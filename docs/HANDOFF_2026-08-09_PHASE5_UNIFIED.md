@@ -29,7 +29,7 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | 5.3 | Numerology Enhancement — confidence reflects real vs. defaulted birth date | AUDIT_5 Phase 3 | ✅ เสร็จ (commit `b2696bd`) — เทส 88/88 ผ่าน |
 | 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | ✅ เสร็จ (commit `030dc78`) — เทส 78/78 ผ่าน, tsc/build/lint สะอาด |
 | 5.4 | Pattern Detection — สร้างบน `decision_log` + เชื่อมท่อเขียนที่หายไป | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | ✅ เสร็จ (commit `d630e5c`) — เทส 96/96 ผ่าน |
-| 5.5 | Decision Support — ~~Coach + Insight agent~~ **rebuild เอง** (ไม่ใช่ adapt จาก Astrovera) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | 🔲 |
+| 5.5 | Decision Support — `/api/coach` endpoint (backend เท่านั้น ยังไม่เชื่อ UI) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | ✅ Backend เสร็จ (commit `ed819f4`) — เทส 107/107 ผ่าน — **ยังไม่มี UI** |
 | 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | 🔲 |
 | 5.7 | Analytics Events (hub transitions, mood, 👍/👎, archetype accuracy) | ROADMAP เดิม 5.1 | 🔲 |
 | 5.8 | System Prompt Optimization + **Confidence Reconciliation** (ดู Master Task audit ด้านล่าง) | ROADMAP เดิม 5.3 | 🔲 |
