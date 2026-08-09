@@ -76,6 +76,14 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 | `registry.js` (knowledge module lookup) | ⚠️ IMPLEMENTED BUT UNUSED — แม้แต่ `orchestrator.js` ต้นทางเองก็ไม่เรียกไฟล์นี้ (import knowledge module ตรงๆ แทน) | D — DO NOT MIGRATE | dead code ตั้งแต่ต้นทาง |
 | Knowledge module อีก 9 ตัว (numerology/bazi/vedic/human-design/kua/gene-keys/thai-astrology/blood/astrology) | ✅ โครงสร้างไฟล์เหมือน psychology (system/instruction/examples/schema) แต่ `version.js` ระบุ `status: 'draft', owner: 'unassigned'` เอง | B — ADAPT (ถ้าจะทำ) | vendor ได้แบบเดียวกับ psychology แต่ต้องเลือกว่าจะเปิดโดเมนไหน (Selfprint ต้องไม่กลายเป็น astrology app ตามกติกาของ user เอง) — ยังไม่ทำตอนนี้ |
 
+### 🔴 บั๊กเดิมที่เจอระหว่างเริ่ม 5.5: `userId` ผี (commit `f722c94`)
+
+ก่อนต่อยอด 5.4 เป็น 5.5 ไปเช็คว่า pattern detection จะรันจริงไหม เจอว่า `useChat.ts`/`Dashboard.tsx` ใช้ `localStorage.getItem('userId')` เป็นตัวระบุผู้ใช้ — **แต่ไม่มีที่ไหนในทั้งโปรเจกต์เคย `setItem('userId', ...)` เลย** (grep ทั่ว `src/` ยืนยันแล้ว) ทำให้ `userId` เป็น `'anonymous'` เสมอ → เงื่อนไข `if (userId !== 'anonymous')` เป็น false ตลอด → `saveMessage()`/`saveAutonomyLog()` (รวมถึง 5.4 ที่เพิ่งต่อไป) **ไม่เคยรันจริงในโค้ดที่ deploy อยู่เลย** — Dashboard insights/trend/pattern ทั้งหน้าน่าจะว่างเปล่ามาตลอด
+
+ระบบ Auth จริงมีอยู่แล้ว (`AuthContext.tsx`, Supabase magic link) และไฟล์อื่นอย่าง `AITwinSection`/`NavBar`/`ClaimAccount`/`ShareButton` ใช้ `useAuth()` ถูกต้องหมด — มีแค่ 2 ไฟล์นี้ที่หลงเหลือโค้ดจากระบบ identity เก่าที่ไม่มีจริง
+
+**ถามผู้ใช้ก่อนแก้** → เลือกแก้ทันที: เปลี่ยนทั้งสองไฟล์ให้ใช้ `useAuth()`'s `session.user.id` แทน `localStorage 'userId'`
+
 ### 5.4 อัปเดต (หลังลงมือจริง): เจอ gap ที่ใหญ่กว่าที่ audit ทำนายไว้
 
 ตอนเริ่ม 5.4 จริง เจอว่า `decision_log` **ไม่มีข้อมูลไหลเข้าเลย** — `saveAutonomyLog()` (ฟังก์ชันเดียวที่เขียน autonomy_level/confidence/hesitation ลงตาราง) ไม่มีที่ไหนเรียกใช้ในแอปจริงเลย (`useChat.ts` เรียกแค่ `saveMessage()` ซึ่งเขียนลง `chat_messages` คนละตาราง) — เท่ากับ Dashboard insights/trend ทั้งหมดว่างเปล่าบน production ก่อนหน้านี้
