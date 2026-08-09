@@ -68,7 +68,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
               marginBottom: '12px',
             }}
           >
-            ความชัดเจนมากกว่า 85%
+            ระดับความชัดเจน {Math.round(accuracy)}%
           </p>
           {prototypeCore && (
             <span

@@ -188,14 +188,15 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // everyone placeholder).
     const birthDate = birthData?.dob ?? '';
     const refined = await analyzeWithAstrovera(answers, mood, birthDate);
-    setAnalysisProfile(
-      refined ?? buildFallbackResponse({ mood, birthDate, finetuneAnswers: answers })
-    );
+    const result =
+      refined ?? buildFallbackResponse({ mood, birthDate, finetuneAnswers: answers });
+    setAnalysisProfile(result);
 
-    // Update accuracy to 85%
-    setSiceResult((prev) =>
-      prev ? { ...prev, accuracy: 85, finetuned: true } : prev
-    );
+    // Accuracy now reflects the real confidence from the analysis (0.6 for
+    // the Life Path fallback, whatever Claude/Astrovera returned otherwise)
+    // instead of a hardcoded 85% regardless of outcome.
+    const accuracy = Math.round(result.confidence * 100);
+    setSiceResult((prev) => (prev ? { ...prev, accuracy, finetuned: true } : prev));
     setStep('complete');
   };
 

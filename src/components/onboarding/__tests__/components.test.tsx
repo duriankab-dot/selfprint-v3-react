@@ -321,7 +321,9 @@ describe('FullAnalysis Component', () => {
     );
 
     expect(screen.getByText(/Nova:/i)).toBeInTheDocument();
-    expect(screen.getByText(/ความชัดเจนมากกว่า 85%/)).toBeTruthy();
+    // Caption is now dynamic (ties to real confidence, not hardcoded "85%") —
+    // see Onboarding.tsx's handleFinetuneSubmit / FullAnalysis.tsx hero.
+    expect(screen.getByText(/ระดับความชัดเจน 85%/)).toBeTruthy();
   });
 });
 
