@@ -29,11 +29,11 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | 5.3 | Numerology Enhancement — confidence reflects real vs. defaulted birth date | AUDIT_5 Phase 3 | ✅ เสร็จ (commit `b2696bd`) — เทส 88/88 ผ่าน |
 | 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | ✅ เสร็จ (commit `030dc78`) — เทส 78/78 ผ่าน, tsc/build/lint สะอาด |
 | 5.4 | Pattern Detection — สร้างบน `decision_log` + เชื่อมท่อเขียนที่หายไป | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | ✅ เสร็จ (commit `d630e5c`) — เทส 96/96 ผ่าน |
-| 5.5 | Decision Support — `/api/coach` endpoint (backend เท่านั้น ยังไม่เชื่อ UI) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | ✅ Backend เสร็จ (commit `ed819f4`) — เทส 107/107 ผ่าน — **ยังไม่มี UI** |
-| 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | 🔲 |
-| 5.7 | Analytics Events (hub transitions, mood, 👍/👎, archetype accuracy) | ROADMAP เดิม 5.1 | 🔲 |
-| 5.8 | System Prompt Optimization + **Confidence Reconciliation** (ดู Master Task audit ด้านล่าง) | ROADMAP เดิม 5.3 | 🔲 |
-| 5.9 | Documentation (User/Archetype/Hub/Troubleshooting guide) | ROADMAP เดิม 5.4 | 🔲 |
+| 5.5 | Decision Support — `/api/coach` endpoint + UI (`AskCoach.tsx` ใน Dashboard) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | ✅ เสร็จครบ (backend `ed819f4`, UI `3ed6454`) — เทส 132/132 ผ่าน |
+| 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | ✅ เสร็จ (commit `3ed6454`) — `src/lib/rollout.ts` deterministic hash gate, gate ปุ่ม Ask Coach ผ่าน `VITE_COACH_ROLLOUT_PERCENT` |
+| 5.7 | Analytics Events (hub transitions, mood, 👍/👎, archetype accuracy) | ROADMAP เดิม 5.1 | ✅ เสร็จ (commit `3ed6454`) — ตาราง `analytics_events` ใหม่ (migration 007) + `src/services/analytics.ts` |
+| 5.8 | System Prompt Optimization + **Confidence Reconciliation** (ดู Master Task audit ด้านล่าง) | ROADMAP เดิม 5.3 | ✅ Confidence Reconciliation เสร็จ (commit `3ed6454`, `reconcileConfidence()`) — System Prompt Optimization: ทบทวนแล้ว ไม่แก้ (ดูเหตุผลด้านล่าง) |
+| 5.9 | Documentation (User/Archetype/Hub/Troubleshooting guide) | ROADMAP เดิม 5.4 | ✅ เสร็จ (`docs/USER_GUIDE_TH.md`) |
 
 A/B Testing (ROADMAP เดิม 5.2) พับรวมเข้ากับ 5.6 (staged rollout ก็คือรูปแบบหนึ่งของ A/B test อยู่แล้ว)
 
@@ -107,6 +107,32 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 - **5.5 (Decision Support):** เปลี่ยนจาก "adapt Coach + Insight agent" → **rebuild เองทั้งหมด** โดยใช้แนวคิด "หลาย perspective + synthesize" จาก orchestrator เป็นแรงบันดาลใจ ไม่ใช่ code migration
 - **5.3.5 (ใหม่):** Safety Layer — ของจริงที่ควรทำเร็วเพราะเป็น production gap ที่มีอยู่จริงตอนนี้
 - **5.8:** เพิ่ม Confidence Reconciliation (จาก `truth.js`/`responseProtocol.js` pattern) เข้าไปด้วย
+
+---
+
+## สิ่งที่ทำไปแล้วรอบนี้ (5.5 UI → 5.9, commit `3ed6454`)
+
+**5.5 UI (Ask Coach):** `src/components/dashboard/AskCoach.tsx` + `.css` — เชื่อม `/api/coach` (backend เสร็จตั้งแต่ `ed819f4`) เข้า Dashboard จริง ดึง `birthDate` จาก `/api/profile`, `mood` จาก `EmotionContext`, ส่งคำถามอิสระ แสดงคำตอบ + จำนวน pattern ที่ใช้ประกอบคำตอบ ถูก gate ด้วย staged rollout (5.6)
+
+**5.6 (Staged Rollout):** `src/lib/rollout.ts` — ไม่มี feature-flag service ในโปรเจกต์ (solo dev) จึงใช้ deterministic hash แทน: `isInRollout(userId, featureKey, percent)` คนเดิม featureKey เดิมได้ผลเดิมเสมอ (ไม่กระพริบเปิด-ปิดตอน reload) ปรับ % แบบขั้นบันได (10→50→100) ได้จากตัวแปรเดียว `VITE_COACH_ROLLOUT_PERCENT` ไม่ต้องแก้โค้ด
+
+**5.7 (Analytics Events):** ตารางใหม่ `analytics_events` (migration 007, แยกจาก `decision_log`/`chat_messages`) + `src/services/analytics.ts` (`logEvent()`, fire-and-forget, ไม่ log ถ้าไม่มี userId จริง — เรียนจากบั๊ก userId ผีที่เจอใน 5.4/5.5) เชื่อมเข้า 4 จุด:
+- `HubContext.switchHub()` → `hub_transition`
+- `EmotionContext.updateMood()` → `mood_change`
+- `ChatPage.tsx` (ปุ่ม 👍/👎 ใต้ข้อความ Nova แต่ละอัน) → `feedback`
+- `PendingOnboardingSaver.tsx` (หลัง save profile/blueprint สำเร็จ — จุดแรกที่มี userId จริงพร้อม accuracy) → `archetype_accuracy`
+
+**ตัดสินใจทางเทคนิคที่น่าสังเกต:** `HubContext`/`EmotionContext` เป็น context ระดับล่างที่มีเทสยืนอิสระ (ไม่ห่อด้วย `AuthProvider`) — เรียก `useAuth()` ตรงๆ จะ throw ในเทสเหล่านั้น แก้โดย export `AuthContext` (ตัว context object) เพิ่มจาก `AuthContext.tsx` แล้วอ่านผ่าน `useContext(AuthContext)` แบบ optional (`undefined` ถ้าไม่มี provider → ไม่ log แค่นั้น ไม่ throw) แทนการบังคับทุกที่ต้องอยู่ใต้ `AuthProvider`
+
+**5.8 (Confidence Reconciliation):** `reconcileConfidence(claimedConfidence, evidenceCount)` ใน `astrovera-adapter.ts` — แนวคิดจาก astrovera-v2's `truth.js`/`responseProtocol.js` (deterministic, ไม่ใช้ LLM) แต่เขียนเองใหม่ทั้งหมด ไม่ copy โค้ด: clamp `confidence` ที่ Claude รายงานเองให้อยู่ในเพดานที่ผูกกับจำนวน `evidence[]` ที่ Claude อ้างจริง (0 evidence → เพดาน 0.5, 1 → 0.65, 2 → 0.8, 3+ → 1.0) กัน Claude รายงาน "มั่นใจ 0.95" โดยไม่มี evidence รองรับ ผูกเข้า `transformAnalysisResponse()` แล้ว
+
+**5.8 (System Prompt Optimization — ตัดสินใจไม่แก้):** ทบทวน `api/utils/prompt-builder.ts` (66 persona string: 11 hub × 6 mood) แล้ว — ไม่พบ gap เชิงเทคนิคที่ต้องแก้ การ "optimize" เนื้อหา persona/starter message เป็นการเปลี่ยนแปลงเชิง UX/product ที่ไม่มีคนสั่ง (ต่างจาก Confidence Reconciliation ที่เป็น gap เทคนิคจริง) จึงไม่แตะ — ถ้าต้องการปรับ ต้องตัดสินใจแยกต่างหากว่าจะปรับโทน/เนื้อหาไปทางไหน
+
+**5.9 (Documentation):** `docs/USER_GUIDE_TH.md` ใหม่ — ครอบคลุม Hub ทั้ง 12, Mood ทั้ง 6, Prototype Core (12 archetype + ตาราง Life Path Number mapping), Dashboard แต่ละส่วนหมายถึงอะไร, วิธีใช้ Ask Coach, และ Troubleshooting คำถามที่พบบ่อย 6 ข้อ เขียนสำหรับผู้ใช้ปลายทาง (ต่างจากไฟล์นี้ที่เป็น technical handoff)
+
+**Verify:** เทสรวม 132/132 ผ่าน (จาก 107), `tsc -b --force` สะอาด, standalone `tsc` บน `api/*.ts` สะอาด, `oxlint` 0 error (เพิ่ม warning เดิม pattern 1 ตัวจากการ export `AuthContext`), `npm run build` ผ่าน
+
+**ยังไม่ทำ (นอก scope รอบนี้ ไม่ใช่บั๊ก):** analytics_events ยังไม่มี dashboard ของตัวเอง (เก็บ event ไว้เฉยๆ ยังไม่มี query/visualize) — เก็บไว้ทำต่อถ้าต้องการดูจริง ไม่ได้อยู่ใน scope 5.7 ตามที่ระบุ (แค่ "Analytics Events" ไม่ใช่ "Analytics Dashboard")
 
 ---
 
