@@ -99,7 +99,10 @@ describe('POST /api/intelligence', () => {
             strengths: ['วิเคราะห์รอบด้าน'],
             cautions: ['รอข้อมูลนานเกินไป'],
             confidence: 0.8,
-            evidence: ['Archetype: Sage'],
+            // 3 รายการ = evidence เพียงพอให้ reconcileConfidence (Phase 5.8)
+            // ไม่ clamp ค่านี้ลง — ดู src/lib/__tests__/astrovera-adapter.test.ts
+            // สำหรับเทสที่ตรวจ clamp behavior โดยตรง
+            evidence: ['Archetype: Sage', 'Trait match', 'Strength pattern'],
             limitation: null,
             archetypeKey: 'sage',
             phaseKey: 'd',
@@ -171,7 +174,10 @@ describe('POST /api/intelligence', () => {
             strengths: ['วิเคราะห์รอบด้าน'],
             cautions: ['รอข้อมูลนานเกินไป'],
             confidence: 0.8,
-            evidence: ['Archetype: Sage'],
+            // 3 รายการ = evidence เพียงพอให้ reconcileConfidence (Phase 5.8)
+            // ไม่ clamp ค่านี้ลง — ดู src/lib/__tests__/astrovera-adapter.test.ts
+            // สำหรับเทสที่ตรวจ clamp behavior โดยตรง
+            evidence: ['Archetype: Sage', 'Trait match', 'Strength pattern'],
             limitation: null,
             archetypeKey: 'sage',
             phaseKey: 'd',

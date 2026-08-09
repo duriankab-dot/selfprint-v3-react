@@ -11,7 +11,10 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// exported (นอกจาก useAuth ปกติ) ให้ context อื่นที่ไม่อยากบังคับว่าต้องอยู่
+// ใต้ AuthProvider เสมอ (เช่น HubContext/EmotionContext ที่มีเทสยืนอิสระ)
+// อ่านได้แบบ optional ผ่าน useContext(AuthContext) ตรงๆ โดยไม่ throw ถ้าไม่มี provider
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);

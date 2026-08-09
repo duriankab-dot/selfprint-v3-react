@@ -1,0 +1,81 @@
+.coach-section {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.coach-section h2 {
+  font-size: 1.3rem;
+  color: #212529;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.coach-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.coach-hint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin: 0 0 12px 0;
+}
+
+.coach-input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #d0d5dd;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+  color: #212529;
+}
+
+.coach-ask-btn {
+  margin-top: 12px;
+  padding: 10px 24px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.coach-ask-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.coach-error {
+  margin-top: 12px;
+  color: #d92d20;
+  font-size: 0.85rem;
+}
+
+.coach-answer {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.coach-answer-text {
+  color: #212529;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.coach-answer-meta {
+  margin-top: 10px;
+  font-size: 0.75rem;
+  color: #6c757d;
+}

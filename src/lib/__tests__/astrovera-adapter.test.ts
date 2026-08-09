@@ -13,6 +13,7 @@ import {
   handleAnalysisError,
   isValidPsychologyOutput,
   safeTransformAnalysisResponse,
+  reconcileConfidence,
 } from '../astrovera-adapter';
 import type { AnalysisRequest, AstroveraPsychologyOutput } from '../types/astrovera';
 
@@ -28,7 +29,14 @@ const validAstroOutput: AstroveraPsychologyOutput = {
   strengths: ['วิเคราะห์สถานการณ์รอบด้านก่อนตัดสินใจ'],
   cautions: ['รอข้อมูลครบจนพลาดจังหวะ'],
   confidence: 0.8,
-  evidence: ['Archetype: The Sage'],
+  // 3 รายการ = evidence เพียงพอให้เพดาน reconcileConfidence เป็น 1.0
+  // (ดู EVIDENCE_CONFIDENCE_CEILING ใน astrovera-adapter.ts) — ฟิกซ์เจอร์นี้
+  // ตั้งใจแทน "คำตอบที่มี evidence รองรับครบ" ไม่ใช่ edge case ของ Phase 5.8
+  evidence: [
+    'Archetype: The Sage',
+    'Traits: ต้องการเข้าใจอย่างรอบด้านก่อนตัดสินใจ',
+    'Strength pattern match',
+  ],
   limitation: null,
   archetypeKey: 'sage',
   phaseKey: 'd',
@@ -73,6 +81,33 @@ describe('buildAnalysisRequest', () => {
   });
 });
 
+describe('reconcileConfidence (Phase 5.8)', () => {
+  it('caps confidence at 0.5 when there is zero evidence', () => {
+    expect(reconcileConfidence(0.95, 0)).toBe(0.5);
+  });
+
+  it('caps confidence at 0.65 with one piece of evidence', () => {
+    expect(reconcileConfidence(0.95, 1)).toBe(0.65);
+  });
+
+  it('caps confidence at 0.8 with two pieces of evidence', () => {
+    expect(reconcileConfidence(0.95, 2)).toBe(0.8);
+  });
+
+  it('allows full confidence through with three or more pieces of evidence', () => {
+    expect(reconcileConfidence(0.95, 3)).toBe(0.95);
+    expect(reconcileConfidence(0.95, 10)).toBe(0.95);
+  });
+
+  it('never raises confidence above what was claimed, even with lots of evidence', () => {
+    expect(reconcileConfidence(0.2, 10)).toBe(0.2);
+  });
+
+  it('never returns a negative confidence', () => {
+    expect(reconcileConfidence(-1, 5)).toBe(0);
+  });
+});
+
 describe('transformAnalysisResponse', () => {
   it('maps Astrovera output fields to Selfprint UI shape', () => {
     const result = transformAnalysisResponse(validAstroOutput);
@@ -86,6 +121,11 @@ describe('transformAnalysisResponse', () => {
 
   it('leaves opportunities empty (no source field in Astrovera output yet)', () => {
     expect(transformAnalysisResponse(validAstroOutput).opportunities).toEqual([]);
+  });
+
+  it('reconciles confidence down when evidence is thin (Phase 5.8)', () => {
+    const thinEvidenceOutput = { ...validAstroOutput, confidence: 0.9, evidence: ['one thing'] };
+    expect(transformAnalysisResponse(thinEvidenceOutput).confidence).toBe(0.65);
   });
 });
 

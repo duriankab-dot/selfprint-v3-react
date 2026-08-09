@@ -12,6 +12,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { logEvent } from '@/services/analytics';
 import type { PendingOnboardingData } from '@/components/onboarding/ClaimAccount';
 
 const STORAGE_KEY = 'pending_onboarding_save';
@@ -54,6 +55,17 @@ export function PendingOnboardingSaver() {
 
         localStorage.removeItem(STORAGE_KEY);
         console.log('✅ Onboarding data saved to Supabase');
+
+        // Phase 5.7: archetype accuracy event — จุดแรกที่มี userId จริงพร้อมกับ
+        // ผล blueprint ของ onboarding รอบนี้ (ก่อนหน้านี้ระหว่าง onboarding เอง
+        // ยังไม่มี session จริงจนกว่าจะ claim account ด้วย magic link)
+        if (session.user?.id) {
+          logEvent(session.user.id, 'archetype_accuracy', {
+            prototypeCore: data.blueprint.prototypeCore,
+            accuracyLevel: data.blueprint.accuracyLevel,
+            source: data.blueprint.source,
+          });
+        }
       } catch (err) {
         console.error('❌ Failed to save pending onboarding data:', err);
         // เก็บ localStorage ไว้ ลองใหม่รอบหน้าที่ session พร้อม

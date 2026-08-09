@@ -14,6 +14,7 @@ import TrendChart from '../components/dashboard/TrendChart';
 import PatternInsights from '../components/dashboard/PatternInsights';
 import ExportButton from '../components/dashboard/ExportButton';
 import AITwinSection from '../components/dashboard/AITwinSection';
+import AskCoach from '../components/dashboard/AskCoach';
 import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
@@ -152,6 +153,9 @@ const Dashboard: React.FC = () => {
 
       {/* AI Twin Blueprint Section */}
       <AITwinSection />
+
+      {/* Ask Coach Section (Phase 5.5 UI, staged rollout — Phase 5.6) */}
+      <AskCoach />
 
       {/* Insights Section */}
       {insights && (

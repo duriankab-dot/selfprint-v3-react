@@ -76,6 +76,29 @@ export function buildAnalysisRequest(request: AnalysisRequest): AstroveraPsychol
 }
 
 // ---------------------------------------------------------------------
+// Confidence Reconciliation (Phase 5.8) — inspired by astrovera-v2's
+// truth.js/responseProtocol.js (deterministic, non-LLM clamp of a
+// self-reported confidence score to what the actual evidence supports —
+// see docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md, Master Task Audit).
+// Not a copy of that code — astrovera's version is bespoke to its own
+// multi-agent output shape. Same idea, own implementation:
+// `api/intelligence.ts` previously trusted Claude's self-reported
+// `confidence` outright. Claude also returns an `evidence: string[]`
+// array (see AstroveraPsychologyOutput) that it doesn't have to actually
+// use to justify that number — this clamps confidence to a ceiling that
+// scales with how much evidence Claude actually cited, so an unsupported
+// "0.95 confident" claim with zero evidence can't pass through unclamped.
+// ---------------------------------------------------------------------
+
+const EVIDENCE_CONFIDENCE_CEILING = [0.5, 0.65, 0.8, 1.0] as const;
+
+export function reconcileConfidence(claimedConfidence: number, evidenceCount: number): number {
+  const clampedCount = Math.max(0, Math.min(evidenceCount, EVIDENCE_CONFIDENCE_CEILING.length - 1));
+  const ceiling = EVIDENCE_CONFIDENCE_CEILING[clampedCount];
+  return Math.max(0, Math.min(claimedConfidence, ceiling));
+}
+
+// ---------------------------------------------------------------------
 // Response transform: Astrovera Psychology output → Selfprint UI shape
 // ---------------------------------------------------------------------
 
@@ -86,7 +109,7 @@ export function transformAnalysisResponse(astro: AstroveraPsychologyOutput): Ana
     insights: astro.traits,
     opportunities: [],
     blindSpots: astro.cautions,
-    confidence: astro.confidence,
+    confidence: reconcileConfidence(astro.confidence, astro.evidence?.length ?? 0),
     sources: ['psychology'],
   };
 }

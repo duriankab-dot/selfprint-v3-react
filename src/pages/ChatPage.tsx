@@ -19,11 +19,16 @@ import { NavBar } from '@/components/layout/NavBar';
 import { useChat } from '@/features/chat/hooks/useChat';
 import { useHub } from '@/context/HubContext';
 import { useEmotion } from '@/context/EmotionContext';
+import { useAuth } from '@/context/AuthContext';
+import { useTwinStore } from '@/store/twinStore';
+import { logEvent } from '@/services/analytics';
 
 
 export const ChatPage: React.FC = () => {
   const { currentHub: hub } = useHub();
   const { mood } = useEmotion();
+  const { session } = useAuth();
+  const recordFeedback = useTwinStore((s) => s.recordFeedback);
 
   // Alias สำหรับให้ readable
   const currentHub = hub;
@@ -35,6 +40,16 @@ export const ChatPage: React.FC = () => {
   const { messages, isLoading, error, sendMessage, clearChat } = useChat(autonomyLevel);
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Phase 5.7: 👍/👎 ต่อข้อความ (ไม่ผูกกับ twinStore.messages ที่แยกอิสระจาก
+  // messages ของ useChat ตรงนี้ — เก็บแค่ index ที่ให้ feedback ไปแล้วในหน้านี้)
+  const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'helpful' | 'unhelpful'>>({});
+
+  const handleFeedback = (idx: number, type: 'helpful' | 'unhelpful') => {
+    if (feedbackGiven[idx]) return;
+    setFeedbackGiven((prev) => ({ ...prev, [idx]: type }));
+    recordFeedback(type);
+    logEvent(session?.user?.id, 'feedback', { type, hub: currentHub, mood: currentMood, messageIndex: idx });
+  };
 
   // Auto-scroll ไปล่างสุด เมื่อมี message ใหม่
   useEffect(() => {
@@ -311,8 +326,9 @@ export const ChatPage: React.FC = () => {
               key={idx}
               style={{
                 display: 'flex',
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                gap: '8px',
+                flexDirection: 'column',
+                alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                gap: '4px',
               }}
             >
               <div
@@ -333,6 +349,42 @@ export const ChatPage: React.FC = () => {
               >
                 {msg.content}
               </div>
+
+              {/* Phase 5.7: feedback 👍/👎 — เฉพาะข้อความของ Nova */}
+              {msg.role === 'assistant' && (
+                <div style={{ display: 'flex', gap: '6px', paddingLeft: '4px' }}>
+                  <button
+                    type="button"
+                    aria-label="helpful"
+                    onClick={() => handleFeedback(idx, 'helpful')}
+                    disabled={Boolean(feedbackGiven[idx])}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: feedbackGiven[idx] ? 'default' : 'pointer',
+                      fontSize: '14px',
+                      opacity: feedbackGiven[idx] && feedbackGiven[idx] !== 'helpful' ? 0.3 : 1,
+                    }}
+                  >
+                    👍
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="unhelpful"
+                    onClick={() => handleFeedback(idx, 'unhelpful')}
+                    disabled={Boolean(feedbackGiven[idx])}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: feedbackGiven[idx] ? 'default' : 'pointer',
+                      fontSize: '14px',
+                      opacity: feedbackGiven[idx] && feedbackGiven[idx] !== 'unhelpful' ? 0.3 : 1,
+                    }}
+                  >
+                    👎
+                  </button>
+                </div>
+              )}
             </div>
           ))}
 
