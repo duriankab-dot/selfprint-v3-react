@@ -41,7 +41,7 @@ export default {
       return new Response(null, {
         status: 200,
         headers: {
-          'Access-Control-Allow-Origin': 'https://selfprint.io',
+          'Access-Control-Allow-Origin': '*', // ตาม convention เดียวกับ api/*.ts ทุกไฟล์ (Vercel) — เดิม hardcode เป็น 'https://selfprint.io' ผิดโดเมนจริง (selfprint.one) แก้ 2026-08-09
           'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
           'Access-Control-Allow-Headers': 'Content-Type, Authorization',
           'Access-Control-Max-Age': '86400',
@@ -122,7 +122,7 @@ export default {
           headers: {
             'Content-Type': 'application/json',
             'Retry-After': '60',
-            'Access-Control-Allow-Origin': 'https://selfprint.io',
+            'Access-Control-Allow-Origin': '*', // ตาม convention เดียวกับ api/*.ts ทุกไฟล์ (Vercel) — เดิม hardcode เป็น 'https://selfprint.io' ผิดโดเมนจริง (selfprint.one) แก้ 2026-08-09
           },
         });
       }
@@ -178,7 +178,7 @@ export default {
           status: claudeResponse.status,
           headers: {
             'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'https://selfprint.io',
+            'Access-Control-Allow-Origin': '*', // ตาม convention เดียวกับ api/*.ts ทุกไฟล์ (Vercel) — เดิม hardcode เป็น 'https://selfprint.io' ผิดโดเมนจริง (selfprint.one) แก้ 2026-08-09
           },
         });
       }
@@ -204,7 +204,7 @@ export default {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://selfprint.io',
+          'Access-Control-Allow-Origin': '*', // ตาม convention เดียวกับ api/*.ts ทุกไฟล์ (Vercel) — เดิม hardcode เป็น 'https://selfprint.io' ผิดโดเมนจริง (selfprint.one) แก้ 2026-08-09
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'X-Response-Time': `${duration}ms`,
         },
@@ -223,7 +223,7 @@ export default {
         status: 500,
         headers: {
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://selfprint.io',
+          'Access-Control-Allow-Origin': '*', // ตาม convention เดียวกับ api/*.ts ทุกไฟล์ (Vercel) — เดิม hardcode เป็น 'https://selfprint.io' ผิดโดเมนจริง (selfprint.one) แก้ 2026-08-09
         },
       });
     }

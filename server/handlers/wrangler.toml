@@ -1,0 +1,19 @@
+name = "selfprint-brain-gateway"
+main = "chat.js"
+compatibility_date = "2026-08-08"
+
+# CLAUDE_API_KEY แก้ไว้ตรงนี้เดิมเป็น plaintext จริง (มีค่า key จริงฝังอยู่)
+# — ย้ายออกแล้ว 2026-08-09 เพราะไฟล์นี้ไม่ได้ถูก .gitignore ก่อนหน้านี้ ถ้า commit
+# ไปจะหลุดขึ้น GitHub ทันที ต้องตั้งผ่าน wrangler secret แทน (เข้ารหัสเก็บฝั่ง
+# Cloudflare ไม่โผล่ในไฟล์นี้เลย) รันคำสั่งนี้เอง 1 ครั้งก่อน deploy ครั้งแรก:
+#
+#   npx wrangler secret put CLAUDE_API_KEY --env production
+#   (แล้ว paste ค่า key จริงตอนที่ prompt ถาม)
+#
+# ทำ local dev ให้สร้างไฟล์ .dev.vars (gitignore ไว้แล้ว) ใน server/handlers/
+# ใส่บรรทัดเดียว: CLAUDE_API_KEY=sk-ant-...
+[env.production]
+
+[build]
+command = "npm install"
+cwd = "./"
