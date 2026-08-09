@@ -27,14 +27,61 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | 5.1 | **Foundation** — TypeScript types + adapter layer + fallback (Astrovera) | AUDIT_5 Phase 1 | ✅ เสร็จ (2026-08-09) |
 | 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟢 Endpoint + UI wiring เสร็จ (commit `96c3f17`, `acfa67d`, `7bb7a7a`) เทสผ่าน 67/67, tsc/build/lint สะอาด — **ยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น จนกว่าจะ deploy)** |
 | 5.3 | Numerology Enhancement — multi-domain confidence scoring | AUDIT_5 Phase 3 | 🔲 |
-| 5.4 | Pattern Detection — Supabase `analysis_history`/`pattern_insights` tables + memory | AUDIT_5 Phase 4 | 🔲 |
-| 5.5 | Decision Support — Coach + Insight agent, "Ask Coach" UI | AUDIT_5 Phase 5 | 🔲 |
+| 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | 🔲 — gap จริงที่เพิ่งเจอ ไม่มีใน `/api/nova` หรือ `/api/intelligence` เลย |
+| 5.4 | Pattern Detection — ~~Supabase `analysis_history`/`pattern_insights` tables~~ **สร้างบน `decision_log` ที่มีอยู่แล้ว** (ไม่ใช่ตารางใหม่) | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | 🔲 |
+| 5.5 | Decision Support — ~~Coach + Insight agent~~ **rebuild เอง** (ไม่ใช่ adapt จาก Astrovera) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | 🔲 |
 | 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | 🔲 |
 | 5.7 | Analytics Events (hub transitions, mood, 👍/👎, archetype accuracy) | ROADMAP เดิม 5.1 | 🔲 |
-| 5.8 | System Prompt Optimization (ใช้ข้อมูลจาก 5.7) | ROADMAP เดิม 5.3 | 🔲 |
+| 5.8 | System Prompt Optimization + **Confidence Reconciliation** (ดู Master Task audit ด้านล่าง) | ROADMAP เดิม 5.3 | 🔲 |
 | 5.9 | Documentation (User/Archetype/Hub/Troubleshooting guide) | ROADMAP เดิม 5.4 | 🔲 |
 
 A/B Testing (ROADMAP เดิม 5.2) พับรวมเข้ากับ 5.6 (staged rollout ก็คือรูปแบบหนึ่งของ A/B test อยู่แล้ว)
+
+---
+
+## Master Task Audit (2026-08-09) — ตรวจ astrovera-v2 ลึกจริง เปลี่ยน scope ของ 5.4/5.5
+
+User ส่ง framework audit แบบละเอียด (18 phases) มาให้ผสานเข้าแผน — แทนที่จะทำ audit แบบเป็นทางการครบ 8 ไฟล์ตาม framework (ใช้โทเคนเยอะเกินจำเป็น) เลือกทำ audit เจาะจุดที่ยังไม่เคยตรวจ (Journey/Pattern/Decision/Journal, Data Model, Safety) แล้วผสานผลเข้าแผน 5.3-5.9 ที่มีอยู่โดยตรง — **ผลลัพธ์เปลี่ยนความเข้าใจเรื่อง Astrovera ไปมาก**
+
+### สิ่งที่เจอ: "Journey / Pattern / Decision / Journal" ของ Astrovera ส่วนใหญ่ไม่มีจริง
+
+ตรวจ `brain/agents/*.js` ทั้ง 8 ไฟล์ (coach, insight, planner, reflector, research, narrator, synthesizer, narrative) แบบอ่านโค้ดจริงทีละบรรทัด พบว่า **ทุกไฟล์เป็นแค่ wrapper บาง ๆ ที่ยิง prompt ไป Claude Haiku ตรงๆ ไม่มี state ไม่มีข้อมูลย้อนหลัง ไม่มี logic วิเคราะห์จริง**:
+
+| ไฟล์ | ชื่อดูเหมือนจะเป็น | ความจริงจากโค้ด |
+|---|---|---|
+| `insight.js` | Life Pattern Analysis | ถาม LLM ดู request เดียว (snapshot เดียว) ไม่มีการอ่านข้อมูลย้อนหลัง ไม่มี pattern detection จริง |
+| `reflector.js` | Journal/Reflection | สร้างคำถามสะท้อนคิด 2-3 ข้อจาก request ปัจจุบัน **ไม่เคยอ่าน journal entry จริงเลย** |
+| — | Journey system | **ไม่มีไฟล์นี้อยู่จริงใน `brain/` เลย** — มีแค่ `js/features/journey/journey.js` ฝั่ง frontend เก่า ที่เป็น localStorage checklist เกมมิฟิเคชัน ไม่เกี่ยวกับ life-stage engine |
+| — | Decision Intelligence | `js/features/scenario/scenario.js` ฝั่ง frontend มีชื่อ "Scenario Intelligence" แต่ตัวเลข success % เป็น **ค่า hardcode ตายตัว** (เช่น 78, 68, 60) ไม่ได้คำนวณจากอะไรเลย |
+
+**สรุป:** ไม่มี Journey/Pattern/Decision/Journal engine ที่แท้จริงให้ "migrate" — งานพวกนี้ต้องออกแบบ/สร้างเองให้ Selfprint ทั้งหมด ไม่ใช่ adapt จาก Astrovera
+
+### ข่าวดี: Selfprint มีฐานที่ดีกว่า Astrovera อยู่แล้วสำหรับ Pattern Detection
+
+ตรวจ `supabase/migrations/003_decision_log_autonomy_tracking.sql` + `src/services/supabase-service.ts` พบว่า **Selfprint มีตาราง `decision_log` ที่ทำงานจริงอยู่แล้ว** (VERIFIED IMPLEMENTED — insert/query จริงจาก `supabase-service.ts`, RLS เปิดแล้ว, ใช้แสดงผลใน `Dashboard.tsx`):
+- เก็บ `user_id, hub, mood, autonomy_level, confidence, hesitation, response_time_ms` ต่อ interaction พร้อม timestamp
+- มี view `autonomy_analytics` (avg ต่อ user/hub/mood) พร้อมใช้แล้ว
+
+เทียบกับ astrovera_profiles ของ Astrovera เอง (ตาราง JSON blob เดียวรวมทุกอย่าง ไม่มี schema จริง) → **`decision_log` ของ Selfprint ดีกว่า เป็นฐานที่ถูกต้องสำหรับ 5.4 Pattern Detection อยู่แล้ว ไม่ต้องสร้างตารางใหม่หรือ migrate อะไรจาก Astrovera**
+
+พบเอกสาร `docs/DATABASE_SCHEMA_V2_0_TH.md` ใน astrovera-v2 ที่เขียนว่า "Production Ready ✅" (ตาราง decisions/reflections/experiments/timeline ฯลฯ) แต่ grep ทั้ง repo แล้ว **ไม่มีโค้ดที่เรียกตารางพวกนี้เลยสักบรรทัด** — จัดเป็น `DOCUMENTED BUT NOT IMPLEMENTED` ใช้เป็นไอเดียชื่อ field ได้ แต่ไม่ใช่โค้ดที่ทำงานจริง
+
+### สิ่งที่เจอว่า "ของจริง" และควรเอามาใช้ (นอกเหนือจาก Psychology ที่ทำไปแล้ว)
+
+| Capability | สถานะจริงใน astrovera-v2 | Classification | เหตุผล |
+|---|---|---|---|
+| `truth.js` + `responseProtocol.js` (confidence reconciliation) | ✅ VERIFIED IMPLEMENTED — deterministic, ไม่ใช้ LLM, clamp AI confidence ให้อยู่ในกรอบที่ evidence รองรับจริง | C — REBUILD USING LOGIC | `api/intelligence.ts` ตอนนี้เชื่อ `confidence` จาก Claude ตรงๆ ไม่มีชั้นตรวจสอบ — แนวคิดนี้เอามาทำเองได้ ไม่ต้อง copy โค้ด |
+| `safety.js` (keyword safety gate) | ✅ VERIFIED IMPLEMENTED — เช็ค keyword ฆ่าตัวตาย/การแพทย์/การพนัน/การลงทุน พร้อมข้อความ redirect จริง (เช่น สายด่วน 1323) | A/B — MIGRATE/ADAPT | **Selfprint ไม่มี safety layer นี้เลยใน `/api/nova` หรือ `/api/intelligence`** — เป็น gap ที่ควรปิดเร็ว ย้ายมาใส่ไว้ 5.3.5 |
+| orchestrator's "ยิงหลาย agent พร้อมกันแล้ว synthesize" pattern | ✅ ใช้งานจริงใน production path (`Promise.allSettled([coach, insight, planner, reflector, research])`) แต่แต่ละ agent เป็นแค่ prompt wrapper | C — REBUILD USING LOGIC (ถ้าต้องการ "Ask Coach" ใน 5.5) | เอาแนวคิด ไม่ใช่โค้ด — เขียนเองจะได้ context ที่ตรงกับ Selfprint มากกว่า |
+| `registry.js` (knowledge module lookup) | ⚠️ IMPLEMENTED BUT UNUSED — แม้แต่ `orchestrator.js` ต้นทางเองก็ไม่เรียกไฟล์นี้ (import knowledge module ตรงๆ แทน) | D — DO NOT MIGRATE | dead code ตั้งแต่ต้นทาง |
+| Knowledge module อีก 9 ตัว (numerology/bazi/vedic/human-design/kua/gene-keys/thai-astrology/blood/astrology) | ✅ โครงสร้างไฟล์เหมือน psychology (system/instruction/examples/schema) แต่ `version.js` ระบุ `status: 'draft', owner: 'unassigned'` เอง | B — ADAPT (ถ้าจะทำ) | vendor ได้แบบเดียวกับ psychology แต่ต้องเลือกว่าจะเปิดโดเมนไหน (Selfprint ต้องไม่กลายเป็น astrology app ตามกติกาของ user เอง) — ยังไม่ทำตอนนี้ |
+
+### ผลต่อแผนเดิม
+
+- **5.4 (Pattern Detection):** เปลี่ยนจาก "สร้างตาราง `analysis_history`/`pattern_insights` ใหม่" → **วิเคราะห์ข้อมูลจาก `decision_log` ที่มีอยู่แล้ว** (autonomy/confidence/hesitation trend ต่อ user ต่อ hub ต่อ mood ตามเวลา) — งานเบาลง ไม่ต้อง migration ตาราง
+- **5.5 (Decision Support):** เปลี่ยนจาก "adapt Coach + Insight agent" → **rebuild เองทั้งหมด** โดยใช้แนวคิด "หลาย perspective + synthesize" จาก orchestrator เป็นแรงบันดาลใจ ไม่ใช่ code migration
+- **5.3.5 (ใหม่):** Safety Layer — ของจริงที่ควรทำเร็วเพราะเป็น production gap ที่มีอยู่จริงตอนนี้
+- **5.8:** เพิ่ม Confidence Reconciliation (จาก `truth.js`/`responseProtocol.js` pattern) เข้าไปด้วย
 
 ---
 
