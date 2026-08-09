@@ -200,10 +200,55 @@ grep ทั้ง `src/`+`api/` หาคำว่า "gateway" ไม่เจ�
 
 ## ก่อนใช้งาน 5.2 จริง (ต้องตัดสินใจ/ทำต่อ)
 
-1. **เทสเรียก Claude จริง** — deploy ขึ้น Vercel (มี `ANTHROPIC_API_KEY` จริงแล้ว) แล้วลอง onboard จริงดูว่า Claude ตอบตรง schema ที่ `validate()` เช็คไหม ถ้าไม่ตรง ระบบจะ fallback เงียบๆ ไป Life Path — ต้องดู log บน Vercel เพื่อรู้ว่า fallback บ่อยแค่ไหน
+1. ~~**เทสเรียก Claude จริง**~~ **ทำแล้ว (2026-08-09 รอบบ่าย) — เจอ production พังจริง ดูหัวข้อด้านล่าง**
 2. ต่อ 5.3 Numerology Enhancement ตามแผนรวมด้านบน
 
 ---
 
-**Last Updated:** 2026-08-09
+## 🔴 สิ่งที่ทำไปแล้วรอบนี้ (opportunities จริง, hub/mood correlation, autonomy-log จริง, code splitting) — commit `a116daa`
+
+**opportunities:** `safeTransformAnalysisResponse()` เติมจาก `getLifePathProfile(lifePathNumber).opportunities` จริง (คำนวณจากวันเกิดจริง) แทนที่จะปล่อย `[]` ตลอดไปตามที่ค้างไว้ใน 5.1 — ไม่ใช่ Insight agent ใหม่ แค่ reuse แหล่งเดียวกับที่ `buildFallbackResponse()` ใช้อยู่แล้ว
+
+**hub/mood correlation:** `getAutonomyTrend()` (และ `/api/coach`'s decision_log query) เพิ่ม `hub, mood` เข้า select — `patternDetection.ts`'s `detectPatterns()` เพิ่ม `detectGroupCorrelation()` หา correlation ระหว่าง mood→confidence และ hub→autonomy_level โดยเทียบค่าเฉลี่ยกลุ่มนั้นกับค่าเฉลี่ยกลุ่มอื่นที่เหลือ (ไม่ใช่เทียบกับค่าเฉลี่ยรวมที่รวมตัวเองด้วย) ต้องมีอย่างน้อย 3 จุดต่อกลุ่ม (`MIN_GROUP_POINTS`) และรวม 6 จุดขึ้นไป (`MIN_DATA_POINTS`) ถึงจะ flag กันสัญญาณเท็จจากข้อมูลน้อย
+
+**autonomy-log ใช้จริง:** `api/autonomy-log.ts` เคย deploy อยู่เฉยๆ ไม่มีใครเรียก (dead code) และมีช่องโหว่จริง — เชื่อ `user_id` จาก client body ตรงๆ ไม่ verify เลย ต่างจากแพทเทิร์นที่ `api/profile.ts`/`api/coach.ts` ใช้ (derive จาก JWT เสมอ) ตอนนี้แก้ให้ verify JWT ก่อนเขียนทุกครั้ง แล้วเชื่อมเข้า `useChat.ts` จริง (แทน `saveAutonomyLog()` แบบ client-side เดิมที่ลบไปแล้ว)
+
+**code splitting:** `dist/assets/index-*.js` เดิม 918kB ก้อนเดียว (ทุกหน้า import แบบ static ใน `App.tsx`) ตอนนี้ใช้ `React.lazy` + `Suspense` แยกทีละหน้า chunk ใหญ่สุดเหลือ 409.96kB (`AuthContext` ก้อนที่สอง 237.5kB มาจาก `@supabase/supabase-js`) ทุก chunk ต่ำกว่า 500kB แล้ว
+
+**ย้ายเอกสาร:** ชุด Audit 8 ไฟล์ + คำแปลไทย 8 ไฟล์ + Executive Summary + Handoff/Tasks/Performance (21 ไฟล์ที่ user อัปโหลดตอนแรกสุดของการรวม Astrovera) ย้ายจาก root เข้า `docs/` แล้ว — เหลือแค่ `README.md` กับรูปที่ root
+
+**Verify:** เทสรวม 157/157 ผ่าน, `tsc -b --force` สะอาด, standalone `tsc` บน `api/**/*.ts` สะอาด, `oxlint` 0 error/0 warning ใหม่ (11 warning เดิมไม่เกี่ยวกับรอบนี้), `npm run build` ผ่าน ทุก chunk < 500kB
+
+---
+
+## 🔴 พบจริงบน production (selfprint.one) — /api/nova, /api/intelligence, /api/coach ใช้งานไม่ได้
+
+ทดสอบผ่าน browser ของ user เอง (Claude in Chrome, ยิง `fetch()` จริงจาก `https://www.selfprint.one` ไม่ใช่จำลอง) ผลคือ:
+
+| endpoint | payload ที่ส่ง | ผลจริง |
+|---|---|---|
+| `POST /api/nova` | `{ messages: [...], hub: 'decision', mood: 'ready', autonomy: 50 }` (shape ตรงตาม `NovaRequest`) | **500 `FUNCTION_INVOCATION_FAILED`** |
+| `POST /api/intelligence` | `{ mood: 'ready', birthDate: '1990-05-15' }` (shape ตรงตาม `IntelligenceRequestBody`) | **500 `FUNCTION_INVOCATION_FAILED`** |
+| `POST /api/coach` | `{ question: 'test' }` | **404 `NOT_FOUND`** — route นี้ไม่มีอยู่บน deploy ปัจจุบันเลย |
+
+**นี่คือ Vercel-level crash (`FUNCTION_INVOCATION_FAILED`)** ไม่ใช่ error ที่โค้ดจัดการเอง — ทั้ง `nova.ts` และ `intelligence.ts` มี try/catch ครอบการเรียก Claude ไว้แล้ว (ควรได้ fallback JSON 200 กลับมาแม้ Claude call ล้มเหลว) แปลว่า function crash **ก่อน**จะถึง try/catch นั้นเลย — จุดที่น่าสงสัยที่สุดคือตอน module-load (เช่น `new Anthropic({...})` ตอน import, หรือ import อะไรบางอย่างที่ resolve ไม่ได้ตอน bundle ขึ้น Vercel)
+
+`/api/coach` เป็น 404 ไม่ใช่ 500 — แปลว่า route นี้ไม่ได้อยู่ใน deploy ปัจจุบันเลย (ทั้งที่มีอยู่ในโค้ด repo ตั้งแต่ commit `ed819f4`) ชี้ว่า **deploy บน Vercel ปัจจุบันเก่ากว่าที่คิด** — น่าจะไม่ได้ redeploy ตั้งแต่ก่อน 5.5 เป็นอย่างน้อย
+
+**สาเหตุที่เป็นไปได้ (ต้องเช็คจาก Vercel dashboard เอง — ไม่มีสิทธิ์เข้าจากที่นี่):**
+1. ยังไม่ได้ redeploy ตั้งแต่ commit ใหม่ๆ หลาย commit ที่ผ่านมา (อธิบาย 404 ของ coach ได้ตรงที่สุด)
+2. Environment variable หายหรือผิดบน Vercel production (เช่น `ANTHROPIC_API_KEY`) — แต่โค้ดปัจจุบันเช็ค `!process.env.ANTHROPIC_API_KEY` แล้ว fallback แบบ 200 ไม่ throw ดังนั้นถ้า deploy เป็นโค้ดปัจจุบันจริง key หายไม่ควรทำให้ 500 — ชี้ไปทาง deploy เก่ากว่าโค้ดที่มี safeguard นี้อีกเช่นกัน
+3. Build error บน Vercel ที่ deploy log เท่านั้นจะบอกได้ (เช่น `src/lib/astrovera-brain/psychology/index.js` — ไฟล์ vendored เป็น `.js` import ตรงๆ อาจ resolve ไม่ได้ตอน build บน Vercel ต่างจาก local)
+
+**ต้องทำต่อ (ฝั่ง user):** เปิด Vercel dashboard → ดู deployment ล่าสุดว่า deploy จาก commit ไหน (เทียบกับ `git log` ล่าสุดที่ตอนนี้อยู่ `a116daa`) และดู Function Logs ของ `/api/nova`/`/api/intelligence` ตอนที่ 500 เพื่อดู stack trace จริง แล้วค่อยกลับมาบอกผลเพื่อแก้ต่อ — เดาต่อจากตรงนี้โดยไม่เห็น log จริงจะเสี่ยงแก้ผิดจุด
+
+---
+
+## ⚠️ พบไฟล์ที่ไม่เกี่ยวกับงานรอบนี้ (ไม่ได้แตะ ไม่ได้ commit)
+
+`git status` เจอ `server/handler/chat.js` (tracked, ไฟล์ Cloudflare Worker "Brain Gateway" ลง commit ไว้ตั้งแต่ก่อนหน้านี้) ถูกลบออกจาก disk ไปแล้ว และมี `server/handlers/` (สังเกตพหูพจน์ "handlers" ต่างจาก "handler" เดิม) โผล่มาใหม่แบบ untracked พร้อม `wrangler.toml`/`.wrangler/` (Cloudflare Workers config) — ไม่ใช่สิ่งที่ทำในรอบงานนี้ ไม่รู้ที่มา ไม่ได้ stage/commit ให้ ต้องถามก่อนว่าจะเอายังไงกับตรงนี้
+
+---
+
+**Last Updated:** 2026-08-09 (รอบบ่าย)
 **Prepared by:** Claude
