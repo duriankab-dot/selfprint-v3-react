@@ -27,7 +27,7 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | 5.1 | **Foundation** — TypeScript types + adapter layer + fallback (Astrovera) | AUDIT_5 Phase 1 | ✅ เสร็จ (2026-08-09) |
 | 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟢 Endpoint + UI wiring เสร็จ (commit `96c3f17`, `acfa67d`, `7bb7a7a`) เทสผ่าน 67/67, tsc/build/lint สะอาด — **ยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น จนกว่าจะ deploy)** |
 | 5.3 | Numerology Enhancement — multi-domain confidence scoring | AUDIT_5 Phase 3 | 🔲 |
-| 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | 🔲 — gap จริงที่เพิ่งเจอ ไม่มีใน `/api/nova` หรือ `/api/intelligence` เลย |
+| 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | ✅ เสร็จ (commit `030dc78`) — เทส 78/78 ผ่าน, tsc/build/lint สะอาด |
 | 5.4 | Pattern Detection — ~~Supabase `analysis_history`/`pattern_insights` tables~~ **สร้างบน `decision_log` ที่มีอยู่แล้ว** (ไม่ใช่ตารางใหม่) | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | 🔲 |
 | 5.5 | Decision Support — ~~Coach + Insight agent~~ **rebuild เอง** (ไม่ใช่ adapt จาก Astrovera) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | 🔲 |
 | 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | 🔲 |
