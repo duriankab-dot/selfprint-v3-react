@@ -28,7 +28,7 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟢 Endpoint + UI wiring เสร็จ (commit `96c3f17`, `acfa67d`, `7bb7a7a`) เทสผ่าน 67/67, tsc/build/lint สะอาด — **ยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น จนกว่าจะ deploy)** |
 | 5.3 | Numerology Enhancement — confidence reflects real vs. defaulted birth date | AUDIT_5 Phase 3 | ✅ เสร็จ (commit `b2696bd`) — เทส 88/88 ผ่าน |
 | 5.3.5 | **[ใหม่]** Safety Layer — keyword gate (ฆ่าตัวตาย/การพนัน/การลงทุน/การแพทย์) ก่อนส่งให้ Claude | Master Task audit (2026-08-09) | ✅ เสร็จ (commit `030dc78`) — เทส 78/78 ผ่าน, tsc/build/lint สะอาด |
-| 5.4 | Pattern Detection — ~~Supabase `analysis_history`/`pattern_insights` tables~~ **สร้างบน `decision_log` ที่มีอยู่แล้ว** (ไม่ใช่ตารางใหม่) | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | 🔲 |
+| 5.4 | Pattern Detection — สร้างบน `decision_log` + เชื่อมท่อเขียนที่หายไป | AUDIT_5 Phase 4 (ปรับ scope ตาม audit) | ✅ เสร็จ (commit `d630e5c`) — เทส 96/96 ผ่าน |
 | 5.5 | Decision Support — ~~Coach + Insight agent~~ **rebuild เอง** (ไม่ใช่ adapt จาก Astrovera) | AUDIT_5 Phase 5 (ปรับ scope ตาม audit) | 🔲 |
 | 5.6 | Testing & Staged Rollout (10%→50%→100%) | AUDIT_5 Phase 6 | 🔲 |
 | 5.7 | Analytics Events (hub transitions, mood, 👍/👎, archetype accuracy) | ROADMAP เดิม 5.1 | 🔲 |
@@ -75,6 +75,23 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 | orchestrator's "ยิงหลาย agent พร้อมกันแล้ว synthesize" pattern | ✅ ใช้งานจริงใน production path (`Promise.allSettled([coach, insight, planner, reflector, research])`) แต่แต่ละ agent เป็นแค่ prompt wrapper | C — REBUILD USING LOGIC (ถ้าต้องการ "Ask Coach" ใน 5.5) | เอาแนวคิด ไม่ใช่โค้ด — เขียนเองจะได้ context ที่ตรงกับ Selfprint มากกว่า |
 | `registry.js` (knowledge module lookup) | ⚠️ IMPLEMENTED BUT UNUSED — แม้แต่ `orchestrator.js` ต้นทางเองก็ไม่เรียกไฟล์นี้ (import knowledge module ตรงๆ แทน) | D — DO NOT MIGRATE | dead code ตั้งแต่ต้นทาง |
 | Knowledge module อีก 9 ตัว (numerology/bazi/vedic/human-design/kua/gene-keys/thai-astrology/blood/astrology) | ✅ โครงสร้างไฟล์เหมือน psychology (system/instruction/examples/schema) แต่ `version.js` ระบุ `status: 'draft', owner: 'unassigned'` เอง | B — ADAPT (ถ้าจะทำ) | vendor ได้แบบเดียวกับ psychology แต่ต้องเลือกว่าจะเปิดโดเมนไหน (Selfprint ต้องไม่กลายเป็น astrology app ตามกติกาของ user เอง) — ยังไม่ทำตอนนี้ |
+
+### 5.4 อัปเดต (หลังลงมือจริง): เจอ gap ที่ใหญ่กว่าที่ audit ทำนายไว้
+
+ตอนเริ่ม 5.4 จริง เจอว่า `decision_log` **ไม่มีข้อมูลไหลเข้าเลย** — `saveAutonomyLog()` (ฟังก์ชันเดียวที่เขียน autonomy_level/confidence/hesitation ลงตาราง) ไม่มีที่ไหนเรียกใช้ในแอปจริงเลย (`useChat.ts` เรียกแค่ `saveMessage()` ซึ่งเขียนลง `chat_messages` คนละตาราง) — เท่ากับ Dashboard insights/trend ทั้งหมดว่างเปล่าบน production ก่อนหน้านี้
+
+**ถามผู้ใช้ก่อนแก้** (ตัวเลือก: เชื่อมท่อจริง / ข้ามไปทำ 5.5 ก่อน / ขอรายละเอียดเพิ่ม) → เลือก **เชื่อมท่อจริง**
+
+แก้โดยเรียก `saveAutonomyLog()` ใน `useChat.ts` ทุกครั้งที่มีการสนทนา ใช้เฉพาะสัญญาณจริงที่มี ไม่เดามั่ว:
+- `autonomy_level` = ค่า slider ที่ user ตั้งเอง (ของจริง)
+- `confidence` = autonomy_level/100 (ใช้สัญญาณเดียวกัน เพราะยังไม่มีการวัดความมั่นใจแยก)
+- `hesitation` = 0.5 คงที่ (**ยังไม่มีสัญญาณจริงมาคำนวณ** — ใส่ตรงๆว่าไม่รู้ ดีกว่าเดาตัวเลข)
+- `response_time_ms` = เวลาที่ Claude API ตอบกลับ (ของจริง แต่เป็น API latency ไม่ใช่เวลาคิดของ user — ระบุ comment ชัดกันสับสน)
+- `message_length`/`response_length` = ความยาวข้อความจริง
+
+จากนั้นสร้าง `src/lib/patternDetection.ts` — `detectPatterns()` เทียบ autonomy/confidence ครึ่งแรกกับครึ่งหลังของประวัติ user, แจ้งเฉพาะเมื่อ delta มีนัยสำคัญ (กัน noise), ต้องมีข้อมูลอย่างน้อย 6 จุด (กัน "pattern" ปลอมจาก user ใหม่ที่เพิ่งใช้ไม่กี่ครั้ง) — แสดงผลใน Dashboard ส่วน "รูปแบบที่พบ"
+
+**ยังไม่ทำ (ตั้งใจตัดขอบเขต):** mood/hub-specific correlation (เช่น "มั่นใจน้อยลงเวลาเครียด") ต้องขยาย query เพิ่ม hub/mood เข้า `getAutonomyTrend()` — เก็บไว้ทำรอบหน้า
 
 ### ผลต่อแผนเดิม
 
