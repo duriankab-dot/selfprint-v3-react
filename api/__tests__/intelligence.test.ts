@@ -149,4 +149,43 @@ describe('POST /api/intelligence', () => {
     await handler(req, res);
     expect(res._status).toBe(200);
   });
+
+  it('blocks an unsafe question and never calls Claude (5.3.5 Safety Layer)', async () => {
+    const handler = (await import('../intelligence')).default;
+    const { req, res } = makeReqRes({ ...validBody, question: 'ตอนนี้ไม่อยากมีชีวิตอยู่แล้ว' });
+    await handler(req, res);
+
+    expect(res._status).toBe(200);
+    expect((res._json as { sources: string[] }).sources).toEqual(['life_path']);
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it('allows a normal question through to Claude', async () => {
+    createMock.mockResolvedValueOnce({
+      content: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            coreIdentity: 'นักปราชญ์ที่กำลังอยู่ในช่วงเปลี่ยนผ่าน',
+            traits: ['ต้องการเข้าใจอย่างรอบด้าน'],
+            strengths: ['วิเคราะห์รอบด้าน'],
+            cautions: ['รอข้อมูลนานเกินไป'],
+            confidence: 0.8,
+            evidence: ['Archetype: Sage'],
+            limitation: null,
+            archetypeKey: 'sage',
+            phaseKey: 'd',
+          }),
+        },
+      ],
+    });
+
+    const handler = (await import('../intelligence')).default;
+    const { req, res } = makeReqRes({ ...validBody, question: 'ควรวางแผนการเงินยังไงดี' });
+    await handler(req, res);
+
+    expect(res._status).toBe(200);
+    expect((res._json as { sources: string[] }).sources).toEqual(['psychology']);
+    expect(createMock).toHaveBeenCalled();
+  });
 });

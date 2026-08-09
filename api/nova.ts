@@ -16,6 +16,7 @@ import {
   type Hub,
   type Mood,
 } from './utils/prompt-builder';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
 
 // ตั้งค่า Claude API Client
 const anthropic = new Anthropic({
@@ -159,13 +160,28 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       return res.status(400).json({ error: validation.error });
     }
 
+    // 5.5 Safety check — เช็คข้อความล่าสุดของ user ก่อนส่งเข้า Claude
+    const latestUserMessage = [...body.messages].reverse().find((m) => m.role === 'user');
+    const safety = safetyCheck(latestUserMessage?.content);
+    if (!safety.safe) {
+      console.log(`[Nova] Safety redirect: category=${safety.category}`);
+      const result: NovaResponse = {
+        content: safety.redirectMessage || '',
+        conversationId: `conv-${Date.now()}`,
+        tokensUsed: 0,
+        timestamp: new Date().toISOString(),
+      };
+      return res.status(200).json(result);
+    }
+
     // 6. สร้าง System Prompt
-    const systemPrompt = buildSystemPrompt(
-      body.hub as Hub,
-      body.mood as Mood,
-      body.autonomy || 50,
-      body.userProfile?.name
-    );
+    const systemPrompt =
+      buildSystemPrompt(
+        body.hub as Hub,
+        body.mood as Mood,
+        body.autonomy || 50,
+        body.userProfile?.name
+      ) + SAFETY_SYSTEM_DIRECTIVE;
 
     // 7. เรียก Claude API
     console.log(`[Nova] Hub: ${body.hub}, Mood: ${body.mood}, Messages: ${body.messages.length}`);

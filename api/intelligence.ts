@@ -29,6 +29,7 @@ import {
 } from '../src/lib/astrovera-adapter';
 import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrovera';
 import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/index.js';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -89,6 +90,18 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     question: body.question ?? null,
   };
 
+  // Safety check — เช็คช่อง question (free text ช่องเดียวใน request นี้)
+  // finetuneAnswers เป็นคำตอบจากตัวเลือกที่กำหนดไว้แล้ว ไม่ใช่ free text
+  // AnalysisResponse ไม่มีช่องสำหรับข้อความสนทนา (เป็น structured blueprint
+  // ไม่ใช่ chat reply) ดังนั้นแค่กันไม่ให้ question ที่ไม่ปลอดภัยถูกส่งเข้า
+  // Claude เลย แล้วตอบด้วย fallback ตามปกติ — ไม่ต่างจากกรณีไม่มี API key
+  const safety = safetyCheck(analysisRequest.question);
+  if (!safety.safe) {
+    console.log(`[Intelligence] Safety block: category=${safety.category} — skipping Claude call`);
+    const fallback: AnalysisResponse = buildFallbackResponse(analysisRequest);
+    return res.status(200).json(fallback);
+  }
+
   // ไม่มี API key → fallback ทันที ไม่ต้องพยายามเรียก Claude
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error('[Intelligence] ANTHROPIC_API_KEY หาย — ใช้ fallback');
@@ -98,7 +111,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   try {
     const psychologyInput = buildAnalysisRequest(analysisRequest);
-    const prompt = buildPrompt({ exampleCount: 1 });
+    const prompt = buildPrompt({ exampleCount: 1 }) + SAFETY_SYSTEM_DIRECTIVE;
 
     const response = await anthropic.messages.create({
       model: process.env.CLAUDE_MODEL_ID || 'claude-haiku-4-5-20251001',
