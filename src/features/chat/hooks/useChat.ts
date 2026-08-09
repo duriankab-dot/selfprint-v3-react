@@ -13,6 +13,7 @@ import axios from 'axios';
 import { useHub } from '@/context/HubContext';
 import { useEmotion } from '@/context/EmotionContext';
 import { useTwin } from '@/context/TwinContext';
+import { useAuth } from '@/context/AuthContext';
 import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
 import { saveMessage, saveAutonomyLog, getChatHistory } from '@/services/supabase-service';
 
@@ -35,6 +36,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
   const { currentHub: hub } = useHub();
   const { mood } = useEmotion();
   const { twin } = useTwin();
+  const { session } = useAuth();
 
   // Alias สำหรับให้ readable
   const currentHub = hub;
@@ -47,10 +49,10 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
    * โหลด chat history จาก Supabase เมื่อ component mount
    */
   useEffect(() => {
-    const loadChatHistory = async () => {
-      const userId = localStorage.getItem('userId');
-      if (!userId || userId === 'anonymous') return;
+    const userId = session?.user?.id;
+    if (!userId) return;
 
+    const loadChatHistory = async () => {
       try {
         const history = await getChatHistory(userId, undefined, 100);
         if (history && history.length > 0) {
@@ -64,7 +66,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
     };
 
     loadChatHistory();
-  }, []);
+  }, [session]);
 
   /**
    * ส่งข้อความไป Nova via selfprintChat
@@ -92,12 +94,16 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         };
         setMessages((prev) => [...prev, userMsg]);
 
-        // เรียก selfprintChat API
-        const userId = localStorage.getItem('userId') || 'anonymous';
+        // เรียก selfprintChat API — ต้องมี userId เสมอ (แม้ยังไม่ login ก็ใช้
+        // 'anonymous' เป็น placeholder ได้ เพราะ API นี้แค่ต้องการ string ไม่ได้
+        // เอาไปเขียน Supabase ตรงๆ) ส่วนการบันทึกลง Supabase จริงด้านล่าง ใช้
+        // realUserId (จาก Supabase Auth session) เท่านั้น ไม่ใช้ค่านี้
+        const chatApiUserId = session?.user?.id || 'anonymous';
+        const realUserId = session?.user?.id;
         const sessionId = localStorage.getItem('sessionId') || `session-${Date.now()}`;
 
         const chatResponse: SelfprintChatResponse = await selfprintChat({
-          userId,
+          userId: chatApiUserId,
           sessionId,
           hub: currentHub as any,
           mood: currentMood as any,
@@ -128,11 +134,14 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         };
         setMessages((prev) => [...prev, assistantMsg]);
 
-        // บันทึกลงไป Supabase (optional)
-        if (userId !== 'anonymous') {
+        // บันทึกลงไป Supabase (optional — ต้อง login จริงเท่านั้น ใช้ realUserId
+        // จาก Supabase Auth session ไม่ใช่ localStorage 'userId' ที่ไม่เคยถูก
+        // set จริงที่ไหนเลย — เดิมเป็น bug ที่ทำให้ path นี้ไม่เคยรันเลยใน
+        // production ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ 5.4)
+        if (realUserId) {
           try {
-            await saveMessage(userId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
-            await saveMessage(userId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
+            await saveMessage(realUserId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
+            await saveMessage(realUserId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
 
             // Phase 5.4: เขียนลง decision_log จริง (เดิม saveAutonomyLog() มีอยู่
             // แต่ไม่มีที่ไหนเรียกใช้เลย ทำให้ Dashboard insights/trend ว่างเปล่า
@@ -148,7 +157,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
             //   — นี่คือ API latency ไม่ใช่เวลาที่ user ใช้คิดตัดสินใจ (ยังไม่มีทาง
             //   วัดอย่างหลังได้จริงตอนนี้) ตั้งชื่อ comment ไว้ให้ชัดกันสับสนทีหลัง
             await saveAutonomyLog(
-              userId,
+              realUserId,
               currentHub,
               currentMood,
               autonomyLevel,
@@ -178,7 +187,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         setIsLoading(false);
       }
     },
-    [currentHub, currentMood, messages, autonomyLevel, twin]
+    [currentHub, currentMood, messages, autonomyLevel, twin, session]
   );
 
   /**

@@ -6,6 +6,7 @@ import {
   exportDecisionLogs,
 } from '../services/supabase-service';
 import { detectPatterns } from '../lib/patternDetection';
+import { useAuth } from '../context/AuthContext';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
 import FilterBar from '../components/dashboard/FilterBar';
@@ -53,18 +54,16 @@ interface Filters {
 }
 
 const Dashboard: React.FC = () => {
-  const [userId, setUserId] = useState<string>('');
+  // userId มาจาก Supabase Auth session จริง (ไม่ใช่ localStorage 'userId' เดิม
+  // ที่ไม่มีที่ไหนเคย set — เป็น bug เดิมที่ทำให้ insights/trend ว่างเปล่าตลอด
+  // ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ 5.4)
+  const { session } = useAuth();
+  const userId = session?.user?.id || '';
   const [insights, setInsights] = useState<Insights | null>(null);
   const [logs, setLogs] = useState<DecisionLog[]>([]);
   const [trendData, setTrendData] = useState<TrendPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({});
-
-  // Get userId from localStorage on mount
-  useEffect(() => {
-    const id = localStorage.getItem('userId') || 'anonymous';
-    setUserId(id);
-  }, []);
 
   // Fetch insights
   useEffect(() => {
