@@ -17,7 +17,8 @@
  * → fallback ไปที่ safeTransformAnalysisResponse()/buildFallbackResponse()
  * เสมอ (Life Path numerology) ไม่เคยส่ง 500 เปล่าๆ กลับไปให้ frontend
  *
- * ยังไม่ได้เชื่อมกับ Onboarding.tsx — endpoint นี้ยืนอิสระ ทดสอบผ่านแล้วค่อยเชื่อม
+ * เชื่อมกับ Onboarding.tsx แล้ว (ดู src/pages/Onboarding.tsx บรรทัด ~40, 185)
+ * — comment เดิมตรงนี้ค้างมาจากตอนยังทดสอบแยกอยู่ แก้ให้ตรงสถานะจริง 2026-08-09
  */
 
 import { VercelRequest, VercelResponse } from '@vercel/node';

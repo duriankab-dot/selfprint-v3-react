@@ -15,7 +15,7 @@ import { useEmotion } from '@/context/EmotionContext';
 import { useTwin } from '@/context/TwinContext';
 import { useAuth } from '@/context/AuthContext';
 import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
-import { saveMessage, saveAutonomyLog, getChatHistory } from '@/services/supabase-service';
+import { saveMessage, getChatHistory } from '@/services/supabase-service';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -143,9 +143,11 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
             await saveMessage(realUserId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
             await saveMessage(realUserId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
 
-            // Phase 5.4: เขียนลง decision_log จริง (เดิม saveAutonomyLog() มีอยู่
-            // แต่ไม่มีที่ไหนเรียกใช้เลย ทำให้ Dashboard insights/trend ว่างเปล่า
-            // ตลอด — ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ 5.4)
+            // เขียนลง decision_log ผ่าน /api/autonomy-log (server-side, JWT
+            // verify แล้วเอา user_id จาก token เสมอ — ดู comment หัวไฟล์
+            // api/autonomy-log.ts) แทนการเขียนตรงจาก client เหมือนเดิม —
+            // endpoint นี้เคย deploy อยู่เฉยๆ ไม่มีใครเรียก ตอนนี้ต่อเข้าจริง
+            // และปิดช่องโหว่ trust-client-user_id ไปพร้อมกัน
             //
             // ค่าที่ใช้เป็นสัญญาณจริงเท่าที่มี ไม่เดามั่ว:
             // - autonomy_level: ค่าจาก slider ที่ user ตั้งเอง (ของจริง)
@@ -156,17 +158,25 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
             // - response_time_ms: เวลาที่ Claude API ตอบกลับ (responseTime ด้านบน)
             //   — นี่คือ API latency ไม่ใช่เวลาที่ user ใช้คิดตัดสินใจ (ยังไม่มีทาง
             //   วัดอย่างหลังได้จริงตอนนี้) ตั้งชื่อ comment ไว้ให้ชัดกันสับสนทีหลัง
-            await saveAutonomyLog(
-              realUserId,
-              currentHub,
-              currentMood,
-              autonomyLevel,
-              autonomyLevel / 100,
-              0.5,
-              responseTime,
-              userMessage.length,
-              chatResponse.response.text.length
-            );
+            if (session?.access_token) {
+              await fetch('/api/autonomy-log', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${session.access_token}`,
+                },
+                body: JSON.stringify({
+                  hub: currentHub,
+                  mood: currentMood,
+                  autonomy_level: autonomyLevel,
+                  confidence: autonomyLevel / 100,
+                  hesitation: 0.5,
+                  response_time_ms: responseTime,
+                  message_length: userMessage.length,
+                  response_length: chatResponse.response.text.length,
+                }),
+              });
+            }
           } catch (dbErr) {
             console.warn('⚠️ Failed to save to Supabase:', dbErr);
           }

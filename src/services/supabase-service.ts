@@ -157,49 +157,10 @@ export async function saveDecision(
   }
 }
 
-/**
- * บันทึก autonomy tracking data (Phase 6)
- */
-export async function saveAutonomyLog(
-  userId: string,
-  hub: string,
-  mood: string,
-  autonomyLevel: number, // 0-100
-  confidence: number, // 0-1
-  hesitation: number, // 0-1
-  responseTimeMs: number, // milliseconds
-  messageLength?: number,
-  responseLength?: number
-): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
-    return false;
-  }
-
-  try {
-    const { error } = await supabase.from('decision_log').insert({
-      user_id: userId,
-      hub,
-      mood,
-      autonomy_level: autonomyLevel,
-      confidence,
-      hesitation,
-      response_time_ms: responseTimeMs,
-      message_length: messageLength || 0,
-      response_length: responseLength || 0,
-    });
-
-    if (error) {
-      console.error('Supabase autonomy log error:', error);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('Save autonomy log error:', err);
-    return false;
-  }
-}
+// saveAutonomyLog() (client-side, direct decision_log insert) เคยอยู่ตรงนี้
+// — ลบแล้ว 2026-08-09 เพราะย้ายไปเขียนผ่าน /api/autonomy-log แทน (server-side,
+// verify JWT ก่อนเขียนเสมอ ปิดช่องโหว่ trust-client-user_id เดิม) ดู
+// src/features/chat/hooks/useChat.ts + api/autonomy-log.ts
 
 /**
  * Phase 7: ดึง dashboard insights (stats)
@@ -325,6 +286,9 @@ export async function getDecisionLogs(
 
 /**
  * Phase 7: ดึง autonomy trend data (สำหรับ chart)
+ * Phase 5.4+: เพิ่ม hub/mood เข้า select ด้วย — ใช้ทำ mood/hub-specific
+ * correlation ใน patternDetection.ts (เดิมมีแค่ created_at/autonomy_level/
+ * confidence ไม่พอให้ detectPatterns() แยกกลุ่มตาม mood/hub ได้)
  */
 export async function getAutonomyTrend(userId: string) {
   if (!supabase) {
@@ -335,7 +299,7 @@ export async function getAutonomyTrend(userId: string) {
   try {
     const { data, error } = await supabase
       .from('decision_log')
-      .select('created_at, autonomy_level, confidence')
+      .select('created_at, autonomy_level, confidence, hub, mood')
       .eq('user_id', userId)
       .order('created_at', { ascending: true });
 

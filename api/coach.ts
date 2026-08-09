@@ -137,10 +137,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // บริบทที่ 2: pattern insight จาก decision_log ของ user คนนี้ (ถ้ามีข้อมูลพอ
     // — detectPatterns() เองมี MIN_DATA_POINTS threshold กันไม่ให้ fabricate
-    // "pattern" จาก user ใหม่ที่ยังไม่มีประวัติ)
+    // "pattern" จาก user ใหม่ที่ยังไม่มีประวัติ) รวม hub/mood ด้วยเพื่อให้
+    // detectPatterns() ทำ mood/hub correlation ได้ ไม่ใช่แค่ trend ตามเวลา
     const { data: logRows } = await supabaseAdmin
       .from('decision_log')
-      .select('created_at, autonomy_level, confidence')
+      .select('created_at, autonomy_level, confidence, hub, mood')
       .eq('user_id', user.id)
       .order('created_at', { ascending: true })
       .limit(200);

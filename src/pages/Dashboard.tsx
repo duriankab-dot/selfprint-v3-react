@@ -5,7 +5,7 @@ import {
   getAutonomyTrend,
   exportDecisionLogs,
 } from '../services/supabase-service';
-import { detectPatterns } from '../lib/patternDetection';
+import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
@@ -40,12 +40,6 @@ interface DecisionLog {
   response_time_ms: number;
   message_length: number;
   response_length: number;
-}
-
-interface TrendPoint {
-  created_at: string;
-  autonomy_level: number;
-  confidence: number;
 }
 
 interface Filters {

@@ -4,33 +4,27 @@
  * บทบาท: รับ autonomy tracking data จาก React → บันทึกเข้า Supabase decision_log
  *
  * ลักษณะการใช้:
- * 1. Frontend (useChat hook) ส่ง POST ไปที่ /api/autonomy-log
- * 2. Function นี้ประมวลผล + บันทึกเข้า Supabase
+ * 1. Frontend (useChat hook) ส่ง POST ไปที่ /api/autonomy-log พร้อม
+ *    Authorization: Bearer <access_token>
+ * 2. Function นี้ verify token แล้วบันทึกเข้า Supabase ด้วย user_id ที่ verify
+ *    แล้วเท่านั้น
  * 3. ส่ง success response กลับ
+ *
+ * แก้ช่องโหว่ (2026-08-09): เดิม endpoint นี้รับ `user_id` จาก request body
+ * ตรงๆ ไม่มีการ verify เลย — ใครก็ POST มาพร้อม user_id ของคนอื่นได้ ทำให้
+ * เขียนทับ/ปลอมข้อมูล decision_log ของคนอื่นได้ ต่างจากแพทเทิร์นที่ใช้จริงใน
+ * api/profile.ts และ api/coach.ts ที่ derive user_id จาก JWT เสมอ ไม่เชื่อ
+ * client เอาไว้ตอน endpoint นี้ยังไม่มีใครเรียกจริง (dead code) แต่ตอนนี้จะ
+ * เอามาต่อกับ useChat.ts จริง เลยต้องปิดช่องโหว่นี้ก่อน
  */
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin, verifyUser } from './utils/verify-user';
 
 /**
- * Initialize Supabase client
- */
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseServiceRoleKey) {
-  console.error('❌ Supabase env vars missing');
-}
-
-const supabase = supabaseUrl && supabaseServiceRoleKey
-  ? createClient(supabaseUrl, supabaseServiceRoleKey)
-  : null;
-
-/**
- * Type definition: สิ่งที่ Frontend ส่งมา
+ * Type definition: สิ่งที่ Frontend ส่งมา (ไม่มี user_id แล้ว — มาจาก JWT แทน)
  */
 interface AutonomyLogRequest {
-  user_id: string;
   hub: string;
   mood: string;
   autonomy_level: number; // 0-100
@@ -55,9 +49,6 @@ interface AutonomyLogResponse {
  * Utility: Validate request data
  */
 function validateInput(data: any): { valid: boolean; error?: string } {
-  if (!data.user_id || !data.user_id.trim()) {
-    return { valid: false, error: 'user_id ต้องระบุ' };
-  }
   if (!data.hub || !data.hub.trim()) {
     return { valid: false, error: 'hub ต้องระบุ' };
   }
@@ -87,7 +78,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
@@ -101,11 +92,21 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   try {
     // 2. ตรวจสอบ Supabase
-    if (!supabase) {
+    if (!supabaseAdmin) {
       console.error('Supabase ไม่พร้อม');
       return res.status(500).json({
         error: 'SERVER_ERROR',
         message: 'Supabase ไม่พร้อม',
+      });
+    }
+
+    // 2.5 Verify user จาก JWT — ไม่เชื่อ user_id จาก client เด็ดขาด (ดู comment
+    // หัวไฟล์ — เดิมเป็นช่องโหว่)
+    const user = await verifyUser(req.headers.authorization);
+    if (!user) {
+      return res.status(401).json({
+        error: 'UNAUTHORIZED',
+        message: 'ต้อง login ก่อน (Authorization header ไม่ถูกต้องหรือหมดอายุ)',
       });
     }
 
@@ -122,10 +123,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     // 5. Insert into Supabase decision_log
-    const { data, error: insertError } = await supabase
+    const { data, error: insertError } = await supabaseAdmin
       .from('decision_log')
       .insert({
-        user_id: body.user_id,
+        user_id: user.id,
         hub: body.hub,
         mood: body.mood,
         autonomy_level: body.autonomy_level,
@@ -148,7 +149,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // 6. Success response
     console.log('✅ Autonomy logged:', {
-      userId: body.user_id,
+      userId: user.id,
       hub: body.hub,
       mood: body.mood,
       autonomyLevel: body.autonomy_level,

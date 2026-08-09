@@ -131,6 +131,11 @@ export function transformAnalysisResponse(astro: AstroveraPsychologyOutput): Ana
     decisionStyle: astro.coreIdentity,
     strengths: astro.strengths,
     insights: astro.traits,
+    // Astrovera's Psychology output has no "opportunities" field of its own
+    // (see AstroveraPsychologyOutput) — left [] here on purpose, filled in
+    // by safeTransformAnalysisResponse() below using the same Life Path
+    // opportunities already computed from the real birth date, instead of
+    // fabricating anything from unrelated fields.
     opportunities: [],
     blindSpots: astro.cautions,
     confidence: reconcileConfidence(astro.confidence, astro.evidence?.length ?? 0),
@@ -177,6 +182,13 @@ export function safeTransformAnalysisResponse(
   if (!isValidBirthDate(request.birthDate)) {
     result.confidence = Math.min(result.confidence, 0.5);
   }
+
+  // opportunities gap fix: Astrovera's schema has no such field, so reuse
+  // the same deterministic Life Path opportunities (from the real birth
+  // date via getLifePathProfile — the same source buildFallbackResponse()
+  // below already uses) instead of leaving this permanently empty.
+  const disciplines = calculateInitialDisciplines(request.birthDate);
+  result.opportunities = getLifePathProfile(disciplines.lifePathNumber).opportunities;
 
   return result;
 }

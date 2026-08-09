@@ -1,10 +1,15 @@
 import { describe, it, expect } from 'vitest';
 import { detectPatterns, type TrendPoint } from '../patternDetection';
 
-function makePoint(daysAgo: number, autonomy: number, confidence: number): TrendPoint {
+function makePoint(
+  daysAgo: number,
+  autonomy: number,
+  confidence: number,
+  extra?: { hub?: string; mood?: string }
+): TrendPoint {
   const date = new Date();
   date.setDate(date.getDate() - daysAgo);
-  return { created_at: date.toISOString(), autonomy_level: autonomy, confidence };
+  return { created_at: date.toISOString(), autonomy_level: autonomy, confidence, ...extra };
 }
 
 describe('detectPatterns', () => {
@@ -72,5 +77,61 @@ describe('detectPatterns', () => {
     ];
     const insights = detectPatterns(points);
     expect(insights.map((i) => i.type).sort()).toEqual(['autonomy_trend', 'confidence_trend']);
+  });
+
+  it('ignores mood/hub grouping when points have no mood/hub field', () => {
+    const points = Array.from({ length: 8 }, (_, i) => makePoint(8 - i, 50, 0.5));
+    const insights = detectPatterns(points);
+    expect(insights.some((i) => i.type === 'mood_confidence')).toBe(false);
+    expect(insights.some((i) => i.type === 'hub_autonomy')).toBe(false);
+  });
+
+  it('detects lower confidence correlated with a specific mood', () => {
+    const points = [
+      makePoint(9, 50, 0.3, { mood: 'stressed' }),
+      makePoint(8, 50, 0.7, { mood: 'ready' }),
+      makePoint(7, 50, 0.7, { mood: 'confident' }),
+      makePoint(6, 50, 0.3, { mood: 'stressed' }),
+      makePoint(5, 50, 0.7, { mood: 'ready' }),
+      makePoint(4, 50, 0.7, { mood: 'confident' }),
+      makePoint(3, 50, 0.3, { mood: 'stressed' }),
+      makePoint(2, 50, 0.7, { mood: 'ready' }),
+      makePoint(1, 50, 0.7, { mood: 'confident' }),
+    ];
+    const insights = detectPatterns(points);
+    const moodInsight = insights.find((i) => i.type === 'mood_confidence');
+    expect(moodInsight?.direction).toBe('down');
+    expect(moodInsight?.message).toContain('เครียด');
+  });
+
+  it('detects higher autonomy correlated with a specific hub', () => {
+    const points = [
+      makePoint(9, 80, 0.5, { hub: 'career' }),
+      makePoint(8, 40, 0.5, { hub: 'health' }),
+      makePoint(7, 40, 0.5, { hub: 'money' }),
+      makePoint(6, 80, 0.5, { hub: 'career' }),
+      makePoint(5, 40, 0.5, { hub: 'health' }),
+      makePoint(4, 40, 0.5, { hub: 'money' }),
+      makePoint(3, 80, 0.5, { hub: 'career' }),
+      makePoint(2, 40, 0.5, { hub: 'health' }),
+      makePoint(1, 40, 0.5, { hub: 'money' }),
+    ];
+    const insights = detectPatterns(points);
+    const hubInsight = insights.find((i) => i.type === 'hub_autonomy');
+    expect(hubInsight?.direction).toBe('up');
+    expect(hubInsight?.message).toContain('อาชีพ');
+  });
+
+  it('does not flag a mood/hub with fewer than the minimum group points', () => {
+    const points = [
+      makePoint(9, 50, 0.1, { mood: 'stressed' }), // only 2 stressed points — below MIN_GROUP_POINTS
+      makePoint(8, 50, 0.7, { mood: 'ready' }),
+      makePoint(7, 50, 0.7, { mood: 'confident' }),
+      makePoint(6, 50, 0.1, { mood: 'stressed' }),
+      makePoint(5, 50, 0.7, { mood: 'ready' }),
+      makePoint(4, 50, 0.7, { mood: 'confident' }),
+    ];
+    const insights = detectPatterns(points);
+    expect(insights.some((i) => i.type === 'mood_confidence')).toBe(false);
   });
 });

@@ -143,7 +143,7 @@ describe('transformAnalysisResponse', () => {
     expect(result.sources).toEqual(['psychology']);
   });
 
-  it('leaves opportunities empty (no source field in Astrovera output yet)', () => {
+  it('leaves opportunities empty at this layer (no source field in Astrovera output) — filled by safeTransformAnalysisResponse instead', () => {
     expect(transformAnalysisResponse(validAstroOutput).opportunities).toEqual([]);
   });
 
@@ -202,6 +202,28 @@ describe('safeTransformAnalysisResponse', () => {
       birthDate: '',
     });
     expect(result.confidence).toBe(0.2);
+  });
+
+  it('fills opportunities from the real Life Path profile (opportunities gap fix)', () => {
+    const result = safeTransformAnalysisResponse(validAstroOutput, baseRequest);
+    const expectedOpportunities = buildFallbackResponse(baseRequest).opportunities;
+    expect(result.opportunities).toEqual(expectedOpportunities);
+    expect(result.opportunities.length).toBeGreaterThan(0);
+  });
+
+  it('opportunities still reflect the real birth date even when the response is otherwise valid', () => {
+    const a = safeTransformAnalysisResponse(validAstroOutput, {
+      ...baseRequest,
+      birthDate: '1990-01-15',
+    });
+    const b = safeTransformAnalysisResponse(validAstroOutput, {
+      ...baseRequest,
+      birthDate: '1985-06-20',
+    });
+    // คนละวันเกิด → Life Path Number คนละค่า → opportunities ไม่ควรเหมือนกันเป๊ะเสมอไป
+    // (อาจบังเอิญตรงกันได้ถ้า Life Path Number คำนวณได้เท่ากัน แต่ทั้งคู่ต้องไม่ว่าง)
+    expect(a.opportunities.length).toBeGreaterThan(0);
+    expect(b.opportunities.length).toBeGreaterThan(0);
   });
 });
 
