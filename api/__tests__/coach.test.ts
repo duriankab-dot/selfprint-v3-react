@@ -84,14 +84,14 @@ describe('POST /api/coach', () => {
   });
 
   it('rejects non-POST methods', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(undefined, 'GET');
     await handler(req, res);
     expect(res._status).toBe(405);
   });
 
   it('handles CORS preflight', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(undefined, 'OPTIONS');
     await handler(req, res);
     expect(res._status).toBe(200);
@@ -99,35 +99,35 @@ describe('POST /api/coach', () => {
 
   it('rejects when not authenticated', async () => {
     verifyUserMock.mockResolvedValueOnce(null);
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(401);
   });
 
   it('rejects a missing birthDate', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes({ ...validBody, birthDate: undefined });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('rejects an invalid mood', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes({ ...validBody, mood: 'not-a-mood' });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('rejects a missing question', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes({ ...validBody, question: '' });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('blocks an unsafe question and never calls Claude', async () => {
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes({ ...validBody, question: 'ไม่อยากมีชีวิตอยู่แล้ว' });
     await handler(req, res);
 
@@ -148,7 +148,7 @@ describe('POST /api/coach', () => {
       content: [{ type: 'text', text: 'คำแนะนำจาก Nova...' }],
     });
 
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -164,7 +164,7 @@ describe('POST /api/coach', () => {
       content: [{ type: 'text', text: 'คำแนะนำจาก Nova...' }],
     });
 
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -175,7 +175,7 @@ describe('POST /api/coach', () => {
 
   it('returns 500 when ANTHROPIC_API_KEY is missing', async () => {
     delete process.env.ANTHROPIC_API_KEY;
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(500);
@@ -183,7 +183,7 @@ describe('POST /api/coach', () => {
 
   it('returns 500 when the Anthropic call throws', async () => {
     createMock.mockRejectedValueOnce(new Error('network error'));
-    const handler = (await import('../coach')).default;
+    const handler = (await import('../coach.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(500);

@@ -27,10 +27,10 @@ import {
   buildAnalysisRequest,
   safeTransformAnalysisResponse,
   buildFallbackResponse,
-} from '../src/lib/astrovera-adapter';
-import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrovera';
+} from '../src/lib/astrovera-adapter.js';
+import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrovera.js';
 import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/index.js';
-import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety.js';
 
 // lazy client — ดู comment เดียวกันใน api/nova.ts (สร้างตอน module load ทำให้
 // @anthropic-ai/sdk throw ก่อนถึง `if (!process.env.ANTHROPIC_API_KEY)` เช็ค

@@ -10,7 +10,7 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import crypto from 'crypto';
-import { supabaseAdmin, verifyUser } from './utils/verify-user';
+import { supabaseAdmin, verifyUser } from './utils/verify-user.js';
 
 function generateCode(): string {
   return crypto.randomBytes(6).toString('base64url'); // 8 chars, URL-safe

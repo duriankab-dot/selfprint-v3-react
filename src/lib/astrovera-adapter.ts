@@ -14,7 +14,7 @@
  * directly — only through the functions here.
  */
 
-import { calculateInitialDisciplines, getLifePathProfile, isValidBirthDate } from './astrology';
+import { calculateInitialDisciplines, getLifePathProfile, isValidBirthDate } from './astrology.js';
 import {
   ARCHETYPE_KEYS,
   type AnalysisError,
@@ -25,7 +25,7 @@ import {
   type AstroveraPsychologyInput,
   type AstroveraPsychologyOutput,
   type PhaseKey,
-} from './types/astrovera';
+} from './types/astrovera.js';
 
 // ---------------------------------------------------------------------
 // Prototype Core (astrology.ts) uses capitalized English names (Hero,

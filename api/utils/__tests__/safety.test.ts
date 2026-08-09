@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { safetyCheck } from '../safety';
+import { safetyCheck } from '../safety.js';
 
 describe('safetyCheck', () => {
   it('passes through normal text', () => {

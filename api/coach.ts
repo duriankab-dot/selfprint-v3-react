@@ -16,11 +16,11 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabaseAdmin, verifyUser } from './utils/verify-user';
-import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
-import { buildSystemPrompt, type Mood } from './utils/prompt-builder';
-import { calculateInitialDisciplines, getLifePathProfile } from '../src/lib/astrology';
-import { detectPatterns, type TrendPoint } from '../src/lib/patternDetection';
+import { supabaseAdmin, verifyUser } from './utils/verify-user.js';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety.js';
+import { buildSystemPrompt, type Mood } from './utils/prompt-builder.js';
+import { calculateInitialDisciplines, getLifePathProfile } from '../src/lib/astrology.js';
+import { detectPatterns, type TrendPoint } from '../src/lib/patternDetection.js';
 
 // lazy client — ดู comment เดียวกันใน api/nova.ts (สร้างตอน module load ทำให้
 // @anthropic-ai/sdk throw ก่อนถึง `if (!process.env.ANTHROPIC_API_KEY)` เช็ค

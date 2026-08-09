@@ -67,14 +67,14 @@ describe('POST /api/autonomy-log', () => {
   });
 
   it('rejects non-POST methods', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes(undefined, 'GET');
     await handler(req, res);
     expect(res._status).toBe(405);
   });
 
   it('handles CORS preflight', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes(undefined, 'OPTIONS');
     await handler(req, res);
     expect(res._status).toBe(200);
@@ -82,7 +82,7 @@ describe('POST /api/autonomy-log', () => {
 
   it('rejects when not authenticated', async () => {
     verifyUserMock.mockResolvedValueOnce(null);
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(401);
@@ -90,21 +90,21 @@ describe('POST /api/autonomy-log', () => {
   });
 
   it('rejects a missing hub', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes({ ...validBody, hub: '' });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('rejects an out-of-range autonomy_level', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes({ ...validBody, autonomy_level: 150 });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('ignores any client-supplied user_id and uses the verified JWT user instead', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes({ ...validBody, user_id: 'someone-elses-id' });
     await handler(req, res);
 
@@ -115,7 +115,7 @@ describe('POST /api/autonomy-log', () => {
   });
 
   it('inserts successfully and returns the log id', async () => {
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -126,7 +126,7 @@ describe('POST /api/autonomy-log', () => {
 
   it('returns 500 when the insert errors', async () => {
     singleMock.mockResolvedValueOnce({ data: null, error: { message: 'db down' } });
-    const handler = (await import('../autonomy-log')).default;
+    const handler = (await import('../autonomy-log.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(500);

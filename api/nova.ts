@@ -15,8 +15,8 @@ import {
   buildSystemPrompt,
   type Hub,
   type Mood,
-} from './utils/prompt-builder';
-import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
+} from './utils/prompt-builder.js';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety.js';
 
 // ตั้งค่า Claude API Client — สร้างตอนใช้จริงเท่านั้น (lazy) ไม่ใช่ตอน module
 // load แก้ไว้ 2026-08-09: @anthropic-ai/sdk throw ทันทีตอน constructor ถ้าไม่มี

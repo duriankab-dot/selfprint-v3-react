@@ -58,21 +58,21 @@ describe('POST /api/intelligence', () => {
   });
 
   it('rejects non-POST methods', async () => {
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(undefined, 'GET');
     await handler(req, res);
     expect(res._status).toBe(405);
   });
 
   it('rejects an invalid mood', async () => {
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes({ ...validBody, mood: 'not-a-mood' });
     await handler(req, res);
     expect(res._status).toBe(400);
   });
 
   it('rejects a missing birthDate', async () => {
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes({ mood: 'ready' });
     await handler(req, res);
     expect(res._status).toBe(400);
@@ -80,7 +80,7 @@ describe('POST /api/intelligence', () => {
 
   it('falls back to Life Path when ANTHROPIC_API_KEY is missing', async () => {
     delete process.env.ANTHROPIC_API_KEY;
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
     expect(res._status).toBe(200);
@@ -111,7 +111,7 @@ describe('POST /api/intelligence', () => {
       ],
     });
 
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -127,7 +127,7 @@ describe('POST /api/intelligence', () => {
       content: [{ type: 'text', text: 'ขอโทษค่ะ ตอบไม่ได้ตอนนี้' }],
     });
 
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -138,7 +138,7 @@ describe('POST /api/intelligence', () => {
   it('falls back to Life Path when the Anthropic call throws', async () => {
     createMock.mockRejectedValueOnce(new Error('network error'));
 
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(validBody);
     await handler(req, res);
 
@@ -147,14 +147,14 @@ describe('POST /api/intelligence', () => {
   });
 
   it('handles CORS preflight', async () => {
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes(undefined, 'OPTIONS');
     await handler(req, res);
     expect(res._status).toBe(200);
   });
 
   it('blocks an unsafe question and never calls Claude (5.3.5 Safety Layer)', async () => {
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes({ ...validBody, question: 'ตอนนี้ไม่อยากมีชีวิตอยู่แล้ว' });
     await handler(req, res);
 
@@ -186,7 +186,7 @@ describe('POST /api/intelligence', () => {
       ],
     });
 
-    const handler = (await import('../intelligence')).default;
+    const handler = (await import('../intelligence.js')).default;
     const { req, res } = makeReqRes({ ...validBody, question: 'ควรวางแผนการเงินยังไงดี' });
     await handler(req, res);
 
