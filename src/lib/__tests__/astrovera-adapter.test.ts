@@ -119,6 +119,26 @@ describe('safeTransformAnalysisResponse', () => {
     expect(result.sources).toEqual(['life_path']);
     expect(result.confidence).toBe(0.6);
   });
+
+  it('caps confidence at 0.5 for a valid response when the birth date is invalid (Phase 5.3)', () => {
+    // Even a well-formed Astrovera response is ungrounded if archKey/strengths
+    // were derived from a defaulted birth date - confidence should reflect that.
+    const result = safeTransformAnalysisResponse(validAstroOutput, {
+      ...baseRequest,
+      birthDate: '',
+    });
+    expect(result.sources).toEqual(['psychology']);
+    expect(result.confidence).toBe(0.5);
+  });
+
+  it('does not raise confidence when it was already below the 0.5 cap', () => {
+    const lowConfidenceOutput = { ...validAstroOutput, confidence: 0.2 };
+    const result = safeTransformAnalysisResponse(lowConfidenceOutput, {
+      ...baseRequest,
+      birthDate: '',
+    });
+    expect(result.confidence).toBe(0.2);
+  });
 });
 
 describe('buildFallbackResponse', () => {
@@ -143,6 +163,16 @@ describe('buildFallbackResponse', () => {
     const a = buildFallbackResponse(baseRequest);
     const b = buildFallbackResponse(baseRequest);
     expect(a).toEqual(b);
+  });
+
+  it('lowers confidence to 0.3 when the birth date is missing/unparseable (Phase 5.3)', () => {
+    // calculateInitialDisciplines() silently defaults to today's date when
+    // birthDate can't be parsed - every value derived from it is then
+    // arbitrary, not a real signal, so confidence should say so.
+    expect(buildFallbackResponse({ ...baseRequest, birthDate: '' }).confidence).toBe(0.3);
+    expect(buildFallbackResponse({ ...baseRequest, birthDate: 'not-a-date' }).confidence).toBe(
+      0.3
+    );
   });
 });
 

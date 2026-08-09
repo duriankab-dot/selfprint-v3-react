@@ -74,6 +74,28 @@ function normalizeDob(dob: string | null | undefined): string {
 }
 
 // ---------------------------------------------------------------------
+// Confidence signal (Phase 5.3 — Numerology Enhancement)
+//
+// normalizeDob() above always returns *some* date (defaulting to today
+// when the input is missing/unparseable) so the rest of this module never
+// breaks. But every value derived from a defaulted "today" date (Life
+// Path, both zodiacs, Bazi element, Prototype Core) is not a real signal
+// about the person — it's arbitrary. isValidBirthDate() lets callers
+// (astrovera-adapter.ts) tell the two cases apart and reflect that
+// honestly in the confidence score, instead of reporting the same
+// confidence whether the birth date was real or silently made up.
+// ---------------------------------------------------------------------
+
+export function isValidBirthDate(dob: string | null | undefined): boolean {
+  const trimmed = dob?.trim();
+  if (!trimmed) return false;
+  const parsed = new Date(trimmed);
+  if (isNaN(parsed.getTime())) return false;
+  const year = parsed.getFullYear();
+  return year >= 1900 && year <= new Date().getFullYear();
+}
+
+// ---------------------------------------------------------------------
 // Life Path Number
 // ---------------------------------------------------------------------
 

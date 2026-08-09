@@ -14,7 +14,7 @@
  * directly — only through the functions here.
  */
 
-import { calculateInitialDisciplines, getLifePathProfile } from './astrology';
+import { calculateInitialDisciplines, getLifePathProfile, isValidBirthDate } from './astrology';
 import {
   ARCHETYPE_KEYS,
   type AnalysisError,
@@ -121,7 +121,17 @@ export function safeTransformAnalysisResponse(
   if (!isValidPsychologyOutput(data)) {
     return buildFallbackResponse(request);
   }
-  return transformAnalysisResponse(data);
+  const result = transformAnalysisResponse(data);
+
+  // Claude's archKey/strengths/blindspot inputs (buildAnalysisRequest above)
+  // are themselves derived from the birth date, so a defaulted/invalid
+  // birth date makes this analysis just as ungrounded as the Life Path
+  // fallback — cap confidence at 0.5 regardless of what Claude reported.
+  if (!isValidBirthDate(request.birthDate)) {
+    result.confidence = Math.min(result.confidence, 0.5);
+  }
+
+  return result;
 }
 
 // ---------------------------------------------------------------------
@@ -133,13 +143,20 @@ export function buildFallbackResponse(request: AnalysisRequest): AnalysisRespons
   const disciplines = calculateInitialDisciplines(request.birthDate);
   const lifePath = getLifePathProfile(disciplines.lifePathNumber);
 
+  // 0.6 when the birth date is real (Life Path/Zodiac/Prototype Core all
+  // computed from an actual date the person gave), 0.3 when it's missing
+  // or unparseable (calculateInitialDisciplines silently defaults to
+  // today's date in that case — every value below is then arbitrary, not
+  // a real signal about the person, and confidence should say so).
+  const confidence = isValidBirthDate(request.birthDate) ? 0.6 : 0.3;
+
   return {
     decisionStyle: lifePath.decisionStyle,
     strengths: lifePath.strengths,
     insights: lifePath.insights,
     opportunities: lifePath.opportunities,
     blindSpots: lifePath.blindSpots,
-    confidence: 0.6,
+    confidence,
     sources: ['life_path'],
   };
 }
