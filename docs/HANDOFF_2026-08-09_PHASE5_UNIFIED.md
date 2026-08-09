@@ -25,7 +25,7 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | # | งาน | มาจาก | สถานะ |
 |---|------|-------|--------|
 | 5.1 | **Foundation** — TypeScript types + adapter layer + fallback (Astrovera) | AUDIT_5 Phase 1 | ✅ เสร็จ (2026-08-09) |
-| 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Supabase Edge Function | AUDIT_5 Phase 2 | 🔲 ยังไม่เริ่ม — ต้องมี `ASTROVERA_API_KEY` env + ตัดสินใจว่าจะ redesign gateway.js จาก Cloudflare Workers call เป็นเรียก knowledge module ตรงยังไง |
+| 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟡 Endpoint เสร็จ + เทสผ่าน 67/67 (commit `96c3f17`) — **ยังไม่ได้เชื่อมกับ UI จริง และยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น)** |
 | 5.3 | Numerology Enhancement — multi-domain confidence scoring | AUDIT_5 Phase 3 | 🔲 |
 | 5.4 | Pattern Detection — Supabase `analysis_history`/`pattern_insights` tables + memory | AUDIT_5 Phase 4 | 🔲 |
 | 5.5 | Decision Support — Coach + Insight agent, "Ask Coach" UI | AUDIT_5 Phase 5 | 🔲 |
@@ -58,11 +58,31 @@ A/B Testing (ROADMAP เดิม 5.2) พับรวมเข้ากับ 5
 
 ---
 
-## ก่อนเริ่ม 5.2 (Psychology Integration) ต้องตัดสินใจ
+## สิ่งที่ทำไปแล้วรอบนี้ (5.2 Psychology Integration)
 
-1. **Redesign gateway.js อย่างไร** — เรียก `psychology/index.js`'s `buildPrompt()` + Anthropic SDK ตรงจาก Supabase Edge Function (ตัด Cloudflare Worker layer ออกทั้งหมด) หรือ deploy Cloudflare Worker แยกแล้วให้ Edge Function เรียกอีกที?
-2. **`ASTROVERA_API_KEY`** — ตอนนี้ยังไม่มีใน `.env` ของ Selfprint (Astrovera เดิมใช้ Anthropic API ของตัวเอง ต้องเช็คว่าจะแชร์ key เดียวกับ `/api/nova` หรือแยก)
-3. **Solo dev scope** — เอกสาร audit เขียนแบบทีม (Engineer 1/2 + DevOps + "Astrovera Team" แยกทีม) 28 วัน ต้องตัด scope ให้เหมาะกับคนเดียว + AI — แนะนำตัด Block 4's "100 concurrent users load test" และ multi-day staged rollout (10%→50%→100% ข้ามวัน) ให้เหลือ manual smoke test ก่อน deploy จริง
+**ไฟล์ใหม่:**
+- `src/lib/astrovera-brain/_shared/outputSchema.js`, `src/lib/astrovera-brain/psychology/{system,instruction,examples,schema,version,index}.js` — vendor (copy ตรงๆ) จาก `D:\astrovera-v2\brain\knowledge\psychology\` เพราะไฟล์เป็น plain ES module ไม่มี dependency และ astrovera-v2 ไม่มี git remote ให้ผูก package จริง — แต่ละไฟล์มี comment หัวบอกว่า vendored ต้อง sync มือถ้าต้นทางเปลี่ยน
+- `src/lib/astrovera-brain/psychology/index.d.ts` — ambient types ให้ TypeScript call site ไม่ต้องเป็น `any`
+- `api/intelligence.ts` — Vercel function ใหม่ `/api/intelligence` (ตามแพทเทิร์นเดียวกับ `api/nova.ts` ที่มีอยู่แล้ว) — **ไม่ใช่ Supabase Edge Function ตามที่เอกสาร audit สมมติไว้** เพราะเช็คแล้วว่า Selfprint deploy จริงเป็น Vercel serverless functions (`ls api/`) ไม่มี `supabase/functions/` เลย
+- `api/__tests__/intelligence.test.ts` — 8 เทส mock `@anthropic-ai/sdk`
+
+**ตัดสินใจที่เคยค้างไว้ (แก้แล้ว):**
+1. ~~Redesign gateway.js~~ → **ข้าม gateway.js/orchestrator.js ไปเลย** เรียก `psychology/index.js`'s `buildPrompt()` + Anthropic SDK ตรงจาก `api/intelligence.ts` (ไม่มี Cloudflare Worker layer)
+2. ~~ASTROVERA_API_KEY~~ → **ใช้ `ANTHROPIC_API_KEY` ตัวเดียวกับ `/api/nova`** ไม่แยก key
+3. Solo dev scope → ตัด load test/multi-day rollout ออกจริง เหลือแค่ unit test (mock) + manual smoke test ก่อน deploy
+
+**ยังไม่ทำ (gap จริง ไม่ใช่ bug):**
+- **ยังไม่เคยเรียก Claude จริง** — sandbox นี้ไม่มี `ANTHROPIC_API_KEY` เข้าถึงได้ เทสทั้งหมด mock `@anthropic-ai/sdk` เท่านั้น ต้องรอ deploy ขึ้น Vercel จริง (มี env จริง) แล้วยิงลอง manual ก่อนเชื่อ UI
+- **ยังไม่เชื่อมกับ `Onboarding.tsx`** — `/api/intelligence` ยืนอิสระ ไม่มีที่ไหน import (`grep` ยืนยันแล้ว) — Onboarding ยังเรียก `/api/nova` เหมือนเดิม 100%
+- `phaseKey` ยังเป็น mood heuristic เหมือนเดิม (ไม่ได้แก้ใน 5.2 — ตามแผนเดิมคือรอ Phase 5.2+ ถ้าต้องการแม่นกว่านี้ แต่รอบนี้เน้นให้ endpoint ทำงานได้ก่อน)
+
+---
+
+## ก่อนใช้งาน 5.2 จริง (ต้องตัดสินใจ/ทำต่อ)
+
+1. **เทสเรียก Claude จริง** — deploy `api/intelligence.ts` ขึ้น Vercel (หรือรัน `vercel dev` ในเครื่องที่มี `ANTHROPIC_API_KEY`) แล้วยิง POST ทดสอบดูว่า Claude ตอบตรง schema ที่ `validate()` เช็คไหม
+2. **เชื่อมกับ UI** — จะแทนที่ `/api/nova` เดิมใน `Onboarding.tsx`'s `analyzeFinetuneAnswers` เลย หรือเพิ่มเป็นทางเลือกเสริม (fallback เดิมยังอยู่)?
+3. ต่อ 5.3 Numerology Enhancement ตามแผนรวมด้านบน
 
 ---
 
