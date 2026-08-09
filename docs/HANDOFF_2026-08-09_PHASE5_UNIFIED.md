@@ -25,7 +25,7 @@ Astrovera integration มาก่อน เพราะแก้ gap ที่�
 | # | งาน | มาจาก | สถานะ |
 |---|------|-------|--------|
 | 5.1 | **Foundation** — TypeScript types + adapter layer + fallback (Astrovera) | AUDIT_5 Phase 1 | ✅ เสร็จ (2026-08-09) |
-| 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟡 Endpoint เสร็จ + เทสผ่าน 67/67 (commit `96c3f17`) — **ยังไม่ได้เชื่อมกับ UI จริง และยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น)** |
+| 5.2 | Psychology Integration — เรียก Astrovera จริงผ่าน Vercel Function | AUDIT_5 Phase 2 | 🟢 Endpoint + UI wiring เสร็จ (commit `96c3f17`, `acfa67d`, `7bb7a7a`) เทสผ่าน 67/67, tsc/build/lint สะอาด — **ยังไม่เคยเทสเรียก Claude จริง (mock เท่านั้น จนกว่าจะ deploy)** |
 | 5.3 | Numerology Enhancement — multi-domain confidence scoring | AUDIT_5 Phase 3 | 🔲 |
 | 5.4 | Pattern Detection — Supabase `analysis_history`/`pattern_insights` tables + memory | AUDIT_5 Phase 4 | 🔲 |
 | 5.5 | Decision Support — Coach + Insight agent, "Ask Coach" UI | AUDIT_5 Phase 5 | 🔲 |
@@ -71,18 +71,22 @@ A/B Testing (ROADMAP เดิม 5.2) พับรวมเข้ากับ 5
 2. ~~ASTROVERA_API_KEY~~ → **ใช้ `ANTHROPIC_API_KEY` ตัวเดียวกับ `/api/nova`** ไม่แยก key
 3. Solo dev scope → ตัด load test/multi-day rollout ออกจริง เหลือแค่ unit test (mock) + manual smoke test ก่อน deploy
 
+**สิ่งที่ทำเพิ่ม (UI wiring, commit `7bb7a7a`):**
+- `Onboarding.tsx`'s `analyzeFinetuneAnswers()` (เรียก `/api/nova` + prompt เอง + regex-extract JSON) ถูกแทนที่ด้วย `analyzeWithAstrovera()` เรียก `/api/intelligence` ตรงๆ — ได้ JSON ที่มี schema ชัดเจนกลับมาเลย ไม่ต้อง regex
+- Local type `AnalysisProfile` + `buildFallbackAnalysisProfile()` ถูกลบ แทนด้วย `AnalysisResponse` + `buildFallbackResponse()` จริงจาก `astrovera-adapter.ts` (Phase 5.1) — ลด logic ซ้ำซ้อนที่เอกสารเคยตั้งข้อสังเกตไว้
+- `FullAnalysis.tsx` เพิ่มการ์ด "⚠️ จุดที่ควรระวัง" แสดง `blindSpots` ที่แต่ก่อนส่งมาถึง component แล้วแต่ไม่เคย render เลย
+
 **ยังไม่ทำ (gap จริง ไม่ใช่ bug):**
-- **ยังไม่เคยเรียก Claude จริง** — sandbox นี้ไม่มี `ANTHROPIC_API_KEY` เข้าถึงได้ เทสทั้งหมด mock `@anthropic-ai/sdk` เท่านั้น ต้องรอ deploy ขึ้น Vercel จริง (มี env จริง) แล้วยิงลอง manual ก่อนเชื่อ UI
-- **ยังไม่เชื่อมกับ `Onboarding.tsx`** — `/api/intelligence` ยืนอิสระ ไม่มีที่ไหน import (`grep` ยืนยันแล้ว) — Onboarding ยังเรียก `/api/nova` เหมือนเดิม 100%
+- **ยังไม่เคยเรียก Claude จริง** — sandbox นี้ไม่มี `ANTHROPIC_API_KEY` เข้าถึงได้ เทสทั้งหมด mock `@anthropic-ai/sdk` เท่านั้น ต้องรอ deploy ขึ้น Vercel จริง (มี env จริง) แล้วยิงลอง manual/สมัคร onboarding จริงดูก่อนเชื่อเต็มที่
 - `phaseKey` ยังเป็น mood heuristic เหมือนเดิม (ไม่ได้แก้ใน 5.2 — ตามแผนเดิมคือรอ Phase 5.2+ ถ้าต้องการแม่นกว่านี้ แต่รอบนี้เน้นให้ endpoint ทำงานได้ก่อน)
+- `accuracy` หลัง fine-tune ยัง hardcode เป็น 85% เหมือนเดิม ไม่ได้ผูกกับ `confidence` จริงจาก Astrovera (0.6 ตอน fallback, ค่าจริงตอนเรียก Claude สำเร็จ) — จงใจไม่แตะ เพราะเป็นการเปลี่ยนพฤติกรรม UX ที่ไม่มีคนขอ (ข้อความ "ความชัดเจนมากกว่า 85%" ใน `FullAnalysis.tsx` จะขัดกับตัวเลขจริงถ้าผูกไว้ตอนนี้) — ถ้าอยากให้ผูกจริง ต้องตัดสินใจ/สั่งแยกต่างหาก
 
 ---
 
 ## ก่อนใช้งาน 5.2 จริง (ต้องตัดสินใจ/ทำต่อ)
 
-1. **เทสเรียก Claude จริง** — deploy `api/intelligence.ts` ขึ้น Vercel (หรือรัน `vercel dev` ในเครื่องที่มี `ANTHROPIC_API_KEY`) แล้วยิง POST ทดสอบดูว่า Claude ตอบตรง schema ที่ `validate()` เช็คไหม
-2. **เชื่อมกับ UI** — จะแทนที่ `/api/nova` เดิมใน `Onboarding.tsx`'s `analyzeFinetuneAnswers` เลย หรือเพิ่มเป็นทางเลือกเสริม (fallback เดิมยังอยู่)?
-3. ต่อ 5.3 Numerology Enhancement ตามแผนรวมด้านบน
+1. **เทสเรียก Claude จริง** — deploy ขึ้น Vercel (มี `ANTHROPIC_API_KEY` จริงแล้ว) แล้วลอง onboard จริงดูว่า Claude ตอบตรง schema ที่ `validate()` เช็คไหม ถ้าไม่ตรง ระบบจะ fallback เงียบๆ ไป Life Path — ต้องดู log บน Vercel เพื่อรู้ว่า fallback บ่อยแค่ไหน
+2. ต่อ 5.3 Numerology Enhancement ตามแผนรวมด้านบน
 
 ---
 
