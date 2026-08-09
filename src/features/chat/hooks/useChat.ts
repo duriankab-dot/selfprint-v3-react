@@ -14,7 +14,7 @@ import { useHub } from '@/context/HubContext';
 import { useEmotion } from '@/context/EmotionContext';
 import { useTwin } from '@/context/TwinContext';
 import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
-import { saveMessage, getChatHistory } from '@/services/supabase-service';
+import { saveMessage, saveAutonomyLog, getChatHistory } from '@/services/supabase-service';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -133,6 +133,31 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
           try {
             await saveMessage(userId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
             await saveMessage(userId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
+
+            // Phase 5.4: เขียนลง decision_log จริง (เดิม saveAutonomyLog() มีอยู่
+            // แต่ไม่มีที่ไหนเรียกใช้เลย ทำให้ Dashboard insights/trend ว่างเปล่า
+            // ตลอด — ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ 5.4)
+            //
+            // ค่าที่ใช้เป็นสัญญาณจริงเท่าที่มี ไม่เดามั่ว:
+            // - autonomy_level: ค่าจาก slider ที่ user ตั้งเอง (ของจริง)
+            // - confidence: autonomy_level/100 — ใช้สัญญาณเดียวกับ autonomy
+            //   เพราะยังไม่มีการวัด "ความมั่นใจ" แยกต่างหากจริงๆ
+            // - hesitation: ยังไม่มีสัญญาณจริงมาคำนวณ (ไม่มี NLP วัดจากข้อความ)
+            //   ปล่อยเป็น 0.5 กลางๆ ตรงๆ แทนการเดาตัวเลข
+            // - response_time_ms: เวลาที่ Claude API ตอบกลับ (responseTime ด้านบน)
+            //   — นี่คือ API latency ไม่ใช่เวลาที่ user ใช้คิดตัดสินใจ (ยังไม่มีทาง
+            //   วัดอย่างหลังได้จริงตอนนี้) ตั้งชื่อ comment ไว้ให้ชัดกันสับสนทีหลัง
+            await saveAutonomyLog(
+              userId,
+              currentHub,
+              currentMood,
+              autonomyLevel,
+              autonomyLevel / 100,
+              0.5,
+              responseTime,
+              userMessage.length,
+              chatResponse.response.text.length
+            );
           } catch (dbErr) {
             console.warn('⚠️ Failed to save to Supabase:', dbErr);
           }

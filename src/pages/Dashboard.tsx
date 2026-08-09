@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   getDashboardInsights,
   getDecisionLogs,
   getAutonomyTrend,
   exportDecisionLogs,
 } from '../services/supabase-service';
+import { detectPatterns } from '../lib/patternDetection';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
 import FilterBar from '../components/dashboard/FilterBar';
 import TrendChart from '../components/dashboard/TrendChart';
+import PatternInsights from '../components/dashboard/PatternInsights';
 import ExportButton from '../components/dashboard/ExportButton';
 import AITwinSection from '../components/dashboard/AITwinSection';
 import { NavBar } from '../components/layout/NavBar';
@@ -113,6 +115,11 @@ const Dashboard: React.FC = () => {
     setFilters(newFilters);
   };
 
+  // Phase 5.4: Pattern Detection — pure, deterministic, computed client-side
+  // from the same trendData already fetched for the chart above. No new
+  // Supabase query needed.
+  const patterns = useMemo(() => detectPatterns(trendData), [trendData]);
+
   const handleExport = async (format: 'csv' | 'json') => {
     if (!userId) return;
 
@@ -193,6 +200,9 @@ const Dashboard: React.FC = () => {
           <TrendChart data={trendData} />
         </div>
       )}
+
+      {/* Pattern Insights Section (Phase 5.4) */}
+      <PatternInsights patterns={patterns} />
 
       {/* Filter Section */}
       <div className="filter-section">
