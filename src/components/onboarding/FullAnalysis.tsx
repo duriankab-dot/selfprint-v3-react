@@ -18,6 +18,7 @@ interface AnalysisData {
   strengths: string[];
   insights: string[];
   opportunities: string[];
+  blindSpots?: string[];
 }
 
 interface FullAnalysisProps {
@@ -366,6 +367,68 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Blind Spots Card — full width, only when the API/analysis actually returned some */}
+        {profile.blindSpots && profile.blindSpots.length > 0 && (
+          <div
+            style={{
+              background: 'var(--color-bg-secondary)',
+              borderRadius: '12px',
+              padding: '28px',
+              border: '2px solid var(--accent-light)',
+              marginBottom: '48px',
+            }}
+          >
+            <h3
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                color: 'var(--color-text-secondary)',
+                marginBottom: '16px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+              }}
+            >
+              ⚠️ จุดที่ควรระวัง
+            </h3>
+            <ul
+              style={{
+                margin: '0',
+                paddingLeft: '20px',
+                listStyleType: 'none',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '4px 24px',
+              }}
+            >
+              {profile.blindSpots.map((blindSpot, idx) => (
+                <li
+                  key={idx}
+                  style={{
+                    fontSize: '14px',
+                    color: 'var(--color-text-primary)',
+                    marginBottom: '12px',
+                    paddingLeft: '20px',
+                    position: 'relative',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  <span
+                    style={{
+                      position: 'absolute',
+                      left: 0,
+                      color: '#FFA726',
+                      fontWeight: 700,
+                    }}
+                  >
+                    !
+                  </span>
+                  {blindSpot}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Nova Closing Message */}
         <div

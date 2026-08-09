@@ -12,7 +12,7 @@ import { BirthdateInput } from '@/components/onboarding/BirthdateInput';
 import { NovaConversation } from '@/components/onboarding/NovaConversation';
 import { AICreationSequence } from '@/components/onboarding/AICreationSequence';
 import { InitialBlueprint } from '@/components/onboarding/InitialBlueprint';
-import { FinetuningQuestions, QUESTIONS } from '@/components/onboarding/FinetuningQuestions';
+import { FinetuningQuestions } from '@/components/onboarding/FinetuningQuestions';
 import { FullAnalysis } from '@/components/onboarding/FullAnalysis';
 import { ClaimAccount } from '@/components/onboarding/ClaimAccount';
 import type { PendingOnboardingData } from '@/components/onboarding/ClaimAccount';
@@ -21,85 +21,44 @@ import type { Mood } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
 import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology';
 import type { InitialDisciplines } from '@/lib/astrology';
+import { buildFallbackResponse } from '@/lib/astrovera-adapter';
+import type { AnalysisResponse } from '@/lib/types/astrovera';
 
-interface AnalysisProfile {
-  decisionStyle: string;
-  strengths: string[];
-  insights: string[];
-  opportunities: string[];
-  blindSpots: string[];
-}
-
-// Used before/instead of a successful /api/nova call (initial blueprint,
-// skipped fine-tuning, or a failed API call). Derived from the person's own
-// Life Path Number (real numerology calculation, see src/lib/astrology.ts)
-// rather than a generic placeholder — onboarding must never get stuck or
-// show identical content for every user.
-function buildFallbackAnalysisProfile(lifePathNumber: number): AnalysisProfile {
-  const p = getLifePathProfile(lifePathNumber);
-  return {
-    decisionStyle: p.decisionStyle,
-    strengths: p.strengths,
-    insights: p.insights,
-    opportunities: p.opportunities,
-    blindSpots: p.blindSpots,
-  };
-}
-
-// Calls /api/nova (Brain Gateway) to turn the 4 fine-tuning answers into a
-// real personality blueprint. Returns null on any failure so the caller can
-// fall back to FALLBACK_ANALYSIS_PROFILE instead of breaking onboarding.
-async function analyzeFinetuneAnswers(
+// Calls /api/intelligence (Phase 5.2 — Astrovera Psychology module via
+// Claude) to turn the birth date + 4 fine-tuning answers into a real
+// personality blueprint. The endpoint itself always returns 200 with a
+// valid AnalysisResponse (falling back to Life Path numerology server-side
+// on any failure) — this function only returns null for a genuine
+// network-level failure (offline, timeout, unreachable), so the caller can
+// fall back to buildFallbackResponse() the same way it always has.
+async function analyzeWithAstrovera(
   answers: Record<string, string>,
-  mood: Mood
-): Promise<AnalysisProfile | null> {
+  mood: Mood,
+  birthDate: string
+): Promise<AnalysisResponse | null> {
   try {
-    const qaText = QUESTIONS.map(
-      (q) => `- ${q.text} → ${answers[q.id] || '(skipped)'}`
-    ).join('\n');
-
-    const prompt = `Based on these fine-tuning answers, analyze this person's decision-making style. Write every value in Thai (ภาษาไทย) — decisionStyle, strengths, insights, opportunities, and blindSpots must all be in Thai, not English. Reply with ONLY valid JSON (no markdown fences, no extra text) in exactly this shape:
-{"decisionStyle":"<คำอธิบายรูปแบบสั้นๆ 2-4 คำ ภาษาไทย>","strengths":["...","...","...","..."],"insights":["...","...","..."],"opportunities":["...","...","..."],"blindSpots":["...","..."]}
-
-Answers:
-${qaText}`;
-
-    const res = await fetch('/api/nova', {
+    const res = await fetch('/api/intelligence', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        messages: [{ role: 'user', content: prompt }],
-        hub: 'identity',
-        mood,
-        autonomy: 50,
-      }),
+      body: JSON.stringify({ mood, birthDate, finetuneAnswers: answers }),
       signal: AbortSignal.timeout(15000),
     });
 
     if (!res.ok) return null;
 
     const data = await res.json();
-    const raw: string = data.content || '';
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return null;
-
-    const parsed = JSON.parse(match[0]);
     if (
-      typeof parsed.decisionStyle !== 'string' ||
-      !Array.isArray(parsed.strengths) ||
-      !Array.isArray(parsed.insights) ||
-      !Array.isArray(parsed.opportunities)
+      typeof data.decisionStyle !== 'string' ||
+      !Array.isArray(data.strengths) ||
+      !Array.isArray(data.insights) ||
+      !Array.isArray(data.opportunities) ||
+      !Array.isArray(data.blindSpots) ||
+      typeof data.confidence !== 'number'
     ) {
       return null;
     }
 
-    return {
-      decisionStyle: parsed.decisionStyle,
-      strengths: parsed.strengths,
-      insights: parsed.insights,
-      opportunities: parsed.opportunities,
-      blindSpots: Array.isArray(parsed.blindSpots) ? parsed.blindSpots : [],
-    };
+    return data as AnalysisResponse;
   } catch {
     return null;
   }
@@ -135,7 +94,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     time?: string;
     place?: string;
   } | null>(null);
-  const [analysisProfile, setAnalysisProfile] = useState<AnalysisProfile | null>(null);
+  const [analysisProfile, setAnalysisProfile] = useState<AnalysisResponse | null>(null);
 
   // Handle emotion selection and proceed to Nova.
   // If the person already gave their birth date on the landing page
@@ -190,7 +149,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const handleAICreationComplete = () => {
     const disciplines = calculateInitialDisciplines(birthData?.dob);
     setSiceResult({ accuracy: 60, disciplines });
-    setAnalysisProfile(buildFallbackAnalysisProfile(disciplines.lifePathNumber));
+    setAnalysisProfile(
+      buildFallbackResponse({ mood, birthDate: birthData?.dob ?? '', finetuneAnswers: {} })
+    );
     setStep('sice-result');
   };
 
@@ -206,7 +167,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
     const disciplines = calculateInitialDisciplines(birthData.dob);
     setSiceResult({ accuracy: 60, disciplines });
-    setAnalysisProfile(buildFallbackAnalysisProfile(disciplines.lifePathNumber));
+    setAnalysisProfile(
+      buildFallbackResponse({ mood, birthDate: birthData.dob, finetuneAnswers: {} })
+    );
     setStep('sice-result');
   };
 
@@ -219,12 +182,15 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     };
     localStorage.setItem('finetune_answers', JSON.stringify(finetuneData));
 
-    // Call Brain Gateway (/api/nova) for a real blueprint analysis; fall
-    // back to the numerology-based profile if the call fails or is
-    // unparseable (never a generic, identical-for-everyone placeholder).
-    const refined = await analyzeFinetuneAnswers(answers, mood);
-    const lifePathNumber = siceResult?.disciplines.lifePathNumber ?? 1;
-    setAnalysisProfile(refined ?? buildFallbackAnalysisProfile(lifePathNumber));
+    // Call /api/intelligence (Astrovera Psychology, Phase 5.2) for a real
+    // blueprint analysis; fall back to the numerology-based profile if the
+    // call fails at the network level (never a generic, identical-for-
+    // everyone placeholder).
+    const birthDate = birthData?.dob ?? '';
+    const refined = await analyzeWithAstrovera(answers, mood, birthDate);
+    setAnalysisProfile(
+      refined ?? buildFallbackResponse({ mood, birthDate, finetuneAnswers: answers })
+    );
 
     // Update accuracy to 85%
     setSiceResult((prev) =>
