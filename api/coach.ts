@@ -22,9 +22,12 @@ import { buildSystemPrompt, type Mood } from './utils/prompt-builder';
 import { calculateInitialDisciplines, getLifePathProfile } from '../src/lib/astrology';
 import { detectPatterns, type TrendPoint } from '../src/lib/patternDetection';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// lazy client — ดู comment เดียวกันใน api/nova.ts (สร้างตอน module load ทำให้
+// @anthropic-ai/sdk throw ก่อนถึง `if (!process.env.ANTHROPIC_API_KEY)` เช็ค
+// ด้านล่าง กลายเป็น 500 FUNCTION_INVOCATION_FAILED แทนที่จะ fallback สวยๆ)
+function getAnthropicClient(): Anthropic {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 const MOODS = ['stressed', 'confused', 'confident', 'drained', 'ready', 'reflective'];
 
@@ -162,7 +165,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
       `\n\nบริบทของคนที่กำลังคุยด้วย:\n${contextBlock}\n\nใช้บริบทนี้ประกอบคำตอบเท่าที่เกี่ยวข้องจริง ห้ามอ้างข้อมูลที่ไม่มีอยู่ในบริบทนี้` +
       SAFETY_SYSTEM_DIRECTIVE;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: process.env.CLAUDE_MODEL_ID || 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system: systemPrompt,

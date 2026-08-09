@@ -32,9 +32,12 @@ import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrove
 import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/index.js';
 import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// lazy client — ดู comment เดียวกันใน api/nova.ts (สร้างตอน module load ทำให้
+// @anthropic-ai/sdk throw ก่อนถึง `if (!process.env.ANTHROPIC_API_KEY)` เช็ค
+// ด้านล่าง กลายเป็น 500 FUNCTION_INVOCATION_FAILED แทนที่จะ fallback สวยๆ)
+function getAnthropicClient(): Anthropic {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 const MOODS = ['stressed', 'confused', 'confident', 'drained', 'ready', 'reflective'];
 
@@ -114,7 +117,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const psychologyInput = buildAnalysisRequest(analysisRequest);
     const prompt = buildPrompt({ exampleCount: 1 }) + SAFETY_SYSTEM_DIRECTIVE;
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: process.env.CLAUDE_MODEL_ID || 'claude-haiku-4-5-20251001',
       max_tokens: 800,
       system: prompt,

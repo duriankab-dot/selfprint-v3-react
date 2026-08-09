@@ -18,10 +18,17 @@ import {
 } from './utils/prompt-builder';
 import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety';
 
-// ตั้งค่า Claude API Client
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+// ตั้งค่า Claude API Client — สร้างตอนใช้จริงเท่านั้น (lazy) ไม่ใช่ตอน module
+// load แก้ไว้ 2026-08-09: @anthropic-ai/sdk throw ทันทีตอน constructor ถ้าไม่มี
+// apiKey เลย (ไม่ใช่แค่ apiKey ว่าง) — เดิมสร้างตรงนี้ที่ module scope ทำให้
+// throw เกิดขึ้นก่อนจะถึง handler ด้วยซ้ำ กลายเป็น Vercel FUNCTION_INVOCATION_FAILED
+// ทันทีที่ deploy ขึ้นเครื่องที่ไม่มี ANTHROPIC_API_KEY แทนที่จะถึง check ข้อ 3
+// ด้านล่าง (`if (!process.env.ANTHROPIC_API_KEY)`) ที่เขียนไว้ให้ fallback สวยๆ
+// อยู่แล้วแต่ไม่เคยมีโอกาสได้รันเลย — ยืนยันจริงว่านี่คือสาเหตุ 500 บน
+// production ผ่านการยิง POST จริงจาก browser (ดู HANDOFF)
+function getAnthropicClient(): Anthropic {
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 /**
  * Type definition: สิ่งที่ Frontend ส่งมา
@@ -186,7 +193,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     // 7. เรียก Claude API
     console.log(`[Nova] Hub: ${body.hub}, Mood: ${body.mood}, Messages: ${body.messages.length}`);
 
-    const response = await anthropic.messages.create({
+    const response = await getAnthropicClient().messages.create({
       model: process.env.CLAUDE_MODEL_ID || 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system: systemPrompt,
