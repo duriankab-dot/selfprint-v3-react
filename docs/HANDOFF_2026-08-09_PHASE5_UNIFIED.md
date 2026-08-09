@@ -110,6 +110,23 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 
 ---
 
+## phaseKey / Analytics Dashboard / gateway.js follow-ups (2026-08-09, commit ถัดจาก `344632a`)
+
+User สั่งให้ปิด 3 gap ที่เหลือจากเอกสารเก่า:
+
+**1. phaseKey — เพิ่มคำถามจริงแทน mood heuristic:**
+ไปอ่านโค้ดจริงใน `D:\astrovera-v2\js\data\static-data.js` (`LIFE_PHASES`) และ `index.html` (`#q3`) เจอคำถามและตัวเลือกจริงที่ต้นทางใช้เก็บ phaseKey (ไม่ใช่แค่ enum เฉยๆ ที่ vendored schema/instruction ไม่มีคำอธิบาย): "ในช่วงชีวิตตอนนี้ คุณรู้สึกอย่างไร?" — 4 ตัวเลือกตรงกับ a=ช่วงสร้าง(Building), b=ช่วงขยาย(Expanding), c=ช่วงพัก(Reflecting), d=ช่วงเปลี่ยนผ่าน(Transforming) เพิ่มเป็น `q5` ใน `FinetuningQuestions.tsx` (คำถาม+ตัวเลือกเดียวกับต้นทางเป๊ะ ไม่ได้แต่งเอง) แล้วเพิ่ม `answerToPhaseKey()`/`resolvePhaseKey()` ใน `astrovera-adapter.ts` — ใช้คำตอบจริงจาก q5 ก่อนเสมอ, mood heuristic เดิมเหลือเป็น fallback สำหรับกรณี skip fine-tune step เท่านั้น (ไม่ได้ลบทิ้ง เพราะ fine-tune ยัง skip ได้)
+
+**2. Analytics Dashboard — query + แสดงผล `analytics_events`:**
+`getAnalyticsSummary()` ใหม่ใน `src/services/analytics.ts` — อ่าน event ทั้งหมดของ user (RLS จำกัดเป็นข้อมูลตัวเองอยู่แล้ว ไม่ใช่ admin-wide) แล้ว aggregate ฝั่ง client (แพทเทิร์นเดียวกับ `getDashboardInsights()` ใน `supabase-service.ts`): hub ที่ไปบ่อยที่สุด, จำนวนครั้งที่เปลี่ยน mood, สัดส่วน feedback 👍/👎, ความแม่นยำ archetype ล่าสุด — component ใหม่ `AnalyticsSummary.tsx` แสดงเป็นการ์ดใน Dashboard (ซ่อนตัวเองถ้ายังไม่มี event เลย ไม่โชว์การ์ดว่างเปล่า) export `HUB_OPTIONS` จาก `HubSwitcher.tsx` เพิ่มเพื่อใช้ label/icon เดียวกัน ไม่สร้าง hub-name map ซ้ำ
+
+**3. gateway.js redesign — ตรวจแล้วไม่ต้องทำ:**
+grep ทั้ง `src/`+`api/` หาคำว่า "gateway" ไม่เจอเลยสักที่ — ยืนยันว่า item นี้ถูกปิดไปแล้วจริงตั้งแต่การตัดสินใจใน Phase 5.2 ("ข้าม gateway.js/orchestrator.js ไปเลย เรียก psychology module ตรง") ที่บันทึกไว้แล้วในหัวข้อ 5.2 ด้านล่าง เอกสารเก่าใน section 5.1 ยังพูดถึง item นี้ว่า "ยังไม่ได้ทำ" ซึ่งล้าสมัยไปแล้ว — แก้ให้ตรงสถานะจริงแล้ว (ดู strikethrough ด้านบน)
+
+**Verify:** เทสรวม (นับหลัง commit นี้) ผ่านหมด — tsc/oxlint/build สะอาด รายละเอียดตัวเลขดูใน commit message
+
+---
+
 ## สิ่งที่ทำไปแล้วรอบนี้ (5.5 UI → 5.9, commit `3ed6454`)
 
 **5.5 UI (Ask Coach):** `src/components/dashboard/AskCoach.tsx` + `.css` — เชื่อม `/api/coach` (backend เสร็จตั้งแต่ `ed819f4`) เข้า Dashboard จริง ดึง `birthDate` จาก `/api/profile`, `mood` จาก `EmotionContext`, ส่งคำถามอิสระ แสดงคำตอบ + จำนวน pattern ที่ใช้ประกอบคำตอบ ถูก gate ด้วย staged rollout (5.6)
@@ -132,7 +149,7 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 
 **Verify:** เทสรวม 132/132 ผ่าน (จาก 107), `tsc -b --force` สะอาด, standalone `tsc` บน `api/*.ts` สะอาด, `oxlint` 0 error (เพิ่ม warning เดิม pattern 1 ตัวจากการ export `AuthContext`), `npm run build` ผ่าน
 
-**ยังไม่ทำ (นอก scope รอบนี้ ไม่ใช่บั๊ก):** analytics_events ยังไม่มี dashboard ของตัวเอง (เก็บ event ไว้เฉยๆ ยังไม่มี query/visualize) — เก็บไว้ทำต่อถ้าต้องการดูจริง ไม่ได้อยู่ใน scope 5.7 ตามที่ระบุ (แค่ "Analytics Events" ไม่ใช่ "Analytics Dashboard")
+~~**ยังไม่ทำ (นอก scope รอบนี้ ไม่ใช่บั๊ก):** analytics_events ยังไม่มี dashboard ของตัวเอง~~ **แก้แล้ว** — ดูหัวข้อ "phaseKey / Analytics Dashboard / gateway.js follow-ups" ด้านบน
 
 ---
 
@@ -148,9 +165,9 @@ User ส่ง framework audit แบบละเอียด (18 phases) มา
 - `archetypeKey` enum ของ Astrovera psychology module (`innocent, explorer, sage, everyman, lover, jester, hero, outlaw, magician, caregiver, creator, ruler`) เป็นชุดเดียวกับ Prototype Core ที่ Selfprint มีอยู่แล้ว (`src/lib/astrology.ts PROTOTYPE_CORE_MAP`) — แค่ตัวพิมพ์เล็ก/ใหญ่ต่างกัน → `toArchetypeKey()` แปลงตรงๆ ได้เลย ไม่ต้องสร้าง mapping ใหม่
 
 **ยังไม่แก้ (รู้ตัว เป็น gap จริง ไม่ใช่ bug):**
-- `phaseKey` ('a'|'b'|'c'|'d') — Astrovera ต้องการค่านี้จาก quiz แยกต่างหากที่ Selfprint ไม่มี ตอนนี้ derive จาก mood แบบ heuristic ชั่วคราว (ดู comment ใน `astrovera-adapter.ts`) — ต้องออกแบบคำถามจริงใน Phase 5.2+ ถ้าอยากได้ค่าที่แม่นกว่านี้
-- `opportunities` — Astrovera Psychology output ไม่มี field นี้โดยตรง ตอนนี้ปล่อยเป็น `[]` แทนที่จะ mapping มั่วจาก field อื่น ต้องรอ Insight agent (5.5) มาเติม
-- **`gateway.js` ของ Astrovera เรียก Cloudflare Worker URL ตรงๆ** ไม่ได้เรียก knowledge module โดยตรง — เอกสาร audit เองก็บอกว่าต้อง REDESIGN ส่วนนี้ก่อนใช้ใน Supabase Edge Function ยังไม่ได้ทำใน 5.1
+- ~~`phaseKey` ('a'|'b'|'c'|'d') — derive จาก mood แบบ heuristic ชั่วคราว~~ **แก้แล้ว** (ดูหัวข้อ "phaseKey/Analytics Dashboard/gateway.js follow-ups" ด้านล่าง)
+- `opportunities` — Astrovera Psychology output ไม่มี field นี้โดยตรง ตอนนี้ปล่อยเป็น `[]` แทนที่จะ mapping มั่วจาก field อื่น ยังไม่มี Insight agent จริงที่จะเติม field นี้ได้อย่างมีมูล (ดู Master Task Audit — astrovera-v2 ไม่มี Insight agent ที่ทำงานจริง) ยังปล่อยว่างต่อไปตามเดิม
+- ~~`gateway.js` ของ Astrovera เรียก Cloudflare Worker URL ตรงๆ ยังไม่ได้ REDESIGN~~ **ตรวจแล้ว ไม่ต้องทำ** (ดูหัวข้อด้านล่าง — Selfprint ไม่เคยพึ่ง gateway.js เลยตั้งแต่ 5.2)
 
 **Zero functional change ยืนยันแล้ว:** ไฟล์ใหม่ทั้งหมดไม่มีที่ไหน import เข้า `src/pages` หรือ `src/components` เลย — `Onboarding.tsx` ยังเรียก `/api/nova` เหมือนเดิมทุกอย่าง ตามเป้าหมายของ Phase 1
 

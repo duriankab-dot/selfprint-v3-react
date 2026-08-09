@@ -45,3 +45,102 @@ export async function logEvent(
     return false;
   }
 }
+
+// ---------------------------------------------------------------------
+// getAnalyticsSummary (follow-up to 5.7) — query + aggregate the events
+// logged above, for the user's own Dashboard. RLS already restricts this
+// to `user_id = auth.uid()` rows, so this is always a personal summary,
+// never cross-user — there's no admin-wide analytics view in scope here.
+// ---------------------------------------------------------------------
+
+interface RawAnalyticsEvent {
+  event_type: AnalyticsEventType;
+  event_data: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface AnalyticsSummary {
+  totalEvents: number;
+  hubVisitCounts: Record<string, number>;
+  topHub: string | null;
+  moodChangeCount: number;
+  feedback: { helpful: number; unhelpful: number };
+  /** ค่า accuracy ล่าสุดที่บันทึกไว้ (จาก archetype_accuracy event ล่าสุดตามเวลา) — null ถ้ายังไม่เคยมี */
+  latestArchetypeAccuracy: number | null;
+}
+
+const EMPTY_SUMMARY: AnalyticsSummary = {
+  totalEvents: 0,
+  hubVisitCounts: {},
+  topHub: null,
+  moodChangeCount: 0,
+  feedback: { helpful: 0, unhelpful: 0 },
+  latestArchetypeAccuracy: null,
+};
+
+export async function getAnalyticsSummary(
+  userId: string | null | undefined
+): Promise<AnalyticsSummary | null> {
+  if (!supabase || !userId) return null;
+
+  try {
+    const { data, error } = await supabase
+      .from('analytics_events')
+      .select('event_type, event_data, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      console.warn('[analytics] getAnalyticsSummary failed:', error.message);
+      return null;
+    }
+
+    const rows = (data || []) as RawAnalyticsEvent[];
+    if (rows.length === 0) return EMPTY_SUMMARY;
+
+    const hubVisitCounts: Record<string, number> = {};
+    let moodChangeCount = 0;
+    const feedback = { helpful: 0, unhelpful: 0 };
+    let latestArchetypeAccuracy: number | null = null;
+
+    for (const row of rows) {
+      const d = row.event_data || {};
+      switch (row.event_type) {
+        case 'hub_transition':
+          if (typeof d.to === 'string') {
+            hubVisitCounts[d.to] = (hubVisitCounts[d.to] || 0) + 1;
+          }
+          break;
+        case 'mood_change':
+          moodChangeCount++;
+          break;
+        case 'feedback':
+          if (d.type === 'helpful' || d.type === 'unhelpful') {
+            feedback[d.type]++;
+          }
+          break;
+        case 'archetype_accuracy':
+          // rows คือ ascending by created_at อยู่แล้ว — ตัวสุดท้ายที่เจอ = ล่าสุดจริง
+          if (typeof d.accuracyLevel === 'number') {
+            latestArchetypeAccuracy = d.accuracyLevel;
+          }
+          break;
+      }
+    }
+
+    const topHub =
+      Object.entries(hubVisitCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+
+    return {
+      totalEvents: rows.length,
+      hubVisitCounts,
+      topHub,
+      moodChangeCount,
+      feedback,
+      latestArchetypeAccuracy,
+    };
+  } catch (err) {
+    console.warn('[analytics] getAnalyticsSummary threw:', err);
+    return null;
+  }
+}

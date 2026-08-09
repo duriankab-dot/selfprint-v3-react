@@ -142,7 +142,7 @@ describe('FinetuningQuestions Component', () => {
     );
 
     expect(screen.getByText('ปกติคุณตัดสินใจอย่างไร?')).toBeInTheDocument();
-    expect(screen.getByText('คำถามที่ 1 จาก 4')).toBeInTheDocument();
+    expect(screen.getByText('คำถามที่ 1 จาก 5')).toBeInTheDocument();
   });
 
   it('should show progressive disclosure (one question at a time)', async () => {
@@ -154,7 +154,7 @@ describe('FinetuningQuestions Component', () => {
     );
 
     // Should only see one question counter at a time
-    const questions = screen.queryAllByText(/คำถามที่ \d+ จาก 4/);
+    const questions = screen.queryAllByText(/คำถามที่ \d+ จาก 5/);
     expect(questions.length).toBe(1);
   });
 
@@ -171,7 +171,7 @@ describe('FinetuningQuestions Component', () => {
     const options = screen.getAllByRole('button').filter(NOT_ANSWER_BUTTON);
     await user.click(options[0]);
 
-    await screen.findByText('คำถามที่ 2 จาก 4', {}, { timeout: 1000 });
+    await screen.findByText('คำถามที่ 2 จาก 5', {}, { timeout: 1000 });
   });
 
   it('should show accuracy progression from 60% to 85%', async () => {
@@ -197,8 +197,8 @@ describe('FinetuningQuestions Component', () => {
       />
     );
 
-    // Click the first option for all 4 questions
-    for (let i = 0; i < 4; i++) {
+    // Click the first option for all 5 questions
+    for (let i = 0; i < 5; i++) {
       const options = screen.getAllByRole('button').filter(NOT_ANSWER_BUTTON);
       await user.click(options[0]);
       await new Promise((resolve) => setTimeout(resolve, 400));

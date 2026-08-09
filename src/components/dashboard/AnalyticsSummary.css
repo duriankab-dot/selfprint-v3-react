@@ -1,0 +1,47 @@
+.analytics-section {
+  background: white;
+  border-radius: 8px;
+  padding: 30px;
+  margin-bottom: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.analytics-section h2 {
+  font-size: 1.3rem;
+  color: #212529;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.analytics-card {
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.analytics-card-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.analytics-card-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.analytics-card-subtitle {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-top: 4px;
+}

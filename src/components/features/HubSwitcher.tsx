@@ -8,8 +8,9 @@
 import { useHub } from '@/context/HubContext';
 import type { Hub } from '@/context/HubContext';
 
-// ข้อมูล 11 hubs
-const HUB_OPTIONS: Array<{ id: Hub; label: string; description: string; icon: string }> = [
+// ข้อมูล 12 hubs — export ให้ที่อื่น (เช่น AnalyticsSummary.tsx) ใช้ label/icon
+// เดียวกันได้ ไม่ต้องสร้าง hub-name map ซ้ำ
+export const HUB_OPTIONS: Array<{ id: Hub; label: string; description: string; icon: string }> = [
   {
     id: 'identity',
     label: 'ตัวตน',

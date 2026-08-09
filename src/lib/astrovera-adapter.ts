@@ -41,9 +41,25 @@ function toArchetypeKey(prototypeCore: string): ArchetypeKey {
 }
 
 // ---------------------------------------------------------------------
-// Heuristic phaseKey from mood — see PhaseKey doc comment in
-// types/astrovera.ts for why this is a placeholder, not a real quiz.
+// phaseKey — real quiz answer (preferred) with a mood heuristic fallback.
+//
+// FinetuningQuestions.tsx's q5 ("ในช่วงชีวิตตอนนี้ คุณรู้สึกอย่างไร?") uses
+// the exact question + 4 options from astrovera-v2's own quiz (index.html
+// #q3 / js/data/static-data.js LIFE_PHASES) — not a guess at what the
+// options should be. answerToPhaseKey() maps that literal answer text back
+// to the a/b/c/d key. Selfprint's finetune step is optional/skippable
+// (see Onboarding.tsx), and q5 was added after q1-q4 existed, so older
+// callers or a skipped finetune step may have no q5 answer — the mood
+// heuristic remains as a documented fallback for exactly that case, not
+// the primary path anymore.
 // ---------------------------------------------------------------------
+
+const PHASE_ANSWER_TO_KEY: Record<string, PhaseKey> = {
+  'กำลังสร้างและเริ่มต้นสิ่งใหม่': 'a',
+  'ขยายและพัฒนาสิ่งที่มีอยู่': 'b',
+  'ต้องการพักและปรับทิศทาง': 'c',
+  'อยู่ในช่วงเปลี่ยนแปลงครั้งใหญ่': 'd',
+};
 
 const MOOD_TO_PHASE: Record<string, PhaseKey> = {
   stressed: 'd',
@@ -58,6 +74,14 @@ function moodToPhaseKey(mood: string): PhaseKey {
   return MOOD_TO_PHASE[mood] ?? 'c';
 }
 
+function resolvePhaseKey(request: AnalysisRequest): PhaseKey {
+  const q5Answer = request.finetuneAnswers?.q5;
+  if (q5Answer && PHASE_ANSWER_TO_KEY[q5Answer]) {
+    return PHASE_ANSWER_TO_KEY[q5Answer];
+  }
+  return moodToPhaseKey(request.mood);
+}
+
 // ---------------------------------------------------------------------
 // Request builder: Selfprint → Astrovera Psychology module input
 // ---------------------------------------------------------------------
@@ -68,7 +92,7 @@ export function buildAnalysisRequest(request: AnalysisRequest): AstroveraPsychol
 
   return {
     archKey: toArchetypeKey(disciplines.prototypeCore),
-    phaseKey: moodToPhaseKey(request.mood),
+    phaseKey: resolvePhaseKey(request),
     strengths: lifePath.strengths,
     blindspot: lifePath.blindSpots,
     question: request.question ?? null,

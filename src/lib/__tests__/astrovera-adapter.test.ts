@@ -53,7 +53,7 @@ describe('buildAnalysisRequest', () => {
     ]).toContain(result.archKey);
   });
 
-  it('derives phaseKey from mood', () => {
+  it('derives phaseKey from mood when there is no q5 answer (fallback path)', () => {
     expect(buildAnalysisRequest({ ...baseRequest, mood: 'ready' }).phaseKey).toBe('a');
     expect(buildAnalysisRequest({ ...baseRequest, mood: 'stressed' }).phaseKey).toBe('d');
     expect(buildAnalysisRequest({ ...baseRequest, mood: 'reflective' }).phaseKey).toBe('c');
@@ -61,6 +61,30 @@ describe('buildAnalysisRequest', () => {
 
   it('falls back to phaseKey "c" for an unknown mood', () => {
     expect(buildAnalysisRequest({ ...baseRequest, mood: 'unknown-mood' }).phaseKey).toBe('c');
+  });
+
+  it('prefers the real q5 quiz answer over the mood heuristic (Phase 5.2+ gap fix)', () => {
+    const withQ5 = (q5: string, mood: string) =>
+      buildAnalysisRequest({
+        ...baseRequest,
+        mood,
+        finetuneAnswers: { ...baseRequest.finetuneAnswers, q5 },
+      }).phaseKey;
+
+    // mood says one thing, q5 answer says another — q5 wins
+    expect(withQ5('กำลังสร้างและเริ่มต้นสิ่งใหม่', 'stressed')).toBe('a');
+    expect(withQ5('ขยายและพัฒนาสิ่งที่มีอยู่', 'stressed')).toBe('b');
+    expect(withQ5('ต้องการพักและปรับทิศทาง', 'ready')).toBe('c');
+    expect(withQ5('อยู่ในช่วงเปลี่ยนแปลงครั้งใหญ่', 'ready')).toBe('d');
+  });
+
+  it('ignores an unrecognized q5 answer and falls back to mood', () => {
+    const result = buildAnalysisRequest({
+      ...baseRequest,
+      mood: 'ready',
+      finetuneAnswers: { ...baseRequest.finetuneAnswers, q5: 'ไม่ใช่ตัวเลือกจริง' },
+    });
+    expect(result.phaseKey).toBe('a');
   });
 
   it('passes question through, defaulting to null', () => {
