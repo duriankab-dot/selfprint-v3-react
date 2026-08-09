@@ -1,0 +1,46 @@
+.export-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-csv {
+  background: #10b981;
+  color: white;
+}
+
+.export-csv:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.export-json {
+  background: #3b82f6;
+  color: white;
+}
+
+.export-json:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.export-button .icon {
+  font-size: 1.2rem;
+}
+
+.export-button .label {
+  font-weight: 600;
+}
+
+.export-button:active {
+  transform: translateY(0);
+}

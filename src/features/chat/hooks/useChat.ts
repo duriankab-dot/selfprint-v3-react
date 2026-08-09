@@ -1,0 +1,174 @@
+/**
+ * useChat.ts
+ *
+ * Hook สำหรับจัดการ chat กับ Nova
+ * - ใช้ selfprintChat API wrapper
+ * - รองรับ 1,296 personality combos (18 archetypes × 12 hubs × 6 moods)
+ * - จำ conversation history
+ * - จัดการ loading/error
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import axios from 'axios';
+import { useHub } from '@/context/HubContext';
+import { useEmotion } from '@/context/EmotionContext';
+import { useTwin } from '@/context/TwinContext';
+import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
+import { saveMessage, getChatHistory } from '@/services/supabase-service';
+
+export interface Message {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}
+
+interface UseChatReturn {
+  messages: Message[];
+  isLoading: boolean;
+  error: string | null;
+  sendMessage: (userMessage: string) => Promise<void>;
+  clearChat: () => void;
+  autonomyLevel?: number;
+}
+
+export function useChat(autonomyLevel: number = 50): UseChatReturn {
+  const { currentHub: hub } = useHub();
+  const { mood } = useEmotion();
+  const { twin } = useTwin();
+
+  // Alias สำหรับให้ readable
+  const currentHub = hub;
+  const currentMood = mood;
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * โหลด chat history จาก Supabase เมื่อ component mount
+   */
+  useEffect(() => {
+    const loadChatHistory = async () => {
+      const userId = localStorage.getItem('userId');
+      if (!userId || userId === 'anonymous') return;
+
+      try {
+        const history = await getChatHistory(userId, undefined, 100);
+        if (history && history.length > 0) {
+          setMessages(history as Message[]);
+          console.log('📚 Loaded', history.length, 'messages from Supabase');
+        }
+      } catch (err) {
+        console.warn('⚠️ Failed to load chat history:', err);
+        // Don't block chat if history load fails
+      }
+    };
+
+    loadChatHistory();
+  }, []);
+
+  /**
+   * ส่งข้อความไป Nova via selfprintChat
+   */
+  const sendMessage = useCallback(
+    async (userMessage: string) => {
+      if (!userMessage.trim()) return;
+      if (!currentHub || !currentMood) {
+        setError('ต้องเลือก hub และ mood ก่อน');
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Record start time for response time tracking
+        const startTime = Date.now();
+
+        // เพิ่มข้อความผู้ใช้เข้า state
+        const userMsg: Message = {
+          role: 'user',
+          content: userMessage,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, userMsg]);
+
+        // เรียก selfprintChat API
+        const userId = localStorage.getItem('userId') || 'anonymous';
+        const sessionId = localStorage.getItem('sessionId') || `session-${Date.now()}`;
+
+        const chatResponse: SelfprintChatResponse = await selfprintChat({
+          userId,
+          sessionId,
+          hub: currentHub as any,
+          mood: currentMood as any,
+          archetype: twin?.primaryArchetype,
+          question: userMessage,
+          history: messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+          twinProfile: twin ? {
+            id: twin.id,
+            userId: twin.userId,
+            name: twin.name,
+            primaryArchetype: twin.primaryArchetype,
+            secondaryArchetype: twin.secondaryArchetype,
+            maturityScore: twin.maturityScore,
+            createdAt: new Date(twin.createdAt).toISOString(),
+          } : undefined,
+          birthData: twin?.birthData,
+          plan: 'starter',
+        });
+
+        // Calculate response time
+        const responseTime = Date.now() - startTime;
+
+        // เพิ่มข้อความ Nova เข้า state
+        const assistantMsg: Message = {
+          role: 'assistant',
+          content: chatResponse.response.text,
+          timestamp: chatResponse.metadata.timestamp,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+
+        // บันทึกลงไป Supabase (optional)
+        if (userId !== 'anonymous') {
+          try {
+            await saveMessage(userId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
+            await saveMessage(userId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
+          } catch (dbErr) {
+            console.warn('⚠️ Failed to save to Supabase:', dbErr);
+          }
+        }
+
+        console.log('✅ Chat response:', {
+          responseTime,
+          tokens: `${chatResponse.metadata.inputTokens} → ${chatResponse.metadata.outputTokens}`,
+          maturity: chatResponse.persona.maturityLevel,
+        });
+      } catch (err) {
+        const errorMsg = axios.isAxiosError(err)
+          ? err.response?.data?.message || err.message
+          : err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
+        setError(errorMsg);
+        console.error('Chat error:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentHub, currentMood, messages, autonomyLevel, twin]
+  );
+
+  /**
+   * ล้าง chat history
+   */
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    setError(null);
+  }, []);
+
+  return {
+    messages,
+    isLoading,
+    error,
+    sendMessage,
+    clearChat,
+  };
+}

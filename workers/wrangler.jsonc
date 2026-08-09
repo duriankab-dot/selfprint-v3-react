@@ -1,0 +1,5 @@
+{
+  "name": "selfprint-chat-api",
+  "compatibility_date": "2026-08-04",
+  "main": "workers/chat-api.ts"
+}

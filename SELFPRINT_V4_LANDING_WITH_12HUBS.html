@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SELFPRINT — ตัดสินใจได้ดีขึ้นด้วย AI ที่เข้าใจตัวคุณ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ────── DESIGN TOKENS (UPDATED with Activity hub) ────── */
+:root {
+  --bg-white: #FFFFFF;
+  --bg-gray: #F7F8FA;
+  --bg-dark: #0F172A;
+  --primary: #5B5CEB;
+  --primary-hover: #7477FF;
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-light: #94A3B8;
+  --border-soft: #E2E8F0;
+
+  /* Mood Colors */
+  --mood-calm: #38D39F;
+  --mood-focus: #F59E0B;
+  --mood-reflect: #8B5CF6;
+  --mood-relate: #EC4899;
+  --mood-creative: #EC4899;
+  --mood-energize: #F59E0B;
+
+  /* Hub Colors (12 hubs) */
+  --hub-identity: #0F172A;
+  --hub-decision: #2563EB;
+  --hub-relationship: #EC4899;
+  --hub-career: #10B981;
+  --hub-health: #06B6D4;
+  --hub-money: #84CC16;
+  --hub-ai-twin: #7C3AED;
+  --hub-learning: #6366F1;
+  --hub-creativity: #F97316;
+  --hub-spirituality: #A855F7;
+  --hub-impact: #0891B2;
+  --hub-activity: #F59E0B;
+
+  --font-body: 'Inter', sans-serif;
+  --font-thai: 'Noto Sans Thai', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-white);
+  color: var(--text-primary);
+  font-family: var(--font-body), var(--font-thai);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+img { max-width: 100%; display: block; }
+
+/* ────── NAVIGATION ────── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 48px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+
+.nav-cta {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.nav-cta:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+/* ────── SECTIONS ────── */
+section {
+  padding: 80px 48px;
+}
+
+section.hero {
+  padding-top: 140px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #F7F8FA 0%, #FFFFFF 100%);
+}
+
+/* ────── TYPOGRAPHY ────── */
+.eyebrow {
+  display: inline-block;
+  background: var(--primary);
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: var(--text-primary);
+}
+
+h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 20px;
+}
+
+h2 em {
+  color: var(--primary);
+  font-style: normal;
+}
+
+.subtitle {
+  font-size: 18px;
+  color: var(--text-secondary);
+  line-height: 1.8;
+  margin-bottom: 32px;
+  max-width: 520px;
+}
+
+/* ────── BUTTONS ────── */
+.btn {
+  padding: 14px 32px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(91, 92, 235, 0.3);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+
+.btn-secondary:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+/* ────── MOOD SELECTOR ────── */
+.emotion-section {
+  background: linear-gradient(135deg, #F7F8FA 0%, #EFF2FF 100%);
+  padding: 80px 48px;
+  text-align: center;
+}
+
+.mood-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  margin: 48px auto;
+  max-width: 600px;
+  justify-content: center;
+}
+
+.mood-btn {
+  padding: 20px 16px;
+  border-radius: 16px;
+  border: 2px solid var(--border-soft);
+  background: white;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
+  text-align: center;
+}
+
+.mood-btn:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.mood-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.mood-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+/* ────── HUB SECTION (NEW) ────── */
+.hub-section {
+  background: white;
+  padding: 100px 48px;
+}
+
+.hub-section h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.hub-section-subtitle {
+  text-align: center;
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin-bottom: 60px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.hub-card {
+  padding: 24px;
+  border-radius: 16px;
+  border: 2px solid var(--border-soft);
+  text-align: center;
+  transition: all 0.3s;
+  background: white;
+  cursor: pointer;
+}
+
+.hub-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
+  border-color: var(--primary);
+}
+
+.hub-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.hub-name {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.hub-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Hub-specific colors */
+.hub-card[data-hub="identity"] { border-top: 3px solid var(--hub-identity); }
+.hub-card[data-hub="decision"] { border-top: 3px solid var(--hub-decision); }
+.hub-card[data-hub="relationship"] { border-top: 3px solid var(--hub-relationship); }
+.hub-card[data-hub="career"] { border-top: 3px solid var(--hub-career); }
+.hub-card[data-hub="health"] { border-top: 3px solid var(--hub-health); }
+.hub-card[data-hub="money"] { border-top: 3px solid var(--hub-money); }
+.hub-card[data-hub="ai-twin"] { border-top: 3px solid var(--hub-ai-twin); }
+.hub-card[data-hub="learning"] { border-top: 3px solid var(--hub-learning); }
+.hub-card[data-hub="creativity"] { border-top: 3px solid var(--hub-creativity); }
+.hub-card[data-hub="spirituality"] { border-top: 3px solid var(--hub-spirituality); }
+.hub-card[data-hub="impact"] { border-top: 3px solid var(--hub-impact); }
+.hub-card[data-hub="activity"] { border-top: 3px solid var(--hub-activity); }
+
+/* ────── RESPONSIVE ────── */
+@media (max-width: 768px) {
+  section {
+    padding: 60px 24px;
+  }
+
+  section.hero {
+    grid-template-columns: 1fr;
+    padding: 140px 24px 60px;
+  }
+
+  .hub-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  nav {
+    padding: 12px 24px;
+  }
+
+  h1 {
+    font-size: 32px;
+  }
+
+  h2 {
+    font-size: 28px;
+  }
+
+  .mood-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .hub-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mood-selector {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a href="#" class="logo">SELFPRINT</a>
+  <button class="nav-cta">สร้าง AI Twin ฟรี</button>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div>
+    <span class="eyebrow">💡 AI ที่เข้าใจตัวคุณ</span>
+    <h1>เข้าใจตัวเองให้ลึกขึ้น<br>ตัดสินใจได้มั่นใจขึ้นทุกวัน</h1>
+    <p class="subtitle">SELFPRINT สร้าง AI Twin ที่เรียนรู้จากตัวคุณ เพื่อช่วยให้ทุกการตัดสินใจดีขึ้นเรื่อย ๆ</p>
+    <div class="btn-group">
+      <button class="btn btn-primary">สร้าง AI Twin ของฉัน</button>
+      <button class="btn btn-secondary">ลองสัมผัสก่อน</button>
+    </div>
+  </div>
+  <div style="text-align: center; min-height: 400px; background: linear-gradient(135deg, rgba(91, 92, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+    <div>
+      <div style="font-size: 80px; margin-bottom: 16px;">🤖</div>
+      <p style="font-size: 18px; font-weight: 700; color: var(--text-primary);">AI Twin Dashboard</p>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: 8px;">ดูการวิเคราะห์ของคุณ</p>
+    </div>
+  </div>
+</section>
+
+<!-- EMOTION CHECK-IN SECTION -->
+<section class="emotion-section">
+  <h2>วันนี้ คุณรู้สึกยังไง?</h2>
+  <p class="subtitle" style="margin: 0 auto 48px; text-align: center;">อารมณ์ของคุณช่วยให้ AI Twin เข้าใจตัวคุณได้ดีขึ้น</p>
+
+  <div class="mood-selector">
+    <button class="mood-btn">
+      <span class="mood-icon">😌</span>
+      <span>สบายใจ</span>
+    </button>
+    <button class="mood-btn">
+      <span class="mood-icon">🎯</span>
+      <span>มั่นใจ</span>
+    </button>
+    <button class="mood-btn">
+      <span class="mood-icon">🤔</span>
+      <span>สะท้อน</span>
+    </button>
+    <button class="mood-btn">
+      <span class="mood-icon">💬</span>
+      <span>เชื่อมต่อ</span>
+    </button>
+    <button class="mood-btn">
+      <span class="mood-icon">💡</span>
+      <span>สร้างสรรค์</span>
+    </button>
+    <button class="mood-btn">
+      <span class="mood-icon">⚡</span>
+      <span>พลัง</span>
+    </button>
+  </div>
+
+  <p style="font-size: 13px; color: var(--text-light); margin-top: 32px; text-align: center;">✨ Emotion check-in ช่วยให้ AI Twin ปรับตัวตามความรู้สึกของคุณ</p>
+</section>
+
+<!-- HUB SECTION (NEW - 12 HUBS) -->
+<section class="hub-section">
+  <h2>เลือก Hub ของคุณ</h2>
+  <p class="hub-section-subtitle">SELFPRINT มี 12 บริบทของชีวิตที่ AI Twin ช่วยเข้าใจคุณ</p>
+
+  <div class="hub-grid">
+    <!-- Original 11 hubs -->
+    <div class="hub-card" data-hub="identity">
+      <span class="hub-icon">🔍</span>
+      <div class="hub-name">Identity</div>
+      <div class="hub-desc">เข้าใจตัวเองให้ลึก</div>
+    </div>
+
+    <div class="hub-card" data-hub="decision">
+      <span class="hub-icon">⚖️</span>
+      <div class="hub-name">Decision</div>
+      <div class="hub-desc">ตัดสินใจอย่างมั่นใจ</div>
+    </div>
+
+    <div class="hub-card" data-hub="relationship">
+      <span class="hub-icon">❤️</span>
+      <div class="hub-name">Relationship</div>
+      <div class="hub-desc">เข้าใจความสัมพันธ์</div>
+    </div>
+
+    <div class="hub-card" data-hub="career">
+      <span class="hub-icon">🚀</span>
+      <div class="hub-name">Career</div>
+      <div class="hub-desc">พัฒนาอาชีพ</div>
+    </div>
+
+    <div class="hub-card" data-hub="health">
+      <span class="hub-icon">🧘</span>
+      <div class="hub-name">Health</div>
+      <div class="hub-desc">ดูแลตัวเอง</div>
+    </div>
+
+    <div class="hub-card" data-hub="money">
+      <span class="hub-icon">💰</span>
+      <div class="hub-name">Money</div>
+      <div class="hub-desc">จัดการเงิน</div>
+    </div>
+
+    <div class="hub-card" data-hub="ai-twin">
+      <span class="hub-icon">🤖</span>
+      <div class="hub-name">AI Twin</div>
+      <div class="hub-desc">ปฏิสัมพันธ์กับ AI</div>
+    </div>
+
+    <div class="hub-card" data-hub="learning">
+      <span class="hub-icon">📚</span>
+      <div class="hub-name">Learning</div>
+      <div class="hub-desc">เรียนรู้เพิ่มเติม</div>
+    </div>
+
+    <div class="hub-card" data-hub="creativity">
+      <span class="hub-icon">🎨</span>
+      <div class="hub-name">Creativity</div>
+      <div class="hub-desc">สร้างสรรค์</div>
+    </div>
+
+    <div class="hub-card" data-hub="spirituality">
+      <span class="hub-icon">✨</span>
+      <div class="hub-name">Spirituality</div>
+      <div class="hub-desc">หาความหมาย</div>
+    </div>
+
+    <div class="hub-card" data-hub="impact">
+      <span class="hub-icon">🌍</span>
+      <div class="hub-name">Impact</div>
+      <div class="hub-desc">สร้างสรรค์การเปลี่ยนแปลง</div>
+    </div>
+
+    <!-- NEW: Activity hub -->
+    <div class="hub-card" data-hub="activity">
+      <span class="hub-icon">⏰</span>
+      <div class="hub-name">Activity</div>
+      <div class="hub-desc">บริหารจัดการกิจกรรม</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM SECTION -->
+<section style="background: var(--bg-gray);">
+  <div style="text-align: center; margin-bottom: 60px;">
+    <span class="eyebrow">⚡ ปัญหาจริง</span>
+    <h2>ทำไมการตัดสินใจจึงยาก</h2>
+    <p class="subtitle" style="margin-left: auto; margin-right: auto;">คุณไม่เคยเพราะคุณยังไม่มี AI ที่เข้าใจตัวเอง</p>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section style="background: linear-gradient(135deg, var(--primary) 0%, #8B5CF6 100%); color: white; text-align: center;">
+  <h2 style="color: white; margin-bottom: 16px;">เริ่มต้นการเดินทางของคุณวันนี้</h2>
+  <p style="font-size: 18px; color: rgba(255, 255, 255, 0.9); margin-bottom: 32px;">สร้าง AI Twin ฟรี ไม่ต้องใส่บัตรเครดิต</p>
+  <button style="padding: 18px 48px; font-size: 18px; background: white; color: var(--primary); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: all 0.3s;">
+    สร้าง AI Twin ของฉัน
+  </button>
+</section>
+
+<script>
+  // Mood selector interactivity
+  document.querySelectorAll('.mood-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Hub card click
+  document.querySelectorAll('.hub-card').forEach(card => {
+    card.addEventListener('click', function() {
+      const hub = this.getAttribute('data-hub');
+      console.log('Selected hub:', hub);
+      // TODO: Navigate to onboarding with hub context
+    });
+  });
+</script>
+
+</body>
+</html>

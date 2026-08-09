@@ -1,0 +1,68 @@
+/* 🎨 MOOD THEME MODULATIONS — 6 Moods */
+/* Each mood affects saturation, brightness, timing */
+
+/* 1. STRESSED */
+[data-mood="stressed"] {
+  --color-accent-mood: #991B1B; /* Dark Red tint */
+  --saturation: 80%;
+  --brightness: 90%;
+  --opacity-bg: 0.95;
+  --duration-mood: calc(var(--duration-hub) * 1.5);
+  --font-weight-heading: var(--font-weight-semibold);
+  --font-weight-body: var(--font-weight-normal);
+}
+
+/* 2. CONFUSED */
+[data-mood="confused"] {
+  --color-accent-mood: #9CA3AF; /* Neutral Gray */
+  --saturation: 85%;
+  --brightness: 100%;
+  --opacity-bg: 0.98;
+  --duration-mood: calc(var(--duration-hub) * 1.2);
+  --font-weight-heading: var(--font-weight-normal);
+  --font-weight-body: var(--font-weight-normal);
+}
+
+/* 3. CONFIDENT */
+[data-mood="confident"] {
+  --color-accent-mood: #F59E0B; /* Gold */
+  --saturation: 110%;
+  --brightness: 110%;
+  --opacity-bg: 1;
+  --duration-mood: calc(var(--duration-hub) * 0.7);
+  --font-weight-heading: var(--font-weight-bold);
+  --font-weight-body: var(--font-weight-semibold);
+}
+
+/* 4. DRAINED */
+[data-mood="drained"] {
+  --color-accent-mood: #67E8F9; /* Soft Cyan */
+  --saturation: 75%;
+  --brightness: 110%;
+  --opacity-bg: 0.95;
+  --duration-mood: calc(var(--duration-hub) * 1.8);
+  --font-weight-heading: var(--font-weight-semibold);
+  --font-weight-body: var(--font-weight-light);
+}
+
+/* 5. READY */
+[data-mood="ready"] {
+  --color-accent-mood: #1D4ED8; /* Bright Blue */
+  --saturation: 115%;
+  --brightness: 115%;
+  --opacity-bg: 1;
+  --duration-mood: calc(var(--duration-hub) * 0.8);
+  --font-weight-heading: var(--font-weight-bold);
+  --font-weight-body: var(--font-weight-semibold);
+}
+
+/* 6. REFLECTIVE */
+[data-mood="reflective"] {
+  --color-accent-mood: #C4B5FD; /* Lavender */
+  --saturation: 90%;
+  --brightness: 100%;
+  --opacity-bg: 0.97;
+  --duration-mood: calc(var(--duration-hub) * 1.3);
+  --font-weight-heading: var(--font-weight-semibold);
+  --font-weight-body: var(--font-weight-normal);
+}

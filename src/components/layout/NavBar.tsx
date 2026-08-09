@@ -1,0 +1,244 @@
+/**
+ * NavBar.tsx
+ *
+ * เมนูด้านบนที่ใช้ร่วมกันทุกหน้า (ยกเว้น Onboarding ที่ตั้งใจให้เป็น
+ * flow เต็มจอไม่มีทางออกกลางคัน) เชื่อมลิงก์หลักของเว็บเข้าด้วยกัน:
+ * หน้าแรก, แดชบอร์ด, แชท และปุ่มเข้าสู่ระบบ/ออกจากระบบตามสถานะ session จริง
+ *
+ * `rightSlot` ให้หน้าที่มีปุ่ม CTA เฉพาะทาง (เช่น LandingPage ที่มี
+ * ProgressiveCTA ติด tracking อยู่แล้ว) ใส่ปุ่มของตัวเองแทนปุ่ม default ได้
+ *
+ * ดีไซน์: glass-morphism translucent bar ที่ปรับตาม mood theme, active-link
+ * pill indicator, hover state, และเมนูมือถือแบบ hamburger สำหรับจอเล็ก
+ */
+
+import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+
+interface NavBarProps {
+  rightSlot?: React.ReactNode;
+  /** LandingPage ใช้ 'fixed' เพื่อคงพฤติกรรมเดิม (ลอยทับเนื้อหา hero) ส่วนหน้าอื่นใช้ 'sticky' (default) */
+  position?: 'sticky' | 'fixed';
+}
+
+const NAV_LINKS = [
+  { to: '/dashboard', label: 'แดชบอร์ด' },
+  { to: '/chat', label: 'แชท' },
+  { to: '/menu', label: 'เมนู' },
+];
+
+export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
+  const { session, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    setMobileOpen(false);
+    await signOut();
+    navigate('/');
+  };
+
+  const isActive = (path: string) => location.pathname === path;
+
+  const authAction = session ? (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      className="sp-nav-signout"
+      style={{
+        padding: '10px 20px',
+        borderRadius: '10px',
+        border: '1.5px solid var(--color-border)',
+        background: 'transparent',
+        color: 'var(--color-text-primary)',
+        fontWeight: 600,
+        fontSize: '14px',
+        cursor: 'pointer',
+        transition: 'border-color 0.2s, background 0.2s',
+      }}
+    >
+      ออกจากระบบ
+    </button>
+  ) : (
+    <Link
+      to="/onboarding"
+      onClick={() => setMobileOpen(false)}
+      className="sp-nav-cta"
+      style={{
+        padding: '10px 22px',
+        borderRadius: '10px',
+        border: 'none',
+        background: 'linear-gradient(135deg, var(--color-accent-primary) 0%, var(--accent-primary, var(--color-accent-primary)) 100%)',
+        color: 'white',
+        fontWeight: 700,
+        fontSize: '14px',
+        textDecoration: 'none',
+        boxShadow: '0 2px 10px color-mix(in srgb, var(--color-accent-primary) 35%, transparent)',
+        transition: 'transform 0.15s, box-shadow 0.15s',
+        display: 'inline-block',
+      }}
+    >
+      เริ่มต้นใช้งาน
+    </Link>
+  );
+
+  return (
+    <>
+      <style>{`
+        .sp-navbar-links { display: flex; }
+        .sp-navbar-hamburger { display: none; }
+        .sp-nav-link:hover { background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent) !important; }
+        .sp-nav-signout:hover { border-color: var(--color-accent-primary) !important; background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent) !important; }
+        .sp-nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-primary) 45%, transparent); }
+        @media (max-width: 760px) {
+          .sp-navbar-links { display: none !important; }
+          .sp-navbar-hamburger { display: flex !important; }
+          .sp-navbar-desktop-action { display: none !important; }
+        }
+      `}</style>
+      <nav
+        style={{
+          position,
+          top: 0,
+          left: position === 'fixed' ? 0 : undefined,
+          right: position === 'fixed' ? 0 : undefined,
+          zIndex: 200,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '14px 32px',
+          // สีทึบเป็น fallback หลัก ถ้า browser รองรับ color-mix() ค่อย override เป็นแบบโปร่งใส
+          // (inline style เขียนได้ค่าเดียวต่อ property เลยแยกสองบรรทัดผ่าน backgroundColor + background)
+          backgroundColor: 'var(--color-bg-primary)',
+          background: 'color-mix(in srgb, var(--color-bg-primary) 82%, transparent)',
+          backdropFilter: 'blur(14px)',
+          WebkitBackdropFilter: 'blur(14px)',
+          borderBottom: '1px solid var(--color-border)',
+          boxShadow: '0 1px 0 rgba(0,0,0,0.03), 0 4px 20px rgba(0,0,0,0.04)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
+          <Link
+            to="/"
+            onClick={() => setMobileOpen(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              fontWeight: 800,
+              fontSize: '18px',
+              letterSpacing: '-0.01em',
+              color: 'var(--color-text-primary)',
+              textDecoration: 'none',
+            }}
+          >
+            <img
+              src="/favicon.svg"
+              alt="SelfPrint"
+              width={30}
+              height={30}
+              style={{ display: 'block' }}
+            />
+            SelfPrint
+          </Link>
+          <div className="sp-navbar-links" style={{ gap: '4px', alignItems: 'center' }}>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="sp-nav-link"
+                style={{
+                  position: 'relative',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: isActive(link.to) ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                  background: isActive(link.to)
+                    ? 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)'
+                    : 'transparent',
+                  textDecoration: 'none',
+                  transition: 'color 0.2s, background 0.2s',
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="sp-navbar-desktop-action">{rightSlot || authAction}</div>
+
+        {/* Mobile hamburger */}
+        <button
+          type="button"
+          aria-label="เปิดเมนู"
+          onClick={() => setMobileOpen((v) => !v)}
+          className="sp-navbar-hamburger"
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+            gap: '5px',
+            width: '38px',
+            height: '38px',
+            border: '1px solid var(--color-border)',
+            borderRadius: '8px',
+            background: 'transparent',
+            cursor: 'pointer',
+            padding: 0,
+          }}
+        >
+          <span style={{ display: 'block', width: '18px', height: '2px', margin: '0 auto', background: 'var(--color-text-primary)', transition: 'transform 0.2s', transform: mobileOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+          <span style={{ display: 'block', width: '18px', height: '2px', margin: '0 auto', background: 'var(--color-text-primary)', opacity: mobileOpen ? 0 : 1, transition: 'opacity 0.2s' }} />
+          <span style={{ display: 'block', width: '18px', height: '2px', margin: '0 auto', background: 'var(--color-text-primary)', transition: 'transform 0.2s', transform: mobileOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+        </button>
+      </nav>
+
+      {/* Mobile dropdown panel */}
+      {mobileOpen && (
+        <div
+          style={{
+            position: position === 'fixed' ? 'fixed' : 'sticky',
+            top: position === 'fixed' ? '60px' : 0,
+            left: 0,
+            right: 0,
+            zIndex: 199,
+            background: 'var(--color-bg-primary)',
+            borderBottom: '1px solid var(--color-border)',
+            padding: '16px 24px 20px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+            boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
+          }}
+        >
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.to}
+              to={link.to}
+              onClick={() => setMobileOpen(false)}
+              style={{
+                padding: '12px 14px',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: 600,
+                color: isActive(link.to) ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
+                background: isActive(link.to)
+                  ? 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)'
+                  : 'transparent',
+                textDecoration: 'none',
+              }}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div style={{ marginTop: '8px' }}>{rightSlot || authAction}</div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default NavBar;
