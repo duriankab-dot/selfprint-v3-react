@@ -1,0 +1,188 @@
+/**
+ * BadgeGallery.tsx
+ *
+ * Master Direction §29-30 — Badge System + Unlock Experience
+ *
+ * Shows:
+ *  - Earned badges with unlock text
+ *  - Available (locked) badges with earn condition
+ *  - Next badge to earn (highlighted)
+ *
+ * Rule: all data from BadgeEngine (Supabase). No mocks.
+ */
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@/context/AuthContext';
+import { BadgeEngine } from '@/lib/intelligence/BadgeEngine';
+import type { BadgeDefinition, EarnedBadge, BadgeId } from '@/lib/intelligence/BadgeEngine';
+import { BADGE_DEFINITIONS } from '@/lib/intelligence/BadgeEngine';
+
+// ============================================================================
+// Engine instance (shared)
+// ============================================================================
+
+const engine = new BadgeEngine();
+
+// ============================================================================
+// Sub-components
+// ============================================================================
+
+interface BadgeCardProps {
+  definition: BadgeDefinition;
+  earned?: EarnedBadge;
+  isNext?: boolean;
+}
+
+function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div
+      className={[
+        'badge-card',
+        earned ? 'badge-card--earned' : 'badge-card--locked',
+        isNext ? 'badge-card--next' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={() => setExpanded((e) => !e)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && setExpanded((v) => !v)}
+      aria-expanded={expanded}
+      aria-label={`${definition.nameTh} — ${earned ? 'ได้รับแล้ว' : 'ยังไม่ได้รับ'}`}
+    >
+      <div className="badge-card-header">
+        <span className="badge-icon" aria-hidden="true">
+          {earned ? definition.icon : '🔒'}
+        </span>
+        <div className="badge-info">
+          <p className="badge-name">{definition.nameTh}</p>
+          {earned ? (
+            <p className="badge-earned-date">
+              ได้รับ {new Date(earned.earnedAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })}
+            </p>
+          ) : isNext ? (
+            <p className="badge-next-label">🎯 ถัดไป</p>
+          ) : (
+            <p className="badge-locked-label">ยังไม่ได้รับ</p>
+          )}
+        </div>
+        <span className="badge-expand" aria-hidden="true">{expanded ? '▲' : '▼'}</span>
+      </div>
+
+      {expanded && (
+        <div className="badge-detail">
+          <p className="badge-desc">{definition.descriptionTh}</p>
+          {!earned && (
+            <p className="badge-requirement">
+              <strong>เงื่อนไข:</strong> {definition.requirementTh}
+            </p>
+          )}
+          <div className="badge-unlock-info">
+            <span className="badge-unlock-label">🔓 ปลดล็อก:</span>
+            <span className="badge-unlock-text">{definition.unlockTh}</span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Main component
+// ============================================================================
+
+export function BadgeGallery() {
+  const { session } = useAuth();
+  const userId = session?.user?.id ?? null;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['badgeState', userId],
+    queryFn: () => engine.getBadgeState(userId!),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (!userId) return null;
+
+  if (isLoading) {
+    return (
+      <div className="badge-gallery badge-gallery--loading">
+        <p className="badge-loading-text">กำลังโหลด Badge ของคุณ...</p>
+      </div>
+    );
+  }
+
+  const earned = data?.earned ?? [];
+  const available = data?.available ?? [];
+  const nextBadge = data?.nextToEarn;
+  const ALL_IDS = Object.keys(BADGE_DEFINITIONS) as BadgeId[];
+  const total = ALL_IDS.length;
+  const earnedCount = earned.length;
+
+  return (
+    <section className="badge-gallery" aria-label="Badge Gallery">
+      {/* Progress bar */}
+      <div className="badge-gallery-header">
+        <h2 className="badge-gallery-title">Badge ของคุณ</h2>
+        <p className="badge-gallery-progress">
+          {earnedCount} / {total} ปลดล็อกแล้ว
+        </p>
+      </div>
+      <div
+        className="badge-progress-bar"
+        role="progressbar"
+        aria-valuenow={earnedCount}
+        aria-valuemin={0}
+        aria-valuemax={total}
+      >
+        <div
+          className="badge-progress-fill"
+          style={{ width: `${(earnedCount / total) * 100}%` }}
+        />
+      </div>
+
+      {/* Earned */}
+      {earned.length > 0 && (
+        <div className="badge-section">
+          <h3 className="badge-section-title">✅ ได้รับแล้ว</h3>
+          <div className="badge-grid">
+            {earned.map((e) => (
+              <BadgeCard
+                key={e.id}
+                definition={BADGE_DEFINITIONS[e.id]}
+                earned={e}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Next + Available */}
+      {available.length > 0 && (
+        <div className="badge-section">
+          <h3 className="badge-section-title">🔒 ยังไม่ได้รับ</h3>
+          <div className="badge-grid">
+            {available.map((def) => (
+              <BadgeCard
+                key={def.id}
+                definition={def}
+                isNext={def.id === nextBadge?.id}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {earnedCount === total && (
+        <div className="badge-complete-banner">
+          🌟 คุณปลดล็อก Badge ทั้งหมดแล้ว — Selfprint ของคุณสมบูรณ์แบบ!
+        </div>
+      )}
+    </section>
+  );
+}
+
+export default BadgeGallery;

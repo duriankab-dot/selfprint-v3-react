@@ -1,0 +1,212 @@
+/* badge-gallery.css — Master Direction §29-30 */
+
+.badge-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5, 1.25rem);
+  padding: var(--space-6, 1.5rem);
+  background: var(--color-surface, rgba(255 255 255 / 0.04));
+  border: 1px solid var(--color-border, rgba(255 255 255 / 0.08));
+  border-radius: var(--radius-lg, 16px);
+}
+
+/* Header */
+.badge-gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.badge-gallery-title {
+  font-size: var(--font-size-base, 1rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #fff);
+  margin: 0;
+}
+
+.badge-gallery-progress {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, rgba(255 255 255 / 0.4));
+}
+
+/* Progress bar */
+.badge-progress-bar {
+  height: 4px;
+  background: rgba(255 255 255 / 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: var(--color-accent-primary, #7b6ee7);
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+
+/* Section */
+.badge-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 0.75rem);
+}
+
+.badge-section-title {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--color-text-secondary, rgba(255 255 255 / 0.6));
+  margin: 0;
+}
+
+.badge-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+/* Badge card */
+.badge-card {
+  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--color-border, rgba(255 255 255 / 0.08));
+  background: var(--color-surface-raised, rgba(255 255 255 / 0.03));
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  outline: none;
+}
+
+.badge-card:focus-visible {
+  border-color: var(--color-accent-primary, #7b6ee7);
+}
+
+.badge-card--earned {
+  border-color: rgba(123 110 231 / 0.35);
+  background: rgba(123 110 231 / 0.06);
+}
+
+.badge-card--next {
+  border-color: rgba(255 200 80 / 0.4);
+  background: rgba(255 200 80 / 0.04);
+}
+
+.badge-card--locked {
+  opacity: 0.65;
+}
+
+.badge-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+}
+
+.badge-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.badge-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.badge-name {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #fff);
+  margin: 0;
+}
+
+.badge-earned-date {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-accent-primary, #7b6ee7);
+  margin: 0;
+}
+
+.badge-next-label {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: rgba(255 200 80 / 0.9);
+  margin: 0;
+}
+
+.badge-locked-label {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-muted, rgba(255 255 255 / 0.35));
+  margin: 0;
+}
+
+.badge-expand {
+  font-size: 0.65rem;
+  color: var(--color-text-muted, rgba(255 255 255 / 0.3));
+  flex-shrink: 0;
+}
+
+/* Detail */
+.badge-detail {
+  margin-top: var(--space-3, 0.75rem);
+  padding-top: var(--space-3, 0.75rem);
+  border-top: 1px solid rgba(255 255 255 / 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 0.5rem);
+}
+
+.badge-desc {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-secondary, rgba(255 255 255 / 0.6));
+  line-height: 1.5;
+  margin: 0;
+}
+
+.badge-requirement {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: rgba(255 200 80 / 0.75);
+  margin: 0;
+}
+
+.badge-requirement strong {
+  font-weight: 600;
+}
+
+.badge-unlock-info {
+  display: flex;
+  gap: var(--space-2, 0.5rem);
+  align-items: flex-start;
+}
+
+.badge-unlock-label {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-accent-secondary, #a78bfa);
+  flex-shrink: 0;
+}
+
+.badge-unlock-text {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--color-text-secondary, rgba(255 255 255 / 0.6));
+}
+
+/* Complete banner */
+.badge-complete-banner {
+  text-align: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-accent-primary, #7b6ee7);
+  font-weight: 600;
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 12px);
+  background: rgba(123 110 231 / 0.08);
+  border: 1px solid rgba(123 110 231 / 0.2);
+}
+
+/* Loading */
+.badge-gallery--loading {
+  min-height: 100px;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-loading-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, rgba(255 255 255 / 0.4));
+}

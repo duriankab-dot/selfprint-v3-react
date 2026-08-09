@@ -1,0 +1,514 @@
+/**
+ * Integration Tests for FeedbackWidget Component
+ * Tests component + AIFeedbackLoop + Supabase integration
+ * @module components/intelligence/__integration__/FeedbackWidget.integration.test
+ */
+
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import FeedbackWidget from './FeedbackWidget';
+import { InsightFeedback, FeedbackType } from '@/lib/intelligence/types';
+
+// Mock Supabase client
+vi.mock('@/lib/supabase/client', () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+}));
+
+// Import after mock
+import { supabase } from '@/lib/supabase/client';
+
+describe('FeedbackWidget Integration Tests', () => {
+  const mockUserId = 'test-user-123';
+  const mockInsightId = 'insight-456';
+  const mockInsightText = 'You tend to analyze problems deeply before making decisions';
+
+  const mockFeedbackResponse: InsightFeedback = {
+    id: 'feedback-789',
+    userId: mockUserId,
+    insightId: mockInsightId,
+    feedbackType: 'very_true',
+    comment: 'Yes, I definitely do this',
+    createdAt: new Date('2026-08-09'),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Integration: Component → AIFeedbackLoop → Supabase', () => {
+    /**
+     * Test 1: Full workflow - user submits feedback successfully
+     * Verifies: feedback selection → validation → loop call → Supabase save → component state
+     */
+    it('should record feedback end-to-end with real AIFeedbackLoop', async () => {
+      // Mock Supabase response for feedback storage
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: mockFeedbackResponse.id,
+              user_id: mockUserId,
+              insight_id: mockInsightId,
+              feedback_type: 'very_true',
+              comment: 'Yes, I definitely do this',
+              created_at: mockFeedbackResponse.createdAt.toISOString(),
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      const onFeedbackSubmitted = vi.fn();
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+          onFeedbackSubmitted={onFeedbackSubmitted}
+          allowComment={true}
+        />
+      );
+
+      // Verify insight text displayed
+      expect(screen.getByText(mockInsightText)).toBeInTheDocument();
+
+      // Select "Very True" feedback
+      const veryTrueButton = screen.getByRole('button', { name: /Very True/i });
+      fireEvent.click(veryTrueButton);
+
+      // Add optional comment
+      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      await userEvent.type(commentInput, 'Yes, I definitely do this');
+
+      // Submit feedback
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify Supabase was called with feedback data
+      await waitFor(() => {
+        expect(mockFrom).toHaveBeenCalledWith('insight_feedback');
+        expect(mockInsert).toHaveBeenCalledWith({
+          id: expect.any(String),
+          user_id: mockUserId,
+          insight_id: mockInsightId,
+          feedback_type: 'very_true',
+          comment: 'Yes, I definitely do this',
+          created_at: expect.any(String),
+        });
+      });
+
+      // Verify callback was called
+      await waitFor(() => {
+        expect(onFeedbackSubmitted).toHaveBeenCalledWith('very_true', 'Yes, I definitely do this');
+      });
+
+      // Verify success message shown
+      expect(screen.getByText(/Thank you for your feedback/i)).toBeInTheDocument();
+    });
+
+    /**
+     * Test 2: All 4 feedback types work correctly
+     * Verifies: each feedback option sends correct type to AIFeedbackLoop
+     */
+    it('should handle all 4 feedback types correctly', async () => {
+      const feedbackTypes: Array<{ key: FeedbackType; label: RegExp }> = [
+        { key: 'very_true', label: /Very True/i },
+        { key: 'somewhat', label: /Somewhat/i },
+        { key: 'not_sure', label: /Not Sure/i },
+        { key: 'not_me', label: /Not Me/i },
+      ];
+
+      for (const { key, label } of feedbackTypes) {
+        vi.clearAllMocks();
+
+        const mockInsert = vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: {
+                id: `feedback-${key}`,
+                user_id: mockUserId,
+                insight_id: mockInsightId,
+                feedback_type: key,
+                comment: null,
+                created_at: new Date().toISOString(),
+              },
+              error: null,
+            }),
+          }),
+        });
+
+        const mockFrom = vi.fn().mockReturnValue({
+          insert: mockInsert,
+        });
+
+        (supabase.from as any).mockImplementation(mockFrom);
+
+        const onFeedbackSubmitted = vi.fn();
+
+        const { unmount } = render(
+          <FeedbackWidget
+            userId={mockUserId}
+            insightId={mockInsightId}
+            insightText={mockInsightText}
+            onFeedbackSubmitted={onFeedbackSubmitted}
+            allowComment={false}
+          />
+        );
+
+        // Select feedback type
+        const typeButton = screen.getByRole('button', { name: label });
+        fireEvent.click(typeButton);
+
+        // Submit
+        const submitButton = screen.getByRole('button', { name: /Submit/i });
+        fireEvent.click(submitButton);
+
+        // Verify correct type sent
+        await waitFor(() => {
+          expect(mockInsert).toHaveBeenCalledWith(
+            expect.objectContaining({
+              feedback_type: key,
+            })
+          );
+          expect(onFeedbackSubmitted).toHaveBeenCalledWith(key, undefined);
+        });
+
+        unmount();
+      }
+    });
+
+    /**
+     * Test 3: Feedback without comment still works
+     * Verifies: comment is optional field
+     */
+    it('should submit feedback without comment when allowComment=false', async () => {
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'feedback-no-comment',
+              user_id: mockUserId,
+              insight_id: mockInsightId,
+              feedback_type: 'somewhat',
+              comment: null,
+              created_at: new Date().toISOString(),
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      const onFeedbackSubmitted = vi.fn();
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+          onFeedbackSubmitted={onFeedbackSubmitted}
+          allowComment={false}
+        />
+      );
+
+      // Verify comment input NOT shown
+      expect(screen.queryByPlaceholderText(/optional feedback/i)).not.toBeInTheDocument();
+
+      // Select feedback
+      const somewhatButton = screen.getByRole('button', { name: /Somewhat/i });
+      fireEvent.click(somewhatButton);
+
+      // Submit
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify feedback sent without comment
+      await waitFor(() => {
+        expect(mockInsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            comment: null,
+          })
+        );
+      });
+    });
+
+    /**
+     * Test 4: Handle Supabase errors gracefully
+     * Verifies: error handling → user feedback
+     */
+    it('should handle feedback submission errors with user message', async () => {
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: null,
+            error: { message: 'Database error' },
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+          allowComment={true}
+        />
+      );
+
+      // Select feedback
+      const veryTrueButton = screen.getByRole('button', { name: /Very True/i });
+      fireEvent.click(veryTrueButton);
+
+      // Add comment
+      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      await userEvent.type(commentInput, 'Test comment');
+
+      // Submit
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify error message shown
+      await waitFor(() => {
+        expect(screen.getByText(/Failed to submit feedback/i)).toBeInTheDocument();
+      });
+
+      // Verify state preserved (comment not cleared)
+      expect(commentInput).toHaveValue('Test comment');
+    });
+
+    /**
+     * Test 5: Inline mode still saves feedback correctly
+     * Verifies: component mode doesn't affect integration
+     */
+    it('should save feedback in inline mode through full integration', async () => {
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'feedback-inline',
+              user_id: mockUserId,
+              insight_id: mockInsightId,
+              feedback_type: 'not_sure',
+              comment: null,
+              created_at: new Date().toISOString(),
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      const onFeedbackSubmitted = vi.fn();
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+          inline={true}
+          onFeedbackSubmitted={onFeedbackSubmitted}
+        />
+      );
+
+      // Select feedback
+      const notSureButton = screen.getByRole('button', { name: /Not Sure/i });
+      fireEvent.click(notSureButton);
+
+      // Submit
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify integration worked
+      await waitFor(() => {
+        expect(mockFrom).toHaveBeenCalledWith('insight_feedback');
+        expect(onFeedbackSubmitted).toHaveBeenCalled();
+      });
+    });
+
+    /**
+     * Test 6: Model calibration data sent correctly
+     * Verifies: feedback impacts confidence metadata
+     */
+    it('should include model calibration metadata in feedback submission', async () => {
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'feedback-calibration',
+              user_id: mockUserId,
+              insight_id: mockInsightId,
+              feedback_type: 'very_true',
+              comment: 'Perfect insight',
+              created_at: new Date().toISOString(),
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+          allowComment={true}
+        />
+      );
+
+      // Select feedback
+      const veryTrueButton = screen.getByRole('button', { name: /Very True/i });
+      fireEvent.click(veryTrueButton);
+
+      // Add comment
+      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      await userEvent.type(commentInput, 'Perfect insight');
+
+      // Submit
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify feedback data structure correct
+      await waitFor(() => {
+        const callArgs = mockInsert.mock.calls[0][0];
+        expect(callArgs).toHaveProperty('user_id');
+        expect(callArgs).toHaveProperty('insight_id');
+        expect(callArgs).toHaveProperty('feedback_type');
+        expect(callArgs).toHaveProperty('comment');
+        expect(callArgs).toHaveProperty('created_at');
+      });
+    });
+  });
+
+  describe('Master Direction Compliance: User Calibrates Model', () => {
+    /**
+     * Test 7: User feedback directly impacts model
+     * Verifies: all feedback types equally valid
+     */
+    it('should accept all feedback types equally - not_me is valid as very_true', async () => {
+      const mockInsert = vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: {
+              id: 'feedback-test',
+              user_id: mockUserId,
+              insight_id: mockInsightId,
+              feedback_type: 'not_me',
+              comment: 'This is not how I am',
+              created_at: new Date().toISOString(),
+            },
+            error: null,
+          }),
+        }),
+      });
+
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      const onFeedbackSubmitted = vi.fn();
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText="You avoid confrontation"
+          onFeedbackSubmitted={onFeedbackSubmitted}
+        />
+      );
+
+      // Select "Not Me" - corrective feedback
+      const notMeButton = screen.getByRole('button', { name: /Not Me/i });
+      fireEvent.click(notMeButton);
+
+      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      await userEvent.type(commentInput, 'This is not how I am');
+
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify "not_me" feedback accepted and processed
+      await waitFor(() => {
+        expect(mockInsert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            feedback_type: 'not_me',
+          })
+        );
+        expect(onFeedbackSubmitted).toHaveBeenCalledWith(
+          'not_me',
+          'This is not how I am'
+        );
+      });
+    });
+
+    /**
+     * Test 8: Feedback requires explicit selection (no auto-feedback)
+     * Verifies: user controls feedback, not AI
+     */
+    it('should require explicit user feedback selection', async () => {
+      const mockInsert = vi.fn();
+      const mockFrom = vi.fn().mockReturnValue({
+        insert: mockInsert,
+      });
+
+      (supabase.from as any).mockImplementation(mockFrom);
+
+      render(
+        <FeedbackWidget
+          userId={mockUserId}
+          insightId={mockInsightId}
+          insightText={mockInsightText}
+        />
+      );
+
+      // Try to submit without selecting feedback
+      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      fireEvent.click(submitButton);
+
+      // Verify Supabase NOT called (validation failed)
+      await waitFor(() => {
+        expect(mockInsert).not.toHaveBeenCalled();
+      });
+
+      // Verify error shown to user
+      expect(screen.getByText(/Please select your feedback/i)).toBeInTheDocument();
+    });
+  });
+});

@@ -1,10 +1,56 @@
 <!doctype html>
-<html lang="en">
+<html lang="th">
   <head>
     <meta charset="UTF-8" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>selfprint-v3-react</title>
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+
+    <!-- Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#4f46e5" />
+
+    <!-- App metadata -->
+    <title>Selfprint — Living AI Twin</title>
+    <meta name="description" content="AI ที่เรียนรู้และเข้าใจตัวคุณ — Living Personal Intelligence Platform" />
+    <meta name="application-name" content="Selfprint" />
+
+    <!-- Apple PWA meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Selfprint" />
+
+    <!-- Apple splash screens (portrait primary) -->
+    <!-- iPhone 14 Pro Max -->
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
+      href="/icons/splash-1290x2796.png" />
+    <!-- iPhone 14 / 13 / 12 -->
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
+      href="/icons/splash-1170x2532.png" />
+    <!-- iPhone SE / 8 / 7 / 6s -->
+    <link rel="apple-touch-startup-image"
+      media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
+      href="/icons/splash-750x1334.png" />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Selfprint — Living AI Twin" />
+    <meta property="og:description" content="AI ที่เรียนรู้และเข้าใจตัวคุณ" />
+    <meta property="og:image" content="/icons/icon-512x512.png" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Selfprint — Living AI Twin" />
+    <meta name="twitter:description" content="AI ที่เรียนรู้และเข้าใจตัวคุณ" />
+    <meta name="twitter:image" content="/icons/icon-192x192.png" />
   </head>
   <body>
     <div id="root"></div>

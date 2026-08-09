@@ -8,6 +8,8 @@ interface AuthContextType {
   loading: boolean;
   /** ส่ง magic link ไปที่ email — ไม่ต้องใช้ password */
   signInWithMagicLink: (email: string) => Promise<{ error?: string }>;
+  /** OAuth — redirects browser; provider: 'google' | 'apple' */
+  signInWithOAuth: (provider: 'google' | 'apple') => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 }
 
@@ -55,12 +57,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message };
   }, []);
 
+  const signInWithOAuth = useCallback(async (provider: 'google' | 'apple') => {
+    if (!supabase) {
+      return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`,
+      },
+    });
+    return { error: error?.message };
+  }, []);
+
   const signOut = useCallback(async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
   }, []);
 
-  const value: AuthContextType = { session, loading, signInWithMagicLink, signOut };
+  const value: AuthContextType = { session, loading, signInWithMagicLink, signInWithOAuth, signOut };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

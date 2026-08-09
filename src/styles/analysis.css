@@ -1,0 +1,628 @@
+/**
+ * analysis.css — Full Personal Analysis Page (Phase 4)
+ * Master Direction §10: 9-section personal analysis
+ * Uses CSS variables throughout — no hardcoded colors except fallbacks
+ */
+
+/* ============================================================================
+   Page Layout
+   ============================================================================ */
+
+.analysis__page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Page header */
+.analysis__page-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.analysis__back-btn {
+  background: none;
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #6c757d);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 150ms;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.analysis__back-btn:hover {
+  background: var(--color-bg-secondary, #f8f9fa);
+  color: var(--color-text-primary, #212529);
+}
+
+.analysis__page-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--color-text-primary, #212529);
+  margin: 0 0 6px 0;
+  line-height: 1.2;
+}
+
+.analysis__page-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0;
+}
+
+.analysis__header-confidence {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* ============================================================================
+   Loading / Empty
+   ============================================================================ */
+
+.analysis__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 80px 0;
+  color: var(--color-text-secondary, #6c757d);
+}
+
+.analysis__spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--color-border, #e9ecef);
+  border-top-color: var(--accent-primary, #4f46e5);
+  border-radius: 50%;
+  animation: spin-analysis 700ms linear infinite;
+}
+
+@keyframes spin-analysis {
+  to { transform: rotate(360deg); }
+}
+
+.analysis__empty {
+  text-align: center;
+  padding: 80px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.analysis__empty-icon { font-size: 3rem; }
+
+.analysis__empty h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #212529);
+  margin: 0;
+}
+
+.analysis__empty p {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  max-width: 360px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================================
+   Sections
+   ============================================================================ */
+
+.analysis__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.analysis__section {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+}
+
+.analysis__section--last {
+  border-bottom: none;
+}
+
+.analysis__section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.analysis__section-number {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent-primary, #4f46e5);
+  background: rgba(79, 70, 229, 0.08);
+  padding: 3px 8px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.analysis__section-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.analysis__section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #212529);
+  margin: 0;
+}
+
+.analysis__section-body {
+  padding-left: 4px;
+}
+
+.analysis__section-note {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: italic;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.analysis__empty-section {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ============================================================================
+   01 — Self Overview
+   ============================================================================ */
+
+.analysis__overview-text {
+  font-size: 1.05rem;
+  color: var(--color-text-primary, #212529);
+  line-height: 1.7;
+  margin: 0 0 16px 0;
+}
+
+.analysis__meta-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.analysis__meta-item {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #6c757d);
+  background: var(--color-bg-secondary, #f8f9fa);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+/* ============================================================================
+   02 — Behavioral Patterns
+   ============================================================================ */
+
+.analysis__pattern-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.analysis__pattern-item {
+  background: var(--color-bg-secondary, #f8f9fa);
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.analysis__pattern-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.analysis__pattern-type-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: var(--accent-primary, #4f46e5);
+  background: rgba(79, 70, 229, 0.08);
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.analysis__pattern-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #212529);
+  margin: 4px 0 0 0;
+}
+
+.analysis__pattern-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-primary, #212529);
+  line-height: 1.6;
+  margin: 0 0 8px 0;
+}
+
+.analysis__pattern-insight {
+  font-size: 0.875rem;
+  color: var(--accent-primary, #4f46e5);
+  background: rgba(79, 70, 229, 0.06);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.analysis__pattern-freq {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================================
+   03 — Strengths
+   ============================================================================ */
+
+.analysis__strength-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.analysis__strength-card {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.analysis__strength-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.analysis__strength-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #212529);
+  margin: 0;
+}
+
+.analysis__strength-desc {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0 0 6px 0;
+  line-height: 1.5;
+}
+
+.analysis__strength-evidence {
+  font-size: 0.75rem;
+  color: rgba(16, 185, 129, 0.8);
+  margin: 0;
+}
+
+/* ============================================================================
+   04 — Blind Spots
+   ============================================================================ */
+
+.analysis__blindspot-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.analysis__blindspot-item {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.analysis__blindspot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.analysis__blindspot-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #212529);
+  margin: 0;
+}
+
+.analysis__blindspot-desc {
+  font-size: 0.88rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   05 — Trends
+   ============================================================================ */
+
+.analysis__trend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.analysis__trend-item {
+  border-left: 3px solid var(--accent-primary, #4f46e5);
+  padding-left: 16px;
+}
+
+.analysis__trend-desc {
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #212529);
+  margin: 0 0 6px 0;
+  line-height: 1.6;
+}
+
+.analysis__trend-insight {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6c757d);
+  font-style: italic;
+  margin: 0 0 6px 0;
+}
+
+.analysis__trend-since {
+  font-size: 0.78rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ============================================================================
+   06 — Journey
+   ============================================================================ */
+
+.analysis__journey-stage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.analysis__journey-stage-label {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #6c757d);
+}
+
+.analysis__journey-stage-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-primary, #4f46e5);
+  background: rgba(79, 70, 229, 0.1);
+  padding: 4px 12px;
+  border-radius: 99px;
+}
+
+.analysis__journey-desc {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  margin: 0 0 20px 0;
+  line-height: 1.6;
+}
+
+.analysis__journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.analysis__journey-col h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-primary, #212529);
+  margin: 0 0 8px 0;
+}
+
+.analysis__journey-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.analysis__journey-list li {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #6c757d);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--color-border, #e9ecef);
+}
+
+/* ============================================================================
+   07 — Focus Areas
+   ============================================================================ */
+
+.analysis__focus-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.analysis__focus-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: var(--color-bg-secondary, #f8f9fa);
+  border-radius: 10px;
+  border: 1px solid var(--color-border, #e9ecef);
+}
+
+.analysis__focus-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent-primary, #4f46e5);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.analysis__focus-text {
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #212529);
+}
+
+/* ============================================================================
+   08 — Personal Guidance
+   ============================================================================ */
+
+.analysis__guidance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.analysis__guidance-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.analysis__guidance-bullet {
+  font-size: 1rem;
+  color: var(--accent-primary, #4f46e5);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.analysis__guidance-text {
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #212529);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ============================================================================
+   09 — Next Steps
+   ============================================================================ */
+
+.analysis__next-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.analysis__next-step {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  background: linear-gradient(135deg,
+    rgba(79, 70, 229, 0.06) 0%,
+    rgba(124, 58, 237, 0.04) 100%);
+  border: 1px solid rgba(79, 70, 229, 0.12);
+  border-radius: 12px;
+}
+
+.analysis__next-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-primary, #4f46e5);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.analysis__next-step-text {
+  font-size: 0.95rem;
+  color: var(--color-text-primary, #212529);
+  line-height: 1.6;
+  margin: 0;
+  padding-top: 4px;
+}
+
+/* ============================================================================
+   Page Footer
+   ============================================================================ */
+
+.analysis__page-footer {
+  margin-top: 48px;
+  padding-top: 32px;
+  border-top: 1px solid var(--color-border, #e9ecef);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.analysis__disclaimer {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary, #6c757d);
+  max-width: 480px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.analysis__back-to-dashboard {
+  background: none;
+  border: 1px solid var(--accent-primary, #4f46e5);
+  color: var(--accent-primary, #4f46e5);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms;
+}
+
+.analysis__back-to-dashboard:hover {
+  background: var(--accent-primary, #4f46e5);
+  color: #fff;
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+
+@media (max-width: 640px) {
+  .analysis__page { padding: 20px 16px 40px; }
+  .analysis__page-title { font-size: 1.4rem; }
+  .analysis__page-header { flex-direction: column; }
+  .analysis__header-confidence { margin-left: 0; }
+  .analysis__strength-grid { grid-template-columns: 1fr; }
+  .analysis__journey-grid { grid-template-columns: 1fr; }
+  .analysis__section { padding: 24px 0; }
+}

@@ -1,0 +1,280 @@
+/**
+ * twin-synthesis.css — WOW MOMENT synthesis animation (§4, §5)
+ * Full-screen cosmic. CSS variables only.
+ */
+
+/* ============================================================================
+   Full-screen overlay
+   ============================================================================ */
+
+.synthesis {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: #050510;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.synthesis--done .synthesis__orb {
+  animation: synth-orb-stabilize 600ms ease-out forwards;
+}
+
+@keyframes synth-orb-stabilize {
+  to { box-shadow: 0 0 60px var(--glow, rgba(109,40,217,0.9)), 0 0 120px rgba(109,40,217,0.4); }
+}
+
+/* ============================================================================
+   Background data stream
+   ============================================================================ */
+
+.synthesis__stream {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.synthesis__glyph {
+  position: absolute;
+  font-family: 'Courier New', monospace;
+  font-size: 0.7rem;
+  color: rgba(99, 102, 241, 0.25);
+  left: var(--col, 50%);
+  animation: synth-glyph-fall var(--speed, 4s) var(--delay, 0s) linear infinite;
+  white-space: nowrap;
+  user-select: none;
+}
+
+@keyframes synth-glyph-fall {
+  0%   { top: -20px;  opacity: 0; }
+  10%  { opacity: 1; }
+  80%  { opacity: 0.4; }
+  100% { top: 110vh;  opacity: 0; }
+}
+
+/* ============================================================================
+   Center container
+   ============================================================================ */
+
+.synthesis__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  z-index: 1;
+  padding: 20px;
+}
+
+/* ============================================================================
+   Orb
+   ============================================================================ */
+
+.synthesis__orb-wrap {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 32px;
+}
+
+/* Concentric rings */
+.synthesis__ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: synth-ring-expand 3s ease-in-out infinite;
+}
+
+.synthesis__ring--1 { width: 180px; height: 180px; animation-delay: 0s; }
+.synthesis__ring--2 { width: 220px; height: 220px; animation-delay: 0.7s; opacity: 0.6; }
+.synthesis__ring--3 { width: 270px; height: 270px; animation-delay: 1.4s; opacity: 0.3; }
+
+@keyframes synth-ring-expand {
+  0%, 100% { transform: translate(-50%, -50%) scale(1);    opacity: 0.3; }
+  50%       { transform: translate(-50%, -50%) scale(1.06); opacity: 0.7; }
+}
+
+/* Main orb */
+.synthesis__orb {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 38% 30%,
+    rgba(255, 255, 255, 0.2) 0%,
+    var(--glow, rgba(79, 70, 229, 0.7)) 45%,
+    rgba(20, 10, 60, 0.8) 100%
+  );
+  box-shadow:
+    0 0 40px var(--glow, rgba(79,70,229,0.7)),
+    0 0 80px rgba(79, 70, 229, 0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.05);
+  animation: synth-orb-pulse 2.5s ease-in-out infinite;
+  overflow: hidden;
+}
+
+@keyframes synth-orb-pulse {
+  0%, 100% { transform: scale(1);    box-shadow: 0 0 40px var(--glow, rgba(79,70,229,0.7)); }
+  50%       { transform: scale(1.06); box-shadow: 0 0 60px var(--glow, rgba(79,70,229,0.9)), 0 0 100px rgba(79,70,229,0.4); }
+}
+
+/* Neural lines inside orb */
+.synthesis__neural {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  top: 50%;
+  left: 50%;
+  animation: synth-neural-flash 2s ease-in-out infinite;
+}
+
+.synthesis__neural--h  { width: 100%; height: 1px; transform: translate(-50%, -50%); }
+.synthesis__neural--v  { width: 1px; height: 100%; transform: translate(-50%, -50%); }
+.synthesis__neural--d1 { width: 141%; height: 1px; transform: translate(-50%, -50%) rotate(45deg); }
+.synthesis__neural--d2 { width: 141%; height: 1px; transform: translate(-50%, -50%) rotate(-45deg); }
+
+@keyframes synth-neural-flash {
+  0%, 100% { opacity: 0.08; }
+  50%       { opacity: 0.3; }
+}
+
+/* Orbiting particles */
+.synthesis__particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  top: 50%;
+  left: 50%;
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.8);
+  animation: synth-particle-orbit var(--speed, 4s) linear infinite;
+  transform-origin: calc(var(--radius, 80px) * -1) 0;
+  margin-left: calc(var(--radius, 80px));
+  margin-top: -2px;
+}
+
+@keyframes synth-particle-orbit {
+  from { transform: rotate(var(--angle, 0deg)); }
+  to   { transform: rotate(calc(var(--angle, 0deg) + 360deg)); }
+}
+
+/* ============================================================================
+   State label
+   ============================================================================ */
+
+.synthesis__state-label {
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #e0e0ff;
+  text-align: center;
+  margin-bottom: 8px;
+  animation: synth-label-in 400ms ease-out;
+}
+
+@keyframes synth-label-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.synthesis__state-desc {
+  font-size: 0.9rem;
+  color: rgba(160, 160, 220, 0.8);
+  text-align: center;
+  margin-bottom: 24px;
+  animation: synth-label-in 400ms ease-out 100ms both;
+}
+
+/* ============================================================================
+   Progress dots
+   ============================================================================ */
+
+.synthesis__dots {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.synthesis__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  transition: all 300ms;
+}
+
+.synthesis__dot--done {
+  background: rgba(99, 102, 241, 0.6);
+  border-color: rgba(139, 92, 246, 0.6);
+}
+
+.synthesis__dot--active {
+  background: #818cf8;
+  border-color: #a78bfa;
+  box-shadow: 0 0 8px rgba(129, 140, 248, 0.8);
+  transform: scale(1.4);
+}
+
+/* ============================================================================
+   Ready state
+   ============================================================================ */
+
+.synthesis__ready {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: synth-label-in 600ms ease-out both;
+}
+
+.synthesis__ready-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #e0e0ff;
+  text-align: center;
+}
+
+.synthesis__ready-desc {
+  font-size: 0.88rem;
+  color: rgba(160, 160, 220, 0.7);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.synthesis__ready-btn {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5);
+  transition: all 200ms;
+}
+
+.synthesis__ready-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(79, 70, 229, 0.7);
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .synthesis__orb-wrap { width: 120px; height: 120px; }
+  .synthesis__orb      { width: 120px; height: 120px; }
+  .synthesis__ring--1  { width: 140px; height: 140px; }
+  .synthesis__ring--2  { width: 170px; height: 170px; }
+  .synthesis__ring--3  { width: 200px; height: 200px; }
+  .synthesis__state-label { font-size: 1rem; }
+}

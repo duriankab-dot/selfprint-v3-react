@@ -5,7 +5,9 @@ import { HubProvider } from './context/HubContext';
 import { TwinProvider } from './context/TwinContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { ExperienceProvider } from './context/ExperienceContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
+import { TwinEvolution } from './components/twin/TwinEvolution';
 import './styles/global.css';
 import './App.css';
 
@@ -17,9 +19,13 @@ const LandingPage = lazy(() => import('./pages/LandingPage')); // NEW: Phase 3.2
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Chat = lazy(() => import('./pages/Chat'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AnalysisPage = lazy(() => import('./pages/AnalysisPage')); // Phase 4
+const PrivacyCenter = lazy(() => import('./pages/PrivacyCenter')); // Phase 6
 const Share = lazy(() => import('./pages/Share'));
 const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
 const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
+const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage')); // §25
+const BadgePage = lazy(() => import('./pages/BadgePage'));            // §29-30
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -35,6 +41,10 @@ function App() {
         <EmotionProvider>
           <HubProvider>
             <TwinProvider>
+              {/* §16 Experience Engine — must be inside Auth+Hub+Emotion providers */}
+              <ExperienceProvider>
+              {/* §30 Twin Evolution overlay — global, above all routes */}
+              <TwinEvolution />
               <Router>
                 <Suspense fallback={null}>
                   <Routes>
@@ -42,12 +52,17 @@ function App() {
                     <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/chat" element={<Chat />} />
                     <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/analysis" element={<AnalysisPage />} /> {/* Phase 4: Full Personal Analysis */}
+                    <Route path="/privacy" element={<PrivacyCenter />} /> {/* Phase 6: PDPA Privacy Center */}
                     <Route path="/share/:code" element={<Share />} />
+                    <Route path="/brief" element={<DailyBriefPage />} />   {/* §25 */}
+                    <Route path="/badges" element={<BadgePage />} />        {/* §29-30 */}
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>
                 </Suspense>
               </Router>
+              </ExperienceProvider>
             </TwinProvider>
           </HubProvider>
         </EmotionProvider>

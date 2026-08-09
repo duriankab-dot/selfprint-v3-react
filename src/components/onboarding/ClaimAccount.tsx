@@ -13,6 +13,22 @@
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
+// ─── Icon SVGs (inline, no deps) ─────────────────────────────────────────────
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+    <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+  </svg>
+);
+
+const AppleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12.63 9.37c-.02-2.04 1.67-3.02 1.74-3.07-0.95-1.38-2.42-1.57-2.94-1.59-1.26-.13-2.46.74-3.1.74-.64 0-1.63-.72-2.68-.7-1.38.02-2.66.8-3.37 2.04-1.44 2.49-.37 6.18 1.03 8.2.69 1 1.5 2.12 2.57 2.08 1.03-.04 1.42-.67 2.67-.67 1.25 0 1.6.67 2.7.65 1.11-.02 1.81-.99 2.48-2 .79-1.14 1.11-2.25 1.13-2.31-.03-.01-2.18-.84-2.23-3.37ZM10.55 3.3c.57-.69.95-1.65.84-2.6-.82.03-1.8.54-2.38 1.22-.52.6-.98 1.57-.86 2.5.91.07 1.84-.46 2.4-1.12Z"/>
+  </svg>
+);
+
 export interface PendingOnboardingData {
   profile: {
     dateOfBirth?: string;
@@ -38,11 +54,12 @@ interface ClaimAccountProps {
 }
 
 export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
-  const { session, signInWithMagicLink } = useAuth();
+  const { session, signInWithMagicLink, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null);
 
   // ถ้า login อยู่แล้ว (กลับมาทำ onboarding ซ้ำ) ไม่ต้องถามอีเมลอีก
   if (session) {
@@ -50,6 +67,19 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
     onDone();
     return null;
   }
+
+  const handleOAuth = async (provider: 'google' | 'apple') => {
+    setOauthLoading(provider);
+    setError(null);
+    // บันทึก pending data ก่อน redirect
+    localStorage.setItem('pending_onboarding_save', JSON.stringify(data));
+    const result = await signInWithOAuth(provider);
+    if (result.error) {
+      setError(result.error);
+      setOauthLoading(null);
+    }
+    // ถ้าสำเร็จ browser จะ redirect ไป /dashboard — ไม่ต้อง setLoading(false)
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,6 +154,55 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
               ใส่อีเมลเพื่อรับลิงก์เข้าสู่ระบบ ไม่ต้องตั้งรหัสผ่าน —
               กลับมาใช้ AI Twin นี้ได้อีกทุกครั้งที่ต้องการ
             </p>
+            {/* ── OAuth Buttons ─────────────────────────────────────────── */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+              <button
+                type="button"
+                disabled={!!oauthLoading}
+                onClick={() => handleOAuth('google')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  width: '100%', padding: '11px 16px', borderRadius: '8px',
+                  border: '2px solid var(--color-border)',
+                  background: 'var(--color-bg-secondary, #fff)',
+                  color: 'var(--color-text-primary)', fontWeight: 600,
+                  cursor: oauthLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px', opacity: oauthLoading && oauthLoading !== 'google' ? 0.5 : 1,
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                <GoogleIcon />
+                {oauthLoading === 'google' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
+              </button>
+              <button
+                type="button"
+                disabled={!!oauthLoading}
+                onClick={() => handleOAuth('apple')}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+                  width: '100%', padding: '11px 16px', borderRadius: '8px',
+                  border: '2px solid var(--color-border)',
+                  background: 'var(--color-bg-secondary, #000)',
+                  color: '#fff', fontWeight: 600,
+                  cursor: oauthLoading ? 'not-allowed' : 'pointer',
+                  fontSize: '14px', opacity: oauthLoading && oauthLoading !== 'apple' ? 0.5 : 1,
+                  transition: 'opacity 0.2s',
+                }}
+              >
+                <AppleIcon />
+                {oauthLoading === 'apple' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Apple'}
+              </button>
+            </div>
+
+            {/* ── Divider ────────────────────────────────────────────────── */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+              <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
+                หรือใช้ Magic Link
+              </span>
+              <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
+            </div>
+
             <form onSubmit={handleSubmit}>
               <input
                 type="email"

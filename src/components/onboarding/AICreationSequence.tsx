@@ -11,14 +11,34 @@
  * 3. "Connecting personality..." (2-3 sec)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  initializeContextFromOnboarding,
+  validateOnboardingData,
+} from '@/lib/intelligence/PersonalContextInitializer';
+import type { AnalysisResponse } from '@/lib/types/astrovera';
+import type { Mood } from '@/context/EmotionContext';
 
 interface AICreationSequenceProps {
   onComplete: () => void;
   className?: string;
+  /** Onboarding data for PersonalContext initialization */
+  onboardingData?: {
+    userId: string;
+    birthDate: string;
+    mood: Mood;
+    analysisResponse: AnalysisResponse;
+    finetuneAnswers?: Record<string, string>;
+  };
 }
 
 type CreationStage = 0 | 1 | 2;
+
+interface InitializationState {
+  isInitializing: boolean;
+  error: string | null;
+  isSuccessful: boolean;
+}
 
 const STAGE_TIMINGS = {
   0: { text: 'กำลังวิเคราะห์วันเกิดของคุณ...', duration: 1000 },
@@ -29,9 +49,58 @@ const STAGE_TIMINGS = {
 export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
   onComplete,
   className = '',
+  onboardingData,
 }) => {
   const [stage, setStage] = useState<CreationStage>(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [initState, setInitState] = useState<InitializationState>({
+    isInitializing: false,
+    error: null,
+    isSuccessful: false,
+  });
+  const initializationAttempted = useRef(false);
+
+  /**
+   * Initialize PersonalContext at stage 2 (Connecting personality)
+   * This ensures the "personality" stage represents real context initialization
+   */
+  useEffect(() => {
+    if (stage === 2 && onboardingData && !initializationAttempted.current) {
+      initializationAttempted.current = true;
+
+      const initializeContext = async () => {
+        try {
+          setInitState({ isInitializing: true, error: null, isSuccessful: false });
+
+          // Validate data before processing
+          validateOnboardingData(onboardingData);
+
+          // Initialize PersonalContext
+          const context = await initializeContextFromOnboarding(onboardingData);
+
+          // In a real implementation, this would save to Supabase
+          // For now, store in sessionStorage for next step to access
+          sessionStorage.setItem(
+            'initialPersonalContext',
+            JSON.stringify(context)
+          );
+
+          setInitState({ isInitializing: false, error: null, isSuccessful: true });
+        } catch (err) {
+          const errorMessage =
+            err instanceof Error ? err.message : 'Failed to initialize PersonalContext';
+          console.error('PersonalContext initialization error:', errorMessage);
+          setInitState({
+            isInitializing: false,
+            error: errorMessage,
+            isSuccessful: false,
+          });
+        }
+      };
+
+      initializeContext();
+    }
+  }, [stage, onboardingData]);
 
   // Progress through stages
   useEffect(() => {
@@ -186,8 +255,33 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
           ))}
         </div>
 
+        {/* Error Message */}
+        {initState.error && (
+          <div
+            style={{
+              marginTop: '48px',
+              padding: '24px',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              borderRadius: '12px',
+              border: '1px solid rgb(239, 68, 68)',
+              animation: 'fade-in 500ms ease-out',
+            }}
+          >
+            <p
+              style={{
+                fontSize: '14px',
+                color: 'rgb(185, 28, 28)',
+                lineHeight: 1.6,
+                margin: 0,
+              }}
+            >
+              ⚠️ {initState.error}
+            </p>
+          </div>
+        )}
+
         {/* Completion Message */}
-        {isComplete && (
+        {isComplete && !initState.error && (
           <div
             style={{
               marginTop: '48px',

@@ -5,3 +5,5 @@
 
 export { HubSwitcher } from './HubSwitcher';
 export { EmotionSelector } from './EmotionSelector';
+export { DailyBrief } from './DailyBrief';
+export { BadgeGallery } from './BadgeGallery';

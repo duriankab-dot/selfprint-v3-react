@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   getDashboardInsights,
   getDecisionLogs,
@@ -13,9 +14,12 @@ import FilterBar from '../components/dashboard/FilterBar';
 import TrendChart from '../components/dashboard/TrendChart';
 import PatternInsights from '../components/dashboard/PatternInsights';
 import ExportButton from '../components/dashboard/ExportButton';
-import AITwinSection from '../components/dashboard/AITwinSection';
+import LivingTwin from '../components/dashboard/LivingTwin';
+import GrowthSpace from '../components/dashboard/GrowthSpace';
 import AskCoach from '../components/dashboard/AskCoach';
 import AnalyticsSummary from '../components/dashboard/AnalyticsSummary';
+import IntelligencePanel from '../components/dashboard/IntelligencePanel';
+import ExecutiveSummary from '../components/dashboard/ExecutiveSummary';
 import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
@@ -55,6 +59,7 @@ const Dashboard: React.FC = () => {
   // ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ 5.4)
   const { session } = useAuth();
   const userId = session?.user?.id || '';
+  const navigate = useNavigate();
   const [insights, setInsights] = useState<Insights | null>(null);
   const [logs, setLogs] = useState<DecisionLog[]>([]);
   const [trendData, setTrendData] = useState<TrendPoint[]>([]);
@@ -146,14 +151,23 @@ const Dashboard: React.FC = () => {
         <p>ติดตามรูปแบบความเป็นอิสระและข้อมูลเชิงลึกของคุณ</p>
       </div>
 
-      {/* AI Twin Blueprint Section */}
-      <AITwinSection />
+      {/* Executive Summary — Phase 3: human-language AI Twin overview (§8-9) */}
+      <ExecutiveSummary />
+
+      {/* Living AI Twin — §3 states, §4 cosmic visual, §5 processing states */}
+      <LivingTwin />
+
+      {/* Growth Space — §12 PAST → NOW → NEXT visualization */}
+      <GrowthSpace />
 
       {/* Ask Coach Section (Phase 5.5 UI, staged rollout — Phase 5.6) */}
       <AskCoach />
 
       {/* Analytics Summary (5.7 follow-up — visualizes analytics_events) */}
       <AnalyticsSummary />
+
+      {/* Intelligence Panel — Phase 2: AI Twin Context, Patterns, Memories */}
+      <IntelligencePanel />
 
       {/* Insights Section */}
       {insights && (
@@ -231,6 +245,23 @@ const Dashboard: React.FC = () => {
           <ExportButton format="json" onExport={() => handleExport('json')} />
         </div>
       </div>
+      </div>
+      {/* Privacy Center link — Master Direction §38 */}
+      <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
+        <button
+          onClick={() => navigate('/privacy')}
+          style={{
+            background: 'none',
+            border: 'none',
+            fontSize: '0.8rem',
+            color: 'var(--color-text-secondary, #6c757d)',
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            padding: '4px 8px',
+          }}
+        >
+          🔒 ความเป็นส่วนตัว / PDPA
+        </button>
       </div>
       <Footer />
       <BottomNav />
