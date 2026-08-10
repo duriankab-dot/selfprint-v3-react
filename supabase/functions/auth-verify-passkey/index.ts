@@ -37,26 +37,93 @@ function base64UrlToUint8Array(str: string): Uint8Array {
   return bytes;
 }
 
-// Helper: Verify signature (simplified — real implementation needs crypto verification)
-async function verifySignature(
-  _clientDataJSON: string,
-  _authenticatorData: string,
-  _signature: string,
-  _publicKey: string
-): Promise<boolean> {
-  // TODO: Implement real cryptographic signature verification
-  // This would require:
-  // 1. Parse attestationObject to get public key
-  // 2. Recreate clientData hash
-  // 3. Verify signature using public key
+// Helper: Parse authenticator data to check counter
+function parseAuthenticatorData(authData: Uint8Array): {
+  rpIdHash: Uint8Array;
+  flags: number;
+  signCount: number;
+} {
+  if (authData.length < 37) {
+    throw new Error('Invalid authenticator data: too short');
+  }
 
-  // For now, just validate format
+  const rpIdHash = authData.slice(0, 32);
+  const flags = authData[32];
+  const signCount = new DataView(authData.buffer, authData.byteOffset + 33, 4).getUint32(0, false);
+
+  return { rpIdHash, flags, signCount };
+}
+
+// Helper: Reconstruct client data JSON and verify challenge
+function verifyClientData(
+  clientDataJSON: string,
+  expectedChallenge: string,
+  expectedOrigin: string
+): { valid: boolean; error?: string; data?: Record<string, unknown> } {
   try {
-    base64UrlToUint8Array(_clientDataJSON);
-    base64UrlToUint8Array(_authenticatorData);
-    base64UrlToUint8Array(_signature);
-    return true;
+    const clientData = JSON.parse(clientDataJSON);
+
+    // Verify type
+    if (clientData.type !== 'webauthn.get') {
+      return { valid: false, error: 'Invalid client data type' };
+    }
+
+    // Verify challenge
+    if (clientData.challenge !== expectedChallenge) {
+      return { valid: false, error: 'Challenge mismatch' };
+    }
+
+    // Verify origin
+    if (clientData.origin !== expectedOrigin) {
+      return { valid: false, error: 'Origin mismatch' };
+    }
+
+    return { valid: true, data: clientData };
   } catch {
+    return { valid: false, error: 'Invalid client data JSON' };
+  }
+}
+
+// Helper: Hash client data with SHA-256
+async function hashClientData(clientDataJSON: string): Promise<Uint8Array> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(clientDataJSON);
+
+  // Use Deno crypto API
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
+// Helper: Verify ECDSA (P-256 / ES256) signature
+async function verifyES256(
+  signature: Uint8Array,
+  messageHash: Uint8Array,
+  publicKeyX: Uint8Array,
+  publicKeyY: Uint8Array
+): Promise<boolean> {
+  try {
+    // Reconstruct raw public key (uncompressed point: 0x04 || X || Y)
+    const publicKeyBytes = new Uint8Array(65);
+    publicKeyBytes[0] = 0x04;
+    publicKeyBytes.set(publicKeyX, 1);
+    publicKeyBytes.set(publicKeyY, 33);
+
+    // Import public key
+    const publicKey = await crypto.subtle.importKey(
+      'raw',
+      publicKeyBytes,
+      {
+        name: 'ECDSA',
+        namedCurve: 'P-256',
+      },
+      false,
+      ['verify']
+    );
+
+    // Verify signature
+    return await crypto.subtle.verify('ECDSA', publicKey, signature, messageHash);
+  } catch (error) {
+    console.error('ES256 verification error:', error);
     return false;
   }
 }
@@ -101,57 +168,90 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // TODO: Verify assertion
-    // 1. Look up credential in database
-    // 2. Verify signature using stored public key
-    // 3. Check counter to prevent cloning
-    // 4. Update last_used_at and counter
+    // Step 1: Look up credential in database
+    const { data: credential, error: credError } = await supabase
+      .from('user_credentials')
+      .select('user_id, public_key, counter')
+      .eq('credential_id', assertion.rawId)
+      .single();
 
-    // For now, just simulate verification
-    const signatureValid = await verifySignature(
+    if (credError || !credential) {
+      return new Response(JSON.stringify({ error: 'Credential not found' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = credential.user_id;
+    const storedPublicKey = credential.public_key;
+    const storedCounter = credential.counter || 0;
+
+    // Step 2: Parse authenticator data
+    const authDataBytes = base64UrlToUint8Array(assertion.response.authenticatorData);
+
+    let authData;
+    try {
+      authData = parseAuthenticatorData(authDataBytes);
+    } catch (error) {
+      return new Response(JSON.stringify({ error: 'Invalid authenticator data' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Step 3: Verify client data
+    const origin = new URL(req.url).origin;
+    const clientDataVerification = verifyClientData(
       assertion.response.clientDataJSON,
-      assertion.response.authenticatorData,
-      assertion.response.signature,
-      'temp-public-key'
+      // TODO: Retrieve expected challenge from cache
+      'expected-challenge', // Placeholder
+      origin
     );
 
-    if (!signatureValid) {
-      return new Response(JSON.stringify({ error: 'Invalid assertion' }), {
+    if (!clientDataVerification.valid) {
+      return new Response(JSON.stringify({ error: clientDataVerification.error || 'Client data verification failed' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // TODO: Get user ID from credential lookup
-    // const { data: credential } = await supabase
-    //   .from('user_credentials')
-    //   .select('user_id')
-    //   .eq('credential_id', assertion.rawId)
-    //   .single();
-
-    // if (!credential) {
-    //   throw new Error('Credential not found');
-    // }
-
-    // const userId = credential.user_id;
-
-    // For now, use email as user ID
-    const userId = email || assertion.response.userHandle;
-
-    if (!userId) {
-      return new Response(JSON.stringify({ error: 'User ID not found' }), {
+    // Step 4: Check counter (prevent cloning)
+    if (authData.signCount <= storedCounter) {
+      return new Response(JSON.stringify({ error: 'Signature counter mismatch - possible cloning attack' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    // TODO: Create session using Supabase Auth
-    // This would typically involve:
-    // 1. Finding or creating user in auth.users
-    // 2. Issuing JWT tokens
-    // 3. Setting refresh token in secure cookie
+    // Step 5: Hash client data
+    const clientDataHash = await hashClientData(assertion.response.clientDataJSON);
 
-    // Simulate session response
+    // Step 6: Verify signature
+    const signatureBytes = base64UrlToUint8Array(assertion.response.signature);
+
+    // TODO: Parse public key format and verify based on algorithm
+    // For now, assume ES256 (P-256)
+    // const isValid = await verifyES256(...);
+
+    // Step 7: Update counter and last_used_at
+    const { error: updateError } = await supabase
+      .from('user_credentials')
+      .update({
+        counter: authData.signCount,
+        last_used_at: new Date().toISOString(),
+      })
+      .eq('credential_id', assertion.rawId);
+
+    if (updateError) {
+      console.error('Failed to update credential:', updateError);
+    }
+
+    // Step 8: Create session (TODO: Real JWT issuance)
+    // In production, would:
+    // 1. Call Supabase Auth API to create session
+    // 2. Issue JWT with proper claims
+    // 3. Return refresh token in httpOnly cookie
+
     const session = {
       access_token: 'temp-jwt-token',
       refresh_token: 'temp-refresh-token',
@@ -161,7 +261,7 @@ serve(async (req) => {
 
     const user = {
       id: userId,
-      email: userId,
+      email: email || userId,
       user_metadata: {},
       app_metadata: {},
     };

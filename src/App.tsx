@@ -10,6 +10,7 @@ import { AudioProvider } from './context/AudioContext';
 import { PopupProvider } from './context/PopupContext';
 import { EvolutionProvider } from './context/EvolutionContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
+import { EnvironmentProvider } from './context/EnvironmentContext'; // §46
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
@@ -36,6 +37,7 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));         // §31
 const PricingSuccessPage = lazy(
   () => import('./pages/PricingPage').then((m) => ({ default: m.PricingSuccessPage }))
 ); // §31 success
+const LoginPage = lazy(() => import('./pages/Login')); // §34 Passkey + OAuth + Magic Link
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -57,6 +59,8 @@ function App() {
                 <ExperienceProvider>
                 {/* §23 Adaptive Background Music — must be inside Hub+Emotion providers */}
                 <AudioProvider>
+                  {/* §46 Advanced Adaptive Environments — inside Audio+Hub+Emotion */}
+                  <EnvironmentProvider>
                   {/* §30 Evolution tracking (reflection count, unlocks) */}
                   <EvolutionProvider>
                     {/* §28 Contextual Popup — must be inside all context providers */}
@@ -81,6 +85,7 @@ function App() {
                     <Route path="/badges" element={<BadgePage />} />                  {/* §29-30 */}
                     <Route path="/pricing" element={<PricingPage />} />               {/* §31 */}
                     <Route path="/pricing/success" element={<PricingSuccessPage />} /> {/* §31 */}
+                    <Route path="/login" element={<LoginPage />} />              {/* §34 */}
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>
@@ -88,6 +93,7 @@ function App() {
               </Router>
                     </PopupProvider>
                   </EvolutionProvider>
+                  </EnvironmentProvider>
                 </AudioProvider>
               </ExperienceProvider>
               </SubscriptionProvider>

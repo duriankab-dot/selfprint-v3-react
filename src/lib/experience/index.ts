@@ -1,5 +1,5 @@
 /**
- * Experience Engine — Master Direction §16-18, §20
+ * Experience Engine — Master Direction §16-18, §20, §46
  * Central exports
  */
 
@@ -11,3 +11,13 @@ export { default as ThemeResolver } from './ThemeResolver';
 
 export * from './ExperienceEngine';
 export { default as ExperienceEngine } from './ExperienceEngine';
+
+// §46 Advanced Adaptive Environments
+export * from './TimeOfDayEngine';
+export { default as TimeOfDayEngine } from './TimeOfDayEngine';
+
+export * from './SoundscapeEngine';
+export { default as SoundscapeEngine } from './SoundscapeEngine';
+
+export * from './EnvironmentEngine';
+export { default as EnvironmentEngine } from './EnvironmentEngine';

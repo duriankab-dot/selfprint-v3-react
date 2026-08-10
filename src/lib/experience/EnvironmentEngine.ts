@@ -1,0 +1,110 @@
+/**
+ * EnvironmentEngine.ts
+ *
+ * Master Direction §46 — Advanced Adaptive Environments
+ *
+ * Orchestrates: TimeOfDayEngine + SoundscapeEngine → EnvironmentConfig
+ *
+ * Input:
+ *   - hub (current user hub)
+ *   - mood (current user mood)
+ *   - now? (Date — defaults to new Date(), injectable for testing)
+ *
+ * Output: EnvironmentConfig — single source of truth สำหรับ environment UI
+ *
+ * Contextual Transition Detection:
+ *   - เปรียบเทียบ period ปัจจุบันกับ prevPeriod
+ *   - ถ้า period เปลี่ยน → shouldTransition = true
+ *   - EnvironmentContext ใช้ flag นี้เพื่อ trigger CSS transition animation
+ *
+ * ไม่มี side effects — pure computation only.
+ */
+
+import type { Hub } from '@/context/HubContext';
+import type { Mood } from '@/context/EmotionContext';
+import type { MusicExperience } from '@/context/AudioContext';
+import { TimeOfDayEngine } from './TimeOfDayEngine';
+import type { TimeOfDayState, TimePeriod } from './TimeOfDayEngine';
+import { SoundscapeEngine } from './SoundscapeEngine';
+import type { SoundscapeConfig } from './SoundscapeEngine';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export interface EnvironmentConfig {
+  /** ช่วงเวลาปัจจุบัน */
+  timePeriod: TimePeriod;
+  /** Full TimeOfDayState (hour, minute, cssVars, etc.) */
+  timeOfDay: TimeOfDayState;
+  /** Soundscape ที่แนะนำ */
+  soundscape: SoundscapeConfig;
+  /** MusicExperience ที่ส่งต่อไปยัง AudioContext.setExperience() */
+  recommendedExperience: MusicExperience;
+  /**
+   * CSS vars รวมทุกอย่าง (--tod-* + --env-* overlay)
+   * EnvironmentContext inject ลงใน :root
+   */
+  cssVars: Record<string, string>;
+  /**
+   * true เมื่อ period เพิ่งเปลี่ยนจาก prevPeriod
+   * EnvironmentContext ใช้เพื่อ trigger transition animation
+   */
+  shouldTransition: boolean;
+  /**
+   * ข้อความ ambient description สำหรับแสดงใน UI (เช่น tooltip, ambient badge)
+   */
+  ambientDescription: string;
+}
+
+interface EnvironmentInput {
+  hub: Hub;
+  mood: Mood;
+  now?: Date;
+  prevPeriod?: TimePeriod;
+}
+
+// ─── EnvironmentEngine ────────────────────────────────────────────────────────
+
+export class EnvironmentEngine {
+  private todEngine    = new TimeOfDayEngine();
+  private soundEngine  = new SoundscapeEngine();
+
+  compute(input: EnvironmentInput): EnvironmentConfig {
+    const { hub, mood, now = new Date(), prevPeriod } = input;
+
+    // 1. Compute time-of-day
+    const timeOfDay = this.todEngine.compute(now);
+    const { period } = timeOfDay;
+
+    // 2. Recommend soundscape
+    const soundscape = this.soundEngine.recommend(hub, mood, period);
+
+    // 3. Detect transition
+    const shouldTransition = !!prevPeriod && prevPeriod !== period;
+
+    // 4. Build merged CSS vars
+    //    --tod-* from TimeOfDayEngine + --env-* overlay
+    const cssVars: Record<string, string> = {
+      ...timeOfDay.cssVars,
+      // --env-* overrides / additions specific to this environment combination
+      '--env-soundscape-id':          `"${soundscape.id}"`,
+      '--env-audio-character':        `"${soundscape.audioCharacter}"`,
+      '--env-transition-duration':    shouldTransition ? '800ms' : '400ms',
+      '--env-energy-level':           String(timeOfDay.energyLevel),
+    };
+
+    // 5. Build ambient description
+    const ambientDescription = `${timeOfDay.emoji} ${timeOfDay.labelThai} — ${soundscape.labelThai}`;
+
+    return {
+      timePeriod: period,
+      timeOfDay,
+      soundscape,
+      recommendedExperience: soundscape.musicExperience,
+      cssVars,
+      shouldTransition,
+      ambientDescription,
+    };
+  }
+}
+
+export default EnvironmentEngine;
