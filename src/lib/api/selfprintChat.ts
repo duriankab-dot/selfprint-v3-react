@@ -204,7 +204,10 @@ interface BrainGatewayResponse {
 }
 
 async function callBrainGateway(request: BrainGatewayRequest): Promise<BrainGatewayResponse> {
-  const brainUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+  // Production (Vercel): no env var → relative URL → hits api/chat.ts on same origin
+  // Local dev with `vercel dev`: same — relative URL served by Vercel dev server
+  // Local dev with `vite dev` only: set VITE_API_BASE_URL in .env to override (e.g. http://localhost:3001)
+  const brainUrl = import.meta.env.VITE_API_BASE_URL || '';
 
   try {
     const response = await fetch(`${brainUrl}/api/chat`, {
@@ -316,7 +319,7 @@ function extractLearningSignals(response: string): SelfprintChatResponse['learni
  */
 export async function healthCheckBrainGateway(): Promise<boolean> {
   try {
-    const brainUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+    const brainUrl = import.meta.env.VITE_API_BASE_URL || '';
     const response = await fetch(`${brainUrl}/health`, {
       method: 'GET',
       signal: AbortSignal.timeout(5000),

@@ -107,11 +107,40 @@
 
 ---
 
+---
+
+## Dead Code Cleanup + Production Fix ✅ (2026-08-10)
+
+### ลบแล้ว
+| ไฟล์ | เหตุผล |
+|------|--------|
+| `workers/chat-api.ts` | Dead — `selfprint-chat-api` Worker ไม่มีใครเรียก |
+| `workers/chat-handler.ts` | Dead — ไฟล์ใน workers/ folder เดียวกัน |
+| `workers/wrangler.jsonc` | Dead — config ของ Worker ที่ลบไปแล้ว |
+| `api/nova.ts` | Orphaned — ไม่มี frontend เรียก `/api/nova` เลย |
+
+### สร้างใหม่
+| ไฟล์ | หน้าที่ |
+|------|---------|
+| `api/chat.ts` | Vercel function แทน Cloudflare Worker — รับ `{system, messages}` → Claude → ส่ง `{response, metadata}` |
+
+### แก้
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `src/lib/api/selfprintChat.ts` | `callBrainGateway` fallback URL: `'http://localhost:3000'` → `''` (relative) ทำให้ production Vercel ใช้ `/api/chat` ตรงๆ โดยไม่ต้องตั้ง env var |
+
+### Local Dev
+- `vercel dev` → relative URL `/api/chat` ทำงานได้ทันที  
+- `vite dev` เพียงอย่างเดียว → ต้องตั้ง `VITE_API_BASE_URL=http://localhost:3001` ใน `.env` (มีอยู่แล้ว)
+- Production Vercel → **ไม่ต้องตั้ง `VITE_API_BASE_URL` ใน Vercel dashboard** (ลบออกได้เลยถ้ามี)
+
+---
+
 ## สิ่งที่ต้องทำบนเครื่อง Windows
 
 ```bash
 git add -A
-git commit -m "feat: Dashboard quick links (Daily Brief + Badges), VoiceTwin integrated in ChatPage"
+git commit -m "feat: P1 complete + cleanup dead code + fix production /api/chat"
 ```
 
 จากนั้น deploy ตามปกติ (Vercel auto-deploy จาก push)
