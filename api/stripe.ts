@@ -17,7 +17,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { verifyUser, supabaseAdmin } from './utils/verify-user';
+import { verifyUser, supabaseAdmin } from './_utils/verify-user';
 
 // ── Lazy Stripe client ────────────────────────────────────────────────────────
 function getStripe(): Stripe {

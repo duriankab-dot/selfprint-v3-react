@@ -8,7 +8,7 @@
  */
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin, verifyUser } from './utils/verify-user.js';
+import { supabaseAdmin, verifyUser } from './_utils/verify-user.js';
 
 interface BlueprintRequest {
   profileId?: string;

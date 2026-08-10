@@ -16,9 +16,9 @@
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
-import { supabaseAdmin, verifyUser } from './utils/verify-user.js';
-import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './utils/safety.js';
-import { buildSystemPrompt, type Mood } from './utils/prompt-builder.js';
+import { supabaseAdmin, verifyUser } from './_utils/verify-user.js';
+import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './_utils/safety.js';
+import { buildSystemPrompt, type Mood } from './_utils/prompt-builder.js';
 import { calculateInitialDisciplines, getLifePathProfile } from '../src/lib/astrology.js';
 import { detectPatterns, type TrendPoint } from '../src/lib/patternDetection.js';
 

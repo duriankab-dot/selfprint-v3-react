@@ -26,3 +26,5 @@ export * from './InsightEngine';
 export { default as InsightEngine } from './InsightEngine';
 export * from './TwinStateEngine';
 export { default as TwinStateEngine } from './TwinStateEngine';
+export * from './NatalChartEngine';
+export * from './HexagramEngine';

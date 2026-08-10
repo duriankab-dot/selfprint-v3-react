@@ -22,6 +22,16 @@ export interface InitialDisciplines {
   chineseZodiac: string;
   baziYearElement: string;
   prototypeCore: string;
+  /** Natal chart dominant element (Fire/Earth/Air/Water) from NatalChartEngine */
+  natalDominantElement?: string;
+  /** Moon sign from NatalChartEngine (approximate) */
+  moonSign?: string;
+  /** I Ching hexagram number (1-64) from HexagramEngine */
+  hexagramNumber?: number;
+  /** I Ching hexagram Thai name */
+  hexagramThai?: string;
+  /** I Ching hexagram core theme (Thai) */
+  hexagramTheme?: string;
 }
 
 export interface LifePathProfile {
@@ -307,11 +317,114 @@ export function calculateBaziYearElement(dob: string): string {
 export function calculateInitialDisciplines(dob: string | null | undefined): InitialDisciplines {
   const safeDob = normalizeDob(dob);
   const lifePathNumber = calculateLifePathNumber(safeDob);
+
+  // Lazy import to avoid circular deps — NatalChartEngine + HexagramEngine
+  // live in src/lib/intelligence/ and do NOT import astrology.ts, so this is safe.
+  // We compute inline here so calculateInitialDisciplines stays synchronous.
+  const natal = calculateNatalChartInline(safeDob);
+  const hex = calculateHexagramInline(safeDob);
+
   return {
     lifePathNumber,
     westernZodiac: calculateWesternZodiac(safeDob),
     chineseZodiac: calculateChineseZodiac(safeDob),
     baziYearElement: calculateBaziYearElement(safeDob),
     prototypeCore: getPrototypeCore(lifePathNumber),
+    natalDominantElement: natal.element,
+    moonSign: natal.moonSign,
+    hexagramNumber: hex.number,
+    hexagramThai: hex.thai,
+    hexagramTheme: hex.theme,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Inline mini-implementations of NatalChartEngine + HexagramEngine
+// (kept here to avoid circular import; the canonical engines live in
+//  src/lib/intelligence/NatalChartEngine.ts and HexagramEngine.ts)
+// ---------------------------------------------------------------------------
+
+function daysSinceJ2000Astro(dob: string): number {
+  const [y, m, d] = dob.split('-').map(Number);
+  const A = Math.floor((14 - m) / 12);
+  const Y = y + 4800 - A;
+  const M = m + 12 * A - 3;
+  const JDN = d + Math.floor((153 * M + 2) / 5) + 365 * Y
+    + Math.floor(Y / 4) - Math.floor(Y / 100) + Math.floor(Y / 400) - 32045;
+  return JDN - 2451545;
+}
+
+function lonToSign(lon: number): string {
+  const idx = Math.floor(((lon % 360) + 360) % 360 / 30);
+  return ['Aries','Taurus','Gemini','Cancer','Leo','Virgo',
+          'Libra','Scorpio','Sagittarius','Capricorn','Aquarius','Pisces'][idx];
+}
+
+const ELEMENT_OF: Record<string, string> = {
+  Aries:'Fire', Leo:'Fire', Sagittarius:'Fire',
+  Taurus:'Earth', Virgo:'Earth', Capricorn:'Earth',
+  Gemini:'Air', Libra:'Air', Aquarius:'Air',
+  Cancer:'Water', Scorpio:'Water', Pisces:'Water',
+};
+
+function calculateNatalChartInline(dob: string): { element: string; moonSign: string } {
+  const d = daysSinceJ2000Astro(dob);
+  // Sun
+  const sunLon = 280.46 + 0.985647 * d;
+  const sunSign = lonToSign(sunLon);
+  // Moon
+  const moonLon = 218.32 + 13.176396 * d;
+  const moonSign = lonToSign(moonLon);
+  // Venus
+  const venusLon = 181.0 + 1.602130 * d;
+  const venusSign = lonToSign(venusLon);
+  // Tally elements to find dominant
+  const count: Record<string, number> = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
+  for (const s of [sunSign, moonSign, venusSign]) {
+    const el = ELEMENT_OF[s];
+    if (el) count[el]++;
+  }
+  const element = Object.keys(count).reduce((a, b) => count[a] >= count[b] ? a : b);
+  return { element, moonSign };
+}
+
+function calculateHexagramInline(dob: string): { number: number; thai: string; theme: string } {
+  const [y, m, d] = dob.split('-').map(Number);
+  const raw = (y + m * 7 + d * 13) % 64;
+  const number = raw + 1;
+  const HEX_THAI = [
+    'พลังสร้าง','พลังรับ','ความยากตอนต้น','ความไม่รู้','การรอคอย',
+    'ความขัดแย้ง','กองทัพ','การร่วมมือ','การสะสมเล็กน้อย','การเดินทาง',
+    'ความสมดุล','ความหยุดนิ่ง','มิตรภาพ','ความยิ่งใหญ่','ความถ่อมตน',
+    'ความกระตือรือร้น','การติดตาม','การแก้ไข','การเข้าหา','การสังเกต',
+    'การตัดสิน','ความงดงาม','การแตกแยก','การกลับมา','ความบริสุทธิ์',
+    'การสะสมใหญ่','การบำรุงเลี้ยง','เกินขีดจำกัด','ความลึก','ความสว่าง',
+    'อิทธิพล','ความยั่งยืน','การถอยทัพ','พลังยิ่งใหญ่','ความก้าวหน้า',
+    'ความมืดมิด','ครอบครัว','ความขัดแย้ง','อุปสรรค','การปลดปล่อย',
+    'การลด','การเพิ่ม','การตัดสิน','การพบกัน','การรวมตัว',
+    'การไต่ขึ้น','ความอ่อนล้า','บ่อน้ำ','การปฏิวัติ','หม้อไฟ',
+    'สายฟ้า','ภูเขา','พัฒนาการค่อยเป็นค่อยไป','การแต่งงาน','ความอุดมสมบูรณ์',
+    'นักเดินทาง','ลม','ความยินดี','การกระจาย','ข้อจำกัด',
+    'ความจริงใจภายใน','เกินเล็กน้อย','หลังสำเร็จ','ก่อนสำเร็จ',
+  ];
+  const HEX_THEME = [
+    'ศักยภาพสูงสุด','ความอดทนและการรับ','ความยากแรกเริ่ม','เรียนรู้ด้วยใจเปิด','รอเวลาที่ใช่',
+    'หลีกเลี่ยงการทะเลาะ','การนำด้วยวินัย','ความสามัคคี','ก้าวเล็กๆ ที่มั่นคง','ก้าวอย่างระมัดระวัง',
+    'ความรุ่งเรือง','ช่วงหยุดพัก','ความเป็นหนึ่งเดียว','ความอุดมสมบูรณ์','คุณธรรมสูงสุด',
+    'แรงบันดาลใจ','ปรับตัวตามสถานการณ์','รักษาสิ่งเสียหาย','โอกาสที่กำลังมา','มองอย่างลึกซึ้ง',
+    'แก้ปัญหาตรงๆ','รูปแบบและสาระ','ยืนหยัดในความดี','การฟื้นฟู','ทำโดยไม่หวังผล',
+    'สั่งสมพลัง','ดูแลสิ่งสำคัญ','แรงกดดันมาก','ฝ่าอันตราย','แสงสว่างแห่งปัญญา',
+    'ดึงดูดกัน','ความสม่ำเสมอ','ถอยเพื่อเก็บแรง','ใช้พลังอย่างถูกต้อง','ก้าวหน้าอย่างสดใส',
+    'ซ่อนแสงชั่วคราว','ความสัมพันธ์ที่ดี','มองข้ามความต่าง','เผชิญกับอุปสรรค','ผ่อนคลายแรงกดดัน',
+    'ลดเพื่อเพิ่ม','ขยายและเติบโต','ตัดสินอย่างเด็ดขาด','ระวังอิทธิพลลบ','รวมพลังกัน',
+    'ก้าวขึ้นอย่างมั่นคง','ฟื้นฟูพลังงาน','แหล่งพลังงานที่ยั่งยืน','การเปลี่ยนแปลงใหญ่','การหลอมรวมและสร้าง',
+    'ตื่นตัวจากช็อก','นิ่งและมีสติ','ก้าวทีละก้าว','บทบาทที่เหมาะสม','จุดสูงสุด',
+    'การเดินทางชีวิต','อิทธิพลที่อ่อนโยน','ความสุขแท้จริง','ละลายความแข็งกร้าว','ขอบเขตที่ดี',
+    'ความสัตย์จริง','ทำน้อยๆ ก่อน','รักษาสิ่งที่ได้มา','ใกล้จะสำเร็จ',
+  ];
+  return {
+    number,
+    thai: HEX_THAI[number - 1] || `เฮกซาแกรม ${number}`,
+    theme: HEX_THEME[number - 1] || '',
   };
 }

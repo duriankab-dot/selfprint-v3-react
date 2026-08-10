@@ -19,7 +19,7 @@
  */
 
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin, verifyUser } from './utils/verify-user.js';
+import { supabaseAdmin, verifyUser } from './_utils/verify-user.js';
 
 /**
  * Type definition: สิ่งที่ Frontend ส่งมา (ไม่มี user_id แล้ว — มาจาก JWT แทน)

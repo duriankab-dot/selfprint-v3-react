@@ -22,7 +22,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Anthropic from '@anthropic-ai/sdk';
-import { verifyUser, supabaseAdmin } from './utils/verify-user';
+import { verifyUser, supabaseAdmin } from './_utils/verify-user';
 
 // ── Lazy client ────────────────────────────────────────────────────────
 function getAnthropicClient(): Anthropic {
