@@ -32,6 +32,10 @@ const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
 const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage')); // §25
 const BadgePage = lazy(() => import('./pages/BadgePage'));            // §29-30
+const PricingPage = lazy(() => import('./pages/PricingPage'));         // §31
+const PricingSuccessPage = lazy(
+  () => import('./pages/PricingPage').then((m) => ({ default: m.PricingSuccessPage }))
+); // §31 success
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -73,8 +77,10 @@ function App() {
                     <Route path="/analysis" element={<AnalysisPage />} /> {/* Phase 4: Full Personal Analysis */}
                     <Route path="/privacy" element={<PrivacyCenter />} /> {/* Phase 6: PDPA Privacy Center */}
                     <Route path="/share/:code" element={<Share />} />
-                    <Route path="/brief" element={<DailyBriefPage />} />   {/* §25 */}
-                    <Route path="/badges" element={<BadgePage />} />        {/* §29-30 */}
+                    <Route path="/brief" element={<DailyBriefPage />} />             {/* §25 */}
+                    <Route path="/badges" element={<BadgePage />} />                  {/* §29-30 */}
+                    <Route path="/pricing" element={<PricingPage />} />               {/* §31 */}
+                    <Route path="/pricing/success" element={<PricingSuccessPage />} /> {/* §31 */}
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>

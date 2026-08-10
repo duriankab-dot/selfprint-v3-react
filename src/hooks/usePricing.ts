@@ -1,5 +1,7 @@
+import { useContext } from 'react';
 import { useSubscription } from '@/context/SubscriptionContext';
 import { createCheckoutSession, createPortalSession, PRICING_PLANS, calculatePrice } from '@/services/stripeService';
+import { AuthContext } from '@/context/AuthContext';
 
 /**
  * Hook for Pricing & Subscription Integration
@@ -19,28 +21,26 @@ import { createCheckoutSession, createPortalSession, PRICING_PLANS, calculatePri
 
 export function usePricing() {
   const { subscription, canAccess, getTierLevel, isTrialing, daysRemaining } = useSubscription();
+  const auth = useContext(AuthContext);
 
   /**
    * Start checkout flow
    */
   const startCheckout = async (tier: 'plus' | 'pro' | 'lifetime', billingPeriod: 'monthly' | 'annual' = 'monthly') => {
     try {
-      // Get user ID from auth context (assuming available)
-      const userId = localStorage.getItem('selfprint-user-id');
+      // userId ต้องมาจาก auth session เท่านั้น — ห้ามใช้ localStorage
+      const userId = auth?.session?.user?.id;
       if (!userId) {
-        console.error('[Pricing] User ID not found, redirect to login');
-        window.location.href = '/login';
+        console.error('[Pricing] User not authenticated, redirect to onboarding');
+        window.location.href = '/onboarding';
         return;
       }
 
       const { sessionId } = await createCheckoutSession(tier, billingPeriod, userId);
-
-      // Redirect to Stripe Checkout
-      // In real implementation: load Stripe.js and redirect
       window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
     } catch (error) {
       console.error('[Pricing] Checkout failed:', error);
-      alert('Failed to start checkout. Please try again.');
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     }
   };
 
@@ -49,9 +49,11 @@ export function usePricing() {
    */
   const managePlan = async () => {
     try {
-      const userId = localStorage.getItem('selfprint-user-id');
+      // userId ต้องมาจาก auth session เท่านั้น — ห้ามใช้ localStorage
+      const userId = auth?.session?.user?.id;
       if (!userId) {
-        console.error('[Pricing] User ID not found');
+        console.error('[Pricing] User not authenticated');
+        window.location.href = '/onboarding';
         return;
       }
 
@@ -59,7 +61,7 @@ export function usePricing() {
       window.location.href = portalUrl;
     } catch (error) {
       console.error('[Pricing] Portal failed:', error);
-      alert('Failed to open billing portal. Please try again.');
+      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     }
   };
 

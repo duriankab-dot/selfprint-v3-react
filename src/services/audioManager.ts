@@ -146,9 +146,9 @@ export async function stopAmbience(): Promise<void> {
  * @param duration - Transition duration in milliseconds
  */
 export async function duckVolume(targetVolume: number = 0.2, duration: number = 300): Promise<void> {
-  if (!audioElement) return;
+  if (!gainNode) return;
 
-  const currentVol = audioElement.volume;
+  const currentVol = gainNode.gain.value;
   const target = Math.max(0, Math.min(1, targetVolume));
 
   await fadeVolume(currentVol, target, duration);
@@ -163,9 +163,9 @@ export async function duckVolume(targetVolume: number = 0.2, duration: number = 
  * @param duration - Transition duration in milliseconds
  */
 export async function restoreVolume(targetVolume: number, duration: number = 500): Promise<void> {
-  if (!audioElement) return;
+  if (!gainNode) return;
 
-  const currentVol = audioElement.volume;
+  const currentVol = gainNode.gain.value;
   const target = Math.max(0, Math.min(1, targetVolume));
 
   await fadeVolume(currentVol, target, duration);
@@ -219,7 +219,7 @@ async function fadeVolume(startVol: number, endVol: number, duration: number): P
  * Set volume directly (0-100)
  */
 export function setVolume(percent: number): void {
-  const ctx = initializeAudioPlayer();
+  initializeAudioPlayer();
   const volume = Math.max(0, Math.min(1, percent / 100));
   if (gainNode) {
     gainNode.gain.value = volume;

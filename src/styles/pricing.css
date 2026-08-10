@@ -1,0 +1,341 @@
+/**
+ * PricingPage Styles — § 31 Monetization
+ * ใช้ var(--...) เท่านั้น ห้าม hardcode สี/ขนาด (§ 43)
+ */
+
+/* ── Page layout ─────────────────────────────────────────────────────────────── */
+.pricing-page {
+  min-height: 100vh;
+  padding: 3rem 1.5rem 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  background: var(--color-bg, #0a0a0f);
+  color: var(--color-text, #e8e8f0);
+}
+
+/* ── Header ──────────────────────────────────────────────────────────────────── */
+.pricing-header {
+  text-align: center;
+  max-width: 48rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pricing-eyebrow {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent, #7c6af7);
+  opacity: 0.7;
+}
+
+.pricing-title {
+  font-size: clamp(1.75rem, 4vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text, #e8e8f0);
+  margin: 0;
+}
+
+.pricing-subtitle {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--color-text-muted, rgba(232,232,240,0.6));
+  margin: 0;
+}
+
+/* ── Billing toggle ───────────────────────────────────────────────────────────── */
+.pricing-billing-toggle {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--color-surface, rgba(255,255,255,0.05));
+  border-radius: 99px;
+  margin-top: 0.5rem;
+}
+
+.pricing-billing-btn {
+  position: relative;
+  padding: 0.45rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted, rgba(232,232,240,0.5));
+  border-radius: 99px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pricing-billing-btn.active {
+  background: var(--color-accent, #7c6af7);
+  color: var(--color-text, #e8e8f0);
+}
+
+.pricing-billing-badge {
+  font-size: 0.65rem;
+  background: var(--color-accent-light, rgba(124,106,247,0.25));
+  color: var(--color-accent, #7c6af7);
+  padding: 0.15rem 0.4rem;
+  border-radius: 99px;
+  font-weight: 600;
+}
+
+.pricing-billing-btn.active .pricing-billing-badge {
+  background: rgba(255,255,255,0.2);
+  color: var(--color-text, #e8e8f0);
+}
+
+/* ── Grid ────────────────────────────────────────────────────────────────────── */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 72rem;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────────── */
+.pricing-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.75rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--color-border, rgba(255,255,255,0.08));
+  background: var(--color-surface, rgba(255,255,255,0.03));
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.pricing-card:hover {
+  border-color: var(--color-accent, #7c6af7);
+  transform: translateY(-2px);
+}
+
+.pricing-card--highlighted {
+  border-color: var(--color-accent, #7c6af7);
+  background: var(--color-surface-elevated, rgba(124,106,247,0.06));
+  box-shadow: 0 0 40px rgba(124,106,247,0.12);
+}
+
+.pricing-card--current {
+  border-color: var(--color-success, #4ade80);
+}
+
+/* ── Card badge ──────────────────────────────────────────────────────────────── */
+.pricing-card-badge {
+  position: absolute;
+  top: -0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.85rem;
+  border-radius: 99px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  background: var(--color-accent, #7c6af7);
+  color: var(--color-text, #e8e8f0);
+  white-space: nowrap;
+}
+
+.pricing-card-badge--current {
+  background: var(--color-success, #4ade80);
+  color: var(--color-bg, #0a0a0f);
+}
+
+/* ── Card header ─────────────────────────────────────────────────────────────── */
+.pricing-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.pricing-card-tier {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text, #e8e8f0);
+}
+
+.pricing-card-tagline {
+  font-size: 0.8rem;
+  color: var(--color-accent, #7c6af7);
+  margin: 0;
+  letter-spacing: 0.03em;
+}
+
+/* ── Price ───────────────────────────────────────────────────────────────────── */
+.pricing-card-price {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pricing-price-main {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-text, #e8e8f0);
+  line-height: 1;
+}
+
+.pricing-price-sub {
+  font-size: 0.8rem;
+  color: var(--color-text-muted, rgba(232,232,240,0.5));
+}
+
+.pricing-savings {
+  font-size: 0.75rem;
+  color: var(--color-success, #4ade80);
+  margin: 0.25rem 0 0;
+}
+
+/* ── Features ────────────────────────────────────────────────────────────────── */
+.pricing-features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  flex: 1;
+}
+
+.pricing-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted, rgba(232,232,240,0.75));
+  line-height: 1.4;
+}
+
+.pricing-feature-check {
+  color: var(--color-accent, #7c6af7);
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+/* ── CTA button ──────────────────────────────────────────────────────────────── */
+.pricing-cta-btn {
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border, rgba(255,255,255,0.12));
+  background: transparent;
+  color: var(--color-text-muted, rgba(232,232,240,0.7));
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  text-align: center;
+}
+
+.pricing-cta-btn:hover:not(:disabled) {
+  border-color: var(--color-accent, #7c6af7);
+  color: var(--color-text, #e8e8f0);
+}
+
+.pricing-cta-btn--primary {
+  background: var(--color-accent, #7c6af7);
+  border-color: var(--color-accent, #7c6af7);
+  color: var(--color-text, #e8e8f0);
+}
+
+.pricing-cta-btn--primary:hover:not(:disabled) {
+  background: var(--color-accent-hover, #9580f9);
+  border-color: var(--color-accent-hover, #9580f9);
+}
+
+.pricing-cta-btn--manage {
+  border-color: var(--color-success, #4ade80);
+  color: var(--color-success, #4ade80);
+}
+
+.pricing-cta-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────────── */
+.pricing-footer {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted, rgba(232,232,240,0.4));
+}
+
+.pricing-footer-link {
+  color: var(--color-accent, #7c6af7);
+  text-decoration: none;
+}
+
+.pricing-footer-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Success page ────────────────────────────────────────────────────────────── */
+.pricing-success {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+  background: var(--color-bg, #0a0a0f);
+  color: var(--color-text, #e8e8f0);
+}
+
+.pricing-success-icon {
+  font-size: 3rem;
+  color: var(--color-accent, #7c6af7);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(1.1); }
+}
+
+.pricing-success-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.pricing-success-subtitle {
+  color: var(--color-text-muted, rgba(232,232,240,0.65));
+  margin: 0;
+  max-width: 30rem;
+  line-height: 1.6;
+}
+
+.pricing-success-ref {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, rgba(232,232,240,0.4));
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .pricing-card { transition: none; }
+  .pricing-success-icon { animation: none; }
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .pricing-grid {
+    grid-template-columns: 1fr;
+  }
+  .pricing-card--highlighted {
+    order: -1;
+  }
+}
