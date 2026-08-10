@@ -28,3 +28,13 @@ export * from './TwinStateEngine';
 export { default as TwinStateEngine } from './TwinStateEngine';
 export * from './NatalChartEngine';
 export * from './HexagramEngine';
+
+// §46 — P2 Advanced Intelligence Engines
+export * from './FutureSelfEngine';
+export { default as FutureSelfEngine } from './FutureSelfEngine';
+export * from './DecisionIntelligenceEngine';
+export { default as DecisionIntelligenceEngine } from './DecisionIntelligenceEngine';
+export * from './LifeIntelligencePackEngine';
+export { default as LifeIntelligencePackEngine } from './LifeIntelligencePackEngine';
+export * from './BehavioralForecastEngine';
+export { default as BehavioralForecastEngine } from './BehavioralForecastEngine';
