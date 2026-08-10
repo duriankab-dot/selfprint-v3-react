@@ -1,43 +1,71 @@
--- ============================================================
--- 20260810_push_subscriptions.sql
--- Push notification subscriptions (§26-27)
--- ============================================================
+/**
+ * 20260810_push_subscriptions.sql
+ *
+ * Create push_subscriptions table for Web Push notifications
+ * Master Direction §26-27: Push Infrastructure
+ *
+ * Supabase cloud-compatible version (no FK constraint needed)
+ * RLS policies handle auth isolation
+ */
 
-create table if not exists push_subscriptions (
-  id           uuid primary key default gen_random_uuid(),
-  user_id      uuid not null references auth.users(id) on delete cascade,
-  endpoint     text not null,
-  keys_p256dh  text not null,
-  keys_auth    text not null,
-  created_at   timestamptz not null default now(),
-  updated_at   timestamptz not null default now(),
-
-  -- one subscription per endpoint per user
-  unique (user_id, endpoint)
+-- Create push_subscriptions table (no FK, RLS instead)
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  endpoint text not null,
+  keys_p256dh text not null,
+  keys_auth text not null,
+  created_at timestamp with time zone not null default now(),
+  updated_at timestamp with time zone not null default now(),
+  is_active boolean not null default true,
+  unique(user_id, endpoint)
 );
 
--- RLS: users can only read/write their own subscriptions
-alter table push_subscriptions enable row level security;
+-- Create indexes
+create index if not exists idx_push_subscriptions_user_id
+  on public.push_subscriptions(user_id);
 
-create policy "Users manage own push subscriptions"
-  on push_subscriptions
-  for all
-  using  (auth.uid() = user_id)
+create index if not exists idx_push_subscriptions_is_active
+  on public.push_subscriptions(is_active);
+
+create index if not exists idx_push_subscriptions_user_active
+  on public.push_subscriptions(user_id, is_active);
+
+-- Enable RLS
+alter table public.push_subscriptions enable row level security;
+
+-- RLS Policies
+create policy "Users can view their own subscriptions"
+  on public.push_subscriptions
+  for select
+  using (auth.uid() = user_id);
+
+create policy "Users can insert their own subscriptions"
+  on public.push_subscriptions
+  for insert
   with check (auth.uid() = user_id);
 
--- updated_at trigger
-create or replace function update_push_subscriptions_updated_at()
-returns trigger language plpgsql as $$
+create policy "Users can update their own subscriptions"
+  on public.push_subscriptions
+  for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own subscriptions"
+  on public.push_subscriptions
+  for delete
+  using (auth.uid() = user_id);
+
+-- Auto-update timestamp
+create or replace function public.update_push_subscriptions_updated_at()
+returns trigger as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$$;
+$$ language plpgsql;
 
-create trigger push_subscriptions_updated_at
-  before update on push_subscriptions
-  for each row execute function update_push_subscriptions_updated_at();
-
--- Index for fast per-user lookup
-create index if not exists push_subscriptions_user_id_idx
-  on push_subscriptions (user_id);
+drop trigger if exists push_subscriptions_updated_at_trigger on public.push_subscriptions;
+create trigger push_subscriptions_updated_at_trigger
+  before update on public.push_subscriptions
+  for each row
+  execute function public.update_push_subscriptions_updated_at();

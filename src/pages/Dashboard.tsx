@@ -28,6 +28,8 @@ import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
 import { AmbientBadge } from '../components/experience/AmbientBadge'; // §46
+import { SoundscapePlayer } from '../components/audio'; // §46
+import { TwinEvolution } from '../components/twin/TwinEvolution'; // §30
 import '../styles/dashboard.css';
 
 interface Insights {
@@ -160,15 +162,21 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <NavBar />
+      <TwinEvolution onEvolved={(badge) => {
+        if (badge) {
+          console.log('[Dashboard] Twin evolved, badge unlocked:', badge);
+        }
+      }} />
       <div className="dashboard" style={{ flex: 1 }}>
       <div className="dashboard-header">
         <h1>📊 แดชบอร์ดความเป็นอิสระ</h1>
         <p>ติดตามรูปแบบความเป็นอิสระและข้อมูลเชิงลึกของคุณ</p>
       </div>
 
-      {/* Quick Links — §25 Daily Brief + §29-30 Badges + §46 Ambient */}
+      {/* Quick Links — §25 Daily Brief + §29-30 Badges + §46 Ambient + Soundscape */}
       <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem 0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <AmbientBadge showSoundscape compact />
+        <SoundscapePlayer compact />
         <a
           href="/brief"
           style={{

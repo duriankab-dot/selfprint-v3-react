@@ -115,6 +115,83 @@ async function syncJournalQueue() {
   }
 }
 
+// Push Notifications: Master Direction §26-27
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push received:', event);
+
+  if (!event.data) {
+    console.warn('[SW] Empty push payload');
+    return;
+  }
+
+  let title = 'Selfprint';
+  let options = {
+    badge: '/logo.png',
+    icon: '/logo.png',
+    tag: 'selfprint-notification',
+    requireInteraction: false,
+  };
+
+  try {
+    const payload = event.data.json();
+    title = payload.title || title;
+    options = {
+      ...options,
+      body: payload.body || 'You have a new message',
+      data: payload.data || {},
+      badge: payload.badge || options.badge,
+      icon: payload.icon || options.icon,
+    };
+  } catch (error) {
+    // Fallback: treat data as text
+    options.body = event.data.text();
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, options).catch((err) => {
+      console.error('[SW] Failed to show notification:', err);
+    })
+  );
+});
+
+// Notification Click: navigate to appropriate page
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event.notification.tag);
+
+  event.notification.close();
+
+  const urlToOpen = event.notification.data?.url || '/dashboard';
+
+  event.waitUntil(
+    (async () => {
+      const windowClients = await self.clients.matchAll({
+        type: 'window',
+        includeUncontrolled: true,
+      });
+
+      // Check if app is already open
+      for (let i = 0; i < windowClients.length; i++) {
+        const client = windowClients[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+
+      // Open new window
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(urlToOpen);
+      }
+    })()
+  );
+});
+
+// Notification Close: track engagement (optional)
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification closed:', event.notification.tag);
+  // Optional: send engagement analytics to backend
+  // fetch('/api/analytics/notification', { method: 'POST', body: JSON.stringify({ action: 'close' }) })
+});
+
 // Listen for messages from client
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {

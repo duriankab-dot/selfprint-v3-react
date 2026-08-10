@@ -1,211 +1,209 @@
 /**
  * usePushSubscription.ts
  *
- * Master Direction §26-27 — Smart Push Notifications
+ * Master Direction §26-27: Push Infrastructure
  *
- * Handles:
- *  1. Requesting browser notification permission
- *  2. Subscribing to push via PushManager (VAPID)
- *  3. Persisting subscription to Supabase push_subscriptions table
- *  4. Unsubscribing + cleaning up
+ * Hook to manage Web Push subscription lifecycle:
+ * 1. Check browser support (service worker + push API)
+ * 2. Request notification permission
+ * 3. Subscribe to push notifications
+ * 4. Send subscription to backend (POST /api/push/subscribe)
+ * 5. Handle errors gracefully
  *
- * Rules:
- *  - Never autosubscribe — always require explicit user action (§24)
- *  - userId from useAuth() only — never localStorage
+ * Usage:
+ * ```typescript
+ * const { isSupported, isSubscribed, subscribe, unsubscribe, error } = usePushSubscription();
+ * ```
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '@/services/supabase-service';
-import { useAuth } from '@/context/AuthContext';
 
-// ─── VAPID Public Key ─────────────────────────────────────────────────────────
-// Set VITE_VAPID_PUBLIC_KEY in .env (generate with: npx web-push generate-vapid-keys)
-const VAPID_PUBLIC_KEY = import.meta.env['VITE_VAPID_PUBLIC_KEY'] as string | undefined;
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-export type PushPermissionStatus = 'default' | 'granted' | 'denied' | 'unsupported';
-
-export interface UsePushSubscriptionReturn {
-  /** Current browser permission state */
-  permissionStatus: PushPermissionStatus;
-  /** Whether user is currently subscribed and stored in Supabase */
+export interface PushSubscriptionResult {
+  isSupported: boolean;
   isSubscribed: boolean;
-  /** Whether an async operation is in progress */
-  loading: boolean;
-  /** Last error message, if any */
+  isLoading: boolean;
   error: string | null;
-  /** Subscribe the user — asks for permission if not yet granted */
-  subscribe: () => Promise<void>;
-  /** Unsubscribe from push */
-  unsubscribe: () => Promise<void>;
+  subscribe: () => Promise<boolean>;
+  unsubscribe: () => Promise<boolean>;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  return Uint8Array.from(rawData, (c) => c.charCodeAt(0));
-}
-
-async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
-  if (!('serviceWorker' in navigator)) return null;
-  try {
-    return await navigator.serviceWorker.ready;
-  } catch {
-    return null;
-  }
-}
-
-// ─── Hook ─────────────────────────────────────────────────────────────────────
-
-export function usePushSubscription(): UsePushSubscriptionReturn {
-  const { session } = useAuth();
-  const userId = session?.user?.id;
-
-  const [permissionStatus, setPermissionStatus] = useState<PushPermissionStatus>(() => {
-    if (!('Notification' in window)) return 'unsupported';
-    return Notification.permission as PushPermissionStatus;
-  });
+export function usePushSubscription(): PushSubscriptionResult {
+  const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Check existing subscription on mount ─────────────────────────────────
+  // Check browser support on mount
   useEffect(() => {
-    if (!userId || !supabase) return;
+    if (
+      typeof window !== 'undefined' &&
+      'serviceWorker' in navigator &&
+      'PushManager' in window
+    ) {
+      setIsSupported(true);
+    }
+  }, []);
 
-    let cancelled = false;
+  // Check if already subscribed
+  useEffect(() => {
+    if (!isSupported) return;
 
-    (async () => {
-      const reg = await getServiceWorkerRegistration();
-      if (!reg || cancelled) return;
-
-      const existing = await reg.pushManager.getSubscription();
-      if (!existing || cancelled) return;
-
-      // verify it's saved in Supabase
-      const { data } = await supabase
-        .from('push_subscriptions')
-        .select('id')
-        .eq('user_id', userId)
-        .eq('endpoint', existing.endpoint)
-        .maybeSingle();
-
-      if (!cancelled) {
-        setIsSubscribed(!!data);
+    const checkSubscription = async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        setIsSubscribed(!!sub);
+      } catch (err) {
+        console.warn('Failed to check push subscription:', err);
       }
-    })();
+    };
 
-    return () => { cancelled = true; };
-  }, [userId]);
+    checkSubscription();
+  }, [isSupported]);
 
-  // ── Subscribe ─────────────────────────────────────────────────────────────
-  const subscribe = useCallback(async () => {
+  // Subscribe to push notifications
+  const subscribe = useCallback(async (): Promise<boolean> => {
+    if (!isSupported) {
+      setError('Push notifications ไม่ได้รับการรองรับบนอุปกรณ์นี้');
+      return false;
+    }
+
+    setIsLoading(true);
     setError(null);
 
-    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setPermissionStatus('unsupported');
-      setError('Browser นี้ไม่รองรับ Push Notifications');
-      return;
-    }
-
-    if (!userId || !supabase) {
-      setError('กรุณาเข้าสู่ระบบก่อนเปิดการแจ้งเตือน');
-      return;
-    }
-
-    if (!VAPID_PUBLIC_KEY) {
-      setError('Push ยังไม่ได้ตั้งค่า VAPID key — กรุณาแจ้งผู้ดูแลระบบ');
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      // 1. Request permission
+      // Step 1: Request permission
       const permission = await Notification.requestPermission();
-      setPermissionStatus(permission as PushPermissionStatus);
-
       if (permission !== 'granted') {
-        setError('ไม่ได้รับอนุญาตให้ส่ง Notification');
-        return;
+        setError('คุณปฏิเสธการอนุญาตแจ้งเตือน');
+        setIsLoading(false);
+        return false;
       }
 
-      // 2. Get SW registration
-      const reg = await getServiceWorkerRegistration();
-      if (!reg) {
-        setError('Service Worker ยังไม่พร้อม — ลองใหม่ในอีกสักครู่');
-        return;
+      // Step 2: Get service worker registration
+      const reg = await navigator.serviceWorker.ready;
+
+      // Step 3: Subscribe to push
+      const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      if (!vapidPublicKey) {
+        setError('VAPID public key ไม่ได้ตั้งค่า');
+        setIsLoading(false);
+        return false;
       }
 
-      // 3. Subscribe to push
-      const vapidKeyBytes = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
-      const subscription = await reg.pushManager.subscribe({
+      const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: vapidKeyBytes.buffer.slice(
-          vapidKeyBytes.byteOffset,
-          vapidKeyBytes.byteOffset + vapidKeyBytes.byteLength
-        ) as ArrayBuffer,
+        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey) as BufferSource,
       });
 
-      const json = subscription.toJSON();
-      const keys = json.keys as { p256dh: string; auth: string };
+      // Step 4: Send subscription to backend
+      const response = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: arrayBufferToBase64(sub.getKey('p256dh') as ArrayBuffer | null),
+            auth: arrayBufferToBase64(sub.getKey('auth') as ArrayBuffer | null),
+          },
+        }),
+      });
 
-      // 4. Persist to Supabase (upsert by user_id + endpoint)
-      const { error: dbError } = await supabase.from('push_subscriptions').upsert(
-        {
-          user_id: userId,
-          endpoint: json.endpoint!,
-          keys_p256dh: keys.p256dh,
-          keys_auth: keys.auth,
-        },
-        { onConflict: 'user_id, endpoint' }
-      );
-
-      if (dbError) throw new Error(dbError.message);
-
-      setIsSubscribed(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาด กรุณาลองใหม่');
-    } finally {
-      setLoading(false);
-    }
-  }, [userId]);
-
-  // ── Unsubscribe ───────────────────────────────────────────────────────────
-  const unsubscribe = useCallback(async () => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const reg = await getServiceWorkerRegistration();
-      const existing = await reg?.pushManager.getSubscription();
-
-      if (existing) {
-        const endpoint = existing.endpoint;
-        await existing.unsubscribe();
-
-        // Remove from Supabase
-        if (userId && supabase) {
-          await supabase
-            .from('push_subscriptions')
-            .delete()
-            .eq('user_id', userId)
-            .eq('endpoint', endpoint);
-        }
+      if (!response.ok) {
+        throw new Error(`Backend error: ${response.statusText}`);
       }
 
-      setIsSubscribed(false);
+      setIsSubscribed(true);
+      setIsLoading(false);
+      return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'เกิดข้อผิดพลาดในการยกเลิก');
-    } finally {
-      setLoading(false);
+      const msg = err instanceof Error ? err.message : 'การสมัครสมาชิก Push ล้มเหลว';
+      setError(msg);
+      setIsLoading(false);
+      return false;
     }
-  }, [userId]);
+  }, [isSupported]);
 
-  return { permissionStatus, isSubscribed, loading, error, subscribe, unsubscribe };
+  // Unsubscribe from push notifications
+  const unsubscribe = useCallback(async (): Promise<boolean> => {
+    if (!isSupported) return false;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.getSubscription();
+
+      if (!sub) {
+        setIsLoading(false);
+        return true;
+      }
+
+      // Unsubscribe from browser
+      await sub.unsubscribe();
+
+      // Notify backend
+      await fetch('/api/push/subscribe', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: sub.endpoint,
+        }),
+      }).catch(() => {
+        // Backend deletion is optional — proceed even if it fails
+      });
+
+      setIsSubscribed(false);
+      setIsLoading(false);
+      return true;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'ยกเลิกการสมัครสมาชิก Push ล้มเหลว';
+      setError(msg);
+      setIsLoading(false);
+      return false;
+    }
+  }, [isSupported]);
+
+  return {
+    isSupported,
+    isSubscribed,
+    isLoading,
+    error,
+    subscribe,
+    unsubscribe,
+  };
 }
 
-export default usePushSubscription;
+// ─── Utilities ────────────────────────────────────────────────────────────
+
+/**
+ * Convert base64 VAPID key to Uint8Array
+ */
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+/**
+ * Convert ArrayBuffer to base64 string
+ */
+function arrayBufferToBase64(buffer: ArrayBuffer | null): string {
+  if (!buffer) return '';
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
