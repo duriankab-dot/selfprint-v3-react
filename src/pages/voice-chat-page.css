@@ -1,0 +1,16 @@
+/**
+ * 🎤 voice-chat-page.css
+ */
+
+.voice-chat-page {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .voice-chat-page {
+    height: auto;
+    min-height: 100vh;
+  }
+}

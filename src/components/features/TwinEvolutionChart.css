@@ -1,0 +1,158 @@
+/**
+ * 📈 TwinEvolutionChart.css — Accuracy trend chart
+ */
+
+.twin-evolution-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: var(--color-bg-secondary, #fafafa);
+  border-radius: 10px;
+  border: 1px solid var(--color-border, #e0e0e0);
+}
+
+/* Chart container */
+.chart-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  height: 160px;
+}
+
+.chart-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 40px;
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
+  text-align: right;
+}
+
+.label {
+  height: 0; /* Align with chart bars */
+}
+
+/* Bars */
+.chart-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.bar-wrapper {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-height: 100%;
+}
+
+.bar {
+  width: 100%;
+  background: linear-gradient(180deg, #3b82f6, #1e40af);
+  border-radius: 4px 4px 0 0;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.bar:hover {
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.bar--highlight {
+  opacity: 1;
+  background: linear-gradient(180deg, #10b981, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Stats below chart */
+.chart-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary, #999);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text-primary, #000);
+}
+
+.stat-value.trend-improving {
+  color: #10b981;
+}
+
+.stat-value.trend-declining {
+  color: #ef4444;
+}
+
+.stat-value.trend-stable {
+  color: #f59e0b;
+}
+
+/* Insight message */
+.chart-insight {
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chart-insight p {
+  margin: 0;
+}
+
+.insight-improving {
+  background: #dcfce7;
+  color: #15803d;
+  border-left: 3px solid #10b981;
+}
+
+.insight-declining {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 3px solid #ef4444;
+}
+
+.insight-stable {
+  background: #fef3c7;
+  color: #92400e;
+  border-left: 3px solid #f59e0b;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .chart-container {
+    height: 120px;
+  }
+
+  .chart-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-item {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}

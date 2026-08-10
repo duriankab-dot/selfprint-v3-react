@@ -1,0 +1,59 @@
+/**
+ * ⚙️ voice-settings.css
+ */
+
+.voice-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.voice-settings h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
+
+.settings-group select,
+.volume-slider {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 12px;
+  background: white;
+}
+
+.settings-group select:focus,
+.volume-slider:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.volume-slider {
+  cursor: pointer;
+  padding: 0;
+  height: 6px;
+}
+
+@media (max-width: 480px) {
+  .voice-settings {
+    padding: 12px;
+  }
+}

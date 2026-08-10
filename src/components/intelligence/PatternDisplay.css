@@ -1,0 +1,381 @@
+/**
+ * 📊 PatternDisplay.css — Styling for pattern cards
+ *
+ * Layout:
+ * - Header: stats + filter + sort
+ * - List: responsive grid of pattern cards
+ * - Card: name + type badge + description + confidence bar + insight
+ */
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.pattern-display {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  background: var(--color-bg-primary, #fff);
+  border-radius: 12px;
+}
+
+.pattern-display--empty {
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px 20px;
+}
+
+.pattern-display__empty-message {
+  font-size: 16px;
+  color: var(--color-text-secondary, #999);
+  text-align: center;
+}
+
+/* ============================================================================
+   HEADER (Stats + Controls)
+   ============================================================================ */
+
+.pattern-display__header {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pattern-display__stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pattern-stats__item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--color-bg-secondary, #f5f5f5);
+}
+
+.pattern-stats__repeating {
+  border-left: 4px solid #3b82f6; /* blue */
+}
+
+.pattern-stats__emerging {
+  border-left: 4px solid #8b5cf6; /* purple */
+}
+
+.pattern-stats__changing {
+  border-left: 4px solid #f59e0b; /* amber */
+}
+
+/* Controls: Filter + Sort */
+.pattern-display__controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.pattern-display__filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pattern-filter-btn {
+  padding: 6px 12px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pattern-filter-btn:hover {
+  border-color: var(--accent-primary, #3b82f6);
+  color: var(--accent-primary, #3b82f6);
+}
+
+.pattern-filter-btn.active {
+  background: var(--accent-primary, #3b82f6);
+  color: white;
+  border-color: var(--accent-primary, #3b82f6);
+}
+
+.pattern-sort-select {
+  padding: 6px 12px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pattern-sort-select:hover,
+.pattern-sort-select:focus {
+  border-color: var(--accent-primary, #3b82f6);
+  outline: none;
+}
+
+/* ============================================================================
+   PATTERN LIST (Grid)
+   ============================================================================ */
+
+.pattern-display__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .pattern-display__list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   PATTERN CARD
+   ============================================================================ */
+
+.pattern-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 10px;
+  background: var(--color-bg-secondary, #fafafa);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pattern-card:hover {
+  border-color: var(--accent-primary, #3b82f6);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.pattern-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pattern-card__name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+  text-transform: capitalize;
+}
+
+.pattern-card__type-badge {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: white;
+  border: 1px solid;
+}
+
+.pattern-card__type-badge--repeating {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
+.pattern-card__type-badge--emerging {
+  background: #ede9fe;
+  color: #5b21b6;
+  border-color: #d8b4fe;
+}
+
+.pattern-card__type-badge--changing {
+  background: #fef3c7;
+  color: #92400e;
+  border-color: #fcd34d;
+}
+
+.pattern-card__description {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.5;
+}
+
+.pattern-card__metadata {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #999);
+}
+
+.pattern-metadata__item {
+  display: inline-flex;
+  gap: 4px;
+}
+
+/* Confidence bar */
+.pattern-card__confidence {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confidence-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.confidence-percent {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.confidence-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-border, #e0e0e0);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.confidence-bar__fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+/* AI Insight */
+.pattern-card__insight {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.insight-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+.insight-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.4;
+}
+
+/* Impact */
+.pattern-card__impact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  background: rgba(239, 68, 68, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #ef4444;
+}
+
+.impact-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+.impact-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.4;
+}
+
+/* Evidence badge */
+.pattern-card__evidence {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.evidence-badge {
+  padding: 4px 8px;
+  background: var(--color-border, #e0e0e0);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #999);
+}
+
+/* ============================================================================
+   FOOTER
+   ============================================================================ */
+
+.pattern-display__footer {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+.pattern-display__count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary, #999);
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .pattern-display {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .pattern-display__header {
+    gap: 12px;
+  }
+
+  .pattern-display__filter {
+    gap: 6px;
+  }
+
+  .pattern-filter-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .pattern-sort-select {
+    padding: 5px 10px;
+    font-size: 12px;
+    flex: 1;
+  }
+
+  .pattern-card {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .pattern-card__name {
+    font-size: 15px;
+  }
+
+  .pattern-card__description {
+    font-size: 13px;
+  }
+}

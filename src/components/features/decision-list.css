@@ -1,0 +1,100 @@
+/**
+ * 📝 decision-list.css — Decision list styling
+ */
+
+.decision-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.decision-list__items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.decision-item {
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
+}
+
+.decision-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.decision-item__header:hover {
+  background: var(--color-bg-secondary, #f5f5f5);
+}
+
+.decision-item__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+  flex: 1;
+}
+
+.decision-item__date {
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
+  white-space: nowrap;
+}
+
+.decision-item__confidence {
+  font-size: 11px;
+  color: #3b82f6;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.decision-item__expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+  background: var(--color-bg-secondary, #f5f5f5);
+}
+
+.decision-item__section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.decision-item__section h4 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+  text-transform: uppercase;
+}
+
+.decision-item__section p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .decision-item__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .decision-item__date,
+  .decision-item__confidence {
+    align-self: flex-start;
+  }
+}

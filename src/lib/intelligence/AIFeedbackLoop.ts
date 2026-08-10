@@ -1,7 +1,26 @@
 /**
- * AI Feedback Loop
- * Learn from user validation to calibrate model
- * Real learning algorithm - updates confidence based on feedback
+ * 🔄 AI Feedback Loop — ระบบเรียนรู้จากผู้ใช้
+ *
+ * **ทำหน้าที่:**
+ * - เก็บ feedback จากผู้ใช้ (Very true / Somewhat / Not sure / Not me)
+ * - วิเคราะห์ pattern ของ feedback
+ * - ปรับน้ำหนัก (calibrate) pattern confidence ตามความเห็นผู้ใช้
+ * - ปรับปรุง Personal Context entries ที่ inaccurate
+ * - Track accuracy trend (improving / stable / declining)
+ *
+ * **Core Feedback Loop:**
+ * 1. AI generates insight → ผู้ใช้เห็น
+ * 2. User gives feedback → recordFeedback()
+ * 3. Analyze pattern → analyzeFeedbackPatterns()
+ * 4. Calibrate model → updatePatternConfidence() + adjustContextFromFeedback()
+ * 5. Next insights are smarter 🧠
+ *
+ * **Real Algorithm** (ไม่ใช่ Stub):
+ * - Very true (> 70%): boost confidence +0.1
+ * - Not me (> 40%): reduce confidence -0.15
+ * - Mixed feedback (30-70% true): keep original
+ * - Accuracy trend: compare last 20 vs previous insights
+ *
  * @module intelligence/AIFeedbackLoop
  */
 
@@ -10,31 +29,85 @@ import type { InsightFeedback, FeedbackType, AccuracyMetrics } from './types';
 import { IntelligenceError } from './types';
 
 /**
- * AIFeedbackLoop
- * Processes user feedback and calibrates AI model
+ * 🏢 AIFeedbackLoop Class
  *
- * Algorithm:
- * 1. User sees insight: "Very true / Somewhat / Not sure / Not me"
- * 2. Store feedback
- * 3. Analyze feedback pattern
- * 4. Adjust confidence of related insights
- * 5. Update patterns and context
- * 6. Next insights are more accurate
+ * **ทำหน้าที่:**
+ * - เก็บและวิเคราะห์ user feedback เกี่ยวกับ AI insights
+ * - Calibrate (ปรับน้ำหนัก) พฤติกรรม patterns ตามความคิดเห็นผู้ใช้
+ * - ทำให้ Twin มั่นใจมากขึ้น
+ * - Track accuracy trend
  *
- * Core Loop:
- * AI Insight → User Feedback → Model Calibration → Better Twin
+ * **Feedback Loop Algorithm:**
+ * ```
+ * 1. User validates AI insight with feedback
+ *    ("Very true" / "Somewhat" / "Not sure" / "Not me")
+ * 2. Store feedback in insight_feedback table
+ * 3. Analyze feedback distribution (% true vs % not_me)
+ * 4. Adjust behavioral pattern confidence:
+ *    - If > 70% "very true" → boost confidence by +0.1
+ *    - If > 40% "not me" → reduce confidence by -0.15
+ *    - If mixed (30-70%) → keep original
+ * 5. Re-examine personal_context entries if too many "not me"
+ * 6. Next insights use updated confidence scores
+ * 7. Track accuracy trend (improving / stable / declining)
+ * ```
  *
- * Usage:
+ * **Master Direction Compliance:**
+ * - Learn only from real feedback (no overclaim)
+ * - Don't boost confidence beyond evidence
+ * - Reduce when user disagrees
+ *
+ * **Usage Example:**
  * ```typescript
  * const loop = new AIFeedbackLoop();
- * await loop.recordFeedback(userId, 'insight-123', 'very_true');
- * await loop.calibrateFromFeedback(userId);
+ *
+ * // User clicks "Very true" on an insight
+ * await loop.recordFeedback(
+ *   userId,
+ *   'insight-123',
+ *   'very_true',
+ *   'Yes! This is exactly me'
+ * );
+ * // → automatically triggers calibrateFromFeedback()
+ *
+ * // Get accuracy metrics
+ * const metrics = await loop.getAccuracyMetrics(userId);
+ * // → { totalInsights: 15, feedback: {...}, accuracy: 0.87, trend: 'improving' }
  * ```
  */
 export class AIFeedbackLoop {
   /**
-   * Record user feedback on an insight
-   * Stores feedback and triggers model calibration
+   * ✅ recordFeedback() — บันทึก feedback ของผู้ใช้
+   *
+   * **ทำหน้าที่:**
+   * 1. Validate input (userId, insightId, feedbackType required)
+   * 2. Store feedback in `insight_feedback` table
+   * 3. Trigger calibrateFromFeedback() (async, non-blocking)
+   *
+   * **Input:**
+   * - userId: ผู้ใช้
+   * - insightId: insight ID ที่ได้ feedback
+   * - feedbackType: 'very_true' | 'somewhat' | 'not_sure' | 'not_me'
+   * - comment: optional user note
+   *
+   * **Output:** InsightFeedback
+   * - id, userId, insightId, feedbackType, comment, createdAt
+   *
+   * **Feedback Types:**
+   * - very_true: "นี่ฉันเลย" (+1.0 accuracy credit)
+   * - somewhat: "บางส่วนถูก" (+0.5 accuracy credit)
+   * - not_sure: "ไม่แน่ใจ" (0 credit, but not wrong)
+   * - not_me: "ไม่ใช่ฉัน" (0 credit, penalize pattern)
+   *
+   * **Example:**
+   * ```typescript
+   * await recordFeedback(
+   *   'user123',
+   *   'insight-456',
+   *   'very_true',
+   *   'Yes! I do love writing'
+   * );
+   * ```
    */
   async recordFeedback(
     userId: string,
@@ -88,8 +161,35 @@ export class AIFeedbackLoop {
   }
 
   /**
-   * Calibrate model from accumulated feedback
-   * Updates confidence scores and retrains patterns
+   * ✅ calibrateFromFeedback() — ปรับน้ำหนัก Model จาก Feedback
+   *
+   * **ทำหน้าที่ (5 Steps):**
+   * 1. getUserFeedback() → ดึง ALL feedback ของผู้ใช้
+   * 2. analyzeFeedbackPatterns() → count, calculate %
+   * 3. updatePatternConfidence() → ปรับ behavioral_patterns confidence
+   * 4. adjustContextFromFeedback() → re-examine personal_context entries
+   * 5. Log calibration event
+   *
+   * **Confidence Adjustment Logic:**
+   * ```
+   * IF veryTruePercentage > 70%:
+   *   confidenceAdjustment = +0.1  // Boost
+   * ELSE IF notMePercentage > 40%:
+   *   confidenceAdjustment = -0.15 // Reduce
+   * ELSE IF mixed (30-70%):
+   *   confidenceAdjustment = 0  // Keep original
+   * ```
+   *
+   * **Result:**
+   * - behavioral_patterns confidence updated in DB
+   * - personal_context confidence lowered if too many "not_me"
+   * - Next AI Insights will be more accurate
+   *
+   * **Called By:**
+   * - recordFeedback() (automatically, async)
+   * - Manual calibration via AIFeedbackLoop.calibrateFromFeedback(userId)
+   *
+   * **Note:** ทำงาน async ไม่ blocking, error หมด log เฉย ไม่ throw
    */
   async calibrateFromFeedback(userId: string): Promise<void> {
     if (!userId) throw new IntelligenceError('User ID required', 'MISSING_USER_ID');
@@ -116,8 +216,42 @@ export class AIFeedbackLoop {
   }
 
   /**
-   * Get accuracy metrics
-   * Shows how accurate AI has been for this user
+   * ✅ getAccuracyMetrics() — วัดความแม่นยำ AI
+   *
+   * **ทำหน้าที่:**
+   * - Count feedback by type (veryTrue, somewhat, notSure, notMe)
+   * - Calculate overall accuracy %
+   * - Calculate trend (comparing recent 20 vs previous)
+   *
+   * **Accuracy Calculation:**
+   * ```
+   * accurateCount = veryTrue + (somewhat * 0.5)
+   * accuracy = accurateCount / totalFeedback
+   * // Example: 10 veryTrue + 4 somewhat = (10 + 2) / 20 = 60% accuracy
+   * ```
+   *
+   * **Trend Analysis:**
+   * - Compare last 20 feedback vs previous insights
+   * - improving: recent accuracy > previous + 10%
+   * - declining: recent accuracy < previous - 10%
+   * - stable: between the two
+   *
+   * **Output:** AccuracyMetrics
+   * ```typescript
+   * {
+   *   totalInsights: 42,
+   *   feedback: { veryTrue: 28, somewhat: 8, notSure: 4, notMe: 2 },
+   *   accuracy: 0.85,        // 85%
+   *   trend: 'improving'      // getting better!
+   * }
+   * ```
+   *
+   * **UI Usage:**
+   * - Show accuracy % in Twin profile
+   * - Show trend with ↑ / → / ↓ icon
+   * - Use for Twin Evolution badge system
+   *
+   * **Note:** If no feedback yet → returns { totalInsights: 0, accuracy: 0, ... }
    */
   async getAccuracyMetrics(userId: string): Promise<AccuracyMetrics> {
     if (!userId) throw new IntelligenceError('User ID required', 'MISSING_USER_ID');

@@ -1,0 +1,174 @@
+/**
+ * 📋 DailyInsightsList.css — Daily insights list with feedback
+ */
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.daily-insights-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  background: var(--color-bg-primary, #fff);
+}
+
+.daily-insights-list--empty {
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================================
+   ACCURACY HEADER
+   ============================================================================ */
+
+.insights-list__accuracy-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+  border-radius: 12px;
+  border: 2px solid var(--color-border, #e0e0e0);
+}
+
+.accuracy-header__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+/* ============================================================================
+   EMPTY STATE
+   ============================================================================ */
+
+.insights-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.insights-empty-icon {
+  font-size: 48px;
+  margin: 0;
+}
+
+.insights-empty-state h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+.insights-empty-state p {
+  margin: 0;
+  max-width: 300px;
+  font-size: 14px;
+  color: var(--color-text-secondary, #999);
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   CONTENT
+   ============================================================================ */
+
+.insights-list__content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.insights-list__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.insights-list__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+.insights-list__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary, #999);
+}
+
+/* ============================================================================
+   GRID
+   ============================================================================ */
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================================
+   HELP TEXT
+   ============================================================================ */
+
+.insights-list__help {
+  padding: 12px 16px;
+  background: rgba(59, 130, 246, 0.05);
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+}
+
+.insights-list__help-text {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.5;
+}
+
+.insights-list__help-text strong {
+  font-weight: 600;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .daily-insights-list {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .insights-list__title {
+    font-size: 16px;
+  }
+
+  .insights-list__subtitle {
+    font-size: 13px;
+  }
+
+  .insights-grid {
+    gap: 12px;
+  }
+
+  .insights-list__accuracy-header {
+    padding: 12px;
+  }
+
+  .accuracy-header__title {
+    font-size: 13px;
+  }
+}

@@ -1,0 +1,82 @@
+/**
+ * 🎙️ voice-input.css
+ */
+
+.voice-input {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+.voice-input__display {
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  min-width: 300px;
+  text-align: center;
+  border: 2px solid #ddd;
+}
+
+.voice-input__text {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-input__controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.voice-input__btn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 3px solid #3b82f6;
+  background: white;
+  font-size: 32px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-input__btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.voice-input__btn.listening {
+  background: #dbeafe;
+  animation: pulse 0.6s infinite;
+}
+
+.voice-input__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.voice-input__lang {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .voice-input__display {
+    min-width: 200px;
+  }
+
+  .voice-input__btn {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+}

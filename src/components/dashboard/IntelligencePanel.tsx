@@ -21,7 +21,10 @@ import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { ContextDisplay } from '@/components/intelligence/ContextDisplay';
 import { ConfidenceIndicator } from '@/components/intelligence/ConfidenceIndicator';
 import { MemoryRecorder } from '@/components/intelligence/MemoryRecorder';
-import { FeedbackWidget } from '@/components/intelligence/FeedbackWidget';
+import MemoryList from '@/components/intelligence/MemoryList';
+import FeedbackSummary from '@/components/intelligence/FeedbackSummary';
+import { PatternDisplay } from '@/components/intelligence/PatternDisplay';
+import { MemoryManager } from '@/lib/intelligence/MemoryManager';
 import { Alert } from '@/components/composites/Alert';
 import type { PersonalMemory } from '@/lib/intelligence/types';
 
@@ -29,12 +32,13 @@ import type { PersonalMemory } from '@/lib/intelligence/types';
 // Types
 // ============================================================================
 
-type ActiveTab = 'overview' | 'patterns' | 'memories';
+type ActiveTab = 'overview' | 'patterns' | 'memories' | 'feedback';
 
 const TAB_LABELS: Record<ActiveTab, string> = {
   overview: '🪞 ภาพรวม',
   patterns: '📊 รูปแบบ',
   memories: '💾 ความทรงจำ',
+  feedback: '📈 Feedback',
 };
 
 // ============================================================================
@@ -97,6 +101,22 @@ export const IntelligencePanel: React.FC = () => {
     retry: 2,
   });
 
+  // ฟ้ได้ memories สำหรับแสดงใน MemoryList
+  const {
+    data: userMemories = [],
+    isLoading: memoriesLoading,
+    error: memoriesError,
+  } = useQuery({
+    queryKey: ['userMemories', userId],
+    queryFn: async () => {
+      const memoryManager = new MemoryManager();
+      return memoryManager.getMemories(userId);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+    retry: 2,
+  });
+
   // --------------------------------------------------------------------------
   // Real-time subscriptions
   // --------------------------------------------------------------------------
@@ -140,6 +160,20 @@ export const IntelligencePanel: React.FC = () => {
         },
         () => {
           queryClient.invalidateQueries({ queryKey: ['accuracyMetrics', userId] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'personal_memories',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          // ✅ Invalidate memories + patterns (memories อาจเปลี่ยนแปลง patterns)
+          queryClient.invalidateQueries({ queryKey: ['userMemories', userId] });
+          queryClient.invalidateQueries({ queryKey: ['behavioralPatterns', userId] });
         }
       )
       .subscribe();
@@ -293,71 +327,14 @@ export const IntelligencePanel: React.FC = () => {
                 </p>
               </div>
             ) : (
-              <div className="intelligence-panel__patterns-list">
-                {patterns.map((pattern) => (
-                  <article
-                    key={pattern.id}
-                    className="intelligence-panel__pattern-card"
-                    aria-label={`Pattern: ${pattern.patternName}`}
-                  >
-                    <div className="intelligence-panel__pattern-header">
-                      <div className="intelligence-panel__pattern-meta">
-                        <h3 className="intelligence-panel__pattern-name">
-                          {pattern.patternName}
-                        </h3>
-                        <span className="intelligence-panel__pattern-type">
-                          {pattern.patternType === 'repeating'
-                            ? '🔁 ซ้ำ'
-                            : pattern.patternType === 'emerging'
-                              ? '🌱 เกิดขึ้นใหม่'
-                              : '🔄 เปลี่ยนแปลง'}
-                        </span>
-                      </div>
-                      <ConfidenceIndicator
-                        confidence={pattern.confidence}
-                        source={pattern}
-                        compact
-                      />
-                    </div>
-
-                    <p className="intelligence-panel__pattern-desc">{pattern.description}</p>
-
-                    {pattern.aiInsight && (
-                      <div className="intelligence-panel__pattern-insight">
-                        <span className="intelligence-panel__insight-label">💡 insight:</span>
-                        <span>{pattern.aiInsight}</span>
-                      </div>
-                    )}
-
-                    {pattern.lastDetected && (
-                      <p className="intelligence-panel__pattern-date">
-                        พบล่าสุด:{' '}
-                        {new Date(pattern.lastDetected).toLocaleDateString('th-TH', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })}
-                      </p>
-                    )}
-
-                    {/* Rate this insight */}
-                    <div className="intelligence-panel__pattern-feedback">
-                      <FeedbackWidget
-                        userId={userId}
-                        insightId={pattern.id}
-                        insightText={pattern.aiInsight || pattern.description}
-                        inline
-                        allowComment={false}
-                        onFeedbackSubmitted={() => {
-                          queryClient.invalidateQueries({
-                            queryKey: ['accuracyMetrics', userId],
-                          });
-                        }}
-                      />
-                    </div>
-                  </article>
-                ))}
-              </div>
+              <PatternDisplay
+                patterns={patterns}
+                showConfidence={true}
+                onPatternClick={(pattern) => {
+                  // Optional: Can add modal/detail view here
+                  console.log('Pattern clicked:', pattern.patternName);
+                }}
+              />
             )}
           </div>
         )}
@@ -367,6 +344,15 @@ export const IntelligencePanel: React.FC = () => {
         ================================================================ */}
         {!isFirstLoad && activeTab === 'memories' && (
           <div className="intelligence-panel__tab-panel">
+            {memoriesError && (
+              <Alert
+                variant="error"
+                message={`ไม่สามารถโหลด memories: ${
+                  memoriesError instanceof Error ? memoriesError.message : String(memoriesError)
+                }`}
+              />
+            )}
+
             {lastSavedMemory && (
               <Alert
                 variant="success"
@@ -375,15 +361,43 @@ export const IntelligencePanel: React.FC = () => {
               />
             )}
 
-            <MemoryRecorder
-              userId={userId}
-              onMemoryCreated={(memory) => {
-                setLastSavedMemory(memory);
-                // New memory may trigger new patterns — invalidate both
-                queryClient.invalidateQueries({ queryKey: ['personalContext', userId] });
-                queryClient.invalidateQueries({ queryKey: ['behavioralPatterns', userId] });
-              }}
-            />
+            {/* ✅ Memory Recorder Form */}
+            <div className="memory-section memory-section--recorder">
+              <h3 className="memory-section__title">📝 เพิ่ม Memory ใหม่</h3>
+              <MemoryRecorder
+                userId={userId}
+                onMemoryCreated={(memory) => {
+                  setLastSavedMemory(memory);
+                  // ✅ Invalidate queries
+                  queryClient.invalidateQueries({ queryKey: ['userMemories', userId] });
+                  queryClient.invalidateQueries({ queryKey: ['personalContext', userId] });
+                  queryClient.invalidateQueries({ queryKey: ['behavioralPatterns', userId] });
+                }}
+              />
+            </div>
+
+            {/* ✅ Memory List */}
+            <div className="memory-section memory-section--list">
+              <h3 className="memory-section__title">📚 Memories ของคุณ</h3>
+              <MemoryList
+                userId={userId}
+                memories={userMemories}
+                isLoading={memoriesLoading}
+                onMemoryDeleted={(id) => {
+                  // Optional: show toast or update UI
+                  console.log(`Memory ${id} deleted`);
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ================================================================
+            TAB: feedback
+        ================================================================ */}
+        {!isFirstLoad && activeTab === 'feedback' && (
+          <div className="intelligence-panel__tab-panel">
+            <FeedbackSummary userId={userId} />
           </div>
         )}
       </div>

@@ -1,0 +1,313 @@
+/**
+ * 💡 InsightCardWithFeedback.css — Insight card with feedback buttons
+ *
+ * Layouts:
+ * - Header: category icon + confidence badge
+ * - Content: insight text
+ * - Metadata: evidence count
+ * - Feedback: buttons (very_true / somewhat / not_sure / not_me)
+ * - States: default / loading / success / error
+ */
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.insight-card-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 10px;
+  background: var(--color-bg-secondary, #fafafa);
+  transition: all 0.2s ease;
+}
+
+.insight-card-feedback:hover {
+  border-color: var(--accent-primary, #3b82f6);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   HEADER (Category + Confidence)
+   ============================================================================ */
+
+.insight-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.insight-card__category {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.insight-card__confidence-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border: 2px solid;
+  border-radius: 6px;
+  background: white;
+}
+
+.confidence-badge__percent {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.confidence-badge__label {
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
+}
+
+/* ============================================================================
+   CONTENT
+   ============================================================================ */
+
+.insight-card__content {
+  flex: 1;
+}
+
+.insight-card__text {
+  margin: 0;
+  font-size: 15px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.5;
+}
+
+/* ============================================================================
+   METADATA (Evidence count)
+   ============================================================================ */
+
+.insight-card__metadata {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--color-text-secondary, #999);
+}
+
+.insight-metadata__item {
+  display: inline-flex;
+  gap: 4px;
+}
+
+/* ============================================================================
+   FEEDBACK SECTION
+   ============================================================================ */
+
+.insight-card__feedback-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-border, #e0e0e0);
+}
+
+/* Feedback prompt + label */
+.insight-card__feedback-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feedback-prompt__label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+/* Feedback buttons */
+.feedback-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.feedback-btn {
+  padding: 8px 10px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.feedback-btn:hover:not(:disabled) {
+  border-color: var(--accent-primary, #3b82f6);
+  color: var(--accent-primary, #3b82f6);
+}
+
+.feedback-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feedback-btn.active {
+  background: var(--accent-primary, #3b82f6);
+  color: white;
+  border-color: var(--accent-primary, #3b82f6);
+}
+
+/* Color-coded feedback buttons */
+.feedback-btn--very-true {
+  --btn-color: #10b981; /* green */
+}
+
+.feedback-btn--very-true:hover:not(:disabled) {
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+}
+
+.feedback-btn--very-true.active {
+  background: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+.feedback-btn--somewhat {
+  --btn-color: #f59e0b; /* amber */
+}
+
+.feedback-btn--somewhat:hover:not(:disabled) {
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+}
+
+.feedback-btn--somewhat.active {
+  background: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+.feedback-btn--not-sure {
+  --btn-color: #6366f1; /* indigo */
+}
+
+.feedback-btn--not-sure:hover:not(:disabled) {
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+}
+
+.feedback-btn--not-sure.active {
+  background: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+.feedback-btn--not-me {
+  --btn-color: #ef4444; /* red */
+}
+
+.feedback-btn--not-me:hover:not(:disabled) {
+  border-color: var(--btn-color);
+  color: var(--btn-color);
+}
+
+.feedback-btn--not-me.active {
+  background: var(--btn-color);
+  border-color: var(--btn-color);
+}
+
+/* ============================================================================
+   FEEDBACK STATES
+   ============================================================================ */
+
+/* Success */
+.insight-card__feedback-success {
+  padding: 10px;
+  background: #dcfce7;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  color: #15803d;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Error */
+.insight-card__feedback-error {
+  padding: 10px;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 13px;
+  color: #991b1b;
+  font-weight: 500;
+}
+
+/* Loading */
+.insight-card__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #999);
+}
+
+.insight-card__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-top-color: var(--accent-primary, #3b82f6);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* ============================================================================
+   ANIMATIONS
+   ============================================================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 480px) {
+  .insight-card-feedback {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .feedback-buttons {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .feedback-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .insight-card__text {
+    font-size: 14px;
+  }
+
+  .feedback-prompt__label {
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,61 @@
+/**
+ * 📌 TwinStatsCard.css — Single stat card
+ */
+
+.twin-stats-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: white;
+  border: 2px solid var(--color-border, #e0e0e0);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.twin-stats-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Icon */
+.stats-card__icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+/* Content */
+.stats-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stats-card__label {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary, #999);
+  font-weight: 500;
+}
+
+.stats-card__value {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-primary, #000);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .twin-stats-card {
+    padding: 12px;
+  }
+
+  .stats-card__icon {
+    font-size: 24px;
+  }
+
+  .stats-card__value {
+    font-size: 20px;
+  }
+}

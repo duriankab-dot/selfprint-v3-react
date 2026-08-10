@@ -1,7 +1,13 @@
 /**
- * Memory Manager
- * Handles persistent storage of personal memories
- * Small wins, important moments, discoveries, personal notes
+ * 🧠 ผู้จัดการหน่วยความจำส่วนตัว
+ * บันทึก ความสำเร็จเล็กๆ น้อยๆ ช่วงเวลาสำคัญ ค้นพบใหม่ หมายเหตุส่วนตัว
+ *
+ * PersonalMemory Types:
+ * - small_win: ความสำเร็จเล็กๆ น้อยๆ ("ปีนเขาแรกครั้ง")
+ * - important_moment: ช่วงเวลาเปลี่ยนแปลง ("ได้งาน", "พบคนพิเศษ")
+ * - discovery: ค้นพบเกี่ยวกับตัวเอง ("รู้ว่าฉันชอบการเขียน")
+ * - personal: หมายเหตุส่วนตัว ("ครอบครัวคณุภาพของฉัน")
+ *
  * @module intelligence/MemoryManager
  */
 
@@ -10,13 +16,25 @@ import { IntelligenceError } from './types';
 import type { PersonalMemory, MemoryType } from './types';
 
 /**
- * MemoryManager
- * CRUD operations for personal memories
+ * MemoryManager — บันทึกที่ผู้ใช้ควบคุม
  *
  * Usage:
  * ```typescript
  * const manager = new MemoryManager();
- * const memory = await manager.addMemory(userId, 'small_win', 'Won a promotion', '...');
+ *
+ * // สร้างความทรงจำใหม่
+ * const memory = await manager.addMemory(
+ *   userId,
+ *   'small_win',
+ *   'ชนะการแข่งขัน',
+ *   'ฉันชนะการแข่งขันว่ายน้ำแรกครั้ง ลูกฉันเชียร์ให้'
+ * );
+ *
+ * // เข้าถึงความทรงจำ
+ * const memories = await manager.getMemories(userId);
+ *
+ * // ลบความทรงจำ
+ * await manager.deleteMemory(memory.id);
  * ```
  */
 export class MemoryManager {

@@ -349,3 +349,41 @@
   margin: 0;
   font-style: italic;
 }
+
+/* ── MemorySection (Task 2D) ─────────────────────────────────────────── */
+.memory-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface-2, rgba(255,255,255,0.02));
+  border-radius: var(--radius-md, 12px);
+  border: 1px solid var(--border-subtle, rgba(255,255,255,0.08));
+}
+
+.memory-section--recorder {
+  background: var(--surface-1, rgba(255,255,255,0.01));
+  border: 1px solid var(--border-muted, rgba(255,255,255,0.05));
+}
+
+.memory-section--list {
+  background: var(--surface-1, rgba(255,255,255,0.01));
+  margin-top: 12px;
+}
+
+.memory-section__title {
+  font-size: var(--text-sm, 14px);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .memory-section {
+    padding: 12px;
+  }
+}

@@ -1,0 +1,875 @@
+📚 SELFPRINT PROJECT DOCUMENTATION SYSTEM
+00. PROJECT_MASTER_INDEX.md
+
+เอกสารแม่ของทุกเอกสาร
+
+บอกว่า Selfprint คืออะไร และเอกสารไหนเป็น Source of Truth ของเรื่องใด
+
+ต้องมี:
+
+Project Vision
+Product Definition
+Current Version
+Architecture Version
+Document Map
+Priority
+Status
+Owner
+Last Updated
+Source of Truth Rules
+
+ตัวอย่าง:
+
+PRODUCT
+→ PRODUCT_SUMMARY.md
+
+REQUIREMENTS
+→ MASTER_PRD.md
+
+AI
+→ AI_INTELLIGENCE_SPEC.md
+
+TWIN
+→ LIVING_AI_TWIN_SPEC.md
+
+UX
+→ UX_UI_SYSTEM.md
+
+TECH
+→ SYSTEM_ARCHITECTURE.md
+
+DATABASE
+→ DATABASE_SPEC.md
+
+PRIVACY
+→ PRIVACY_PDPA_SPEC.md
+
+อันนี้สำคัญมากที่สุดสำหรับ AI Dev
+
+01. PROJECT_SUMMARY.md
+Project Summary / Project Bible
+
+อ่าน 5–10 นาทีแล้วต้องเข้าใจ Selfprint ทั้งโปรเจกต์
+
+ประกอบด้วย:
+
+Product
+Selfprint คืออะไร
+แก้ปัญหาอะไร
+Target User
+Core Value Proposition
+Differentiation
+Product Philosophy
+Vision
+
+Living Personal Intelligence Platform
+
+North Star
+
+Understand → Remember → Reflect → Detect → Adapt → Guide → Evolve
+
+Product Pillars
+Personal Intelligence
+Living AI Twin
+Personal Memory
+Deep Analysis
+Adaptive Experience
+Personal Growth
+Voice
+PWA
+Privacy
+Gamification
+02. MASTER_PRD.md
+
+นี่คือ PRD ตัวจริง
+
+ต้อง rewrite ใหม่ให้ตรงกับ Selfprint ปัจจุบัน
+
+แบ่ง:
+
+Product Requirements
+Functional Requirements
+AI Requirements
+UX Requirements
+Twin Requirements
+Dashboard Requirements
+Memory Requirements
+Journey Requirements
+Notification Requirements
+PWA Requirements
+Privacy Requirements
+Gamification Requirements
+Monetization Requirements
+
+ทุก Feature มี:
+
+Feature ID
+Name
+Purpose
+User Story
+Input
+Output
+UX
+Business Rules
+AI Logic
+Data
+Dependencies
+Priority
+Acceptance Criteria
+Status
+03. PRODUCT_GLOSSARY.md
+
+ต้องมีแน่นอน
+
+เพราะ Selfprint เริ่มมีศัพท์เฉพาะเยอะมาก
+
+เช่น:
+
+Term	Definition
+Selfprint	Personal Intelligence Platform
+AI Twin	Digital representation of Personal Intelligence
+Personal Model	Structured representation of user
+Memory	Persistent user information
+Insight	AI-generated meaningful interpretation
+Pattern	Repeated / emerging behavior
+Journey	User development trajectory
+Experience Engine	System controlling adaptive experience
+Hub	Major interaction domain
+Emotion Signal	Contextual emotional signal
+Twin Evolution	Change in Twin state
+Daily Brief	Personalized daily summary
+
+และต้องระบุ:
+
+คำไหนใช้ได้ / คำไหนห้ามใช้
+
+เพื่อป้องกัน AI Dev ตั้งชื่อไม่ตรงกัน
+
+04. AI_INTELLIGENCE_SPEC.md
+
+อันนี้สำคัญมาก
+
+เป็น สมองของ Selfprint
+
+ต้องอธิบาย:
+
+Input
+↓
+Context
+↓
+Personal Model
+↓
+Memory
+↓
+Analysis
+↓
+Pattern Detection
+↓
+Insight
+↓
+Recommendation
+↓
+Experience Adaptation
+↓
+Feedback
+↓
+Model Update
+
+รวม:
+
+AI Context Architecture
+Memory Architecture
+Reasoning Pipeline
+Personalization
+Confidence
+Evidence
+Feedback
+Hallucination Control
+AI Safety
+Fallback Logic
+05. PERSONAL_MODEL_SPEC.md
+
+แยกจาก AI เพราะนี่คือ Digital representation ของผู้ใช้
+
+ต้องกำหนด Schema เช่น:
+
+Identity
+Preferences
+Values
+Goals
+Patterns
+Behaviors
+Journey
+Interests
+Decision Patterns
+Memories
+Strengths
+Challenges
+Current Context
+Growth
+
+รวม:
+
+Data structure
+Source
+Confidence
+Recency
+Update rules
+Conflict resolution
+Delete rules
+06. LIVING_AI_TWIN_SPEC.md
+
+เอกสารเฉพาะของ Twin
+
+ต้องระบุ:
+
+Twin Identity
+Twin State
+Twin Visual
+Twin Animation
+Twin Synthesis
+Twin Evolution
+Twin Interaction
+Twin Voice
+Twin Memory
+Twin Personality
+Twin Context
+Twin UI
+
+รวม state machine เช่น:
+
+Dormant
+ ↓
+Awakening
+ ↓
+Aware
+ ↓
+Connected
+ ↓
+Reflective
+ ↓
+Insightful
+ ↓
+Evolving
+07. EXPERIENCE_INTELLIGENCE_SPEC.md
+
+อันนี้คือของใหม่ที่ควรเพิ่มจากเอกสารเก่า
+
+อธิบายว่า AI จะปรับ ประสบการณ์ อย่างไร
+
+Personal Context
++
+Intent
++
+Emotion Signal
++
+Hub
++
+Journey
++
+Time
+↓
+Experience Engine
+↓
+Theme
+Hub Priority
+Twin State
+Motion
+Voice
+Music
+Dashboard
+Notification
+
+รวม Rule ว่า:
+
+AI เปลี่ยนอะไรได้ / เปลี่ยนอะไรไม่ได้
+
+08. THEME_DESIGN_SYSTEM.md
+
+เนื่องจากมี 66–72 Theme
+
+อย่าให้ AI Dev เดา
+
+ต้อง document:
+
+Theme ID
+Name
+Emotion
+Hub
+Background
+Gradient
+Lighting
+Particle
+Twin Glow
+Motion
+Audio
+Usage condition
+
+เช่น:
+
+THEME_042
+
+Emotion: Reflective
+Hub: Self
+Motion: Slow
+Lighting: Low
+Music: Ambient_03
+Twin: Soft_Glow
+09. UX_UI_SPEC.md
+
+รวม:
+
+Information Architecture
+Navigation
+Dashboard
+Hub
+Twin
+Journal
+Analysis
+Memory
+Journey
+Notifications
+Popup
+Onboarding
+Empty States
+Error States
+Loading States
+Mobile UX
+Desktop UX
+
+โดยเฉพาะ Dashboard ใหม่
+
+10. DASHBOARD_INTELLIGENCE_SPEC.md
+
+ผมแนะนำให้แยก เพราะ Dashboard กลายเป็น Core Product
+
+ต้องกำหนด:
+
+Executive Summary
+Full Analysis
+Behavioral Patterns
+Growth
+Recent Memories
+Small Wins
+Personal Guidance
+Journey
+Progress
+Twin
+
+และที่สำคัญ:
+
+Dashboard Priority Engine
+
+AI เลือกว่าอะไรควรอยู่บนสุดวันนี้
+
+11. PWA_SPEC.md
+
+รวม:
+
+Manifest
+Install
+Splash
+App Shell
+Offline
+Cache
+Sync
+Push
+Deep Link
+Update
+Mobile UX
+Install Prompt
+Permission strategy
+12. VOICE_AUDIO_SPEC.md
+
+เอกสารใหม่
+
+รวม:
+
+Voice
+STT
+TTS
+Voice Twin
+Interrupt
+Voice personality
+Audio
+Music
+Ambient
+Theme mapping
+Audio ducking
+Volume
+Autoplay rules
+User preference
+13. PRIVACY_PDPA_SPEC.md
+
+ต้องมีเป็นเอกสารจริง ไม่ใช่แค่ checkbox
+
+รวม:
+
+Data Inventory
+Consent
+Personal Data
+AI Memory
+Personal Model
+Data Retention
+Export
+Delete
+Account Delete
+AI Memory Delete
+Personal Model Reset
+Security
+Audit
+Transparency
+Privacy UX
+
+และควรให้ทีมตรวจสอบกับข้อกำหนด PDPA ไทยโดยผู้เชี่ยวชาญ/ที่ปรึกษากฎหมายก่อน production
+
+14. GAMIFICATION_SPEC.md
+
+รวม:
+
+XP
+Badge
+Achievement
+Level
+Unlock
+Twin Evolution
+Progress
+Free User Progression
+
+ต้องตอบ:
+
+Badge มีไว้ทำไม?
+
+คำตอบไม่ควรเป็นแค่:
+
+“เพื่อให้ user สนุก”
+
+แต่:
+
+ทำให้ผู้ใช้เห็นพัฒนาการของตัวเองและกระตุ้นการกลับมาใช้งานอย่างมีความหมาย
+
+15. MONETIZATION_SPEC.md
+
+รวม:
+
+Free
+Plus
+Pro
+Lifetime
+Feature entitlement
+Usage limits
+Premium Analysis
+Premium Memory
+Premium Twin
+Subscription logic
+Upgrade flow
+Cancellation
+Grace period
+16. SYSTEM_ARCHITECTURE.md
+
+สำหรับ Dev โดยเฉพาะ
+
+Frontend
+↓
+API
+↓
+AI Orchestrator
+↓
+Personal Intelligence
+↓
+Personal Model
+↓
+Memory
+↓
+Experience Engine
+↓
+Twin
+
+รวม:
+
+Vercel
+Frontend
+Backend
+Database
+Auth
+AI providers
+Storage
+Notification
+PWA
+External services
+Fallback
+17. DATABASE_SCHEMA.md
+
+ต้องเป็น Source of Truth ของ Database
+
+ระบุ:
+
+Tables
+Columns
+Types
+Relations
+Indexes
+Constraints
+Ownership
+RLS
+Delete behavior
+Audit
+
+รวม Entity หลัก:
+
+User
+Profile
+PersonalModel
+Memory
+Journal
+Insight
+Pattern
+Journey
+Twin
+TwinState
+Theme
+Hub
+Notification
+Badge
+Achievement
+Subscription
+Consent
+AIInteraction
+18. API_SPEC.md
+
+ทุก API:
+
+Endpoint
+Method
+Auth
+Input
+Output
+Validation
+Error
+Rate Limit
+Permissions
+
+ต้องมี Versioning
+
+19. AI_PROMPT_SYSTEM.md
+
+อันนี้สำคัญกับโปรเจกต์คุณมาก
+
+ต้องรวม:
+
+System Prompt
+Analysis Prompt
+Memory Prompt
+Pattern Prompt
+Insight Prompt
+Twin Prompt
+Dashboard Prompt
+Daily Brief Prompt
+Voice Prompt
+Safety Prompt
+Fallback Prompt
+
+และต้องทำ Prompt Versioning
+
+เช่น:
+
+AI_CORE_v1.4
+TWIN_v2.1
+ANALYSIS_v3.0
+20. FALLBACK_ARCHITECTURE.md
+
+ระบุ Astrovera ให้ชัดเจน:
+
+Selfprint Native AI
+       ↓
+Primary
+       ↓
+Insufficient capability / unavailable
+       ↓
+Astrovera Intelligence
+       ↓
+Fallback
+
+ห้ามให้ Dev ผูก Astrovera เป็น dependency หลัก
+
+เป้าหมาย:
+
+ค่อย ๆ ลด dependency ของ Astrovera จน Selfprint สามารถทำงานด้วย Native Intelligence ได้สมบูรณ์
+
+21. ANALYTICS_EVENTS_SPEC.md
+
+ต้องรู้ว่า user ทำอะไร
+
+เช่น:
+
+signup_completed
+twin_created
+analysis_viewed
+analysis_completed
+memory_created
+memory_deleted
+pattern_discovered
+journey_opened
+voice_started
+voice_completed
+theme_changed
+notification_opened
+badge_unlocked
+pwa_installed
+subscription_started
+
+เอาไปวัด:
+
+Activation
+Retention
+Engagement
+Conversion
+AI quality
+22. QA_TEST_PLAN.md
+
+รวม:
+
+Functional Testing
+AI Testing
+UX Testing
+PWA Testing
+Mobile Testing
+Performance
+Security
+Privacy
+Accessibility
+Regression
+AI Quality
+
+โดยเฉพาะ:
+
+First Impression Test
+
+และ:
+
+Does the AI actually feel personal?
+
+23. ROADMAP.md
+
+แบ่ง:
+
+Current
+P0
+P1
+P2
+Future
+
+และแต่ละ Feature มี:
+
+Status
+Priority
+Dependencies
+Owner
+Target
+24. CHANGELOG.md
+
+ทุกครั้งที่ AI Dev แก้ระบบ:
+
+Date
+Version
+Changed
+Why
+Files
+Database Migration
+API Change
+AI Prompt Change
+Breaking Change
+25. DECISION_LOG.md
+
+อันนี้ ผมอยากให้มีมาก
+
+เพราะโปรเจกต์นี้เปลี่ยนแนวคิดหลายครั้ง
+
+เช่น:
+
+DECISION-001
+
+Decision:
+Selfprint Native AI = Primary
+
+Reason:
+ลด dependency Astrovera
+
+Alternative:
+Astrovera as primary
+
+Status:
+Approved
+
+ทำให้ AI Dev รุ่นใหม่ไม่ย้อนกลับไปทำ architecture เก่า
+
+🧠 และผมแนะนำให้ทำ "AI DEV ONBOARDING"
+
+ไฟล์:
+
+AI_DEV_ONBOARDING.md
+
+AI Dev ทุกตัวที่เข้ามาใหม่ต้องอ่านตามลำดับ:
+
+01 PROJECT_MASTER_INDEX
+↓
+02 PROJECT_SUMMARY
+↓
+03 PRODUCT_GLOSSARY
+↓
+04 MASTER_PRD
+↓
+05 SYSTEM_ARCHITECTURE
+↓
+06 AI_INTELLIGENCE
+↓
+07 PERSONAL_MODEL
+↓
+08 LIVING_AI_TWIN
+↓
+09 EXPERIENCE_ENGINE
+↓
+10 UX_UI
+↓
+11 DATABASE
+↓
+12 API
+↓
+13 QA
+↓
+14 ROADMAP
+↓
+15 DECISION_LOG
+
+แล้วต้องตอบกลับว่า:
+
+“I understand the current Selfprint architecture and Source of Truth.”
+
+ก่อนเริ่มแก้ code
+
+⭐ โครงสร้างโฟลเดอร์ที่ผมแนะนำ
+
+ให้ AI Dev สร้างไว้ใน repo:
+
+/docs
+│
+├── 00_PROJECT_MASTER_INDEX.md
+├── 01_PROJECT_SUMMARY.md
+├── 02_MASTER_PRD.md
+├── 03_PRODUCT_GLOSSARY.md
+│
+├── /ai
+│   ├── AI_INTELLIGENCE_SPEC.md
+│   ├── PERSONAL_MODEL_SPEC.md
+│   ├── AI_PROMPT_SYSTEM.md
+│   └── FALLBACK_ARCHITECTURE.md
+│
+├── /twin
+│   └── LIVING_AI_TWIN_SPEC.md
+│
+├── /experience
+│   ├── EXPERIENCE_INTELLIGENCE_SPEC.md
+│   ├── THEME_DESIGN_SYSTEM.md
+│   ├── DASHBOARD_INTELLIGENCE_SPEC.md
+│   └── VOICE_AUDIO_SPEC.md
+│
+├── /product
+│   ├── GAMIFICATION_SPEC.md
+│   ├── MONETIZATION_SPEC.md
+│   └── PWA_SPEC.md
+│
+├── /ux
+│   └── UX_UI_SPEC.md
+│
+├── /technical
+│   ├── SYSTEM_ARCHITECTURE.md
+│   ├── DATABASE_SCHEMA.md
+│   └── API_SPEC.md
+│
+├── /privacy
+│   └── PRIVACY_PDPA_SPEC.md
+│
+├── /analytics
+│   └── ANALYTICS_EVENTS_SPEC.md
+│
+├── /qa
+│   └── QA_TEST_PLAN.md
+│
+├── /management
+│   ├── ROADMAP.md
+│   ├── CHANGELOG.md
+│   └── DECISION_LOG.md
+│
+└── AI_DEV_ONBOARDING.md
+🔥 แต่มีอีกเรื่องที่สำคัญมาก
+
+อย่าให้ AI Dev เขียนเอกสารจากความจำของมัน
+
+ให้คำสั่งมันทำ:
+
+PHASE 1 — AUDIT CURRENT PROJECT
+
+ตรวจ code จริงทั้งหมด
+
+routes
+components
+hooks
+services
+API
+database
+prompts
+environment
+assets
+PWA
+authentication
+current features
+existing themes
+existing Twin
+existing Astrovera integration
+PHASE 2 — DOCUMENT CURRENT STATE
+
+สร้าง:
+
+AS-IS Documentation
+
+ก่อน
+
+PHASE 3 — DOCUMENT TARGET STATE
+
+สร้าง:
+
+TO-BE Documentation
+
+จาก Master Direction ที่เราตกลงกัน
+
+PHASE 4 — GAP ANALYSIS
+CURRENT
+   ↓
+TARGET
+   ↓
+GAP
+   ↓
+IMPLEMENTATION
+
+นี่จะป้องกันปัญหาใหญ่ที่สุดคือ AI Dev คิดว่า feature มีแล้ว ทั้งที่ยังไม่สมบูรณ์ หรือสร้างของใหม่ทับของเดิม
+
+🧩 และให้ทุกเอกสารมีสถานะ
+
+เช่น:
+
+Status:
+DRAFT
+REVIEW
+APPROVED
+IMPLEMENTED
+DEPRECATED
+
+โดยมีหลัก:
+
+APPROVED = Source of Truth
+
+ถ้า Code ขัดกับ Approved Documentation:
+
+ต้องแจ้ง Conflict ก่อนแก้
+
+ห้าม AI Dev เลือกเอง

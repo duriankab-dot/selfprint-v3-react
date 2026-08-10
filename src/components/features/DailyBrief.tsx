@@ -13,9 +13,10 @@
  */
 
 import { useState, useCallback, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { DailyBriefEngine } from '@/lib/intelligence/DailyBriefEngine';
+import { DailyInsightsList } from './DailyInsightsList';
 import type { DailyBrief as DailyBriefData, BriefObservation } from '@/lib/intelligence/DailyBriefEngine';
 
 // ============================================================================
@@ -88,6 +89,7 @@ const engine = new DailyBriefEngine();
 export function DailyBrief() {
   const { session } = useAuth();
   const userId = session?.user?.id ?? null;
+  const queryClient = useQueryClient();
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioConsented, setAudioConsented] = useState(() =>
     localStorage.getItem('sp-audio-consent') === 'true'
@@ -221,6 +223,28 @@ export function DailyBrief() {
       {brief.dataRichness === 'minimal' && (
         <div className="brief-richness-hint">
           💡 Twin ยังรู้จักคุณน้อย — สะท้อนตัวเองเพิ่มเพื่อให้ Brief ลึกขึ้น
+        </div>
+      )}
+
+      {/* Daily Insights with Feedback Collection — Task 2B */}
+      {brief.observations && (
+        <div className="brief-insights-section" style={{ marginTop: '32px', paddingTop: '24px', borderTop: '2px solid var(--color-border, #e0e0e0)' }}>
+          <DailyInsightsList
+            userId={userId || ''}
+            insights={brief.observations.map((obs) => ({
+              id: obs.id,
+              text: obs.detail,
+              category: obs.category,
+              confidence: 0.7, // Can be passed from observations if available
+              evidenceCount: 3, // Can be calculated if available
+            }))}
+            onFeedbackUpdate={() => {
+              // Invalidate accuracy metrics เมื่อ user ให้ feedback
+              if (userId) {
+                queryClient.invalidateQueries({ queryKey: ['accuracyMetrics', userId] });
+              }
+            }}
+          />
         </div>
       )}
     </section>

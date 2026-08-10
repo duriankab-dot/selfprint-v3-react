@@ -1,7 +1,19 @@
 /**
- * Pattern Detector
- * Detects behavioral patterns: repeating, emerging, changing
- * Real algorithm - analyzes actual user data
+ * 🔍 ตรวจจับรูปแบบพฤติกรรม
+ * ค้นหาสิ่งที่: เกิดซ้ำ, กำลังเกิดใหม่, กำลังเปลี่ยน
+ *
+ * 3 ประเภท Pattern:
+ * 1. REPEATING — เกิดบ่อย ระยะยาว เสถียร ("ทุกวันฉันเข้า gym")
+ * 2. EMERGING — ใหม่ < 30 วัน ไม่บ่อย ("เพิ่งเริ่มเรียน Python")
+ * 3. CHANGING — ความถี่เพิ่มหรือลด ("ประมาณนี้เขียนมากขึ้น")
+ *
+ * Algorithm (5 ขั้น):
+ * 1. รวบรวม evidence ทั้งหมด (memories, reflections, decisions)
+ * 2. จัดกลุ่มตามความคล้ายคลึง (pattern name)
+ * 3. คำนวณความถี่ (กี่ครั้ง)
+ * 4. วิเคราะห์ timeline → จำแนกประเภท
+ * 5. คำนวณ confidence (มั่นใจขนาดไหน)
+ *
  * @module intelligence/PatternDetector
  */
 
@@ -14,33 +26,31 @@ import type {
 } from './types';
 
 /**
- * Pattern analysis result from algorithm
+ * ผลการวิเคราะห์รูปแบบจาก algorithm
  */
 interface PatternAnalysisResult {
   name: string;
   type: PatternType;
-  frequency: number; // occurrences
-  daysSpan: number; // days between first and last occurrence
-  confidence: number;
+  frequency: number; // จำนวนครั้งที่เกิด
+  daysSpan: number; // วันระหว่าง first → last occurrence
+  confidence: number; // ความมั่นใจ (0-1)
   evidence: EvidencePoint[];
-  trend: 'accelerating' | 'stable' | 'declining';
+  trend: 'accelerating' | 'stable' | 'declining'; // เพิ่มขึ้น/เสถียร/ลดลง
 }
 
 /**
- * PatternDetector
- * Real algorithm to detect behavioral patterns from actual user data
- *
- * Algorithm:
- * 1. Collect all evidence (reflections, decisions, memories)
- * 2. Group by semantic similarity (pattern name)
- * 3. Calculate frequency (how often)
- * 4. Analyze timeline (when) → detect type (repeating/emerging/changing)
- * 5. Calculate confidence based on evidence strength
+ * PatternDetector — ค้นหารูปแบบพฤติกรรมจริง
+ * ไม่ใช่เดา แต่ดึงจากข้อมูลจริง ของผู้ใช้
  *
  * Usage:
  * ```typescript
  * const detector = new PatternDetector();
  * const patterns = await detector.detectPatterns(userId);
+ *
+ * // ค้นหาแบบเฉพาะ
+ * const repeating = await detector.detectRepeatingPatterns(userId);
+ * const emerging = await detector.detectEmergingPatterns(userId);
+ * const changing = await detector.detectChangingPatterns(userId);
  * ```
  */
 export class PatternDetector {

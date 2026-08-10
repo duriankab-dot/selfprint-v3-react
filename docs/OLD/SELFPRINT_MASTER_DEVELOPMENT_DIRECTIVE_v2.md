@@ -1030,7 +1030,7 @@ Discover Yourself
 PLUS (~฿249/month)
 Know Yourself
 ↓
-PRO (~฿599/month)
+PRO (~฿589/month)
 Navigate Yourself
 ↓
 LIFETIME (~฿4,900–7,900)
@@ -1141,7 +1141,7 @@ Personal Intelligence Asset
 
 ห้ามทำให้ Free รู้สึกว่าเป็น Demo
 
-Free ต้องมี: **Identity → Experience → Progression → Relationship** ก่อนจึงค่อยเสนอ Depth
+Free ต้องมี: **Identity → Experience → Progression → Relationship→ Activities** ก่อนจึงค่อยเสนอ Depth
 
 ### 7.9 Contextual Conversion — ไม่ใช่ Aggressive
 

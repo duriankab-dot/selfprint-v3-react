@@ -1,7 +1,24 @@
 /**
- * Evidence Analyzer
- * Calculates confidence in AI insights and classifies knowledge
- * Real algorithm - supports Master Direction: "Never pretend to know"
+ * 📊 ตัววิเคราะห์หลักฐาน — Evidence Analyzer
+ *
+ * คำนวณระดับความมั่นใจใน AI Insights
+ * และจำแนก Knowledge ตามประเภท KNOW / INFER / UNKNOWN
+ *
+ * ✅ Real Algorithm (ไม่ใช่ Stub)
+ * ✅ Supports Master Direction: "Never pretend to know"
+ *
+ * Knowledge Types:
+ * - KNOW: ผู้ใช้บอกชัดเจน ("ฉันรักการเขียน")
+ * - INFER: AI คาดเดาจากพฤติกรรม ("ดูเหมือนว่าคุณชอบการเขียน")
+ * - UNKNOWN: ยังไม่มีข้อมูลเพียงพอ
+ *
+ * Confidence Calculation (5 Factors):
+ * 1. Count (15%): มีหลักฐานกี่ชิ้น
+ * 2. Recency (25%): ใหม่ไหม เก่าไปไกล?
+ * 3. Consistency (25%): Sources ตกลงกัน?
+ * 4. Quality (20%): reflection 0.9 > mood 0.6
+ * 5. Corroboration (15%): Multiple independent sources?
+ *
  * @module intelligence/EvidenceAnalyzer
  */
 
@@ -15,43 +32,81 @@ import type {
 } from './types';
 
 /**
- * Confidence components breakdown
+ * 📋 Confidence Breakdown — ส่วนประกอบของความมั่นใจ
+ *
+ * ประกอบด้วย 5 ปัจจัย:
+ * - evidenceCount: จำนวนหลักฐาน (0+ = เพิ่มเติมดี)
+ * - recency: อายุหลักฐาน (1 = ใหม่, 0.1 = เก่า 90+ วัน)
+ * - consistency: สอดคล้องกัน (1 = ตกลงกัน, 0 = ขัดแย้ง)
+ * - sourceQuality: คุณภาพแหล่งที่มา (0.9 = reflection, 0.6 = mood)
+ * - corroboration: หลายแหล่ง (1 = independent, 0.5 = เดี่ยว)
+ * - overall: รวมทั้งหมด (0-1 clamped)
+ * - reasoning: คำอธิบายให้มนุษย์อ่าน
  */
 interface ConfidenceBreakdown {
   evidenceCount: number;
-  recency: number; // 0-1
-  consistency: number; // 0-1
-  sourceQuality: number; // 0-1
-  corroboration: number; // 0-1 (multiple sources agreeing)
-  overall: number; // 0-1
+  recency: number; // 0-1 (ใหม่ = 1, เก่า = 0.1)
+  consistency: number; // 0-1 (สอดคล้อง = 1)
+  sourceQuality: number; // 0-1 (reflection 0.9 > mood 0.6)
+  corroboration: number; // 0-1 (หลายแหล่ง = 1)
+  overall: number; // 0-1 (สุดท้าย)
   reasoning: string;
 }
 
 /**
- * EvidenceAnalyzer
- * Calculates confidence scores for insights
+ * 🏢 EvidenceAnalyzer Class
  *
- * Master Direction Rule:
+ * **ทำหน้าที่:**
+ * - คำนวณระดับความมั่นใจ ว่า insight นี้เชื่อถือได้แค่ไหน
+ * - จำแนก knowledge เป็น KNOW / INFER / UNKNOWN
+ * - ให้ reasoning ที่ชัดเจน แต่ไม่ overclaim
+ *
+ * **Master Direction Rule:**
  * "Never pretend to know what the system does not know"
  *
- * Algorithm:
- * 1. Classify claim as KNOW / INFER / UNKNOWN
- * 2. Collect evidence
- * 3. Analyze evidence quality
- * 4. Calculate confidence from multiple factors
- * 5. Return with transparency about reasoning
+ * **Algorithm Flow:**
+ * 1. Classify Claim → KNOW (ผู้ใช้บอก) / INFER (AI คาดเดา) / UNKNOWN (ไม่รู้)
+ * 2. Collect Evidence → รวบรวมหลักฐาน
+ * 3. Analyze Quality → reflection vs mood, recent vs old, consistent vs contradicting
+ * 4. Calculate Confidence → weighted 5 factors = score 0-1
+ * 5. Return with Reasoning → อธิบายว่าทำไม
  *
- * Usage:
+ * **Usage Example:**
  * ```typescript
  * const analyzer = new EvidenceAnalyzer();
  * const confidence = await analyzer.calculateConfidence('User values family', sources);
+ * // → 0.82 (82% confident, based on 5 recent consistent sources)
+ *
  * const classified = analyzer.separateKnowInferUnknown(userId, 'User is introverted');
+ * // → 'INFER' (keyword-based, likely AI inference)
+ *
+ * const breakdown = await analyzer.getConfidenceBreakdown('claim', sources);
+ * // → {count: 0.7, recency: 0.9, consistency: 0.8, quality: 0.8, corroboration: 0.6, overall: 0.82}
  * ```
  */
 export class EvidenceAnalyzer {
   /**
-   * Calculate confidence in an insight
-   * Returns score 0-1 based on evidence quality and quantity
+   * ✅ calculateConfidence() — คำนวณความมั่นใจ
+   *
+   * **Input:**
+   * - insight: claim ที่อยากทำนาย ("User loves writing")
+   * - sources: หลักฐาน []
+   * - userId: optional, ใช้ corroboration lookup
+   *
+   * **Output:** number (0-1)
+   * - 0 = ไม่มีหลักฐาน
+   * - 0.5 = ปานกลาง
+   * - 1.0 = มั่นใจมาก
+   *
+   * **Example:**
+   * ```
+   * const confidence = await analyzer.calculateConfidence(
+   *   'User is introverted',
+   *   [{type: 'reflection', date: new Date(), id: '123', ...}],
+   *   userId
+   * );
+   * // → 0.68
+   * ```
    */
   async calculateConfidence(
     _insight: string,
@@ -59,7 +114,7 @@ export class EvidenceAnalyzer {
     userId?: string
   ): Promise<number> {
     if (!_insight || !sources.length) {
-      return 0; // No evidence = no confidence
+      return 0; // ไม่มี insight หรือ source = 0 confidence
     }
 
     const breakdown = await this.getConfidenceBreakdown(_insight, sources, userId);
@@ -67,35 +122,59 @@ export class EvidenceAnalyzer {
   }
 
   /**
-   * Detailed confidence breakdown
-   * Shows all factors that influenced confidence calculation
+   * ✅ getConfidenceBreakdown() — คำนวณความมั่นใจ 5 ปัจจัย
+   *
+   * **Core Algorithm — 5 Weighted Factors:**
+   *
+   * | Factor | Weight | Meaning | Range |
+   * |--------|--------|---------|-------|
+   * | Count | 15% | มีหลักฐานกี่ชิ้น (5+ = max) | 0-1 |
+   * | Recency | 25% | ใหม่ไหม (recent = 1, 90d+ = 0.1) | 0-1 |
+   * | Consistency | 25% | Sources ตกลงกัน | 0-1 |
+   * | Quality | 20% | reflection 0.9 > mood 0.6 | 0-1 |
+   * | Corroboration | 15% | Multiple independent sources | 0-1 |
+   *
+   * **Formula:**
+   * ```
+   * overall = count*0.15 + recency*0.25 + consistency*0.25 + quality*0.20 + corroboration*0.15
+   * final = min(overall, 1.0)  // Clamp to 0-1
+   * ```
+   *
+   * **Example Calculation:**
+   * ```
+   * 5 sources, all recent, 100% consistent, high quality, corroborated
+   * count=1.0, recency=0.95, consistency=1.0, quality=0.85, corroboration=0.8
+   * = 1.0*0.15 + 0.95*0.25 + 1.0*0.25 + 0.85*0.20 + 0.8*0.15
+   * = 0.15 + 0.2375 + 0.25 + 0.17 + 0.12
+   * = 0.9075 ≈ 91% confidence ✅
+   * ```
    */
   async getConfidenceBreakdown(
     _insight: string,
     sources: EvidenceSource[],
     userId?: string
   ): Promise<ConfidenceBreakdown> {
-    // Factor 1: Evidence count
+    // ปัจจัยที่ 1: จำนวนหลักฐาน (15% weight)
     const evidenceCount = sources.length;
-    const countScore = Math.min(evidenceCount / 5, 1); // 5+ sources = max score
+    const countScore = Math.min(evidenceCount / 5, 1); // 5+ sources = score 1.0
 
-    // Factor 2: Recency (how recent is the evidence?)
+    // ปัจจัยที่ 2: อายุหลักฐาน (25% weight)
     const recencyScore = this.calculateRecencyScore(sources);
 
-    // Factor 3: Consistency (do sources agree?)
+    // ปัจจัยที่ 3: ความสอดคล้อง (25% weight)
     const consistencyScore = this.calculateConsistencyScore(sources);
 
-    // Factor 4: Source quality
+    // ปัจจัยที่ 4: คุณภาพแหล่งที่มา (20% weight)
     const qualityScore = this.calculateSourceQuality(sources);
 
-    // Factor 5: Corroboration (multiple independent sources?)
+    // ปัจจัยที่ 5: การยืนยัน (15% weight)
     const corroborationScore = await this.calculateCorroboration(sources, userId);
 
-    // Weighted average
+    // Weighted average = final score
     const overall =
       countScore * 0.15 +
-      recencyScore * 0.25 + // Recent evidence = very important
-      consistencyScore * 0.25 + // Consistency = very important
+      recencyScore * 0.25 + // Recency สำคัญมาก ← ข้อมูลใหม่ดีกว่า
+      consistencyScore * 0.25 + // Consistency สำคัญมาก ← ต้องตกลงกัน
       qualityScore * 0.20 +
       corroborationScore * 0.15;
 
@@ -119,12 +198,29 @@ export class EvidenceAnalyzer {
   }
 
   /**
-   * Separate KNOW vs INFER vs UNKNOWN
-   * Classify what AI actually knows vs infers vs doesn't know
+   * ✅ separateKnowInferUnknown() — จำแนก Knowledge Type
    *
-   * KNOW = User told us directly
-   * INFER = We concluded from evidence
-   * UNKNOWN = We don't have data yet
+   * **Master Direction Implementation:**
+   * "Never pretend to know what the system does not know"
+   *
+   * **Logic (Keyword-based):**
+   * - KNOW: ผู้ใช้บอกชัดเจน เช่น "I am", "I want", "I prefer", "I love"
+   * - INFER: AI คาดเดาจากพฤติกรรม เช่น "tend to", "usually", "pattern", "appear"
+   * - UNKNOWN: ไม่มีข้อมูล หรือ ไม่แน่ใจ
+   *
+   * **Example:**
+   * ```
+   * separateKnowInferUnknown(userId, "I love writing")
+   * → 'KNOW' (มี "I love")
+   *
+   * separateKnowInferUnknown(userId, "User tends to procrastinate")
+   * → 'INFER' (มี "tends to")
+   *
+   * separateKnowInferUnknown(userId, "Something random")
+   * → 'UNKNOWN' (ไม่มี keywords)
+   * ```
+   *
+   * **Note:** ใช้ simple keyword heuristic (production ควร NLP)
    */
   separateKnowInferUnknown(_userId: string, claim: string): KnowledgeLevel {
     // Simple heuristic (in production would use NLP)

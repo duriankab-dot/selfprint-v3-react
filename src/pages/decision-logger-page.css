@@ -1,0 +1,15 @@
+/**
+ * 📋 decision-logger-page.css — Page styling
+ */
+
+.decision-logger-page {
+  min-height: 100vh;
+  padding: 20px;
+  background: var(--color-bg-primary, #fff);
+}
+
+@media (max-width: 480px) {
+  .decision-logger-page {
+    padding: 12px;
+  }
+}

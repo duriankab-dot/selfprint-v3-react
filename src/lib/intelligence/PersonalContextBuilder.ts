@@ -292,14 +292,69 @@ export class PersonalContextBuilder {
   }
 
   /**
-   * Detect initial patterns from onboarding
+   * ตรวจจับรูปแบบพฤติกรรมเบื้องต้นจากการตอบของผู้ใช้
+   * ค้นหาสิ่งที่เกิดซ้ำ, เปลี่ยนแปลง, หรือกำลังเกิดขึ้น
    */
   private async detectInitialPatterns(
-    _request: InitializeContextRequest
+    request: InitializeContextRequest
   ): Promise<BehavioralPattern[]> {
-    // Simplified: just return empty array for now
-    // In production, would analyze answers for patterns
-    return [];
+    const patterns: BehavioralPattern[] = [];
+    const answers = request.onboardingAnswers;
+
+    // Pattern 1: จากคำตอบของผู้ใช้ — ค้นหาคำที่เกิดซ้ำ (recurring themes)
+    const allAnswerText = Object.values(answers || {}).join(' ').toLowerCase();
+    const commonKeywords = ['want', 'goal', 'like', 'enjoy', 'struggle', 'learn', 'improve'];
+
+    for (const keyword of commonKeywords) {
+      if (allAnswerText.includes(keyword)) {
+        patterns.push({
+          id: crypto.randomUUID(),
+          userId: request.userId,
+          patternName: `ความสนใจในการ${keyword}`,
+          patternType: 'emerging',
+          evidencePoints: [{
+            date: new Date(),
+            source: 'explicit_statement',
+            sourceId: 'onboarding_answers',
+            excerpt: `ผู้ใช้พูดถึง "${keyword}"`,
+            confidence: 0.6,
+          }],
+          frequency: 'ongoing',
+          lastDetected: new Date(),
+          confidence: 0.6,
+          description: `ผู้ใช้พูดถึง "${keyword}" ในการตอบของพวกเขา`,
+          aiInsight: `บ่งชี้ความสนใจในการ${keyword}`,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    }
+
+    // Pattern 2: จาก Mood state — จับคู่กับ emotional pattern
+    if (request.mood) {
+      patterns.push({
+        id: crypto.randomUUID(),
+        userId: request.userId,
+        patternName: `สถานะอารมณ์: ${request.mood}`,
+        patternType: 'repeating',
+        evidencePoints: [{
+          date: new Date(),
+          source: 'explicit_statement',
+          sourceId: 'mood_selection',
+          excerpt: `ผู้ใช้เลือกสถานะอารมณ์ "${request.mood}"`,
+          confidence: 0.8,
+        }],
+        frequency: 'ongoing',
+        lastDetected: new Date(),
+        confidence: 0.8,
+        description: `ผู้ใช้เลือกสถานะอารมณ์ "${request.mood}"`,
+        aiInsight: 'Baseline emotional state established',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    return patterns;
   }
 
   /**
@@ -530,19 +585,39 @@ export class PersonalContextBuilder {
   }
 
   /**
-   * Extract relationships from entries
+   * ดึงความสัมพันธ์จาก entries
+   * ผู้ใช้อาจจะกล่าวถึงคนสำคัญ ครอบครัว เพื่อน หรือเพื่อนร่วมงาน
    */
   private extractRelationships(_entries: PersonalContextEntry[]): Relationship[] {
-    return [];
+    // Note: Relationship data not stored in PersonalContextEntry yet
+    // TODO: Extend PersonalContextEntry to support relationship type or create separate table
+    const relationships: Relationship[] = [];
+    return relationships;
   }
 
   /**
-   * Calculate overall confidence across entries
+   * คำนวณค่าความมั่นใจโดยรวมข้ามทั้ง entries
+   * ใช้ weighted average โดย user-stated data มีน้ำหนักมากกว่า inferred
    */
   private calculateOverallConfidence(entries: PersonalContextEntry[]): number {
     if (entries.length === 0) return 0;
-    const sum = entries.reduce((acc, e) => acc + e.confidence, 0);
-    return sum / entries.length;
+
+    let totalWeightedConfidence = 0;
+    let totalWeight = 0;
+
+    for (const entry of entries) {
+      // User-stated data (ไม่ได้ infer): weight = 1.5
+      // AI-inferred data: weight = 1.0
+      const isUserStated = entry.inferredFrom.sources?.some((s) => s.type === 'question_answer' || s.type === 'mood');
+      const weight = isUserStated ? 1.5 : 1.0;
+
+      totalWeightedConfidence += entry.confidence * weight;
+      totalWeight += weight;
+    }
+
+    // Normalize to 0-1 range
+    const overallConfidence = totalWeightedConfidence / totalWeight;
+    return Math.min(1, Math.max(0, overallConfidence)); // Clamp between 0-1
   }
 }
 

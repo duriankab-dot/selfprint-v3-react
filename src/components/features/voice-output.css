@@ -1,0 +1,46 @@
+/**
+ * 🔊 voice-output.css
+ */
+
+.voice-output {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.voice-output__btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid #10b981;
+  background: white;
+  font-size: 28px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.voice-output__btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.voice-output__btn.speaking {
+  background: #dcfce7;
+  animation: pulse 0.6s infinite;
+}
+
+.voice-output__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: #ccc;
+}
+
+.voice-output__status {
+  font-size: 12px;
+  color: #666;
+  font-weight: 600;
+}

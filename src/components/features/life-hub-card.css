@@ -1,0 +1,81 @@
+/**
+ * 🎯 life-hub-card.css
+ */
+
+.life-hub-card {
+  padding: 16px;
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.life-hub-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  transform: translateY(-2px);
+}
+
+.life-hub-card.selected {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.card-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.card-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+}
+
+.card-score {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.score-bar {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  transition: width 0.3s ease;
+}
+
+.score-text {
+  margin: 0;
+  font-size: 11px;
+  color: #666;
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .life-hub-card {
+    padding: 12px;
+  }
+
+  .card-emoji {
+    font-size: 28px;
+  }
+
+  .card-name {
+    font-size: 13px;
+  }
+}

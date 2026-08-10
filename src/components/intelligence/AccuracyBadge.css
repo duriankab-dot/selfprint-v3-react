@@ -1,0 +1,201 @@
+/**
+ * 🎯 AccuracyBadge.css — Styling for accuracy display badge
+ *
+ * Layouts:
+ * - Default: full badge with percentage + trend + evidence
+ * - Compact: mini badge (% + trend icon only)
+ * - Empty: placeholder when no data
+ */
+
+/* ============================================================================
+   MAIN CONTAINER
+   ============================================================================ */
+
+.accuracy-badge {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.accuracy-badge--compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.accuracy-badge--empty {
+  padding: 12px 16px;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.accuracy-badge--empty p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary, #999);
+}
+
+/* ============================================================================
+   COMPACT VARIANT
+   ============================================================================ */
+
+.accuracy-badge--compact .accuracy-badge__percent {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.accuracy-badge--compact .accuracy-badge__trend {
+  font-size: 16px;
+}
+
+/* ============================================================================
+   DEFAULT VARIANT
+   ============================================================================ */
+
+.accuracy-badge__container {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border: 2px solid;
+  border-radius: 10px;
+  background: var(--color-bg-secondary, #fafafa);
+}
+
+/* Main section (percentage + label) */
+.accuracy-badge__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.accuracy-badge__percent {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.accuracy-badge__label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-secondary, #999);
+}
+
+/* Trend section (icon + label) */
+.accuracy-badge__trend-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.accuracy-badge__trend-icon {
+  font-size: 24px;
+}
+
+.accuracy-badge__trend-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-primary, #000);
+}
+
+/* Evidence count */
+.accuracy-badge__evidence {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border-radius: 8px;
+}
+
+.accuracy-badge__evidence-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.accuracy-badge__evidence-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #3b82f6;
+}
+
+/* Helper text */
+.accuracy-badge__helper {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary, #999);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ============================================================================
+   RESPONSIVE
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .accuracy-badge__container {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .accuracy-badge__percent {
+    font-size: 28px;
+  }
+
+  .accuracy-badge__trend-icon {
+    font-size: 20px;
+  }
+
+  .accuracy-badge__evidence-count {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .accuracy-badge__container {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .accuracy-badge__main {
+    order: 1;
+  }
+
+  .accuracy-badge__trend-section {
+    order: 2;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .accuracy-badge__evidence {
+    order: 3;
+    flex-direction: row;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .accuracy-badge__evidence-count {
+    font-size: 16px;
+  }
+
+  .accuracy-badge__percent {
+    font-size: 24px;
+  }
+
+  .accuracy-badge__trend-icon {
+    font-size: 18px;
+  }
+
+  .accuracy-badge__helper {
+    font-size: 11px;
+  }
+}
