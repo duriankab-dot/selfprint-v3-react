@@ -14,6 +14,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { HubSwitcher } from '@/components/features/HubSwitcher';
 import { EmotionSelector } from '@/components/features/EmotionSelector';
+import { VoiceTwin } from '@/components/twin/VoiceTwin';
+import '@/styles/voice-twin.css';
 import { TypingIndicator } from '@/components/chat/TypingIndicator';
 import { NavBar } from '@/components/layout/NavBar';
 import { useChat } from '@/features/chat/hooks/useChat';
@@ -43,6 +45,10 @@ export const ChatPage: React.FC = () => {
   // Phase 5.7: 👍/👎 ต่อข้อความ (ไม่ผูกกับ twinStore.messages ที่แยกอิสระจาก
   // messages ของ useChat ตรงนี้ — เก็บแค่ index ที่ให้ feedback ไปแล้วในหน้านี้)
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'helpful' | 'unhelpful'>>({});
+  // §21 Voice Twin toggle
+  const [voiceMode, setVoiceMode] = useState(false);
+  // Last assistant message for TTS
+  const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')?.content;
 
   const handleFeedback = (idx: number, type: 'helpful' | 'unhelpful') => {
     if (feedbackGiven[idx]) return;
@@ -409,6 +415,19 @@ export const ChatPage: React.FC = () => {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* §21 Voice Twin Panel — แสดงเมื่อ voiceMode เปิด */}
+        {voiceMode && (
+          <VoiceTwin
+            mood={currentMood ?? undefined}
+            onUserSpeech={(text) => {
+              setInputValue(text);
+              // ส่งทันทีหลังได้ transcript
+              sendMessage(text);
+            }}
+            twinSpeechText={voiceMode ? lastAssistantMsg : undefined}
+          />
+        )}
+
         {/* Chat Input */}
         <div
           style={{
@@ -417,6 +436,26 @@ export const ChatPage: React.FC = () => {
             alignItems: 'flex-end',
           }}
         >
+          {/* Voice Mode toggle button */}
+          <button
+            onClick={() => setVoiceMode((v) => !v)}
+            title={voiceMode ? 'ปิด Voice Mode' : 'เปิด Voice Mode (Talk to Twin)'}
+            style={{
+              padding: '12px',
+              borderRadius: '8px',
+              border: `1px solid ${voiceMode ? 'var(--color-accent-primary)' : 'var(--color-border)'}`,
+              background: voiceMode ? 'rgba(123,110,231,0.12)' : 'transparent',
+              color: voiceMode ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+              fontSize: '18px',
+              cursor: 'pointer',
+              lineHeight: 1,
+              transition: 'all 0.2s',
+              flexShrink: 0,
+            }}
+            aria-label={voiceMode ? 'ปิด Voice Mode' : 'เปิด Voice Mode'}
+          >
+            🎤
+          </button>
           <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}

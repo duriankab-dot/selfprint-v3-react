@@ -151,6 +151,46 @@ const Dashboard: React.FC = () => {
         <p>ติดตามรูปแบบความเป็นอิสระและข้อมูลเชิงลึกของคุณ</p>
       </div>
 
+      {/* Quick Links — §25 Daily Brief + §29-30 Badges */}
+      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem 0.5rem', flexWrap: 'wrap' }}>
+        <a
+          href="/brief"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.6rem 1.1rem',
+            borderRadius: '9999px',
+            border: '1px solid var(--color-accent-primary)',
+            color: 'var(--color-accent-primary)',
+            fontSize: '0.875rem', fontWeight: 500,
+            textDecoration: 'none',
+            background: 'rgba(123,110,231,0.06)',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(123,110,231,0.14)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(123,110,231,0.06)')}
+        >
+          ⚡ Daily Brief
+        </a>
+        <a
+          href="/badges"
+          style={{
+            display: 'flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.6rem 1.1rem',
+            borderRadius: '9999px',
+            border: '1px solid var(--color-border, rgba(255,255,255,0.15))',
+            color: 'var(--color-text-secondary, rgba(255,255,255,0.65))',
+            fontSize: '0.875rem', fontWeight: 500,
+            textDecoration: 'none',
+            background: 'rgba(255,255,255,0.03)',
+            transition: 'background 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+          onMouseLeave={(e) => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+        >
+          🏅 Badge ของฉัน
+        </a>
+      </div>
+
       {/* Executive Summary — Phase 3: human-language AI Twin overview (§8-9) */}
       <ExecutiveSummary />
 
