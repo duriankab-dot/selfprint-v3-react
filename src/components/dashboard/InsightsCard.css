@@ -31,4 +31,181 @@
   font-size: 0.75rem;
   opacity: 0.7;
   font-weight: 400;
+  margin-bottom: 16px;
+}
+
+.insights-text {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  opacity: 0.95;
+}
+
+/* Feedback Section */
+.insights-feedback-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding-top: 12px;
+}
+
+.insights-feedback-trigger {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.insights-feedback-trigger:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Feedback Form */
+.insights-feedback-form {
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedback-prompt {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.feedback-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.feedback-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.feedback-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.feedback-btn.selected {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.feedback-comment {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  resize: vertical;
+  margin-bottom: 12px;
+  font-family: inherit;
+  max-height: 100px;
+}
+
+.feedback-comment::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.feedback-comment:focus {
+  outline: none;
+  border-color: white;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.feedback-submit,
+.feedback-cancel {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.feedback-submit {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.feedback-submit:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.feedback-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feedback-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.feedback-cancel:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.feedback-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feedback-success,
+.feedback-error {
+  font-size: 0.875rem;
+  padding: 8px;
+  border-radius: 6px;
+  margin: 0;
+  text-align: center;
+}
+
+.feedback-success {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.feedback-error {
+  background: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
 }

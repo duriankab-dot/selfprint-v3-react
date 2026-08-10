@@ -6,6 +6,7 @@ import { TwinProvider } from './context/TwinContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ExperienceProvider } from './context/ExperienceContext';
+import { AudioProvider } from './context/AudioContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import './styles/global.css';
@@ -43,6 +44,8 @@ function App() {
             <TwinProvider>
               {/* §16 Experience Engine — must be inside Auth+Hub+Emotion providers */}
               <ExperienceProvider>
+                {/* §23 Adaptive Background Music — must be inside Hub+Emotion providers */}
+                <AudioProvider>
               {/* §30 Twin Evolution overlay — global, above all routes */}
               <TwinEvolution />
               <Router>
@@ -62,6 +65,7 @@ function App() {
                   </Routes>
                 </Suspense>
               </Router>
+                </AudioProvider>
               </ExperienceProvider>
             </TwinProvider>
           </HubProvider>
