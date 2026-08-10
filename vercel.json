@@ -3,6 +3,11 @@
   "devCommand": "",
   "installCommand": "npm install",
   "framework": "vite",
+  "functions": {
+    "api/stripe.ts": {
+      "bodyParser": false
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",

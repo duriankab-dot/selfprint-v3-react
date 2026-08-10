@@ -24,6 +24,7 @@ import { useEmotion } from '@/context/EmotionContext';
 import { useAuth } from '@/context/AuthContext';
 import { useTwinStore } from '@/store/twinStore';
 import { logEvent } from '@/services/analytics';
+import { useJournalQueue } from '@/hooks/useJournalQueue';
 
 
 export const ChatPage: React.FC = () => {
@@ -40,8 +41,10 @@ export const ChatPage: React.FC = () => {
   const [autonomyLevel, setAutonomyLevel] = useState(50);
 
   const { messages, isLoading, error, sendMessage, clearChat } = useChat(autonomyLevel);
+  const { status: offlineStatus, pendingCount, lastError: queueError, saveOffline, syncQueue, requestBackgroundSync } = useJournalQueue();
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [savedOfflineMsg, setSavedOfflineMsg] = useState<string | null>(null);
   // Phase 5.7: 👍/👎 ต่อข้อความ (ไม่ผูกกับ twinStore.messages ที่แยกอิสระจาก
   // messages ของ useChat ตรงนี้ — เก็บแค่ index ที่ให้ feedback ไปแล้วในหน้านี้)
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'helpful' | 'unhelpful'>>({});
@@ -49,6 +52,27 @@ export const ChatPage: React.FC = () => {
   const [voiceMode, setVoiceMode] = useState(false);
   // Last assistant message for TTS
   const lastAssistantMsg = [...messages].reverse().find((m) => m.role === 'assistant')?.content;
+
+  // §37: Register service worker + request background sync
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch((err) => {
+        console.warn('[ChatPage] Failed to register SW:', err);
+      });
+    }
+  }, []);
+
+  // Auto-sync when online
+  useEffect(() => {
+    if (offlineStatus === 'online' && pendingCount > 0) {
+      const timer = setTimeout(() => {
+        syncQueue().catch((err) => {
+          console.error('[ChatPage] Auto-sync failed:', err);
+        });
+      }, 500); // Debounce
+      return () => clearTimeout(timer);
+    }
+  }, [offlineStatus, pendingCount, syncQueue]);
 
   const handleFeedback = (idx: number, type: 'helpful' | 'unhelpful') => {
     if (feedbackGiven[idx]) return;
@@ -62,7 +86,7 @@ export const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ส่งข้อความ
+  // ส่งข้อความ — § 37 Offline support
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     if (!currentHub || !currentMood) {
@@ -70,8 +94,29 @@ export const ChatPage: React.FC = () => {
       return;
     }
 
-    await sendMessage(inputValue);
+    const messageText = inputValue;
     setInputValue('');
+
+    try {
+      // Try send via API
+      await sendMessage(messageText);
+    } catch (err) {
+      // API failed — save offline if not authenticated error
+      if (offlineStatus === 'offline' || (err instanceof Error && err.message.includes('Network'))) {
+        console.log('[ChatPage] Saving offline:', messageText);
+        try {
+          await saveOffline(messageText, currentHub, currentMood);
+          setSavedOfflineMsg('💾 บันทึกไว้ในเครื่อง — จะส่งเมื่อออนไลน์');
+          setTimeout(() => setSavedOfflineMsg(null), 3000);
+          await requestBackgroundSync();
+        } catch (offlineErr) {
+          console.error('[ChatPage] Failed to save offline:', offlineErr);
+          alert('ไม่สามารถบันทึกข้อความได้');
+        }
+      } else {
+        throw err;
+      }
+    }
   };
 
   // ปุ่ม Enter ส่งข้อความ
@@ -426,6 +471,43 @@ export const ChatPage: React.FC = () => {
             }}
             twinSpeechText={voiceMode ? lastAssistantMsg : undefined}
           />
+        )}
+
+        {/* § 37 Offline Status Indicator */}
+        {(offlineStatus !== 'online' || pendingCount > 0 || savedOfflineMsg || queueError) && (
+          <div
+            style={{
+              padding: '12px',
+              borderRadius: '8px',
+              background:
+                offlineStatus === 'offline'
+                  ? 'rgba(255, 200, 100, 0.1)'
+                  : offlineStatus === 'syncing'
+                  ? 'rgba(100, 200, 255, 0.1)'
+                  : 'rgba(100, 200, 100, 0.1)',
+              border: `1px solid ${
+                offlineStatus === 'offline'
+                  ? 'rgba(255, 200, 100, 0.3)'
+                  : offlineStatus === 'syncing'
+                  ? 'rgba(100, 200, 255, 0.3)'
+                  : 'rgba(100, 200, 100, 0.3)'
+              }`,
+              color:
+                offlineStatus === 'offline'
+                  ? 'rgba(255, 200, 100, 0.8)'
+                  : offlineStatus === 'syncing'
+                  ? 'rgba(100, 200, 255, 0.8)'
+                  : 'rgba(100, 200, 100, 0.8)',
+              fontSize: '12px',
+              lineHeight: '1.5',
+            }}
+          >
+            {offlineStatus === 'offline' && '🔌 ออนไลน์ - ข้อความจะบันทึกไว้ในเครื่อง'}
+            {offlineStatus === 'syncing' && '🔄 กำลังซิงค์ข้อความที่บันทึกไว้...'}
+            {offlineStatus === 'online' && pendingCount > 0 && `✅ เชื่อมต่ออยู่ — ${pendingCount} ข้อความรอการส่ง`}
+            {savedOfflineMsg && <div>{savedOfflineMsg}</div>}
+            {queueError && <div style={{ color: 'rgba(255, 100, 100, 0.8)' }}>❌ {queueError}</div>}
+          </div>
         )}
 
         {/* Chat Input */}
