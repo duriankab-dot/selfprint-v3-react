@@ -1,0 +1,178 @@
+/* Passkey Login Component Styles */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-6);
+  background: var(--surface-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-2);
+}
+
+.header h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-2) 0;
+}
+
+.subheader {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.input {
+  padding: var(--spacing-3);
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-secondary);
+  color: var(--text-primary);
+  transition: all 0.2s ease-in-out;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.button {
+  padding: var(--spacing-3);
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: var(--color-white);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  padding: var(--spacing-3);
+  background: var(--color-error-light);
+  border-left: 3px solid var(--color-error);
+  border-radius: var(--radius-md);
+  color: var(--color-error-dark);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.info {
+  padding: var(--spacing-3);
+  background: var(--color-info-light);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-md);
+  color: var(--color-info-dark);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.info p {
+  margin: 0;
+}
+
+.unavailable {
+  padding: var(--spacing-4);
+  text-align: center;
+  background: var(--surface-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.unavailable p {
+  margin: var(--spacing-2) 0;
+  font-size: 0.9rem;
+}
+
+.hint {
+  color: var(--text-tertiary) !important;
+  font-size: 0.8rem !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+
+  .button:hover:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .form {
+    background: var(--surface-primary-dark);
+  }
+
+  .input {
+    background: var(--surface-secondary-dark);
+    color: var(--text-primary-dark);
+    border-color: var(--border-color-dark);
+  }
+
+  .error {
+    background: var(--color-error-light-dark);
+    color: var(--color-error-dark-dark);
+  }
+
+  .info {
+    background: var(--color-info-light-dark);
+    color: var(--color-info-dark-dark);
+  }
+}
