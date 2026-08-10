@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import {
   getDashboardInsights,
   getDecisionLogs,
@@ -8,6 +9,7 @@ import {
 } from '../services/supabase-service';
 import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
+import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
 import FilterBar from '../components/dashboard/FilterBar';
@@ -20,9 +22,12 @@ import AskCoach from '../components/dashboard/AskCoach';
 import AnalyticsSummary from '../components/dashboard/AnalyticsSummary';
 import IntelligencePanel from '../components/dashboard/IntelligencePanel';
 import ExecutiveSummary from '../components/dashboard/ExecutiveSummary';
+import FutureSelfPanel from '../components/dashboard/FutureSelfPanel';
+import { DecisionCard, LifePackCarousel, ForecastWidget } from '../components/dashboard/IntelligencePanels';
 import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
+import { AmbientBadge } from '../components/experience/AmbientBadge'; // §46
 import '../styles/dashboard.css';
 
 interface Insights {
@@ -53,6 +58,8 @@ interface Filters {
   endDate?: string;
 }
 
+const contextBuilder = new PersonalContextBuilder();
+
 const Dashboard: React.FC = () => {
   // userId มาจาก Supabase Auth session จริง (ไม่ใช่ localStorage 'userId' เดิม
   // ที่ไม่มีที่ไหนเคย set — เป็น bug เดิมที่ทำให้ insights/trend ว่างเปล่าตลอด
@@ -60,6 +67,14 @@ const Dashboard: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id || '';
   const navigate = useNavigate();
+
+  // § P2 — PersonalContext สำหรับ intelligence panels (shared cache key กับ ExperienceContext)
+  const { data: personalContext = null } = useQuery({
+    queryKey: ['personalContext', userId],
+    queryFn: () => contextBuilder.getContext(userId),
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
   const [insights, setInsights] = useState<Insights | null>(null);
   const [logs, setLogs] = useState<DecisionLog[]>([]);
   const [trendData, setTrendData] = useState<TrendPoint[]>([]);
@@ -151,8 +166,9 @@ const Dashboard: React.FC = () => {
         <p>ติดตามรูปแบบความเป็นอิสระและข้อมูลเชิงลึกของคุณ</p>
       </div>
 
-      {/* Quick Links — §25 Daily Brief + §29-30 Badges */}
-      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem 0.5rem', flexWrap: 'wrap' }}>
+      {/* Quick Links — §25 Daily Brief + §29-30 Badges + §46 Ambient */}
+      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem 0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+        <AmbientBadge showSoundscape compact />
         <a
           href="/brief"
           style={{
@@ -304,6 +320,19 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
       </div>
+      {/* §46 P2 — Advanced Intelligence Panels */}
+      <div className="p2-intelligence-grid">
+        <h2 className="p2-section-title">🧬 Advanced Intelligence</h2>
+        <div className="p2-panels-row">
+          <FutureSelfPanel context={personalContext} />
+          <DecisionCard context={personalContext} />
+        </div>
+        <div className="p2-panels-row">
+          <LifePackCarousel context={personalContext} />
+          <ForecastWidget context={personalContext} />
+        </div>
+      </div>
+
       {/* Privacy Center link — Master Direction §38 */}
       <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
         <button

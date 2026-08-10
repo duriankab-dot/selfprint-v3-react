@@ -131,6 +131,24 @@ const DASHBOARD_PRIORITY_BY_STATE: Record<TwinState, DashboardSection[]> = {
     'analytics',
     'decision-logs',
   ],
+  flourishing: [
+    'intelligence-panel',
+    'executive-summary',
+    'growth-space',
+    'living-twin',
+    'ask-coach',
+    'analytics',
+    'decision-logs',
+  ],
+  mastery: [
+    'intelligence-panel',
+    'executive-summary',
+    'growth-space',
+    'living-twin',
+    'ask-coach',
+    'analytics',
+    'decision-logs',
+  ],
 };
 
 // ============================================================================

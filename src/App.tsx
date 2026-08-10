@@ -38,6 +38,7 @@ const PricingSuccessPage = lazy(
   () => import('./pages/PricingPage').then((m) => ({ default: m.PricingSuccessPage }))
 ); // §31 success
 const LoginPage = lazy(() => import('./pages/Login')); // §34 Passkey + OAuth + Magic Link
+const PasskeySettings = lazy(() => import('./pages/PasskeySettings')); // §34 Passkey Management
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -86,6 +87,7 @@ function App() {
                     <Route path="/pricing" element={<PricingPage />} />               {/* §31 */}
                     <Route path="/pricing/success" element={<PricingSuccessPage />} /> {/* §31 */}
                     <Route path="/login" element={<LoginPage />} />              {/* §34 */}
+                    <Route path="/settings/passkeys" element={<PasskeySettings />} /> {/* §34 */}
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>

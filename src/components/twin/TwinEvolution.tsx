@@ -32,24 +32,28 @@ import { supabase } from '@/services/supabase-service';
 // ─── State metadata ──────────────────────────────────────────────────────────
 
 const STATE_ORDER: TwinState[] = [
-  'awakening', 'aware', 'connected', 'reflective', 'insightful', 'aligned',
+  'awakening', 'aware', 'connected', 'reflective', 'insightful', 'aligned', 'flourishing', 'mastery',
 ];
 
 const STATE_BADGE: Partial<Record<TwinState, string>> = {
-  aware: 'Twin Awakening',
-  connected: 'Pattern Finder',
-  reflective: 'Journey Explorer',
-  insightful: 'Deep Thinker',
-  aligned: 'Selfprint Complete',
+  aware:       'Twin Awakening',
+  connected:   'Pattern Finder',
+  reflective:  'Journey Explorer',
+  insightful:  'Deep Thinker',
+  aligned:     'Selfprint Complete',
+  flourishing: 'Life in Bloom',
+  mastery:     'Twin Mastery',
 };
 
 const STATE_LABELS: Record<TwinState, { th: string; en: string }> = {
-  awakening: { th: 'กำลังตื่น', en: 'AWAKENING' },
-  aware:     { th: 'รับรู้',     en: 'AWARE' },
-  connected: { th: 'เชื่อมต่อ', en: 'CONNECTED' },
-  reflective:{ th: 'สะท้อน',   en: 'REFLECTIVE' },
-  insightful:{ th: 'เข้าใจลึก', en: 'INSIGHTFUL' },
-  aligned:   { th: 'สอดคล้อง',  en: 'ALIGNED' },
+  awakening:   { th: 'กำลังตื่น', en: 'AWAKENING' },
+  aware:       { th: 'รับรู้',     en: 'AWARE' },
+  connected:   { th: 'เชื่อมต่อ', en: 'CONNECTED' },
+  reflective:  { th: 'สะท้อน',   en: 'REFLECTIVE' },
+  insightful:  { th: 'เข้าใจลึก', en: 'INSIGHTFUL' },
+  aligned:     { th: 'สอดคล้อง',  en: 'ALIGNED' },
+  flourishing: { th: 'เบ่งบาน',   en: 'FLOURISHING' },
+  mastery:     { th: 'เชี่ยวชาญ', en: 'MASTERY' },
 };
 
 // ─── Supabase helpers ─────────────────────────────────────────────────────────

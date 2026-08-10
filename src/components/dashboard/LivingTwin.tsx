@@ -41,12 +41,14 @@ const Particles: React.FC = () => (
 // ============================================================================
 
 const STATE_SHORT: Record<TwinState, string> = {
-  awakening:  'AWAKE',
-  aware:      'AWARE',
-  connected:  'CONNECT',
-  reflective: 'REFLECT',
-  insightful: 'INSIGHT',
-  aligned:    'ALIGN',
+  awakening:   'AWAKE',
+  aware:       'AWARE',
+  connected:   'CONNECT',
+  reflective:  'REFLECT',
+  insightful:  'INSIGHT',
+  aligned:     'ALIGN',
+  flourishing: 'BLOOM',
+  mastery:     'MASTER',
 };
 
 const Ladder: React.FC<{ current: TwinState; engine: TwinStateEngine }> = ({

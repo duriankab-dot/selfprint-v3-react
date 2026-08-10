@@ -706,3 +706,29 @@
   .exec-summary__header { flex-direction: column; }
   .exec-summary__footer { flex-direction: column; align-items: flex-start; }
 }
+
+
+/* §46 P2 — Advanced Intelligence Grid */
+.p2-intelligence-grid {
+  padding: var(--space-5, 20px) var(--space-5, 20px) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.p2-section-title {
+  font-size: var(--text-lg, 18px);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.p2-panels-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4, 16px);
+}
+
+@media (max-width: 640px) {
+  .p2-panels-row { grid-template-columns: 1fr; }
+}

@@ -26,7 +26,9 @@ export type TwinState =
   | 'connected'
   | 'reflective'
   | 'insightful'
-  | 'aligned';
+  | 'aligned'
+  | 'flourishing'
+  | 'mastery';
 
 export type ProcessingState =
   | 'analyzing'
@@ -131,6 +133,20 @@ const STATE_DEFS: Record<TwinState, Omit<TwinStateResult, 'state' | 'progress' |
     glowColor: 'rgba(109, 40, 217, 0.8)',
     particleIntensity: 5,
   },
+  flourishing: {
+    label: 'เบ่งบาน',
+    labelEn: 'FLOURISHING',
+    description: 'Twin เห็นพลังชีวิตของคุณเติบโตอย่างต่อเนื่อง',
+    glowColor: 'rgba(52, 211, 153, 0.85)',
+    particleIntensity: 5,
+  },
+  mastery: {
+    label: 'เชี่ยวชาญ',
+    labelEn: 'MASTERY',
+    description: 'Twin เข้าใจตัวคุณในระดับที่ลึกที่สุด — ผู้เชี่ยวชาญชีวิตตัวเอง',
+    glowColor: 'rgba(251, 191, 36, 0.9)',
+    particleIntensity: 5,
+  },
 };
 
 // ============================================================================
@@ -196,9 +212,17 @@ export class TwinStateEngine {
     // 35–50 → insightful
     // 51+   → aligned
 
+    if (score >= 90) {
+      const progress = Math.min(100, Math.round(95 + (score - 90) * 0.5));
+      return this.buildResult('mastery', progress, 'คุณบรรลุ Mastery แล้ว — Twin สะท้อนตัวคุณได้อย่างสมบูรณ์');
+    }
+    if (score >= 70) {
+      const progress = Math.round(85 + ((score - 70) / 20) * 10);
+      return this.buildResult('flourishing', progress, 'ทำ Reflection ลึกขึ้นเพื่อก้าวสู่ Mastery');
+    }
     if (score >= 51) {
-      const progress = Math.min(100, Math.round(50 + (score - 51) * 0.5));
-      return this.buildResult('aligned', progress, 'Twin เข้าใจตัวคุณอย่างสมบูรณ์แล้ว');
+      const progress = Math.min(100, Math.round(75 + ((score - 51) / 19) * 10));
+      return this.buildResult('aligned', progress, 'Twin เข้าใจตัวคุณอย่างสมบูรณ์แล้ว — สำรวจต่อเพื่อก้าวสู่ Flourishing');
     }
     if (score >= 35) {
       const progress = Math.round(70 + ((score - 35) / 16) * 15);
@@ -239,7 +263,7 @@ export class TwinStateEngine {
    * Returns all 6 states in order for visualization purposes.
    */
   getAllStates(): TwinState[] {
-    return ['awakening', 'aware', 'connected', 'reflective', 'insightful', 'aligned'];
+    return ['awakening', 'aware', 'connected', 'reflective', 'insightful', 'aligned', 'flourishing', 'mastery'];
   }
 
   /**
