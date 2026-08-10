@@ -15,91 +15,97 @@ import type { MusicExperience } from '@/context/AudioContext';
  * Map experience to audio file/stream
  * Using data URLs or external CDN (production would use proper audio files)
  */
-export const AUDIO_LIBRARY: Record<MusicExperience, { url: string; name: string }> = {
+/**
+ * Web Audio API Oscillator Frequencies (Hz)
+ * Generates ambient tones without external audio files
+ */
+export const AUDIO_LIBRARY: Record<MusicExperience, { frequencies: number[]; name: string }> = {
   reflection: {
     name: 'Ambient Piano',
-    url: 'https://example.com/audio/reflection-ambient.mp3', // TODO: Replace with actual URL
+    frequencies: [262, 330, 392], // C4, E4, G4 (C major chord)
   },
   focus: {
     name: 'Minimal Pulse',
-    url: 'https://example.com/audio/focus-pulse.mp3',
+    frequencies: [440], // A4 (pure tone)
   },
   discovery: {
     name: 'Cosmic Ambient',
-    url: 'https://example.com/audio/discovery-cosmic.mp3',
+    frequencies: [174, 258, 417], // Solfeggio frequencies (root, earth, light)
   },
   deep_reflection: {
     name: 'Sparse Ambient',
-    url: 'https://example.com/audio/deep-reflection-sparse.mp3',
+    frequencies: [136.10], // OM frequency (cosmic)
   },
   celebration: {
     name: 'Cinematic Uplift',
-    url: 'https://example.com/audio/celebration-cinematic.mp3',
+    frequencies: [523, 659, 784], // C5, E5, G5 (high C major chord)
   },
   idle: {
     name: 'Silence',
-    url: '', // No audio in idle state
+    frequencies: [], // No audio in idle state
   },
 };
 
 /**
- * Audio player instance (singleton)
+ * Web Audio API context (singleton)
  */
-let audioElement: HTMLAudioElement | null = null;
+let audioContext: AudioContext | null = null;
+let oscillators: OscillatorNode[] = [];
+let gainNode: GainNode | null = null;
 let currentExperience: MusicExperience = 'idle';
 let volumeTransitionInterval: ReturnType<typeof setTimeout> | null = null;
 
 /**
- * Initialize audio element if not already done
+ * Initialize Web Audio API context
  */
-export function initializeAudioPlayer(): HTMLAudioElement {
-  if (!audioElement) {
-    audioElement = new Audio();
-    audioElement.preload = 'auto';
-    audioElement.loop = true;
-    audioElement.style.display = 'none';
-    document.body.appendChild(audioElement);
-    console.log('[Audio] Player initialized');
+export function initializeAudioPlayer(): AudioContext {
+  if (!audioContext) {
+    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    gainNode = audioContext.createGain();
+    gainNode.connect(audioContext.destination);
+    gainNode.gain.value = 0.3; // Default volume
+    console.log('[Audio] Web Audio context initialized');
   }
-  return audioElement;
+  return audioContext;
 }
 
 /**
- * Play ambient music for a given experience
- * Fades in smoothly to avoid jarring transitions
+ * Play ambient music for a given experience using Web Audio API
+ * Generates oscillator tones without external files
  *
  * @param experience - Type of experience (reflection, focus, etc.)
  * @param volume - Current volume (0-100)
  */
 export async function playAmbience(experience: MusicExperience, volume: number): Promise<void> {
-  if (!audioElement) {
-    initializeAudioPlayer();
-  }
-
-  const audio = audioElement!;
+  const ctx = initializeAudioPlayer();
   const audioData = AUDIO_LIBRARY[experience];
 
   try {
-    // Don't restart if already playing the same track
-    if (currentExperience === experience && audio.src === audioData.url) {
+    // Don't restart if already playing the same experience
+    if (currentExperience === experience && oscillators.length > 0) {
       return;
     }
 
-    // Stop current audio
-    audio.pause();
-    audio.volume = 0;
+    // Stop current oscillators
+    stopAmbience();
 
-    // Update source
-    audio.src = audioData.url;
     currentExperience = experience;
 
-    // Only play if not idle and not empty URL
-    if (experience !== 'idle' && audioData.url) {
-      await audio.play();
+    // Only play if not idle and has frequencies
+    if (experience !== 'idle' && audioData.frequencies.length > 0) {
+      // Create oscillators for each frequency (polyphonic)
+      audioData.frequencies.forEach(freq => {
+        const osc = ctx.createOscillator();
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        osc.connect(gainNode!);
+        osc.start();
+        oscillators.push(osc);
+      });
 
       // Fade in
       await fadeVolume(0, volume / 100, 1000); // 1 second fade-in
-      console.log(`[Audio] Playing: ${audioData.name}`);
+      console.log(`[Audio] Playing: ${audioData.name} (${audioData.frequencies.join(', ')} Hz)`);
     }
   } catch (error) {
     console.error(`[Audio] Failed to play ${audioData.name}:`, error);
@@ -107,14 +113,24 @@ export async function playAmbience(experience: MusicExperience, volume: number):
 }
 
 /**
- * Stop ambient music (fade out)
+ * Stop ambient music (fade out and stop oscillators)
  */
 export async function stopAmbience(): Promise<void> {
-  if (!audioElement) return;
+  if (!gainNode) return;
 
   try {
-    await fadeVolume(audioElement.volume, 0, 500); // 0.5 second fade-out
-    audioElement.pause();
+    await fadeVolume(gainNode.gain.value, 0, 500); // 0.5 second fade-out
+
+    // Stop all oscillators
+    oscillators.forEach(osc => {
+      try {
+        osc.stop();
+      } catch (e) {
+        // Already stopped
+      }
+    });
+    oscillators = [];
+
     currentExperience = 'idle';
     console.log('[Audio] Stopped');
   } catch (error) {
@@ -157,14 +173,14 @@ export async function restoreVolume(targetVolume: number, duration: number = 500
 }
 
 /**
- * Smooth volume fade
+ * Smooth volume fade using Web Audio API
  * @param startVol - Starting volume (0-1)
  * @param endVol - Ending volume (0-1)
  * @param duration - Fade duration in milliseconds
  */
 async function fadeVolume(startVol: number, endVol: number, duration: number): Promise<void> {
   return new Promise(resolve => {
-    if (!audioElement) {
+    if (!gainNode) {
       resolve();
       return;
     }
@@ -183,15 +199,15 @@ async function fadeVolume(startVol: number, endVol: number, duration: number): P
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      if (audioElement) {
-        audioElement.volume = startVolume + volumeDiff * progress;
+      if (gainNode) {
+        gainNode.gain.value = startVolume + volumeDiff * progress;
       }
 
       if (progress >= 1) {
         clearInterval(volumeTransitionInterval!);
         volumeTransitionInterval = null;
-        if (audioElement) {
-          audioElement.volume = targetVolume;
+        if (gainNode) {
+          gainNode.gain.value = targetVolume;
         }
         resolve();
       }
@@ -203,12 +219,11 @@ async function fadeVolume(startVol: number, endVol: number, duration: number): P
  * Set volume directly (0-100)
  */
 export function setVolume(percent: number): void {
-  if (!audioElement) {
-    initializeAudioPlayer();
-  }
-
+  const ctx = initializeAudioPlayer();
   const volume = Math.max(0, Math.min(1, percent / 100));
-  audioElement!.volume = volume;
+  if (gainNode) {
+    gainNode.gain.value = volume;
+  }
 }
 
 /**
@@ -216,28 +231,33 @@ export function setVolume(percent: number): void {
  */
 export function getPlaybackState() {
   return {
-    isPlaying: audioElement ? !audioElement.paused : false,
+    isPlaying: oscillators.length > 0,
     currentExperience,
-    volume: audioElement ? Math.round(audioElement.volume * 100) : 0,
+    volume: gainNode ? Math.round(gainNode.gain.value * 100) : 0,
   };
 }
 
 /**
- * Cleanup
+ * Cleanup Web Audio resources
  */
 export function cleanup(): void {
-  if (audioElement) {
-    audioElement.pause();
-    audioElement.src = '';
-    if (audioElement.parentNode) {
-      audioElement.parentNode.removeChild(audioElement);
+  oscillators.forEach(osc => {
+    try {
+      osc.stop();
+    } catch (e) {
+      // Already stopped
     }
-    audioElement = null;
-  }
+  });
+  oscillators = [];
 
   if (volumeTransitionInterval) {
     clearInterval(volumeTransitionInterval);
     volumeTransitionInterval = null;
+  }
+
+  if (audioContext) {
+    audioContext.close();
+    audioContext = null;
   }
 
   currentExperience = 'idle';
