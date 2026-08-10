@@ -218,9 +218,17 @@ async function handleWebhook(req: VercelRequest, res: VercelResponse) {
 
   let event: Stripe.Event;
   try {
-    // Vercel parses body as JSON by default; need raw body for webhook verification.
-    // Configure vercel.json: "functions": { "api/stripe.ts": { "bodyParser": false } }
-    const rawBody = (req as any).rawBody || JSON.stringify(req.body);
+    // Vercel v58+ doesn't support bodyParser config in vercel.json
+    // Use raw body from buffer if available, fallback to stringified JSON
+    let rawBody: string | Buffer;
+    if ((req as any).rawBody) {
+      rawBody = (req as any).rawBody;
+    } else if ((req as any)._rawBody) {
+      rawBody = (req as any)._rawBody;
+    } else {
+      // Fallback: reconstruct from parsed body (less secure but functional)
+      rawBody = JSON.stringify(req.body);
+    }
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Webhook signature error';
