@@ -28,8 +28,8 @@ interface UseAudioDuckingOptions {
 
 export function useAudioDucking(options: UseAudioDuckingOptions = {}) {
   const { state, state: audioState } = useAudio();
-  const duckTimeoutRef = useRef<NodeJS.Timeout>();
-  const restoreTimeoutRef = useRef<NodeJS.Timeout>();
+  const duckTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const restoreTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const {
     duckLevel = 0.2,

@@ -12,13 +12,57 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
+.insights-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  gap: 12px;
+}
+
 .insights-label {
   font-size: 0.875rem;
   font-weight: 500;
   opacity: 0.85;
-  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  flex: 1;
+}
+
+.insights-evidence-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  cursor: help;
+  transition: all 0.2s ease;
+}
+
+.insights-evidence-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Evidence Type Styles */
+.insights-evidence-know {
+  background: rgba(76, 175, 80, 0.3);
+  color: #4caf50;
+  border: 1px solid rgba(76, 175, 80, 0.5);
+}
+
+.insights-evidence-infer {
+  background: rgba(156, 39, 176, 0.3);
+  color: #9c27b0;
+  border: 1px solid rgba(156, 39, 176, 0.5);
+}
+
+.insights-evidence-unknown {
+  background: rgba(158, 158, 158, 0.3);
+  color: #9e9e9e;
+  border: 1px solid rgba(158, 158, 158, 0.5);
 }
 
 .insights-value {

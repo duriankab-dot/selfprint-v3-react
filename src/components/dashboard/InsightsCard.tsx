@@ -8,6 +8,8 @@ interface InsightsCardProps {
   subtitle: string;
   insightText: string;
   onFeedbackSubmit?: (feedback: FeedbackData) => Promise<void>;
+  evidence: 'KNOW' | 'INFER' | 'UNKNOWN';
+  evidenceDetails?: string;
 }
 
 interface FeedbackData {
@@ -23,6 +25,8 @@ const InsightsCard: React.FC<InsightsCardProps> = ({
   subtitle,
   insightText,
   onFeedbackSubmit,
+  evidence,
+  evidenceDetails,
 }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [selectedSentiment, setSelectedSentiment] = useState<string | null>(null);
@@ -62,7 +66,12 @@ const InsightsCard: React.FC<InsightsCardProps> = ({
 
   return (
     <div className="insights-card">
-      <div className="insights-label">{label}</div>
+      <div className="insights-header">
+        <div className="insights-label">{label}</div>
+        <div className={`insights-evidence-badge insights-evidence-${evidence.toLowerCase()}`} title={evidenceDetails}>
+          {evidence}
+        </div>
+      </div>
       <div className="insights-value">{value}</div>
       <div className="insights-subtitle">{subtitle}</div>
       <div className="insights-text">{insightText}</div>

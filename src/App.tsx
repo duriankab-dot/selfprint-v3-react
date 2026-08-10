@@ -7,8 +7,13 @@ import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ExperienceProvider } from './context/ExperienceContext';
 import { AudioProvider } from './context/AudioContext';
+import { PopupProvider } from './context/PopupContext';
+import { EvolutionProvider } from './context/EvolutionContext';
+import { SubscriptionProvider } from './context/SubscriptionContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { TwinEvolution } from './components/twin/TwinEvolution';
+import ContextualPopup from './components/ContextualPopup';
+import TwinEvolutionSceneWrapper from './components/TwinEvolutionSceneWrapper';
 import './styles/global.css';
 import './App.css';
 
@@ -42,12 +47,22 @@ function App() {
         <EmotionProvider>
           <HubProvider>
             <TwinProvider>
-              {/* §16 Experience Engine — must be inside Auth+Hub+Emotion providers */}
-              <ExperienceProvider>
+              {/* §31 Subscription & Monetization */}
+              <SubscriptionProvider>
+                {/* §16 Experience Engine — must be inside Auth+Hub+Emotion providers */}
+                <ExperienceProvider>
                 {/* §23 Adaptive Background Music — must be inside Hub+Emotion providers */}
                 <AudioProvider>
-              {/* §30 Twin Evolution overlay — global, above all routes */}
-              <TwinEvolution />
+                  {/* §30 Evolution tracking (reflection count, unlocks) */}
+                  <EvolutionProvider>
+                    {/* §28 Contextual Popup — must be inside all context providers */}
+                    <PopupProvider>
+                      {/* §30 Twin Evolution overlay — global, above all routes */}
+                      <TwinEvolution />
+                      {/* §28 Popup renderer */}
+                      <ContextualPopup />
+                      {/* §30 Twin Evolution Scene (30 reflections celebration) */}
+                      <TwinEvolutionSceneWrapper />
               <Router>
                 <Suspense fallback={null}>
                   <Routes>
@@ -65,8 +80,11 @@ function App() {
                   </Routes>
                 </Suspense>
               </Router>
+                    </PopupProvider>
+                  </EvolutionProvider>
                 </AudioProvider>
               </ExperienceProvider>
+              </SubscriptionProvider>
             </TwinProvider>
           </HubProvider>
         </EmotionProvider>

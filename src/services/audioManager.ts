@@ -47,7 +47,7 @@ export const AUDIO_LIBRARY: Record<MusicExperience, { url: string; name: string 
  */
 let audioElement: HTMLAudioElement | null = null;
 let currentExperience: MusicExperience = 'idle';
-let volumeTransitionInterval: NodeJS.Timeout | null = null;
+let volumeTransitionInterval: ReturnType<typeof setTimeout> | null = null;
 
 /**
  * Initialize audio element if not already done

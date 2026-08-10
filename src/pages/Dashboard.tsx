@@ -215,34 +215,52 @@ const Dashboard: React.FC = () => {
           <h2>ข้อมูลเชิงลึกของคุณ</h2>
           <div className="insights-grid">
             <InsightsCard
+              id="total-interactions"
               label="การโต้ตอบทั้งหมด"
               value={insights.totalInteractions}
               subtitle="ข้อความที่ติดตาม"
+              insightText={`คุณมีการโต้ตอบกับ Twin ทั้งหมด ${insights.totalInteractions} ครั้ง`}
+              evidence="KNOW"
             />
             <InsightsCard
+              id="avg-autonomy"
               label="ความเป็นอิสระเฉลี่ย"
               value={`${insights.avgAutonomy}%`}
               subtitle="ค่าพื้นฐานของคุณ"
+              insightText="วัดจากรูปแบบการตัดสินใจจริง ไม่ใช่การประเมินตัวเอง"
+              evidence="INFER"
             />
             <InsightsCard
+              id="avg-confidence"
               label="ความมั่นใจเฉลี่ย"
               value={insights.avgConfidence.toFixed(2)}
               subtitle="0.0 ถึง 1.0"
+              insightText="ค่าเฉลี่ย Confidence Score จากทุก session"
+              evidence="KNOW"
             />
             <InsightsCard
+              id="top-hub"
               label="Hub ที่ใช้บ่อยที่สุด"
               value={insights.topHub || 'N/A'}
               subtitle="ใช้งานมากที่สุด"
+              insightText={insights.topHub ? `คุณสำรวจ ${insights.topHub} มากกว่า Hub อื่น` : 'ยังไม่มีข้อมูลเพียงพอ'}
+              evidence={insights.topHub ? 'KNOW' : 'UNKNOWN'}
             />
             <InsightsCard
+              id="top-mood"
               label="Mood ที่พบบ่อยที่สุด"
               value={insights.topMood || 'N/A'}
               subtitle="รู้สึกบ่อยที่สุด"
+              insightText={insights.topMood ? `${insights.topMood} เป็น Mood หลักในช่วงที่ผ่านมา` : 'ยังไม่มีข้อมูลเพียงพอ'}
+              evidence={insights.topMood ? 'INFER' : 'UNKNOWN'}
             />
             <InsightsCard
+              id="avg-response-time"
               label="เวลาตอบสนองเฉลี่ย"
               value={`${insights.avgResponseTime}ms`}
-              subtitle="จาก nova"
+              subtitle="จาก Brain Gateway"
+              insightText="เวลาเฉลี่ยที่ Twin ใช้ประมวลผลคำถามของคุณ"
+              evidence="KNOW"
             />
           </div>
         </div>
