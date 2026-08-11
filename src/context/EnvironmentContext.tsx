@@ -7,12 +7,13 @@
  *
  * ทำหน้าที่:
  *   1. คำนวณ EnvironmentConfig จาก hub + mood + time (ทุก 60 วินาที)
- *   2. Inject --tod-* / --env-* CSS vars ลงใน :root
- *   3. Set data-tod attribute บน <html> (สำหรับ CSS selectors)
- *   4. Sync recommendedExperience ไปยัง AudioContext.setExperience()
+ *   2. Inject --tod-* / --env-* / --lighting-* / --particles-* / --twin-* CSS vars ลงใน :root
+ *   3. Set data-tod attribute บน <html> (สำหรับ time-of-day CSS selectors)
+ *   4. Set data-twin-state attribute บน <html> (สำหรับ Twin avatar styling)
+ *   5. Sync recommendedExperience ไปยัง AudioContext.setExperience()
  *      — เฉพาะเมื่อ period เปลี่ยน (contextual transition)
  *      — ไม่ override ถ้า user ปิด music (musicEnabled = false)
- *   5. Expose useEnvironment() hook สำหรับ components
+ *   6. Expose useEnvironment() hook สำหรับ components
  *
  * §19 Rule: User Preference > AI Personalization
  *   - ไม่ force-set audio ถ้า musicEnabled = false
@@ -91,13 +92,19 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
       prevPeriod: prevPeriodRef.current,
     });
 
-    // Apply CSS vars to :root
+    // Apply CSS vars to :root (merged from all engines)
     const root = document.documentElement;
     for (const [key, value] of Object.entries(config.cssVars)) {
       root.style.setProperty(key, value);
     }
-    // Set data-tod for CSS selectors
+
+    // Set data-tod for time-of-day CSS selectors
     root.setAttribute('data-tod', config.timePeriod);
+
+    // Set data-twin-state for Twin avatar styling
+    // Format: "period-expression" (e.g. "awake-joyful", "dreaming-tired")
+    const twinStateAttr = `${config.twinState.posture}-${config.twinState.expression}`;
+    root.setAttribute('data-twin-state', twinStateAttr);
 
     // Handle period transition
     if (config.shouldTransition) {

@@ -27,6 +27,12 @@ import { TimeOfDayEngine } from './TimeOfDayEngine';
 import type { TimeOfDayState, TimePeriod } from './TimeOfDayEngine';
 import { SoundscapeEngine } from './SoundscapeEngine';
 import type { SoundscapeConfig } from './SoundscapeEngine';
+import { LightingEngine } from './LightingEngine';
+import type { LightingConfig } from './LightingEngine';
+import { ParticleSystemEngine } from './ParticleSystemEngine';
+import type { ParticleConfig } from './ParticleSystemEngine';
+import { TwinStateEngine } from './TwinStateEngine';
+import type { TwinStateConfig } from './TwinStateEngine';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,8 +45,14 @@ export interface EnvironmentConfig {
   soundscape: SoundscapeConfig;
   /** MusicExperience ที่ส่งต่อไปยัง AudioContext.setExperience() */
   recommendedExperience: MusicExperience;
+  /** Lighting configuration for this period */
+  lighting: LightingConfig;
+  /** Particle system configuration for this mood */
+  particles: ParticleConfig;
+  /** Twin visual state based on period + mood */
+  twinState: TwinStateConfig;
   /**
-   * CSS vars รวมทุกอย่าง (--tod-* + --env-* overlay)
+   * CSS vars รวมทุกอย่าง (--tod-* + --env-* + --lighting-* + --particles-* + --twin-*)
    * EnvironmentContext inject ลงใน :root
    */
   cssVars: Record<string, string>;
@@ -65,8 +77,11 @@ interface EnvironmentInput {
 // ─── EnvironmentEngine ────────────────────────────────────────────────────────
 
 export class EnvironmentEngine {
-  private todEngine    = new TimeOfDayEngine();
-  private soundEngine  = new SoundscapeEngine();
+  private todEngine     = new TimeOfDayEngine();
+  private soundEngine   = new SoundscapeEngine();
+  private lightEngine   = new LightingEngine();
+  private particleEngine = new ParticleSystemEngine();
+  private twinEngine    = new TwinStateEngine();
 
   compute(input: EnvironmentInput): EnvironmentConfig {
     const { hub, mood, now = new Date(), prevPeriod } = input;
@@ -78,13 +93,25 @@ export class EnvironmentEngine {
     // 2. Recommend soundscape
     const soundscape = this.soundEngine.recommend(hub, mood, period);
 
-    // 3. Detect transition
+    // 3. Compute lighting
+    const lighting = this.lightEngine.compute(period);
+
+    // 4. Compute particles
+    const particles = this.particleEngine.compute(mood);
+
+    // 5. Compute Twin state
+    const twinState = this.twinEngine.compute(period, mood);
+
+    // 6. Detect transition
     const shouldTransition = !!prevPeriod && prevPeriod !== period;
 
-    // 4. Build merged CSS vars
-    //    --tod-* from TimeOfDayEngine + --env-* overlay
+    // 7. Build merged CSS vars
+    //    Merge from: TimeOfDay + Soundscape + Lighting + Particles + Twin
     const cssVars: Record<string, string> = {
       ...timeOfDay.cssVars,
+      ...lighting.cssVars,
+      ...particles.cssVars,
+      ...twinState.cssVars,
       // --env-* overrides / additions specific to this environment combination
       '--env-soundscape-id':          `"${soundscape.id}"`,
       '--env-audio-character':        `"${soundscape.audioCharacter}"`,
@@ -92,7 +119,7 @@ export class EnvironmentEngine {
       '--env-energy-level':           String(timeOfDay.energyLevel),
     };
 
-    // 5. Build ambient description
+    // 8. Build ambient description
     const ambientDescription = `${timeOfDay.emoji} ${timeOfDay.labelThai} — ${soundscape.labelThai}`;
 
     return {
@@ -100,6 +127,9 @@ export class EnvironmentEngine {
       timeOfDay,
       soundscape,
       recommendedExperience: soundscape.musicExperience,
+      lighting,
+      particles,
+      twinState,
       cssVars,
       shouldTransition,
       ambientDescription,

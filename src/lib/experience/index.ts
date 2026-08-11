@@ -19,5 +19,14 @@ export { default as TimeOfDayEngine } from './TimeOfDayEngine';
 export * from './SoundscapeEngine';
 export { default as SoundscapeEngine } from './SoundscapeEngine';
 
+export * from './LightingEngine';
+export { default as LightingEngine } from './LightingEngine';
+
+export * from './ParticleSystemEngine';
+export { default as ParticleSystemEngine } from './ParticleSystemEngine';
+
+export * from './TwinStateEngine';
+export { default as TwinStateEngine } from './TwinStateEngine';
+
 export * from './EnvironmentEngine';
 export { default as EnvironmentEngine } from './EnvironmentEngine';
