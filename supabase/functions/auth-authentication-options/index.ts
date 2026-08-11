@@ -70,31 +70,45 @@ serve(async (req) => {
     let allowCredentials: Array<{ id: string; type: string }> = [];
 
     if (email) {
-      // TODO: Query user_credentials table for email
-      // const { data: credentials } = await supabase
-      //   .from('user_credentials')
-      //   .select('credential_id')
-      //   .eq('user_id', email);
+      // Query user_credentials table for email
+      const { data: credentials, error: credError } = await supabase
+        .from('user_credentials')
+        .select('credential_id')
+        .eq('user_id', email);
 
-      // if (credentials) {
-      //   allowCredentials = credentials.map(c => ({
-      //     id: c.credential_id,
-      //     type: 'public-key'
-      //   }));
-      // }
+      if (!credError && credentials && credentials.length > 0) {
+        allowCredentials = credentials.map((c: any) => ({
+          id: c.credential_id,
+          type: 'public-key',
+        }));
+      }
+    }
+
+    // Store challenge in DB (5 minute TTL)
+    const challengeB64 = uint8ArrayToBase64Url(challenge);
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const { error: dbError } = await supabase
+      .from('passkey_challenges')
+      .insert({
+        user_id: email || 'discoverable',
+        challenge: challengeB64,
+        challenge_type: 'authentication',
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (dbError) {
+      console.error('Failed to store challenge:', dbError);
+      throw new Error(`Challenge storage failed: ${dbError.message}`);
     }
 
     // Return authentication options
     const options = {
-      challenge: uint8ArrayToBase64Url(challenge),
+      challenge: challengeB64,
       timeout: 60000,
       userVerification: 'preferred' as const,
       rpId: rpId,
       ...(allowCredentials.length > 0 && { allowCredentials }),
     };
-
-    // TODO: Store challenge in cache/DB for verification
-    // challenge_store[email || 'discoverable'] = { challenge, expires_at: Date.now() + 300000 }
 
     return new Response(JSON.stringify(options), {
       status: 200,

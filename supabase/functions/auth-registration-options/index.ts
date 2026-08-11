@@ -6,6 +6,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { crypto } from 'https://deno.land/std@0.168.0/crypto/mod.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.1';
 
 interface RequestBody {
   email: string;
@@ -55,16 +56,43 @@ serve(async (req) => {
       });
     }
 
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing Supabase configuration');
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     // Generate challenge
     const challenge = generateChallenge();
+    const challengeB64 = uint8ArrayToBase64Url(challenge);
 
     // Extract domain from request origin
     const origin = new URL(req.url).origin;
     const rpId = new URL(origin).hostname;
 
+    // Store challenge in DB (5 minute TTL)
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const { error: dbError } = await supabase
+      .from('passkey_challenges')
+      .insert({
+        user_id: email,
+        challenge: challengeB64,
+        challenge_type: 'registration',
+        expires_at: expiresAt.toISOString(),
+      });
+
+    if (dbError) {
+      console.error('Failed to store challenge:', dbError);
+      throw new Error(`Challenge storage failed: ${dbError.message}`);
+    }
+
     // Return registration options
     const options = {
-      challenge: uint8ArrayToBase64Url(challenge),
+      challenge: challengeB64,
       rp: {
         name: 'Selfprint',
         id: rpId,
@@ -81,9 +109,6 @@ serve(async (req) => {
       timeout: 60000,
       attestation: 'none' as const,
     };
-
-    // TODO: Store challenge in cache/DB for verification
-    // challenge_store[email] = { challenge, expires_at: Date.now() + 300000 }
 
     return new Response(JSON.stringify(options), {
       status: 200,
