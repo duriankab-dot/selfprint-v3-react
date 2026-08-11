@@ -37,6 +37,10 @@ const PricingPage = lazy(() => import('./pages/PricingPage'));         // §31
 const PricingSuccessPage = lazy(() => import('./pages/PricingSuccessPage')); // §31 success
 const LoginPage = lazy(() => import('./pages/Login')); // §34 Passkey + OAuth + Magic Link
 const PasskeySettings = lazy(() => import('./pages/PasskeySettings')); // §34 Passkey Management
+// §5.1 5-Tab Navigation — new pages
+const ExplorePage = lazy(() => import('./pages/ExplorePage'));    // สำรวจ
+const ActivitiesPage = lazy(() => import('./pages/ActivitiesPage')); // กิจกรรม
+const MePage = lazy(() => import('./pages/MePage'));               // ฉัน
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -86,6 +90,10 @@ function App() {
                     <Route path="/pricing/success" element={<PricingSuccessPage />} /> {/* §31 */}
                     <Route path="/login" element={<LoginPage />} />              {/* §34 */}
                     <Route path="/settings/passkeys" element={<PasskeySettings />} /> {/* §34 */}
+                    {/* §5.1 5-Tab Navigation */}
+                    <Route path="/explore" element={<ExplorePage />} />
+                    <Route path="/activities" element={<ActivitiesPage />} />
+                    <Route path="/me" element={<MePage />} />
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>
