@@ -6,6 +6,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.1';
+import { decode as decodeCBOR } from 'https://esm.sh/cbor@9.0.1';
 
 interface AssertionResponse {
   clientDataJSON: string;
@@ -26,7 +27,8 @@ interface RequestBody {
   assertion: AssertionData;
 }
 
-// Helper: Base64 URL to Uint8Array
+// ─── Helpers ──────────────────────────────────────────────────
+
 function base64UrlToUint8Array(str: string): Uint8Array {
   const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
   const binary = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
@@ -37,7 +39,28 @@ function base64UrlToUint8Array(str: string): Uint8Array {
   return bytes;
 }
 
-// Helper: Parse authenticator data to check counter
+function uint8ArrayToBase64Url(arr: Uint8Array): string {
+  const binary = String.fromCharCode(...arr);
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+async function hashSHA256(data: Uint8Array): Promise<Uint8Array> {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
+function parseClientDataJSON(clientDataJSON: string): {
+  type: string;
+  challenge: string;
+  origin: string;
+} {
+  const decoded = new TextDecoder().decode(base64UrlToUint8Array(clientDataJSON));
+  return JSON.parse(decoded);
+}
+
 function parseAuthenticatorData(authData: Uint8Array): {
   rpIdHash: Uint8Array;
   flags: number;
@@ -54,79 +77,66 @@ function parseAuthenticatorData(authData: Uint8Array): {
   return { rpIdHash, flags, signCount };
 }
 
-// Helper: Reconstruct client data JSON and verify challenge
-function verifyClientData(
-  clientDataJSON: string,
-  expectedChallenge: string,
-  expectedOrigin: string
-): { valid: boolean; error?: string; data?: Record<string, unknown> } {
-  try {
-    const clientData = JSON.parse(clientDataJSON);
+// Convert COSE public key to JWK (for ES256 / P-256)
+function coseToJwk(coseKey: any): JsonWebKey {
+  // COSE keys have structure:
+  // 1 (kty): 2 = EC
+  // 3 (alg): -7 = ES256
+  // -1 (crv): 1 = P-256
+  // -2 (x): x coordinate
+  // -3 (y): y coordinate
 
-    // Verify type
-    if (clientData.type !== 'webauthn.get') {
-      return { valid: false, error: 'Invalid client data type' };
-    }
+  const kty = coseKey.get(1);
+  const alg = coseKey.get(3);
+  const crv = coseKey.get(-1);
+  const x = coseKey.get(-2);
+  const y = coseKey.get(-3);
 
-    // Verify challenge
-    if (clientData.challenge !== expectedChallenge) {
-      return { valid: false, error: 'Challenge mismatch' };
-    }
-
-    // Verify origin
-    if (clientData.origin !== expectedOrigin) {
-      return { valid: false, error: 'Origin mismatch' };
-    }
-
-    return { valid: true, data: clientData };
-  } catch {
-    return { valid: false, error: 'Invalid client data JSON' };
+  if (kty !== 2 || alg !== -7 || crv !== 1) {
+    throw new Error(`Unsupported COSE key: kty=${kty}, alg=${alg}, crv=${crv}`);
   }
+
+  return {
+    kty: 'EC',
+    crv: 'P-256',
+    x: uint8ArrayToBase64Url(new Uint8Array(x)),
+    y: uint8ArrayToBase64Url(new Uint8Array(y)),
+  };
 }
 
-// Helper: Hash client data with SHA-256
-async function hashClientData(clientDataJSON: string): Promise<Uint8Array> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(clientDataJSON);
+// Create JWT token (for session)
+async function createJWT(
+  userId: string,
+  expiresIn: number = 3600 // 1 hour
+): Promise<string> {
+  // For MVP: create a simple JWT-like object
+  // In production: use proper JWT library with signing key
 
-  // Use Deno crypto API
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return new Uint8Array(hashBuffer);
+  const now = Math.floor(Date.now() / 1000);
+  const payload = {
+    sub: userId,
+    aud: 'authenticated',
+    role: 'authenticated',
+    iat: now,
+    exp: now + expiresIn,
+  };
+
+  const header = { alg: 'HS256', typ: 'JWT' };
+  const headerB64 = uint8ArrayToBase64Url(
+    new TextEncoder().encode(JSON.stringify(header))
+  );
+  const payloadB64 = uint8ArrayToBase64Url(
+    new TextEncoder().encode(JSON.stringify(payload))
+  );
+
+  // For MVP, skip signature verification
+  // In production: HMAC-SHA256 with Supabase JWT secret
+  const signature = uint8ArrayToBase64Url(new Uint8Array(32)); // dummy
+
+  return `${headerB64}.${payloadB64}.${signature}`;
 }
 
-// Helper: Verify ECDSA (P-256 / ES256) signature
-async function verifyES256(
-  signature: Uint8Array,
-  messageHash: Uint8Array,
-  publicKeyX: Uint8Array,
-  publicKeyY: Uint8Array
-): Promise<boolean> {
-  try {
-    // Reconstruct raw public key (uncompressed point: 0x04 || X || Y)
-    const publicKeyBytes = new Uint8Array(65);
-    publicKeyBytes[0] = 0x04;
-    publicKeyBytes.set(publicKeyX, 1);
-    publicKeyBytes.set(publicKeyY, 33);
-
-    // Import public key
-    const publicKey = await crypto.subtle.importKey(
-      'raw',
-      publicKeyBytes,
-      {
-        name: 'ECDSA',
-        namedCurve: 'P-256',
-      },
-      false,
-      ['verify']
-    );
-
-    // Verify signature
-    return await crypto.subtle.verify('ECDSA', publicKey, signature, messageHash);
-  } catch (error) {
-    console.error('ES256 verification error:', error);
-    return false;
-  }
-}
+// ─── Main Handler ─────────────────────────────────────────────
 
 serve(async (req) => {
   // CORS handling
@@ -158,7 +168,8 @@ serve(async (req) => {
       });
     }
 
-    // Initialize Supabase client
+    // ─── Initialize Supabase ───────────────────────────────────
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -168,115 +179,143 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Step 1: Look up credential in database
+    // ─── Verify Challenge ──────────────────────────────────────
+
+    const clientDataJSON = base64UrlToUint8Array(assertion.response.clientDataJSON);
+    const clientData = parseClientDataJSON(assertion.response.clientDataJSON);
+
+    // Verify type
+    if (clientData.type !== 'webauthn.get') {
+      throw new Error('Invalid client data type for authentication');
+    }
+
+    // Lookup challenge in DB
+    const { data: challengeRow, error: challengeError } = await supabase
+      .from('passkey_challenges')
+      .select('*')
+      .eq('challenge', clientData.challenge)
+      .eq('challenge_type', 'authentication')
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (challengeError || !challengeRow) {
+      throw new Error('Challenge not found or expired');
+    }
+
+    // ─── Lookup Credential ─────────────────────────────────────
+
+    const credentialIdB64 = assertion.rawId;
     const { data: credential, error: credError } = await supabase
       .from('user_credentials')
-      .select('user_id, public_key, counter')
-      .eq('credential_id', assertion.rawId)
+      .select('*')
+      .eq('credential_id', credentialIdB64)
       .single();
 
     if (credError || !credential) {
-      return new Response(JSON.stringify({ error: 'Credential not found' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      throw new Error('Credential not found');
     }
 
-    const userId = credential.user_id;
-    const storedPublicKey = credential.public_key;
-    const storedCounter = credential.counter || 0;
+    // ─── Parse AuthenticatorData ──────────────────────────────
 
-    // Step 2: Parse authenticator data
     const authDataBytes = base64UrlToUint8Array(assertion.response.authenticatorData);
+    const parsed = parseAuthenticatorData(authDataBytes);
+    const { signCount } = parsed;
 
-    let authData;
-    try {
-      authData = parseAuthenticatorData(authDataBytes);
-    } catch (error) {
-      return new Response(JSON.stringify({ error: 'Invalid authenticator data' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    // Verify counter (replay attack prevention)
+    if (signCount <= credential.counter) {
+      throw new Error('Counter did not increase — possible clone attack');
     }
 
-    // Step 3: Verify client data
-    const origin = new URL(req.url).origin;
-    const clientDataVerification = verifyClientData(
-      assertion.response.clientDataJSON,
-      // TODO: Retrieve expected challenge from cache
-      'expected-challenge', // Placeholder
-      origin
+    // ─── Verify Signature ──────────────────────────────────────
+
+    // Reconstruct signed data: authData + clientDataHash
+    const clientDataHash = await hashSHA256(clientDataJSON);
+    const signedData = new Uint8Array(authDataBytes.length + clientDataHash.length);
+    signedData.set(authDataBytes);
+    signedData.set(clientDataHash, authDataBytes.length);
+
+    // Get signature
+    const signature = base64UrlToUint8Array(assertion.response.signature);
+
+    // Get public key from credential
+    const publicKeyBytes = base64UrlToUint8Array(credential.public_key);
+    const cosePublicKey = decodeCBOR(publicKeyBytes);
+    const publicKeyJwk = coseToJwk(cosePublicKey);
+
+    // Import key for verification
+    const publicKey = await crypto.subtle.importKey(
+      'jwk',
+      publicKeyJwk,
+      { name: 'ECDSA', namedCurve: 'P-256', hash: 'SHA-256' },
+      false,
+      ['verify']
     );
 
-    if (!clientDataVerification.valid) {
-      return new Response(JSON.stringify({ error: clientDataVerification.error || 'Client data verification failed' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    // Verify signature
+    const isValid = await crypto.subtle.verify(
+      'ECDSA',
+      publicKey,
+      signature,
+      signedData
+    );
+
+    if (!isValid) {
+      throw new Error('Signature verification failed');
     }
 
-    // Step 4: Check counter (prevent cloning)
-    if (authData.signCount <= storedCounter) {
-      return new Response(JSON.stringify({ error: 'Signature counter mismatch - possible cloning attack' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // ─── Update Counter ────────────────────────────────────────
 
-    // Step 5: Hash client data
-    const clientDataHash = await hashClientData(assertion.response.clientDataJSON);
-
-    // Step 6: Verify signature
-    const signatureBytes = base64UrlToUint8Array(assertion.response.signature);
-
-    // TODO: Parse public key format and verify based on algorithm
-    // For now, assume ES256 (P-256)
-    // const isValid = await verifyES256(...);
-
-    // Step 7: Update counter and last_used_at
     const { error: updateError } = await supabase
       .from('user_credentials')
       .update({
-        counter: authData.signCount,
+        counter: signCount,
         last_used_at: new Date().toISOString(),
       })
-      .eq('credential_id', assertion.rawId);
+      .eq('id', credential.id);
 
     if (updateError) {
-      console.error('Failed to update credential:', updateError);
+      console.error('Failed to update counter:', updateError);
     }
 
-    // Step 8: Create session (TODO: Real JWT issuance)
-    // In production, would:
-    // 1. Call Supabase Auth API to create session
-    // 2. Issue JWT with proper claims
-    // 3. Return refresh token in httpOnly cookie
+    // ─── Create Session ────────────────────────────────────────
 
-    const session = {
-      access_token: 'temp-jwt-token',
-      refresh_token: 'temp-refresh-token',
-      expires_in: 3600,
-      token_type: 'bearer',
-    };
+    const userId = credential.user_id;
+    const accessToken = await createJWT(userId);
 
-    const user = {
-      id: userId,
-      email: email || userId,
-      user_metadata: {},
-      app_metadata: {},
-    };
+    // Delete challenge (consumed)
+    await supabase
+      .from('passkey_challenges')
+      .delete()
+      .eq('challenge', clientData.challenge);
 
-    return new Response(JSON.stringify({ user, session }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    // ─── Return Success ────────────────────────────────────────
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        session: {
+          access_token: accessToken,
+          token_type: 'bearer',
+          expires_in: 3600,
+          user: {
+            id: userId,
+            email: userId,
+          },
+        },
+      }),
+      {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
+    console.error('Verification error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 400,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

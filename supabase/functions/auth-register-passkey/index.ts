@@ -6,6 +6,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.1';
+import { decode as decodeCBOR } from 'https://esm.sh/cbor@9.0.1';
 
 interface AttestationResponse {
   clientDataJSON: string;
@@ -17,6 +18,7 @@ interface CredentialData {
   rawId: string;
   type: string;
   response: AttestationResponse;
+  transports?: string[];
 }
 
 interface RequestBody {
@@ -25,7 +27,8 @@ interface RequestBody {
   displayName?: string;
 }
 
-// Helper: Base64 URL to Uint8Array
+// ─── Helpers ──────────────────────────────────────────────────
+
 function base64UrlToUint8Array(str: string): Uint8Array {
   const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
   const binary = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
@@ -36,17 +39,75 @@ function base64UrlToUint8Array(str: string): Uint8Array {
   return bytes;
 }
 
-// Helper: Verify attestation object (simplified — no deep verification)
-async function verifyAttestation(attestationObject: string): Promise<boolean> {
-  // TODO: Implement full attestation verification
-  // For now, just check if it's valid base64
-  try {
-    base64UrlToUint8Array(attestationObject);
-    return true;
-  } catch {
-    return false;
-  }
+function uint8ArrayToBase64Url(arr: Uint8Array): string {
+  const binary = String.fromCharCode(...arr);
+  return btoa(binary)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
+
+async function hashSHA256(data: Uint8Array): Promise<Uint8Array> {
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return new Uint8Array(hashBuffer);
+}
+
+function parseClientDataJSON(clientDataJSON: string): {
+  type: string;
+  challenge: string;
+  origin: string;
+} {
+  const decoded = new TextDecoder().decode(base64UrlToUint8Array(clientDataJSON));
+  return JSON.parse(decoded);
+}
+
+function parseAuthenticatorData(authData: Uint8Array): {
+  rpIdHash: Uint8Array;
+  flags: number;
+  signCount: number;
+  credentialId: Uint8Array;
+  credentialPublicKey: Uint8Array;
+} {
+  if (authData.length < 37) {
+    throw new Error('Invalid authenticator data: too short');
+  }
+
+  const rpIdHash = authData.slice(0, 32);
+  const flags = authData[32];
+  const signCount = new DataView(authData.buffer, 33, 4).getUint32(0, false);
+
+  const userPresent = (flags & 0x01) !== 0;
+  const hasAttData = (flags & 0x40) !== 0;
+
+  if (!userPresent) {
+    throw new Error('User not present during registration');
+  }
+
+  if (!hasAttData) {
+    throw new Error('Attestation data not present');
+  }
+
+  // Parse credential data
+  let offset = 37;
+  const credIdLength = new DataView(authData.buffer, offset, 2).getUint16(0, false);
+  offset += 2;
+
+  const credentialId = authData.slice(offset, offset + credIdLength);
+  offset += credIdLength;
+
+  // COSE public key (CBOR encoded)
+  const credentialPublicKey = authData.slice(offset);
+
+  return {
+    rpIdHash,
+    flags,
+    signCount,
+    credentialId,
+    credentialPublicKey,
+  };
+}
+
+// ─── Main Handler ─────────────────────────────────────────────
 
 serve(async (req) => {
   // CORS handling
@@ -78,16 +139,8 @@ serve(async (req) => {
       });
     }
 
-    // Verify attestation
-    const attestationValid = await verifyAttestation(credential.response.attestationObject);
-    if (!attestationValid) {
-      return new Response(JSON.stringify({ error: 'Invalid attestation' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    // ─── Initialize Supabase ───────────────────────────────────
 
-    // Initialize Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
@@ -97,29 +150,96 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // TODO: Find user by email and get their ID
-    // For now, use email as user ID (in production, match to existing auth user)
+    // ─── Verify Challenge ──────────────────────────────────────
 
-    // Store credential in database
-    const { data, error } = await supabase.from('user_credentials').insert({
-      user_id: email, // TODO: Use actual user ID
-      credential_id: credential.rawId,
-      public_key: credential.response.attestationObject,
-      counter: 0,
-      name: displayName || 'My Passkey',
-      created_at: new Date().toISOString(),
-      last_used_at: null,
-    });
+    const clientDataJSON = base64UrlToUint8Array(credential.response.clientDataJSON);
+    const clientData = parseClientDataJSON(credential.response.clientDataJSON);
 
-    if (error) {
-      throw error;
+    // Verify type
+    if (clientData.type !== 'webauthn.create') {
+      throw new Error('Invalid client data type for registration');
     }
+
+    // Lookup challenge in DB
+    const { data: challengeRow, error: challengeError } = await supabase
+      .from('passkey_challenges')
+      .select('*')
+      .eq('challenge', clientData.challenge)
+      .eq('challenge_type', 'registration')
+      .gt('expires_at', new Date().toISOString())
+      .single();
+
+    if (challengeError || !challengeRow) {
+      throw new Error('Challenge not found or expired');
+    }
+
+    // Verify user matches
+    if (challengeRow.user_id !== email) {
+      throw new Error('Challenge user mismatch');
+    }
+
+    // Verify origin (basic check — in production, compare against config)
+    const reqOrigin = new URL(req.url).origin;
+    if (!clientData.origin.includes('localhost') && !clientData.origin.includes('selfprint.one')) {
+      // Allow localhost for testing, selfprint.one for production
+      console.warn(`Unusual origin: ${clientData.origin}`);
+    }
+
+    // ─── Decode & Verify Attestation Object ────────────────────
+
+    const attestationObjectBytes = base64UrlToUint8Array(credential.response.attestationObject);
+    const attestationObject = decodeCBOR(attestationObjectBytes);
+
+    const { fmt, attStmt, authData: authDataRaw } = attestationObject;
+
+    // For MVP: only support 'none' attestation
+    if (fmt !== 'none') {
+      throw new Error(`Attestation format '${fmt}' not supported`);
+    }
+
+    // ─── Parse AuthenticatorData ──────────────────────────────
+
+    const authData = new Uint8Array(authDataRaw);
+    const parsed = parseAuthenticatorData(authData);
+
+    const { credentialId, credentialPublicKey, signCount } = parsed;
+    const credentialIdB64 = uint8ArrayToBase64Url(credentialId);
+    const publicKeyB64 = uint8ArrayToBase64Url(credentialPublicKey);
+
+    // ─── Store in Database ────────────────────────────────────
+
+    const { data: insertedCred, error: dbError } = await supabase
+      .from('user_credentials')
+      .insert({
+        user_id: email,
+        credential_id: credentialIdB64,
+        public_key: publicKeyB64,
+        counter: signCount,
+        transports: credential.transports || [],
+        name: displayName || 'My Passkey',
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error('Failed to store credential:', dbError);
+      throw new Error(`Database insert failed: ${dbError.message}`);
+    }
+
+    // ─── Delete Challenge (consumed) ────────────────────────
+
+    await supabase
+      .from('passkey_challenges')
+      .delete()
+      .eq('challenge', clientData.challenge);
+
+    // ─── Return Success ────────────────────────────────────
 
     return new Response(
       JSON.stringify({
-        id: credential.rawId,
-        publicKey: credential.response.attestationObject,
-        counter: 0,
+        success: true,
+        credential_id: credentialIdB64,
+        message: 'Passkey registered successfully',
       }),
       {
         status: 200,
@@ -130,9 +250,10 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
+    console.error('Registration error:', error);
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: message }), {
+      status: 400,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',

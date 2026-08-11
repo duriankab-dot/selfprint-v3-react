@@ -24,20 +24,15 @@ import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 
-// Calls /api/intelligence (Phase 5.2 — Astrovera Psychology module via
-// Claude) to turn the birth date + 4 fine-tuning answers into a real
-// personality blueprint. The endpoint itself always returns 200 with a
-// valid AnalysisResponse (falling back to Life Path numerology server-side
-// on any failure) — this function only returns null for a genuine
-// network-level failure (offline, timeout, unreachable), so the caller can
-// fall back to buildFallbackResponse() the same way it always has.
+// Calls backend /api/intelligence (Phase 5.2 — Astrovera Psychology via Claude)
 async function analyzeWithAstrovera(
   answers: Record<string, string>,
   mood: Mood,
   birthDate: string
 ): Promise<AnalysisResponse | null> {
   try {
-    const res = await fetch('/api/intelligence', {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+    const res = await fetch(`${backendUrl}/api/intelligence`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ mood, birthDate, finetuneAnswers: answers }),

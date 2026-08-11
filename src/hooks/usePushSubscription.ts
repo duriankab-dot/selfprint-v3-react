@@ -97,7 +97,8 @@ export function usePushSubscription(): PushSubscriptionResult {
       });
 
       // Step 4: Send subscription to backend
-      const response = await fetch('/api/push/subscribe', {
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const response = await fetch(`${backendUrl}/api/push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -143,8 +144,9 @@ export function usePushSubscription(): PushSubscriptionResult {
       // Unsubscribe from browser
       await sub.unsubscribe();
 
-      // Notify backend
-      await fetch('/api/push/subscribe', {
+      // Notify backend (optional — proceed even if fails)
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      await fetch(`${backendUrl}/api/push`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
