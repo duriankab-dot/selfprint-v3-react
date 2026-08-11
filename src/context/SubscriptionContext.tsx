@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { getSubscriptionStatus } from '@/services/stripeService';
+import { useAuth } from '@/hooks/useAuth';
 
 /**
  * § 31 Monetization
@@ -162,14 +164,15 @@ const FEATURE_AVAILABILITY: Record<SubscriptionTier, Set<string>> = {
 };
 
 export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { session, loading } = useAuth();
   const [subscription, setSubscription] = useState<SubscriptionStatus>(() => {
-    // Load from localStorage
+    // Load from localStorage as cache
     const stored = localStorage.getItem('selfprint-subscription');
     if (stored) {
       try {
         return JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to load subscription:', error);
+        console.error('Failed to load subscription from cache:', error);
       }
     }
 
@@ -180,7 +183,36 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
   });
 
-  // Persist subscription to localStorage
+  // Fetch subscription from API when auth session changes
+  useEffect(() => {
+    if (loading || !session?.access_token) {
+      // User not authenticated — stay on free tier
+      setSubscription({
+        tier: 'free',
+        status: 'active',
+      });
+      return;
+    }
+
+    (async () => {
+      try {
+        const data = await getSubscriptionStatus(session.access_token);
+        const newSubscription: SubscriptionStatus = {
+          tier: data.tier || 'free',
+          status: data.status || 'active',
+          expiresAt: data.expiresAt,
+          stripeCustomerId: data.stripeCustomerId,
+          stripeSubscriptionId: data.stripeSubscriptionId,
+        };
+        setSubscription(newSubscription);
+      } catch (error) {
+        console.error('[Subscription] Failed to fetch subscription:', error);
+        // Keep cached subscription on error
+      }
+    })();
+  }, [session?.access_token, loading]);
+
+  // Persist subscription to localStorage as cache
   useEffect(() => {
     localStorage.setItem('selfprint-subscription', JSON.stringify(subscription));
   }, [subscription]);

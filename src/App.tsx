@@ -34,9 +34,7 @@ const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage')); // §25
 const BadgePage = lazy(() => import('./pages/BadgePage'));            // §29-30
 const PricingPage = lazy(() => import('./pages/PricingPage'));         // §31
-const PricingSuccessPage = lazy(
-  () => import('./pages/PricingPage').then((m) => ({ default: m.PricingSuccessPage }))
-); // §31 success
+const PricingSuccessPage = lazy(() => import('./pages/PricingSuccessPage')); // §31 success
 const LoginPage = lazy(() => import('./pages/Login')); // §34 Passkey + OAuth + Magic Link
 const PasskeySettings = lazy(() => import('./pages/PasskeySettings')); // §34 Passkey Management
 

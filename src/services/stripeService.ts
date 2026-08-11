@@ -117,22 +117,24 @@ export const ANNUAL_PRICING = {
  *
  * @param tier - Subscription tier
  * @param billingPeriod - 'monthly' | 'annual'
- * @param userId - User ID for metadata
+ * @param accessToken - Supabase access token for authorization
  */
 export async function createCheckoutSession(
   tier: SubscriptionTier,
   billingPeriod: 'monthly' | 'annual',
-  userId: string
-): Promise<{ sessionId: string }> {
+  accessToken: string
+): Promise<{ sessionId: string; url: string }> {
   try {
     // Call backend API to create Stripe session
-    const response = await fetch('/api/stripe/create-checkout', {
+    const response = await fetch('/api/stripe?action=create-checkout', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
       body: JSON.stringify({
         tier,
         billingPeriod,
-        userId,
         returnUrl: `${window.location.origin}/pricing/success`,
       }),
       credentials: 'include',
@@ -154,14 +156,17 @@ export async function createCheckoutSession(
  * Create portal session for existing customers
  * Redirects to Stripe Billing Portal (manage subscription)
  *
- * @param userId - User ID
+ * @param accessToken - Supabase access token for authorization
  */
-export async function createPortalSession(userId: string): Promise<{ portalUrl: string }> {
+export async function createPortalSession(accessToken: string): Promise<{ portalUrl: string }> {
   try {
-    const response = await fetch('/api/stripe/create-portal', {
+    const response = await fetch('/api/stripe?action=create-portal', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId }),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({}),
       credentials: 'include',
     });
 
@@ -181,12 +186,15 @@ export async function createPortalSession(userId: string): Promise<{ portalUrl: 
  * Get current subscription from backend
  * Calls Stripe API to fetch latest subscription status
  *
- * @param userId - User ID
+ * @param accessToken - Supabase access token for authorization
  */
-export async function getSubscriptionStatus(userId: string) {
+export async function getSubscriptionStatus(accessToken: string) {
   try {
-    const response = await fetch(`/api/stripe/subscription?userId=${userId}`, {
+    const response = await fetch(`/api/stripe?action=subscription`, {
       method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+      },
       credentials: 'include',
     });
 

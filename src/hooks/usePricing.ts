@@ -28,15 +28,15 @@ export function usePricing() {
    */
   const startCheckout = async (tier: 'plus' | 'pro' | 'lifetime', billingPeriod: 'monthly' | 'annual' = 'monthly') => {
     try {
-      // userId ต้องมาจาก auth session เท่านั้น — ห้ามใช้ localStorage
-      const userId = auth?.session?.user?.id;
-      if (!userId) {
+      // accessToken ต้องมาจาก auth session เท่านั้น
+      const accessToken = auth?.session?.access_token;
+      if (!accessToken) {
         console.error('[Pricing] User not authenticated, redirect to onboarding');
         window.location.href = '/onboarding';
         return;
       }
 
-      const { sessionId } = await createCheckoutSession(tier, billingPeriod, userId);
+      const { sessionId } = await createCheckoutSession(tier, billingPeriod, accessToken);
       window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
     } catch (error) {
       console.error('[Pricing] Checkout failed:', error);
@@ -49,15 +49,15 @@ export function usePricing() {
    */
   const managePlan = async () => {
     try {
-      // userId ต้องมาจาก auth session เท่านั้น — ห้ามใช้ localStorage
-      const userId = auth?.session?.user?.id;
-      if (!userId) {
+      // accessToken ต้องมาจาก auth session เท่านั้น
+      const accessToken = auth?.session?.access_token;
+      if (!accessToken) {
         console.error('[Pricing] User not authenticated');
         window.location.href = '/onboarding';
         return;
       }
 
-      const { portalUrl } = await createPortalSession(userId);
+      const { portalUrl } = await createPortalSession(accessToken);
       window.location.href = portalUrl;
     } catch (error) {
       console.error('[Pricing] Portal failed:', error);
