@@ -64,7 +64,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     if (req.method === 'GET') {
       const { data, error: selectError } = await supabaseAdmin
-        .schema('selfprint')
         .from('blueprints')
         .select()
         .eq('user_id', user.id)
@@ -88,14 +87,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     // ตัว blueprint ก่อนหน้าของ user นี้ ให้ mark เป็น is_latest = false ก่อน
     await supabaseAdmin
-      .schema('selfprint')
       .from('blueprints')
       .update({ is_latest: false })
       .eq('user_id', user.id)
       .eq('is_latest', true);
 
     const { data, error: insertError } = await supabaseAdmin
-      .schema('selfprint')
       .from('blueprints')
       .insert({
         user_id: user.id,

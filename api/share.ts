@@ -37,7 +37,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     const { data: link, error: linkError } = await supabaseAdmin
-      .schema('selfprint')
       .from('share_links')
       .select('user_id')
       .eq('code', code)
@@ -52,7 +51,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     const { data: blueprint, error: blueprintError } = await supabaseAdmin
-      .schema('selfprint')
       .from('blueprints')
       .select('accuracy_level, decision_style')
       .eq('user_id', link.user_id)
@@ -84,7 +82,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     }
 
     const { data: existing, error: existingError } = await supabaseAdmin
-      .schema('selfprint')
       .from('share_links')
       .select('code')
       .eq('user_id', user.id)
@@ -104,7 +101,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     for (let attempt = 0; attempt < 5; attempt++) {
       const code = generateCode();
       const { error: insertError } = await supabaseAdmin
-        .schema('selfprint')
         .from('share_links')
         .insert({ user_id: user.id, code });
 

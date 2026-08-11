@@ -51,7 +51,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
     if (req.method === 'GET') {
       const { data, error: selectError } = await supabaseAdmin
-        .schema('selfprint')
         .from('users_profiles')
         .select()
         .eq('user_id', user.id)
@@ -68,7 +67,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const body: ProfileRequest = req.body || {};
 
     const { data, error: upsertError } = await supabaseAdmin
-      .schema('selfprint')
       .from('users_profiles')
       .upsert(
         {
