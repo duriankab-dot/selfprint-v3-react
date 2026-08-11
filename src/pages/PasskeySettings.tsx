@@ -93,7 +93,7 @@ const PasskeySettings: React.FC = () => {
       if (err) throw err;
 
       setPasskeys(
-        (data ?? []).map((row) => ({
+        (data ?? []).map((row: Record<string, any>) => ({
           id: row.id as string,
           credentialId: row.credential_id as string,
           name: (row.name as string | null) ?? 'Passkey',

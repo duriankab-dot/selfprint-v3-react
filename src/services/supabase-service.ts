@@ -7,6 +7,9 @@
 
 import supabase from '@/lib/supabase/client';
 
+// Re-export singleton client for backward compatibility
+export { supabase };
+
 /**
  * บันทึก message ไป Supabase
  */
@@ -179,25 +182,25 @@ export async function getDashboardInsights(userId: string) {
     // Calculate stats
     const totalInteractions = data.length;
     const avgAutonomy = Math.round(
-      data.reduce((sum, item) => sum + item.autonomy_level, 0) / data.length
+      data.reduce((sum: number, item: any) => sum + item.autonomy_level, 0) / data.length
     );
     const avgConfidence = (
-      data.reduce((sum, item) => sum + item.confidence, 0) / data.length
+      data.reduce((sum: number, item: any) => sum + item.confidence, 0) / data.length
     ).toFixed(2);
     const avgResponseTime = Math.round(
-      data.reduce((sum, item) => sum + (item.response_time_ms || 0), 0) / data.length
+      data.reduce((sum: number, item: any) => sum + (item.response_time_ms || 0), 0) / data.length
     );
 
     // Top hub
     const hubCounts: Record<string, number> = {};
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       hubCounts[item.hub] = (hubCounts[item.hub] || 0) + 1;
     });
     const topHub = Object.entries(hubCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
 
     // Top mood
     const moodCounts: Record<string, number> = {};
-    data.forEach((item) => {
+    data.forEach((item: any) => {
       moodCounts[item.mood] = (moodCounts[item.mood] || 0) + 1;
     });
     const topMood = Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
