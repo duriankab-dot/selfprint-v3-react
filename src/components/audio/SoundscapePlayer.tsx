@@ -19,9 +19,10 @@
  *   6. Crossfade on soundscape transitions
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useEnvironment } from '@/context/EnvironmentContext';
 import { useAudio } from '@/context/AudioContext';
+import { useSoundscapeAudioLoader } from '@/hooks/useSoundscapeAudioLoader';
 import type { SoundscapeConfig } from '@/lib/experience/SoundscapeEngine';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -177,6 +178,19 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
   const [isPlaying, setIsPlaying] = useState(false);
   const prevSoundscapeRef = useRef<SoundscapeConfig | undefined>(undefined);
 
+  // Audio context for CDN loader
+  const audioContext = useMemo(() => {
+    if (typeof window === 'undefined') return null;
+    return new (window.AudioContext || (window as any).webkitAudioContext)();
+  }, []);
+
+  // Load audio from CDN
+  const soundscapeId = environment?.soundscape.id || null;
+  const { buffer: cdnBuffer, isLoading: isCdnLoading, error: cdnError, progress } = useSoundscapeAudioLoader(
+    soundscapeId,
+    audioContext
+  );
+
   // ─── Sync user audio preferences ───────────────────────────────────────────
 
   useEffect(() => {
@@ -205,8 +219,8 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     }
   }, [audio.state.isDucking, isInitialized, isPlaying, startDucking, stopDucking]);
 
-  // ─── Handle soundscape transitions ─────────────────────────────────────────
-  // (Crossfade when period changes)
+  // ─── Handle soundscape transitions with CDN audio ─────────────────────────
+  // (Try CDN first, fallback to synthesis if unavailable)
 
   useEffect(() => {
     if (!environment || !isPlaying) return;
@@ -214,64 +228,71 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     const { soundscape } = environment;
     if (prevSoundscapeRef.current?.id === soundscape.id) return;
 
-    // Generate oscillator-based audio buffer for soundscape
-    // §23: Adaptive Background Music — Web Audio API synthesis
-    const generateSoundscapeBuffer = () => {
-      const ctx = pool.ctx;
-      if (!ctx) return null;
+    // Prefer CDN buffer, fallback to synthesis
+    let bufferToPlay = cdnBuffer;
 
-      const duration = 30; // 30 second loop
-      const sampleRate = ctx.sampleRate;
-      const buffer = ctx.createBuffer(2, duration * sampleRate, sampleRate);
-      const left = buffer.getChannelData(0);
-      const right = buffer.getChannelData(1);
+    if (!bufferToPlay) {
+      // Fallback: Generate oscillator-based audio buffer for soundscape
+      // §23: Adaptive Background Music — Web Audio API synthesis
+      const generateSoundscapeBuffer = () => {
+        const ctx = pool.ctx;
+        if (!ctx) return null;
 
-      // Frequency map based on soundscape type
-      const frequencies: Record<string, number[]> = {
-        cosmic: [174, 285, 396],      // Deep bass chord
-        ambient: [264, 396, 528],     // Middle tones
-        energetic: [528, 640, 784],   // Higher energy
-        minimal: [111, 222, 333],     // Sparse low tones
-      };
+        const duration = 30; // 30 second loop
+        const sampleRate = ctx.sampleRate;
+        const buffer = ctx.createBuffer(2, duration * sampleRate, sampleRate);
+        const left = buffer.getChannelData(0);
+        const right = buffer.getChannelData(1);
 
-      const freqs = frequencies[soundscape.id] || frequencies.ambient;
+        // Frequency map based on soundscape type
+        const frequencies: Record<string, number[]> = {
+          cosmic: [174, 285, 396],      // Deep bass chord
+          ambient: [264, 396, 528],     // Middle tones
+          energetic: [528, 640, 784],   // Higher energy
+          minimal: [111, 222, 333],     // Sparse low tones
+        };
 
-      // Generate polyphonic oscillator signal
-      for (let i = 0; i < buffer.length; i++) {
-        const t = i / sampleRate;
-        let sample = 0;
+        const freqs = frequencies[soundscape.id] || frequencies.ambient;
 
-        freqs.forEach((freq) => {
-          sample += Math.sin(2 * Math.PI * freq * t) * (1 / freqs.length);
-        });
+        // Generate polyphonic oscillator signal
+        for (let i = 0; i < buffer.length; i++) {
+          const t = i / sampleRate;
+          let sample = 0;
 
-        // Envelope: fade in/out
-        const fadeDuration = 2;
-        if (t < fadeDuration) {
-          sample *= t / fadeDuration; // fade in
-        } else if (t > duration - fadeDuration) {
-          sample *= (duration - t) / fadeDuration; // fade out
+          freqs.forEach((freq) => {
+            sample += Math.sin(2 * Math.PI * freq * t) * (1 / freqs.length);
+          });
+
+          // Envelope: fade in/out
+          const fadeDuration = 2;
+          if (t < fadeDuration) {
+            sample *= t / fadeDuration; // fade in
+          } else if (t > duration - fadeDuration) {
+            sample *= (duration - t) / fadeDuration; // fade out
+          }
+
+          left[i] = sample * 0.3; // Volume: 30%
+          right[i] = sample * 0.3;
         }
 
-        left[i] = sample * 0.3; // Volume: 30%
-        right[i] = sample * 0.3;
-      }
+        return buffer;
+      };
 
-      return buffer;
-    };
+      bufferToPlay = generateSoundscapeBuffer();
+    }
 
     try {
-      const buffer = generateSoundscapeBuffer();
-      if (buffer) {
-        play(buffer);
-        console.log(`[Soundscape] Playing ${soundscape.id} (${soundscape.labelThai})`);
+      if (bufferToPlay) {
+        play(bufferToPlay);
+        const source = cdnBuffer ? '(CDN)' : '(Synthesis)';
+        console.log(`[Soundscape] Playing ${soundscape.id} ${source} (${soundscape.labelThai})`);
       }
     } catch (error) {
-      console.warn(`[Soundscape] Failed to generate audio: ${error}`);
+      console.warn(`[Soundscape] Failed to play audio: ${error}`);
     }
 
     prevSoundscapeRef.current = soundscape;
-  }, [environment, isPlaying, play, pool]);
+  }, [environment, isPlaying, play, pool, cdnBuffer]);
 
   // ─── PlayControl ──────────────────────────────────────────────────────────
 
@@ -357,15 +378,47 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
         />
       )}
 
-      {/* Status indicator */}
-      {isPlaying && (
+      {/* Loading indicator (CDN) */}
+      {isCdnLoading && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '10px',
+            opacity: 0.6,
+            marginLeft: 'auto',
+          }}
+        >
+          <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⚙️</span>
+          <span>{progress}%</span>
+        </div>
+      )}
+
+      {/* Error indicator */}
+      {cdnError && !cdnBuffer && (
         <span
+          title={cdnError.message}
+          style={{
+            fontSize: '10px',
+            opacity: 0.5,
+            marginLeft: 'auto',
+          }}
+        >
+          ⚠️ (Synthesis)
+        </span>
+      )}
+
+      {/* Status indicator */}
+      {isPlaying && !isCdnLoading && (
+        <span
+          title={cdnBuffer ? 'CDN Audio' : 'Synthesized Audio'}
           style={{
             display: 'inline-block',
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: 'var(--color-accent-primary)',
+            background: cdnBuffer ? 'var(--color-accent-primary)' : 'var(--color-warning)',
             animation: 'pulse 2s infinite',
             marginLeft: 'auto',
           }}
