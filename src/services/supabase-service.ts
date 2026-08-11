@@ -2,19 +2,10 @@
  * supabase-service.ts
  *
  * บันทึก/ดึง messages จาก Supabase
+ * ✓ Uses singleton client from @/lib/supabase/client (avoids GotrueLient multiple instances warning)
  */
 
-import { createClient } from '@supabase/supabase-js';
-
-// ตั้งค่า Supabase
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.warn('⚠️ Supabase env vars หาย — ดึงข้อมูลจาก localStorage แทน');
-}
-
-export const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabaseKey) : null;
+import supabase from '@/lib/supabase/client';
 
 /**
  * บันทึก message ไป Supabase
@@ -27,10 +18,6 @@ export async function saveMessage(
   content: string,
   autonomyLevel: number = 50
 ): Promise<boolean> {
-  if (!supabase) {
-    console.warn('Supabase ไม่พร้อม — ข้ามการบันทึก');
-    return false;
-  }
 
   try {
     const { error } = await supabase.from('chat_messages').insert({
@@ -58,10 +45,6 @@ export async function saveMessage(
  * ดึง chat history ของผู้ใช้
  */
 export async function getChatHistory(userId: string, hub?: string, limit: number = 50) {
-  if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
-    return [];
-  }
 
   try {
     let query = supabase
@@ -244,10 +227,6 @@ export async function getDecisionLogs(
   endDate?: string,
   limit: number = 50
 ) {
-  if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
-    return [];
-  }
 
   try {
     let query = supabase
@@ -291,10 +270,6 @@ export async function getDecisionLogs(
  * confidence ไม่พอให้ detectPatterns() แยกกลุ่มตาม mood/hub ได้)
  */
 export async function getAutonomyTrend(userId: string) {
-  if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
-    return [];
-  }
 
   try {
     const { data, error } = await supabase
