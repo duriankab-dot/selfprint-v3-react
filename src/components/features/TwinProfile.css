@@ -1,0 +1,107 @@
+/* TwinProfile.css — AI Twin Profile Component */
+
+.twin-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.twin-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.twin-profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.twin-profile-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 4px;
+}
+
+.twin-profile-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.twin-accuracy-section {
+  padding: 1.25rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+}
+
+.twin-accuracy-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.twin-accuracy-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-accent-primary);
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.twin-accuracy-bar {
+  height: 8px;
+  background: var(--color-border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.twin-accuracy-fill {
+  height: 100%;
+  background: var(--color-accent-primary);
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.twin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.twin-stat-card {
+  padding: 1rem;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.twin-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.twin-stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  line-height: 1.3;
+}
