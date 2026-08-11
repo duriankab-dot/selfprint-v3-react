@@ -41,6 +41,11 @@ const PasskeySettings = lazy(() => import('./pages/PasskeySettings')); // §34 P
 const ExplorePage = lazy(() => import('./pages/ExplorePage'));    // สำรวจ
 const ActivitiesPage = lazy(() => import('./pages/ActivitiesPage')); // กิจกรรม
 const MePage = lazy(() => import('./pages/MePage'));               // ฉัน
+// Orphan pages — now routed
+const VoiceChatPage = lazy(() => import('./pages/VoiceChatPage'));
+const TwinProfilePage = lazy(() => import('./pages/TwinProfilePage'));
+const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
+const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
 
 // Phase 2 Testing
 import('./PHASE2_TEST_CONSOLE').then(module => {
@@ -94,6 +99,11 @@ function App() {
                     <Route path="/explore" element={<ExplorePage />} />
                     <Route path="/activities" element={<ActivitiesPage />} />
                     <Route path="/me" element={<MePage />} />
+                    {/* Previously orphan pages — now routed */}
+                    <Route path="/voice" element={<VoiceChatPage />} />
+                    <Route path="/twin" element={<TwinProfilePage />} />
+                    <Route path="/life-hubs" element={<LifeHubsPage />} />
+                    <Route path="/decisions" element={<DecisionLoggerPage />} />
                     <Route path="/menu" element={<FeatureMenu />} />
                     <Route path="/components" element={<ComponentShowcase />} />
                   </Routes>

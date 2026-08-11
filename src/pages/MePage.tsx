@@ -62,6 +62,12 @@ export default function MePage() {
           route: '/brief',
         },
         {
+          emoji: '👥',
+          label: 'โปรไฟล์ AI ฝาแฝด',
+          sublabel: 'Accuracy %, Evolution, Stats',
+          route: '/twin',
+        },
+        {
           emoji: '🧬',
           label: 'วิเคราะห์ตัวตน',
           sublabel: 'ภาพรวม Blueprint และ Patterns',
@@ -72,6 +78,18 @@ export default function MePage() {
           label: 'เหรียญรางวัล',
           sublabel: 'ความก้าวหน้าของการเติบโต',
           route: '/badges',
+        },
+        {
+          emoji: '🎯',
+          label: 'Life Hubs',
+          sublabel: 'อาชีพ / ความสัมพันธ์ / สุขภาพ / เติบโต / สมดุล',
+          route: '/life-hubs',
+        },
+        {
+          emoji: '📋',
+          label: 'บันทึกการตัดสินใจ',
+          sublabel: 'Decision Logger + สถิติ',
+          route: '/decisions',
         },
       ],
     },

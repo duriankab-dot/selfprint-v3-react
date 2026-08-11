@@ -139,6 +139,14 @@ const CATEGORIES: ActivityCategory[] = [
     color: '#10B981',
     activities: [
       {
+        id: 'voice-chat',
+        emoji: '🎤',
+        title: 'คุยกับ AI ด้วยเสียง',
+        description: 'พูดคุยกับ AI ฝาแฝดแบบ real-time ด้วย Speech-to-Text',
+        duration: '5–15 นาที',
+        route: '/voice',
+      },
+      {
         id: 'share-insight',
         emoji: '💡',
         title: 'แบ่งปันข้อคิด',
@@ -170,6 +178,22 @@ const CATEGORIES: ActivityCategory[] = [
         description: 'ดูความก้าวหน้าและเหรียญที่ได้รับจากการสำรวจตัวเอง',
         duration: '2 นาที',
         route: '/badges',
+      },
+      {
+        id: 'life-hubs',
+        emoji: '🎯',
+        title: 'Life Hubs',
+        description: 'มองภาพรวม 5 ด้านชีวิต: อาชีพ / ความสัมพันธ์ / สุขภาพ / เติบโต / สมดุล',
+        duration: '5 นาที',
+        route: '/life-hubs',
+      },
+      {
+        id: 'decisions',
+        emoji: '📋',
+        title: 'บันทึกการตัดสินใจ',
+        description: 'Log การตัดสินใจสำคัญ ดูสถิติและรูปแบบที่เกิดขึ้น',
+        duration: '5 นาที',
+        route: '/decisions',
       },
       {
         id: 'goal-setting',
