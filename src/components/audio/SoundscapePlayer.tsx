@@ -171,7 +171,7 @@ interface SoundscapePlayerProps {
 export function SoundscapePlayer({ compact = false, className = '' }: SoundscapePlayerProps) {
   const { environment, isTransitioning } = useEnvironment();
   const audio = useAudio();
-  const { isInitialized, initAudio, stop, setVolume, startDucking, stopDucking } =
+  const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking, pool } =
     useSoundscapeAudio();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -214,11 +214,64 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     const { soundscape } = environment;
     if (prevSoundscapeRef.current?.id === soundscape.id) return;
 
-    // TODO: In production, fetch actual audio buffer from CDN/storage
-    // For now, we just mark the transition
-    console.log(`[Soundscape] Transitioning to ${soundscape.id} (${soundscape.labelThai})`);
+    // Generate oscillator-based audio buffer for soundscape
+    // §23: Adaptive Background Music — Web Audio API synthesis
+    const generateSoundscapeBuffer = () => {
+      const ctx = pool.ctx;
+      if (!ctx) return null;
+
+      const duration = 30; // 30 second loop
+      const sampleRate = ctx.sampleRate;
+      const buffer = ctx.createBuffer(2, duration * sampleRate, sampleRate);
+      const left = buffer.getChannelData(0);
+      const right = buffer.getChannelData(1);
+
+      // Frequency map based on soundscape type
+      const frequencies: Record<string, number[]> = {
+        cosmic: [174, 285, 396],      // Deep bass chord
+        ambient: [264, 396, 528],     // Middle tones
+        energetic: [528, 640, 784],   // Higher energy
+        minimal: [111, 222, 333],     // Sparse low tones
+      };
+
+      const freqs = frequencies[soundscape.id] || frequencies.ambient;
+
+      // Generate polyphonic oscillator signal
+      for (let i = 0; i < buffer.length; i++) {
+        const t = i / sampleRate;
+        let sample = 0;
+
+        freqs.forEach((freq) => {
+          sample += Math.sin(2 * Math.PI * freq * t) * (1 / freqs.length);
+        });
+
+        // Envelope: fade in/out
+        const fadeDuration = 2;
+        if (t < fadeDuration) {
+          sample *= t / fadeDuration; // fade in
+        } else if (t > duration - fadeDuration) {
+          sample *= (duration - t) / fadeDuration; // fade out
+        }
+
+        left[i] = sample * 0.3; // Volume: 30%
+        right[i] = sample * 0.3;
+      }
+
+      return buffer;
+    };
+
+    try {
+      const buffer = generateSoundscapeBuffer();
+      if (buffer) {
+        play(buffer);
+        console.log(`[Soundscape] Playing ${soundscape.id} (${soundscape.labelThai})`);
+      }
+    } catch (error) {
+      console.warn(`[Soundscape] Failed to generate audio: ${error}`);
+    }
+
     prevSoundscapeRef.current = soundscape;
-  }, [environment, isPlaying]);
+  }, [environment, isPlaying, play, pool]);
 
   // ─── PlayControl ──────────────────────────────────────────────────────────
 
@@ -235,9 +288,8 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
       setIsPlaying(false);
     } else {
       if (!isInitialized) initAudio();
-      // TODO: fetch actual audio buffer
-      // For now, just set playing state
-      setIsPlaying(true);
+      // Generate initial soundscape buffer on play
+      setIsPlaying(true); // Trigger useEffect to generate + play buffer
     }
   }, [isPlaying, isInitialized, initAudio, stop, audio]);
 
