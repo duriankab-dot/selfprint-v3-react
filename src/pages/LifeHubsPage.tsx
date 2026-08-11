@@ -6,7 +6,7 @@
  * 2. Relationships (ความสัมพันธ์)
  * 3. Health (สุขภาพ)
  * 4. Growth (การเติบโต)
- * 5. Life Balance (توازن ชีวิต)
+ * 5. Life Balance (สมดุลชีวิต)
  */
 
 import React, { useState } from 'react';
@@ -62,7 +62,7 @@ const HUBS: Hub[] = [
     id: 'balance',
     emoji: '⚖️',
     name: 'Life Balance',
-    thaiName: 'توازن ชีวิต',
+    thaiName: 'สมดุลชีวิต',
     description: 'เวลาให้ตัวเอง สิ่งที่สำคัญ ความสุข',
     score: 0,
   },
