@@ -63,6 +63,39 @@
 
 ---
 
+### FR-02b | THREE WOW MOMENTS (NEW 2026-08-12)
+
+**Feature ID:** FR-02b  
+**Name:** Three WOW Moments — Core Product Experience  
+**Purpose:** Define signature moments where user feels profound understanding from Selfprint  
+**Status:** ✅ Implemented (onboarding flow) — Documentation UPDATED
+
+**WOW #1 — FIRST INSIGHT**
+- **When:** End of Onboarding Step 3 (Initial Analysis)
+- **What Happens:** Nova displays initial analysis of user
+- **User Feels:** "It understands me already"
+- **Implementation:** ShowAnalysisPage with InsightEngine output
+- **Criteria:** User sees personalized insights within 5 minutes of meeting Nova
+
+**WOW #2 — FULL ANALYSIS**
+- **When:** After Fine-tuning (Onboarding Step 5 — Full Analysis)
+- **What Happens:** System shows comprehensive personal profile after fine-tuning answers
+- **User Feels:** "It REALLY knows me"
+- **Implementation:** FullAnalysisonPage with deeper insights, patterns, recommendations
+- **Criteria:** Analysis depth clearly increased vs WOW #1
+
+**WOW #3 — CORE AWAKENING**
+- **When:** Twin creation / awakening (Onboarding Step 6 — after naming)
+- **What Happens:** Visual celebration when AI Twin becomes "alive"
+- **User Feels:** "My Twin exists now — it's real"
+- **Implementation:** TwinEvolutionScene + celebration animation + Twin introduction message
+- **Criteria:** User names Twin and receives personalized intro message from Twin
+
+**Related Documents:**
+- See SELFPRINT_CURRENT_IMPROVEMENT_DIRECTIVE_2026-08-12.md (Item C)
+
+---
+
 ### FR-03 | NOVA AI TWIN CHAT
 ## 📌 บุคลิก AI ใน Selfprint (แยกให้ชัดเจน!)
 
@@ -308,13 +341,34 @@ BASE_PERSONA (300-400 tokens)
 
 ---
 
-### UX-03 | 5-TAB NAVIGATION
+### UX-03 | 5-TAB NAVIGATION (UPDATED 2026-08-12)
 
 **Feature ID:** UX-03  
-**Name:** 5-Tab Bottom Navigation (§5.1)  
-**Tabs:** Home (Today) / Explore / Activities / Me / Chat  
+**Name:** 5-Tab Bottom Navigation with Twin Center (§5.1 UPDATED)  
+**Tabs:** Home (Today) / Explore / **TWIN** / Activities / Me  
 **Implementation:** BottomNav component, NavBar component  
-**Status:** ✅ Implemented
+**Status:** ✅ Implemented (Navigation bar structure ready; Twin tab replacement PENDING)
+
+---
+
+**🔴 CHANGE NOTES (2026-08-12):**
+
+**OLD:** Home / Explore / Activities / Me / Chat  
+**NEW:** Home / Explore / **TWIN** / Activities / Me
+
+**Rationale:**
+- Twin is primary interaction point after Core Awakening
+- TWIN tab is center position (visual prominence)
+- Chat ≠ Navigation — Chat is interaction mode WITHIN Twin destination
+- Navigation rule: TWIN is destination; Chat/Voice/Memory are modes to interact with Twin
+
+**Rules:**
+- Before Twin Awakening: TWIN tab shows "Meet Twin" onboarding entry
+- After Awakening: TWIN tab opens Twin Chat interface
+- TWIN tab is not visible on Landing/Onboarding pages (only after first interaction)
+
+**Related Documents:**
+- See SELFPRINT_CURRENT_IMPROVEMENT_DIRECTIVE_2026-08-12.md (Item D, E)
 
 ---
 
@@ -345,17 +399,62 @@ BASE_PERSONA (300-400 tokens)
 
 ---
 
-### TW-02 | TWIN EVOLUTION
+### TW-02 | TWIN EVOLUTION (UPDATED 2026-08-12)
 
 **Feature ID:** TW-02  
-**Name:** Twin Evolution System (§30)  
-**Unlocks:**
+**Name:** Twin Evolution System — Continuous Progression (§30 UPDATED)  
+**Purpose:** Show Twin developing continuously, not just at major level-ups
+**Status:** ✅ Implemented (8-state system) — Enhanced with micro-evolution visibility
+
+---
+
+**🔴 CHANGE NOTES (2026-08-12):**
+
+**8 Main Evolution States** (unchanged):
+- `awakening` → `aware` → `connected` → `reflective` → `insightful` → `aligned` → `flourishing` → `mastery`
+
+**NEW: Micro-Evolution Between States** (visible daily/weekly)
+```
+CORE
+  ↓
+MICRO EVOLUTION (visible improvement in Twin accuracy/voice/recommendations)
+  ↓
+CORE+
+  ↓
+MICRO EVOLUTION
+  ↓
+EMERGING FORM (visual/behavior shift)
+  ↓
+MICRO EVOLUTION
+  ↓
+HOLOGRAM (representation change)
+  ↓
+MICRO EVOLUTION
+  ↓
+HUMAN FORM (more natural interaction)
+  ↓
+... (continued development)
+  ↓
+MATURE TWIN
+```
+
+**Visible Signals:**
+- Daily accuracy improvement tracking
+- Weekly Twin voice/personality micro-changes
+- Small visual updates (Twin appearance, gestures)
+- Reflection on growth milestones ("Twin noticed this about you this week")
+
+**Unlocks** (unchanged):
 - `twin-awakening` — Voice + Personality activated
 - `pattern-visualization` — Patterns shown as timeline
-- `twin-evolution` — Celebration scene at 30 reflections
-**Implementation:** EvolutionContext tracks reflectionCount; TwinEvolution component แสดง overlay; TwinEvolutionScene แสดง celebration  
-**Business Rules:** unlock() idempotent; ห้าม fabricate earned states  
-**Status:** ✅ Implemented
+- `twin-evolution` — Celebration scene at 30 reflections (now shows progression)
+
+**Implementation:** EvolutionContext tracks reflectionCount + micro-evolution signals; TwinEvolution component shows progression; Visual evolution markers appear frequently
+
+**Business Rules:** unlock() idempotent; ห้าม fabricate earned states; ALL evolution backed by real PersonalContext depth
+
+**Related Documents:**
+- See SELFPRINT_CURRENT_IMPROVEMENT_DIRECTIVE_2026-08-12.md (Item M)
 
 ---
 
@@ -504,25 +603,61 @@ BASE_PERSONA (300-400 tokens)
 
 ---
 
-### GM-01 | BADGE SYSTEM
+### GM-01 | GAMIFICATION AS GROWTH LAYER (UPDATED 2026-08-12)
 
 **Feature ID:** GM-01  
-**Name:** Badge System (§29–30)  
-**Badges (8):**
+**Name:** Gamification System — Growth Visualization (§29–30 UPDATED)  
+**Purpose:** Visualize Growth and Evolution; NOT core product  
+**Status:** ✅ Implemented — Clarified as enhancement layer
 
-| Badge ID | Thai Name | Condition | Unlock |
+---
+
+**🔴 CHANGE NOTES (2026-08-12):**
+
+**What Gamification IS:**
+- Visualizes Growth over time
+- Represents Twin Evolution milestones
+- Rewards consistent engagement
+- Enables customization / expression
+- Makes progress tangible
+
+**What Gamification is NOT:**
+- Core product (people use Selfprint for Intelligence, not badges)
+- Required to understand Twin
+- Required to use Selfprint
+- Reason to have Selfprint account
+
+**Separation of Concerns:**
+
+| Layer | System | Gamified? |
+|-------|--------|----------|
+| **Intelligence** | Personal Model, Insights, Patterns, Learning | ❌ NO |
+| **Growth** | Badges, Levels, Evolution visualization, Milestones | ✅ YES |
+| **Assets** | Twin Outfits, Orbits, Nodes, Customization | ✅ YES (optional) |
+
+### Badge System Details
+
+**Badges (8) — Growth Markers (not requirements)**
+
+| Badge ID | Thai Name | Condition | Unlocks |
 |---|---|---|---|
-| first_reflection | การสะท้อนครั้งแรก 🌱 | ส่งข้อความถึง Twin ครั้งแรก | Twin Memory |
-| pattern_finder | นักค้นหารูปแบบ 🔍 | Twin ตรวจพบ Pattern แรก | Pattern Visualization |
-| journey_explorer | นักสำรวจ Journey 🧭 | ใช้งาน Hub ≥ 3 ด้าน | Journey Map |
-| self_mirror | กระจกส่องตัวเอง | – | – |
-| deep_thinker | นักคิดลึก | – | – |
-| decision_maker | ผู้ตัดสินใจ | – | – |
-| twin_awakening | Twin ตื่นขึ้น | – | Voice + Full Personality |
-| selfprint_complete | Selfprint สมบูรณ์ | – | – |
+| first_reflection | การสะท้อนครั้งแรก 🌱 | ส่งข้อความถึง Twin ครั้งแรก | Twin Memory visibility |
+| pattern_finder | นักค้นหารูปแบบ 🔍 | Twin ตรวจพบ Pattern แรก | Pattern Visualization feature |
+| journey_explorer | นักสำรวจ Journey 🧭 | ใช้งาน World ≥ 3 ด้าน | Journey Map access |
+| self_mirror | กระจกส่องตัวเอง | 30 reflections | Twin visual evolution |
+| deep_thinker | นักคิดลึก | 50 insights received | Advanced analysis access |
+| decision_maker | ผู้ตัดสินใจ | 20 decision logs | Decision analytics |
+| twin_awakening | Twin ตื่นขึ้น | Complete onboarding | Voice + Full Personality activation |
+| selfprint_complete | Selfprint เนิ่นเต็ม | Pro subscription + milestones | VIP community |
 
-**Business Rules:** unlock() idempotent; Badge state ใน Supabase user_metadata; ห้าม fabricate  
-**Status:** ✅ Implemented — BadgeEngine.ts + BadgePage
+**Business Rules:**
+- unlock() idempotent
+- Badge state stored in Supabase user_metadata
+- ห้าม fabricate — all based on real milestones
+- Badges are VISUAL RECOGNITION, not gatekeeping
+
+**Related Documents:**
+- See SELFPRINT_CURRENT_IMPROVEMENT_DIRECTIVE_2026-08-12.md (Item N, O)
 
 ---
 

@@ -12,22 +12,67 @@
 
 ---
 
-## 🔄 Core Flows — แยก Nova และ AI Twin
+## 🔄 Core Flows — แยก Nova และ AI Twin (UPDATED 2026-08-12)
 
-### 1. Onboarding Flow (Nova นำทาง)
-Landing → Nova ทักทาย → Nova พา Onboarding
-→ Nova สอนให้สร้าง AI Twin
-→ AI Twin ถูกสร้าง (จากข้อมูลของผู้ใช้)
-→ ผู้ใช้ตั้งชื่อ AI Twin
-→ Nova ส่งต่อให้ AI Twin
+### 1. Nova → Twin Journey (Canonical User Flow)
+```
+User enters Selfprint
+    ↓
+Nova greets (WOW #1: First Insight)
+    ↓
+Onboarding: Initial Input
+    ↓
+Nova analyzes (WOW #1 moment)
+    ↓
+Fine-tuning phase
+    ↓
+Full Analysis (WOW #2 moment)
+    ↓
+Core Awakening begins
+    ↓
+AI Twin is created & named
+    ↓
+WOW #3: Twin introduction
+    ↓
+Twin becomes primary AI
+    ↓
+Nova works behind scenes (Dashboard, recommendations)
+```
 
-text
+**Key Rule:** After WOW #3, user's Chat interaction = Twin interaction, not Nova
 
-### 2. Daily Chat Flow (AI Twin คุยกับผู้ใช้)
-ผู้ใช้พิมพ์ข้อความ → AI Twin รับข้อความ
-→ AI Twin ดึง Personal Context + Memory + Patterns
-→ AI Twin ตอบ (ใช้ข้อมูลเฉพาะของผู้ใช้)
-→ บันทึกเป็น Reflection → Personal Model อัปเดต
+### 2. Daily Twin Chat Flow (After Awakening)
+```
+User enters Twin chat
+    ↓
+Twin loads:
+  ├─ Personal Context (values, goals, patterns)
+  ├─ Recent Memories (last 5 interactions)
+  ├─ Behavioral Patterns (autonomy, confidence trends)
+  └─ Mood/World context
+    ↓
+User sends message
+    ↓
+Twin analyzes with PersonalContextBuilder + PatternDetector
+    ↓
+Twin responds (personalized + contextual)
+    ↓
+Message saved as Reflection
+    ↓
+Personal Model updates (learning signal)
+    ↓
+Twin becomes slightly more understanding
+```
+
+### 3. Nova Behind Scenes (Orchestration)
+```
+Nova (via AI Orchestrator) periodically:
+  • Reviews user state → selects dashboard sections
+  • Suggests topics/questions based on patterns
+  • Recommends World/Mood based on user profile
+  • BUT: Does not directly chat (Twin does)
+```
+
 ---
 
 ## 📊 System Architecture Overview
@@ -113,6 +158,42 @@ text
 │ └─ localStorage (client-side persistence)                   │
 └──────────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🧠 Twin Learning System (NEW 2026-08-12)
+
+**Core Principle:** Twin doesn't just remember text; it learns patterns and synthesizes understanding
+
+**Twin learns from (6 sources):**
+1. **Conversation** — Direct messages in Chat
+2. **Reflection** — Journal entries, analyses, self-assessments
+3. **Activities** — Tracked behaviors, completed tasks, engagement patterns
+4. **Journal** — User-recorded notes and thoughts
+5. **Journey** — Progression over time, milestones reached
+6. **Feedback** — Accuracy ratings on insights (very_true / somewhat / not_sure / not_me)
+
+**Learning Pipeline:**
+```
+Conversation + Reflection + Activities + Journal + Journey + Feedback
+                           ↓
+                  Personal Learning (synthesis)
+                           ↓
+                  Twin understands more deeply
+                           ↓
+                  Next insights are more accurate
+                           ↓
+                  Cycle repeats at deeper level
+```
+
+**NOT:** Chatbot that memorizes text  
+**YES:** AI that synthesizes behavior, detects patterns, offers personalized guidance
+
+**Implementation:**
+- PersonalContextBuilder: synthesizes data → PersonalContext
+- AIFeedbackLoop: validates insights → improves confidence
+- PatternDetector: finds patterns → behavior understanding
+- MemoryManager: stores significant moments → context for future conversations
 
 ---
 
