@@ -1,5 +1,27 @@
 # PROJECT SUMMARY — SELFPRINT
-> อ่านจากโค้ดจริง `D:\selfprint-v3-react` | วันที่ 11 สิงหาคม 2569
+> อ่านจากโค้ดจริง `D:\selfprint-v3-react` | วันที่ 12 สิงหาคม 2569
+
+---
+
+## 🔴 แยก Nova และ AI Twin ให้ชัดเจน
+
+| บุคลิก | บทบาท | รายละเอียด |
+|--------|-------|-----------|
+| **Nova** | AI Guide | ผู้แนะนำที่มีอยู่ในระบบตั้งแต่แรก — คอยช่วยเหลือ, นำทาง, สอนผู้ใช้ |
+| **AI Twin** | AI ฝาแฝดส่วนตัว | ผู้ใช้สร้างขึ้นเองระหว่าง Onboarding, ตั้งชื่อเอง, เรียนรู้จากผู้ใช้โดยเฉพาะ |
+
+**Nova ≠ AI Twin** — เป็นคนละตัวกัน!
+
+---
+
+### Living AI Twin (Nova) — เปลี่ยนเป็น "Living AI Twin"
+
+**Engine:** nova-ai.ts + getNovaPrompt.ts + TwinContext + TwinStateEngine
+
+> **หมายเหตุ:** ชื่อฟังก์ชันในโค้ดอาจใช้ "Nova" แต่ใน UX ต้องแยกให้ชัดเจน:
+> - **Nova** = ผู้แนะนำ (Guide)
+> - **AI Twin** = ฝาแฝดส่วนตัว (Personal Twin)
+
 
 ---
 

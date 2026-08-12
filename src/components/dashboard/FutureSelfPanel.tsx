@@ -35,7 +35,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
   return (
     <div className="future-self-panel">
       <div className="future-self-header">
-        <h3 className="future-self-title">🔮 Future Self</h3>
+        <h3 className="future-self-title">Future Self Projection</h3>
         <span className="future-self-quality">{qualityLabel}</span>
       </div>
 
@@ -59,7 +59,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
             </div>
 
             <div className="scenario-section">
-              <p className="scenario-section-title">🌱 โอกาสเติบโต</p>
+              <p className="scenario-section-title">↑ โอกาสเติบโต</p>
               <ul className="scenario-list">
                 {s.growthOpportunities.map((g, i) => (
                   <li key={i}>{g}</li>

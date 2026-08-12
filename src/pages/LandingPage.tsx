@@ -127,19 +127,46 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             </button>
           </div>
         </div>
+        {/* Hero visual — AI network diagram (SVG, no emoji) */}
         <div
           style={{
             textAlign: 'center',
             minHeight: '400px',
-            background: 'linear-gradient(135deg, rgba(91, 92, 235, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)',
+            background: 'linear-gradient(135deg, rgba(91, 92, 235, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '80px',
           }}
         >
-          🤖
+          <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Central CPU node */}
+            <rect x="72" y="72" width="56" height="56" rx="12" fill="var(--color-accent-primary)" opacity="0.15" stroke="var(--color-accent-primary)" strokeWidth="2"/>
+            <rect x="84" y="84" width="32" height="32" rx="6" fill="var(--color-accent-primary)" opacity="0.3"/>
+            {/* CPU pins */}
+            <line x1="86" y1="72" x2="86" y2="60" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="100" y1="72" x2="100" y2="60" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="114" y1="72" x2="114" y2="60" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="86" y1="128" x2="86" y2="140" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="100" y1="128" x2="100" y2="140" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="114" y1="128" x2="114" y2="140" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="72" y1="86" x2="60" y2="86" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="72" y1="100" x2="60" y2="100" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="72" y1="114" x2="60" y2="114" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="128" y1="86" x2="140" y2="86" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="128" y1="100" x2="140" y2="100" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            <line x1="128" y1="114" x2="140" y2="114" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round"/>
+            {/* Orbit nodes */}
+            <circle cx="100" cy="30" r="10" fill="var(--color-accent-primary)" opacity="0.2" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
+            <circle cx="170" cy="100" r="10" fill="var(--color-accent-primary)" opacity="0.2" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
+            <circle cx="100" cy="170" r="10" fill="var(--color-accent-primary)" opacity="0.2" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
+            <circle cx="30" cy="100" r="10" fill="var(--color-accent-primary)" opacity="0.2" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
+            {/* Connection lines */}
+            <line x1="100" y1="40" x2="100" y2="60" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+            <line x1="160" y1="100" x2="140" y2="100" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+            <line x1="100" y1="160" x2="100" y2="140" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+            <line x1="40" y1="100" x2="60" y2="100" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="4 3" opacity="0.5"/>
+          </svg>
         </div>
       </section>
 
@@ -224,9 +251,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>💡</div>
-            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>จำหน่วยเดิม</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>จดจำรูปแบบของคุณ</h3>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              เห็นสิ่งที่มองไม่เห็น
+              AI มองเห็นสิ่งที่คุณมองข้าม
             </p>
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px' }}>
@@ -239,6 +266,81 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         </div>
 
         <ProgressiveCTA section="why" text="สร้าง AI Twin ของฉัน" variant="primary" />
+      </section>
+
+      {/* AI TOUR VIDEO SECTION */}
+      <section
+        style={{
+          background: 'white',
+          padding: '80px 48px',
+          textAlign: 'center',
+        }}
+      >
+        <h2
+          style={{
+            fontSize: 'clamp(24px, 3.5vw, 40px)',
+            fontWeight: 700,
+            lineHeight: 1.25,
+            marginBottom: '12px',
+          }}
+        >
+          ดูว่า AI ฝาแฝดทำงานยังไง
+        </h2>
+        <p
+          style={{
+            fontSize: '16px',
+            color: 'var(--color-text-secondary)',
+            marginBottom: '40px',
+            maxWidth: '560px',
+            marginLeft: 'auto',
+            marginRight: 'auto',
+            lineHeight: 1.7,
+          }}
+        >
+          ชม Demo สั้น 2 นาที — เห็นตั้งแต่สร้าง AI ฝาแฝดจนถึงรับ Insight แรก
+        </p>
+
+        <div
+          style={{
+            maxWidth: '800px',
+            margin: '0 auto',
+            borderRadius: '16px',
+            overflow: 'hidden',
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-bg-secondary)',
+            aspectRatio: '16/9',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexDirection: 'column',
+            gap: 16,
+            minHeight: '280px',
+          }}
+        >
+          {/* Video จะ load จาก VITE_AI_TOUR_VIDEO_URL */}
+          {import.meta.env.VITE_AI_TOUR_VIDEO_URL ? (
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster={import.meta.env.VITE_AI_TOUR_POSTER_URL}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            >
+              <source src={import.meta.env.VITE_AI_TOUR_VIDEO_URL} type="video/mp4" />
+            </video>
+          ) : (
+            /* Placeholder — ใส่ VITE_AI_TOUR_VIDEO_URL ใน .env เพื่อเปิดใช้ */
+            <>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <polygon points="10 8 16 12 10 16 10 8" fill="var(--color-text-secondary)" stroke="none"/>
+              </svg>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, margin: 0 }}>
+                วิดีโอ AI Tour กำลังจะมาเร็วๆ นี้
+              </p>
+            </>
+          )}
+        </div>
       </section>
 
       {/* HOW SECTION - Process */}
@@ -294,9 +396,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               >
                 1️⃣
               </div>
-              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>บอกวันเกิด</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>บอกข้อมูลตัวเอง</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                Nova ขอพื้นฐาน
+                AI เรียนรู้ข้อมูลเบื้องต้น
               </p>
             </div>
             <div style={{ flex: 1, minWidth: '200px' }}>
@@ -342,9 +444,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               >
                 3️⃣
               </div>
-              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>ลงโอนเริ่มใช้</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>เริ่มใช้งาน</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                Twin เรียนรู้
+                AI ฝาแฝดเรียนรู้คุณทุกวัน
               </p>
             </div>
           </div>

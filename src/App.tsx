@@ -1,5 +1,7 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
 import { EmotionProvider } from './context/EmotionContext';
 import { HubProvider } from './context/HubContext';
 import { TwinProvider } from './context/TwinContext';
@@ -53,6 +55,18 @@ import('./PHASE2_TEST_CONSOLE').then(module => {
   console.log('✅ Phase 2 Tests Ready: window.PHASE2_TESTS.runAll()');
 });
 
+/**
+ * HomeRoute — แสดง LandingPage สำหรับ guest
+ * ถ้า login อยู่แล้ว redirect ตรงไป /dashboard
+ */
+function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
+  const auth = useContext(AuthContext);
+  // ยังโหลด session อยู่ — รอก่อน ไม่ flash redirect
+  if (auth?.loading) return null;
+  if (auth?.session) return <Navigate to="/dashboard" replace />;
+  return <LandingPage onStartOnboarding={onStartOnboarding} />;
+}
+
 function App() {
   return (
     <ThemeProvider>
@@ -82,7 +96,7 @@ function App() {
               <Router>
                 <Suspense fallback={null}>
                   <Routes>
-                    <Route path="/" element={<LandingPage onStartOnboarding={() => window.location.href = '/onboarding'} />} /> {/* Phase 3.2: New Landing */}
+                    <Route path="/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/onboarding'} />} /> {/* Phase 3.2: redirect to /dashboard if logged in */}
                     <Route path="/onboarding" element={<Onboarding />} />
                     <Route path="/chat" element={<Chat />} />
                     <Route path="/dashboard" element={<Dashboard />} />

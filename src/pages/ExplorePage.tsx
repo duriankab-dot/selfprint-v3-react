@@ -132,9 +132,24 @@ export default function ExplorePage() {
             marginBottom: 20,
           }}>
             <div style={{ textAlign: 'center', marginBottom: 4 }}>
-              <div style={{ fontSize: 48, lineHeight: 1.2 }}>☯</div>
+              {/* Pattern ID badge แทน ☯ emoji */}
+              <div style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                background: 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)',
+                marginBottom: 8,
+              }}>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                  <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+              </div>
               <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '6px 0 2px' }}>
-                เฮ็กซะแกรม #{hexagram.number} · {hexagram.symbol}
+                รูปแบบที่ #{hexagram.number} · {hexagram.symbol}
               </div>
               <div style={{
                 fontSize: 22,
@@ -195,7 +210,7 @@ export default function ExplorePage() {
               onClick={() =>
                 navigate('/chat', {
                   state: {
-                    initialMessage: `ช่วยเชื่อมคำแนะนำของเซียมซี "${hexagram.thaiName}" (${hexagram.theme}) กับสิ่งที่ฉันกำลังเผชิญในชีวิตจริงได้ไหม?`,
+                    initialMessage: `รูปแบบที่ AI วิเคราะห์ได้: "${hexagram.thaiName}" (${hexagram.theme}) — ช่วยเชื่อมโยงกับสิ่งที่ฉันกำลังเผชิญในชีวิตจริงได้ไหม?`,
                   },
                 })
               }

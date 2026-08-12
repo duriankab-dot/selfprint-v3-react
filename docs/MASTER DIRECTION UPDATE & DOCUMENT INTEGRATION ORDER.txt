@@ -1,0 +1,718 @@
+SELFPRINT — MASTER DIRECTION UPDATE & DOCUMENT INTEGRATION ORDER
+Document Consolidation Pass — 2026-08-12
+คำสั่งหลัก
+
+คุณกำลังทำงานกับ Selfprint เวอร์ชันที่พัฒนาอยู่แล้ว
+
+ห้ามรื้อระบบ ห้ามสร้าง Product ใหม่ และห้ามสร้างเอกสารใหม่ซ้ำโดยไม่จำเป็น
+
+ภารกิจรอบนี้คือ:
+
+นำ Product Direction / UX / AI Architecture / Experience Improvements ที่ได้รับการตัดสินใจล่าสุด ไป Update ลงในเอกสารหลักที่มีอยู่แล้ว เพื่อให้เอกสารทั้งหมดกลับมาเป็น Source of Truth เดียวกันก่อนเริ่ม Development รอบถัดไป
+
+1. หลักการสำคัญ
+
+ของเดิมที่ถูกต้อง:
+
+KEEP
+
+ของเดิมที่ดีแต่ต้องปรับ:
+
+IMPROVE / MODIFY
+
+ของเดิมที่ต้องขยาย:
+
+EXTEND
+
+สิ่งที่เราตัดสินใจใหม่:
+
+ADD TO MASTER DIRECTION
+
+สิ่งที่ขัดกับ Direction ใหม่:
+
+UPDATE / SUPERSEDE เฉพาะส่วนนั้น
+
+ไม่ใช่:
+
+DELETE PRODUCT / REBUILD PRODUCT
+
+2. อ่านเอกสารเดิมก่อน
+
+ต้องอ่านและ cross-check เอกสารหลักที่มีอยู่จริงใน /docs
+
+จากชุดเอกสารที่มีอยู่ ให้ตรวจอย่างน้อย:
+
+INTELLIGENCE_SYSTEM_ARCHITECTURE
+MASTER_PRD
+PROJECT_SUMMARY
+PROJECT_ROADMAP_UPDATED
+FINAL_PROJECT_SUMMARY
+SELFPRINT_MASTER_DEVELOPMENT_DIRECTIVE_v2
+SELFPRINT AI DEV DEVELOPMENT HANDOFF
+FEATURE_COMPLETENESS_AUDIT_2026-08-11
+CODEBASE_MAP_2026-08-11
+FIX_CHECKLIST
+BUILD_STATUS_2026-08-10_TH
+README
+CHANGELOG
+USER_GUIDE_TH
+AI CONTEXT
+CONTRIBUTING
+
+เอกสาร Master Direction ของ Selfprint เวอร์ชันใหม่ ที่มีอยู่
+
+โดยเฉพาะ Handoff เดิม(ย้ายไปแล้ว)ต้องรักษา foundation ที่กำหนดให้ตรวจระบบเดิมก่อนสร้างอะไรใหม่
+
+3. ห้ามเอาทุกอย่างยัดลงทุกเอกสาร
+
+ให้ AI วิเคราะห์ว่าแต่ละเรื่องควรอยู่ในเอกสารใด
+
+ตัวอย่าง:
+
+MASTER PRD
+
+Product / UX / Feature Direction
+
+INTELLIGENCE SYSTEM ARCHITECTURE
+
+Nova / Twin / Personal Intelligence / Memory / AI Orchestration / Learning
+
+DEVELOPMENT HANDOFF
+
+Implementation Direction / Rules / Developer Behavior
+
+PROJECT ROADMAP
+
+Phase / Priority / Development sequence
+
+PROJECT SUMMARY
+
+Current Product Definition
+
+FEATURE AUDIT
+
+Implemented / Partial / Missing / Needs Improvement
+
+CODEBASE MAP
+
+ตำแหน่ง implementation จริง
+
+USER GUIDE
+
+ภาษาที่ผู้ใช้เห็น
+
+อย่าก๊อปปี้เนื้อหาเดียวกันไปทุกไฟล์จนเกิดความขัดแย้งใหม่
+
+4. ADD THIS AS “NEW IMPROVEMENT DIRECTION”
+
+เพิ่มรายการต่อไปนี้เข้าไปในเอกสารหลักที่เกี่ยวข้อง
+
+A. NOVA และ AI TWIN ต้องแยกบทบาทชัดเจน
+NOVA
+
+Nova คือ AI ที่ผู้ใช้ทุกคนพบตั้งแต่เริ่มต้น
+
+บทบาท:
+
+Introduction
+Onboarding
+Initial Understanding
+First Analysis
+First WOW
+Fine-tuning
+Question Selection
+Full Analysis
+Recommendation
+Experience Orchestration
+Dashboard Section Selection
+Context / Mood orchestration
+Background Intelligence
+
+Nova ต้องทำให้ผู้ใช้รู้สึกว่า:
+
+“AI นี้ฉลาดตั้งแต่ครั้งแรกที่เจอ”
+
+B. AI TWIN
+
+AI Twin คือ AI ส่วนบุคคลที่เกิดขึ้นหลังจากกระบวนการสร้าง Twin / Core Awakening
+
+Twin เป็น:
+
+Personal AI ที่เรียนรู้และเติบโตไปพร้อมกับผู้ใช้
+
+Twin รับผิดชอบ:
+
+Personal Conversation
+Personal Memory
+Personal Learning
+Reflection
+Pattern Understanding
+Personal Context
+Voice Interaction
+Growth
+Evolution
+กฎสำคัญ
+
+หลัง Twin เกิด:
+
+Chat หลัก = Twin
+
+Nova ไม่กลับมาแทน Twin
+
+Nova ทำงาน behind the scenes
+
+C. NOVA → TWIN JOURNEY
+
+เพิ่ม User Journey นี้เป็น canonical flow:
+
+User enters Selfprint
+        ↓
+Meet Nova
+        ↓
+Initial Input
+        ↓
+Initial Analysis
+        ↓
+WOW #1
+        ↓
+Fine-tuning
+        ↓
+Full Analysis
+        ↓
+WOW #2
+        ↓
+Core Awakening
+        ↓
+WOW #3
+        ↓
+AI Twin is born
+        ↓
+Twin becomes user's primary AI
+
+นี่เป็นการ ขยายและทำให้ของเดิมชัดขึ้น เพราะ Handoff เดิมมี Nova → Personal Core → Twin Birth อยู่แล้ว
+
+D. THREE WOW MOMENTS
+
+เพิ่มเป็น Product Experience Principle:
+
+WOW #1 — FIRST INSIGHT
+
+Nova วิเคราะห์ผู้ใช้จากข้อมูลเบื้องต้นได้อย่างน่าประทับใจ
+
+WOW #2 — FULL ANALYSIS
+
+หลัง Fine-tuning:
+
+AI เข้าใจผู้ใช้ลึกขึ้นอย่างชัดเจน
+
+WOW #3 — CORE AWAKENING
+
+ผู้ใช้สร้าง / ปลุก AI Twin ของตัวเอง(ตั้งชื่อเองภายหลัง)
+
+E. FIVE NAVIGATION
+
+นี่คือ การปรับปรุงจากโครงสร้าง Navigation เดิม
+
+Canonical Navigation ใหม่:
+
+HOME | EXPLORE | TWIN | ACTIVITIES | ME
+สำคัญที่สุด
+
+TWIN ต้องอยู่ตรงกลาง
+
+และเป็น Primary Interaction Point ของ Product หลัง Twin Awakening
+
+ดังนั้นเอกสารใดที่ยังระบุ:
+
+Home | Explore | Activities | Me
+
+หรือ
+
+Home | Explore | Activities | Me | Chat
+
+ให้ update เป็น:
+
+Home | Explore | Twin | Activities | Me
+
+แต่:
+
+ไม่ต้องลบข้อมูลเดิมออกจาก historical document หากเอกสารนั้นมีคุณค่าในฐานะ implementation history
+
+ให้ระบุว่าเป็น:
+
+Previous Direction / Superseded
+
+Handoff เดิมระบุ 4 เมนูไว้จริง ดังนั้นนี่เป็นหนึ่งในจุดที่ต้องแก้ให้ตรงกับ Direction ใหม่
+
+F. CHAT ≠ NAVIGATION
+
+เปลี่ยน conceptual model:
+
+Twin
+ └── Chat
+
+ไม่ใช่:
+
+Chat
+ └── AI Twin
+
+Twin คือ Destination
+
+Chat คือ interaction mode
+
+G. 12 HUBS = 12 WORLDS
+
+นี่เป็นการยกระดับความหมายของ Hub เดิม
+
+ไม่ใช่แค่:
+
+12 categories
+
+แต่:
+
+12 Worlds of Selfprint
+
+แต่ละ World มี:
+
+Background
+Environment
+Lighting
+Atmosphere
+Sound
+Visual identity
+Context
+Mood relationship
+
+และสามารถใช้เป็น:
+
+Full-screen background ของ Twin Experience
+
+H. TWIN + WORLD
+
+เมื่อผู้ใช้เลือก Hub / World:
+
+World Context
+      ↓
+Twin
+      ↓
+Conversation
+
+ผู้ใช้ควรรู้จากภาพและบรรยากาศทันทีว่า:
+
+“ตอนนี้ฉันกำลังคุยกับ Twin เรื่องนี้”
+
+I. DEEP INTELLIGENT BLUE
+
+ห้ามให้ World color เปลี่ยน Selfprint Brand Identity
+
+กำหนด:
+
+Deep Intelligent Blue = Global Selfprint DNA
+
+World สามารถเปลี่ยน:
+
+Atmosphere
+Lighting
+Accent
+Environment
+Mood
+
+แต่ Deep Intelligent Blue ยังคงเป็น Core Brand Language
+
+J. FULL-SCREEN TWIN EXPERIENCE
+
+Twin Chat ไม่ควรถูกออกแบบเหมือน chatbot ทั่วไปเพียงอย่างเดียว
+
+เมื่อเข้าสู่ Twin Experience:
+
+Twin / Core เป็น visual center
+
+ด้านหลัง:
+
+World Environment
+
+รอบ ๆ:
+
+Lighting / Atmosphere / Mood
+
+ด้านล่าง:
+
+Conversation / Voice / Controls
+
+K. MOOD ADAPTATION
+
+AI สามารถปรับ:
+
+Color
+Light
+Voice
+Sound
+Animation
+Atmosphere
+
+ตาม:
+
+Context
+Conversation
+User Mood
+World
+
+แต่:
+
+Mood ห้ามเปลี่ยนตัวตนของ Twin
+
+และ:
+
+Mood ห้ามซ่อน Navigation หรือ Controls สำคัญ
+
+User สามารถ Override AI ได้
+
+L. ADAPTIVE AI
+
+AI สามารถเลือก:
+
+Topics
+Questions
+Sections
+Recommendations
+Dashboard ordering
+World emphasis
+Mood
+Voice expression
+Visual atmosphere
+
+หลักเดิมเรื่อง Dynamic Home และ Section Library + AI Orchestrator ให้รักษาไว้ ไม่สร้างระบบใหม่ซ้ำ
+
+M. TWIN LEARNING
+
+Twin ต้องพัฒนาความเข้าใจผู้ใช้จากการใช้งานจริง:
+
+Conversation
++
+Reflection
++
+Activities
++
+Journal
++
+Journey
++
+User Feedback
+        ↓
+Personal Learning
+        ↓
+Twin understands more
+
+ไม่ใช่แค่:
+
+Chatbot ที่จำข้อความ
+
+Handoff เดิมระบุอยู่แล้วว่า Twin ต้องเชื่อม Conversation, Journey, Reflection, Goals และข้อมูลที่อนุญาตให้จำ
+
+N. TWIN EVOLUTION
+
+เพิ่มรายละเอียด Evolution ใหม่
+
+เดิมมี Growth / Evolution อยู่แล้ว แต่ต้องขยายให้ผู้ใช้เห็นพัฒนาการบ่อยขึ้น
+
+แนวคิด:
+
+CORE
+ ↓
+MICRO EVOLUTION
+ ↓
+CORE+
+ ↓
+MICRO EVOLUTION
+ ↓
+EMERGING FORM
+ ↓
+MICRO EVOLUTION
+ ↓
+HOLOGRAM
+ ↓
+MICRO EVOLUTION
+ ↓
+HUMAN FORM
+ ↓
+...
+ ↓
+MATURE TWIN
+
+เป้าหมาย:
+
+ผู้ใช้ควรรู้สึกว่าการพัฒนาของ Twin เกิดขึ้นอย่างต่อเนื่อง ไม่ใช่รอ Level ใหญ่เพียงไม่กี่ครั้ง
+
+O. GAMIFICATION
+
+Gamification เป็น Growth Layer
+
+ไม่ใช่ตัว Product หลัก
+
+ใช้เพื่อ:
+
+Level
+Growth
+Evolution
+Rewards
+Outfit
+Orbit
+Nodes
+Customization
+
+แต่ต้องแยก:
+
+INTELLIGENCE
+GROWTH
+ASSET
+
+ออกจากกัน
+
+P. DIGITAL ASSETS
+
+Digital Asset ไม่ได้จำกัดอยู่แค่ Gamification
+
+ครอบคลุม:
+
+Twin Assets
+Outfit
+Orbit
+Nodes
+World Assets
+Hub Assets
+Experiences
+Other purchasable digital access/assets
+
+ต้องแยกสถานะ:
+
+OWNED
+UNLOCKED
+ACCESS
+SUBSCRIPTION
+
+ไม่ตีความทุกอย่างเป็น Game Reward
+
+Q. LANDING PAGE
+
+Landing Page ต้องกระชับ
+
+ไม่ใช่ feature catalog
+
+Story:
+
+Meet Nova
+ ↓
+Understand Yourself
+ ↓
+First Insight
+ ↓
+Go Deeper
+ ↓
+Full Analysis
+ ↓
+Awaken Your Twin
+ ↓
+Grow Together
+
+CTA หลัก:
+
+Meet Nova
+
+ไม่ต้องอธิบาย 12 Worlds, Assets, Gamification และระบบย่อยทั้งหมดใน Landing Page
+
+ให้ผู้ใช้ เข้าใจ Product ก่อน แล้วค่อย discover Product
+
+R. LEARNING PAGE
+
+Learning Page ต้อง:
+
+กระชับ
+
+ไม่ทำเป็นหน้า documentation ยาว ๆ
+
+ใช้:
+
+concise explanation
+visual progression
+current learning
+next meaningful action
+
+เป้าหมายคือ:
+
+ทำให้ผู้ใช้เห็นว่า Twin เรียนรู้อะไรจากเขา และกำลังพัฒนาไปทางไหน
+
+ไม่ใช่ให้ผู้ใช้อ่านรายงานยาว
+
+S. VOICE
+
+รักษาระบบ Voice เดิม
+
+ไม่สร้างใหม่ถ้ามีของเดิมใช้งานได้
+
+แต่เพิ่ม Direction:
+
+Nova
+
+Guide / Intelligent / Warm
+
+Twin
+
+Personal / Familiar / Adaptive
+
+ทั้งสองสามารถพูดได้ แต่หลัง Twin Awakening:
+
+Twin เป็นเสียงหลักในการสนทนา
+
+Handoff เดิมมี Voice Input, Voice Playback และ Background Audio อยู่แล้ว และระบุชัดว่า Nova กับ Twin สามารถพูดกับผู้ใช้ได้
+
+T. สิ่งที่ “ไม่เปลี่ยน”
+
+เพิ่มหัวข้อนี้ในเอกสาร Master เพื่อป้องกัน AI Dev เข้าใจผิด:
+
+ไม่เปลี่ยน
+Existing working systems
+Existing AI infrastructure
+Existing Voice system
+Existing Audio system
+Existing Journal
+Existing Reflection
+Existing Journey
+Existing Assessment
+Existing Personal Intelligence
+Existing PWA
+Existing authentication
+Existing database
+Existing APIs
+
+ถ้าของเดิมทำงานได้:
+
+Improve / Integrate
+
+ไม่สร้างซ้ำ
+
+หลักนี้ตรงกับ Handoff เดิมโดยตรง
+
+U. เพิ่ม “IMPROVEMENT BACKLOG” ใน MASTER
+
+นี่เป็นส่วนที่สำคัญมาก
+
+อย่าให้ AI เอาประเด็นใหม่ไปเขียนกลืนกับ Requirement เดิมจนไม่รู้ว่าอะไรคือการปรับปรุงล่าสุด
+
+ให้เพิ่ม section:
+
+SELFPRINT — CURRENT IMPROVEMENT DIRECTIVE
+2026-08-12
+
+และจัดเป็น:
+
+P0 — Must Align Before Development
+
+P1 — Product Experience Improvements
+
+P2 — Refinement / Polish
+
+FUTURE — Do Not Implement Yet
+P0 ตอนนี้
+Nova / Twin separation
+5 Navigation
+Twin center navigation
+Chat → Twin
+12 Hubs → 12 Worlds
+Deep Intelligent Blue Global DNA
+Full-screen Twin World experience
+Mood / Light / Sound / Voice adaptation
+3 WOW Journey
+Twin Learning
+Detailed Twin Evolution
+Digital Asset ownership distinction
+Landing Page refinement
+Learning Page concise experience
+AI adaptive topic/question/section selection
+V. ห้าม Development ก่อน Documentation Alignment
+
+รอบนี้:
+
+DOCUMENT FIRST
+
+ลำดับ:
+
+Read Existing Docs
+        ↓
+Identify Conflicts
+        ↓
+Integrate New Direction
+        ↓
+Update Master Documents
+        ↓
+Cross-document Consistency Check
+        ↓
+AI DEV uses updated docs as Source of Truth
+        ↓
+Development
+
+ยังไม่ต้องลงมือ implement Feature ใหม่จากรายการนี้ในรอบ Consolidation
+
+ยกเว้นการตรวจสอบ codebase เพื่อระบุ:
+
+Existing / Partial / Needs Update
+
+W. รายงานก่อนจบ
+
+AI ต้องส่งกลับ:
+
+1. Documents Updated
+
+ระบุชื่อไฟล์จริงทุกไฟล์
+
+2. Sections Added / Modified
+
+เช่น:
+
+MASTER_PRD
+- AI Architecture
+- Navigation
+- Hub / World
+- Twin Evolution
+- Digital Assets
+- Landing
+
+INTELLIGENCE_SYSTEM_ARCHITECTURE
+- Nova
+- Twin
+- Learning
+- Adaptive Intelligence
+3. Conflicts Found
+
+เช่น:
+
+OLD → NEW
+4 Navigation → 5 Navigation
+Chat → Twin
+Hub → World
+Nova/Twin overlap → separated
+4. Existing Features Preserved
+5. Development Gaps Identified
+6. Documents That Remain Historical
+7. Git Commit
+8. Git Push Status
+คำสั่งท้ายสุดถึง AI Dev
+
+อย่าเพิ่งพัฒนา Feature ตาม Directive นี้
+
+รอบนี้ให้ทำหน้าที่เป็น Product Documentation Architect + AI Development Lead
+
+อ่านเอกสาร Selfprint เดิมทั้งหมดที่เกี่ยวข้อง → ตรวจสิ่งที่มีอยู่จริง → นำ Direction ล่าสุดด้านบนเข้าไป ปรับปรุงในเอกสารหลักเดิม → แก้เฉพาะจุดที่ขัดกัน → เพิ่ม Improvement Directive → ตรวจ consistency ระหว่างเอกสาร
+
+รักษาเนื้อหาเดิมที่ถูกต้องไว้ทั้งหมด
+
+เป้าหมายไม่ใช่การรื้อ Selfprint แต่คือ:
+
+ทำให้เอกสารทั้งหมดพูดภาษาเดียวกัน ก่อนที่ทีม AI Dev จะลงมือพัฒนาต่อ
+
+หลังจาก Document Consolidation เสร็จแล้ว ให้ Commit และ Push และรายงานรายการไฟล์ที่ Update ให้ครบ
+
+สิ่งที่เรากำลังทำจึงไม่ใช่ “Selfprint V3 ใหม่”
+
+แต่คือ:
+
+Selfprint เดิม + Direction ใหม่ → Update Master → ทุก AI Dev อ่าน Source of Truth เดียวกัน → แล้วค่อยพัฒนาทีละ Phase

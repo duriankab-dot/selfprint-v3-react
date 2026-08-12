@@ -34,7 +34,7 @@ const FEATURES: Feature[] = [
   },
   {
     icon: '💬',
-    title: 'แชทกับ Nova AI',
+    title: 'คุยกับ AI ฝาแฝด',
     description: 'สนทนากับ AI ที่เข้าใจรูปแบบการตัดสินใจของคุณ ปรับระดับความเป็นอิสระได้เอง',
     to: '/chat',
   },

@@ -1,32 +1,51 @@
-# React + TypeScript + Vite
+# Selfprint — Living Personal Intelligence Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+แพลตฟอร์มที่ใช้ AI Nova สร้าง "Nova AI Twin" (ฝาแฝดเวอร์ชันดิจิทัลของคุณ) ที่เรียนรู้จากคุณสะสมตลอดเวลา
 
-Currently, two official plugins are available:
+## 🚀 Quick Start
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+# Clone project
+git clone https://github.com/duriankab-dot/selfprint-v3-react.git
+cd selfprint-v3-react
 
-## React Compiler
+# Install dependencies
+npm install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Create .env.local from .env.example
+cp .env.example .env.local
 
-## Expanding the Oxlint configuration
+# Run development server
+npm run dev
+🧠 สถาปัตยกรรม
+Frontend: React 18 + TypeScript + Vite + Tailwind CSS
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+State: Zustand + React Query
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+Backend: Express.js (Node)
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Database: Supabase (PostgreSQL + Auth)
+
+AI: Anthropic Claude API
+
+Payment: Stripe
+
+Deploy: Vercel
+
+📂 เอกสารสำคัญ
+เอกสาร	คำอธิบาย
+AI_CONTEXT.md	AI อ่านก่อนทำงานทุกครั้ง — กฎ, Skill, โครงสร้าง
+MASTER_PRD.md	ข้อกำหนดผลิตภัณฑ์ (Product Requirements)
+PROJECT_SUMMARY.md	สรุปภาพรวมโปรเจกต์
+USER_GUIDE_TH.md	คู่มือผู้ใช้ฉบับสมบูรณ์
+CONTRIBUTING.md	แนวทางการพัฒนา
+DEPLOYMENT.md	วิธี Deploy
+🔑 Environment Variables
+ดูที่ .env.example สำหรับรายการ Variables ที่ต้องตั้ง
+
+📞 ติดต่อ
+GitHub: https://github.com/duriankab-dot/selfprint-v3-react
+
+Production: https://selfprint.one
+
+อัปเดตล่าสุด: 12 สิงหาคม 2569
