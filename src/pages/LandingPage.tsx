@@ -50,7 +50,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
       {/* NAVIGATION */}
       <NavBar
         position="fixed"
-        rightSlot={<ProgressiveCTA section="next" text="สร้าง AI Twin ฟรี" variant="primary" />}
+        rightSlot={<ProgressiveCTA section="next" text="เริ่มใช้งาน ฟรี" variant="primary" />}
       />
 
       {/* HERO SECTION - SIMPLIFIED */}
@@ -81,7 +81,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               letterSpacing: '0.05em',
             }}
           >
-            💡 AI ที่เข้าใจตัวคุณ
+            💡 แพลตฟอร์ม Living AI ภาษาไทยหนึ่งเดียว ที่ช่วยตัดสินใจ และพัฒนาศักยภาพในตัวคุณ
           </span>
           <h1
             style={{
@@ -92,9 +92,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               color: 'var(--color-text-primary)',
             }}
           >
-            เข้าใจตัวเองให้ลึกขึ้น
+            เลิกเดา ทิศทางชีวิต
             <br />
-            ตัดสินใจได้มั่นใจขึ้นทุกวัน
+            ให้ AI ช่วยคิดและตัดสินใจเพื่อคุณ
           </h1>
           <p
             style={{
@@ -105,10 +105,10 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               maxWidth: '520px',
             }}
           >
-            SELFPRINT สร้าง AI Twin ที่เรียนรู้จากตัวคุณ เพื่อช่วยให้ทุกการตัดสินใจดีขึ้นเรื่อย ๆ
+            SELFPRINT สังเคราะห์ข้อมูลเวลาเกิดและพฤติกรรมผ่าน 12 SICE เป็นแบบจำลองอนาคตที่แม่นยำด้วยสถิติจริง ป้องกันความผิดพลาดในอนาคตครบทุกด้านของชีวิตคุณ
           </p>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            <ProgressiveCTA section="why" text="สร้าง AI Twin ของฉัน" variant="primary" />
+            <ProgressiveCTA section="why" text="สร้าง AI Digital Twin ของฉัน (ฟรีใน 2 นาที)" variant="primary" />
             <button
               onClick={handleHeroClick}
               style={{
@@ -123,7 +123,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 transition: 'all 0.3s',
               }}
             >
-              ลองสัมผัสก่อน
+              ดูวิดีโอแนะนำ SELFPRINT
             </button>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '16px',
           }}
         >
-          วันนี้ คุณรู้สึกยังไง?
+          วันนี้ คุณรู้สึกยังไงบ้าง? ให้ AI เริ่มคำนวณจากสภาวะจิตใจของคุณ
         </h2>
         <p
           style={{
@@ -199,7 +199,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginRight: 'auto',
           }}
         >
-          อารมณ์ของคุณช่วยให้ AI Twin เข้าใจตัวคุณได้ดีขึ้น
+          อารมณ์ปัจจุบันของคุณคือดาต้าสำคัญ ช่วยให้ ฝาแฝด เข้าใจ และปรับตัวเองให้สอดคล้องกับตัวคุณได้ดีขึ้น
         </p>
 
         <div style={{ maxWidth: '800px', marginLeft: 'auto', marginRight: 'auto' }}>
@@ -224,7 +224,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '16px',
           }}
         >
-          ทำไมคุณถึงต้องใช้ AI Twin?
+          ทำไมคนไทยยุคใหม่ต้องใช้ SELFPRINT?
         </h2>
         <p
           style={{
@@ -237,35 +237,34 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          คุณทำการตัดสินใจ 100+ ครั้งต่อวัน แต่ผลลัพธ์ส่วนใหญ่เกิดจากรูปแบบที่ซ้ำ ๆ กัน
-          ที่คุณยังไม่เข้าใจตัวเอง
+          ในแต่ละวันคุณต้องตัดสินใจมากกว่า 100 ครั้ง แต่หลายครั้งติดกับดักรูปแบบพฤติกรรมเดิมๆ (Blind Spots) โดยไม่รู้ตัว SELFPRINT ช่วยจดจำและพัฒนาข้อมูลเหล่านี้ด้วยสถิติที่จับต้องได้จริง
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', maxWidth: '1000px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '40px' }}>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎯</div>
-            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>ตัดสินใจได้ชัด</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>ตัดสินใจได้ถูกต้องมั่นใจมากขึ้น</h3>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              เข้าใจสไตล์การตัดสินใจของคุณ
+              ตรวจจับรูปแบบ Pattern ซ้ำๆ ชี้ข้อควรระวังและประเมินความเสี่ยงให้คุณรู้ทันก่อนจะตัดสินใจผิดพลาด
             </p>
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>💡</div>
-            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>จดจำรูปแบบของคุณ</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>วิเคราะห์พฤติกรรมและจุดอ่อน (Blind Spots)</h3>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              AI มองเห็นสิ่งที่คุณมองข้าม
+              คำนวนแนวโน้มทิศทางความสำเร็จล่วงหน้าจากข้อมูลสถิติจริง เพื่อช่วยการตัดสินใจเรื่อง งาน และเงินที่แม่นยำ
             </p>
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>🚀</div>
-            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>เติบโตช่วยตัวเอง</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>วิวัฒนาการตัวเอง</h3>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-              ทุกการตัดสินใจถูกเรียนรู้
+              ทุกการตัดสินใจถูกเรียนรู้จดจำและวิเคราะห์ สแกนโครงสร้างเชิงลึกตั้งแต่วันแรกที่ใช้งาน
             </p>
           </div>
         </div>
 
-        <ProgressiveCTA section="why" text="สร้าง AI Twin ของฉัน" variant="primary" />
+        <ProgressiveCTA section="why" text="เริ่มต้นเลย ฟรี" variant="primary" />
       </section>
 
       {/* AI TOUR VIDEO SECTION */}
@@ -284,7 +283,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '12px',
           }}
         >
-          ดูว่า AI ฝาแฝดทำงานยังไง
+          ดูวิธีสร้าง AI Twin ของคุณใน 2 นาที
         </h2>
         <p
           style={{
@@ -297,7 +296,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.7,
           }}
         >
-          ชม Demo สั้น 2 นาที — เห็นตั้งแต่สร้าง AI ฝาแฝดจนถึงรับ Insight แรก
+          ชมวิดีโอแนะนำสั้นๆ — เห็นภาพการทำงานตั้งแต่การคำนวณ Insight แรก ไปจนถึงระบบประมวลผล Living AI ที่เติบโตไปพร้อมกับคุณ
         </p>
 
         <div
@@ -336,7 +335,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 <polygon points="10 8 16 12 10 16 10 8" fill="var(--color-text-secondary)" stroke="none"/>
               </svg>
               <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, margin: 0 }}>
-                วิดีโอ AI Tour กำลังจะมาเร็วๆ นี้
+                วิดีโอ AI Tour กำลังจะมาเร็วๆ นี้(รอก่อนนะจ๊ะ)
               </p>
             </>
           )}
@@ -359,7 +358,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '16px',
           }}
         >
-          ทำงานยังไง?
+          SELFPRINT ทำงานยังไง?
         </h2>
         <p
           style={{
@@ -372,7 +371,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          ใช้ 3 ขั้นตอนสร้าง AI Twin ที่เข้าใจตัวคุณ 60% ใน 40 วินาที
+          ใช้ 3 ขั้นตอนสร้าง  Insight แรก ที่เข้าใจตัวคุณมากกว่า 60% ใน 40 วินาที Fine tuning ด้วยคำถามสั้น จนถึงสร้าง AI ฝาแฝดที่เข้าใจคุณมากขึ้น ภายใน 2 นาที
         </p>
 
         <div style={{ maxWidth: '900px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '40px' }}>
@@ -396,9 +395,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               >
                 1️⃣
               </div>
-              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>บอกข้อมูลตัวเอง</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>บอกข้อมูลตัวตน</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                AI เรียนรู้ข้อมูลเบื้องต้น
+                AI เรียนรู้โครงสร้างและสภาวะเริ่มต้นของคุณ
               </p>
             </div>
             <div style={{ flex: 1, minWidth: '200px' }}>
@@ -420,9 +419,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               >
                 2️⃣
               </div>
-              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>Twin ถูกสร้าง</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>AI Twin ฝาแฝด ถูกสร้าง</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                เห็นตัวเองครั้งแรก
+                เห็นกระจกสะท้อนตัวเอง รูปแบบพฤติกรรม ความคิดและสไตล์การตัดสินใจครั้งแรก
               </p>
             </div>
             <div style={{ flex: 1, minWidth: '200px' }}>
@@ -444,15 +443,15 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               >
                 3️⃣
               </div>
-              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>เริ่มใช้งาน</h3>
+              <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>เริ่มต้นพัฒนาศักยภาพ</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                AI ฝาแฝดเรียนรู้คุณทุกวัน
+                ยิ่งสะท้อนตัวตนผ่านการพูดและเขียนบันทึกมากขึ้น  AI Twin จะยิ่งแม่นยำแล้วเข้าใจมากขึ้น
               </p>
             </div>
           </div>
         </div>
 
-        <ProgressiveCTA section="how" text="เริ่มสร้างเลย" variant="primary" />
+        <ProgressiveCTA section="how" text="เริ่มสร้าง AI Twin ของคุณเลย ฟรี" variant="primary" />
       </section>
 
       {/* WHO SECTION - Social Proof */}
@@ -471,7 +470,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '16px',
           }}
         >
-          ใครใช้อยู่บ้าง?
+         เสียงตอบรับจากผู้ใช้งาน SELFPRINT ในประเทศไทย
         </h2>
         <p
           style={{
@@ -484,34 +483,34 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          ผู้ประกอบการ นักลงทุน และผู้บริหารกว่า 1,000 คนใช้ SELFPRINT เพื่อตัดสินใจได้ดีขึ้น
+          ผู้ประกอบการ นักลงทุน และผู้บริหารกว่า 10,000 คนใช้ SELFPRINT เพื่อการตัดสินใจได้ดีมากยิ่งขึ้น
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '1000px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '40px' }}>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px', textAlign: 'left' }}>
             <p style={{ fontSize: '16px', fontStyle: 'italic', marginBottom: '16px', color: 'var(--color-text-primary)' }}>
-              "SELFPRINT ช่วยให้ฉันเข้าใจรูปแบบการตัดสินใจของตัวเอง"
+              "SELFPRINT ช่วยให้ผมเข้าใจรูปแบบการตัดสินใจของตัวเอง มันน่าทึ่งมากที่ผมสามารถปรึกษามันได้ทั้งวันด้วย ฝาแฝด ของผมที่สร้างขึ้นมาเอง 😳😳😳" 
             </p>
             <div style={{ fontSize: '14px', fontWeight: 600 }}>ณัฐพล, CEO</div>
             <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>Tech Startup</div>
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px', textAlign: 'left' }}>
             <p style={{ fontSize: '16px', fontStyle: 'italic', marginBottom: '16px', color: 'var(--color-text-primary)' }}>
-              "ไม่คิดว่า AI จะเข้าใจฉันได้ลึกขึ้นจากข้อมูลวันเกิด"
+              "เลิกนั่งเดาอนาคตไปเลยค่ะ SELFPRINT เอาสถิติมาลิงค์กับพฤติกรรมจริง คาดการณ์แนวโน้มชีวิตได้แม่นมาก ช่วยตัดสินใจเรื่องงานและเงินเฉียบคมมากขึ้นเยอะ"
             </p>
-            <div style={{ fontSize: '14px', fontWeight: 600 }}>สดชลา, Investor</div>
+            <div style={{ fontSize: '14px', fontWeight: 600 }}>พนนีย์, Investor</div>
             <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>VC Fund</div>
           </div>
           <div style={{ padding: '24px', background: 'var(--color-bg-secondary)', borderRadius: '12px', textAlign: 'left' }}>
             <p style={{ fontSize: '16px', fontStyle: 'italic', marginBottom: '16px', color: 'var(--color-text-primary)' }}>
-              "ทุกการตัดสินใจหลังจากใช้ SELFPRINT ดีขึ้นหลายเท่า"
+              "ทุกการตัดสินใจดีขึ้นมากหลายเท่าหลังจากใช้ SELFPRINT เป็นแอพที่ไม่น่าเชื่อว่าจะตอบโจทย์ได้มากขนาดนี้ 👍👍"
             </p>
             <div style={{ fontSize: '14px', fontWeight: 600 }}>วิทยา, Entrepreneur</div>
             <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>E-commerce</div>
           </div>
         </div>
 
-        <ProgressiveCTA section="who" text="พร้อมแล้ว" variant="primary" />
+        <ProgressiveCTA section="who" text="ลอง SELFPRINT เลย ฟรี" variant="primary" />
       </section>
 
       {/* NEXT SECTION - Final Context */}
@@ -530,7 +529,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '16px',
           }}
         >
-          พร้อมสร้าง AI Twin ของคุณเลยไหม?
+          พร้อมสร้าง AI ฝาแฝด ของคุณแล้วหรือยัง?
         </h2>
         <p
           style={{
@@ -543,10 +542,10 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          ฟรีแบบเต็มศักยภาพ ไม่ต้องใส่บัตรเครดิต
+          ทดลองใช้เครื่องมือวิเคราะห์ระดับสูงสุดของ SELFPRINT ฟรี ไม่ผูกมัด ไม่ต้องใส่ข้อมูลบัตรเครดิต
         </p>
 
-        <ProgressiveCTA section="next" text="สร้างเลยตอนนี้" variant="primary" />
+        <ProgressiveCTA section="next" text="ทดลองเลยตอนนี้" variant="primary" />
       </section>
 
       {/* BIRTH DATA INPUT - MOVED TO END */}
@@ -577,7 +576,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             color: 'white',
           }}
         >
-          เริ่มต้นการเดินทางของคุณวันนี้
+          เริ่มต้นวิเคราะห์ระบบตัวตนและสร้างฝาแฝด AI Twin ของคุณเพื่อพัฒนาศักยภาพของคุณ วันนี้ ฟรี ไม่มีข้อผูกมัด
         </h2>
         <p
           style={{
@@ -586,7 +585,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '32px',
           }}
         >
-          AI Twin ของคุณพร้อมแล้ว
+          👥 ฝาแฝด 👥 ของคุณพร้อมแล้ว ↗️↗️
         </p>
         <button
           onClick={handleFinalCTA}
@@ -610,7 +609,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          สร้าง AI Twin ของฉัน
+          สร้าง AI Twin ที่เข้าใจฉันจริงๆ
         </button>
       </section>
 

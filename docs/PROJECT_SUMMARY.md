@@ -1,5 +1,6 @@
 # PROJECT SUMMARY — SELFPRINT
-> อ่านจากโค้ดจริง `D:\selfprint-v3-react` | วันที่ 12 สิงหาคม 2569
+
+> อ่านจากโค้ดจริง `D:\selfprint-v3-react` | อัปเดตล่าสุด: 12 สิงหาคม 2569
 
 ---
 
@@ -14,22 +15,11 @@
 
 ---
 
-### Living AI Twin (Nova) — เปลี่ยนเป็น "Living AI Twin"
-
-**Engine:** nova-ai.ts + getNovaPrompt.ts + TwinContext + TwinStateEngine
-
-> **หมายเหตุ:** ชื่อฟังก์ชันในโค้ดอาจใช้ "Nova" แต่ใน UX ต้องแยกให้ชัดเจน:
-> - **Nova** = ผู้แนะนำ (Guide)
-> - **AI Twin** = ฝาแฝดส่วนตัว (Personal Twin)
-
-
----
-
 ## PRODUCT
 
 ### Selfprint คืออะไร
 
-Selfprint คือ **Personal Intelligence Platform** ในรูปแบบ Progressive Web App (PWA) ที่ใช้ AI สร้าง "เวอร์ชันดิจิทัลของคุณ" หรือที่เรียกว่า **Nova AI Twin** — ระบบที่เรียนรู้ความเป็นคุณจากการสนทนา การสะท้อนตัวเอง และรูปแบบพฤติกรรม แล้วนำข้อมูลเหล่านั้นมาวิเคราะห์ สังเคราะห์ และนำเสนอเป็น Insight ส่วนตัวที่ลึกและแม่นยำยิ่งขึ้นเรื่อยๆ ตามเวลา
+Selfprint คือ **Personal Intelligence Platform** ในรูปแบบ Progressive Web App (PWA) ที่ใช้ AI สร้าง "เวอร์ชันดิจิทัลของคุณ" หรือที่เรียกว่า **AI Twin** — ระบบที่เรียนรู้ความเป็นคุณจากการสนทนา การสะท้อนตัวเอง และรูปแบบพฤติกรรม แล้วนำข้อมูลเหล่านั้นมาวิเคราะห์ สังเคราะห์ และนำเสนอเป็น Insight ส่วนตัวที่ลึกและแม่นยำยิ่งขึ้นเรื่อยๆ ตามเวลา
 
 **Tech Stack (จากโค้ดจริง):**
 - Frontend: React 18 + TypeScript + Vite + Tailwind CSS
@@ -49,7 +39,7 @@ Selfprint คือ **Personal Intelligence Platform** ในรูปแบบ 
 | ปัญหา | สิ่งที่ Selfprint แก้ |
 |---|---|
 | ไม่รู้ว่าตัวเองมี pattern อะไร | AI ตรวจจับรูปแบบพฤติกรรมจากการสนทนาจริง |
-| ขาดคนที่เข้าใจบริบทชีวิตเต็มๆ | Nova Twin เรียนรู้คุณสะสมตลอดเวลา |
+| ขาดคนที่เข้าใจบริบทชีวิตเต็มๆ | AI Twin เรียนรู้คุณสะสมตลอดเวลา |
 | Therapy แพง / journal ไม่ได้ทำต่อ | สนทนากับ Twin ได้ทุกวัน ฟรีระดับพื้นฐาน |
 | คำแนะนำทั่วไปไม่ตรงกับชีวิตจริง | ทุก Insight คำนวณจากข้อมูลของคุณเท่านั้น |
 | ไม่เห็นพัฒนาการของตัวเองตามเวลา | Journey tracking + Growth signals + Milestones |
@@ -86,7 +76,7 @@ Selfprint คือ **Personal Intelligence Platform** ในรูปแบบ 
 | มิติ | คู่แข่งทั่วไป | Selfprint |
 |---|---|---|
 | การเรียนรู้ | Static prompts | Twin เรียนรู้สะสมจากคุณจริงๆ |
-| บุคลิก AI | หนึ่งบุคลิกตลอด | 1,296 combinations (18 Archetypes × 12 Hubs × 6 Moods) |
+| บุคลิก AI | หนึ่งบุคลิกตลอด | 1,296 combinations (18 Archetypes × 12 Worlds × 6 Moods) |
 | Context | ต่อ conversation | ข้ามเซสชัน ข้ามเวลา |
 | Output | ข้อความ | Insight, Pattern, Journey, Badge, Evolution |
 | UX | Functional | Adaptive: ธีม เสียง แอนิเมชัน ปรับตามคุณแบบ real-time |
@@ -137,9 +127,9 @@ Selfprint ไม่ใช่ chatbot — แต่เป็น **Living Platform
 **Engine:** PersonalContextBuilder + PatternDetector + InsightEngine + AIFeedbackLoop  
 ระบบ AI หลักที่สังเคราะห์ข้อมูลทั้งหมดของผู้ใช้ (บริบทชีวิต รูปแบบพฤติกรรม ค่านิยม จุดแข็ง จุดตาบอด) ให้เป็นโมเดลส่วนตัวที่แม่นยำขึ้นเรื่อยๆ
 
-### 2. Living AI Twin (Nova)
+### 2. Living AI Twin
 **Engine:** nova-ai.ts + getNovaPrompt.ts + TwinContext + TwinStateEngine  
-AI Twin ที่มีบุคลิกหลายมิติ: 18 Archetypes × 12 Life Hubs × 6 Moods = **1,296 personality combinations**  
+AI Twin ที่มีบุคลิกหลายมิติ: 18 Archetypes × 12 Worlds × 6 Moods = **1,296 personality combinations**  
 Twin วิวัฒนาการได้ตาม maturityScore (0–100) และ reflection count
 
 ### 3. Personal Memory
@@ -150,11 +140,11 @@ Twin ใช้ memory เหล่านี้ในการตอบสนอ�
 ### 4. Deep Analysis
 **Engine:** ExecutiveSummary + AnalysisPage + PatternDetector + BehavioralForecastEngine + FutureSelfEngine  
 Dashboard แสดง: Executive Summary, Full Analysis, Behavioral Patterns, Future Self Projection  
-Pattern Detection: autonomy_trend, confidence_trend, mood_confidence, hub_autonomy
+Pattern Detection: autonomy_trend, confidence_trend, mood_confidence, world_autonomy
 
 ### 5. Adaptive Experience
 **Engine:** ExperienceEngine + EnvironmentEngine + ThemeContext + AudioContext  
-ธีม, เสียง, แอนิเมชัน, สีสัน ปรับตาม Hub + Mood + เวลา + Device แบบ real-time  
+ธีม, เสียง, แอนิเมชัน, สีสัน ปรับตาม World + Mood + เวลา + Device แบบ real-time  
 ผ่าน CSS variables (--exp-*, --tod-*, --env-*, --lighting-*, --twin-*)
 
 ### 6. Personal Growth
@@ -182,40 +172,87 @@ Evolution milestones ที่ทำให้ Twin "เกิด" และ "เ
 
 ---
 
-## CURRENT STATE (จากโค้ดจริง วันที่ 11/08/2569)
+## 🧭 5-Tab Navigation
 
-### Implemented
-- ✅ Landing Page (Emotion-first)
-- ✅ Onboarding 7 Steps (Emotion → Nova Conversation → AI Creation → Blueprint → Fine-tune → Analysis → Claim Account)
-- ✅ Nova AI Twin (18 Archetypes × 12 Hubs × 6 Moods)
-- ✅ Dashboard (ExecutiveSummary, Analytics, Patterns, InsightsCard, LivingTwin, GrowthSpace, AskCoach, IntelligencePanel, FutureSelfPanel)
-- ✅ Chat / Voice Chat
-- ✅ Analysis Page (Full Personal Analysis)
-- ✅ Privacy Center (PDPA)
-- ✅ Badge System (8 badges)
-- ✅ Twin Evolution Scene (30 reflections milestone)
-- ✅ Daily Brief Page
-- ✅ Pricing Page (4 tiers: Free / Plus ฿249 / Pro ฿589 / Lifetime ฿4,990)
-- ✅ Authentication (Passkey + OAuth + Magic Link)
-- ✅ Adaptive Experience Engine (Theme + Environment + Audio)
-- ✅ Pattern Detection
-- ✅ Memory Manager
-- ✅ 5-Tab Navigation (Home, Explore, Activities, Me, Chat)
-- ✅ AI Feedback Loop
-- ✅ Decision Logger
-- ✅ Life Hubs Page (12 hubs)
-- ✅ Twin Profile Page
-- ✅ Code Splitting (Phase 5.9 — React.lazy + Suspense)
+| ลำดับ | แท็บ | ใช้ทำอะไร |
+|-------|------|----------|
+| 1 | **วันนี้** | Dynamic Personal Home |
+| 2 | **สำรวจ** | Discover yourself |
+| 3 | **TWIN** | คุยกับ AI ฝาแฝดของคุณ (ศูนย์กลาง) |
+| 4 | **กิจกรรม** | Do / Reflect / Practice |
+| 5 | **ฉัน** | Personal control |
 
-### Phase 2 (สถานะ: ✅ CORE IMPLEMENTATION COMPLETE ณ 07/08/2569)
-- ✅ System Prompt Builder (1,296 personality combinations)
-- ✅ API Integration Layer (Brain Gateway)
-- ✅ Nova AI Service Update
-- ✅ Twin Profile Context
-- ✅ Chat Hook Integration
+---
+
+## 🌍 12 Worlds (เดิมคือ Hubs)
+
+| World | ใช้ทำอะไร |
+|-------|----------|
+| Identity | ตัวตน |
+| Decision | การตัดสินใจ |
+| Relationship | ความสัมพันธ์ |
+| Career | อาชีพ |
+| Health | สุขภาพ |
+| Money | เงินตรา |
+| AI-Twin | AI ฝาแฝด |
+| Learning | การเรียนรู้ |
+| Creativity | ความสร้างสรรค์ |
+| Spirituality | ความเป็นอยู่ |
+| Impact | ผลกระทบ |
+| Activities | กิจกรรม |
+
+> แต่ละ World มี Environment, Lighting, Atmosphere, Sound, Visual Identity ของตัวเอง
+
+---
+
+## CURRENT STATE (จากโค้ดจริง วันที่ 12/08/2569)
+
+### Implemented — 100% Complete
+
+| หมวดหมู่ | รายการ | สถานะ |
+|----------|--------|--------|
+| **Core** | Landing Page (Emotion-first) | ✅ |
+| **Core** | Onboarding 7 Steps | ✅ |
+| **Core** | AI Twin (18 Archetypes × 12 Worlds × 6 Moods) | ✅ |
+| **Core** | Dashboard (ExecutiveSummary, Analytics, Patterns) | ✅ |
+| **Core** | TWIN Chat (แทน Chat) | ✅ |
+| **Core** | Voice Chat | ✅ |
+| **Core** | Analysis Page | ✅ |
+| **Core** | Privacy Center (PDPA) | ✅ |
+| **Core** | 5-Tab Navigation (Home/Explore/TWIN/Activities/Me) | ✅ |
+| **Core** | 12 Worlds (ยกระดับจาก Hubs) | ✅ |
+| **Growth** | Badge System (8 badges) | ✅ |
+| **Growth** | Twin Evolution Scene | ✅ |
+| **Growth** | Micro-Evolution (continuous progression) | ✅ |
+| **Growth** | Daily Brief Page | ✅ |
+| **Monetization** | Pricing Page (4 tiers) | ✅ |
+| **Monetization** | Stripe Integration | ✅ |
+| **Auth** | Passkey + OAuth + Magic Link | ✅ |
+| **Auth** | WebAuthn Crypto Verification | ✅ |
+| **AI** | Pattern Detection | ✅ |
+| **AI** | Memory Manager | ✅ |
+| **AI** | AI Feedback Loop | ✅ |
+| **AI** | Decision Logger (API + UI) | ✅ |
+| **Performance** | Code Splitting (React.lazy + Suspense) | ✅ |
+| **PWA** | Service Worker + Offline Support | ✅ |
+| **Docs** | All documentation updated | ✅ |
+
+### P0 Cleanup — 100% Complete
+
+| Task | สถานะ |
+|------|--------|
+| P0-1: Remove PHASE2_TEST_CONSOLE | ✅ |
+| P0-2: Remove console.log (51 occurrences) | ✅ |
+| P0-3: Decision APIs (CRUD) | ✅ |
+| P0-4: WebAuthn Crypto Verification | ✅ |
+
+---
 
 ### Routes ทั้งหมด
-`/` `/onboarding` `/chat` `/dashboard` `/analysis` `/privacy` `/share/:code` `/brief` `/badges` `/pricing` `/pricing/success` `/login` `/settings/passkeys` `/explore` `/activities` `/me` `/voice` `/twin` `/hubs` `/decisions`
+
+`/` `/onboarding` `/twin` `/dashboard` `/analysis` `/privacy` `/share/:code` `/brief` `/badges` `/pricing` `/pricing/success` `/login` `/settings/passkeys` `/explore` `/activities` `/me` `/voice` `/twin-profile` `/worlds` `/decisions` `/menu` `/components`
+
+> `/chat` redirects to `/twin`
 
 ---
 
@@ -223,7 +260,25 @@ Evolution milestones ที่ทำให้ Twin "เกิด" และ "เ
 
 | Plan | ราคา | Tagline | Key Features |
 |---|---|---|---|
-| Free | ฿0 | Discover Yourself | Twin พื้นฐาน, Hub access, Archetype 1 แบบ, Badge, Evolution |
+| Free | ฿0 | Discover Yourself | Twin พื้นฐาน, World access, Archetype 1 แบบ, Badge, Evolution |
 | Plus | ฿249/เดือน / ฿1,990/ปี | Know Yourself | Memory persistence, Pattern detection, Analytics, Archetypes 18 แบบ, Daily Brief เสียง |
 | Pro | ฿589/เดือน / ฿4,990/ปี | Navigate Yourself | Future Self, Journey Roadmap, Relationship & Career Intelligence |
 | Lifetime | ฿4,990 (ครั้งเดียว) | Own Your Twin | Pro ไม่จำกัด, Export data, Custom training, VIP community |
+
+---
+
+## 🎯 Quality Gates
+
+| Metric | Status |
+|--------|--------|
+| TypeScript Build | ✅ PASS |
+| Lint (oxlint) | ✅ 0 errors |
+| PHASE2_TEST_CONSOLE Removed | ✅ PASS |
+| console.log in Production | ✅ 0 results |
+| Decision APIs | ✅ Implemented |
+| WebAuthn Crypto | ✅ Implemented |
+| Documentation | ✅ 100% Complete |
+
+---
+
+*Selfprint PROJECT SUMMARY | อัปเดตล่าสุด: 12 สิงหาคม 2569*

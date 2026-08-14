@@ -109,6 +109,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   };
 
   // ถ้าผู้ใช้เช็คอินอารมณ์มาแล้ว (เช่นจากหน้าแรก) ไม่ต้องถามซ้ำใน onboarding
+ // ถ้าผู้ใช้ใาข้อมูลวันเกิดมาแล้ว (เช่นจากหน้าแรก) ไม่ต้องถามซ้ำใน onboarding
   // ข้าม step 'emotion' ไปเลย ด้วย logic เดียวกับตอนกดปุ่ม "ไปต่อ" เอง
   // ใช้ useLayoutEffect (รันก่อน paint) + ref กันไม่ให้ยิงซ้ำ เพื่อไม่ให้เห็นหน้าจอกระพริบ
   const hasAutoSkippedEmotion = useRef(false);
@@ -292,7 +293,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   lineHeight: 1.6,
                 }}
               >
-                อารมณ์ตอนนี้ของคุณช่วยให้ AI Twin เข้าใจคุณได้ดีขึ้นตั้งแต่แรก
+                อารมณ์ตอนนี้ของคุณจะช่วยให้ ฝาแฝด เข้าใจคุณได้ดีขึ้นตั้งแต่แรก
               </p>
             </div>
             <EmotionSelector />
@@ -383,7 +384,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         </div>
       )}
 
-      {/* STEP 6: Fine-tuning (4 Questions) */}
+      {/* STEP 6: Fine-tuning (5 Questions) */}
       {step === 'fine-tune' && (
         <div
           style={{

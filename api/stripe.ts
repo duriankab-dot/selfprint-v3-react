@@ -1,23 +1,10 @@
 /**
  * Vercel API Function: /api/stripe
- *
  * § 31 Monetization — Stripe Integration
- *
- * Routes (via query param ?action=...):
- *   POST /api/stripe?action=create-checkout  → Stripe Checkout session
- *   POST /api/stripe?action=create-portal    → Stripe Billing Portal
- *   GET  /api/stripe?action=subscription     → Current subscription status
- *   POST /api/stripe?action=webhook          → Stripe webhook (update Supabase)
- *
- * Rules:
- * - userId ต้องมาจาก verifyUser() เท่านั้น — ห้าม trust client body
- * - Stripe client สร้างแบบ lazy (ไม่สร้างที่ module scope)
- * - Prices เป็น Stripe Price IDs — ตั้งใน env vars
  */
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
-import { verifyUser, supabaseAdmin } from './_utils/verify-user';
+import { verifyUser, supabaseAdmin } from '../_utils/verify-user.js';  // <-- แก้ path + .js
 
 // ── Lazy Stripe client ────────────────────────────────────────────────────────
 function getStripe(): Stripe {
@@ -27,15 +14,6 @@ function getStripe(): Stripe {
 }
 
 // ── Price ID helpers ──────────────────────────────────────────────────────────
-/**
- * Map (tier, billingPeriod) → Stripe Price ID
- * ตั้งค่าใน Vercel env vars:
- *   STRIPE_PRICE_PLUS_MONTHLY   = price_xxxxx
- *   STRIPE_PRICE_PLUS_ANNUAL    = price_xxxxx
- *   STRIPE_PRICE_PRO_MONTHLY    = price_xxxxx
- *   STRIPE_PRICE_PRO_ANNUAL     = price_xxxxx
- *   STRIPE_PRICE_LIFETIME       = price_xxxxx
- */
 function getPriceId(tier: string, billingPeriod: string): string {
   const key = (() => {
     if (tier === 'plus' && billingPeriod === 'monthly') return 'STRIPE_PRICE_PLUS_MONTHLY';
@@ -91,7 +69,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 async function handleCreateCheckout(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  // Verify user from JWT
   const user = await verifyUser(req.headers['authorization']);
   if (!user) return res.status(401).json({ error: 'Unauthorized' });
 
@@ -147,7 +124,6 @@ async function handleCreatePortal(req: VercelRequest, res: VercelResponse) {
   const stripe = getStripe();
   const origin = process.env.FRONTEND_URL || 'https://selfprint.app';
 
-  // Look up Stripe customer ID from Supabase
   const customerId = await getStripeCustomerId(user.id);
   if (!customerId) {
     return res.status(404).json({ error: 'No Stripe customer found for this user' });
@@ -184,7 +160,6 @@ async function handleGetSubscription(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!data) {
-    // No record = free tier
     return res.status(200).json({
       tier: 'free',
       status: 'active',
@@ -218,15 +193,12 @@ async function handleWebhook(req: VercelRequest, res: VercelResponse) {
 
   let event: Stripe.Event;
   try {
-    // Vercel v58+ doesn't support bodyParser config in vercel.json
-    // Use raw body from buffer if available, fallback to stringified JSON
     let rawBody: string | Buffer;
     if ((req as any).rawBody) {
       rawBody = (req as any).rawBody;
     } else if ((req as any)._rawBody) {
       rawBody = (req as any)._rawBody;
     } else {
-      // Fallback: reconstruct from parsed body (less secure but functional)
       rawBody = JSON.stringify(req.body);
     }
     event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
@@ -256,7 +228,6 @@ async function handleWebhook(req: VercelRequest, res: VercelResponse) {
       break;
     }
     default:
-      // Ignore other events
       break;
   }
 
@@ -281,7 +252,7 @@ async function onCheckoutComplete(session: Stripe.Checkout.Session) {
       status: 'active',
       stripe_customer_id: session.customer as string,
       stripe_subscription_id: isLifetime ? null : (session.subscription as string),
-      expires_at: isLifetime ? null : null, // will be set via subscription.updated
+      expires_at: isLifetime ? null : null,
       updated_at: new Date().toISOString(),
     },
     { onConflict: 'user_id' }
@@ -320,7 +291,6 @@ async function onSubscriptionChange(sub: Stripe.Subscription) {
 async function onPaymentFailed(invoice: Stripe.Invoice) {
   if (!supabaseAdmin) return;
 
-  // Mark subscription as pending/expired in our DB
   const customerId = typeof invoice.customer === 'string'
     ? invoice.customer
     : invoice.customer?.id;
@@ -343,7 +313,7 @@ async function onPaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-// ── Supabase helpers ──────────────────────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 async function getStripeCustomerId(userId: string): Promise<string | null> {
   if (!supabaseAdmin) return null;

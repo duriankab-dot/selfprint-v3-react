@@ -5,8 +5,8 @@
  *
  * Master Direction §10 — 9 sections:
  *   01 ภาพรวมตัวตน      02 รูปแบบพฤติกรรม   03 จุดแข็ง
- *   04 Blind Spots       05 แนวโน้ม           06 Journey
- *   07 สิ่งที่ควรสนใจ    08 Personal Guidance  09 Next Step
+ *   04 ข้อควรระวัง       05 แนวโน้ม           06 เส้นทางชีวิต
+ *   07 สิ่งที่ควรสนใจ    08 ข้อแนะนำส่วนบุคคล  09 แผนพัฒนา
  *
  * Implementation:
  * - useAuth() for userId (never localStorage)
@@ -110,7 +110,7 @@ const AnalysisPage: React.FC = () => {
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <NavBar />
         <div className="analysis__page">
-          <Alert variant="warning" message="กรุณาเข้าสู่ระบบเพื่อดูการวิเคราะห์ของคุณ" />
+          <Alert variant="warning" message="กรุณาเข้าสู่ระบบ SELFPRINT" />
         </div>
         <Footer />
         <BottomNav />
@@ -139,7 +139,7 @@ const AnalysisPage: React.FC = () => {
           <div>
             <h1 className="analysis__page-title">การวิเคราะห์ส่วนตัวของคุณ</h1>
             <p className="analysis__page-subtitle">
-              ภาพรวมเต็มรูปแบบจาก AI Twin — อิงข้อมูลจริงจากการใช้งานของคุณ
+              ภาพรวมเต็มรูปแบบจาก AI ฝาแฝด — อ้างอิงข้อมูลจริงจากการใช้งานของคุณ
             </p>
           </div>
           {metrics && metrics.totalInsights > 0 && (
@@ -148,7 +148,7 @@ const AnalysisPage: React.FC = () => {
                 confidence={metrics.accuracy}
                 evidenceCount={metrics.totalInsights}
                 compact
-                explanation={`Twin แม่นยำ ${Math.round(metrics.accuracy * 100)}% จาก ${metrics.totalInsights} feedbacks`}
+                explanation={`ฝาแฝด เข้าใจ ${Math.round(metrics.accuracy * 100)}% จาก ${metrics.totalInsights} feedbacks`}
               />
             </div>
           )}
@@ -166,7 +166,7 @@ const AnalysisPage: React.FC = () => {
         {isLoading && (
           <div className="analysis__loading" aria-live="polite">
             <div className="analysis__spinner" aria-hidden="true" />
-            <p>กำลังสังเคราะห์การวิเคราะห์ส่วนตัวของคุณ...</p>
+            <p>กำลังสังเคราะห์รูปแบบต้นแบบของคุณ...</p>
           </div>
         )}
 
@@ -177,7 +177,7 @@ const AnalysisPage: React.FC = () => {
             <h2>ยังไม่มีข้อมูลเพียงพอ</h2>
             <p>
               ใช้ Selfprint ต่อไปสักระยะ บันทึกความทรงจำและ reflection
-              เพื่อให้ AI Twin สร้างการวิเคราะห์ที่มีความหมาย
+              เพื่อให้ ฝาแฝด สร้างการวิเคราะห์ที่ชัดเจนขึ้น
             </p>
             <button className="analysis__back-btn" onClick={() => navigate('/dashboard')}>
               กลับไปบันทึกความทรงจำ
@@ -204,7 +204,7 @@ const AnalysisPage: React.FC = () => {
                     </span>
                     {analysis.modelAccuracy > 0 && (
                       <span className="analysis__meta-item">
-                        🎯 แม่นยำ {Math.round(analysis.modelAccuracy * 100)}%
+                        🎯 เข้าใจ {Math.round(analysis.modelAccuracy * 100)}%
                       </span>
                     )}
                   </div>
@@ -218,7 +218,7 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 {analysis.behavioralPatterns.length === 0 ? (
                   <p className="analysis__empty-section">
-                    ยังไม่พบรูปแบบที่ชัดเจน — ใช้งานต่อไปเพื่อให้ AI สังเกตรูปแบบของคุณ
+                    ยังไม่พบรูปแบบที่ชัดเจน — ใช้งานต่อไปเพื่อให้ ฝาแฝด สังเกตรูปแบบที่ชัดเจนของคุณมากขึ้น
                   </p>
                 ) : (
                   <div className="analysis__pattern-list">
@@ -256,7 +256,7 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 {analysis.strengths.length === 0 ? (
                   <p className="analysis__empty-section">
-                    AI ยังไม่ได้ระบุจุดแข็งของคุณ — ใช้ Selfprint ต่อไปเพื่อให้ข้อมูลมากขึ้น
+                    ฝาแฝด ยังไม่ได้ระบุจุดแข็งของคุณ — ใช้ Selfprint ต่อไปเพื่อให้ข้อมูลมากขึ้น
                   </p>
                 ) : (
                   <div className="analysis__strength-grid">
@@ -281,16 +281,16 @@ const AnalysisPage: React.FC = () => {
               </div>
             </section>
 
-            {/* 04 — Blind Spots */}
+            {/* 04 — ข้อควรระวัง */}
             <section className="analysis__section" aria-labelledby="section-04">
               <SectionHeader number="04" title="Blind Spots" icon="🔍" />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
-                  สิ่งเหล่านี้คือสิ่งที่ AI สังเกตว่าคุณอาจมองข้ามไป — ไม่ใช่การตัดสิน แต่เป็นพื้นที่ให้สำรวจ
+                  สิ่งเหล่านี้คือสิ่งที่ ฝาแฝดคุณ สังเกตว่าคุณอาจมองข้ามไป — ไม่ใช่การตัดสิน แต่เป็นพื้นที่ให้สำรวจ
                 </p>
                 {analysis.blindSpots.length === 0 ? (
                   <p className="analysis__empty-section">
-                    ยังไม่พบ blind spots ที่ชัดเจนในตอนนี้
+                    ยังไม่พบ ข้อควรระวัง ที่ชัดเจนในตอนนี้
                   </p>
                 ) : (
                   <div className="analysis__blindspot-list">
@@ -337,7 +337,7 @@ const AnalysisPage: React.FC = () => {
               </div>
             </section>
 
-            {/* 06 — Journey */}
+            {/* 06 — เส้นทางชีวิต */}
             <section className="analysis__section" aria-labelledby="section-06">
               <SectionHeader number="06" title="Journey" icon="🗺" />
               <div className="analysis__section-body">
@@ -358,7 +358,7 @@ const AnalysisPage: React.FC = () => {
                   )}
                   {analysis.journey.changing.length > 0 && (
                     <div className="analysis__journey-col">
-                      <h4 className="analysis__journey-col-title">🔄 สิ่งที่เปลี่ยน</h4>
+                      <h4 className="analysis__journey-col-title">🔄 สิ่งที่เปลี่ยนแปลง</h4>
                       <ul className="analysis__journey-list">
                         {analysis.journey.changing.map((c, i) => <li key={i}>{c}</li>)}
                       </ul>
@@ -366,7 +366,7 @@ const AnalysisPage: React.FC = () => {
                   )}
                   {analysis.journey.stillWorking.length > 0 && (
                     <div className="analysis__journey-col">
-                      <h4 className="analysis__journey-col-title">⚙️ ยังคงพัฒนา</h4>
+                      <h4 className="analysis__journey-col-title">⚙️ กำลังพัฒนา</h4>
                       <ul className="analysis__journey-list">
                         {analysis.journey.stillWorking.map((w, i) => <li key={i}>{w}</li>)}
                       </ul>
@@ -382,7 +382,7 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 {analysis.focusAreas.length === 0 ? (
                   <p className="analysis__empty-section">
-                    AI ยังไม่สามารถระบุพื้นที่ที่ควรให้ความสนใจได้ชัดเจน
+                    ฝาแฝด ยังไม่สามารถระบุพื้นที่ที่ควรให้ความสนใจได้ชัดเจน
                   </p>
                 ) : (
                   <div className="analysis__focus-list">
@@ -397,12 +397,12 @@ const AnalysisPage: React.FC = () => {
               </div>
             </section>
 
-            {/* 08 — Personal Guidance */}
+            {/* 08 — ข้อแนะนำส่วนบุคคล */}
             <section className="analysis__section" aria-labelledby="section-08">
               <SectionHeader number="08" title="Personal Guidance" icon="🧭" />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
-                  คำแนะนำเหล่านี้มาจากรูปแบบที่ AI สังเกตเห็น — ไม่ใช่คำสั่ง แต่เป็นคำถามให้ลองสำรวจ
+                  คำแนะนำเหล่านี้มาจากรูปแบบที่ ฝาแฝด สังเกตเห็น — เป็นแค่คำถามให้คุณลองสำรวจ
                 </p>
                 {analysis.guidance.length === 0 ? (
                   <p className="analysis__empty-section">ยังไม่มีคำแนะนำเฉพาะบุคคลในตอนนี้</p>
@@ -419,7 +419,7 @@ const AnalysisPage: React.FC = () => {
               </div>
             </section>
 
-            {/* 09 — Next Step */}
+            {/* 09 — แผนพัฒนา */}
             <section className="analysis__section analysis__section--last" aria-labelledby="section-09">
               <SectionHeader number="09" title="Next Step" icon="🚀" />
               <div className="analysis__section-body">
@@ -437,8 +437,8 @@ const AnalysisPage: React.FC = () => {
             {/* Footer */}
             <div className="analysis__page-footer">
               <p className="analysis__disclaimer">
-                การวิเคราะห์นี้สร้างจากข้อมูลจริงที่ AI Twin เรียนรู้จากการใช้งานของคุณ
-                ยิ่งใช้ Selfprint มาก AI ยิ่งเข้าใจคุณได้แม่นยำขึ้น
+                การวิเคราะห์นี้สร้างจากข้อมูลจริงที่ ฝาแฝดของคุณ เรียนรู้จากการใช้งานของคุณ
+                ยิ่งใช้ Selfprint มาก ฝาแฝด ยิ่งเข้าใจคุณได้มากขึ้น
               </p>
               <button
                 className="analysis__back-to-dashboard"

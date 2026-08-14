@@ -33,3 +33,6 @@ tsconfig.api-check.tmp.json
 # Cloudflare Workers (server/handlers/ — Brain Gateway fallback)
 .wrangler
 .dev.vars
+
+.vercel
+.env*

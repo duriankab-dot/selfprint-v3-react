@@ -118,7 +118,7 @@ export default function ExplorePage() {
             marginTop: 6,
             margin: '6px 0 0',
           }}>
-            มองตัวเองจากหลายมุม เพื่อเข้าใจตัวเองมากขึ้น
+            มองตัวเองจากหลากหลายมุม เพื่อให้เข้าใจตัวเองมากยิ่งขึ้น
           </p>
         </div>
 
@@ -203,7 +203,7 @@ export default function ExplorePage() {
               margin: '16px 0 0',
               lineHeight: 1.6,
             }}>
-              นี่เป็นมุมมองหนึ่งสำหรับการสำรวจตัวเอง ลองดูว่าตรงกับสิ่งที่คุณกำลังรู้สึกไหม
+              นี่เป็นมุมมองหนึ่งสำหรับการสำรวจตัวเอง ลองดูว่าตรงกับสิ่งที่คุณกำลังรู้สึกอยู่ตอนนี้ไหม?
             </p>
 
             <button
@@ -227,7 +227,7 @@ export default function ExplorePage() {
                 cursor: 'pointer',
               }}
             >
-              💬 คุยกับ AI ฝาแฝดเกี่ยวกับเรื่องนี้
+              💬 คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้
             </button>
           </div>
         )}
@@ -292,13 +292,13 @@ export default function ExplorePage() {
                       cursor: 'pointer',
                     }}
                   >
-                    คุยกับ AI ฝาแฝดเกี่ยวกับเรื่องนี้
+                    คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้
                   </button>
                 )}
               </>
             ) : (
               <p style={{ fontSize: 14, color: 'var(--color-accent-primary)', margin: 0 }}>
-                ✅ ส่งให้ AI ฝาแฝดแล้ว
+                ✅ ส่งให้  ฝาแฝดของคุณแล้ว
               </p>
             )}
           </div>
@@ -328,7 +328,7 @@ export default function ExplorePage() {
           <ExploreCard
             emoji="🧬"
             title="วิเคราะห์ตัวตน"
-            subtitle="ภาพรวมจาก AI ฝาแฝดของคุณ"
+            subtitle="ภาพรวมจาก ฝาแฝด ของคุณ"
             available
             onClick={() => navigate('/analysis')}
           />
@@ -362,7 +362,7 @@ export default function ExplorePage() {
           lineHeight: 1.6,
           padding: '0 8px',
         }}>
-          ข้อมูลจากการสำรวจตัวเองเป็นสัญญาณเพื่อสำรวจ ไม่ใช่ข้อเท็จจริงสัมบูรณ์
+          ข้อมูลจากการสำรวจตัวเองเป็นสัญญาณเพื่อสำรวจตัวเอง ไม่ใช่ข้อเท็จจริงสมบูรณ์โปรดใช้วิจารณญาณ
         </p>
       </div>
 

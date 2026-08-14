@@ -7,13 +7,28 @@
 ## [Unreleased]
 
 ### Added
-- สร้างเอกสารครบชุด: README, .env.example, CONTRIBUTING, DEPLOYMENT, AI_CONTEXT
-- จัดระเบียบ docs/ — ย้ายไฟล์เก่าไป archive/
-- แยก Nova (AI Guide) และ AI Twin ให้ชัดเจนในเอกสาร
+- Decision APIs (CRUD) with Supabase integration
+- WebAuthn crypto verification with @simplewebauthn/server
+- TWIN navigation replacing Chat (center position)
+- 12 Worlds immersive environments (replacing Hubs)
+- Gamification as Growth Layer (separated from Core)
+- Micro-Evolution visibility for Twin progression
+- Voice personality separation (Nova vs Twin)
+- Landing page simplification (Meet Nova CTA)
+- 6 new documentation files (Worlds, UX, Gamification, Assets, Voice, Landing)
 
 ### Changed
-- ปรับปรุง AI_CONTEXT.md ให้มี Skill และกฎการทำงานของ AI
-- ปรับปรุง MASTER_PRD, PROJECT_SUMMARY, USER_GUIDE_TH ให้ตรงกับโค้ดล่าสุด
+- Navigation: Home | Explore | TWIN | Activities | Me
+- HubContext → WorldContext
+- EvolutionContext with micro-evolution tracking
+- Chat route redirects to /twin
+
+### Fixed
+- Foreign key constraint (user_id text → uuid)
+- DecisionForm and DecisionLogger API integration
+- WebAuthn signature verification (removed hardcoded)
+- PHASE2_TEST_CONSOLE removed from production
+- console.log removed from production (51 occurrences)
 
 ---
 

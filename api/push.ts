@@ -1,82 +1,40 @@
 /**
  * api/push.ts
- *
  * Master Direction §26-27: Push Infrastructure
- *
- * Vercel Edge Function to manage push subscriptions
- * - POST: subscribe user to push notifications
- * - DELETE: unsubscribe user from push notifications
- *
- * Rules:
- *  - Must extract userId from JWT (Authorization header)
- *  - Upsert into push_subscriptions table
- *  - Return 200 on success, 4xx on client errors, 5xx on server errors
  */
-
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@supabase/supabase-js';
-
-// ─── Types ────────────────────────────────────────────────────────────────
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '../_utils/database.types.js';
 
 interface SubscribeRequest {
   endpoint: string;
-  keys: {
-    p256dh: string;
-    auth: string;
-  };
+  keys: { p256dh: string; auth: string };
 }
 
 interface UnsubscribeRequest {
   endpoint: string;
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────
-
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // Only allow POST and DELETE
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST' && req.method !== 'DELETE') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    // Extract user ID from Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      // Try to extract from Supabase session cookie as fallback
-      const supabaseUrl = process.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
-
-      if (!supabaseUrl || !supabaseAnonKey) {
-        return res.status(500).json({ error: 'Supabase not configured' });
-      }
-
-      const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-      // Try to get session from request cookie
-      const { data: { user } } = await supabase.auth.getUser(authHeader || '');
-      if (!user?.id) {
-        return res.status(401).json({ error: 'Unauthorized' });
-      }
-
-      return handleRequest(req, res, user.id, supabase);
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // Extract token from Bearer
     const token = authHeader.slice(7);
-
-    // Initialize Supabase client
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
     const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY;
 
@@ -84,15 +42,10 @@ export default async function handler(
       return res.status(500).json({ error: 'Supabase not configured' });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
+    const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { authorization: `Bearer ${token}` } },
     });
 
-    // Get user info from token
     const { data: { user } } = await supabase.auth.getUser(token);
     if (!user?.id) {
       return res.status(401).json({ error: 'Invalid token' });
@@ -107,48 +60,36 @@ export default async function handler(
   }
 }
 
-// ─── Request Handler ──────────────────────────────────────────────────────
-
 async function handleRequest(
   req: VercelRequest,
   res: VercelResponse,
   userId: string,
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClient<Database>
 ) {
   if (req.method === 'POST') {
     return handleSubscribe(req, res, userId, supabase);
   } else if (req.method === 'DELETE') {
     return handleUnsubscribe(req, res, userId, supabase);
   }
-
   return res.status(405).json({ error: 'Method not allowed' });
 }
-
-// ─── Subscribe Handler ────────────────────────────────────────────────────
 
 async function handleSubscribe(
   req: VercelRequest,
   res: VercelResponse,
   userId: string,
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClient<Database>
 ) {
   const body = req.body as SubscribeRequest;
 
-  // Validate payload
   if (!body.endpoint || !body.keys?.p256dh || !body.keys?.auth) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-
-  if (typeof body.endpoint !== 'string') {
-    return res.status(400).json({ error: 'Invalid endpoint format' });
-  }
-
-  if (!/^https?:\/\//.test(body.endpoint)) {
-    return res.status(400).json({ error: 'Invalid endpoint URL' });
+  if (typeof body.endpoint !== 'string' || !/^https?:\/\//.test(body.endpoint)) {
+    return res.status(400).json({ error: 'Invalid endpoint' });
   }
 
   try {
-    // Upsert subscription
     const { error: upsertError } = await supabase
       .from('push_subscriptions')
       .upsert(
@@ -159,9 +100,7 @@ async function handleSubscribe(
           keys_auth: body.keys.auth,
           is_active: true,
         },
-        {
-          onConflict: 'user_id,endpoint',
-        }
+        { onConflict: 'user_id,endpoint' }
       );
 
     if (upsertError) {
@@ -169,10 +108,7 @@ async function handleSubscribe(
       return res.status(500).json({ error: 'Failed to save subscription' });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'Subscription saved',
-    });
+    return res.status(200).json({ success: true, message: 'Subscription saved' });
   } catch (error) {
     console.error('[PUSH] Subscribe error:', error);
     return res.status(500).json({
@@ -181,23 +117,19 @@ async function handleSubscribe(
   }
 }
 
-// ─── Unsubscribe Handler ──────────────────────────────────────────────────
-
 async function handleUnsubscribe(
   req: VercelRequest,
   res: VercelResponse,
   userId: string,
-  supabase: ReturnType<typeof createClient>
+  supabase: SupabaseClient<Database>
 ) {
   const body = req.body as UnsubscribeRequest;
 
-  // Validate payload
   if (!body.endpoint || typeof body.endpoint !== 'string') {
     return res.status(400).json({ error: 'Missing or invalid endpoint' });
   }
 
   try {
-    // Soft-delete by marking is_active = false
     const { error: updateError } = await supabase
       .from('push_subscriptions')
       .update({ is_active: false })
@@ -208,10 +140,7 @@ async function handleUnsubscribe(
       return res.status(500).json({ error: 'Failed to unsubscribe' });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: 'Unsubscribed',
-    });
+    return res.status(200).json({ success: true, message: 'Unsubscribed' });
   } catch (error) {
     console.error('[PUSH] Unsubscribe error:', error);
     return res.status(500).json({

@@ -4,8 +4,13 @@
  *
  * Handles:
  * - POST /api/intelligence (Astrovera Psychology via Claude)
+ * - POST /api/decisions (Decision Logging)
+ * - GET /api/decisions (Fetch Decision History)
+ * - DELETE /api/decisions (Delete Decision)
  * - POST /api/push (Web Push subscriptions)
+ * - DELETE /api/push (Unsubscribe Web Push)
  * - POST /api/auth/* (Passkey auth via Supabase)
+ * - GET /health (Health Check)
  */
 
 import express, { Request, Response, NextFunction } from 'express';
@@ -20,6 +25,7 @@ import {
 import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrovera';
 import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/index';
 import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './middleware/safety';
+import * as decisions from '../api/decisions';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -129,6 +135,18 @@ app.post('/api/intelligence', async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// ─── /api/decisions ──────────────────────────────────────────────────────
+
+/**
+ * Decision API Routes
+ * - POST: Save a new decision log
+ * - GET: Fetch decision history
+ * - DELETE: Delete a decision log
+ */
+app.post('/api/decisions', decisions.POST);
+app.get('/api/decisions', decisions.GET);
+app.delete('/api/decisions', decisions.DELETE);
 
 // ─── /api/push ────────────────────────────────────────────────────────────
 
@@ -256,4 +274,5 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`Health: http://localhost:${PORT}/health`);
+  console.log(`API: http://localhost:${PORT}/api`);
 });

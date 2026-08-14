@@ -3,7 +3,7 @@
  *
  * แถบเมนูด้านล่าง 5 แท็บ ตาม Master Directive §5.1
  *
- * วันนี้ | กิจกรรม | สำรวจ | AI ฝาแฝด | ฉัน
+ * วันนี้ | กิจกรรม | AI ฝาแฝด | สำรวจ | ฉันเอง
  *
  * แสดงเฉพาะจอ <= 760px (mobile) — desktop ใช้ NavBar ด้านบน
  * ใช้ inline SVG icons แทน emoji — ดูเป็น tech/app ไม่ใช่ fortune-telling

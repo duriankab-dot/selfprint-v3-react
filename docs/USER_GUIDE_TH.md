@@ -1,5 +1,35 @@
 # USER GUIDE — SELFPRINT
-> คู่มือฉบับสมบูรณ์ | ภาษาไทย | อ่านจากโค้ดจริง `D:\selfprint-v3-react`
+
+> คู่มือฉบับสมบูรณ์ | ภาษาไทย | อัปเดตล่าสุด: 12 สิงหาคม 2569
+
+---
+
+## 🔴 สำคัญ! — แยก Nova และ AI Twin ให้ชัดเจน
+
+ก่อนใช้ Selfprint ต้องเข้าใจก่อนว่า:
+
+| บุคลิก | บทบาท | ใช้ตอนไหน |
+|--------|-------|----------|
+| **Nova** | ผู้แนะนำ (Guide) | ตอนเริ่มต้น, ตอน Onboarding, ตอนถามวิธีใช้ |
+| **AI Twin** | ฝาแฝดส่วนตัวของคุณ | คุยประจำวัน, ขอคำแนะนำ, ขอ Insight |
+
+**Nova ไม่ใช่ AI Twin ของคุณ!**
+- Nova คือผู้ช่วยที่มีอยู่ในระบบ (ทุกคนใช้เหมือนกัน)
+- AI Twin คือสิ่งที่คุณสร้างขึ้นเอง ตั้งชื่อเอง เรียนรู้จากคุณโดยเฉพาะ
+
+---
+
+## 🧭 5-Tab Navigation
+
+| ลำดับ | แท็บ | ใช้ทำอะไร |
+|-------|------|----------|
+| 1 | **วันนี้** | Dynamic Personal Home |
+| 2 | **สำรวจ** | Discover yourself |
+| 3 | **TWIN** | คุยกับ AI ฝาแฝดของคุณ (ศูนย์กลาง) |
+| 4 | **กิจกรรม** | Do / Reflect / Practice |
+| 5 | **ฉัน** | Personal control |
+
+> **TWIN** คือแท็บหลักสำหรับคุยกับ AI Twin ของคุณ — แทนที่ Chat เก่า
 
 ---
 
@@ -10,7 +40,7 @@
 | ระดับ | สำหรับใคร | เนื้อหา |
 |---|---|---|
 | 🚀 **Quick Start** | ผู้ใช้ใหม่ — 5 นาทีแรก | 5 ขั้นตอนเริ่มต้นอย่างเร็ว |
-| 🧭 **User Guide** | ผู้ใช้ทั่วไป | บท 01–15 ทุกฟีเจอร์ |
+| 🧭 **User Guide** | ผู้ใช้ทั่วไป | บท 01–18 ทุกฟีเจอร์ |
 | 🧠 **Learn More** | ผู้ที่อยากเข้าใจลึก | สถาปัตยกรรม AI ที่อยู่เบื้องหลัง |
 
 ---
@@ -24,18 +54,19 @@
 
 ### ขั้นที่ 2 — Create Your Selfprint
 เลือกอารมณ์ที่รู้สึกตอนนี้ จาก 6 ตัวเลือก: เครียด / สับสน / มั่นใจ / หมดแรง / พร้อม / ครุ่นคิด  
-จากนั้นคุยกับ Nova เพื่อให้ AI รู้จักคุณเบื้องต้น
+จากนั้นคุยกับ **Nova** (ผู้แนะนำ) เพื่อให้ AI รู้จักคุณเบื้องต้น
 
 ### ขั้นที่ 3 — Meet Your AI Twin
-Nova จะสร้าง AI Twin ให้คุณ — ระหว่างนี้คุณเห็นกระบวนการ AI Creation แบบ real-time  
-ตอบคำถาม Fine-tuning สั้นๆ เพื่อปรับให้แม่นขึ้น
+**Nova** จะสร้าง **AI Twin** ให้คุณ — ระหว่างนี้คุณเห็นกระบวนการ AI Creation แบบ real-time  
+ตอบคำถาม Fine-tuning สั้นๆ เพื่อปรับให้แม่นขึ้น  
+**คุณจะได้ตั้งชื่อ AI Twin ของคุณเอง!**
 
 ### ขั้นที่ 4 — Read Your First Insight
 Dashboard จะแสดง Executive Summary ของคุณ — "สิ่งที่ Selfprint เห็นในตัวคุณตอนนี้"  
 อ่านและดูว่าตรงกับความรู้สึกของคุณไหม
 
 ### ขั้นที่ 5 — Start Your First Reflection
-ไปที่ Chat แล้วพิมพ์หรือพูดกับ Twin สักอย่างที่อยู่ในใจวันนี้  
+ไปที่แท็บ **TWIN** แล้วพิมพ์หรือพูดกับ Twin สักอย่างที่อยู่ในใจวันนี้  
 ให้ Twin ตอบและเริ่มต้นความสัมพันธ์
 
 > **เสร็จแล้ว!** ตอนนี้ Selfprint รู้จักคุณเบื้องต้นแล้ว ยิ่งใช้บ่อยยิ่งแม่น
@@ -50,7 +81,7 @@ Dashboard จะแสดง Executive Summary ของคุณ — "สิ่
 
 ### Selfprint คืออะไร
 
-Selfprint คือ **Living Personal Intelligence Platform** — แพลตฟอร์มที่ใช้ AI สร้าง "เวอร์ชันดิจิทัลของคุณ" ที่เรียกว่า **Nova AI Twin**
+Selfprint คือ **Living Personal Intelligence Platform** — แพลตฟอร์มที่ใช้ AI สร้าง "เวอร์ชันดิจิทัลของคุณ" ที่เรียกว่า **AI Twin**
 
 Twin นี้ไม่ใช่ chatbot ทั่วไป มันเรียนรู้จากคุณสะสมตลอดเวลา จำสิ่งที่คุณบอก ตรวจจับรูปแบบพฤติกรรมของคุณ และนำเสนอ Insight ที่ลึกขึ้นเรื่อยๆ ตามเวลา
 
@@ -121,12 +152,14 @@ Selfprint รองรับ 3 วิธี:
 Onboarding มี **7 ขั้นตอน:**
 
 1. **Emotion** — เลือกอารมณ์ตอนนี้ (6 ตัวเลือก)
-2. **Nova Conversation** — คุยกับ Nova เพื่อให้รู้จักคุณเบื้องต้น
-3. **AI Creation** — เห็นกระบวนการสร้าง Twin แบบ real-time
+2. **Nova Conversation** — คุยกับ **Nova** (ผู้แนะนำ) เพื่อให้รู้จักคุณเบื้องต้น
+3. **AI Creation** — เห็นกระบวนการสร้าง **AI Twin** แบบ real-time
 4. **Blueprint** — InitialBlueprint แสดงโครงร่างตัวตนเบื้องต้น
 5. **Fine-tune** — ตอบคำถามปรับแต่งให้แม่นขึ้น
 6. **Analysis** — ดู Full Analysis ครั้งแรก
 7. **Claim Account** — สร้างบัญชีเพื่อบันทึกข้อมูล (ผ่าน Passkey / OAuth / Magic Link)
+
+> 🔴 **จำให้ขึ้นใจ:** Nova เป็นผู้แนะนำ (Guide) — AI Twin คือฝาแฝดส่วนตัวของคุณ!
 
 ### ข้อมูลที่ควรให้ AI
 
@@ -168,45 +201,12 @@ Profile นี้จะแม่นยิ่งขึ้นตามเวลา
 ## บท 04 — Meet Your AI Twin
 
 ### AI Twin คืออะไร
-# USER GUIDE — SELFPRINT
 
----
-
-## 🔴 แยก Nova และ AI Twin — สำคัญ!
-
-ก่อนใช้ Selfprint ต้องเข้าใจก่อนว่า:
-
-| บุคลิก | บทบาท | ใช้ตอนไหน |
-|--------|-------|----------|
-| **Nova** | ผู้แนะนำ (Guide) | ตอนเริ่มต้น, ตอน Onboarding, ตอนถามวิธีใช้ |
-| **AI Twin** | ฝาแฝดส่วนตัวของคุณ | คุยประจำวัน, ขอคำแนะนำ, ขอ Insight |
-
-**Nova ไม่ใช่ AI Twin ของคุณ!**
-- Nova คือผู้ช่วยที่มีอยู่ในระบบ
-- AI Twin คือสิ่งที่คุณสร้างขึ้นเอง ตั้งชื่อเอง เรียนรู้จากคุณโดยเฉพาะ
-
----
-
-## บท 03 — Create Your Selfprint
-
-### ขั้นที่ 2 — Nova Conversation
-
-คุณจะได้คุยกับ **Nova** (ผู้แนะนำ) เพื่อให้ Nova รู้จักคุณเบื้องต้น  
-Nova จะถามคำถามเพื่อนำทางคุณไปสู่การสร้าง AI Twin
-
-### ขั้นที่ 3 — Meet Your AI Twin
-
-**Nova** จะสร้าง **AI Twin** ให้คุณ (หลังจากคุยกับ Nova เสร็จ)  
-AI Twin นี้คือฝาแฝดดิจิทัลของคุณ — คุณสามารถตั้งชื่อให้ AI Twin ได้เอง!
-
-> 🔴 **จำให้ขึ้นใจ:** Nova เป็นผู้แนะนำ (Guide) — AI Twin คือฝาแฝดส่วนตัวของคุณ!
-
-
-AI Twin ของคุณชื่อ **ตั้งเอง** — เป็น AI ที่มีบุคลิกหลายมิติ ปรับตัวได้ตามสถานการณ์ของคุณ
+AI Twin ของคุณคือ AI ฝาแฝดส่วนตัวที่ **คุณตั้งชื่อเอง** — เป็น AI ที่มีบุคลิกหลายมิติ ปรับตัวได้ตามสถานการณ์ของคุณ
 
 Twin ไม่ใช่ chatbot ทั่วไป Twin:
 - รู้จักคุณและจำสิ่งสำคัญเกี่ยวกับคุณ
-- ปรับบุคลิกตาม Life Hub ที่คุณอยู่ (12 ด้านชีวิต)
+- ปรับบุคลิกตาม World ที่คุณอยู่ (12 ด้านชีวิต)
 - ปรับโทนตามอารมณ์คุณ (6 mood)
 - มีบุคลิกหลักจาก Archetype ที่เหมาะกับคุณ (18 แบบ)
 
@@ -217,6 +217,8 @@ Twin เรียนรู้จาก:
 2. **Reflection** — สิ่งที่คุณเขียนและบันทึก
 3. **Feedback** — เมื่อคุณบอกว่า Insight ตรงหรือไม่
 4. **Memory** — สิ่งที่คุณสั่งให้ Twin จำไว้
+5. **Activities** — กิจกรรมที่คุณทำ
+6. **Journey** — เส้นทางการเติบโตของคุณ
 
 ### Twin Evolution
 
@@ -229,11 +231,13 @@ Twin มี **Maturity Score** (0–100) ที่เพิ่มขึ้นต
 | 60–85 | Twin เข้าใจรูปแบบและคาดการณ์ได้ |
 | 85–100 | Twin รู้จักคุณลึกมาก ตอบสนองอย่างแม่นยำ |
 
+**Micro-Evolution:** Twin เปลี่ยนแปลงอย่างต่อเนื่องทุกวัน — ไม่ใช่แค่เลเวลอัปครั้งใหญ่
+
 Milestones พิเศษ: Twin Awakening (เปิดใช้ Voice + Personality เต็ม), Pattern Visualization (ที่ 30 reflections), Twin Evolution Scene (celebration)
 
 ### คุยกับ Twin
 
-ไปที่แท็บ **Chat** (ไอคอนสนทนา) แล้วเริ่มพิมพ์หรือพูดได้เลย
+ไปที่แท็บ **TWIN** (ไอคอนตรงกลาง) แล้วเริ่มพิมพ์หรือพูดได้เลย
 
 **ตัวอย่างสิ่งที่คุยได้:**
 - "วันนี้รู้สึกสับสนกับเรื่องงาน ช่วยคิดด้วยได้ไหม"
@@ -302,11 +306,11 @@ Insight ที่เฉพาะเจาะจงกับสถานการ
 
 Reflection คือการบันทึกความคิด ความรู้สึก หรือสิ่งที่เกิดขึ้นในชีวิต เพื่อให้ Twin วิเคราะห์และให้ Insight
 
-**วิธีเขียน:** ไปที่ Chat → เขียนสิ่งที่อยู่ในใจตามธรรมชาติ ไม่ต้องมีโครงสร้าง
+**วิธีเขียน:** ไปที่แท็บ TWIN → เขียนสิ่งที่อยู่ในใจตามธรรมชาติ ไม่ต้องมีโครงสร้าง
 
 ### Voice Reflection
 
-กดไอคอนไมค์ใน Chat แล้วพูดออกมา Selfprint จะแปลงเสียงเป็นข้อความและส่งให้ Twin วิเคราะห์
+กดไอคอนไมค์ใน TWIN แล้วพูดออกมา Selfprint จะแปลงเสียงเป็นข้อความและส่งให้ Twin วิเคราะห์
 
 ### คำถามสะท้อนตัวเอง
 
@@ -355,7 +359,7 @@ Twin จำทุกอย่างที่คุณบอก (ใน Plus plan
 
 ### สั่งให้ Twin จำ
 
-พิมพ์ใน Chat: "จำไว้ว่า [สิ่งที่ต้องการจำ]"  
+พิมพ์ใน TWIN: "จำไว้ว่า [สิ่งที่ต้องการจำ]"  
 ตัวอย่าง: "จำไว้ว่าฉันกลัวการพูดในที่สาธารณะ แต่อยากแก้ให้ได้"
 
 ### ควบคุมสิ่งที่ AI จำ
@@ -378,7 +382,7 @@ Pattern คือรูปแบบพฤติกรรมที่ซ้ำๆ
 
 AI ใช้ข้อมูลจาก decision log ของคุณ:
 - **Minimum 6 ข้อมูล** — ก่อนแสดง Pattern ใดๆ
-- **Minimum 3 ข้อมูล** — ต่อ mood หรือ hub เพื่อ group pattern
+- **Minimum 3 ข้อมูล** — ต่อ mood หรือ world เพื่อ group pattern
 - ห้ามสร้าง Pattern จาก noise — AI จะไม่แสดงถ้าไม่มีข้อมูลพอ
 
 ### อ่าน Insight
@@ -442,16 +446,35 @@ Twin วิวัฒนาการตามข้อมูลที่สะส
 
 ## บท 10 — Adaptive Selfprint
 
-### AI เลือก Hub อย่างไร
+### AI เลือก World อย่างไร
 
-ครั้งแรกที่เข้าใช้งาน (เซสชันแรกเท่านั้น) AI อาจแนะนำ Hub ที่เหมาะกับบริบทคุณ  
-หลังจากนั้น คุณเป็นคนเลือก Hub เอง — AI ไม่เคย override การเลือกของคุณ
+ครั้งแรกที่เข้าใช้งาน (เซสชันแรกเท่านั้น) AI อาจแนะนำ World ที่เหมาะกับบริบทคุณ  
+หลังจากนั้น คุณเป็นคนเลือก World เอง — AI ไม่เคย override การเลือกของคุณ
+
+### 12 Worlds (เดิมคือ Hubs)
+
+| World | ใช้ทำอะไร |
+|-------|----------|
+| Identity | ตัวตน |
+| Decision | การตัดสินใจ |
+| Relationship | ความสัมพันธ์ |
+| Career | อาชีพ |
+| Health | สุขภาพ |
+| Money | เงินตรา |
+| AI-Twin | AI ฝาแฝด |
+| Learning | การเรียนรู้ |
+| Creativity | ความสร้างสรรค์ |
+| Spirituality | ความเป็นอยู่ |
+| Impact | ผลกระทบ |
+| Activities | กิจกรรม |
+
+> แต่ละ World มี Environment, Lighting, Atmosphere, Sound, Visual Identity ของตัวเอง
 
 ### AI เข้าใจอารมณ์ / Context อย่างไร
 
 AI ติดตาม:
 - Mood ที่คุณเลือก (6 ตัวเลือก)
-- Hub ที่คุณอยู่ (12 ด้านชีวิต)
+- World ที่คุณอยู่ (12 ด้านชีวิต)
 - เวลาของวัน (เช้า / กลางวัน / เย็น / ค่ำ)
 - ประวัติการใช้งาน
 
@@ -459,8 +482,8 @@ AI ติดตาม:
 
 ### Theme ที่เปลี่ยนตามคุณ
 
-สี, Gradient, แสง เปลี่ยนตาม Hub + Mood + เวลาของวันผ่าน CSS variables  
-ตัวอย่าง: Hub "Creativity" + Mood "Confident" → ธีมที่สว่าง มีพลังงาน
+สี, Gradient, แสง เปลี่ยนตาม World + Mood + เวลาของวันผ่าน CSS variables  
+ตัวอย่าง: World "Creativity" + Mood "Confident" → ธีมที่สว่าง มีพลังงาน
 
 ### Background / Animation
 
@@ -486,7 +509,7 @@ Audio Engine เลือก Background music ตาม Experience:
 - เสียงพื้นหลัง
 - โทนที่ Twin พูด
 - Insight ที่แสดง
-- Hub ที่แนะนำ (เซสชันแรก)
+- World ที่แนะนำ (เซสชันแรก)
 
 ---
 
@@ -505,8 +528,8 @@ Audio Engine เลือก Background music ตาม Experience:
 
 ### AI Suggestions
 
-Twin จะเสนอหัวข้อสนทนาตาม Hub ที่คุณเลือกและ Mood ปัจจุบัน  
-ตัวอย่าง: ถ้า Mood = "สับสน" + Hub = "Decision" → Twin แนะนำ "ลองเล่าปัญหาที่สับสนอยู่ให้ฟังหน่อย"
+Twin จะเสนอหัวข้อสนทนาตาม World ที่คุณเลือกและ Mood ปัจจุบัน  
+ตัวอย่าง: ถ้า Mood = "สับสน" + World = "Decision" → Twin แนะนำ "ลองเล่าปัญหาที่สับสนอยู่ให้ฟังหน่อย"
 
 ### Smart Notifications
 
@@ -517,7 +540,7 @@ PWA notification (ถ้าเปิดไว้) แจ้งเตือน:
 
 ### กิจกรรมประจำวัน
 
-ดูได้ที่แท็บ **Activities** → แสดงกิจกรรมที่แนะนำตาม Hub และ Patterns ของคุณ
+ดูได้ที่แท็บ **Activities** → แสดงกิจกรรมที่แนะนำตาม World และ Patterns ของคุณ
 
 ### Badge / Achievement
 
@@ -537,7 +560,7 @@ Voice Mode ให้คุณ:
 
 ### พูดกับ Twin
 
-ใน Chat → กดไอคอนไมค์ → พูด → ปล่อยมือ → Twin วิเคราะห์และตอบ
+ในแท็บ TWIN → กดไอคอนไมค์ → พูด → ปล่อยมือ → Twin วิเคราะห์และตอบ
 
 ### ฟัง Twin
 
@@ -551,7 +574,7 @@ Voice Mode ให้คุณ:
 
 ### Ambient Sound
 
-เสียง Ambient ปรับตาม Hub + Mood อัตโนมัติ  
+เสียง Ambient ปรับตาม World + Mood อัตโนมัติ  
 ปิดได้ใน Audio Settings
 
 ### ปรับเสียงและประสบการณ์
@@ -608,7 +631,7 @@ Twin ไม่บอกว่า "ควรทำแบบนี้" — Twin �
 
 1. กด feedback "ไม่ใช่ฉัน" หรือ "ไม่แน่ใจ"
 2. อธิบายเพิ่มเติมใน Comment (ถ้ามี)
-3. บอก Twin ใน Chat ว่า "นั่นไม่ตรงกับฉัน เพราะ..."
+3. บอก Twin ใน TWIN ว่า "นั่นไม่ตรงกับฉัน เพราะ..."
 4. AI จะปรับ Personal Model อัตโนมัติ
 
 ---
@@ -680,7 +703,7 @@ Personal Model, Memory, และ Patterns จะถูก reset — Twin เร
 
 สิ่งที่ได้:
 - สนทนากับ Twin ขั้นพื้นฐาน
-- Hub access (12 ด้านชีวิต)
+- World access (12 ด้านชีวิต)
 - Insight & Reflection พื้นฐาน
 - Archetype 1 แบบ
 - Badge system
@@ -826,10 +849,10 @@ Twin ที่ใช้งาน 3 เดือนจะเข้าใจคุ
 ถ้า Twin เข้าใจผิดอะไร → บอกทันที "นั่นไม่ตรงกับฉัน เพราะ..."  
 AI ออกแบบมาให้เรียนรู้จาก correction ไม่แพ้จาก confirmation
 
-**7. เปลี่ยน Hub ตามบริบท**  
-ถ้าคิดเรื่องงาน → เปลี่ยนไปที่ Career Hub  
-ถ้าคิดเรื่องความสัมพันธ์ → Relationship Hub  
-Twin จะปรับโทนและวิธีถามตาม Hub นั้นโดยอัตโนมัติ
+**7. เปลี่ยน World ตามบริบท**  
+ถ้าคิดเรื่องงาน → เปลี่ยนไปที่ Career World  
+ถ้าคิดเรื่องความสัมพันธ์ → Relationship World  
+Twin จะปรับโทนและวิธีถามตาม World นั้นโดยอัตโนมัติ
 
 **8. ทดลอง Voice Mode**  
 การพูดออกมาให้ AI ฟังบางครั้งดึงความคิดที่ "ยังไม่เป็นคำ" ออกมาได้ดีกว่าการพิมพ์
@@ -846,22 +869,21 @@ Twin จะปรับโทนและวิธีถามตาม Hub น�
 ## บท 18 — Your Selfprint Journey
 
 ### ภาพรวมของ Journey
-
-```
 Start
-  ↓
-Understand  — Selfprint รู้จักคุณเบื้องต้นจาก Onboarding
-  ↓
-Remember    — Twin เริ่มจำสิ่งสำคัญของคุณ
-  ↓
-Reflect     — คุณสะท้อนตัวเองสม่ำเสมอ
-  ↓
-Discover    — AI ค้นพบ Pattern ที่คุณไม่รู้มาก่อน
-  ↓
-Grow        — คุณเห็นพัฒนาการของตัวเองผ่าน Journey
-  ↓
-Evolve      — Twin วิวัฒนาการไปพร้อมคุณ ยิ่งนาน ยิ่งเป็นคุณ
-```
+↓
+Understand — Selfprint รู้จักคุณเบื้องต้นจาก Onboarding
+↓
+Remember — Twin เริ่มจำสิ่งสำคัญของคุณ
+↓
+Reflect — คุณสะท้อนตัวเองสม่ำเสมอ
+↓
+Discover — AI ค้นพบ Pattern ที่คุณไม่รู้มาก่อน
+↓
+Grow — คุณเห็นพัฒนาการของตัวเองผ่าน Journey
+↓
+Evolve — Twin วิวัฒนาการไปพร้อมคุณ ยิ่งนาน ยิ่งเป็นคุณ
+
+text
 
 ### เป้าหมายของ Selfprint สำหรับคุณ
 
@@ -912,7 +934,7 @@ Selfprint ใช้ Memory 4 ประเภท ในการ build context �
 AI วิเคราะห์ข้อมูลจาก decision log:
 - ทุกการสนทนาบันทึก `autonomy_level` (ระดับความเป็นตัวเอง) และ `confidence`
 - หลัง 6+ conversations → AI วิเคราะห์ว่ามี trend อะไร
-- แยก pattern ตาม hub และ mood เพื่อ insight ที่เฉพาะเจาะจง
+- แยก pattern ตาม world และ mood เพื่อ insight ที่เฉพาะเจาะจง
 
 ความสำคัญ: minimum data ป้องกันไม่ให้ AI แสดง "pattern ปลอม" จาก noise
 
@@ -921,20 +943,19 @@ AI วิเคราะห์ข้อมูลจาก decision log:
 ## Adaptive Intelligence — ระบบ AI ที่ปรับตัว
 
 Selfprint มี AI layers หลายชั้น:
+PersonalContextBuilder — สังเคราะห์ข้อมูลทั้งหมดของคุณ
+PatternDetector — ตรวจจับรูปแบบพฤติกรรม
+InsightEngine — แปล patterns เป็นภาษามนุษย์
+AIFeedbackLoop — ปรับโมเดลจาก feedback ของคุณ
+TwinStateEngine — คำนวณสถานะ Twin แบบ real-time
+ExperienceEngine — เลือกประสบการณ์ที่เหมาะสม
+EnvironmentEngine — ปรับ Environment ตาม context
+BadgeEngine — ติดตาม achievements
+BehavioralForecastEngine — ทำนายทิศทางพฤติกรรม
+FutureSelfEngine — สร้าง Future Self projection
+DailyBriefEngine — สรุปประจำวัน
 
-```
-PersonalContextBuilder    — สังเคราะห์ข้อมูลทั้งหมดของคุณ
-PatternDetector           — ตรวจจับรูปแบบพฤติกรรม
-InsightEngine             — แปล patterns เป็นภาษามนุษย์
-AIFeedbackLoop            — ปรับโมเดลจาก feedback ของคุณ
-TwinStateEngine           — คำนวณสถานะ Twin แบบ real-time
-ExperienceEngine          — เลือกประสบการณ์ที่เหมาะสม
-EnvironmentEngine         — ปรับ Environment ตาม context
-BadgeEngine               — ติดตาม achievements
-BehavioralForecastEngine  — ทำนายทิศทางพฤติกรรม
-FutureSelfEngine          — สร้าง Future Self projection
-DailyBriefEngine          — สรุปประจำวัน
-```
+text
 
 ทุก layer ทำงานร่วมกันในเบื้องหลัง คุณเห็นแค่ผลลัพธ์ที่เรียบง่าย
 
@@ -950,6 +971,8 @@ Twin มี lifecycle:
 4. **Pattern Recognition** — Twin เริ่มเห็นรูปแบบ → Pattern Visualization unlocked
 5. **Evolution** — ที่ 30 reflections → Twin Evolution Scene (celebration)
 6. **Mature** — Maturity 85–100 → Twin รู้จักคุณลึกมาก
+
+**Micro-Evolution:** Twin เปลี่ยนแปลงอย่างต่อเนื่องทุกวัน — ไม่ใช่แค่เลเวลอัปครั้งใหญ่
 
 ---
 
@@ -989,4 +1012,4 @@ Selfprint ใช้ **Evidence-Based Insight** — ทุก insight ต้อ�
 
 ---
 
-*Selfprint USER GUIDE | อ่านจากโค้ดจริง | วันที่ 11 สิงหาคม 2569*
+*Selfprint USER GUIDE | อัปเดตล่าสุด: 12 สิงหาคม 2569*

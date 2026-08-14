@@ -250,7 +250,7 @@ export default function Login() {
           </div>
           <h1 style={heading}>กลับสู่ Selfprint</h1>
           <p style={subtext}>
-            เข้าสู่ระบบเพื่อดู AI Twin ของคุณ
+            เข้าสู่ระบบเพื่อดู AI ฝาแฝด ของคุณ
           </p>
         </div>
 
@@ -293,7 +293,7 @@ export default function Login() {
                     onClick={() => setShowPasskey(true)}
                   >
                     <PasskeyIcon />
-                    {hasBiometric ? '🔓 เข้าสู่ระบบด้วย Face ID / Biometric' : '🔑 เข้าสู่ระบบด้วย Passkey'}
+                    {hasBiometric ? '🔓 ล๊อกอินด้วย Face ID / Biometric' : '🔑 ล๊อกอินด้วย Passkey'}
                   </button>
                 )}
 
@@ -370,12 +370,12 @@ export default function Login() {
 
         {/* ── Footer ────────────────────────────────────────────────────────── */}
         <div style={footerLink}>
-          ยังไม่มีบัญชี?{' '}
+          ยังไม่มีบัญชีใช่ไหม?{' '}
           <Link
             to="/onboarding"
             style={{ color: 'var(--color-accent-primary)', textDecoration: 'none', fontWeight: 600 }}
           >
-            สร้าง AI Twin ของคุณ →
+            สร้าง AI ฝาแฝด ของคุณ →
           </Link>
         </div>
       </div>

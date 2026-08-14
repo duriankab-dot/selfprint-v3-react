@@ -344,12 +344,13 @@ BASE_PERSONA (300-400 tokens)
 ### UX-03 | 5-TAB NAVIGATION (UPDATED 2026-08-12)
 
 **Feature ID:** UX-03  
-**Name:** 5-Tab Bottom Navigation with Twin Center (§5.1 UPDATED)  
+### UX-03 | 5-TAB NAVIGATION (UPDATED 2026-08-12)
+
+**Feature ID:** UX-03  
+**Name:** 5-Tab Bottom Navigation with TWIN Center  
 **Tabs:** Home (Today) / Explore / **TWIN** / Activities / Me  
 **Implementation:** BottomNav component, NavBar component  
-**Status:** ✅ Implemented (Navigation bar structure ready; Twin tab replacement PENDING)
-
----
+**Status:** ✅ Implemented
 
 **🔴 CHANGE NOTES (2026-08-12):**
 
@@ -357,19 +358,10 @@ BASE_PERSONA (300-400 tokens)
 **NEW:** Home / Explore / **TWIN** / Activities / Me
 
 **Rationale:**
-- Twin is primary interaction point after Core Awakening
+- TWIN is primary interaction point after Core Awakening
 - TWIN tab is center position (visual prominence)
-- Chat ≠ Navigation — Chat is interaction mode WITHIN Twin destination
-- Navigation rule: TWIN is destination; Chat/Voice/Memory are modes to interact with Twin
-
-**Rules:**
-- Before Twin Awakening: TWIN tab shows "Meet Twin" onboarding entry
-- After Awakening: TWIN tab opens Twin Chat interface
-- TWIN tab is not visible on Landing/Onboarding pages (only after first interaction)
-
-**Related Documents:**
-- See SELFPRINT_CURRENT_IMPROVEMENT_DIRECTIVE_2026-08-12.md (Item D, E)
-
+- Chat ≠ Navigation — Chat is interaction mode WITHIN Twin
+- Before Awakening: TWIN tab shows "Meet Twin" onboarding entry
 ---
 
 ### UX-04 | LOADING & PERFORMANCE
