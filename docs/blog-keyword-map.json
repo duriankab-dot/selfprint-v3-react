@@ -1,0 +1,416 @@
+{
+  "metadata": {
+    "created": "2026-08-16",
+    "totalArticles": 60,
+    "byWorld": {
+      "career": 20,
+      "relationships": 20,
+      "health": 20
+    },
+    "seoStrategy": "Long-tail keywords + Twin positioning + decision-making angle"
+  },
+  "career": {
+    "pillar": {
+      "title": "Decision-Making in Career Transitions",
+      "slug": "career-transitions-decisions",
+      "keywords": ["career decisions", "career transitions", "decision making", "career change"],
+      "seoTarget": "Head + long-tail (high volume + intent)"
+    },
+    "derivatives": [
+      {
+        "title": "How to Evaluate Job Offers Like Your Twin Would",
+        "slug": "evaluate-job-offers-decision",
+        "keywords": ["job offer evaluation", "career decisions", "job comparison", "salary negotiation"],
+        "seoTarget": "Medium-tail (specific buyer intent)"
+      },
+      {
+        "title": "Resume Tips for Career Changers",
+        "slug": "resume-career-change",
+        "keywords": ["resume writing", "career change resume", "job search tips", "career transition"],
+        "seoTarget": "Long-tail (high intent + niche)"
+      },
+      {
+        "title": "Interview Preparation: Decision-Making Framework",
+        "slug": "interview-prep-framework",
+        "keywords": ["interview tips", "interview preparation", "interview questions", "job interview"],
+        "seoTarget": "Medium-tail (recurring search)"
+      },
+      {
+        "title": "Negotiating Your Salary: A Twin's Approach",
+        "slug": "salary-negotiation-guide",
+        "keywords": ["salary negotiation", "negotiate salary", "salary discussion", "career advancement"],
+        "seoTarget": "Long-tail (high-value intent)"
+      },
+      {
+        "title": "Career Goals: Setting Decisions That Stick",
+        "slug": "career-goals-setting",
+        "keywords": ["career goals", "setting goals", "career planning", "goal setting"],
+        "seoTarget": "Medium-tail (evergreen)"
+      },
+      {
+        "title": "Should You Take That Promotion? Twin Insights",
+        "slug": "promotion-decision-guide",
+        "keywords": ["promotion decision", "career advancement", "take promotion", "leadership"],
+        "seoTarget": "Long-tail (specific career milestone)"
+      },
+      {
+        "title": "Entrepreneurship vs Employment: The Decision",
+        "slug": "entrepreneur-vs-employment",
+        "keywords": ["entrepreneurship", "starting a business", "business decision", "self-employment"],
+        "seoTarget": "Long-tail (high-impact decision)"
+      },
+      {
+        "title": "Networking Decisions: Building Your Career",
+        "slug": "networking-strategy-career",
+        "keywords": ["networking tips", "career networking", "professional relationships", "business networking"],
+        "seoTarget": "Medium-tail (career building)"
+      },
+      {
+        "title": "Remote vs Office: Making the Work Location Decision",
+        "slug": "remote-work-decision",
+        "keywords": ["remote work", "work from home", "office vs remote", "work flexibility"],
+        "seoTarget": "Long-tail (post-pandemic relevance)"
+      },
+      {
+        "title": "Career Burnout: Time for a Change?",
+        "slug": "career-burnout-decision",
+        "keywords": ["burnout", "job stress", "career change signs", "work life balance"],
+        "seoTarget": "Long-tail (emotional + decision intent)"
+      },
+      {
+        "title": "Industry Switch: Is Your Twin Guiding You Right?",
+        "slug": "industry-switch-decision",
+        "keywords": ["career change industry", "changing careers", "industry transition", "new field"],
+        "seoTarget": "Long-tail (major life decision)"
+      },
+      {
+        "title": "Freelancing Decision: Freedom vs Security",
+        "slug": "freelance-decision",
+        "keywords": ["freelancing", "freelance work", "independent contractor", "side gig"],
+        "seoTarget": "Long-tail (modern career path)"
+      },
+      {
+        "title": "Further Education: MBA or Bootcamp Decision",
+        "slug": "education-career-decision",
+        "keywords": ["MBA", "bootcamp", "further education", "career training", "skill development"],
+        "seoTarget": "Long-tail (investment decision)"
+      },
+      {
+        "title": "Staying vs Leaving a Job You Love",
+        "slug": "job-loyalty-decision",
+        "keywords": ["leaving job", "job satisfaction", "career decision", "when to quit"],
+        "seoTarget": "Long-tail (loyalty + opportunity tension)"
+      },
+      {
+        "title": "Mentorship Decisions: Who Should Guide Your Career?",
+        "slug": "mentorship-career",
+        "keywords": ["mentorship", "finding mentor", "career mentor", "professional guidance"],
+        "seoTarget": "Medium-tail (career growth)"
+      },
+      {
+        "title": "Company Culture Fit: Red Flags and Green Lights",
+        "slug": "company-culture-decision",
+        "keywords": ["company culture", "workplace culture", "job fit", "work environment"],
+        "seoTarget": "Long-tail (quality of life)"
+      },
+      {
+        "title": "Staying Updated: Continuous Learning Decisions",
+        "slug": "continuous-learning-career",
+        "keywords": ["professional development", "continuous learning", "skill development", "career growth"],
+        "seoTarget": "Medium-tail (evergreen growth)"
+      },
+      {
+        "title": "Leadership Role Decision: Are You Ready?",
+        "slug": "leadership-decision",
+        "keywords": ["leadership", "management role", "team lead", "leadership skills"],
+        "seoTarget": "Long-tail (career milestone)"
+      },
+      {
+        "title": "Geographic Move for Career: Twin Perspective",
+        "slug": "geographic-move-career",
+        "keywords": ["relocate for job", "moving for career", "geographic decision", "relocation"],
+        "seoTarget": "Long-tail (life-changing decision)"
+      },
+      {
+        "title": "Year-End Review: Career Progress Assessment",
+        "slug": "career-review-assessment",
+        "keywords": ["career progress", "year end review", "career assessment", "performance review"],
+        "seoTarget": "Seasonal (evergreen + timely)"
+      }
+    ]
+  },
+  "relationships": {
+    "pillar": {
+      "title": "Twin Guidance for Relationship Decisions",
+      "slug": "relationship-decisions-guide",
+      "keywords": ["relationship decisions", "dating decisions", "relationship advice", "love guidance"],
+      "seoTarget": "Head + long-tail (high emotion + intent)"
+    },
+    "derivatives": [
+      {
+        "title": "Dating App Dilemma: Swiping Smarter",
+        "slug": "dating-app-guide",
+        "keywords": ["dating apps", "online dating", "dating tips", "relationship app"],
+        "seoTarget": "Long-tail (modern dating)"
+      },
+      {
+        "title": "First Date Decisions: Making a Great Impression",
+        "slug": "first-date-guide",
+        "keywords": ["first date tips", "dating advice", "first date ideas", "first impression"],
+        "seoTarget": "Long-tail (high-intent audience)"
+      },
+      {
+        "title": "Should You Text Back? Communication Decisions",
+        "slug": "dating-communication",
+        "keywords": ["relationship communication", "texting etiquette", "communication tips", "talking to partner"],
+        "seoTarget": "Long-tail (humorous + practical)"
+      },
+      {
+        "title": "Commitment Conversations: When and How",
+        "slug": "commitment-conversation",
+        "keywords": ["commitment", "define relationship", "relationship status", "where is this going"],
+        "seoTarget": "Long-tail (vulnerable moment)"
+      },
+      {
+        "title": "Meeting the Family: Relationship Milestone",
+        "slug": "meet-family-decision",
+        "keywords": ["meeting parents", "meeting family", "relationship milestone", "family approval"],
+        "seoTarget": "Long-tail (life milestone)"
+      },
+      {
+        "title": "Long Distance Love: Is It Worth It?",
+        "slug": "long-distance-decision",
+        "keywords": ["long distance relationship", "long distance love", "relationship distance", "long distance dating"],
+        "seoTarget": "Long-tail (specific relationship challenge)"
+      },
+      {
+        "title": "Breaking Up: How to Know It's Time",
+        "slug": "breakup-decision",
+        "keywords": ["breaking up", "when to break up", "red flags relationship", "end relationship"],
+        "seoTarget": "Long-tail (high-emotion, high-intent)"
+      },
+      {
+        "title": "Reconnecting with an Ex: Should You?",
+        "slug": "reconnect-ex-decision",
+        "keywords": ["reconnecting with ex", "getting back together", "second chances", "exes"],
+        "seoTarget": "Long-tail (emotional + decision tension)"
+      },
+      {
+        "title": "Marriage Proposal: Twin Wisdom on Forever",
+        "slug": "marriage-proposal",
+        "keywords": ["marriage proposal", "getting married", "engagement", "marriage decision"],
+        "seoTarget": "Long-tail (life-changing + emotional)"
+      },
+      {
+        "title": "Pre-Marital Conversations: Important Questions",
+        "slug": "premarital-questions",
+        "keywords": ["pre marital", "before marriage", "marriage preparation", "relationship commitment"],
+        "seoTarget": "Long-tail (preparation + planning)"
+      },
+      {
+        "title": "Trust Issues: Building Relationship Foundation",
+        "slug": "trust-relationships",
+        "keywords": ["trust in relationships", "building trust", "relationship trust", "infidelity"],
+        "seoTarget": "Long-tail (foundational issue)"
+      },
+      {
+        "title": "Jealousy and Boundaries: Healthy Decisions",
+        "slug": "jealousy-boundaries",
+        "keywords": ["jealousy", "healthy boundaries", "relationship boundaries", "personal space"],
+        "seoTarget": "Long-tail (relationship health)"
+      },
+      {
+        "title": "Financial Decisions in Relationships",
+        "slug": "relationship-finances",
+        "keywords": ["financial decisions relationships", "money and relationships", "sharing finances", "prenup"],
+        "seoTarget": "Long-tail (practical + important)"
+      },
+      {
+        "title": "Children: To Have Them or Not?",
+        "slug": "kids-decision",
+        "keywords": ["having kids", "parenthood decision", "family planning", "children"],
+        "seoTarget": "Long-tail (major life decision)"
+      },
+      {
+        "title": "Friendship and Romance: Boundaries",
+        "slug": "friendship-romance-boundary",
+        "keywords": ["friendship and dating", "platonic relationships", "mixed friendships", "attraction"],
+        "seoTarget": "Long-tail (nuanced decision)"
+      },
+      {
+        "title": "Your Twin's Take on Love Languages",
+        "slug": "love-languages",
+        "keywords": ["love languages", "relationship compatibility", "expressing love", "relationship intimacy"],
+        "seoTarget": "Medium-tail (popular psychology)"
+      },
+      {
+        "title": "Polyamory or Monogamy: Which Fits You?",
+        "slug": "relationship-model-decision",
+        "keywords": ["polyamory", "open relationship", "monogamy", "relationship structure"],
+        "seoTarget": "Long-tail (modern relationship types)"
+      },
+      {
+        "title": "Conflict Resolution: Arguments That Matter",
+        "slug": "conflict-resolution-relationship",
+        "keywords": ["conflict resolution", "relationship arguments", "fighting fair", "resolving conflict"],
+        "seoTarget": "Long-tail (relationship skills)"
+      },
+      {
+        "title": "Friendship Breakups: Endings with Clarity",
+        "slug": "friendship-breakup",
+        "keywords": ["friendship breakup", "ending friendships", "toxic friends", "friendship loss"],
+        "seoTarget": "Long-tail (underexplored topic)"
+      },
+      {
+        "title": "Self-Love First: A Twin's Perspective",
+        "slug": "self-love-foundation",
+        "keywords": ["self love", "self care", "self worth", "personal development"],
+        "seoTarget": "Medium-tail (foundational + popular)"
+      }
+    ]
+  },
+  "health": {
+    "pillar": {
+      "title": "Personal Wellness Decisions Guided by Your Twin",
+      "slug": "wellness-decisions-guide",
+      "keywords": ["wellness decisions", "health decisions", "health goals", "wellness advice"],
+      "seoTarget": "Head + long-tail (health interest + decision-making)"
+    },
+    "derivatives": [
+      {
+        "title": "Starting a Fitness Journey: Your Twin's Framework",
+        "slug": "fitness-journey-start",
+        "keywords": ["fitness journey", "start exercising", "fitness for beginners", "exercise routine"],
+        "seoTarget": "Long-tail (beginner intent)"
+      },
+      {
+        "title": "Gym vs Home Workouts: What Suits You?",
+        "slug": "gym-home-workout-decision",
+        "keywords": ["gym vs home workout", "home exercise", "gym membership", "workout options"],
+        "seoTarget": "Long-tail (practical decision)"
+      },
+      {
+        "title": "Nutrition Decisions: Diets That Actually Work",
+        "slug": "nutrition-diet-decision",
+        "keywords": ["diet", "nutrition", "healthy eating", "diet plan", "weight loss"],
+        "seoTarget": "Long-tail (high-intent + evergreen)"
+      },
+      {
+        "title": "Meal Prep or Spontaneous? Twin Wisdom",
+        "slug": "meal-prep-decision",
+        "keywords": ["meal prep", "meal planning", "healthy meals", "cooking"],
+        "seoTarget": "Long-tail (practical lifestyle)"
+      },
+      {
+        "title": "Sleep Decisions: Quality Rest for Decision-Making",
+        "slug": "sleep-health-wellness",
+        "keywords": ["sleep quality", "sleep tips", "insomnia", "sleep habits", "rest"],
+        "seoTarget": "Long-tail (foundation of health)"
+      },
+      {
+        "title": "Stress Management: Decisions That Calm",
+        "slug": "stress-management",
+        "keywords": ["stress management", "anxiety relief", "stress relief", "coping mechanisms"],
+        "seoTarget": "Long-tail (mental health + decision)"
+      },
+      {
+        "title": "Mental Health Support: When to Seek Help",
+        "slug": "mental-health-support",
+        "keywords": ["mental health", "therapy", "counseling", "mental health support"],
+        "seoTarget": "Long-tail (important + sensitive)"
+      },
+      {
+        "title": "Meditation or Yoga? Wellness Path Choices",
+        "slug": "meditation-yoga-choice",
+        "keywords": ["meditation", "yoga", "mindfulness", "relaxation"],
+        "seoTarget": "Long-tail (wellness practice)"
+      },
+      {
+        "title": "Supplement Decisions: What Does Your Body Need?",
+        "slug": "supplements-decision",
+        "keywords": ["supplements", "vitamins", "health supplements", "nutritional supplements"],
+        "seoTarget": "Long-tail (health optimization)"
+      },
+      {
+        "title": "Substance Choices: Alcohol, Caffeine, and More",
+        "slug": "substance-moderation",
+        "keywords": ["alcohol", "caffeine", "substance use", "habits"],
+        "seoTarget": "Long-tail (lifestyle choices)"
+      },
+      {
+        "title": "Doctor Visits: Taking Preventative Health Action",
+        "slug": "preventative-health",
+        "keywords": ["doctor visit", "preventative care", "health checkup", "medical appointment"],
+        "seoTarget": "Long-tail (health responsibility)"
+      },
+      {
+        "title": "Medical Decisions: Getting a Second Opinion",
+        "slug": "medical-decisions",
+        "keywords": ["second opinion", "medical decision", "health treatment", "doctor advice"],
+        "seoTarget": "Long-tail (informed decision-making)"
+      },
+      {
+        "title": "Skincare Routine: What's Right for You?",
+        "slug": "skincare-decision",
+        "keywords": ["skincare", "skin care routine", "acne", "skin health"],
+        "seoTarget": "Long-tail (beauty + wellness)"
+      },
+      {
+        "title": "Hair and Beauty: Self-Care Decisions",
+        "slug": "beauty-self-care",
+        "keywords": ["self care", "personal care", "beauty", "grooming"],
+        "seoTarget": "Long-tail (self-expression)"
+      },
+      {
+        "title": "Weight Management: Healthy Decisions",
+        "slug": "weight-management",
+        "keywords": ["weight loss", "weight management", "healthy weight", "body image"],
+        "seoTarget": "Long-tail (sensitive + high-intent)"
+      },
+      {
+        "title": "Energy Levels: Decisions to Boost Vitality",
+        "slug": "energy-levels",
+        "keywords": ["energy boost", "fatigue", "low energy", "productivity"],
+        "seoTarget": "Long-tail (quality of life)"
+      },
+      {
+        "title": "Seasonal Health: Adjusting Your Wellness Plan",
+        "slug": "seasonal-health",
+        "keywords": ["seasonal health", "seasonal affective disorder", "weather health", "seasonal changes"],
+        "seoTarget": "Seasonal (timely + relevant)"
+      },
+      {
+        "title": "Aging Gracefully: Wellness Decisions for Later Life",
+        "slug": "aging-wellness",
+        "keywords": ["healthy aging", "anti-aging", "aging", "longevity"],
+        "seoTarget": "Long-tail (demographic-specific)"
+      },
+      {
+        "title": "Work-Life Balance: Health in a Busy Schedule",
+        "slug": "work-life-balance-health",
+        "keywords": ["work life balance", "busy schedule", "time management", "wellness routine"],
+        "seoTarget": "Long-tail (professional + health)"
+      },
+      {
+        "title": "New Year, New Habits: Health Goals That Stick",
+        "slug": "new-year-health-goals",
+        "keywords": ["new year resolutions", "health goals", "habits", "goal setting"],
+        "seoTarget": "Seasonal (high-intent timing)"
+      }
+    ]
+  },
+  "seoStrategy": {
+    "keywords": "3-5 keywords per article (mix of head + long-tail)",
+    "internalLinking": "Each article links to 2-3 related articles + /worlds + /onboarding",
+    "metadata": "Meta title (60 chars) + meta description (150 chars) + og tags",
+    "freshness": "Update dates monthly to signal freshness to Google",
+    "cta": "Every article ends with Twin/product CTA"
+  },
+  "content_requirements": {
+    "length": "800-1200 words per article (scannable with sections)",
+    "tone": "Hybrid (practical guide + Twin storytelling)",
+    "structure": "Intro + 2-3 sections + Key Takeaways + How Your Twin Guides You + CTA",
+    "examples": "Specific, relatable examples (not generic)",
+    "voice": "Friendly, authoritative, decision-focused"
+  }
+}

@@ -1,0 +1,235 @@
+{
+  "metadata": {
+    "total": 60,
+    "published": 4,
+    "inProgress": 56,
+    "lastUpdated": "2026-08-16",
+    "seoStrategy": "Long-tail keywords + Twin positioning"
+  },
+  "worldStats": {
+    "career": {
+      "total": 20,
+      "published": 2,
+      "description": "Career transitions, job decisions, leadership, growth"
+    },
+    "relationships": {
+      "total": 20,
+      "published": 1,
+      "description": "Dating, commitment, breakups, communication, love"
+    },
+    "health": {
+      "total": 20,
+      "published": 1,
+      "description": "Wellness, fitness, mental health, nutrition, self-care"
+    }
+  },
+  "articles": [
+    {
+      "id": "career-transitions-001",
+      "title": "Decision-Making in Career Transitions: Your Twin's Framework",
+      "slug": "career-transitions-decisions",
+      "world": "career",
+      "excerpt": "Career transitions are pivotal moments. Learn how Twin intelligence can guide your most important career decisions—from evaluating opportunities to navigating uncertainty.",
+      "keywords": ["career decisions", "career transitions", "career change", "decision making"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": true,
+      "status": "published",
+      "wordCount": 1200
+    },
+    {
+      "id": "career-002",
+      "title": "How to Evaluate Job Offers Like Your Twin Would",
+      "slug": "evaluate-job-offers-decision",
+      "world": "career",
+      "excerpt": "Job offer in hand—now what? Learn a framework to evaluate job offers beyond salary. Discover how to weigh culture fit, growth, stability, and fulfillment.",
+      "keywords": ["job offer evaluation", "career decisions", "job comparison"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "published",
+      "wordCount": 900
+    },
+    {
+      "id": "relationships-transitions-001",
+      "title": "Twin Guidance for Relationship Decisions",
+      "slug": "relationship-decisions-guide",
+      "world": "relationships",
+      "excerpt": "Relationships are built on decisions—some small, some life-changing. Learn how Twin intelligence helps you navigate dating, commitment, trust, and love with clarity.",
+      "keywords": ["relationship decisions", "dating advice", "love guidance", "commitment"],
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": true,
+      "status": "published",
+      "wordCount": 1200
+    },
+    {
+      "id": "health-wellness-001",
+      "title": "Personal Wellness Decisions Guided by Your Twin",
+      "slug": "wellness-decisions-guide",
+      "world": "health",
+      "excerpt": "Health is built on small decisions made consistently. Discover how Twin intelligence helps you navigate fitness, nutrition, mental health, and self-care with intention.",
+      "keywords": ["wellness decisions", "health goals", "self-care", "fitness"],
+      "category": "Health & Wellness",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": true,
+      "status": "published",
+      "wordCount": 1200
+    },
+    {
+      "id": "career-003",
+      "title": "Resume Tips for Career Changers",
+      "slug": "resume-career-change",
+      "world": "career",
+      "excerpt": "Changing careers? Your resume needs to translate experience, not just list jobs. Learn how to position yourself for a new field.",
+      "keywords": ["resume writing", "career change resume", "job search tips"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "career-004",
+      "title": "Interview Preparation: Decision-Making Framework",
+      "slug": "interview-prep-framework",
+      "world": "career",
+      "excerpt": "Interviews aren't just about selling yourself—they're about assessing fit. Learn how to interview the company while they interview you.",
+      "keywords": ["interview tips", "interview preparation", "job interview"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "career-005",
+      "title": "Negotiating Your Salary: A Twin's Approach",
+      "slug": "salary-negotiation-guide",
+      "world": "career",
+      "excerpt": "Salary negotiation is a decision, not a conflict. Learn how to negotiate with confidence and know your worth.",
+      "keywords": ["salary negotiation", "negotiate salary", "career advancement"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "career-006",
+      "title": "Career Goals: Setting Decisions That Stick",
+      "slug": "career-goals-setting",
+      "world": "career",
+      "excerpt": "SMART goals aren't enough. Learn how to set career goals that actually align with your values and stick.",
+      "keywords": ["career goals", "goal setting", "career planning"],
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "relationships-002",
+      "title": "Dating App Dilemma: Swiping Smarter",
+      "slug": "dating-app-guide",
+      "world": "relationships",
+      "excerpt": "Online dating has changed everything. Learn how to navigate dating apps with intention, not desperation.",
+      "keywords": ["dating apps", "online dating", "dating tips"],
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "relationships-003",
+      "title": "First Date Decisions: Making a Great Impression",
+      "slug": "first-date-guide",
+      "world": "relationships",
+      "excerpt": "First dates are exciting and terrifying. Learn how to be present and assess fit without overthinking.",
+      "keywords": ["first date tips", "dating advice", "first impression"],
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "health-002",
+      "title": "Starting a Fitness Journey: Your Twin's Framework",
+      "slug": "fitness-journey-start",
+      "world": "health",
+      "excerpt": "New to fitness? Learn how to start a fitness journey that actually fits your life and goals.",
+      "keywords": ["fitness journey", "start exercising", "fitness for beginners"],
+      "category": "Health & Wellness",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    },
+    {
+      "id": "health-003",
+      "title": "Gym vs Home Workouts: What Suits You?",
+      "slug": "gym-home-workout-decision",
+      "world": "health",
+      "excerpt": "Gym membership or home workout? The answer is personal. Learn how to choose what actually works for you.",
+      "keywords": ["gym vs home workout", "home exercise", "workout options"],
+      "category": "Health & Wellness",
+      "publishedAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "author": "Twin",
+      "featured": false,
+      "status": "draft",
+      "wordCount": 0
+    }
+  ],
+  "categories": {
+    "Career Development": {
+      "count": 20,
+      "description": "Career decisions, job hunting, leadership, growth"
+    },
+    "Relationships": {
+      "count": 20,
+      "description": "Dating, commitment, communication, relationships"
+    },
+    "Health & Wellness": {
+      "count": 20,
+      "description": "Fitness, nutrition, mental health, self-care, wellness"
+    }
+  },
+  "featured": [
+    "career-transitions-001",
+    "relationships-transitions-001",
+    "health-wellness-001"
+  ],
+  "upcoming": [
+    "Breaking Up: How to Know It's Time",
+    "Should You Take That Promotion? Twin Insights",
+    "Mental Health Support: When to Seek Help",
+    "Entrepreneurship vs Employment: The Decision"
+  ],
+  "sitemapPriority": 0.8,
+  "updateFrequency": "weekly"
+}
