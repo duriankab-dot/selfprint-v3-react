@@ -1,12 +1,14 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useContext } from 'react';
+import { validateWorldPersonalities } from './constants/worldPersonalities';
 import { AuthContext } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AIProvider } from './context/AIContext';
 import { EmotionProvider } from './context/EmotionContext';
 import { HubProvider } from './context/HubContext';
 import { TwinProvider } from './context/TwinContext';
+import { WorldProvider } from './context/WorldContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 import { ExperienceProvider } from './context/ExperienceContext';
@@ -73,6 +75,14 @@ function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
 }
 
 function App() {
+  // Validate world personalities on app startup
+  useEffect(() => {
+    const { isValid, missingWorlds } = validateWorldPersonalities();
+    if (!isValid) {
+      console.error('World personality validation failed. Missing worlds:', missingWorlds);
+    }
+  }, []);
+
   return (
     <ThemeProvider>
       <AuthProvider>
@@ -81,7 +91,8 @@ function App() {
           <EmotionProvider>
             <HubProvider>
               <TwinProvider>
-                <SubscriptionProvider>
+                <WorldProvider>
+                  <SubscriptionProvider>
                   <ExperienceProvider>
                     <AudioProvider>
                       <EnvironmentProvider>
@@ -132,6 +143,7 @@ function App() {
                     </AudioProvider>
                   </ExperienceProvider>
                 </SubscriptionProvider>
+                </WorldProvider>
               </TwinProvider>
             </HubProvider>
           </EmotionProvider>

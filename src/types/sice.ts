@@ -68,6 +68,7 @@ export interface ISICEEngine {
 /**
  * SICE #1: PersonalContextBuilder
  * Builds user's personal context from available data
+ * P0 #7.4: Includes world-specific personality adaptation
  */
 export interface PersonalContext {
   userId: string;
@@ -78,6 +79,12 @@ export interface PersonalContext {
   recentMemories: Array<{ timestamp: string; content: string }>;
   strengthAreas: string[];
   growthAreas: string[];
+  // P0 #7.4: World-specific adaptation
+  worldPersonality?: {
+    mood: string;
+    responseStyle: string;
+    focusArea: string;
+  };
 }
 
 /**

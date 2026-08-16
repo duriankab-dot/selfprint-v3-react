@@ -13,6 +13,9 @@ import type {
 } from '../../types/sice';
 import { SICEBase } from './SICEBase';
 import { PersonalContextBuilder } from './engines/PersonalContextBuilder';
+import { PatternDetector } from './engines/PatternDetector';
+import { InsightEngine } from './engines/InsightEngine';
+import { TwinStateEngine } from './engines/TwinStateEngine';
 
 export class SICEOrchestrator {
   private engines: Map<number, SICEBase> = new Map();
@@ -23,16 +26,17 @@ export class SICEOrchestrator {
 
   /**
    * Register all 12 SICE engines
+   * P0 #7.3: All engines now receive currentWorld in SICEInput
    */
   private registerEngines(): void {
-    // Implemented engines
+    // Implemented engines (World-aware)
     this.engines.set(1, new PersonalContextBuilder());
+    this.engines.set(2, new PatternDetector());
+    this.engines.set(3, new InsightEngine());
+    this.engines.set(5, new TwinStateEngine());
 
-    // TODO: Implement remaining engines
-    // #2: PatternDetector
-    // #3: InsightEngine
+    // TODO: Implement remaining engines (also use currentWorld context)
     // #4: AIFeedbackLoop
-    // #5: TwinStateEngine
     // #6: ExperienceEngine
     // #7: EnvironmentEngine
     // #8: BadgeEngine
@@ -50,14 +54,21 @@ export class SICEOrchestrator {
 
     // Run all engines in parallel
     const resultPromises = Array.from(this.engines.values()).map((engine) =>
-      engine.process(input).catch((error) => ({
-        engineId: engine.id,
-        engineName: engine.name,
-        result: null,
-        confidence: 0,
-        executionTime: 0,
-        error: error instanceof Error ? error.message : String(error),
-      }))
+      engine
+        .process(input)
+        .catch((error) => {
+          // Return proper SICEOutput shape on error
+          const errorMsg = error instanceof Error ? error.message : String(error);
+          console.error(`Engine ${engine.name} failed:`, errorMsg);
+          return {
+            engineId: engine.id,
+            engineName: engine.name,
+            result: null, // null result for failed engines
+            confidence: 0,
+            executionTime: 0,
+            error: errorMsg,
+          };
+        })
     );
 
     const results = await Promise.all(resultPromises);
@@ -68,8 +79,9 @@ export class SICEOrchestrator {
     // Fine-tune based on feedback history
     const fineTuned = await this.performFineTuning(input, results);
 
-    // Build personal intelligence
+    // Build personal intelligence (includes world-specific guidance)
     const personalIntelligence = this.buildPersonalIntelligence(
+      input,
       results,
       synthesis,
       fineTuned
@@ -132,8 +144,10 @@ export class SICEOrchestrator {
 
   /**
    * Build the final PersonalIntelligence output
+   * P0 #7.3: Includes world-specific guidance in recommendations
    */
   private buildPersonalIntelligence(
+    input: SICEInput,
     _results: Array<unknown>,
     synthesis: CrossEngineSynthesis,
     _fineTuned: FineTunedResult
@@ -142,10 +156,12 @@ export class SICEOrchestrator {
     // - Combine recommendations from multiple engines
     // - Prioritize by confidence and relevance
     // - Identify warnings/cautions
+    // - Apply world-specific guidance (P0 #7.3)
 
+    const worldContext = input.currentWorld ? ` in the ${input.currentWorld} world` : '';
     return {
       userUnderstanding: synthesis.confidenceScore,
-      recommendedAction: 'Continue self-discovery with Twin',
+      recommendedAction: `Continue self-discovery with Twin${worldContext}`,
       confidence: synthesis.confidenceScore,
       insights: [],
       nextStepsSuggested: [],

@@ -1,10 +1,12 @@
 /**
  * SICE #1: PersonalContextBuilder
  * Builds comprehensive personal context from available data
+ * P0 #7.4: Adapts per world with world-specific personalities
  */
 
 import { SICEBase } from '../SICEBase';
 import type { SICEInput, SICEOutput, PersonalContext } from '../../../types/sice';
+import { getWorldPersonality } from '../../../constants/worldPersonalities';
 
 export class PersonalContextBuilder extends SICEBase {
   constructor() {
@@ -24,15 +26,26 @@ export class PersonalContextBuilder extends SICEBase {
       // - Memory entries
       // - Activity log
 
+      // P0 #7.4: Get world-specific personality if world is specified
+      const worldPersonality = input.currentWorld
+        ? getWorldPersonality(input.currentWorld)
+        : null;
+
       const context: PersonalContext = {
         userId: input.userId,
-        emotionalState: 'neutral', // TODO: Infer from recent data
+        emotionalState: worldPersonality?.defaultMood || 'neutral', // TODO: Infer from recent data
         currentGoals: [], // TODO: From user_profile
         activePatterns: [], // TODO: From PatternDetector
-        worldFocus: input.currentWorld || 'SELF',
+        worldFocus: input.currentWorld || 'self',
         recentMemories: [], // TODO: From memories table
         strengthAreas: [], // TODO: From analysis
         growthAreas: [], // TODO: From feedback
+        // P0 #7.4: World-aware adaptation
+        worldPersonality: worldPersonality ? {
+          mood: worldPersonality.defaultMood,
+          responseStyle: worldPersonality.responseStyle,
+          focusArea: worldPersonality.focusArea,
+        } : undefined,
       };
 
       return context;

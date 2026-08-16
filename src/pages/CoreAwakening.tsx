@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useAIContext } from '../context/AIContext';
 import { TwinHologramBirth } from '../components/TwinHologramBirth';
 import { completeCoreAwakening, initializeTwin } from '../services/CoreAwakeningService';
-import './styles/core-awakening.css';
+import '../styles/core-awakening.css';
 
 type Phase = 'intro' | 'processing' | 'birth' | 'naming' | 'complete';
 
