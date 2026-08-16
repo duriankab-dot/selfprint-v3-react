@@ -148,6 +148,58 @@ app.post('/api/decisions', decisions.POST);
 app.get('/api/decisions', decisions.GET);
 app.delete('/api/decisions', decisions.DELETE);
 
+// ─── /api/decision/trigger-reminders ──────────────────────────────────────
+
+/**
+ * Trigger decision follow-up automation
+ * POST /api/decision/trigger-reminders
+ * Query params:
+ *   - userId (optional): Trigger for specific user, or all users if omitted
+ *
+ * Security: Requires AUTOMATION_SECRET header for production
+ */
+app.post('/api/decision/trigger-reminders', async (req: Request, res: Response) => {
+  try {
+    // Verify automation secret (simple auth for scheduled jobs)
+    const secret = req.headers['x-automation-secret'] as string;
+    const expectedSecret = process.env.AUTOMATION_SECRET;
+
+    if (expectedSecret && secret !== expectedSecret) {
+      console.warn('[Decision Automation] Unauthorized trigger attempt');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const userId = req.query.userId as string | undefined;
+
+    // Import automation service
+    const { triggerFollowUpAutomation } = await import(
+      '../src/services/DecisionAutomationService'
+    );
+
+    const result = await triggerFollowUpAutomation(userId);
+
+    if (result.errors.length > 0) {
+      console.warn('[Decision Automation] Completed with errors:', result.errors);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Decision follow-up automation triggered`,
+      stats: {
+        processed: result.processed,
+        notified: result.notified,
+        errors: result.errors,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[Decision Automation] Error:', error);
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : 'Internal server error',
+    });
+  }
+});
+
 // ─── /api/push ────────────────────────────────────────────────────────────
 
 interface SubscribeRequest {
