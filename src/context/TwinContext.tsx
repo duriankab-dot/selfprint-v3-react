@@ -1,7 +1,11 @@
 /**
- * Twin Context
- * จัดการข้อมูล Nova Twin: archetype, maturity score, personality
+ * TwinContext.tsx
+ * Manages AI Twin state: archetype, maturity, world context
  * + world-aware recommendations (P0 #7)
+ *
+ * CRITICAL: Twin ≠ Nova
+ * - Nova: Universal guide (temporary, Acts 1-2)
+ * - Twin: Personal expert (persistent, Acts 2-3+)
  */
 
 import React, { createContext, useState, useCallback } from 'react';
@@ -9,6 +13,11 @@ import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
 import { createDecision } from '../services/DecisionService';
+import {
+  fetchUserTwin,
+  createTwinInDatabase,
+  updateTwinInDatabase,
+} from '../services/TwinSupabaseService';
 
 // 18 Archetypes (12 base + 6 hybrid)
 export const ARCHETYPES = [
@@ -80,22 +89,39 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const [currentWorld, setCurrentWorld] = useState<WorldId | null>(null);
 
   const createTwin = useCallback(
-    (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
+    async (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
       try {
+        // GUARD: Validate profile.userId
+        if (!profile.userId || typeof profile.userId !== 'string') {
+          throw new Error('Twin creation requires valid userId');
+        }
+
         setLoading(true);
+
+        // Save to Supabase
+        const savedTwin = await createTwinInDatabase(profile.userId, profile);
+
+        if (!savedTwin) {
+          throw new Error('Failed to create Twin in database');
+        }
+
+        // Map Supabase snake_case to TypeScript camelCase
         const newTwin: TwinProfile = {
-          ...profile,
-          id: `twin-${profile.userId}-${Date.now()}`,
-          maturityScore: profile.maturityScore || 30,
-          createdAt: Date.now(),
+          id: savedTwin.id,
+          userId: profile.userId,
+          name: savedTwin.name,
+          primaryArchetype: (savedTwin as any).primary_archetype as any,
+          secondaryArchetype: (savedTwin as any).secondary_archetype as any,
+          maturityScore: Math.max(0, Math.min(100, (savedTwin as any).maturity_score || 30)),
+          createdAt: new Date((savedTwin as any).awakened_at).getTime(),
           updatedAt: Date.now(),
         };
 
         setTwin(newTwin);
-        localStorage.setItem('selfprint_twin', JSON.stringify(newTwin));
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to create twin');
+        const errorMsg = err instanceof Error ? err.message : 'Failed to create twin';
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -105,13 +131,23 @@ export function TwinProvider({ children }: { children: ReactNode }) {
 
   const updateTwin = useCallback((updates: Partial<TwinProfile>) => {
     setTwin(prev => {
-      if (!prev) return null;
-      const updated = {
+      // GUARD: Ensure Twin exists before updating
+      if (!prev) {
+        console.warn('Attempted to update Twin when Twin is null');
+        return null;
+      }
+
+      const updated: TwinProfile = {
         ...prev,
         ...updates,
         updatedAt: Date.now(),
       };
-      localStorage.setItem('selfprint_twin', JSON.stringify(updated));
+
+      // Persist to Supabase (async, don't block state update)
+      updateTwinInDatabase(prev.id, updated).catch(err => {
+        console.error('Failed to update Twin in database:', err);
+      });
+
       return updated;
     });
   }, []);
@@ -169,23 +205,45 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     [currentWorld]
   );
 
-  const resetTwin = useCallback(() => {
-    setTwin(null);
-    localStorage.removeItem('selfprint_twin');
-    setError(null);
-  }, []);
-
-  // Load twin from localStorage on mount
-  React.useEffect(() => {
+  const resetTwin = useCallback(async () => {
     try {
-      const stored = localStorage.getItem('selfprint_twin');
-      if (stored) {
-        const parsed = JSON.parse(stored) as TwinProfile;
-        setTwin(parsed);
-      }
+      // TODO: P1 - Delete Twin from Supabase
+      // if (!supabase || !twin?.id) return;
+      // await supabase.from('twins').delete().eq('id', twin.id);
+
+      setTwin(null);
+      setError(null);
     } catch (err) {
-      // Failed to load twin from storage
+      const errorMsg = err instanceof Error ? err.message : 'Failed to reset Twin';
+      setError(errorMsg);
     }
+  }, [twin?.id]);
+
+  // Load Twin from Supabase on mount
+  React.useEffect(() => {
+    const loadTwin = async () => {
+      // Get current user ID from auth context (if available)
+      // GUARD: Must be called after auth is ready
+      try {
+        // Note: This assumes AuthContext provides user ID
+        // In real implementation, extract from useAuth()
+        const stored = localStorage.getItem('selfprint_user_id');
+        if (!stored) return;
+
+        const fetchedTwin = await fetchUserTwin(stored);
+        if (fetchedTwin) {
+          setTwin({
+            ...fetchedTwin,
+            createdAt: new Date(fetchedTwin.awakened_at).getTime(),
+            updatedAt: Date.now(),
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load Twin from Supabase:', err);
+      }
+    };
+
+    loadTwin();
   }, []);
 
   const value: TwinContextType = {

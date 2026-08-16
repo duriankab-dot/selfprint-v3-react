@@ -1,7 +1,11 @@
 /**
- * src/pages/TwinChat.tsx
- * Twin chat page with world-specific context (P0 #7.2)
- * Supports query param: ?world=<worldId>
+ * TwinChat.tsx
+ * Personal AI Twin chat interface with world-specific expertise
+ *
+ * IDENTITY: Twin = Personal expert (NOT Nova)
+ * PHASE: Act III+ (Life, growth, expertise per world)
+ * WORLD AWARENESS: Twin adapts expertise based on current world
+ * QUERY PARAM: ?world=<worldId> (optional)
  */
 
 import { useState, useEffect } from 'react';
@@ -11,6 +15,8 @@ import { useTwin } from '../context/TwinContext';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { saveMessage } from '@/services/supabase-service';
+// TODO: P0 - Use buildTwinSystemPrompt when calling Twin API
+// import { buildTwinSystemPrompt } from '../config/twin-prompts';
 
 interface Message {
   role: 'user' | 'twin';
@@ -20,18 +26,37 @@ interface Message {
 
 export default function TwinChat() {
   const { session } = useAuth();
-  const { setCurrentWorld } = useTwin();
+  const { twin, setCurrentWorld } = useTwin();
   const [searchParams] = useSearchParams();
 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentWorld, setLocalWorld] = useState<WorldId | null>(null);
+
+  // GUARD: Check if Twin exists
+  if (!twin) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="text-gray-500 mb-4">Your Twin hasn't awakened yet. Complete Core Awakening first.</p>
+      </div>
+    );
+  }
+
+  // GUARD: Check if user is logged in
+  if (!session?.user?.id) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="text-gray-500 mb-4">Please login to chat with your Twin</p>
+      </div>
+    );
+  }
 
   // Extract and validate world param from URL
   useEffect(() => {
     const worldParam = searchParams.get('world');
-    if (worldParam) {
+    if (worldParam && typeof worldParam === 'string') {
       const isValidWorld = Object.keys(WORLDS).includes(worldParam);
       if (isValidWorld) {
         const world = worldParam as WorldId;
@@ -41,15 +66,42 @@ export default function TwinChat() {
     }
   }, [searchParams, setCurrentWorld]);
 
+  // TODO: P0 - Use getSystemPrompt when calling Twin API
+  // const getSystemPrompt = (): string => {
+  //   return buildTwinSystemPrompt(
+  //     twin.name || 'Twin',
+  //     JSON.stringify(twin),
+  //     currentWorld || undefined,
+  //     undefined,
+  //     messages
+  //       .filter(m => m.role === 'user')
+  //       .slice(-3)
+  //       .map(m => m.content)
+  //       .join(' | ')
+  //   );
+  // };
+
   const handleSend = async () => {
-    if (!message.trim() || !session?.user?.id) return;
+    if (!message.trim()) return;
 
     const userMessage = message.trim();
-    setMessages([...messages, { role: 'user', content: userMessage, world: currentWorld || undefined }]);
     setMessage('');
     setIsSending(true);
+    setError(null);
 
     try {
+      // GUARD: Ensure userId exists
+      if (!session.user?.id) {
+        throw new Error('User session lost');
+      }
+
+      // Add user message to UI immediately
+      setMessages(prev => [...prev, {
+        role: 'user',
+        content: userMessage,
+        world: currentWorld || undefined
+      }]);
+
       // Save message to database with world tag
       await saveMessage(
         session.user.id,
@@ -59,28 +111,52 @@ export default function TwinChat() {
         userMessage,
         50 // autonomyLevel
       );
+
+      // TODO: P0 - Call Twin API with world-aware prompt
+      // const twinResponse = await callTwinAPI({
+      //   messages,
+      //   systemPrompt: getSystemPrompt(),
+      //   world: currentWorld,
+      // });
+
+      // Temporary: Add mock response
+      setMessages(prev => [...prev, {
+        role: 'twin',
+        content: 'I understand. Let me help you with that.',
+        world: currentWorld || undefined
+      }]);
+
     } catch (err) {
-      // Message saved to UI but failed in DB — will retry next sync
+      const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
+      setError(errorMsg);
+      console.error('Twin message error:', err);
     } finally {
       setIsSending(false);
     }
   };
-
-  if (!session) {
-    return <div className="text-center py-8 text-gray-500">Please login to chat with your Twin</div>;
-  }
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
       {/* World Context Header */}
       {currentWorld && <WorldContextHeader world={currentWorld} />}
 
-      <h1 className="text-2xl font-bold text-center mb-4">🤖 My Twin</h1>
+      <h1 className="text-2xl font-bold text-center mb-4">
+        💫 {twin.name || 'My Twin'}
+      </h1>
+
+      {/* Error Alert */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-3 mb-4">
         {messages.length === 0 ? (
           <div className="text-center text-gray-400 py-8">
             {currentWorld
-              ? `Start a conversation with your Twin about ${WORLDS[currentWorld].name}`
+              ? `Start a conversation with your Twin about ${WORLDS[currentWorld]?.name || currentWorld}`
               : 'Start a conversation with your AI Twin'}
           </div>
         ) : (
@@ -92,23 +168,36 @@ export default function TwinChat() {
             </div>
           ))
         )}
+        {isSending && (
+          <div className="flex justify-start">
+            <div className="bg-gray-200 text-gray-800 p-3 rounded-lg">
+              <div className="flex gap-1">
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
+                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex gap-2">
+
+      {/* Input Area */}
+      <div className="flex gap-2 pt-4 border-t border-gray-200">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSend()}
-          placeholder="Type a message..."
+          placeholder={currentWorld ? `Ask your Twin about ${WORLDS[currentWorld]?.name}...` : 'Message your Twin...'}
           disabled={isSending}
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 text-sm"
         />
         <button
           onClick={handleSend}
-          disabled={isSending}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSending || !message.trim()}
+          className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >
-          {isSending ? 'Sending...' : 'Send'}
+          {isSending ? '...' : 'Send'}
         </button>
       </div>
     </div>

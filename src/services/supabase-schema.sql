@@ -1,0 +1,156 @@
+-- SELFPRINT Supabase Schema
+-- Tables for Twin persistence + decision tracking + worlds
+
+-- Twin Profiles Table
+CREATE TABLE IF NOT EXISTS twins (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name text NOT NULL,
+  primary_archetype text,
+  secondary_archetype text,
+  maturity_score integer DEFAULT 30 CHECK (maturity_score >= 0 AND maturity_score <= 100),
+  evolution_stage integer DEFAULT 1 CHECK (evolution_stage >= 1 AND evolution_stage <= 5),
+  awakened_at timestamp DEFAULT now(),
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now(),
+  UNIQUE(user_id) -- One Twin per user
+);
+
+-- Twin Memories (conversation history)
+CREATE TABLE IF NOT EXISTS twin_memories (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  world_id text, -- 'self', 'mind', 'relationship', etc.
+  role text NOT NULL CHECK (role IN ('user', 'twin', 'system')),
+  content text NOT NULL,
+  metadata jsonb, -- Store world context, mood, etc.
+  created_at timestamp DEFAULT now()
+);
+
+-- Decisions Table
+CREATE TABLE IF NOT EXISTS decisions (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  world_id text, -- Which world decision relates to
+  title text NOT NULL,
+  description text,
+  options jsonb NOT NULL, -- Array of decision options
+  chosen_option text,
+  context jsonb, -- Background context when decision was made
+  confidence integer CHECK (confidence >= 0 AND confidence <= 100),
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now()
+);
+
+-- Decision Follow-ups
+CREATE TABLE IF NOT EXISTS decision_follow_ups (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  decision_id uuid NOT NULL REFERENCES decisions(id) ON DELETE CASCADE,
+  follow_up_type text NOT NULL CHECK (follow_up_type IN ('30-day', '90-day', '180-day', '365-day')),
+  scheduled_at timestamp NOT NULL,
+  completed_at timestamp,
+  outcome text, -- 'worked', 'didn\'t work', 'modified'
+  notes text,
+  created_at timestamp DEFAULT now()
+);
+
+-- Twin SICE Scores (track contribution of each intelligence engine)
+CREATE TABLE IF NOT EXISTS twin_sice_scores (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  sice_name text NOT NULL, -- identity, cognitive, emotional, behavioral, social, career, financial, health, decision, growth, purpose, future
+  contribution_score integer DEFAULT 0 CHECK (contribution_score >= 0 AND contribution_score <= 100),
+  last_active timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now(),
+  UNIQUE(twin_id, sice_name)
+);
+
+-- World Preferences (user preferences per world)
+CREATE TABLE IF NOT EXISTS world_preferences (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  world_id text NOT NULL, -- 'self', 'mind', etc.
+  last_visited timestamp,
+  visit_count integer DEFAULT 0,
+  preferences jsonb, -- World-specific settings
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now(),
+  UNIQUE(twin_id, world_id)
+);
+
+-- Analytics Events (for tracking usage + insights)
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  event_type text NOT NULL, -- 'decision_logged', 'world_visited', 'insight_generated', 'twin_evolved'
+  world_id text,
+  metadata jsonb,
+  created_at timestamp DEFAULT now()
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_twins_user_id ON twins(user_id);
+CREATE INDEX IF NOT EXISTS idx_twin_memories_twin_id ON twin_memories(twin_id);
+CREATE INDEX IF NOT EXISTS idx_twin_memories_world ON twin_memories(world_id);
+CREATE INDEX IF NOT EXISTS idx_decisions_twin_id ON decisions(twin_id);
+CREATE INDEX IF NOT EXISTS idx_decision_follow_ups_decision ON decision_follow_ups(decision_id);
+CREATE INDEX IF NOT EXISTS idx_twin_sice_twin_id ON twin_sice_scores(twin_id);
+CREATE INDEX IF NOT EXISTS idx_world_preferences_twin ON world_preferences(twin_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_twin_id ON analytics_events(twin_id);
+
+-- Row Level Security (RLS) Policies
+ALTER TABLE twins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE twin_memories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE decision_follow_ups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE twin_sice_scores ENABLE ROW LEVEL SECURITY;
+ALTER TABLE world_preferences ENABLE ROW LEVEL SECURITY;
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+-- Users can only access their own Twin
+CREATE POLICY "Twin access policy" ON twins
+  FOR ALL USING (auth.uid() = user_id);
+
+CREATE POLICY "Twin memories access" ON twin_memories
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Decisions access" ON decisions
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Follow-ups access" ON decision_follow_ups
+  FOR ALL USING (
+    decision_id IN (
+      SELECT id FROM decisions WHERE twin_id IN (
+        SELECT id FROM twins WHERE user_id = auth.uid()
+      )
+    )
+  );
+
+CREATE POLICY "SICE scores access" ON twin_sice_scores
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "World preferences access" ON world_preferences
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Analytics access" ON analytics_events
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );

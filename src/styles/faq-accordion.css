@@ -1,0 +1,104 @@
+/**
+ * FAQ Accordion Styles
+ */
+
+.faq-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+
+.faq-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-bg-secondary);
+  transition: box-shadow 0.2s var(--easing-primary);
+}
+
+.faq-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-md);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-align: left;
+  transition: color 0.2s var(--easing-primary);
+}
+
+.faq-question:hover {
+  color: var(--color-accent-primary);
+}
+
+.faq-question.active {
+  color: var(--color-accent-primary);
+  background: var(--color-bg-tertiary);
+}
+
+.faq-text {
+  flex: 1;
+  padding-right: var(--space-md);
+}
+
+.faq-icon {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-light);
+  color: var(--color-accent-primary);
+  transition: transform 0.2s var(--easing-primary);
+  flex-shrink: 0;
+}
+
+.faq-question.active .faq-icon {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 var(--space-md) var(--space-md);
+  border-top: 1px solid var(--color-border);
+  animation: slideDown 0.3s var(--easing-primary);
+}
+
+.faq-answer p {
+  margin: 0;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-body-base);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 600px) {
+  .faq-question {
+    padding: var(--space-sm);
+    font-size: var(--font-size-body-base);
+  }
+
+  .faq-answer {
+    padding: 0 var(--space-sm) var(--space-sm);
+  }
+
+  .faq-text {
+    padding-right: var(--space-sm);
+  }
+}

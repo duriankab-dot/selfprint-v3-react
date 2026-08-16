@@ -30,6 +30,8 @@ import './styles/worlds-hub.css';
 import './styles/twin-nav.css';
 import './styles/twin-settings.css';
 import './styles/twin-personality.css';
+import './styles/faq-page.css';
+import './styles/faq-accordion.css';
 import './App.css';
 
 // Phase 5.9: Code splitting
@@ -63,6 +65,7 @@ const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
 const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
+const FAQPage = lazy(() => import('./pages/FAQPage'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
@@ -132,6 +135,7 @@ function App() {
                                 <Route path="/decisions" element={<DecisionDashboard />} />
                                 <Route path="/decision-log" element={<DecisionLoggerPage />} />
                                 <Route path="/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />
+                                <Route path="/faq" element={<FAQPage />} />
                                 <Route path="/menu" element={<FeatureMenu />} />
                                 <Route path="/components" element={<ComponentShowcase />} />
                               </Routes>

@@ -88,6 +88,114 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
 }
 
 /**
+ * Save Twin profile to database
+ */
+export async function saveTwinProfile(
+  userId: string,
+  twinName: string,
+  profile: any
+): Promise<any> {
+  try {
+    if (!userId || !twinName) {
+      throw new Error('User ID and Twin name required');
+    }
+
+    // TODO: P1 - Persist to Supabase
+    const newTwin = {
+      ...profile,
+      id: `twin-${userId}-${Date.now()}`,
+      name: twinName,
+      maturityScore: Math.max(0, Math.min(100, profile.maturityScore || 30)),
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    console.log('Twin profile created (dev mode):', newTwin);
+    return newTwin;
+  } catch (error) {
+    console.error('Error saving Twin profile:', error);
+    throw error;
+  }
+}
+
+/**
+ * Celebrate Twin awakening with effects
+ */
+export function celebrateTwinAwakening(): void {
+  try {
+    // Confetti effect
+    const canvas = document.createElement('canvas');
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '9999';
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const confetti: any[] = [];
+    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+
+    for (let i = 0; i < 100; i++) {
+      confetti.push({
+        x: Math.random() * canvas.width,
+        y: -10,
+        vx: (Math.random() - 0.5) * 8,
+        vy: Math.random() * 5 + 5,
+        life: 1,
+        size: Math.random() * 8 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      confetti.forEach((piece) => {
+        piece.y += piece.vy;
+        piece.vy += 0.1;
+        piece.life -= 0.01;
+
+        if (piece.life > 0) {
+          ctx.globalAlpha = piece.life;
+          ctx.fillStyle = piece.color;
+          ctx.fillRect(piece.x, piece.y, piece.size, piece.size);
+        }
+      });
+
+      if (confetti.some((c) => c.life > 0)) {
+        requestAnimationFrame(animate);
+      } else {
+        document.body.removeChild(canvas);
+      }
+    };
+
+    animate();
+
+    // Voice announcement
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      const msg = new SpeechSynthesisUtterance(
+        "I know you. I've been learning you. I'm ready to grow with you."
+      );
+      try {
+        window.speechSynthesis.speak(msg);
+      } catch (err) {
+        console.warn('Speech synthesis unavailable', err);
+      }
+    }
+  } catch (error) {
+    console.error('Error celebrating awakening:', error);
+  }
+}
+
+/**
  * Complete the Core Awakening ceremony
  */
 export async function completeCoreAwakening(

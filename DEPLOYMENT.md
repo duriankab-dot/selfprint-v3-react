@@ -1,196 +1,94 @@
-# 🚀 SELFPRINT — DEPLOYMENT GUIDE
+# SELFPRINT Deployment Verification
+**Phase 4.2 — Pre-Launch Checklist**
 
-**Version:** 17-Phase Master Direction  
-**Date:** 14 สิงหาคม 2569
+## Status Summary
 
----
-
-## 🔴 สิ่งสำคัญก่อน Deploy
-
-### Architecture Verification
-
-| Item | Status |
-|------|--------|
-| Nova ≠ Twin Separation | ✅ |
-| 12 SICE Core | ✅ |
-| 5 Navigation + Twin Center | ✅ |
-| 12 Hub Worlds | ✅ |
-| 5 Growth Stages | ✅ |
-| Trial 7-14 days | ✅ |
-| Human Expert | ✅ |
-| SEO/GEO Layer | ✅ |
-| Public/Private | ✅ |
+✅ **Phase 2.1**: FAQ Page complete (9 FAQs, accordion, /faq route)
+✅ **Phase 2.2**: Badges complete (168 total, 14 per world)
+✅ **Phase 3.1**: Adaptive Audio complete (network/device aware)
+✅ **Phase 3.3**: Privacy Boundary complete (GDPR compliance)
+⏳ **Phase 4.2**: Deployment verification (THIS DOCUMENT)
 
 ---
 
-## 📦 Production Build
+## Quick Pre-Deploy Checklist
 
-### 1. Build
+### Code Quality
+- [x] TypeScript strict mode: PASS
+- [x] No unused imports: VERIFIED
+- [ ] npm audit: RUN `npm audit`
+- [ ] Production build: RUN `npm run build`
+
+### Environment
+- [ ] .env.production configured
+- [ ] Supabase migrations applied
+- [ ] Database tables created
+- [ ] RLS policies enabled
+
+### Performance
+- [ ] Bundle size < 800KB: VERIFY IN BUILD
+- [ ] Web Vitals > 75: TEST WITH LIGHTHOUSE
+- [ ] Adaptive audio working: MANUAL TEST
+
+### Security
+- [ ] No secrets in code: VERIFIED
+- [ ] HTTPS enabled on Vercel: AUTOMATIC
+- [ ] CORS configured: CHECK SUPABASE
+- [ ] Privacy policy accessible: ADD TO LANDING PAGE
+
+### Testing
+- [ ] Login flow: TEST
+- [ ] Journey creation: TEST
+- [ ] Badge unlock: TEST
+- [ ] Audio playback: TEST
+- [ ] Privacy export: TEST
+- [ ] Responsive design: TEST
+
+### Deployment
+- [ ] Vercel build passing: MERGE TO MAIN
+- [ ] Preview deployment stable: VERIFY
+- [ ] Production deploy: MANUAL
+- [ ] Monitoring active: SETUP
+
+---
+
+## Deployment Steps
 
 ```bash
+# 1. Final verification
+npm run lint
 npm run build
-2. Preview
-bash
-npm run preview
-3. Verify
-✅ No TypeScript errors
+npx tsc -b --noEmit
 
-✅ No lint errors
-
-✅ All tests passing
-
-✅ Lighthouse ≥ 85
-
-🌐 Vercel Deployment
-1. Connect to Vercel
-bash
-vercel
-2. Environment Variables
-Variable	Production	Staging
-VITE_SUPABASE_URL	✅	✅
-VITE_SUPABASE_ANON_KEY	✅	✅
-VITE_CLAUDE_API_KEY	✅	✅
-VITE_STRIPE_PUBLISHABLE_KEY	✅	✅
-STRIPE_SECRET_KEY	✅	❌
-STRIPE_WEBHOOK_SECRET	✅	❌
-3. Deploy
-bash
-vercel --prod
-📱 PWA Configuration
-1. Manifest
-json
-{
-  "name": "Selfprint",
-  "short_name": "Selfprint",
-  "description": "Living Personal Intelligence Platform",
-  "start_url": "/",
-  "display": "standalone",
-  "theme_color": "#1a1a2e",
-  "background_color": "#0a0a1a"
-}
-2. Service Worker
-Static assets caching
-
-API calls caching
-
-Offline fallback
-
-Auto-update
-
-🔐 Security
-1. HTTPS
-Vercel provides automatic HTTPS
-
-Force HTTPS redirect
-
-2. Headers
-javascript
-// Security Headers
-{
-  'X-Frame-Options': 'DENY',
-  'X-Content-Type-Options': 'nosniff',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-  'Content-Security-Policy': "..."
-}
-3. Environment
-Never expose secrets in client
-
-Use environment variables
-
-Supabase RLS enabled
-
-📊 Monitoring
-1. Analytics
-Vercel Analytics
-
-Custom events
-
-Performance monitoring
-
-2. Error Tracking
-Sentry integration
-
-Error boundaries
-
-Logging service
-
-3. Performance
-Lighthouse CI
-
-Core Web Vitals
-
-Real user monitoring
-
-🔄 CI/CD Pipeline
-1. GitHub Actions
-yaml
-name: Deploy
-on:
-  push:
-    branches: [main]
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-      - run: npm install
-      - run: npm run build
-      - run: npm test
-      - run: vercel --prod
-2. Pre-deploy Checks
-✅ TypeScript compilation
-
-✅ Lint
-
-✅ Tests
-
-✅ Build
-
-📁 Production Assets
-1. Static Assets
-Images optimized
-
-Fonts preloaded
-
-Critical CSS inlined
-
-2. Dynamic Assets
-Code splitting
-
-Lazy loading
-
-Prefetch on demand
-
-3. Cache Strategy
-Asset Type	Cache	TTL
-HTML	no-cache	—
-JS/CSS	immutable	1 year
-Images	cache	1 week
-Fonts	cache	1 month
-🔍 Post-Deploy Checklist
-Item	Status
-Homepage loads	✅
-Authentication works	✅
-Nova appears	✅
-Onboarding works	✅
-Core Awakening works	✅
-Twin created	✅
-Chat works	✅
-5 Navigation works	✅
-Dashboard loads	✅
-PWA installable	✅
-Offline works	✅
-Analytics tracking	✅
-Error tracking	✅
-SEO metadata	✅
-Performance OK	✅
-🚨 Rollback
-1. Vercel Rollback
-bash
-vercel rollback
-2. Manual Rollback
-bash
-git revert <commit>
+# 2. Commit and push
+git add .
+git commit -m "feat: P2+P3 complete - ready for deploy"
 git push origin main
-อัปเดตล่าสุด: 14 สิงหาคม 2569
+
+# 3. Monitor Vercel build
+# → Dashboard auto-deploys on main push
+
+# 4. Verify production
+# → Check: https://selfprint.vercel.app
+```
+
+---
+
+## Rollback if needed
+
+```bash
+# Identify last stable commit
+git log --oneline | head -5
+
+# Revert if issues found
+git revert <commit-hash>
+git push origin main
+```
+
+---
+
+## Estimated Timelines
+
+- **Deploy**: 5-10 minutes
+- **Rollback**: 2-3 minutes
+- **Monitoring**: 24 hours post-launch

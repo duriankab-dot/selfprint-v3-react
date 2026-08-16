@@ -11,64 +11,7 @@
   "lang": "th-TH",
   "dir": "ltr",
   "categories": ["productivity", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "/screenshot-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "form_factor": "narrow"
-    },
-    {
-      "src": "/screenshot-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide"
-    }
-  ],
-  "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-maskable.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Daily Insights",
-      "short_name": "Daily",
-      "description": "ดูข้อมูลเชิงลึกของวันนี้",
-      "url": "/daily",
-      "icons": [
-        {
-          "src": "/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Voice Chat",
-      "short_name": "Chat",
-      "description": "คุยกับ AI Twin",
-      "url": "/voice",
-      "icons": [
-        {
-          "src": "/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ]
+  "screenshots": [],
+  "icons": [],
+  "shortcuts": []
 }

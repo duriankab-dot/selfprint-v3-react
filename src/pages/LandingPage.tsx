@@ -93,7 +93,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               color: 'var(--color-text-primary)',
             }}
           >
-            เลิกเดา ทิศทางชีวิต
+            เลิกเดา ทิศทางของชีวิต
             <br />
             ให้ AI ช่วยคิดและตัดสินใจเพื่อคุณ
           </h1>
@@ -115,7 +115,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             alignItems: 'center',
             justifyContent: 'flex-start',
           }}>
-            <ProgressiveCTA section="why" text="สร้าง AI Digital Twin ของฉัน (ฟรีใน 2 นาที)" variant="primary" />
+            <ProgressiveCTA section="why" text="สร้าง Digital Twin ของฉันฟรี (ใน 2 นาที)" variant="primary" />
             <button
               onClick={handleHeroClick}
               style={{
@@ -353,7 +353,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 <polygon points="10 8 16 12 10 16 10 8" fill="var(--color-text-secondary)" stroke="none"/>
               </svg>
               <p style={{ color: 'var(--color-text-secondary)', fontSize: 14, margin: 0 }}>
-                วิดีโอ AI Tour กำลังจะมาเร็วๆ นี้(รอก่อนนะจ๊ะ)
+                วิดีโอ AI Tour กำลังจะมาเร็วๆ นี้
               </p>
             </>
           )}
@@ -389,7 +389,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          ใช้ 3 ขั้นตอนสร้าง  Insight แรก ที่เข้าใจตัวคุณมากกว่า 60% ใน 40 วินาที Fine tuning ด้วยคำถามสั้น จนถึงสร้าง AI ฝาแฝดที่เข้าใจคุณมากขึ้น ภายใน 2 นาที
+          ใช้ 3 ขั้นตอนสร้าง  Insight แรก ที่เข้าใจตัวคุณมากกว่า 60% ใน 40 วินาที Fine tuning ด้วยคำถามสั้น จนถึงสร้าง AI ฝาแฝดที่เข้าใจคุณมากขึ้นและช่วยพัฒนาคุณ ภายใน 2 นาที
         </p>
 
         <div style={{ maxWidth: '900px', marginLeft: 'auto', marginRight: 'auto', marginBottom: '40px' }}>
@@ -415,7 +415,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               </div>
               <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>บอกข้อมูลตัวตน</h3>
               <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)' }}>
-                AI เรียนรู้โครงสร้างและสภาวะเริ่มต้นของคุณ
+                AI เรียนรู้โครงสร้างและวิเคราะห์สภาวะเริ่มต้นของคุณ
               </p>
             </div>
             <div style={{ flex: 1, minWidth: '200px' }}>
@@ -560,7 +560,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             lineHeight: 1.8,
           }}
         >
-          ทดลองใช้เครื่องมือวิเคราะห์ระดับสูงสุดของ SELFPRINT ฟรี ไม่ผูกมัด ไม่ต้องใส่ข้อมูลบัตรเครดิต
+          ทดลองใช้เครื่องมือวิเคราะห์ระดับสูงสุด AI Digital Twinของ SELFPRINT ฟรี ไม่ผูกมัด ปลอดภัย ไม่ต้องใส่ข้อมูลบัตรเครดิต
         </p>
 
         <ProgressiveCTA section="next" text="ทดลองเลยตอนนี้" variant="primary" />
@@ -594,7 +594,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             color: 'white',
           }}
         >
-          เริ่มต้นวิเคราะห์ระบบตัวตนและสร้างฝาแฝด AI Twin ของคุณเพื่อพัฒนาศักยภาพของคุณ วันนี้ ฟรี ไม่มีข้อผูกมัด
+          เริ่มต้นวิเคราะห์ระบบตัวตนและสร้างฝาแฝด AI Twin ของคุณเพื่อพัฒนาศักยภาพของคุณ วันนี้ ฟรี🆓  ปลอดภัย ไม่มีข้อผูกมัด
         </h2>
         <p
           style={{
@@ -603,7 +603,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             marginBottom: '32px',
           }}
         >
-          👥 ฝาแฝด 👥 ของคุณพร้อมแล้ว ↗️↗️
+          👥 SELPRINT 👥 พร้อมพัฒนาคุณแล้ว 🚀🚀🚀
         </p>
         <button
           onClick={handleFinalCTA}
@@ -627,7 +627,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             e.currentTarget.style.boxShadow = 'none';
           }}
         >
-          สร้าง AI Twin ที่เข้าใจฉันจริงๆ
+          สร้าง AI ฝาแฝด ที่เข้าใจฉัน
         </button>
       </section>
 
