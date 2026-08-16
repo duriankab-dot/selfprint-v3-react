@@ -1,0 +1,338 @@
+/**
+ * twin-evolution.css
+ * Styling for Twin Evolution Display component
+ */
+
+.twin-evolution-container {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+}
+
+/* ===== HEADER ===== */
+
+.evolution-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.evolution-header h3 {
+  font-size: 1.5rem;
+  color: #a78bfa;
+  margin-bottom: var(--spacing-xs);
+}
+
+.twin-name {
+  font-size: 1.1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+/* ===== TIMELINE ===== */
+
+.evolution-timeline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding: var(--spacing-lg) 0;
+}
+
+.stage-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.stage-node {
+  transition: all 0.3s ease;
+  cursor: default;
+}
+
+.stage-connection {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  width: calc(100% - 60px);
+  height: 3px;
+  display: flex;
+}
+
+.connection-line {
+  flex: 1;
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 2px;
+  transition: background-color 0.3s ease;
+}
+
+.connection-line.completed {
+  background: #a78bfa;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.5);
+}
+
+/* ===== STAGE LABELS ===== */
+
+.stage-info {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.stage-label {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stage-label.active {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: #a78bfa;
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
+}
+
+.stage-number {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stage-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #a78bfa;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stage-desc {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  line-height: 1.4;
+}
+
+/* ===== PROGRESS ===== */
+
+.progress-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.progress-percent {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #a78bfa;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: rgba(99, 102, 241, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+}
+
+/* ===== METRICS GRID ===== */
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+}
+
+.metric-card {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.metric-card:hover {
+  background: rgba(99, 102, 241, 0.1);
+  border-color: #a78bfa;
+  transform: translateY(-2px);
+}
+
+.metric-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #a78bfa;
+  margin-bottom: var(--spacing-xs);
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== MILESTONE ===== */
+
+.milestone-section {
+  text-align: center;
+  padding: var(--spacing-md);
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.milestone-text {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.evolution-ready {
+  font-size: 0.95rem;
+  color: #a78bfa;
+  font-weight: 600;
+  margin-top: var(--spacing-sm);
+  animation: pulse-text 2s ease-in-out infinite;
+}
+
+@keyframes pulse-text {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* ===== STAGE INFO ===== */
+
+.current-stage-info {
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.current-stage-info h4 {
+  color: #a78bfa;
+  margin-bottom: var(--spacing-sm);
+}
+
+.current-stage-info p {
+  color: var(--color-text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .stage-info {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+  }
+
+  .stage-label {
+    padding: var(--spacing-sm);
+  }
+
+  .stage-name {
+    font-size: 0.85rem;
+  }
+
+  .stage-desc {
+    font-size: 0.75rem;
+  }
+
+  .evolution-timeline {
+    padding: var(--spacing-md) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .twin-evolution-container {
+    padding: var(--spacing-md);
+  }
+
+  .evolution-timeline {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  .stage-connection {
+    display: none;
+  }
+
+  .stage-info {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+  }
+
+  .stage-label {
+    padding: var(--spacing-sm);
+  }
+
+  .metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  }
+
+  .metric-icon {
+    font-size: 1.2rem;
+  }
+
+  .metric-value {
+    font-size: 1.2rem;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-node,
+  .stage-label,
+  .progress-bar-fill,
+  .metric-card,
+  .evolution-ready {
+    animation: none;
+    transition: none;
+  }
+}
+
+.stage-node:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}

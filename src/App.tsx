@@ -20,6 +20,10 @@ import ContextualPopup from './components/ContextualPopup';
 import TwinEvolutionSceneWrapper from './components/TwinEvolutionSceneWrapper';
 import './styles/global.css';
 import './styles/nova-twin.css';
+import './styles/core-awakening.css';
+import './styles/twin-evolution.css';
+import './styles/decision-dashboard.css';
+import './styles/worlds-hub.css';
 import './App.css';
 
 // Phase 5.9: Code splitting
@@ -32,6 +36,7 @@ const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
 const PrivacyCenter = lazy(() => import('./pages/PrivacyCenter'));
 const Share = lazy(() => import('./pages/Share'));
 const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
+const CoreAwakening = lazy(() => import('./pages/CoreAwakening'));
 const NovaChat = lazy(() => import('./pages/NovaChat'));
 const TwinChat = lazy(() => import('./pages/TwinChat'));
 const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
@@ -47,7 +52,9 @@ const MePage = lazy(() => import('./pages/MePage'));
 const VoiceChatPage = lazy(() => import('./pages/VoiceChatPage'));
 const TwinProfilePage = lazy(() => import('./pages/TwinProfilePage'));
 const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
+const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
+const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
@@ -82,6 +89,7 @@ function App() {
                               <Routes>
                                 <Route path="/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/onboarding'} />} />
                                 <Route path="/onboarding" element={<Onboarding />} />
+                                <Route path="/core-awakening" element={<CoreAwakening />} />
                                 <Route path="/chat" element={<Navigate to="/chat/nova" replace />} />
                                 <Route path="/chat/nova" element={<NovaChat />} />
                                 <Route path="/chat/twin" element={<TwinChat />} />
@@ -102,7 +110,9 @@ function App() {
                                 <Route path="/voice" element={<VoiceChatPage />} />
                                 <Route path="/twin-profile" element={<TwinProfilePage />} />
                                 <Route path="/life-hubs" element={<LifeHubsPage />} />
-                                <Route path="/decisions" element={<DecisionLoggerPage />} />
+                                <Route path="/decisions" element={<DecisionDashboard />} />
+                                <Route path="/decision-log" element={<DecisionLoggerPage />} />
+                                <Route path="/worlds" element={<WorldsHub />} />
                                 <Route path="/menu" element={<FeatureMenu />} />
                                 <Route path="/components" element={<ComponentShowcase />} />
                               </Routes>
