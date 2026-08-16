@@ -4,6 +4,8 @@
  * USP: Track decisions at 30/90/180/365 days
  */
 
+import type { WorldId } from '../constants/worlds';
+
 export type DecisionCategory =
   | 'career'
   | 'relationships'
@@ -39,6 +41,7 @@ export interface Decision {
   expectedOutcome: string;
   actualOutcome?: string;
   followUps: FollowUp[];
+  world?: WorldId; // World context for this decision (e.g., 'career', 'love')
   createdAt: string;
   updatedAt: string;
 
@@ -61,6 +64,7 @@ export interface DecisionStats {
 export interface DecisionFilters {
   category?: DecisionCategory;
   status?: 'open' | 'completed' | 'pending-followup';
+  world?: WorldId; // Filter by world context
   dateRange?: {
     from: string;
     to: string;

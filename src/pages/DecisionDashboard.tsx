@@ -6,13 +6,17 @@
 
 import { useEffect, useState } from 'react';
 import type { Decision, DecisionStats } from '../types/decision';
+import type { WorldId } from '../constants/worlds';
+import { WORLDS } from '../constants/worlds';
 import { useAuth } from '../context/AuthContext';
 import { useDecisionStore } from '../store/decisionStore';
+import { useTwin } from '../context/TwinContext';
 import { getDecisionStats } from '../services/DecisionService';
 import '../styles/decision-dashboard.css';
 
 export default function DecisionDashboard() {
   const { session } = useAuth();
+  const { currentWorld } = useTwin();
   const {
     decisions,
     loadDecisions,
@@ -23,6 +27,7 @@ export default function DecisionDashboard() {
 
   const [stats, setStats] = useState<DecisionStats | null>(null);
   const [showNewDecision, setShowNewDecision] = useState(false);
+  const [selectedWorld, setSelectedWorld] = useState<WorldId | 'all'>(currentWorld || 'all');
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -32,9 +37,10 @@ export default function DecisionDashboard() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      getDecisionStats(session.user.id).then(setStats);
+      const world = selectedWorld === 'all' ? undefined : selectedWorld;
+      getDecisionStats(session.user.id, world).then(setStats);
     }
-  }, [session?.user?.id, decisions]);
+  }, [session?.user?.id, decisions, selectedWorld]);
 
   const filteredDecisions = getFilteredDecisions();
   const pendingCount = getPendingCount();
@@ -54,6 +60,29 @@ export default function DecisionDashboard() {
       <div className="dd-header">
         <h1>📊 Decision Tracker</h1>
         <p className="dd-subtitle">Track decisions and learn from 30/90/180/365 follow-ups</p>
+
+        {/* World Filter */}
+        <div className="dd-world-filter" style={{ marginTop: '1rem' }}>
+          <label htmlFor="world-select">Filter by World: </label>
+          <select
+            id="world-select"
+            value={selectedWorld}
+            onChange={(e) => setSelectedWorld(e.target.value as WorldId | 'all')}
+            style={{
+              padding: '0.5rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              marginLeft: '0.5rem',
+            }}
+          >
+            <option value="all">📋 All Worlds</option>
+            {Object.entries(WORLDS).map(([id, world]) => (
+              <option key={id} value={id}>
+                {world.emoji} {world.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Stats Summary */}

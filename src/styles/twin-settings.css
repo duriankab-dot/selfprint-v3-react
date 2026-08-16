@@ -1,0 +1,275 @@
+/**
+ * Twin Settings page styles
+ * P0 #7.1 - Twin Navigation Integration
+ */
+
+.twin-settings-page {
+  width: 100%;
+  min-height: 100vh;
+  background-color: var(--bg-primary, #fff);
+  padding: var(--spacing-lg, 2rem) var(--spacing-md, 1rem);
+}
+
+.twin-settings-page.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #666);
+  font-size: var(--font-size-base, 1rem);
+}
+
+.twin-settings-container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.twin-settings-header {
+  margin-bottom: var(--spacing-xl, 3rem);
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: var(--spacing-lg, 2rem);
+}
+
+.twin-settings-header h1 {
+  font-size: var(--font-size-xl, 1.875rem);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-primary, #333);
+  margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+}
+
+.twin-settings-header p {
+  font-size: var(--font-size-base, 1rem);
+  color: var(--text-secondary, #666);
+  margin: 0;
+}
+
+.twin-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl, 3rem);
+}
+
+/* Settings Section */
+.settings-section {
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  padding-bottom: var(--spacing-lg, 2rem);
+}
+
+.settings-section:last-of-type {
+  border-bottom: none;
+}
+
+.settings-section h2 {
+  font-size: var(--font-size-lg, 1.25rem);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-primary, #333);
+  margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+}
+
+.section-description {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-secondary, #666);
+  margin: 0 0 var(--spacing-md, 1rem) 0;
+}
+
+/* Settings Options (Radio Buttons) */
+.settings-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
+}
+
+.option-label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 0.25rem);
+  padding: var(--spacing-md, 1rem);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+  background-color: var(--bg-secondary, #f9f9f9);
+}
+
+.option-label:hover {
+  border-color: var(--color-primary, #4a90e2);
+  background-color: var(--bg-hover, #f0f5ff);
+}
+
+.option-label input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #4a90e2);
+}
+
+.option-label input[type="radio"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.option-name {
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-primary, #333);
+  font-size: var(--font-size-base, 1rem);
+}
+
+.option-hint {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-secondary, #666);
+}
+
+/* Settings Toggles (Checkboxes) */
+.settings-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 1rem);
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md, 1rem);
+  padding: var(--spacing-md, 1rem);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+  background-color: var(--bg-secondary, #f9f9f9);
+}
+
+.toggle-label:hover {
+  border-color: var(--color-primary, #4a90e2);
+  background-color: var(--bg-hover, #f0f5ff);
+}
+
+.toggle-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--color-primary, #4a90e2);
+}
+
+.toggle-label input[type="checkbox"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.toggle-label span {
+  font-size: var(--font-size-base, 1rem);
+  color: var(--text-primary, #333);
+}
+
+/* Text Input */
+.text-input {
+  width: 100%;
+  padding: var(--spacing-md, 1rem);
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-base, 1rem);
+  color: var(--text-primary, #333);
+  background-color: var(--bg-secondary, #fff);
+  transition: border-color var(--transition-normal, 0.2s ease);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #4a90e2);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.text-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Error Message */
+.error-message {
+  padding: var(--spacing-md, 1rem);
+  background-color: var(--color-error-bg, #fee);
+  color: var(--color-error, #c33);
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-sm, 0.875rem);
+  border-left: 4px solid var(--color-error, #c33);
+}
+
+/* Action Buttons */
+.settings-actions {
+  display: flex;
+  gap: var(--spacing-md, 1rem);
+  margin-top: var(--spacing-xl, 3rem);
+}
+
+.btn {
+  padding: var(--spacing-md, 1rem) var(--spacing-lg, 2rem);
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-base, 1rem);
+  font-weight: var(--font-weight-bold, 700);
+  cursor: pointer;
+  transition: all var(--transition-normal, 0.2s ease);
+}
+
+.btn-primary {
+  background-color: var(--color-primary, #4a90e2);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-primary-dark, #2e5db8);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: var(--bg-secondary, #f0f0f0);
+  color: var(--text-primary, #333);
+  border: 1px solid var(--border-color, #d0d0d0);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--bg-hover, #e8e8e8);
+  border-color: var(--text-primary, #333);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .twin-settings-page {
+    padding: var(--spacing-md, 1rem);
+  }
+
+  .twin-settings-header {
+    margin-bottom: var(--spacing-lg, 2rem);
+  }
+
+  .settings-section {
+    padding-bottom: var(--spacing-lg, 2rem);
+  }
+
+  .settings-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .option-label,
+  .toggle-label,
+  .text-input,
+  .btn {
+    transition: none;
+  }
+}

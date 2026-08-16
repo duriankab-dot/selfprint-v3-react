@@ -7,6 +7,8 @@
 import React, { createContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
+import type { Decision } from '../types/decision';
+import { createDecision } from '../services/DecisionService';
 
 // 18 Archetypes (12 base + 6 hybrid)
 export const ARCHETYPES = [
@@ -62,6 +64,10 @@ interface TwinContextType {
   setMaturityScore: (score: number) => void;
   setCurrentWorld: (world: WorldId | null) => void;
   recommendWorld: (messageContent: string) => WorldId | null;
+  saveDecision: (
+    userId: string,
+    decision: Omit<Decision, 'id' | 'createdAt' | 'updatedAt' | 'followUps'>
+  ) => Promise<{ success: boolean; decision?: Decision; message: string }>;
   resetTwin: () => void;
 }
 
@@ -147,6 +153,22 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     return bestMatch;
   }, []);
 
+  const saveDecision = useCallback(
+    async (
+      userId: string,
+      decision: Omit<Decision, 'id' | 'createdAt' | 'updatedAt' | 'followUps'>
+    ) => {
+      // Automatically tag with currentWorld if not already set
+      const decisionWithWorld = {
+        ...decision,
+        world: decision.world || currentWorld || undefined,
+      };
+
+      return createDecision(userId, decisionWithWorld);
+    },
+    [currentWorld]
+  );
+
   const resetTwin = useCallback(() => {
     setTwin(null);
     localStorage.removeItem('selfprint_twin');
@@ -176,6 +198,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     setMaturityScore,
     setCurrentWorld,
     recommendWorld,
+    saveDecision,
     resetTwin,
   };
 

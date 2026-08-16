@@ -25,6 +25,9 @@ import './styles/core-awakening.css';
 import './styles/twin-evolution.css';
 import './styles/decision-dashboard.css';
 import './styles/worlds-hub.css';
+import './styles/twin-nav.css';
+import './styles/twin-settings.css';
+import './styles/twin-personality.css';
 import './App.css';
 
 // Phase 5.9: Code splitting
@@ -40,6 +43,8 @@ const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
 const CoreAwakening = lazy(() => import('./pages/CoreAwakening'));
 const NovaChat = lazy(() => import('./pages/NovaChat'));
 const TwinChat = lazy(() => import('./pages/TwinChat'));
+const TwinSettingsPage = lazy(() => import('./pages/TwinSettingsPage'));
+const TwinPersonalityPage = lazy(() => import('./pages/TwinPersonalityPage'));
 const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage'));
 const BadgePage = lazy(() => import('./pages/BadgePage'));
@@ -95,6 +100,8 @@ function App() {
                                 <Route path="/chat/nova" element={<NovaChat />} />
                                 <Route path="/chat/twin" element={<TwinChat />} />
                                 <Route path="/twin" element={<Navigate to="/chat/twin" replace />} />
+                                <Route path="/twin/settings" element={<ProtectedRoute><TwinSettingsPage /></ProtectedRoute>} />
+                                <Route path="/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/analysis" element={<AnalysisPage />} />
                                 <Route path="/privacy" element={<PrivacyCenter />} />

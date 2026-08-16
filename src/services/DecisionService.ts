@@ -17,6 +17,9 @@ import {
 
 /**
  * Create new decision and auto-schedule 30/90/180/365 follow-ups
+ * @param userId - User ID from auth session
+ * @param decision - Decision details (including optional world context)
+ * @returns Created decision with auto-scheduled follow-ups
  */
 export async function createDecision(
   userId: string,
@@ -67,14 +70,18 @@ export async function createDecision(
 }
 
 /**
- * Get all decisions for user
+ * Get all decisions for user (optionally filtered by world)
+ * @param userId - User ID from auth session
+ * @param _world - Optional: filter decisions by world context (TODO: implement in Supabase query)
+ * @returns Array of decisions (optionally filtered)
  */
-export async function getDecisions(userId: string): Promise<Decision[]> {
+export async function getDecisions(userId: string, _world?: string): Promise<Decision[]> {
   try {
     if (!userId) return [];
 
     // TODO: Query Supabase
     // SELECT * FROM decisions WHERE user_id = userId
+    // {_world && 'AND world = ?', _world}
     // LEFT JOIN follow_ups ...
 
     return [];
@@ -185,9 +192,12 @@ export async function getPendingFollowUpsForUser(userId: string): Promise<Follow
 }
 
 /**
- * Calculate decision statistics
+ * Calculate decision statistics (optionally filtered by world)
+ * @param userId - User ID from auth session
+ * @param world - Optional: filter stats by world context
+ * @returns Decision statistics for the user
  */
-export async function getDecisionStats(userId: string): Promise<DecisionStats> {
+export async function getDecisionStats(userId: string, world?: string): Promise<DecisionStats> {
   try {
     if (!userId) {
       return {
@@ -201,7 +211,7 @@ export async function getDecisionStats(userId: string): Promise<DecisionStats> {
       };
     }
 
-    const decisions = await getDecisions(userId);
+    const decisions = await getDecisions(userId, world);
     const pending = getPendingFollowUps(decisions);
 
     const completed = decisions.filter((d) =>

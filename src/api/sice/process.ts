@@ -5,12 +5,13 @@
  */
 
 import type { SICEInput, OrchestratorResult } from '../../types/sice';
+import type { WorldId } from '../../constants/worlds';
 import { SICEOrchestrator } from '../../services/sice/SICEOrchestrator';
 
 export interface SICEProcessRequest {
   userId: string;
   userInput?: string;
-  currentWorld?: string;
+  currentWorld?: WorldId;
   conversationHistory?: Array<{ role: string; content: string }>;
 }
 

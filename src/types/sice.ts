@@ -4,11 +4,13 @@
  * Core intelligence system powering Twin
  */
 
+import type { WorldId } from '../constants/worlds';
+
 export interface SICEInput {
   userId: string;
   userContext?: Record<string, unknown>; // Current user data
   conversationHistory?: Array<{ role: string; content: string }>;
-  currentWorld?: string; // Which of 12 Worlds active
+  currentWorld?: WorldId; // Which of 12 Worlds active
   metadata?: Record<string, unknown>;
 }
 
