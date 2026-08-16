@@ -1,15 +1,17 @@
 /**
  * Audio Manager Service
- * § 23 Adaptive Background Music
+ * § 23 Adaptive Background Music + P3.1 Adaptive Engine
  *
  * Handles:
  * - Experience-to-audio mapping
  * - Volume management
  * - Audio ducking (music reduction when Twin speaks)
  * - Playback control
+ * - Adaptive quality (network/device aware)
  */
 
 import type { MusicExperience } from '@/context/AudioContext';
+import { adaptiveAudioEngine, type AudioProfile } from './adaptive-audio-engine';
 
 /**
  * Map experience to audio file/stream
@@ -235,6 +237,130 @@ export function getPlaybackState() {
     currentExperience,
     volume: gainNode ? Math.round(gainNode.gain.value * 100) : 0,
   };
+}
+
+/**
+ * P3.1 Adaptive Audio: Get frequencies adjusted for device capability
+ * @param experience Experience type
+ * @param profile Adaptive audio profile
+ * @returns Adjusted frequency array
+ */
+export function getAdaptiveFrequencies(
+  experience: MusicExperience,
+  profile: AudioProfile
+): number[] {
+  const baseFrequencies = AUDIO_LIBRARY[experience].frequencies;
+
+  // Limit oscillators based on device capability
+  if (profile.maxConcurrentOscillators === 0) {
+    return []; // Silent mode
+  }
+
+  return baseFrequencies.slice(0, profile.maxConcurrentOscillators);
+}
+
+/**
+ * P3.1 Adaptive Audio: Play with device-aware settings
+ * @param experience Experience type
+ * @param volume Volume 0-100
+ * @param adaptiveProfile Optional audio profile (auto-detect if not provided)
+ */
+export async function playAmbienceWithAdaptation(
+  experience: MusicExperience,
+  volume: number,
+  adaptiveProfile?: AudioProfile
+): Promise<void> {
+  const profile = adaptiveProfile || adaptiveAudioEngine.getRecommendedProfile();
+
+  // Handle silent mode
+  if (profile.quality === 'silence') {
+    console.log('[Audio] Adaptive: Silent mode (low battery/offline)');
+    await stopAmbience();
+    return;
+  }
+
+  // For now, use oscillators with adaptive frequency count
+  // In future: load MP3 files based on profile.quality
+  const frequencies = getAdaptiveFrequencies(experience, profile);
+
+  if (frequencies.length === 0) {
+    await stopAmbience();
+    return;
+  }
+
+  // Log adaptive decision
+  const audioData = AUDIO_LIBRARY[experience];
+  console.log(
+    `[Audio] Adaptive: ${audioData.name} (${frequencies.length}/${AUDIO_LIBRARY[experience].frequencies.length} freq) - ${profile.quality}`
+  );
+
+  // Play with adapted frequencies
+  const ctx = initializeAudioPlayer();
+
+  try {
+    if (currentExperience === experience && oscillators.length > 0) {
+      return;
+    }
+
+    await stopAmbience();
+    currentExperience = experience;
+
+    if (experience !== 'idle' && frequencies.length > 0) {
+      frequencies.forEach(freq => {
+        const osc = ctx.createOscillator();
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        osc.connect(gainNode!);
+        osc.start();
+        oscillators.push(osc);
+      });
+
+      await fadeVolume(0, volume / 100, 1000);
+    }
+  } catch (error) {
+    console.error('[Audio] Adaptive playback failed:', error);
+  }
+}
+
+/**
+ * P3.1 Adaptive Audio: Get current network/device profile
+ */
+export function getAdaptiveProfile(): AudioProfile {
+  return adaptiveAudioEngine.getRecommendedProfile();
+}
+
+/**
+ * P3.1 Adaptive Audio: Get network info
+ */
+export function getNetworkInfo() {
+  return adaptiveAudioEngine.getNetworkProfile();
+}
+
+/**
+ * P3.1 Adaptive Audio: Get device capabilities
+ */
+export function getDeviceInfo() {
+  return adaptiveAudioEngine.getDeviceProfile();
+}
+
+/**
+ * P3.1 Adaptive Audio: Listen for network changes and auto-adapt
+ */
+export function enableAutoAdaptation(): void {
+  adaptiveAudioEngine.onNetworkChange((newProfile) => {
+    const audioProfile = adaptiveAudioEngine.computeAudioProfile(
+      newProfile,
+      adaptiveAudioEngine.getDeviceProfile()
+    );
+
+    console.log('[Audio] Network changed, auto-adapting:', audioProfile.quality);
+
+    // Re-play current experience with new profile if playing
+    if (oscillators.length > 0) {
+      const currentVol = gainNode?.gain.value || 0.3;
+      playAmbienceWithAdaptation(currentExperience, Math.round(currentVol * 100), audioProfile);
+    }
+  });
 }
 
 /**
