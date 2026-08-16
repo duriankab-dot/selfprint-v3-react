@@ -14,6 +14,7 @@ import { useNova } from '../context/NovaContext';
 import { NovaAvatar } from '../components/features/NovaAvatar';
 import { saveMessage } from '@/services/supabase-service';
 import { NOVA_INITIAL_PROMPT } from '../config/nova-prompts';
+import { callNovaAPI } from '../services/NovaAPIService';
 
 export default function NovaChat() {
   const { session } = useAuth();
@@ -32,11 +33,11 @@ export default function NovaChat() {
     }
   }, []);
 
-  // GUARD: Verify user is logged in + Nova is active
+  // GUARD: Verify user is logged in + Nova (Self Print) is active
   if (!session?.user?.id) {
     return (
       <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Please login to begin your Self Print discovery with Nova</p>
+        <p className="text-gray-500 mb-4">Please login to begin your Self Print discovery</p>
       </div>
     );
   }
@@ -44,7 +45,7 @@ export default function NovaChat() {
   if (!isNovaActive) {
     return (
       <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500">Twin has awakened. Switch back to Nova or continue with your Twin.</p>
+        <p className="text-gray-500">Your Twin has awakened. Continue with your Twin or return to Self Print.</p>
       </div>
     );
   }
@@ -75,22 +76,37 @@ export default function NovaChat() {
         userMessage
       );
 
-      // TODO: P0 - Call actual Nova API
-      // For now, add to insights (temporary mock)
+      // Add insight for pattern detection
       addInsight(userMessage);
 
-      // TODO: P0 - Generate Nova response from API
-      // const novaResponse = await callNovaAPI({
-      //   messages,
-      //   phase: novaState.phase,
-      //   userDataCollected: novaState.userDataCollected,
-      //   systemPrompt: buildNovaPrompt(novaState),
-      // });
+      // Convert messages to API format (role: 'user' | 'assistant')
+      const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
+        .filter(m => m.role === 'user' || m.role === 'nova')
+        .map(m => ({
+          role: (m.role === 'nova' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: m.content
+        }))
+        .concat([{ role: 'user' as const, content: userMessage }]);
 
-      // Temporary: Add mock response
+      // Call Nova API to generate response
+      const novaResponse = await callNovaAPI(
+        apiMessages,
+        'onboarding' // Phase for system prompt
+      );
+
+      // Save Nova's response to database (role must be 'user' | 'assistant')
+      await saveMessage(
+        session.user.id,
+        'nova-chat',
+        'discovery',
+        'assistant',
+        novaResponse
+      );
+
+      // Add Nova response to messages
       setMessages(prev => [...prev, {
         role: 'nova',
-        content: 'I appreciate you sharing that with me. Tell me more...'
+        content: novaResponse
       }]);
 
     } catch (err) {
@@ -109,8 +125,8 @@ export default function NovaChat() {
         <div className="flex justify-center mb-2">
           <NovaAvatar size="lg" showLabel={true} />
         </div>
-        <h1 className="text-3xl font-bold nova-label">Nova</h1>
-        <p className="text-sm text-gray-600 mt-2">Your Self Print Guide | Discover Yourself</p>
+        <h1 className="text-3xl font-bold nova-label">Self Print</h1>
+        <p className="text-sm text-gray-600 mt-2">Your Universal Guide | Discover Yourself</p>
       </div>
 
       {/* Error Alert */}
@@ -173,7 +189,7 @@ export default function NovaChat() {
 
       {/* Info Footer */}
       <div className="text-center text-xs text-gray-400 mt-4 pb-2">
-        Nova remembers context within this session • Ready to awaken your Twin? Continue to explore with Nova
+        Self Print remembers context within this session • Ready to awaken your Twin? Continue your discovery
       </div>
     </div>
   );

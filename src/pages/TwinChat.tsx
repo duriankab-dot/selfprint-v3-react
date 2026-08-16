@@ -15,8 +15,7 @@ import { useTwin } from '../context/TwinContext';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { saveMessage } from '@/services/supabase-service';
-// TODO: P0 - Use buildTwinSystemPrompt when calling Twin API
-// import { buildTwinSystemPrompt } from '../config/twin-prompts';
+import { callTwinAPI } from '../services/TwinAPIService';
 
 interface Message {
   role: 'user' | 'twin';
@@ -66,20 +65,6 @@ export default function TwinChat() {
     }
   }, [searchParams, setCurrentWorld]);
 
-  // TODO: P0 - Use getSystemPrompt when calling Twin API
-  // const getSystemPrompt = (): string => {
-  //   return buildTwinSystemPrompt(
-  //     twin.name || 'Twin',
-  //     JSON.stringify(twin),
-  //     currentWorld || undefined,
-  //     undefined,
-  //     messages
-  //       .filter(m => m.role === 'user')
-  //       .slice(-3)
-  //       .map(m => m.content)
-  //       .join(' | ')
-  //   );
-  // };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -112,17 +97,42 @@ export default function TwinChat() {
         50 // autonomyLevel
       );
 
-      // TODO: P0 - Call Twin API with world-aware prompt
-      // const twinResponse = await callTwinAPI({
-      //   messages,
-      //   systemPrompt: getSystemPrompt(),
-      //   world: currentWorld,
-      // });
+      // Convert messages to API format (role: 'user' | 'assistant')
+      const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
+        .filter(m => m.role === 'user' || m.role === 'twin')
+        .map(m => ({
+          role: (m.role === 'twin' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: m.content
+        }))
+        .concat([{ role: 'user' as const, content: userMessage }]);
 
-      // Temporary: Add mock response
+      // Call Twin API with world-aware expertise
+      const twinProfile = JSON.stringify({
+        name: twin.name,
+        maturityScore: twin.maturityScore || 30,
+      });
+
+      const twinResponse = await callTwinAPI(
+        apiMessages,
+        twin.name || 'Twin',
+        twinProfile,
+        currentWorld || undefined // World-aware system prompt (or undefined)
+      );
+
+      // Save Twin's response to database (role must be 'user' | 'assistant')
+      await saveMessage(
+        session.user.id,
+        currentWorld ? `twin-chat-${currentWorld}` : 'twin-chat',
+        'chat',
+        'assistant',
+        twinResponse,
+        50 // autonomyLevel
+      );
+
+      // Add Twin response to messages
       setMessages(prev => [...prev, {
         role: 'twin',
-        content: 'I understand. Let me help you with that.',
+        content: twinResponse,
         world: currentWorld || undefined
       }]);
 

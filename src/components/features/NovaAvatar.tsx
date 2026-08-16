@@ -1,7 +1,8 @@
 /**
  * NovaAvatar.tsx
- * Visual representation of Nova - the Universal Self Print Guide
+ * Visual representation of Self Print (implementation: Nova) - the Universal Guide
  * Golden/warm glow effect, distinct from Twin's hologram
+ * Note: Nova is the code/implementation name; "Self Print" is the character name users see
  */
 
 import type { CSSProperties } from 'react';
@@ -86,7 +87,7 @@ export function NovaAvatar({ size = 'md', showLabel = true, className = '' }: No
       <div style={avatarStyle}>
         <div style={innerGlowStyle} />
       </div>
-      {showLabel && <div style={labelStyle}>Nova</div>}
+      {showLabel && <div style={labelStyle}>Self Print</div>}
     </div>
   );
 }
