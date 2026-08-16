@@ -3,10 +3,24 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "vite",
+  "functions": {
+    "api/unified-handler.ts": {
+      "maxDuration": 10,
+      "memory": 1024
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/api/notifications/:action*",
+      "destination": "/api/unified-handler?module=notifications&action=:action*"
+    },
+    {
+      "source": "/api/twin-evolution/:action*",
+      "destination": "/api/unified-handler?module=twin-evolution&action=:action*"
+    },
+    {
+      "source": "/api/sice/:action*",
+      "destination": "/api/unified-handler?module=sice&action=:action*"
     },
     {
       "source": "/((?!api/).*)",

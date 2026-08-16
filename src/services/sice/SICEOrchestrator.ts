@@ -16,7 +16,15 @@ import { SICEBase } from './SICEBase';
 import { PersonalContextBuilder } from './engines/PersonalContextBuilder';
 import { PatternDetector } from './engines/PatternDetector';
 import { InsightEngine } from './engines/InsightEngine';
+import { AIFeedbackLoop } from './engines/AIFeedbackLoop';
 import { TwinStateEngine } from './engines/TwinStateEngine';
+import { ExperienceEngine } from './engines/ExperienceEngine';
+import { EnvironmentEngine } from './engines/EnvironmentEngine';
+import { BadgeEngine } from './engines/BadgeEngine';
+import { BehavioralForecastEngine } from './engines/BehavioralForecastEngine';
+import { FutureSelfEngine } from './engines/FutureSelfEngine';
+import { MemoryManagerEngine } from './engines/MemoryManagerEngine';
+import { DecisionIntelligenceEngineAdapter } from './engines/DecisionIntelligenceEngineAdapter';
 
 export class SICEOrchestrator {
   private engines: Map<number, SICEBase> = new Map();
@@ -30,21 +38,19 @@ export class SICEOrchestrator {
    * P0 #7.3: All engines now receive currentWorld in SICEInput
    */
   private registerEngines(): void {
-    // Implemented engines (World-aware)
+    // All 12 SICE Engines (World-aware)
     this.engines.set(1, new PersonalContextBuilder());
     this.engines.set(2, new PatternDetector());
     this.engines.set(3, new InsightEngine());
+    this.engines.set(4, new AIFeedbackLoop());
     this.engines.set(5, new TwinStateEngine());
-
-    // TODO: Implement remaining engines (also use currentWorld context)
-    // #4: AIFeedbackLoop
-    // #6: ExperienceEngine
-    // #7: EnvironmentEngine
-    // #8: BadgeEngine
-    // #9: BehavioralForecastEngine
-    // #10: FutureSelfEngine
-    // #11: MemoryManager
-    // #12: DecisionIntelligenceEngine
+    this.engines.set(6, new ExperienceEngine());
+    this.engines.set(7, new EnvironmentEngine());
+    this.engines.set(8, new BadgeEngine());
+    this.engines.set(9, new BehavioralForecastEngine());
+    this.engines.set(10, new FutureSelfEngine());
+    this.engines.set(11, new MemoryManagerEngine());
+    this.engines.set(12, new DecisionIntelligenceEngineAdapter());
   }
 
   /**
