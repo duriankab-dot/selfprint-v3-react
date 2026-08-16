@@ -54,7 +54,6 @@ export function PendingOnboardingSaver() {
         });
 
         localStorage.removeItem(STORAGE_KEY);
-        console.log('✅ Onboarding data saved to Supabase');
 
         // Phase 5.7: archetype accuracy event — จุดแรกที่มี userId จริงพร้อมกับ
         // ผล blueprint ของ onboarding รอบนี้ (ก่อนหน้านี้ระหว่าง onboarding เอง
@@ -67,8 +66,7 @@ export function PendingOnboardingSaver() {
           });
         }
       } catch (err) {
-        console.error('❌ Failed to save pending onboarding data:', err);
-        // เก็บ localStorage ไว้ ลองใหม่รอบหน้าที่ session พร้อม
+        // Failed to save pending onboarding data — will retry next session
       } finally {
         savingRef.current = false;
       }

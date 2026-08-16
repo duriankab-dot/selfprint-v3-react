@@ -9,15 +9,28 @@
 @tailwind utilities;
 
 #root {
-  width: 1126px;
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  
+  /* Desktop: add horizontal padding instead of fixed width */
+  padding-left: max(1rem, calc((100% - 1126px) / 2));
+  padding-right: max(1rem, calc((100% - 1126px) / 2));
+  
+  /* Desktop: subtle border for desktop (optional) */
+  @media (min-width: 1200px) {
+    border-inline: 1px solid var(--border);
+  }
+  
+  /* Mobile: ensure full viewport usage */
+  @media (max-width: 768px) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 
 body {

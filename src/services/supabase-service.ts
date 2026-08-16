@@ -143,6 +143,82 @@ export async function saveDecision(
   }
 }
 
+/**
+ * บันทึก decision แบบเต็ม (สำหรับ DecisionForm)
+ * ใช้สำหรับบันทึกการตัดสินใจพร้อมค่า confidence
+ */
+export async function saveDecisionForm(
+  userId: string,
+  data: { title: string; context: string; expectedOutcome: string; confidence: number }
+): Promise<{ id: string } | null> {
+  if (!supabase) {
+    console.warn('Supabase ไม่พร้อม');
+    return null;
+  }
+
+  try {
+    const { data: result, error } = await supabase
+      .from('decision_logs')
+      .insert({
+        user_id: userId,
+        title: data.title,
+        context: data.context,
+        expected_outcome: data.expectedOutcome,
+        confidence: data.confidence,
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return null;
+    }
+
+    return result;
+  } catch (err) {
+    console.error('Save decision form error:', err);
+    return null;
+  }
+}
+
+/**
+ * ดึง user decisions จาก decision_logs
+ */
+export async function getUserDecisions(
+  userId: string,
+  limit: number = 50
+): Promise<Array<{ id: string; title: string; context: string; expectedOutcome: string; confidence: number; createdAt: string }>> {
+  if (!supabase) {
+    return [];
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('decision_logs')
+      .select('id, title, context, expected_outcome, confidence, created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.error('Supabase error:', error);
+      return [];
+    }
+
+    return (data || []).map(row => ({
+      id: row.id,
+      title: row.title,
+      context: row.context,
+      expectedOutcome: row.expected_outcome,
+      confidence: row.confidence ?? 0,
+      createdAt: row.created_at,
+    }));
+  } catch (err) {
+    console.error('Get user decisions error:', err);
+    return [];
+  }
+}
+
 // saveAutonomyLog() (client-side, direct decision_log insert) เคยอยู่ตรงนี้
 // — ลบแล้ว 2026-08-09 เพราะย้ายไปเขียนผ่าน /api/autonomy-log แทน (server-side,
 // verify JWT ก่อนเขียนเสมอ ปิดช่องโหว่ trust-client-user_id เดิม) ดู

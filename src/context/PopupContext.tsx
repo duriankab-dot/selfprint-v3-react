@@ -64,7 +64,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         return new Set(JSON.parse(stored));
       } catch (error) {
-        console.error('Failed to load shown popups:', error);
+        // Failed to load shown popups from storage
       }
     }
     return new Set();
@@ -85,7 +85,6 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     (popup: PopupData) => {
       // Don't show if already shown (unless forced)
       if (shownPopups.has(popup.id)) {
-        console.log(`[Popup] ${popup.id} already shown, skipping`);
         return;
       }
 
@@ -97,23 +96,17 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setCurrentPopup(popup);
         markPopupShown(popup.id);
       }
-
-      console.log(`[Popup] Showing ${popup.type}: ${popup.title}`);
     },
     [currentPopup, shownPopups]
   );
 
   const dismissPopup = useCallback(() => {
-    if (currentPopup) {
-      console.log(`[Popup] Dismissed: ${currentPopup.title}`);
-    }
     showNextPopup();
   }, [showNextPopup]);
 
   const clearAll = useCallback(() => {
     setCurrentPopup(null);
     setPopupQueue([]);
-    console.log('[Popup] Cleared all');
   }, []);
 
   const hasShownPopup = useCallback(

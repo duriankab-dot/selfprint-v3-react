@@ -62,7 +62,7 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         return JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to load audio state:', error);
+        // Failed to load audio state
       }
     }
 
@@ -90,7 +90,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const hasUserInteraction = localStorage.getItem('selfprint-audio-permission-granted');
     if (!hasUserInteraction) {
       // Show permission request (handled by AudioSettings component)
-      console.log('[Audio] Waiting for user permission to play audio');
     }
   }, []);
 

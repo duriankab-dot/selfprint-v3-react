@@ -58,15 +58,16 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         style={{
           paddingTop: '140px',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '64px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+          gap: 'clamp(32px, 5vw, 64px)',
           alignItems: 'center',
           minHeight: '80vh',
           background: 'linear-gradient(135deg, #F7F8FA 0%, #FFFFFF 100%)',
-          padding: '140px 48px 80px',
+          padding: 'clamp(80px, 10vw, 140px) clamp(24px, 5vw, 48px) clamp(40px, 8vw, 80px)',
         }}
+        className="hero-section"
       >
-        <div>
+        <div style={{ maxWidth: '100%', width: '100%' }}>
           <span
             style={{
               display: 'inline-block',
@@ -74,7 +75,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               color: 'white',
               padding: '6px 16px',
               borderRadius: '20px',
-              fontSize: '12px',
+              fontSize: 'clamp(10px, 2vw, 12px)',
               fontWeight: 600,
               marginBottom: '20px',
               textTransform: 'uppercase',
@@ -107,7 +108,13 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           >
             SELFPRINT สังเคราะห์ข้อมูลเวลาเกิดและพฤติกรรมผ่าน 12 SICE เป็นแบบจำลองอนาคตที่แม่นยำด้วยสถิติจริง ป้องกันความผิดพลาดในอนาคตครบทุกด้านของชีวิตคุณ
           </p>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ 
+            display: 'flex', 
+            gap: 'clamp(12px, 3vw, 16px)', 
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+          }}>
             <ProgressiveCTA section="why" text="สร้าง AI Digital Twin ของฉัน (ฟรีใน 2 นาที)" variant="primary" />
             <button
               onClick={handleHeroClick}
@@ -131,15 +138,25 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         <div
           style={{
             textAlign: 'center',
-            minHeight: '400px',
+            minHeight: 'clamp(250px, 60vw, 400px)',
             background: 'linear-gradient(135deg, rgba(91, 92, 235, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%)',
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            width: '100%',
+            maxWidth: '100%',
+            overflow: 'hidden',
           }}
         >
-          <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg 
+            width="100%" 
+            height="100%" 
+            viewBox="0 0 200 200" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ maxWidth: 'min(200px, 80vw)', maxHeight: 'min(200px, 80vw)' }}
+          >
             {/* Central CPU node */}
             <rect x="72" y="72" width="56" height="56" rx="12" fill="var(--color-accent-primary)" opacity="0.15" stroke="var(--color-accent-primary)" strokeWidth="2"/>
             <rect x="84" y="84" width="32" height="32" rx="6" fill="var(--color-accent-primary)" opacity="0.3"/>
@@ -301,7 +318,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
 
         <div
           style={{
-            maxWidth: '800px',
+            maxWidth: 'min(800px, calc(100% - 32px))',
+            width: '100%',
             margin: '0 auto',
             borderRadius: '16px',
             overflow: 'hidden',
@@ -312,8 +330,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             alignItems: 'center',
             justifyContent: 'center',
             flexDirection: 'column',
-            gap: 16,
-            minHeight: '280px',
+            gap: 'clamp(8px, 2vw, 16px)',
+            minHeight: 'clamp(200px, 50vw, 450px)',
           }}
         >
           {/* Video จะ load จาก VITE_AI_TOUR_VIDEO_URL */}

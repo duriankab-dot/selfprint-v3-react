@@ -1,18 +1,38 @@
- 
+
 // src/pages/TwinChat.tsx
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { saveMessage } from '@/services/supabase-service';
 
 export default function TwinChat() {
   const { session } = useAuth();
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'twin'; content: string }>>([]);
+  const [isSending, setIsSending] = useState(false);
 
-  const handleSend = () => {
-    if (!message.trim()) return;
-    setMessages([...messages, { role: 'user', content: message }]);
-    // TODO: ส่งไปยัง API
+  const handleSend = async () => {
+    if (!message.trim() || !session?.user?.id) return;
+
+    const userMessage = message.trim();
+    setMessages([...messages, { role: 'user', content: userMessage }]);
     setMessage('');
+    setIsSending(true);
+
+    try {
+      // Save message to database
+      await saveMessage(
+        session.user.id,
+        'twin-chat',  // hub
+        'chat',       // mood
+        'user',
+        userMessage
+      );
+    } catch (err) {
+      // Message saved to UI but failed in DB — will retry next sync
+      console.error('Failed to save message:', err);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   if (!session) {
@@ -42,15 +62,17 @@ export default function TwinChat() {
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSend()}
           placeholder="Type a message..."
-          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isSending}
+          className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         />
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          disabled={isSending}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Send
+          {isSending ? 'Sending...' : 'Send'}
         </button>
       </div>
     </div>

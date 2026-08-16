@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
+import { AIProvider } from './context/AIContext';
 import { EmotionProvider } from './context/EmotionContext';
 import { HubProvider } from './context/HubContext';
 import { TwinProvider } from './context/TwinContext';
@@ -18,6 +19,7 @@ import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
 import TwinEvolutionSceneWrapper from './components/TwinEvolutionSceneWrapper';
 import './styles/global.css';
+import './styles/nova-twin.css';
 import './App.css';
 
 // Phase 5.9: Code splitting
@@ -30,6 +32,7 @@ const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
 const PrivacyCenter = lazy(() => import('./pages/PrivacyCenter'));
 const Share = lazy(() => import('./pages/Share'));
 const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
+const NovaChat = lazy(() => import('./pages/NovaChat'));
 const TwinChat = lazy(() => import('./pages/TwinChat'));
 const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage'));
@@ -60,16 +63,17 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <PendingOnboardingSaver />
-        <EmotionProvider>
-          <HubProvider>
-            <TwinProvider>
-              <SubscriptionProvider>
-                <ExperienceProvider>
-                  <AudioProvider>
-                    <EnvironmentProvider>
-                      <EvolutionProvider>
-                        <PopupProvider>
+        <AIProvider>
+          <PendingOnboardingSaver />
+          <EmotionProvider>
+            <HubProvider>
+              <TwinProvider>
+                <SubscriptionProvider>
+                  <ExperienceProvider>
+                    <AudioProvider>
+                      <EnvironmentProvider>
+                        <EvolutionProvider>
+                          <PopupProvider>
                           <TwinEvolution />
                           <ContextualPopup />
                           <TwinEvolutionSceneWrapper />
@@ -78,8 +82,10 @@ function App() {
                               <Routes>
                                 <Route path="/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/onboarding'} />} />
                                 <Route path="/onboarding" element={<Onboarding />} />
-                                <Route path="/chat" element={<Navigate to="/twin" replace />} />
-                                <Route path="/twin" element={<TwinChat />} />
+                                <Route path="/chat" element={<Navigate to="/chat/nova" replace />} />
+                                <Route path="/chat/nova" element={<NovaChat />} />
+                                <Route path="/chat/twin" element={<TwinChat />} />
+                                <Route path="/twin" element={<Navigate to="/chat/twin" replace />} />
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/analysis" element={<AnalysisPage />} />
                                 <Route path="/privacy" element={<PrivacyCenter />} />
@@ -102,15 +108,16 @@ function App() {
                               </Routes>
                             </Suspense>
                           </Router>
-                        </PopupProvider>
-                      </EvolutionProvider>
-                    </EnvironmentProvider>
-                  </AudioProvider>
-                </ExperienceProvider>
-              </SubscriptionProvider>
-            </TwinProvider>
-          </HubProvider>
-        </EmotionProvider>
+                          </PopupProvider>
+                        </EvolutionProvider>
+                      </EnvironmentProvider>
+                    </AudioProvider>
+                  </ExperienceProvider>
+                </SubscriptionProvider>
+              </TwinProvider>
+            </HubProvider>
+          </EmotionProvider>
+        </AIProvider>
       </AuthProvider>
     </ThemeProvider>
   );

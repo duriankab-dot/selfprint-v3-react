@@ -57,7 +57,7 @@ const InsightsCard: React.FC<InsightsCardProps> = ({
       // Reset success message after 3 seconds
       setTimeout(() => setSubmitStatus('idle'), 3000);
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
+      // Failed to submit feedback
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);

@@ -1,0 +1,686 @@
+SELFPRINT — 12 HUB WORLDS VISUAL & EXPERIENCE DIRECTIVE
+หนังสือแจ้ง AI Dev / Codex
+
+Status: Product & UX Visual Direction — Source of Truth
+
+1. วัตถุประสงค์
+
+ให้ทีม AI Dev / Codex นำแนวคิด 12 Hub Worlds นี้ไปใช้เป็นมาตรฐานในการพัฒนา UX, Visual Environment, Twin Experience, Hub Architecture และระบบ Asset ของ Selfprint
+
+12 Hub Worlds ไม่ใช่เพียง 12 หน้า หรือ 12 ภาพ Background
+
+แต่คือ:
+
+12 โลกแห่งความเชี่ยวชาญของ Selfprint ที่ AI Twin สามารถเข้าไปทำงาน เรียนรู้ และสนทนากับผู้ใช้ในบริบทเฉพาะด้าน
+
+ผู้ใช้จะรู้สึกว่าไม่ได้เพียง “เปลี่ยนหมวดหัวข้อ” แต่กำลัง:
+
+พา AI Twin ของตัวเองเข้าไปในโลกที่มันเชี่ยวชาญ
+
+2. Shared Visual DNA
+
+ทั้ง 12 โลกต้องเป็นจักรวาลเดียวกัน
+
+Brand Foundation
+
+Deep Intelligent Blue
+
+เป็นสีหลักของ Selfprint และต้องคงอยู่ในทุก Hub
+
+เสริมด้วย:
+
+Holographic Intelligence
+Energy
+Light
+Data structures
+Glass / Crystal
+Volumetric light
+Cinematic depth
+Premium minimalism
+ห้าม
+ทำให้เหมือนเกม
+Neon เยอะเกินไป
+สีจัดจนหลุดจาก Selfprint
+Cartoon
+Fantasy game UI
+Background ทึบจนบัง Twin
+ใส่ตัวอักษรใน Background
+ใส่ UI ลงใน World Asset
+3. หลักการสำคัญของ Hub
+
+ทุก Hub ต้องมี 5 Layer:
+
+HUB WORLD
+    │
+    ├── Environment
+    │
+    ├── Hub Expertise
+    │
+    ├── Conversation Context
+    │
+    ├── Learning
+    │
+    └── Insight
+             ↓
+           TWIN
+
+ดังนั้นการเลือก Hub ต้องส่งผลต่อ ทั้ง Experience และ Intelligence Context ไม่ใช่แค่เปลี่ยนภาพพื้นหลัง
+
+4. 12 HUB WORLDS
+WORLD 01 — SELF
+The Inner Core
+
+คำถามหลัก
+
+“ฉันคือใคร?”
+
+Focus
+Identity
+Personality
+Strengths
+Weaknesses
+Values
+Patterns
+Self-awareness
+Visual
+
+แกนกลางเป็น Deep Blue Intelligence Core
+
+ประกอบด้วย:
+
+Crystal Core
+Concentric Energy Rings
+Consciousness Filaments
+Data / Energy Flow
+Mood
+
+Reflective / Introspective
+
+Twin Role
+
+Identity Expert
+
+5. WORLD 02 — MIND
+The Neural Observatory
+
+คำถามหลัก
+
+“ฉันคิดอย่างไร?”
+
+Focus
+Thinking patterns
+Mental models
+Cognitive patterns
+Behavior
+Emotion
+Bias
+Visual
+Holographic neural network
+Cognitive nodes
+Orbital structures
+Observatory atmosphere
+Mood
+
+Curious / Intelligent
+
+Twin Role
+
+Cognitive Expert
+
+6. WORLD 03 — RELATIONSHIP
+The Twin Constellation
+
+คำถามหลัก
+
+“ฉันเชื่อมโยงกับคนอื่นอย่างไร?”
+
+Focus
+Relationships
+Communication
+Connection
+Interpersonal patterns
+Boundaries
+Visual
+
+ใช้:
+
+Luminous nodes
+Constellation paths
+Connected energy structures
+
+สามารถสื่อถึงความสัมพันธ์โดย ไม่จำเป็นต้องใช้ภาพคน
+
+Mood
+
+Connected / Warm
+
+Twin Role
+
+Relationship Expert
+
+7. WORLD 04 — LOVE
+The Luminous Heart
+
+คำถามหลัก
+
+“ฉันรักและผูกพันอย่างไร?”
+
+Focus
+Love
+Emotional intimacy
+Attachment
+Romantic patterns
+Emotional understanding
+Visual
+
+ใช้:
+
+Abstract heart-energy geometry
+Soft light
+Violet / Cyan accents
+Deep Intelligent Blue foundation
+
+ต้องดู premium และ sophisticated
+
+ไม่ใช้ visual ความรักแบบ cliché
+
+Mood
+
+Deep / Intimate
+
+Twin Role
+
+Love & Emotional Intelligence Expert
+
+8. WORLD 05 — CAREER
+The Future City
+
+คำถามหลัก
+
+“ฉันกำลังสร้างอะไรจากความสามารถของตัวเอง?”
+
+Focus
+Career
+Skills
+Work
+Leadership
+Opportunities
+Professional development
+Visual
+Futuristic architecture
+Intelligent city
+Vertical structures
+Branching opportunity pathways
+
+เส้นทางต่าง ๆ สามารถสื่อถึง:
+
+Career Path A / B / C
+
+Mood
+
+Focused / Ambitious
+
+Twin Role
+
+Career Strategist
+
+9. WORLD 06 — WEALTH
+The Quantum Exchange
+
+คำถามหลัก
+
+“ฉันสร้างและจัดการความมั่งคั่งอย่างไร?”
+
+Focus
+Money
+Wealth
+Assets
+Risk
+Opportunities
+Financial behavior
+Visual
+Quantum grid
+Crystalline structures
+Financial data geometry
+Intelligent networks
+
+ใช้ Gold เป็น secondary accent อย่างจำกัด
+
+ห้ามทำให้เหมือน Casino หรือ Trading Game
+
+Mood
+
+Strategic / Precise
+
+Twin Role
+
+Wealth Intelligence Expert
+
+10. WORLD 07 — LIFE
+The Infinite Path
+
+คำถามหลัก
+
+“ชีวิตของฉันกำลังไปทางไหน?”
+
+Focus
+Life direction
+Priorities
+Major life phases
+Timing
+Trade-offs
+Long-term patterns
+Visual
+Cosmic pathway
+Horizon
+Energy trails
+Subtle stars
+Infinite routes
+
+สามารถแสดงแนวคิด:
+
+Current Path
+Alternative Path
+Possible Path
+Mood
+
+Expansive / Contemplative
+
+Twin Role
+
+Life Strategist
+
+11. WORLD 08 — GROWTH
+The Evolution Garden
+
+คำถามหลัก
+
+“ฉันกำลังกลายเป็นใคร?”
+
+Focus
+Personal development
+Habits
+Skills
+Learning
+Transformation
+Growth
+Visual
+Bioluminescent organic structures
+Crystal growth
+Intelligent light
+Evolution forms
+
+ใช้ Emerald accent อย่าง restrained
+
+จุดสำคัญ
+
+Hub นี้สามารถเชื่อมกับ:
+
+Twin Growth System
+
+ให้ผู้ใช้เห็นว่า:
+
+User Growth + Twin Growth
+
+กำลังพัฒนาไปพร้อมกัน
+
+Mood
+
+Inspiring / Evolving
+
+Twin Role
+
+Growth Expert
+
+12. WORLD 09 — DECISION
+The Probability Chamber
+
+คำถามหลัก
+
+“ถ้าฉันเลือกแบบนี้ จะเกิดอะไรขึ้น?”
+
+Focus
+Decision making
+Options
+Risks
+Trade-offs
+Scenarios
+Potential outcomes
+Visual
+
+จุดหนึ่งแตกออกเป็นหลายเส้นทาง:
+
+           OPTION A
+          /
+ORIGIN ──┼── OPTION B
+          \
+           OPTION C
+
+ใช้:
+
+Probability nodes
+Branching paths
+Holographic routes
+Mood
+
+Analytical / Strategic
+
+Twin Role
+
+Decision Strategist
+
+Twin ไม่ควรอ้างว่ารู้อนาคตแน่นอน แต่ช่วยวิเคราะห์ทางเลือกและแนวโน้มจากข้อมูลและประสบการณ์ที่มี
+
+13. WORLD 10 — PURPOSE
+The Stellar Temple
+
+คำถามหลัก
+
+“อะไรคือความหมายของชีวิตฉัน?”
+
+Focus
+Meaning
+Purpose
+Values
+Calling
+Legacy
+Life philosophy
+Visual
+Monumental cosmic geometry
+Stellar light
+Deep Indigo
+Large contemplative space
+
+ห้ามใช้ religious iconography โดยตรง
+
+แนวคิดคือ:
+
+Inner Meaning Space
+
+Mood
+
+Profound / Contemplative
+
+Twin Role
+
+Purpose & Meaning Expert
+
+14. WORLD 11 — WELLBEING
+The Living Sanctuary
+
+คำถามหลัก
+
+“ฉันจะสร้างชีวิตที่สมดุลและยั่งยืนได้อย่างไร?”
+
+Focus
+Balance
+Energy
+Rest
+Lifestyle
+Emotional wellbeing
+Sustainable routines
+Visual
+
+ผสม:
+
+Digital + Organic
+
+เช่น:
+
+Flowing forms
+Water-inspired curves
+Mist
+Organic light
+Holographic nature
+
+ใช้ Teal เป็น accent อย่างนุ่มนวล
+
+Mood
+
+Calm / Restorative
+
+Twin Role
+
+Wellbeing Expert
+
+15. WORLD 12 — FUTURE
+The Horizon
+
+คำถามหลัก
+
+“ฉันสามารถไปถึงอะไรได้บ้าง?”
+
+Focus
+Future possibilities
+Vision
+Potential
+Long-term scenarios
+Future self
+Aspirations
+Visual
+Expansive horizon
+Energy arcs
+Distant intelligent structures
+Futuristic light
+Sense of possibility
+Mood
+
+Visionary / Expansive
+
+Twin Role
+
+Future & Possibility Strategist
+
+16. Visual Color System
+
+สีรองสามารถใช้สร้างความแตกต่าง แต่ต้องไม่แย่ง Deep Intelligent Blue
+
+Hub	Secondary Accent
+SELF	Cyan
+MIND	Electric Violet
+RELATIONSHIP	Soft Cyan
+LOVE	Violet
+CAREER	Silver
+WEALTH	Gold
+LIFE	Azure
+GROWTH	Emerald
+DECISION	Ice Blue
+PURPOSE	Indigo
+WELLBEING	Teal
+FUTURE	Blue-White
+
+กฎ: Accent เป็น contextual color ไม่ใช่การเปลี่ยน Brand Color ของ Selfprint
+
+17. Background Asset Specification
+
+Visual Background ของแต่ละ Hub ต้องถูกเตรียมสำหรับ Full-Screen Twin Experience
+
+Production Target
+Format: PNG
+Color: RGBA / 32-bit
+Resolution: 4096 × 4096 px
+DPI target: 300 DPI
+Background: Transparent Alpha
+Quality: Master Production
+Asset ต้องเป็น
+Transparent overlay
+Layer-friendly
+High detail
+Clean edges
+Suitable for compositing
+Responsive cropping
+Center-safe composition
+บริเวณกลางภาพ
+
+ต้องมี negative space เพียงพอสำหรับ:
+
+Twin Core / Twin Body / Interaction
+
+18. ห้ามสร้าง Background เป็นหน้าเว็บ
+
+Asset Generator / Designer ต้องไม่ใส่:
+
+❌ Navigation
+❌ Buttons
+❌ Cards
+❌ Text
+❌ Logo
+❌ UI
+❌ Chat bubbles
+❌ Character
+❌ User avatar
+
+สิ่งเหล่านี้เป็น UI Layer แยกจาก World Environment
+
+19. Architecture
+
+แนะนำให้ระบบคิดเป็น:
+
+SELFPRINT BRAND
+      │
+      ↓
+12 HUB WORLDS
+      │
+      ├── Visual Environment
+      ├── Expertise Context
+      ├── Conversation Context
+      ├── Learning Context
+      ├── Insight Context
+      └── Digital Assets
+               │
+               ↓
+             TWIN
+
+เมื่อผู้ใช้เปลี่ยน Hub:
+
+Hub A
+ ↓
+Environment A
++
+Expertise A
++
+Context A
++
+Mood A
+
+เมื่อเปลี่ยนเป็น Hub B:
+
+Hub B
+ ↓
+Environment B
++
+Expertise B
++
+Context B
++
+Mood B
+
+แต่:
+
+Twin Identity เดิมยังคงอยู่
+
+นี่สำคัญมาก เพราะ Hub เปลี่ยน โลกและบริบท ไม่ได้เปลี่ยนตัวตนของ Twin
+
+20. Twin + Hub Personalization
+
+Twin แต่ละคนต้องมี Visual DNA ของตัวเองตั้งแต่ Core Awakening
+
+ดังนั้น:
+
+User
++
+12+6 Hetype
++
+Personal Intelligence
++
+Hub Interest
++
+Preference
+        ↓
+Unique Twin
+
+เมื่อเข้า Hub:
+
+Unique Twin
+        +
+Hub World
+        ↓
+Personalized Hub Experience
+
+ดังนั้นผู้ใช้สองคนที่เข้า Hub เดียวกัน ไม่จำเป็นต้องเห็น Twin หรือ Experience เหมือนกัน
+
+21. AI Behavior
+
+การเลือก Hub ต้องสามารถทำให้ AI:
+
+แนะนำหัวข้อ
+แนะนำคำถาม
+แนะนำ Insight
+แนะนำ Learning
+ปรับ mood
+ปรับ theme
+ปรับเสียง
+ปรับ lighting
+
+ได้ตามบริบท
+
+แต่:
+
+User สามารถ override การเลือกของ AI ได้เสมอ
+
+22. Product Principle
+
+ทีม Dev ต้องจำหลักนี้:
+
+12 Hub Worlds = 12 โลกของ Intelligence ไม่ใช่ 12 Backgrounds
+
+Background เป็นเพียง visual manifestation ของโลก
+
+แกนจริงคือ:
+
+WORLD
++
+EXPERTISE
++
+CONTEXT
++
+LEARNING
++
+TWIN
+23. Final Experience
+
+เป้าหมายเมื่อผู้ใช้กดเข้า Hub:
+
+USER SELECTS HUB
+       ↓
+WORLD OPENS
+       ↓
+FULL-SCREEN ENVIRONMENT
+       ↓
+TWIN APPEARS
+       ↓
+LIGHT / COLOR / SOUND ADAPT
+       ↓
+TWIN BECOMES EXPERT IN THIS CONTEXT
+       ↓
+CONVERSATION
+       ↓
+INSIGHT
+       ↓
+LEARNING
+       ↓
+TWIN GROWS
+
+ความรู้สึกที่ต้องการคือ:
+
+“ฉันกำลังเข้าไปในโลกหนึ่งกับ Twin ของฉัน และในโลกนี้ Twin ของฉันรู้เรื่องนี้ดีที่สุด”
+
+🔒 FINAL RULE FOR AI DEV
+
+ห้ามตีความ 12 Hub Worlds เป็นเพียงระบบ Category หรือ Background Selector
+
+ให้พัฒนาในฐานะ:
+
+Selfprint's 12 Intelligence Worlds
+
+โดยต้องเชื่อม Hub → Visual → Twin → Expertise → Conversation → Learning → Insight → Growth เข้าด้วยกัน และรักษา Deep Intelligent Blue เป็น visual DNA กลางของ Selfprint ตลอดทั้งระบบ.

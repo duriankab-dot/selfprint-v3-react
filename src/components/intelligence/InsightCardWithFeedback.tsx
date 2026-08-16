@@ -86,8 +86,8 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
       // Auto-reset after 2 seconds
       setTimeout(() => setFeedbackSubmitted(false), 2000);
     },
-    onError: (error) => {
-      console.error('Failed to submit feedback:', error);
+    onError: () => {
+      // Failed to submit feedback
     },
   });
 

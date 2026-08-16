@@ -124,7 +124,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
         setTwin(parsed);
       }
     } catch (err) {
-      console.error('Failed to load twin from storage:', err);
+      // Failed to load twin from storage
     }
   }, []);
 

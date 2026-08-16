@@ -30,8 +30,6 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker
       .register('/sw.js', { scope: '/' })
       .then((registration) => {
-        console.log('[SW] Registered:', registration.scope)
-
         // Listen for SW updates — notify user to reload
         registration.addEventListener('updatefound', () => {
           const newWorker = registration.installing
@@ -45,14 +43,12 @@ if ('serviceWorker' in navigator) {
               // New SW ready — the SW itself will postMessage SW_UPDATED
               // App can listen to navigator.serviceWorker messages to show a
               // "New version available — reload" banner (see usePWAUpdate hook)
-              console.log('[SW] Update available')
             }
           })
         })
       })
-      .catch((error) => {
+      .catch(() => {
         // Non-fatal — app still works without SW
-        console.warn('[SW] Registration failed:', error)
       })
 
     // Forward SW messages to app (SW_UPDATED, SYNC_JOURNAL, etc.)

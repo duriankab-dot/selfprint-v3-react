@@ -45,7 +45,7 @@ export const EvolutionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       try {
         return JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to load evolution state:', error);
+        // Failed to load evolution state from storage, use default
       }
     }
 
@@ -70,16 +70,13 @@ export const EvolutionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // Auto-unlock milestones
       if (newCount === 1) {
         newState.twinAwakening = true;
-        console.log('[Evolution] 🌟 Twin Awakening unlocked!');
       }
       if (newCount === 10) {
         newState.patternVisualization = true;
-        console.log('[Evolution] 📊 Pattern Visualization unlocked!');
       }
       if (newCount === 30) {
         newState.twinEvolution = true;
         newState.lastEvolutionTriggeredAt = new Date().toISOString();
-        console.log('[Evolution] 🎬 Twin Evolution Scene unlocked!');
       }
 
       return newState;
@@ -103,7 +100,6 @@ export const EvolutionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           break;
       }
 
-      console.log(`[Evolution] Unlocked: ${type}`);
       return newState;
     });
   };
@@ -115,7 +111,6 @@ export const EvolutionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       twinEvolution: false,
       reflectionCount: 0,
     });
-    console.log('[Evolution] All unlocks reset');
   };
 
   const isUnlocked = (type: UnlockType) => {

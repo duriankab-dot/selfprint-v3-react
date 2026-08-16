@@ -163,10 +163,8 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <NavBar />
-      <TwinEvolution onEvolved={(badge) => {
-        if (badge) {
-          console.log('[Dashboard] Twin evolved, badge unlocked:', badge);
-        }
+      <TwinEvolution onEvolved={() => {
+        // Twin evolved
       }} />
       <div className="dashboard" style={{ flex: 1 }}>
 

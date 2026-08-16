@@ -89,7 +89,6 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
         } catch (err) {
           const errorMessage =
             err instanceof Error ? err.message : 'Failed to initialize PersonalContext';
-          console.error('PersonalContext initialization error:', errorMessage);
           setInitState({
             isInitializing: false,
             error: errorMessage,

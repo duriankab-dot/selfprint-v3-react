@@ -98,22 +98,92 @@ export function parseAuthenticatorData(authData: Uint8Array): AuthenticatorData 
  *
  * Returns: { kty, crv, x, y } for ECDSA or { kty, n, e } for RSA
  */
-export function extractPublicKey(_cborPublicKey: Uint8Array): Record<string, unknown> {
-  // TODO: Implement full CBOR parser
-  // For now, this is a placeholder that requires server-side verification
+export function extractPublicKey(cborPublicKey: Uint8Array): Record<string, unknown> {
+  try {
+    // Simple CBOR parser for COSE key format
+    // COSE key is a CBOR map with integer keys
+    const key: Record<number, unknown> = {};
+    let offset = 0;
 
-  // In production, use:
-  // - npm: cbor-x or cbor-web
-  // - Parse CBOR map
-  // - Extract COSE key parameters
+    // Parse CBOR map header (0xa0-0xb7 for maps)
+    if (cborPublicKey[offset] < 0xa0 || cborPublicKey[offset] > 0xb7) {
+      throw new Error('Not a CBOR map');
+    }
 
-  console.warn('CBOR parsing not implemented - use server-side verification');
+    const mapSize = cborPublicKey[offset] & 0x1f;
+    offset++;
 
-  return {
-    type: 'ECDSA',
-    curve: 'P-256',
-    // x, y coordinates would be parsed here
-  };
+    // Parse map entries
+    for (let i = 0; i < mapSize; i++) {
+      // Parse key (typically small integers: -3 to 3)
+      let keyVal: number;
+      if (cborPublicKey[offset] >= 0 && cborPublicKey[offset] <= 23) {
+        keyVal = cborPublicKey[offset];
+        offset++;
+      } else if (cborPublicKey[offset] === 0x38) {
+        // 1-byte uint
+        keyVal = cborPublicKey[offset + 1];
+        offset += 2;
+      } else if (cborPublicKey[offset] >= 0x20 && cborPublicKey[offset] <= 0x37) {
+        // Negative integer
+        keyVal = -(cborPublicKey[offset] - 0x20 + 1);
+        offset++;
+      } else {
+        throw new Error('Unsupported CBOR key type');
+      }
+
+      // Parse value
+      const valueStart = offset;
+      let value: unknown;
+
+      if (cborPublicKey[offset] >= 0x40 && cborPublicKey[offset] <= 0x57) {
+        // Byte string
+        const byteStringSize = cborPublicKey[offset] & 0x1f;
+        offset++;
+        value = cborPublicKey.slice(offset, offset + byteStringSize);
+        offset += byteStringSize;
+      } else if (cborPublicKey[offset] === 0x18) {
+        // Uint8
+        value = cborPublicKey[offset + 1];
+        offset += 2;
+      } else if (cborPublicKey[offset] >= 0 && cborPublicKey[offset] <= 23) {
+        // Small positive integer
+        value = cborPublicKey[offset];
+        offset++;
+      } else {
+        throw new Error('Unsupported CBOR value type at offset ' + valueStart);
+      }
+
+      key[keyVal] = value;
+    }
+
+    // Map COSE key to standard format
+    const kty = key[1] as number; // 1=OKP, 2=EC2, 3=RSA
+    const alg = key[3] as number; // -7=ES256, -257=RS256
+
+    if (kty === 2 && alg === -7) {
+      // ECDSA P-256 (ES256)
+      return {
+        kty: 'ECDSA',
+        crv: 'P-256',
+        x: key[-2], // x coordinate
+        y: key[-3], // y coordinate
+        alg: 'ES256',
+      };
+    } else if (kty === 3 && alg === -257) {
+      // RSA (RS256)
+      return {
+        kty: 'RSA',
+        n: key[-1], // modulus
+        e: key[-2], // exponent
+        alg: 'RS256',
+      };
+    } else {
+      throw new Error(`Unsupported key type (kty=${kty}, alg=${alg})`);
+    }
+  } catch (error) {
+    throw new Error(`Failed to extract public key: ${error instanceof Error ? error.message : String(error)}`);
+  }
 }
 
 /**
@@ -302,7 +372,7 @@ export async function verifyAuthenticationAssertion(
   signature: string,
   challenge: string,
   origin: string,
-  _storedPublicKey: Record<string, unknown>, // From registration — used server-side
+  storedPublicKey: Record<string, unknown>, // From registration — used for signature verification
   storedCounter: number
 ): Promise<{
   valid: boolean;
@@ -335,26 +405,46 @@ export async function verifyAuthenticationAssertion(
       return { valid: false, error: 'Signature counter mismatch - possible cloning attack' };
     }
 
-    // 4. Hash client data (stubbed — real verification is server-side)
-    void hashClientData(clientDataJSON);
+    // 4. Hash client data
+    const clientDataHash = await hashClientData(clientDataJSON);
 
-    // 5. Verify signature
-    // This requires the public key format from registration
-    // For now, this is stubbed - real implementation uses stored public key
+    // 5. Verify signature based on key type
+    const signatureBytes = base64UrlToArrayBuffer(signature);
+    let isValid = false;
 
-    void base64UrlToArrayBuffer(signature);
+    try {
+      if (storedPublicKey.kty === 'ECDSA' && storedPublicKey.crv === 'P-256') {
+        // ES256 signature verification
+        const x = storedPublicKey.x as Uint8Array;
+        const y = storedPublicKey.y as Uint8Array;
 
-    // TODO: Implement signature verification based on key type
-    // if (storedPublicKey.kty === 'ECDSA') {
-    //   const isValid = await verifyES256Signature(signatureBytes, clientDataHash, ...);
-    // } else if (storedPublicKey.kty === 'RSA') {
-    //   const isValid = await verifyRS256Signature(signatureBytes, clientDataHash, ...);
-    // }
+        if (!x || !y) {
+          return { valid: false, error: 'Missing ECDSA key coordinates' };
+        }
 
-    console.warn('Signature verification stubbed - requires server-side implementation');
+        isValid = await verifyES256Signature(signatureBytes, clientDataHash, x, y);
+      } else if (storedPublicKey.kty === 'RSA') {
+        // RS256 signature verification
+        const n = storedPublicKey.n as Uint8Array;
+        const e = storedPublicKey.e as Uint8Array;
+
+        if (!n || !e) {
+          return { valid: false, error: 'Missing RSA key parameters' };
+        }
+
+        isValid = await verifyRS256Signature(signatureBytes, clientDataHash, n, e);
+      } else {
+        return { valid: false, error: `Unsupported key type: ${storedPublicKey.kty}` };
+      }
+    } catch (verifyError) {
+      return {
+        valid: false,
+        error: `Signature verification failed: ${verifyError instanceof Error ? verifyError.message : String(verifyError)}`,
+      };
+    }
 
     return {
-      valid: true, // TODO: Return actual verification result
+      valid: isValid,
       newCounter: authData.signCount,
     };
   } catch (error) {

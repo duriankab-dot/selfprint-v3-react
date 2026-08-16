@@ -1,0 +1,259 @@
+/**
+ * nova-twin.css
+ * Styling for Nova (Golden Guide) and Twin (Holographic Personal AI)
+ * All colors use CSS variables for theme consistency
+ */
+
+/* ===== NOVA STYLING ===== */
+
+.nova-container {
+  background: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
+}
+
+.nova-header {
+  background: linear-gradient(90deg, #ffd70060, #ffa50040);
+  border-left: 4px solid #ffd700;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+}
+
+.nova-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+}
+
+.nova-avatar-sm {
+  width: 48px;
+  height: 48px;
+}
+
+.nova-avatar-lg {
+  width: 96px;
+  height: 96px;
+}
+
+.nova-message {
+  background: #fff9e6;
+  border-left: 3px solid #ffd700;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+}
+
+.nova-label {
+  color: #ffa500;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== TWIN STYLING ===== */
+
+.twin-container {
+  background: linear-gradient(135deg, var(--color-bg-primary), var(--color-bg-secondary));
+}
+
+.twin-header {
+  background: linear-gradient(90deg, #6366f160, #818cf840);
+  border-left: 4px solid #6366f1;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+}
+
+.twin-avatar {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.twin-avatar-sm {
+  width: 48px;
+  height: 48px;
+}
+
+.twin-avatar-lg {
+  width: 96px;
+  height: 96px;
+}
+
+.twin-message {
+  background: #f0f4ff;
+  border-left: 3px solid #6366f1;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  position: relative;
+}
+
+.twin-message-stage-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #6366f1;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.twin-label {
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* ===== AI SWITCHER STYLING ===== */
+
+.ai-switcher {
+  display: flex;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.ai-switcher-button {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ai-switcher-button:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.ai-switcher-button.active-nova {
+  border-color: #ffd700;
+  background: #ffd70015;
+  color: #ffa500;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.ai-switcher-button.active-twin {
+  border-color: #6366f1;
+  background: #6366f115;
+  color: #6366f1;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+.ai-switcher-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== TRANSITIONS ===== */
+
+.nova-to-twin-transition {
+  animation: nova-fade-out 0.3s ease-out;
+}
+
+.twin-from-nova-transition {
+  animation: twin-fade-in 0.3s ease-in;
+}
+
+@keyframes nova-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes twin-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  .nova-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .twin-avatar {
+    width: 64px;
+    height: 64px;
+  }
+
+  .ai-switcher {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .ai-switcher-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .nova-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .twin-avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .nova-header,
+  .twin-header {
+    padding: var(--spacing-sm);
+  }
+
+  .nova-message,
+  .twin-message {
+    padding: var(--spacing-sm);
+    font-size: 14px;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+
+.ai-switcher-button:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.nova-avatar,
+.twin-avatar {
+  /* Ensure icons are not affected by reduced-motion */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nova-avatar,
+  .twin-avatar {
+    animation: none;
+  }
+
+  .nova-to-twin-transition,
+  .twin-from-nova-transition {
+    animation: none;
+  }
+}

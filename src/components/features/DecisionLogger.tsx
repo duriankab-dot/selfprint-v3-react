@@ -16,6 +16,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { getUserDecisions } from '@/services/supabase-service';
 import { DecisionIntelligenceEngine } from '@/lib/intelligence/DecisionIntelligenceEngine';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import DecisionForm from './DecisionForm';
@@ -74,9 +75,15 @@ export const DecisionLogger: React.FC = () => {
   const { data: decisions = [], isLoading: decisionsLoading } = useQuery({
     queryKey: ['userDecisions', userId],
     queryFn: async () => {
-      // TODO: Implement actual API call to fetch decisions from database
-      // For now, return empty array (mock)
-      return [] as DecisionInfo[];
+      const results = await getUserDecisions(userId);
+      return results.map(r => ({
+        id: r.id,
+        userId,
+        title: r.title,
+        context: r.context,
+        expectedOutcome: r.expectedOutcome,
+        createdAt: new Date(r.createdAt),
+      })) as DecisionInfo[];
     },
     enabled: !!userId,
     staleTime: 60_000,

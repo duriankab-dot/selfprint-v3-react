@@ -1,40 +1,196 @@
-```markdown
-# Selfprint Deployment Guide
+# 🚀 SELFPRINT — DEPLOYMENT GUIDE
 
-## 🚀 Frontend — Vercel
+**Version:** 17-Phase Master Direction  
+**Date:** 14 สิงหาคม 2569
+
+---
+
+## 🔴 สิ่งสำคัญก่อน Deploy
+
+### Architecture Verification
+
+| Item | Status |
+|------|--------|
+| Nova ≠ Twin Separation | ✅ |
+| 12 SICE Core | ✅ |
+| 5 Navigation + Twin Center | ✅ |
+| 12 Hub Worlds | ✅ |
+| 5 Growth Stages | ✅ |
+| Trial 7-14 days | ✅ |
+| Human Expert | ✅ |
+| SEO/GEO Layer | ✅ |
+| Public/Private | ✅ |
+
+---
+
+## 📦 Production Build
+
+### 1. Build
 
 ```bash
 npm run build
+2. Preview
+bash
+npm run preview
+3. Verify
+✅ No TypeScript errors
+
+✅ No lint errors
+
+✅ All tests passing
+
+✅ Lighthouse ≥ 85
+
+🌐 Vercel Deployment
+1. Connect to Vercel
+bash
+vercel
+2. Environment Variables
+Variable	Production	Staging
+VITE_SUPABASE_URL	✅	✅
+VITE_SUPABASE_ANON_KEY	✅	✅
+VITE_CLAUDE_API_KEY	✅	✅
+VITE_STRIPE_PUBLISHABLE_KEY	✅	✅
+STRIPE_SECRET_KEY	✅	❌
+STRIPE_WEBHOOK_SECRET	✅	❌
+3. Deploy
+bash
 vercel --prod
-Environment Variables ที่ต้องตั้งใน Vercel:
+📱 PWA Configuration
+1. Manifest
+json
+{
+  "name": "Selfprint",
+  "short_name": "Selfprint",
+  "description": "Living Personal Intelligence Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#1a1a2e",
+  "background_color": "#0a0a1a"
+}
+2. Service Worker
+Static assets caching
 
-VITE_SUPABASE_URL
+API calls caching
 
-VITE_SUPABASE_ANON_KEY
+Offline fallback
 
-VITE_ANTHROPIC_API_KEY
+Auto-update
 
-VITE_STRIPE_PUBLISHABLE_KEY
+🔐 Security
+1. HTTPS
+Vercel provides automatic HTTPS
 
-STRIPE_SECRET_KEY
+Force HTTPS redirect
 
-STRIPE_WEBHOOK_SECRET
+2. Headers
+javascript
+// Security Headers
+{
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+  'Referrer-Policy': 'strict-origin-when-cross-origin',
+  'Content-Security-Policy': "..."
+}
+3. Environment
+Never expose secrets in client
 
-🗄️ Backend — Supabase
+Use environment variables
+
+Supabase RLS enabled
+
+📊 Monitoring
+1. Analytics
+Vercel Analytics
+
+Custom events
+
+Performance monitoring
+
+2. Error Tracking
+Sentry integration
+
+Error boundaries
+
+Logging service
+
+3. Performance
+Lighthouse CI
+
+Core Web Vitals
+
+Real user monitoring
+
+🔄 CI/CD Pipeline
+1. GitHub Actions
+yaml
+name: Deploy
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install
+      - run: npm run build
+      - run: npm test
+      - run: vercel --prod
+2. Pre-deploy Checks
+✅ TypeScript compilation
+
+✅ Lint
+
+✅ Tests
+
+✅ Build
+
+📁 Production Assets
+1. Static Assets
+Images optimized
+
+Fonts preloaded
+
+Critical CSS inlined
+
+2. Dynamic Assets
+Code splitting
+
+Lazy loading
+
+Prefetch on demand
+
+3. Cache Strategy
+Asset Type	Cache	TTL
+HTML	no-cache	—
+JS/CSS	immutable	1 year
+Images	cache	1 week
+Fonts	cache	1 month
+🔍 Post-Deploy Checklist
+Item	Status
+Homepage loads	✅
+Authentication works	✅
+Nova appears	✅
+Onboarding works	✅
+Core Awakening works	✅
+Twin created	✅
+Chat works	✅
+5 Navigation works	✅
+Dashboard loads	✅
+PWA installable	✅
+Offline works	✅
+Analytics tracking	✅
+Error tracking	✅
+SEO metadata	✅
+Performance OK	✅
+🚨 Rollback
+1. Vercel Rollback
 bash
-supabase migration up
-💳 Payment — Stripe
-Webhook endpoint: /api/stripe/webhook
-
-ทดสอบใน Local:
-
+vercel rollback
+2. Manual Rollback
 bash
-stripe listen --forward-to localhost:5173/api/stripe/webhook
-📱 PWA
-iOS: Share → "Add to Home Screen"
-
-Android: เมนู ⋮ → "Install app"
-
-Desktop: ไอคอน Install ที่ URL bar
-
-อัปเดตล่าสุด: 12 สิงหาคม 2569
+git revert <commit>
+git push origin main
+อัปเดตล่าสุด: 14 สิงหาคม 2569

@@ -56,8 +56,8 @@ export const ChatPage: React.FC = () => {
   // §37: Register service worker + request background sync
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch((err) => {
-        console.warn('[ChatPage] Failed to register SW:', err);
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // Failed to register SW
       });
     }
   }, []);
@@ -66,8 +66,8 @@ export const ChatPage: React.FC = () => {
   useEffect(() => {
     if (offlineStatus === 'online' && pendingCount > 0) {
       const timer = setTimeout(() => {
-        syncQueue().catch((err) => {
-          console.error('[ChatPage] Auto-sync failed:', err);
+        syncQueue().catch(() => {
+          // Auto-sync failed
         });
       }, 500); // Debounce
       return () => clearTimeout(timer);
@@ -103,14 +103,13 @@ export const ChatPage: React.FC = () => {
     } catch (err) {
       // API failed — save offline if not authenticated error
       if (offlineStatus === 'offline' || (err instanceof Error && err.message.includes('Network'))) {
-        console.log('[ChatPage] Saving offline:', messageText);
         try {
           await saveOffline(messageText, currentHub, currentMood);
           setSavedOfflineMsg('💾 บันทึกไว้ในเครื่อง — จะส่งเมื่อออนไลน์');
           setTimeout(() => setSavedOfflineMsg(null), 3000);
           await requestBackgroundSync();
         } catch (offlineErr) {
-          console.error('[ChatPage] Failed to save offline:', offlineErr);
+          // Failed to save offline
           alert('ไม่สามารถบันทึกข้อความได้');
         }
       } else {

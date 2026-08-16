@@ -172,7 +172,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         return JSON.parse(stored);
       } catch (error) {
-        console.error('Failed to load subscription from cache:', error);
+        // Failed to load subscription from cache
       }
     }
 
@@ -206,7 +206,6 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
         };
         setSubscription(newSubscription);
       } catch (error) {
-        console.error('[Subscription] Failed to fetch subscription:', error);
         // Keep cached subscription on error
       }
     })();
@@ -242,7 +241,6 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const updateSubscription = (status: SubscriptionStatus) => {
     setSubscription(status);
-    console.log(`[Subscription] Updated to ${status.tier} (${status.status})`);
   };
 
   return (

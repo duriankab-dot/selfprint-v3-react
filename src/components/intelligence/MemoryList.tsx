@@ -66,8 +66,8 @@ export const MemoryList: React.FC<MemoryListProps> = ({
       queryClient.invalidateQueries({ queryKey: ['userMemories', userId] });
       onMemoryDeleted?.(memoryId);
     },
-    onError: (error) => {
-      console.error('Failed to delete memory:', error);
+    onError: () => {
+      // Failed to delete memory
     },
   });
 

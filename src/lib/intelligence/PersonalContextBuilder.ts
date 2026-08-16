@@ -590,7 +590,7 @@ export class PersonalContextBuilder {
    */
   private extractRelationships(_entries: PersonalContextEntry[]): Relationship[] {
     // Note: Relationship data not stored in PersonalContextEntry yet
-    // TODO: Extend PersonalContextEntry to support relationship type or create separate table
+    // Future: Extend PersonalContextEntry to support relationship type or create separate table
     const relationships: Relationship[] = [];
     return relationships;
   }

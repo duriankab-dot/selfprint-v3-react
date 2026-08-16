@@ -284,11 +284,9 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     try {
       if (bufferToPlay) {
         play(bufferToPlay);
-        const source = cdnBuffer ? '(CDN)' : '(Synthesis)';
-        console.log(`[Soundscape] Playing ${soundscape.id} ${source} (${soundscape.labelThai})`);
       }
     } catch (error) {
-      console.warn(`[Soundscape] Failed to play audio: ${error}`);
+      // Failed to play audio
     }
 
     prevSoundscapeRef.current = soundscape;

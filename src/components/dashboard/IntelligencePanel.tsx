@@ -330,9 +330,8 @@ export const IntelligencePanel: React.FC = () => {
               <PatternDisplay
                 patterns={patterns}
                 showConfidence={true}
-                onPatternClick={(pattern) => {
+                onPatternClick={() => {
                   // Optional: Can add modal/detail view here
-                  console.log('Pattern clicked:', pattern.patternName);
                 }}
               />
             )}
@@ -383,9 +382,8 @@ export const IntelligencePanel: React.FC = () => {
                 userId={userId}
                 memories={userMemories}
                 isLoading={memoriesLoading}
-                onMemoryDeleted={(id) => {
+                onMemoryDeleted={() => {
                   // Optional: show toast or update UI
-                  console.log(`Memory ${id} deleted`);
                 }}
               />
             </div>

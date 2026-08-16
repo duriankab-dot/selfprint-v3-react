@@ -160,7 +160,6 @@ describe('Phase 2 Integration Tests - Nova AI Twin System', () => {
           expect(response.response.text).toBeDefined();
           successCount++;
         } catch (error) {
-          console.error(`Failed for ${combo.hub}/${combo.mood}/${combo.archetype}:`, error);
           throw error;
         }
       }

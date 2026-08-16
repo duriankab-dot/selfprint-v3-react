@@ -15,6 +15,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { DecisionIntelligenceReport } from '@/lib/intelligence/DecisionIntelligenceEngine';
+import { saveDecisionForm } from '@/services/supabase-service';
 import './decision-form.css';
 
 // ============================================================================
@@ -59,11 +60,12 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
   const createDecisionMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      // TODO: Implement actual API call
-      // For now, return mock data
+      const result = await saveDecisionForm(userId, data);
+      if (!result) {
+        throw new Error('Failed to save decision');
+      }
       return {
-        id: `decision_${Date.now()}`,
-        userId,
+        ...result,
         ...data,
         createdAt: new Date(),
       };
@@ -83,8 +85,8 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
       onDecisionCreated?.(decision);
     },
-    onError: (error) => {
-      console.error('Failed to create decision:', error);
+    onError: () => {
+      // Failed to create decision
     },
   });
 

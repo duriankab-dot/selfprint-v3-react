@@ -101,7 +101,7 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
         osc.stop(noteStart + 0.3);
       });
     } catch (error) {
-      console.error('[TwinEvolution] Failed to play sound:', error);
+      // Failed to play sound
     }
   };
 

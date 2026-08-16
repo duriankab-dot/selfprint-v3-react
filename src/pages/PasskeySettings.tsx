@@ -105,7 +105,6 @@ const PasskeySettings: React.FC = () => {
       );
     } catch (e) {
       setError('โหลดข้อมูล Passkeys ไม่สำเร็จ — ลองใหม่อีกครั้ง');
-      console.error('[PasskeySettings] load error:', e);
     } finally {
       setLoading(false);
     }
