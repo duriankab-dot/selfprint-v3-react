@@ -6,7 +6,8 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAllWorlds, getWorldArticles, WorldId } from '../constants/worlds';
+import type { WorldId } from '../constants/worlds';
+import { getAllWorlds, getWorldArticles } from '../constants/worlds';
 import '../styles/worlds-hub.css';
 
 export default function WorldsHub() {

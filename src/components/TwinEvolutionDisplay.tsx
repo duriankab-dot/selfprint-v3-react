@@ -4,15 +4,17 @@
  * Displays current stage, progress to next, and milestones
  */
 
-import { CSSProperties } from 'react';
-import {
+import type { CSSProperties } from 'react';
+import type {
   TwinStage,
+  ProgressMetrics,
+} from '../constants/twinStages';
+import {
   TWIN_STAGES,
   calculateProgress,
   getNextMilestoneText,
   STAGE_OPACITY,
   STAGE_COLORS,
-  ProgressMetrics,
 } from '../constants/twinStages';
 
 interface TwinEvolutionDisplayProps {

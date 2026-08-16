@@ -3,7 +3,7 @@
  * Abstract base class for all SICE engines
  */
 
-import { SICEInput, SICEOutput, ISICEEngine } from '../../types/sice';
+import type { SICEInput, SICEOutput, ISICEEngine } from '../../types/sice';
 
 export abstract class SICEBase implements ISICEEngine {
   readonly id: number;
@@ -54,7 +54,7 @@ export abstract class SICEBase implements ISICEEngine {
    * Log execution for debugging
    */
   protected log(message: string, data?: unknown): void {
-    if (process.env.NODE_ENV === 'development') {
+    if (typeof window !== 'undefined') {
       console.log(`[SICE #${this.id} ${this.name}] ${message}`, data || '');
     }
   }

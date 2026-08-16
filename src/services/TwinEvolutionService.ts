@@ -3,10 +3,12 @@
  * Manages Twin evolution and stage progression
  */
 
-import {
+import type {
   TwinStage,
-  calculateProgress,
   ProgressMetrics,
+} from '../constants/twinStages';
+import {
+  calculateProgress,
   getStageInfo,
 } from '../constants/twinStages';
 
@@ -152,9 +154,9 @@ export function getStageRequirements(stage: TwinStage) {
  * Notify when Twin evolves
  */
 export async function notifyEvolution(
-  userId: string,
-  newStage: TwinStage,
-  twinName: string
+  _userId: string,
+  _newStage: TwinStage,
+  _twinName: string
 ): Promise<void> {
   try {
     // TODO: Send browser notification

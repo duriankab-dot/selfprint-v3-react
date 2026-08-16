@@ -121,7 +121,7 @@ export async function completeCoreAwakening(
 /**
  * Trigger notifications when awakening completes
  */
-export async function notifyAwakening(userId: string, twinName: string): Promise<void> {
+export async function notifyAwakening(_userId: string, _twinName: string): Promise<void> {
   try {
     // TODO: Send browser notification
     // - Title: "Your Twin is Alive!"

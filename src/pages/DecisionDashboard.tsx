@@ -5,9 +5,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import type { Decision, DecisionStats } from '../types/decision';
 import { useAuth } from '../context/AuthContext';
 import { useDecisionStore } from '../store/decisionStore';
-import { Decision, DecisionStats } from '../types/decision';
 import { getDecisionStats } from '../services/DecisionService';
 import '../styles/decision-dashboard.css';
 

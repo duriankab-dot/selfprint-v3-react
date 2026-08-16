@@ -43,7 +43,7 @@ export async function createTwin(
   request: TwinCreationRequest
 ): Promise<TwinCreationResponse> {
   try {
-    const { userId, twinName, birthData, personalityEssence } = request;
+    const { userId, twinName, personalityEssence } = request;
 
     if (!userId || !twinName) {
       throw new Error('userId and twinName are required');
@@ -144,7 +144,7 @@ export async function createFirstMemory(
  * Generate Twin personality from SICE results
  * Called after 12 SICE orchestration completes
  */
-export async function generatePersonality(siceResults: Record<string, unknown>): Promise<{
+export async function generatePersonality(_siceResults: Record<string, unknown>): Promise<{
   essence: string;
   archetypes: string[];
   strengths: string[];

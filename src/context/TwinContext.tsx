@@ -1,10 +1,12 @@
 /**
  * Twin Context
  * จัดการข้อมูล Nova Twin: archetype, maturity score, personality
+ * + world-aware recommendations (P0 #7)
  */
 
 import React, { createContext, useState, useCallback } from 'react';
 import type { ReactNode } from 'react';
+import type { WorldId } from '../constants/worlds';
 
 // 18 Archetypes (12 base + 6 hybrid)
 export const ARCHETYPES = [
@@ -54,9 +56,12 @@ interface TwinContextType {
   twin: TwinProfile | null;
   loading: boolean;
   error: string | null;
+  currentWorld: WorldId | null;
   createTwin: (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateTwin: (updates: Partial<TwinProfile>) => void;
   setMaturityScore: (score: number) => void;
+  setCurrentWorld: (world: WorldId | null) => void;
+  recommendWorld: (messageContent: string) => WorldId | null;
   resetTwin: () => void;
 }
 
@@ -66,6 +71,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const [twin, setTwin] = useState<TwinProfile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentWorld, setCurrentWorld] = useState<WorldId | null>(null);
 
   const createTwin = useCallback(
     (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -109,6 +115,38 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     updateTwin({ maturityScore: clamped });
   }, [updateTwin]);
 
+  const recommendWorld = useCallback((messageContent: string): WorldId | null => {
+    // Simple keyword-based world recommendation
+    const content = messageContent.toLowerCase();
+    const worldKeywords: Record<WorldId, string[]> = {
+      self: ['identity', 'self', 'who am i', 'authentic', 'values', 'beliefs'],
+      mind: ['thoughts', 'emotions', 'mental', 'clarity', 'focus', 'anxiety', 'stress'],
+      relationship: ['relationship', 'friend', 'family', 'communication', 'connection', 'bond', 'people'],
+      love: ['love', 'romance', 'intimate', 'partner', 'heart', 'dating', 'attraction'],
+      career: ['career', 'work', 'job', 'professional', 'business', 'leadership', 'purpose'],
+      wealth: ['money', 'finance', 'wealth', 'budget', 'investment', 'abundance'],
+      life: ['life', 'meaning', 'direction', 'path', 'journey', 'balance'],
+      growth: ['growth', 'learn', 'develop', 'improve', 'potential', 'skill'],
+      decision: ['decision', 'choice', 'choose', 'dilemma', 'uncertain', 'option'],
+      purpose: ['purpose', 'meaning', 'mission', 'calling', 'why', 'legacy'],
+      wellbeing: ['health', 'wellness', 'wellbeing', 'exercise', 'nutrition', 'sleep', 'body'],
+      future: ['future', 'tomorrow', 'ahead', 'next', 'vision', 'goals', 'dream'],
+    };
+
+    let bestMatch: WorldId | null = null;
+    let maxMatches = 0;
+
+    for (const [world, keywords] of Object.entries(worldKeywords) as Array<[WorldId, string[]]>) {
+      const matches = keywords.filter(kw => content.includes(kw)).length;
+      if (matches > maxMatches) {
+        maxMatches = matches;
+        bestMatch = world;
+      }
+    }
+
+    return bestMatch;
+  }, []);
+
   const resetTwin = useCallback(() => {
     setTwin(null);
     localStorage.removeItem('selfprint_twin');
@@ -132,9 +170,12 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     twin,
     loading,
     error,
+    currentWorld,
     createTwin,
     updateTwin,
     setMaturityScore,
+    setCurrentWorld,
+    recommendWorld,
     resetTwin,
   };
 

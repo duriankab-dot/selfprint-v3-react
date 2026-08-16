@@ -4,7 +4,7 @@
  * POST /api/sice/process
  */
 
-import { SICEInput, OrchestratorResult } from '../../types/sice';
+import type { SICEInput, OrchestratorResult } from '../../types/sice';
 import { SICEOrchestrator } from '../../services/sice/SICEOrchestrator';
 
 export interface SICEProcessRequest {

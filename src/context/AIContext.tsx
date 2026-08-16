@@ -6,7 +6,8 @@
  * Twin = Personal AI Intelligence Entity (Act III: Living phase)
  */
 
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 
 export type ActiveAI = 'nova' | 'twin';

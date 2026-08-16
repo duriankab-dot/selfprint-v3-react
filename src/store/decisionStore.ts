@@ -4,12 +4,8 @@
  */
 
 import { create } from 'zustand';
-import { Decision, DecisionFilters } from '../types/decision';
-import {
-  getDecisions,
-  getPendingFollowUpsForUser,
-  getDecisionStats,
-} from '../services/DecisionService';
+import type { Decision, DecisionFilters } from '../types/decision';
+import { getDecisions } from '../services/DecisionService';
 
 interface DecisionStore {
   // State

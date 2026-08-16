@@ -24,6 +24,7 @@ import IntelligencePanel from '../components/dashboard/IntelligencePanel';
 import ExecutiveSummary from '../components/dashboard/ExecutiveSummary';
 import FutureSelfPanel from '../components/dashboard/FutureSelfPanel';
 import { DecisionCard, LifePackCarousel, ForecastWidget } from '../components/dashboard/IntelligencePanels';
+import { ExplorWorldsCard } from '../components/dashboard/ExplorWorldsCard';
 import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
@@ -182,6 +183,9 @@ const Dashboard: React.FC = () => {
 
       {/* Living AI Twin — §3 states, §4 cosmic visual, §5 processing states */}
       <LivingTwin />
+
+      {/* P0 #7 — Explore Worlds quick action */}
+      <ExplorWorldsCard />
 
       {/* Growth Space — §12 PAST → NOW → NEXT visualization */}
       <GrowthSpace />

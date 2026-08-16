@@ -18,7 +18,7 @@ export function TwinHologramBirth({
   autoPlay = true,
 }: TwinHologramBirthProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | undefined>(undefined);
   const stateRef = useRef({
     startTime: 0,
     currentPhase: 0,

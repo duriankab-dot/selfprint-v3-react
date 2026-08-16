@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from './context/AuthContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { AIProvider } from './context/AIContext';
 import { EmotionProvider } from './context/EmotionContext';
 import { HubProvider } from './context/HubContext';
@@ -112,7 +113,7 @@ function App() {
                                 <Route path="/life-hubs" element={<LifeHubsPage />} />
                                 <Route path="/decisions" element={<DecisionDashboard />} />
                                 <Route path="/decision-log" element={<DecisionLoggerPage />} />
-                                <Route path="/worlds" element={<WorldsHub />} />
+                                <Route path="/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />
                                 <Route path="/menu" element={<FeatureMenu />} />
                                 <Route path="/components" element={<ComponentShowcase />} />
                               </Routes>

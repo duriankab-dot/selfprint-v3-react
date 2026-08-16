@@ -8,7 +8,6 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAIContext } from '../context/AIContext';
 import { NovaAvatar } from '../components/features/NovaAvatar';
-import { getNovaPrompt } from '../config/prompts';
 import { saveMessage } from '@/services/supabase-service';
 
 export default function NovaChat() {

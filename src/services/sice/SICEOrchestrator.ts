@@ -4,7 +4,7 @@
  * Synthesizes results into PersonalIntelligence
  */
 
-import {
+import type {
   SICEInput,
   OrchestratorResult,
   CrossEngineSynthesis,
@@ -115,8 +115,8 @@ export class SICEOrchestrator {
    * Adjust results based on user feedback history
    */
   private async performFineTuning(
-    input: SICEInput,
-    results: Array<unknown>
+    _input: SICEInput,
+    _results: Array<unknown>
   ): Promise<FineTunedResult> {
     // TODO: Query feedback history
     // - Get past feedback scores
@@ -134,9 +134,9 @@ export class SICEOrchestrator {
    * Build the final PersonalIntelligence output
    */
   private buildPersonalIntelligence(
-    results: Array<unknown>,
+    _results: Array<unknown>,
     synthesis: CrossEngineSynthesis,
-    fineTuned: FineTunedResult
+    _fineTuned: FineTunedResult
   ): PersonalIntelligence {
     // TODO: Extract key insights from all engines
     // - Combine recommendations from multiple engines

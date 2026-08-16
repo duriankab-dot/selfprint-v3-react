@@ -4,7 +4,7 @@
  * 2.5D hologram effect, evolves with stage and mood
  */
 
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 export type TwinStage = 1 | 2 | 3 | 4 | 5;
 export type TwinMood = 'curious' | 'confident' | 'learning' | 'reflective' | 'playful';

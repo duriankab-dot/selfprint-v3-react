@@ -4,7 +4,7 @@
  * Golden/warm glow effect, distinct from Twin's hologram
  */
 
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
 interface NovaAvatarProps {
   size?: 'sm' | 'md' | 'lg' | 'xl';

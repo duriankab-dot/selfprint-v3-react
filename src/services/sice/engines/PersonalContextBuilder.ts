@@ -4,7 +4,7 @@
  */
 
 import { SICEBase } from '../SICEBase';
-import { SICEInput, SICEOutput, PersonalContext } from '../../../types/sice';
+import type { SICEInput, SICEOutput, PersonalContext } from '../../../types/sice';
 
 export class PersonalContextBuilder extends SICEBase {
   constructor() {

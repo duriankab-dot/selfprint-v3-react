@@ -3,14 +3,16 @@
  * CRUD and follow-up management for decisions
  */
 
-import {
+import type {
   Decision,
   FollowUp,
   DecisionStats,
+  FollowUpDays,
+} from '../types/decision';
+import {
   getFollowUpDueDate,
   calculateSuccessRate,
   getPendingFollowUps,
-  FollowUpDays,
 } from '../types/decision';
 
 /**
@@ -87,7 +89,7 @@ export async function getDecisions(userId: string): Promise<Decision[]> {
  */
 export async function updateDecision(
   decisionId: string,
-  updates: Partial<Decision>
+  _updates: Partial<Decision>
 ): Promise<{ success: boolean; message: string }> {
   try {
     if (!decisionId) {
@@ -138,7 +140,7 @@ export async function deleteDecision(decisionId: string): Promise<{ success: boo
  */
 export async function completeFollowUp(
   followUpId: string,
-  reflection: string,
+  _reflection: string,
   resultScore: number
 ): Promise<{ success: boolean; milestone?: boolean; message: string }> {
   try {
@@ -232,7 +234,7 @@ export async function getDecisionStats(userId: string): Promise<DecisionStats> {
       pendingFollowUps: pending.length,
       averageConfidence: avgConfidence,
       successRate,
-      averageOutcome,
+      averageOutcome: avgOutcome,
     };
   } catch (error) {
     console.error('Error calculating stats:', error);

@@ -22,9 +22,16 @@ interface NavBarProps {
   position?: 'sticky' | 'fixed';
 }
 
-const NAV_LINKS = [
+interface NavLink {
+  to: string;
+  label: string;
+  requiresAuth?: boolean;
+}
+
+const NAV_LINKS: NavLink[] = [
   { to: '/dashboard', label: 'แดชบอร์ด' },
   { to: '/chat', label: 'แชท' },
+  { to: '/worlds', label: '🌍 Worlds', requiresAuth: true },
   { to: '/menu', label: 'เมนู' },
 ];
 
@@ -41,6 +48,9 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   };
 
   const isActive = (path: string) => location.pathname === path;
+
+  // Filter nav links based on auth status
+  const visibleLinks = NAV_LINKS.filter(link => !link.requiresAuth || session);
 
   const authAction = session ? (
     <button
@@ -144,7 +154,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             SelfPrint
           </Link>
           <div className="sp-navbar-links" style={{ gap: '4px', alignItems: 'center' }}>
-            {NAV_LINKS.map((link) => (
+            {visibleLinks.map((link) => (
               <Link
                 key={link.to}
                 to={link.to}
@@ -214,7 +224,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
           }}
         >
-          {NAV_LINKS.map((link) => (
+          {visibleLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
