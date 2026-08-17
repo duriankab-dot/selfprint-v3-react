@@ -2,7 +2,6 @@ import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { useContext } from 'react';
-import * as Sentry from '@sentry/react';
 import { validateWorldPersonalities } from './constants/worldPersonalities';
 import { AuthContext } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
@@ -158,56 +157,7 @@ function App() {
   }, []);
 
   return (
-    <Sentry.ErrorBoundary
-      fallback={({ error, resetError }: { error: Error | null; resetError: () => void }) => (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100vh',
-            fontFamily: 'system-ui, -apple-system, sans-serif',
-            padding: '20px',
-          }}
-        >
-          <h1>Something went wrong</h1>
-          <p style={{ color: '#666', marginBottom: '20px' }}>
-            An unexpected error occurred. Our team has been notified.
-          </p>
-          <button
-            onClick={resetError}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Try again
-          </button>
-          {error && import.meta.env.DEV && (
-            <pre
-              style={{
-                marginTop: '20px',
-                padding: '10px',
-                backgroundColor: '#f5f5f5',
-                borderRadius: '4px',
-                fontSize: '12px',
-                overflow: 'auto',
-                maxHeight: '300px',
-                maxWidth: '100%',
-              }}
-            >
-              {error.toString()}
-            </pre>
-          )}
-        </div>
-      )}
-    >
-      <HelmetProvider>
+    <HelmetProvider>
         <ThemeProvider>
           <AuthProvider>
             <AIProvider>
@@ -249,8 +199,7 @@ function App() {
           </AIProvider>
         </AuthProvider>
       </ThemeProvider>
-      </HelmetProvider>
-    </Sentry.ErrorBoundary>
+    </HelmetProvider>
   );
 }
 
