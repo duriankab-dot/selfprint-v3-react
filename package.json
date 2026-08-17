@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
-    "@sentry/react": "^7.92.0",
+    "@sentry/react": "^7.91.0",
     "@sentry/tracing": "^7.92.0",
     "@simplewebauthn/browser": "^9.0.1",
     "@simplewebauthn/server": "^9.0.3",
