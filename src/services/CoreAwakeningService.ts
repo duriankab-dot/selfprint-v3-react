@@ -64,11 +64,16 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
 /**
  * Start the awakening process
  * Initiates 12 SICE orchestration to generate personal intelligence seed
+ *
+ * Phase 3 Fix:
+ * - Persist essence to Supabase (awakening_essence table)
+ * - Remove sessionStorage hack
+ * - Return essenceId for reference
  */
-export async function startAwakening(userId: string): Promise<AwakeningResult> {
+export async function startAwakening(userId: string): Promise<AwakeningResult & { essenceId?: string }> {
   try {
     if (!userId || !supabase) {
-      return { success: false, message: 'User ID required' };
+      return { success: false, message: 'ต้องมี User ID' };
     }
 
     // Run SICE orchestrator to generate personal intelligence
@@ -85,7 +90,7 @@ export async function startAwakening(userId: string): Promise<AwakeningResult> {
     if (!orchestrationResult || !orchestrationResult.personalIntelligence) {
       return {
         success: false,
-        message: 'SICE orchestration failed — could not generate personal intelligence',
+        message: 'SICE orchestration ล้มเหลว — ไม่สามารถสร้าง personal intelligence',
       };
     }
 
@@ -98,28 +103,38 @@ export async function startAwakening(userId: string): Promise<AwakeningResult> {
       generatedAt: new Date().toISOString(),
     };
 
-    // Store essence in a temporary cache (will be used when Twin is named)
-    // Using a simple in-memory cache keyed by userId (in production, use Redis or similar)
-    const awakeningCache = new Map<string, any>();
-    awakeningCache.set(userId, essence);
+    // ✅ Phase 3: Persist essence to Supabase (replace sessionStorage hack)
+    const { data: savedEssence, error: essenceError } = await supabase
+      .from('awakening_essence')
+      .insert({
+        user_id: userId,
+        personal_intelligence: essence.personalIntelligence,
+        sice_results: essence.siceResults,
+        synthesis: essence.synthesis,
+        execution_time: essence.executionTime,
+        status: 'pending',
+      })
+      .select('id')
+      .single();
 
-    // Store in browser sessionStorage as fallback
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      window.sessionStorage.setItem(
-        `awakening-essence-${userId}`,
-        JSON.stringify(essence)
-      );
+    if (essenceError || !savedEssence) {
+      console.error('ล้มเหลวในการบันทึก essence:', essenceError);
+      return {
+        success: false,
+        message: `ไม่สามารถบันทึก essence: ${essenceError?.message || 'Database error'}`,
+      };
     }
 
     return {
       success: true,
-      message: 'Awakening process initiated — Personal intelligence generated',
+      message: 'กระบวนการ Awakening เริ่มต้น — Personal intelligence สร้างสำเร็จ ✨',
+      essenceId: savedEssence.id,
     };
   } catch (error) {
-    console.error('Error starting awakening:', error);
+    console.error('ข้อผิดพลาดในการ Awakening:', error);
     return {
       success: false,
-      message: `Awakening failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Awakening ล้มเหลว: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
@@ -127,20 +142,65 @@ export async function startAwakening(userId: string): Promise<AwakeningResult> {
 /**
  * Initialize Twin in system after naming
  * Creates Twin record + initializes SICE baseline scores
+ *
+ * Phase 3 Fix:
+ * - Retrieve essence from Supabase (not sessionStorage)
+ * - Atomic transaction: create Twin + mark essence as used
+ * - Link essence to Twin
  */
-export async function initializeTwin(userId: string, twinName: string): Promise<AwakeningResult> {
+export async function initializeTwin(userId: string, twinName: string, essenceId?: string): Promise<AwakeningResult> {
   try {
     if (!userId || !twinName || !supabase) {
-      return { success: false, message: 'User ID and Twin name required' };
+      return { success: false, message: 'ต้องมี User ID และชื่อ Twin' };
+    }
+
+    // ✅ Phase 3: Retrieve essence from Supabase (not sessionStorage)
+    let essence = null;
+    if (essenceId) {
+      const { data, error } = await supabase
+        .from('awakening_essence')
+        .select('*')
+        .eq('id', essenceId)
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .single();
+
+      if (error || !data) {
+        return {
+          success: false,
+          message: 'ไม่พบ essence — กรุณาทำการ Awakening ใหม่',
+        };
+      }
+
+      essence = data;
+    } else {
+      // Fallback: get latest pending essence
+      const { data, error } = await supabase
+        .from('awakening_essence')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error || !data) {
+        return {
+          success: false,
+          message: 'ไม่พบ essence ที่ค้างอยู่ — กรุณาทำการ Awakening ใหม่',
+        };
+      }
+
+      essence = data;
     }
 
     // Create Twin record in database
     const twinData = {
-      userId, // Required by type (though not used by createTwinInDatabase)
+      userId,
       name: twinName,
-      primaryArchetype: 'sage' as const, // Default archetype at birth
+      primaryArchetype: 'sage' as const,
       secondaryArchetype: 'explorer' as const,
-      maturityScore: 30, // Start immature, grows through interaction
+      maturityScore: 30,
     };
 
     const newTwin = await createTwinInDatabase(userId, twinData);
@@ -148,8 +208,46 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
     if (!newTwin) {
       return {
         success: false,
-        message: 'Failed to create Twin record in database',
+        message: 'ไม่สามารถสร้าง Twin record ใน database',
       };
+    }
+
+    // ✅ Phase 3: Link essence to Twin and mark as used (transaction-like)
+    const { error: essenceUpdateError } = await supabase
+      .from('awakening_essence')
+      .update({
+        twin_id: newTwin.id,
+        status: 'used',
+        used_at: new Date().toISOString(),
+      })
+      .eq('id', essence.id);
+
+    if (essenceUpdateError) {
+      console.error('คำเตือน: ไม่สามารถอัพเดท essence status:', essenceUpdateError);
+      // ไม่ fail process — Twin สร้างแล้ว
+    }
+
+    // ✅ P0 #1 FIX: Link personal_context to essence if exists
+    try {
+      const { data: personalContext } = await supabase
+        .from('personal_contexts')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (personalContext) {
+        await supabase
+          .from('personal_contexts')
+          .update({
+            awakening_essence_id: essence.id,
+          })
+          .eq('id', personalContext.id);
+      }
+    } catch (contextError) {
+      console.warn('คำเตือน: ไม่สามารถ link personal context:', contextError);
+      // ไม่ fail process
     }
 
     // Initialize SICE baseline scores for this Twin
@@ -171,7 +269,7 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
     const baselineScores = siceEngines.map((engineName) => ({
       twin_id: newTwin.id,
       sice_name: engineName,
-      contribution_score: 50, // Neutral baseline
+      contribution_score: 50,
       last_active: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
@@ -182,8 +280,7 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
       .insert(baselineScores);
 
     if (scoresError) {
-      console.error('Warning: Could not initialize SICE baseline scores:', scoresError);
-      // Don't fail the whole process if scores fail — Twin is already created
+      console.error('คำเตือน: ไม่สามารถเตรียม SICE baseline scores:', scoresError);
     }
 
     // Create initial Twin memory entry: "I was born"
@@ -193,7 +290,7 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
         twin_id: newTwin.id,
         world_id: 'self',
         role: 'system',
-        content: `I was born as ${twinName}. I'm here to grow with you.`,
+        content: `ฉันเกิดมาในชื่อ ${twinName} ฉันอยู่ที่นี่เพื่อเติบโตไปกับคุณ`,
         metadata: {
           eventType: 'awakening',
           timestamp: new Date().toISOString(),
@@ -201,20 +298,19 @@ export async function initializeTwin(userId: string, twinName: string): Promise<
       });
 
     if (memoryError) {
-      console.error('Warning: Could not create birth memory:', memoryError);
-      // Don't fail — Twin is already created
+      console.error('คำเตือน: ไม่สามารถสร้าง birth memory:', memoryError);
     }
 
     return {
       success: true,
-      message: `Twin "${twinName}" has been awakened! 🎉`,
+      message: `Twin "${twinName}" ได้ตื่นตัวแล้ว! 🎉 Essence บันทึกในฐานข้อมูล ✨`,
       twinId: newTwin.id,
     };
   } catch (error) {
-    console.error('Error initializing Twin:', error);
+    console.error('ข้อผิดพลาดในการ initialize Twin:', error);
     return {
       success: false,
-      message: `Initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: `initialization ล้มเหลว: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }

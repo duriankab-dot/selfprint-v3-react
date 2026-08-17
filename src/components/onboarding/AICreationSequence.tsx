@@ -16,6 +16,7 @@ import {
   initializeContextFromOnboarding,
   validateOnboardingData,
 } from '@/lib/intelligence/PersonalContextInitializer';
+import { supabase } from '@/services/supabase-service';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 import type { Mood } from '@/context/EmotionContext';
 
@@ -78,12 +79,42 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
           // Initialize PersonalContext
           const context = await initializeContextFromOnboarding(onboardingData);
 
-          // In a real implementation, this would save to Supabase
-          // For now, store in sessionStorage for next step to access
-          sessionStorage.setItem(
-            'initialPersonalContext',
-            JSON.stringify(context)
-          );
+          // P0 #1 FIX: Save to Supabase instead of sessionStorage
+          if (supabase) {
+            try {
+              const { error } = await supabase
+                .from('personal_contexts')
+                .insert({
+                  user_id: onboardingData.userId,
+                  context_data: context,
+                  initialized_at: new Date().toISOString(),
+                })
+                .select('id')
+                .single();
+
+              if (error) {
+                console.warn('Failed to save PersonalContext to Supabase:', error);
+                // Fallback: still use sessionStorage if Supabase fails
+                sessionStorage.setItem(
+                  'initialPersonalContext',
+                  JSON.stringify(context)
+                );
+              }
+            } catch (supabaseError) {
+              console.warn('Error saving to Supabase, falling back to sessionStorage:', supabaseError);
+              // Fallback to sessionStorage
+              sessionStorage.setItem(
+                'initialPersonalContext',
+                JSON.stringify(context)
+              );
+            }
+          } else {
+            // Supabase unavailable, fallback to sessionStorage
+            sessionStorage.setItem(
+              'initialPersonalContext',
+              JSON.stringify(context)
+            );
+          }
 
           setInitState({ isInitializing: false, error: null, isSuccessful: true });
         } catch (err) {

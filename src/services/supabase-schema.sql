@@ -88,6 +88,32 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   created_at timestamp DEFAULT now()
 );
 
+-- Awakening Essence (Twin birth seed data - P0 #1 fix)
+CREATE TABLE IF NOT EXISTS awakening_essence (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  personal_intelligence jsonb NOT NULL,
+  sice_results jsonb NOT NULL,
+  synthesis jsonb,
+  execution_time integer, -- milliseconds
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'used')),
+  twin_id uuid REFERENCES twins(id) ON DELETE SET NULL,
+  used_at timestamp,
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now()
+);
+
+-- Personal Context (from onboarding, stored for initialization - P0 #1 fix)
+CREATE TABLE IF NOT EXISTS personal_contexts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  awakening_essence_id uuid REFERENCES awakening_essence(id) ON DELETE CASCADE,
+  context_data jsonb NOT NULL, -- PersonalContext object from PersonalContextInitializer
+  initialized_at timestamp,
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now()
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_twins_user_id ON twins(user_id);
 CREATE INDEX IF NOT EXISTS idx_twin_memories_twin_id ON twin_memories(twin_id);
@@ -97,6 +123,10 @@ CREATE INDEX IF NOT EXISTS idx_decision_follow_ups_decision ON decision_follow_u
 CREATE INDEX IF NOT EXISTS idx_twin_sice_twin_id ON twin_sice_scores(twin_id);
 CREATE INDEX IF NOT EXISTS idx_world_preferences_twin ON world_preferences(twin_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_twin_id ON analytics_events(twin_id);
+CREATE INDEX IF NOT EXISTS idx_awakening_essence_user_id ON awakening_essence(user_id);
+CREATE INDEX IF NOT EXISTS idx_awakening_essence_status ON awakening_essence(status);
+CREATE INDEX IF NOT EXISTS idx_personal_contexts_user_id ON personal_contexts(user_id);
+CREATE INDEX IF NOT EXISTS idx_personal_contexts_essence ON personal_contexts(awakening_essence_id);
 
 -- Row Level Security (RLS) Policies
 ALTER TABLE twins ENABLE ROW LEVEL SECURITY;
@@ -106,6 +136,8 @@ ALTER TABLE decision_follow_ups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE twin_sice_scores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE world_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE awakening_essence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE personal_contexts ENABLE ROW LEVEL SECURITY;
 
 -- Users can only access their own Twin
 CREATE POLICY "Twin access policy" ON twins
@@ -154,3 +186,11 @@ CREATE POLICY "Analytics access" ON analytics_events
       SELECT id FROM twins WHERE user_id = auth.uid()
     )
   );
+
+-- RLS for awakening_essence (P0 #1)
+CREATE POLICY "Users can access own essence" ON awakening_essence
+  FOR ALL USING (auth.uid() = user_id);
+
+-- RLS for personal_contexts (P0 #1)
+CREATE POLICY "Users can access own context" ON personal_contexts
+  FOR ALL USING (auth.uid() = user_id);
