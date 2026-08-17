@@ -76,7 +76,8 @@ const Dashboard: React.FC = () => {
   const userId = session?.user?.id || '';
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { currentWorld, worldStats } = useWorld();
+  // TODO: P0 #6 — Use world context to display world-specific insights
+  // const { currentWorld, worldStats } = useWorld();
   const seoData = getSeoMetadata('dashboard', language);
 
   // § P2 — PersonalContext สำหรับ intelligence panels (shared cache key กับ ExperienceContext)
