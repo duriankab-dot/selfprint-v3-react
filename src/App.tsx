@@ -68,7 +68,6 @@ const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
-const MonitoringDashboard = lazy(() => import('./pages/MonitoringDashboard'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
@@ -123,7 +122,6 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/faq', element: <FAQPage /> },
     { path: '/menu', element: <FeatureMenu /> },
     { path: '/components', element: <ComponentShowcase /> },
-    { path: '/monitoring', element: <ProtectedRoute><MonitoringDashboard /></ProtectedRoute> },
   ];
 
   // Add all public routes for both languages
