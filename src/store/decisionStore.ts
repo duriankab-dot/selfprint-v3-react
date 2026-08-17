@@ -43,8 +43,8 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
       const decisions = await getUserDecisions(userId);
       set({ decisions, isLoading: false });
     } catch (error) {
-      console.error('Error loading decisions:', error);
-      set({ isLoading: false });
+      // Error handled silently - logged upstream by service
+      set({ decisions: [], isLoading: false });
     }
   },
 
