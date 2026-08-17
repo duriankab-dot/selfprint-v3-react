@@ -116,7 +116,9 @@ function generatePatternDescription(world: WorldId, successes: number, total: nu
   // Keep cache size reasonable (max 1000 entries)
   if (patternDescriptionCache.size > 1000) {
     const firstKey = patternDescriptionCache.keys().next().value;
-    patternDescriptionCache.delete(firstKey);
+    if (firstKey) {
+      patternDescriptionCache.delete(firstKey);
+    }
   }
 
   return description;

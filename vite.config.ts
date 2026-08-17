@@ -10,23 +10,27 @@ export default defineConfig({
     },
   },
   build: {
-    // Phase G: Code splitting optimization
     rollupOptions: {
       output: {
-        // Split decision components into separate chunk
-        manualChunks: {
-          'decision-components': [
-            './src/components/decision/DecisionStats.tsx',
-            './src/components/decision/DecisionInsights.tsx',
-            './src/components/decision/DecisionTimeline.tsx',
-            './src/components/decision/TwinConfidenceIndicator.tsx',
-          ],
+        manualChunks: (id) => {
+          // Split decision components into separate chunk
+          if (
+            id.includes('/src/components/decision/DecisionStats') ||
+            id.includes('/src/components/decision/DecisionInsights') ||
+            id.includes('/src/components/decision/DecisionTimeline') ||
+            id.includes('/src/components/decision/TwinConfidenceIndicator')
+          ) {
+            return 'decision-components'
+          }
+          
           // Split services into separate chunk
-          'decision-services': [
-            './src/services/DecisionService.ts',
-            './src/services/DecisionLearningService.ts',
-            './src/services/FollowUpScheduler.ts',
-          ],
+          if (
+            id.includes('/src/services/DecisionService') ||
+            id.includes('/src/services/DecisionLearningService') ||
+            id.includes('/src/services/FollowUpScheduler')
+          ) {
+            return 'decision-services'
+          }
         },
       },
     },

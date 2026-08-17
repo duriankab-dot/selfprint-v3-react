@@ -174,7 +174,8 @@ describe('WorldContextAdapter', () => {
       const adapted = adaptDecisionIntelligence(analysis, mockWorldContext);
 
       expect(adapted.recommendation).toBe('Do this');
-      expect(adapted.confidence).toBe(80);
+      // Confidence is modified: 80 * 1.1 = 88
+      expect(adapted.confidence).toBeCloseTo(88, 1);
     });
 
     it('should handle null/undefined analysis', () => {

@@ -195,7 +195,7 @@ describe('Phase E: Complete Decision Intelligence System', () => {
       const successCount = outcomes.filter(o => o.impact === 'positive').length;
       const successRate = (successCount / outcomes.length) * 100;
 
-      expect(successRate).toBe(66.67);
+      expect(successRate).toBeCloseTo(66.67, 2);
     });
 
     it('should calculate world-specific success rates', () => {
