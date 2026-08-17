@@ -26,14 +26,22 @@ import type { AnalysisRequest, AnalysisResponse } from '../src/lib/types/astrove
 import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/index';
 import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './middleware/safety';
 import * as decisions from '../api/decisions';
+// ✅ P0-B SECURITY MIDDLEWARE
+import { configureSecurityMiddleware, applyAuth, applyOwnershipCheck } from './middleware/security-config';
+import { validateDecisionData, validateUserId } from './middleware/validate';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // ─── Middleware ───────────────────────────────────────────────────────────
 
+// ✅ P0-B SECURITY: Configure security middleware FIRST
+configureSecurityMiddleware(app);
+
+// Standard middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ limit: '1mb' }));
 
 // ─── Clients ──────────────────────────────────────────────────────────────
 
@@ -69,7 +77,8 @@ function extractJson(raw: string): unknown {
   }
 }
 
-app.post('/api/intelligence', async (req: Request, res: Response) => {
+// ✅ P0-B: Protected endpoint (requires authentication)
+app.post('/api/intelligence', ...applyAuth(), async (req: Request, res: Response) => {
   try {
     const body: Partial<IntelligenceRequestBody> = req.body || {};
 
@@ -144,9 +153,10 @@ app.post('/api/intelligence', async (req: Request, res: Response) => {
  * - GET: Fetch decision history
  * - DELETE: Delete a decision log
  */
-app.post('/api/decisions', decisions.POST);
-app.get('/api/decisions', decisions.GET);
-app.delete('/api/decisions', decisions.DELETE);
+// ✅ P0-B: Protected decision endpoints (requires auth + validation)
+app.post('/api/decisions', ...applyAuth(), validateDecisionData, decisions.POST);
+app.get('/api/decisions', ...applyAuth(), decisions.GET);
+app.delete('/api/decisions', ...applyAuth(), decisions.DELETE);
 
 // ─── /api/decision/trigger-reminders ──────────────────────────────────────
 
@@ -214,7 +224,8 @@ interface UnsubscribeRequest {
   endpoint: string;
 }
 
-app.post('/api/push', async (req: Request, res: Response) => {
+// ✅ P0-B: Protected push subscription endpoint
+app.post('/api/push', ...applyAuth(), async (req: Request, res: Response) => {
   try {
     const body = req.body as SubscribeRequest;
 
@@ -269,7 +280,8 @@ app.post('/api/push', async (req: Request, res: Response) => {
   }
 });
 
-app.delete('/api/push', async (req: Request, res: Response) => {
+// ✅ P0-B: Protected push unsubscribe endpoint
+app.delete('/api/push', ...applyAuth(), async (req: Request, res: Response) => {
   try {
     const body = req.body as UnsubscribeRequest;
 
