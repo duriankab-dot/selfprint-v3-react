@@ -100,13 +100,13 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
     it('P1-2: Should create user profile in profiles table', async () => {
       /**
        * Scenario: After signup, profile created in Supabase
-       * Expected: profiles row created with user_id
+       * Expected: profiles row created with userId
        */
 
       const mockProfileInsert = vi.fn().mockResolvedValue({
         data: [
           {
-            user_id: 'user-123',
+            userId: 'user-123',
             email: scenario.user.email,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
@@ -117,7 +117,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const result = await mockProfileInsert('user-123', scenario.user.email);
 
-      expect(result.data[0].user_id).toBe('user-123');
+      expect(result.data[0].userId).toBe('user-123');
       expect(result.data[0].email).toBe(scenario.user.email);
     });
 
@@ -182,7 +182,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
       const mockProfileUpdate = vi.fn().mockResolvedValue({
         data: [
           {
-            user_id: 'user-123',
+            userId: 'user-123',
             self_print_answers: mockAnswers,
             updated_at: new Date().toISOString(),
           },
@@ -204,7 +204,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const mockCharacteristics = {
         personality_type: 'analytical_intuitive',
-        decision_style: 'thorough_deliberate',
+        decisionStyle: 'thorough_deliberate',
         communication_style: 'direct_clear',
         value_alignment: {
           growth: 0.9,
@@ -214,7 +214,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
       };
 
       expect(mockCharacteristics.personality_type).toBeDefined();
-      expect(mockCharacteristics.decision_style).toBeDefined();
+      expect(mockCharacteristics.decisionStyle).toBeDefined();
       expect(Object.keys(mockCharacteristics.value_alignment).length).toBeGreaterThan(0);
     });
   });
@@ -227,14 +227,14 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
     it('P3-1: Should create Twin record in database', async () => {
       /**
        * Scenario: After onboarding, Twin created
-       * Expected: twins row created, associated with user_id
+       * Expected: twins row created, associated with userId
        */
 
       const mockTwinInsert = vi.fn().mockResolvedValue({
         data: [
           {
             id: 'twin-abc123',
-            user_id: 'user-123',
+            userId: 'user-123',
             name: 'Nova', // User can name their Twin
             status: 'awakening',
             created_at: new Date().toISOString(),
@@ -250,7 +250,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
       const result = await mockTwinInsert('user-123');
 
       expect(result.data[0].id).toBeDefined();
-      expect(result.data[0].user_id).toBe('user-123');
+      expect(result.data[0].userId).toBe('user-123');
       expect(result.data[0].status).toBe('awakening');
 
       scenario.twin.id = result.data[0].id;
@@ -334,16 +334,16 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockChatInit = vi.fn().mockResolvedValue({
-        conversation_id: 'conv-001',
-        twin_id: scenario.twin.id,
+        conversationId: 'conv-001',
+        twinId: scenario.twin.id,
         status: 'active',
-        first_message: 'Hello! I'm Nova, your personal intelligence companion. How can I help you today?',
+        firstMessage: 'Hello! I\'m Nova, your personal intelligence companion. How can I help you today?",
       });
 
       const result = await mockChatInit(scenario.twin.id, 'user-123');
 
-      expect(result.conversation_id).toBeDefined();
-      expect(result.first_message).toBeDefined();
+      expect(result.conversationId).toBeDefined();
+      expect(result.firstMessage).toBeDefined();
       expect(result.status).toBe('active');
     });
 
@@ -359,9 +359,9 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
         data: [
           {
             id: 'msg-001',
-            conversation_id: 'conv-001',
-            user_message: userMessage,
-            context_tags: ['achievement', 'work', 'completion'],
+            conversationId: 'conv-001',
+            userMessage: userMessage,
+            contextTags: ['achievement', 'work', 'completion'],
             created_at: new Date().toISOString(),
           },
         ],
@@ -370,8 +370,8 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const result = await mockMessageInsert('conv-001', userMessage);
 
-      expect(result.data[0].user_message).toBe(userMessage);
-      expect(result.data[0].context_tags.length).toBeGreaterThan(0);
+      expect(result.data[0].userMessage).toBe(userMessage);
+      expect(result.data[0].contextTags.length).toBeGreaterThan(0);
 
       scenario.memory.push(userMessage);
     });
@@ -383,15 +383,15 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockAIResponse = vi.fn().mockResolvedValue({
-        twin_response: 'That's wonderful! Completing a major project is a significant achievement. How are you feeling about it?',
+        twinResponse: 'That\'\'s wonderful! Completing a major project is a significant achievement. How are you feeling about it?',
         confidence: 0.92,
         intelligence_engines: ['decision', 'emotional', 'social'],
       });
 
       const result = await mockAIResponse(scenario.memory[0]);
 
-      expect(result.twin_response).toBeDefined();
-      expect(result.twin_response.length).toBeGreaterThan(0);
+      expect(result.twinResponse).toBeDefined();
+      expect(result.twinResponse.length).toBeGreaterThan(0);
       expect(result.confidence).toBeGreaterThan(0);
     });
 
@@ -402,15 +402,15 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockReloadTwin = vi.fn().mockResolvedValue({
-        twin_id: scenario.twin.id,
+        twinId: scenario.twin.id,
         name: scenario.twin.name,
         memory_count: scenario.memory.length,
-        last_interaction: new Date().toISOString(),
+        lastInteraction: new Date().toISOString(),
       });
 
       const result = await mockReloadTwin(scenario.twin.id);
 
-      expect(result.twin_id).toBe(scenario.twin.id);
+      expect(result.twinId).toBe(scenario.twin.id);
       expect(result.memory_count).toBe(scenario.memory.length);
     });
   });
@@ -444,19 +444,19 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
     it('P5-2: Should switch Twin context when World changes', async () => {
       /**
        * Scenario: User selects different World
-       * Expected: Twin's personality/knowledge adapts to World context
+       * Expected: Twin'\'s personality/knowledge adapts to World context
        */
 
       const mockWorldSwitch = vi.fn().mockResolvedValue({
-        world_id: 'work',
-        context_updated: true,
-        twin_adaptation: 'professional_focused',
+        worldId: 'work',
+        contextUpdated: true,
+        twinAdaptation: 'professional_focused',
       });
 
       const result = await mockWorldSwitch('work', scenario.twin.id);
 
-      expect(result.context_updated).toBe(true);
-      expect(result.twin_adaptation).toBeDefined();
+      expect(result.contextUpdated).toBe(true);
+      expect(result.twinAdaptation).toBeDefined();
     });
 
     it('P5-3: Should track world expertise score', async () => {
@@ -466,16 +466,16 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockWorldUpdate = vi.fn().mockResolvedValue({
-        world_id: 'work',
-        expertise_score: 0.45,
-        interaction_count: 5,
-        last_interaction: new Date().toISOString(),
+        worldId: 'work',
+        expertiseScore: 0.45,
+        interactionCount: 5,
+        lastInteraction: new Date().toISOString(),
       });
 
       const result = await mockWorldUpdate(scenario.twin.id, 'work');
 
-      expect(result.expertise_score).toBeGreaterThan(0);
-      expect(result.interaction_count).toBeGreaterThan(0);
+      expect(result.expertiseScore).toBeGreaterThan(0);
+      expect(result.interactionCount).toBeGreaterThan(0);
     });
   });
 
@@ -492,19 +492,19 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const mockDecision = {
         id: 'decision-001',
-        user_id: 'user-123',
-        twin_id: scenario.twin.id,
-        decision_text: 'I decided to take on the project leadership role',
+        userId: 'user-123',
+        twinId: scenario.twin.id,
+        decisionText: 'I decided to take on the project leadership role',
         world: 'work',
         confidence: 0.88,
         created_at: new Date().toISOString(),
       };
 
       expect(mockDecision.id).toBeDefined();
-      expect(mockDecision.decision_text).toBeDefined();
+      expect(mockDecision.decisionText).toBeDefined();
       expect(mockDecision.confidence).toBeGreaterThan(0);
 
-      scenario.decisions.push(mockDecision.decision_text);
+      scenario.decisions.push(mockDecision.decisionText);
     });
 
     it('P6-2: Should analyze decision patterns', async () => {
@@ -514,14 +514,14 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockPatternAnalysis = vi.fn().mockResolvedValue({
-        decision_style: 'deliberate_analytical',
+        decisionStyle: 'deliberate_analytical',
         pattern_confidence: 0.82,
         traits: ['thorough_analysis', 'risk_aware', 'values_aligned'],
       });
 
       const result = await mockPatternAnalysis(scenario.decisions);
 
-      expect(result.decision_style).toBeDefined();
+      expect(result.decisionStyle).toBeDefined();
       expect(result.traits.length).toBeGreaterThan(0);
     });
 
@@ -535,8 +535,8 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
         data: [
           {
             id: 'followup-001',
-            decision_id: 'decision-001',
-            scheduled_for: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            decisionId: 'decision-001',
+            scheduledFor: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
             type: 'decision_outcome_check',
           },
         ],
@@ -545,7 +545,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const result = await mockFollowUpSchedule('decision-001');
 
-      expect(result.data[0].scheduled_for).toBeDefined();
+      expect(result.data[0].scheduledFor).toBeDefined();
       expect(result.data[0].type).toBe('decision_outcome_check');
 
       scenario.followUpNotifications.push(result.data[0].id);
@@ -558,7 +558,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockNotificationDeliver = vi.fn().mockResolvedValue({
-        notification_id: scenario.followUpNotifications[0],
+        notificationId: scenario.followUpNotifications[0],
         delivered: true,
         timestamp: new Date().toISOString(),
         content: 'How did things go with your project leadership role?',
@@ -621,7 +621,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
 
       const mockWebhook = vi.fn().mockResolvedValue({
         event_type: 'checkout.session.completed',
-        user_id: 'user-123',
+        userId: 'user-123',
         subscription_created: true,
         subscription_id: 'sub_123',
       });
@@ -639,7 +639,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockAccessGrant = vi.fn().mockResolvedValue({
-        user_id: 'user-123',
+        userId: 'user-123',
         subscription_tier: 'pro',
         features_enabled: [
           'advanced_worlds',
@@ -680,7 +680,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
        */
 
       const mockReload = vi.fn().mockResolvedValue({
-        twin_id: scenario.twin.id,
+        twinId: scenario.twin.id,
         name: scenario.twin.name,
         memories_preserved: true,
         decisions_preserved: true,
