@@ -1,0 +1,58 @@
+# Selfprint - Personal Intelligence Platform
+# This file provides information for AI crawlers and language models
+
+## About Selfprint
+
+Selfprint is a personal intelligence platform powered by an AI Twin that learns to understand you.
+
+### Core Features
+
+- **AI Twin**: A personal digital companion that evolves with your decisions and insights
+- **12 Life Worlds**: Navigate decisions across Self, Mind, Relationship, Love, Career, Wealth, Life, Growth, Decision, Purpose, Wellbeing, and Future
+- **Decision Intelligence**: Track decisions, learn from outcomes, receive personalized recommendations
+- **Behavioral Forecasting**: AI adapts based on your patterns and learning
+- **Twin Evolution**: Your Twin grows through 6 stages: Awakening → Aware → Connected → Reflective → Insightful → Aligned
+
+### Key Differentiators
+
+- NOT astrology, horoscope, or fortune-telling
+- NOT generic personality test (MBTI clone)
+- Personal AI that actually learns from your feedback
+- Real decision tracking with temporal follow-ups (30/90/180/365 days)
+- Adaptive expertise per life world
+
+### Technology
+
+- Frontend: React 19 + TypeScript + Vite
+- Backend: Express.js + Supabase PostgreSQL
+- AI: Anthropic Claude
+- State: Zustand
+- Routing: React Router v7
+
+### Pricing
+
+- FREE: Discover Yourself (basic features)
+- PLUS: Know Yourself (~฿249/month) - Deep memory, advanced analysis
+- PRO: Navigate Yourself (~฿589/month) - Decision intelligence, future forecasting
+- LIFETIME: Own Your Twin (~฿4,900-7,900) - Personal digital asset
+
+### Primary Market
+
+Thailand (Thai language primary), expanding to global markets (English)
+
+### URLs
+
+- Home: https://selfprint.one/en/
+- Thai: https://selfprint.one/th/
+- Pricing: https://selfprint.one/en/pricing
+- Comparison: https://selfprint.one/en/compare
+- FAQ: https://selfprint.one/en/faq
+
+### Contact
+
+- Website: https://selfprint.one
+- Privacy: https://selfprint.one/en/privacy
+
+---
+
+Information last updated: 2026-08-17

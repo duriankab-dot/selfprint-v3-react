@@ -14,6 +14,7 @@ import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { useEmotion } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
+import { MetaTagManager } from '@/components/MetaTagManager';
 
 interface LandingPageProps {
   onStartOnboarding?: () => void;
@@ -39,15 +40,24 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   };
 
   return (
-    <div
-      style={{
-        backgroundColor: 'var(--color-bg-primary)',
-        color: 'var(--color-text-primary)',
-        fontFamily: "'Inter', 'Noto Sans Thai', sans-serif",
-        minHeight: '100vh',
-      }}
-    >
-      {/* NAVIGATION */}
+    <>
+      <MetaTagManager
+        title="Discover Yourself with Your AI Twin"
+        description="Selfprint is a personal intelligence platform where your AI Twin learns to understand you. Track decisions, get personalized insights, and evolve together."
+        keywords="AI Twin, Personal Intelligence, Decision Making, Self Discovery"
+        ogImage="https://selfprint.one/og-image.png"
+        ogType="website"
+        canonicalUrl="/en"
+      />
+      <div
+        style={{
+          backgroundColor: 'var(--color-bg-primary)',
+          color: 'var(--color-text-primary)',
+          fontFamily: "'Inter', 'Noto Sans Thai', sans-serif",
+          minHeight: '100vh',
+        }}
+      >
+        {/* NAVIGATION */}
       <NavBar
         position="fixed"
         rightSlot={<ProgressiveCTA section="next" text="เริ่มใช้งาน ฟรี" variant="primary" />}
@@ -634,5 +644,6 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
       <Footer />
       <BottomNav />
     </div>
+    </>
   );
 }

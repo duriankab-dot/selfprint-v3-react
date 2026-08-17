@@ -1,8 +1,10 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { useContext } from 'react';
 import { validateWorldPersonalities } from './constants/worldPersonalities';
 import { AuthContext } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AIProvider } from './context/AIContext';
 import { EmotionProvider } from './context/EmotionContext';
@@ -87,24 +89,26 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AIProvider>
-          <PendingOnboardingSaver />
-          <EmotionProvider>
-            <HubProvider>
-              <TwinProvider>
-                <WorldProvider>
-                  <SubscriptionProvider>
-                  <ExperienceProvider>
-                    <AudioProvider>
-                      <EnvironmentProvider>
-                        <EvolutionProvider>
-                          <PopupProvider>
-                          <TwinEvolution />
-                          <ContextualPopup />
-                          <TwinEvolutionSceneWrapper />
-                          <Router>
+    <HelmetProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AIProvider>
+            <PendingOnboardingSaver />
+            <EmotionProvider>
+              <HubProvider>
+                <TwinProvider>
+                  <WorldProvider>
+                    <SubscriptionProvider>
+                    <ExperienceProvider>
+                      <AudioProvider>
+                        <EnvironmentProvider>
+                          <EvolutionProvider>
+                            <PopupProvider>
+                            <TwinEvolution />
+                            <ContextualPopup />
+                            <TwinEvolutionSceneWrapper />
+                            <Router>
+                              <LanguageProvider>
                             <Suspense fallback={null}>
                               <Routes>
                                 <Route path="/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/onboarding'} />} />
@@ -140,7 +144,8 @@ function App() {
                                 <Route path="/components" element={<ComponentShowcase />} />
                               </Routes>
                             </Suspense>
-                          </Router>
+                              </LanguageProvider>
+                            </Router>
                           </PopupProvider>
                         </EvolutionProvider>
                       </EnvironmentProvider>
@@ -154,6 +159,7 @@ function App() {
         </AIProvider>
       </AuthProvider>
     </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
