@@ -79,6 +79,72 @@ function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
   return <LandingPage onStartOnboarding={onStartOnboarding} />;
 }
 
+/**
+ * Route list generator: สร้าง /en/* และ /th/* routes
+ */
+function getLanguagePrefixedRoutes(): React.ReactElement[] {
+  // Define all routes with language prefix
+  const routes: React.ReactElement[] = [];
+
+  // Home route
+  routes.push(
+    <Route key="en-home" path="/en/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/en/onboarding'} />} />,
+    <Route key="th-home" path="/th/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/th/onboarding'} />} />,
+    <Route key="home-redirect" path="/" element={<Navigate to="/en/" replace />} />
+  );
+
+  // Public pages (support both /en and /th)
+  const publicPages = [
+    { path: '/onboarding', element: <Onboarding /> },
+    { path: '/core-awakening', element: <CoreAwakening /> },
+    { path: '/chat', element: <Navigate to="/chat/nova" replace /> },
+    { path: '/chat/nova', element: <NovaChat /> },
+    { path: '/chat/twin', element: <TwinChat /> },
+    { path: '/twin', element: <Navigate to="/chat/twin" replace /> },
+    { path: '/dashboard', element: <Dashboard /> },
+    { path: '/analysis', element: <AnalysisPage /> },
+    { path: '/privacy', element: <PrivacyCenter /> },
+    { path: '/share/:code', element: <Share /> },
+    { path: '/brief', element: <DailyBriefPage /> },
+    { path: '/badges', element: <BadgePage /> },
+    { path: '/pricing', element: <PricingPage /> },
+    { path: '/pricing/success', element: <PricingSuccessPage /> },
+    { path: '/login', element: <LoginPage /> },
+    { path: '/settings/passkeys', element: <PasskeySettings /> },
+    { path: '/explore', element: <ExplorePage /> },
+    { path: '/activities', element: <ActivitiesPage /> },
+    { path: '/me', element: <MePage /> },
+    { path: '/voice', element: <VoiceChatPage /> },
+    { path: '/twin-profile', element: <TwinProfilePage /> },
+    { path: '/life-hubs', element: <LifeHubsPage /> },
+    { path: '/decisions', element: <DecisionDashboard /> },
+    { path: '/decision-log', element: <DecisionLoggerPage /> },
+    { path: '/faq', element: <FAQPage /> },
+    { path: '/menu', element: <FeatureMenu /> },
+    { path: '/components', element: <ComponentShowcase /> },
+  ];
+
+  // Add all public routes for both languages
+  publicPages.forEach((page, idx) => {
+    routes.push(
+      <Route key={`en-${idx}`} path={`/en${page.path}`} element={page.element} />,
+      <Route key={`th-${idx}`} path={`/th${page.path}`} element={page.element} />
+    );
+  });
+
+  // Protected routes (support both /en and /th)
+  routes.push(
+    <Route key="en-twin-settings" path="/en/twin/settings" element={<ProtectedRoute><TwinSettingsPage /></ProtectedRoute>} />,
+    <Route key="th-twin-settings" path="/th/twin/settings" element={<ProtectedRoute><TwinSettingsPage /></ProtectedRoute>} />,
+    <Route key="en-twin-personality" path="/en/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />,
+    <Route key="th-twin-personality" path="/th/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />,
+    <Route key="en-worlds" path="/en/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />,
+    <Route key="th-worlds" path="/th/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />
+  );
+
+  return routes;
+}
+
 function App() {
   // Validate world personalities on app startup
   useEffect(() => {
@@ -111,37 +177,9 @@ function App() {
                               <LanguageProvider>
                             <Suspense fallback={null}>
                               <Routes>
-                                <Route path="/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/onboarding'} />} />
-                                <Route path="/onboarding" element={<Onboarding />} />
-                                <Route path="/core-awakening" element={<CoreAwakening />} />
-                                <Route path="/chat" element={<Navigate to="/chat/nova" replace />} />
-                                <Route path="/chat/nova" element={<NovaChat />} />
-                                <Route path="/chat/twin" element={<TwinChat />} />
-                                <Route path="/twin" element={<Navigate to="/chat/twin" replace />} />
-                                <Route path="/twin/settings" element={<ProtectedRoute><TwinSettingsPage /></ProtectedRoute>} />
-                                <Route path="/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />
-                                <Route path="/dashboard" element={<Dashboard />} />
-                                <Route path="/analysis" element={<AnalysisPage />} />
-                                <Route path="/privacy" element={<PrivacyCenter />} />
-                                <Route path="/share/:code" element={<Share />} />
-                                <Route path="/brief" element={<DailyBriefPage />} />
-                                <Route path="/badges" element={<BadgePage />} />
-                                <Route path="/pricing" element={<PricingPage />} />
-                                <Route path="/pricing/success" element={<PricingSuccessPage />} />
-                                <Route path="/login" element={<LoginPage />} />
-                                <Route path="/settings/passkeys" element={<PasskeySettings />} />
-                                <Route path="/explore" element={<ExplorePage />} />
-                                <Route path="/activities" element={<ActivitiesPage />} />
-                                <Route path="/me" element={<MePage />} />
-                                <Route path="/voice" element={<VoiceChatPage />} />
-                                <Route path="/twin-profile" element={<TwinProfilePage />} />
-                                <Route path="/life-hubs" element={<LifeHubsPage />} />
-                                <Route path="/decisions" element={<DecisionDashboard />} />
-                                <Route path="/decision-log" element={<DecisionLoggerPage />} />
-                                <Route path="/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />
-                                <Route path="/faq" element={<FAQPage />} />
-                                <Route path="/menu" element={<FeatureMenu />} />
-                                <Route path="/components" element={<ComponentShowcase />} />
+                                {getLanguagePrefixedRoutes()}
+                                {/* Catch-all fallback redirects to /en/ */}
+                                <Route path="*" element={<Navigate to="/en/" replace />} />
                               </Routes>
                             </Suspense>
                               </LanguageProvider>

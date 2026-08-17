@@ -22,10 +22,13 @@
 import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase/client';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { MetaTagManager } from '@/components/MetaTagManager';
+import { getSeoMetadata } from '@/constants/seoMetadata';
 import '../styles/privacy.css';
 
 // ============================================================================
@@ -76,6 +79,8 @@ const PrivacyCenter: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const seoData = getSeoMetadata('privacy', language);
 
   // Per-action statuses
   const [exportStatus, setExportStatus] = useState<ActionStatus>({ state: 'idle' });
@@ -337,6 +342,15 @@ const PrivacyCenter: React.FC = () => {
 
   return (
     <>
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          canonicalUrl={`/${language}/privacy`}
+        />
+      )}
       <NavBar />
       <main className="privacy__page">
         {/* Page Header */}

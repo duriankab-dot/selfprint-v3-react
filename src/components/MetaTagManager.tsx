@@ -1,5 +1,10 @@
 import { Helmet } from 'react-helmet-async';
 import { useLanguage } from '../context/LanguageContext';
+import {
+  generateOrganizationSchema,
+  generateBreadcrumbSchema,
+  type BreadcrumbItem,
+} from '../lib/structuredData';
 
 interface MetaTagsProps {
   title: string;
@@ -8,6 +13,8 @@ interface MetaTagsProps {
   ogImage?: string;
   ogType?: string;
   canonicalUrl?: string;
+  schema?: Record<string, any>; // Additional JSON-LD schema
+  breadcrumbs?: BreadcrumbItem[]; // For BreadcrumbList schema
 }
 
 export function MetaTagManager({
@@ -17,11 +24,19 @@ export function MetaTagManager({
   ogImage,
   ogType = 'website',
   canonicalUrl,
+  schema,
+  breadcrumbs,
 }: MetaTagsProps) {
   const { language } = useLanguage();
   const baseUrl = 'https://selfprint.one';
   const fullTitle = `${title} | Selfprint`;
   const fullUrl = canonicalUrl || baseUrl;
+
+  // Generate breadcrumb schema if provided
+  const breadcrumbSchema = breadcrumbs ? generateBreadcrumbSchema(breadcrumbs) : null;
+
+  // Generate organization schema (present on all pages)
+  const orgSchema = generateOrganizationSchema();
 
   return (
     <Helmet>
@@ -48,7 +63,13 @@ export function MetaTagManager({
       {/* Canonical URL */}
       {canonicalUrl && <link rel="canonical" href={`${baseUrl}${canonicalUrl}`} />}
 
-      {/* JSON-LD Schema (SoftwareApplication) */}
+      {/* JSON-LD Schemas */}
+      {/* Organization Schema (always present) */}
+      <script type="application/ld+json">
+        {JSON.stringify(orgSchema)}
+      </script>
+
+      {/* SoftwareApplication Schema */}
       <script type="application/ld+json">
         {JSON.stringify({
           '@context': 'https://schema.org',
@@ -70,6 +91,20 @@ export function MetaTagManager({
           },
         })}
       </script>
+
+      {/* Breadcrumb Schema (if provided) */}
+      {breadcrumbSchema && (
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      )}
+
+      {/* Custom Schema (if provided) */}
+      {schema && (
+        <script type="application/ld+json">
+          {JSON.stringify(schema)}
+        </script>
+      )}
     </Helmet>
   );
 }

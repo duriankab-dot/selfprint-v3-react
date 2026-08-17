@@ -15,6 +15,8 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { LanguageSwitcher } from '../LanguageSwitcher';
 
 interface NavBarProps {
   rightSlot?: React.ReactNode;
@@ -23,34 +25,44 @@ interface NavBarProps {
 }
 
 interface NavLink {
-  to: string;
+  path: string; // Base path without language prefix
   label: string;
   requiresAuth?: boolean;
 }
 
-const NAV_LINKS: NavLink[] = [
-  { to: '/dashboard', label: 'แดชบอร์ด' },
-  { to: '/chat', label: 'แชท' },
-  { to: '/worlds', label: '🌍 Worlds', requiresAuth: true },
-  { to: '/menu', label: 'เมนู' },
+const BASE_NAV_LINKS: NavLink[] = [
+  { path: '/dashboard', label: 'แดชบอร์ด' },
+  { path: '/chat', label: 'แชท' },
+  { path: '/worlds', label: '🌍 Worlds', requiresAuth: true },
+  { path: '/menu', label: 'เมนู' },
 ];
 
 export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   const { session, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { language } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  /**
+   * สร้าง URL พร้อม language prefix
+   */
+  const getLangUrl = (basePath: string) => `/${language}${basePath}`;
 
   const handleSignOut = async () => {
     setMobileOpen(false);
     await signOut();
-    navigate('/');
+    navigate(getLangUrl('/'));
   };
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (basePath: string) => {
+    const currentPath = location.pathname;
+    // ตรวจสอบ /en/path หรือ /th/path
+    return currentPath === getLangUrl(basePath) || currentPath === basePath;
+  };
 
   // Filter nav links based on auth status
-  const visibleLinks = NAV_LINKS.filter(link => !link.requiresAuth || session);
+  const visibleLinks = BASE_NAV_LINKS.filter(link => !link.requiresAuth || session);
 
   const authAction = session ? (
     <button
@@ -73,7 +85,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
     </button>
   ) : (
     <Link
-      to="/onboarding"
+      to={getLangUrl('/onboarding')}
       onClick={() => setMobileOpen(false)}
       className="sp-nav-cta"
       style={{
@@ -131,7 +143,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
           <Link
-            to="/"
+            to={getLangUrl('/')}
             onClick={() => setMobileOpen(false)}
             style={{
               display: 'flex',
@@ -156,8 +168,8 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
           <div className="sp-navbar-links" style={{ gap: '4px', alignItems: 'center' }}>
             {visibleLinks.map((link) => (
               <Link
-                key={link.to}
-                to={link.to}
+                key={link.path}
+                to={getLangUrl(link.path)}
                 className="sp-nav-link"
                 style={{
                   position: 'relative',
@@ -165,8 +177,8 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
                   borderRadius: '8px',
                   fontSize: '14px',
                   fontWeight: 600,
-                  color: isActive(link.to) ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
-                  background: isActive(link.to)
+                  color: isActive(link.path) ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                  background: isActive(link.path)
                     ? 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)'
                     : 'transparent',
                   textDecoration: 'none',
@@ -179,7 +191,10 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
           </div>
         </div>
 
-        <div className="sp-navbar-desktop-action">{rightSlot || authAction}</div>
+        <div className="sp-navbar-desktop-action" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <LanguageSwitcher />
+          {rightSlot || authAction}
+        </div>
 
         {/* Mobile hamburger */}
         <button
@@ -226,16 +241,16 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         >
           {visibleLinks.map((link) => (
             <Link
-              key={link.to}
-              to={link.to}
+              key={link.path}
+              to={getLangUrl(link.path)}
               onClick={() => setMobileOpen(false)}
               style={{
                 padding: '12px 14px',
                 borderRadius: '8px',
                 fontSize: '15px',
                 fontWeight: 600,
-                color: isActive(link.to) ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
-                background: isActive(link.to)
+                color: isActive(link.path) ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
+                background: isActive(link.path)
                   ? 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)'
                   : 'transparent',
                 textDecoration: 'none',
@@ -244,7 +259,10 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
               {link.label}
             </Link>
           ))}
-          <div style={{ marginTop: '8px' }}>{rightSlot || authAction}</div>
+          <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
+            <LanguageSwitcher />
+            {rightSlot || authAction}
+          </div>
         </div>
       )}
     </>

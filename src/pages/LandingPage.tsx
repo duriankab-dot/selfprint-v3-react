@@ -15,6 +15,8 @@ import { BottomNav } from '@/components/layout/BottomNav';
 import { useEmotion } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
 import { MetaTagManager } from '@/components/MetaTagManager';
+import { useLanguage } from '@/context/LanguageContext';
+import { getSeoMetadata } from '@/constants/seoMetadata';
 
 interface LandingPageProps {
   onStartOnboarding?: () => void;
@@ -23,6 +25,8 @@ interface LandingPageProps {
 export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const { mood } = useEmotion();
   const { setLandingContext } = useUserStore();
+  const { language } = useLanguage();
+  const seoData = getSeoMetadata('home', language);
 
   const handleHeroClick = () => {
     setTimeout(() => {
@@ -35,20 +39,22 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
     if (onStartOnboarding) {
       onStartOnboarding();
     } else {
-      window.location.href = '/onboarding';
+      window.location.href = `/${language}/onboarding`;
     }
   };
 
   return (
     <>
-      <MetaTagManager
-        title="Discover Yourself with Your AI Twin"
-        description="Selfprint is a personal intelligence platform where your AI Twin learns to understand you. Track decisions, get personalized insights, and evolve together."
-        keywords="AI Twin, Personal Intelligence, Decision Making, Self Discovery"
-        ogImage="https://selfprint.one/og-image.png"
-        ogType="website"
-        canonicalUrl="/en"
-      />
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          ogType="website"
+          canonicalUrl={`/${language}`}
+        />
+      )}
       <div
         style={{
           backgroundColor: 'var(--color-bg-primary)',

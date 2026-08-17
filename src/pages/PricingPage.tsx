@@ -16,6 +16,12 @@
 import { useState } from 'react';
 import { usePricing } from '@/hooks/usePricing';
 import type { SubscriptionTier } from '@/context/SubscriptionContext';
+import { MetaTagManager } from '@/components/MetaTagManager';
+import { useLanguage } from '@/context/LanguageContext';
+import { getSeoMetadata } from '@/constants/seoMetadata';
+import { generatePricingSchema, type PricingPlan } from '@/lib/structuredData';
+import { formatCurrency, convertUSDToLocal } from '@/config/currencyConfig';
+import type { CurrencyCode } from '@/config/currencyConfig';
 import '../styles/pricing.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -119,6 +125,41 @@ const PLANS: Array<{
 export default function PricingPage() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly');
   const { tier: currentTier, startCheckout, managePlan, canUpgrade } = usePricing();
+  const { language } = useLanguage();
+  const seoData = getSeoMetadata('pricing', language);
+
+  // Generate pricing schema for search engines
+  const pricingPlans: PricingPlan[] = [
+    {
+      name: 'Free',
+      price: 0,
+      priceCurrency: 'USD',
+      billingDuration: 'P1M',
+      description: 'Discover yourself with basic Twin conversation',
+    },
+    {
+      name: 'Plus',
+      price: 9.99,
+      priceCurrency: 'USD',
+      billingDuration: 'P1M',
+      description: 'Know yourself deeper with enhanced insights',
+    },
+    {
+      name: 'Pro',
+      price: 18.99,
+      priceCurrency: 'USD',
+      billingDuration: 'P1M',
+      description: 'Navigate yourself with advanced analytics',
+    },
+    {
+      name: 'Lifetime',
+      price: 199,
+      priceCurrency: 'USD',
+      billingDuration: 'P1Y',
+      description: 'Own your Twin forever with lifetime access',
+    },
+  ];
+  const pricingSchema = generatePricingSchema(pricingPlans);
 
   const handleCTA = async (plan: typeof PLANS[number]) => {
     if (plan.tier === 'free') {
@@ -133,26 +174,55 @@ export default function PricingPage() {
     await startCheckout(plan.tier as 'plus' | 'pro' | 'lifetime', billing);
   };
 
+  // Get currency based on language
+  const getCurrency = (): CurrencyCode => (language === 'th' ? 'THB' : 'USD');
+  const currency = getCurrency();
+
   const formatPrice = (plan: typeof PLANS[number]): { main: string; sub: string } => {
-    if (plan.tier === 'free') return { main: 'ฟรี', sub: 'ตลอดไป' };
-    if (plan.tier === 'lifetime') return { main: '฿4,990', sub: 'จ่ายครั้งเดียว (Founder)' };
+    const isThai = language === 'th';
+    const freeText = isThai ? 'ฟรี' : 'Free';
+    const foreverText = isThai ? 'ตลอดไป' : 'Forever';
+    const lifetimeText = isThai ? 'จ่ายครั้งเดียว (Founder)' : 'One-time (Founder)';
+    const perYearText = isThai ? '/ปี' : '/year';
+    const perMonthText = isThai ? '/เดือน' : '/month';
+
+    if (plan.tier === 'free') return { main: freeText, sub: foreverText };
+
+    const lifetimeUSD = 199;
+    const lifetimeLocal = isThai ? convertUSDToLocal(lifetimeUSD, 'THB') : lifetimeUSD;
+    if (plan.tier === 'lifetime') return { main: formatCurrency(lifetimeLocal, currency), sub: lifetimeText };
 
     if (billing === 'annual' && plan.annualMonthly !== null) {
+      const monthlyLocal = isThai ? convertUSDToLocal(plan.annualMonthly, 'THB') : plan.annualMonthly;
+      const totalLocal = isThai ? convertUSDToLocal(plan.annualTotal || 0, 'THB') : (plan.annualTotal || 0);
       return {
-        main: `฿${plan.annualMonthly.toLocaleString()}`,
-        sub: `฿${plan.annualTotal?.toLocaleString()}/ปี`,
+        main: formatCurrency(monthlyLocal, currency),
+        sub: `${formatCurrency(totalLocal, currency)}${perYearText}`,
       };
     }
+
+    const monthlyLocal = isThai ? convertUSDToLocal(plan.monthlyPrice || 0, 'THB') : (plan.monthlyPrice || 0);
     return {
-      main: `฿${plan.monthlyPrice?.toLocaleString()}`,
-      sub: '/เดือน',
+      main: formatCurrency(monthlyLocal, currency),
+      sub: perMonthText,
     };
   };
 
   return (
-    <div className="pricing-page">
-      {/* Header */}
-      <div className="pricing-header">
+    <>
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          canonicalUrl={`/${language}/pricing`}
+          schema={pricingSchema}
+        />
+      )}
+      <div className="pricing-page">
+        {/* Header */}
+        <div className="pricing-header">
         <p className="pricing-eyebrow">§ 31 Monetization</p>
         <h1 className="pricing-title">เลือกแผนที่ใช่สำหรับคุณ</h1>
         <p className="pricing-subtitle">
@@ -262,6 +332,7 @@ export default function PricingPage() {
         </p>
       </div>
     </div>
+    </>
   );
 }
 

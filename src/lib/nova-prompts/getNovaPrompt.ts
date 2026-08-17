@@ -24,6 +24,7 @@ interface NovaPromptConfig {
   hub: 'identity' | 'decision' | 'relationship' | 'career' | 'health' | 'money' | 'ai-twin' | 'learning' | 'creativity' | 'spirituality' | 'impact' | 'activities';
   mood: 'stressed' | 'confused' | 'confident' | 'drained' | 'ready' | 'reflective';
   archetype: string; // 18 archetypes
+  language?: 'en' | 'th'; // Language for prompt generation
   userProfile?: UserProfile;
   maturityScore?: number; // 0-100
 }
@@ -644,6 +645,7 @@ export function getNovaPrompt(config: NovaPromptConfig): string {
     hub,
     mood,
     archetype,
+    language: _language = 'en', // TODO: Use for English prompt selection
     userProfile,
     maturityScore = 50
   } = config;

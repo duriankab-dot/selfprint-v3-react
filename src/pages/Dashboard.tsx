@@ -9,6 +9,9 @@ import {
 } from '../services/supabase-service';
 import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { MetaTagManager } from '../components/MetaTagManager';
+import { getSeoMetadata } from '../constants/seoMetadata';
 import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
@@ -71,6 +74,8 @@ const Dashboard: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id || '';
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const seoData = getSeoMetadata('dashboard', language);
 
   // § P2 — PersonalContext สำหรับ intelligence panels (shared cache key กับ ExperienceContext)
   const { data: personalContext = null } = useQuery({
@@ -162,8 +167,18 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <NavBar />
+    <>
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          canonicalUrl={`/${language}/dashboard`}
+        />
+      )}
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <NavBar />
       <TwinEvolution onEvolved={() => {
         // Twin evolved
       }} />
@@ -326,7 +341,8 @@ const Dashboard: React.FC = () => {
       </div>
       <Footer />
       <BottomNav />
-    </div>
+      </div>
+    </>
   );
 };
 

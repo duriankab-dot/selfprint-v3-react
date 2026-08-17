@@ -8,17 +8,32 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { WorldId } from '../constants/worlds';
 import { getAllWorlds, getWorldArticles } from '../constants/worlds';
+import { MetaTagManager } from '../components/MetaTagManager';
+import { useLanguage } from '../context/LanguageContext';
+import { getSeoMetadata } from '../constants/seoMetadata';
 import '../styles/worlds-hub.css';
 
 export default function WorldsHub() {
   const [selectedWorld, setSelectedWorld] = useState<WorldId | null>(null);
   const worlds = getAllWorlds();
+  const { language } = useLanguage();
+  const seoData = getSeoMetadata('worlds', language);
 
   const selectedWorldData = selectedWorld ? worlds.find((w) => w.id === selectedWorld) : null;
   const articles = selectedWorld ? getWorldArticles(selectedWorld) : [];
 
   return (
-    <div className="worlds-hub">
+    <>
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          canonicalUrl={`/${language}/worlds`}
+        />
+      )}
+      <div className="worlds-hub">
       {/* Header */}
       <div className="wh-header">
         <h1>✨ The 12 Worlds</h1>
@@ -95,7 +110,8 @@ export default function WorldsHub() {
           according to your unique needs and values.
         </p>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 

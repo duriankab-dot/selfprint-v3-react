@@ -49,6 +49,7 @@ export interface SelfprintChatRequest {
   hub: 'identity' | 'decision' | 'relationship' | 'career' | 'health' | 'money' | 'ai-twin' | 'learning' | 'creativity' | 'spirituality' | 'impact' | 'activities';
   mood: 'stressed' | 'confused' | 'confident' | 'drained' | 'ready' | 'reflective';
   archetype?: string;
+  language?: 'en' | 'th';
 
   // User input
   question: string;
@@ -117,11 +118,12 @@ export async function selfprintChat(
     if (!request.sessionId) throw new SelfprintChatError('MISSING_SESSION_ID', 'sessionId is required');
     if (!request.question) throw new SelfprintChatError('MISSING_QUESTION', 'question is required');
 
-    // Generate system prompt
+    // Generate system prompt based on language
     const systemPrompt = getNovaPrompt({
       hub: request.hub,
       mood: request.mood,
       archetype: request.archetype || request.twinProfile?.primaryArchetype || 'sage',
+      language: request.language || 'en',
       userProfile: request.twinProfile ? {
         primaryArchetype: request.twinProfile.primaryArchetype,
         secondaryArchetype: request.twinProfile.secondaryArchetype,

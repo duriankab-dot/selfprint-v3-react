@@ -14,6 +14,7 @@ import { useHub } from '@/context/HubContext';
 import { useEmotion } from '@/context/EmotionContext';
 import { useTwin } from '@/context/TwinContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
 import { saveMessage, getChatHistory } from '@/services/supabase-service';
 
@@ -37,6 +38,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
   const { mood } = useEmotion();
   const { twin } = useTwin();
   const { session } = useAuth();
+  const { language } = useLanguage();
 
   // Alias สำหรับให้ readable
   const currentHub = hub;
@@ -109,6 +111,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
           mood: currentMood as any,
           archetype: twin?.primaryArchetype,
           question: userMessage,
+          language: language as 'en' | 'th',
           history: messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
           twinProfile: twin ? {
             id: twin.id,
