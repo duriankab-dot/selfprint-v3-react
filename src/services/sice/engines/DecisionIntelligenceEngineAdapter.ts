@@ -73,16 +73,17 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
         return this.getDefaultAnalysis();
       }
 
-      // Fetch decisions with follow-up outcomes
+      // Fetch decisions with P0 #3 outcomes schema
       const { data: decisions } = await supabase
         .from('decisions')
         .select(
           `
           id,
-          world_id,
+          world,
           title,
           created_at,
-          decision_follow_ups(outcome)
+          decision_outcomes(impact),
+          follow_up_schedule(day30_completed, day90_completed, day180_completed, day365_completed)
         `
         )
         .eq('twin_id', twin.id)
@@ -95,11 +96,19 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
       // Analyze success rate
       const successRate = this.calculateSuccessRate(decisions);
 
+      // Fetch learned decision patterns from P0 #3
+      const { data: patterns } = await supabase
+        .from('decision_patterns')
+        .select('*')
+        .eq('twin_id', twin.id)
+        .order('success_rate', { ascending: false })
+        .limit(5);
+
       // Group by world
       const byWorld = this.groupByWorld(decisions);
 
-      // Extract insights
-      const insights = this.generateInsights(decisions, successRate);
+      // Extract insights (including learned patterns)
+      const insights = this.generateInsights(decisions, successRate, patterns || undefined);
 
       // Find best area
       const bestArea = Object.entries(byWorld).reduce(
@@ -140,11 +149,11 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
     let totalWithOutcome = 0;
 
     decisions.forEach((d) => {
-      const followUps = (d as any).decision_follow_ups || [];
-      if (followUps.length > 0) {
+      const outcomes = (d as any).decision_outcomes || [];
+      if (outcomes.length > 0) {
         totalWithOutcome++;
-        const successfulOutcomes = followUps.filter(
-          (f: any) => f.outcome === 'worked' || f.outcome === 'modified'
+        const successfulOutcomes = outcomes.filter(
+          (o: any) => o.impact === 'positive' || o.impact === 'neutral'
         );
         if (successfulOutcomes.length > 0) {
           successCount++;
@@ -179,11 +188,11 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
       let totalWithOutcome = 0;
 
       worldDecisions.forEach((d: any) => {
-        const followUps = d.decision_follow_ups || [];
-        if (followUps.length > 0) {
+        const outcomes = d.decision_outcomes || [];
+        if (outcomes.length > 0) {
           totalWithOutcome++;
-          const successful = followUps.filter(
-            (f: any) => f.outcome === 'worked' || f.outcome === 'modified'
+          const successful = outcomes.filter(
+            (o: any) => o.impact === 'positive' || o.impact === 'neutral'
           );
           if (successful.length > 0) successCount++;
         }
@@ -198,11 +207,12 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
   }
 
   /**
-   * Generate insights from decision analysis
+   * Generate insights from decision analysis including learned patterns
    */
   private generateInsights(
     decisions: any[],
-    successRate: number
+    successRate: number,
+    patterns?: any[]
   ): string[] {
     const insights: string[] = [];
 
@@ -216,6 +226,14 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
 
     if (decisions.length > 10) {
       insights.push(`${decisions.length} decisions logged - solid tracking habit`);
+    }
+
+    // Add learned patterns from P0 #3
+    if (patterns && patterns.length > 0) {
+      const topPattern = patterns[0];
+      insights.push(
+        `Pattern detected: "${topPattern.pattern}" (${Math.round(topPattern.success_rate)}% success)`
+      );
     }
 
     return insights.slice(0, 3);
