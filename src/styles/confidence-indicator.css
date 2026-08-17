@@ -1,0 +1,75 @@
+/* Confidence Indicator Styles */
+
+.confidence-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.confidence-indicator.confidence-small {
+  font-size: 0.875rem;
+}
+
+.confidence-indicator.confidence-medium {
+  font-size: 1rem;
+}
+
+.confidence-indicator.confidence-large {
+  font-size: 1.25rem;
+}
+
+.confidence-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.confidence-small .confidence-badge {
+  width: 36px;
+  height: 36px;
+  font-size: 0.875rem;
+}
+
+.confidence-large .confidence-badge {
+  width: 64px;
+  height: 64px;
+  font-size: 1.25rem;
+}
+
+.confidence-badge:hover {
+  transform: scale(1.05);
+}
+
+.confidence-value {
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.confidence-label {
+  color: var(--text-secondary, #6b7280);
+  font-weight: 500;
+}
+
+.confidence-skeleton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--skeleton-color, #e5e7eb);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import type { Decision, DecisionFilters } from '../types/decision';
-import { getDecisions } from '../services/DecisionService';
+import { getUserDecisions } from '../services/DecisionService';
 
 interface DecisionStore {
   // State
@@ -39,7 +39,8 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
   loadDecisions: async (userId: string) => {
     set({ isLoading: true });
     try {
-      const decisions = await getDecisions(userId);
+      // userId is same as twinId in Phase E
+      const decisions = await getUserDecisions(userId);
       set({ decisions, isLoading: false });
     } catch (error) {
       console.error('Error loading decisions:', error);
@@ -80,13 +81,11 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
     set({ selectedCategory: category });
   },
 
-  // Get pending follow-up count
+  // Get pending follow-up count (TODO: Integrate with FollowUpScheduler in Phase F)
   getPendingCount: () => {
-    const decisions = get().decisions;
-    return decisions.reduce((count, d) => {
-      const pending = d.followUps?.filter((f) => !f.completed) || [];
-      return count + pending.length;
-    }, 0);
+    // Placeholder: Phase E follow-ups managed separately in FollowUpScheduler
+    // Will be integrated in Phase F Task F2
+    return 0;
   },
 
   // Get filtered decisions
@@ -94,63 +93,30 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
     const { decisions, filters, selectedCategory } = get();
 
     return decisions.filter((d) => {
-      // Category filter
+      // Category filter (Phase E compatibility)
       if (selectedCategory && d.category !== selectedCategory) {
         return false;
       }
 
-      // Status filter
-      if (filters.status) {
-        if (filters.status === 'completed') {
-          return d.followUps?.every((f) => f.completed);
-        } else if (filters.status === 'open') {
-          return !d.followUps?.every((f) => f.completed);
-        }
+      // Status filter: Phase E has status managed in FollowUpScheduler
+      // TODO: Integrate in Phase F
+      if (filters?.status && filters.status !== 'all') {
+        // Skip status filtering for now
       }
 
-      // Date range filter
-      if (filters.dateRange) {
-        const decDate = new Date(d.decisionDate);
-        const fromDate = new Date(filters.dateRange.from);
-        const toDate = new Date(filters.dateRange.to);
-        if (decDate < fromDate || decDate > toDate) {
-          return false;
-        }
-      }
-
-      // Search filter
-      if (filters.search) {
-        const search = filters.search.toLowerCase();
-        return (
-          d.title.toLowerCase().includes(search) ||
-          d.description.toLowerCase().includes(search)
-        );
+      // World filter
+      if (filters?.world && d.world !== filters.world) {
+        return false;
       }
 
       return true;
     });
   },
 
-  // Get success rate
+  // Get success rate (TODO: Calculate from DecisionLearningService in Phase F)
   getSuccessRate: () => {
-    const decisions = get().decisions;
-    if (decisions.length === 0) return 0;
-
-    const completedDecisions = decisions.filter((d) =>
-      d.followUps?.some((f) => f.completed && f.resultScore !== undefined)
-    );
-
-    if (completedDecisions.length === 0) return 0;
-
-    const totalScore = completedDecisions.reduce((sum, d) => {
-      const scores = d.followUps
-        ?.filter((f) => f.completed && f.resultScore !== undefined)
-        .map((f) => f.resultScore || 0) || [];
-
-      const avg = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0;
-      return sum + avg;
-    }, 0);
-
-    return Math.round(totalScore / completedDecisions.length);
+    // Phase E success rates calculated by DecisionLearningService
+    // Will be integrated in Phase F Task F2
+    return 0;
   },
 }));

@@ -197,10 +197,16 @@ export function TwinProvider({ children }: { children: ReactNode }) {
       // Automatically tag with currentWorld if not already set
       const decisionWithWorld = {
         ...decision,
+        twinId: userId,
         world: decision.world || currentWorld || undefined,
       };
 
-      return createDecision(userId, decisionWithWorld);
+      const result = await createDecision(decisionWithWorld);
+      return {
+        success: !!result,
+        decision: result || undefined,
+        message: result ? 'Decision saved' : 'Failed to save decision',
+      };
     },
     [currentWorld]
   );

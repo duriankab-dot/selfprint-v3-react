@@ -1,261 +1,316 @@
 /**
  * DecisionService.ts
- * CRUD and follow-up management for decisions
+ * Phase E: Decision Intelligence - Track and learn from decisions
  */
 
-import type {
-  Decision,
-  FollowUp,
-  DecisionStats,
-  FollowUpDays,
-} from '../types/decision';
-import {
-  getFollowUpDueDate,
-  calculateSuccessRate,
-  getPendingFollowUps,
-} from '../types/decision';
+import { supabase } from './supabase-service';
+import type { WorldId } from '../constants/worlds';
+import type { Decision, DecisionOutcome, FollowUpSchedule } from '../types/decision';
 
 /**
- * Create new decision and auto-schedule 30/90/180/365 follow-ups
- * @param userId - User ID from auth session
- * @param decision - Decision details (including optional world context)
- * @returns Created decision with auto-scheduled follow-ups
+ * Map database snake_case fields to TypeScript camelCase
  */
-export async function createDecision(
-  userId: string,
-  decision: Omit<Decision, 'id' | 'createdAt' | 'updatedAt' | 'followUps'>
-): Promise<{ success: boolean; decision?: Decision; message: string }> {
+function mapDecisionRow(row: any): Decision {
+  return {
+    id: row.id,
+    twinId: row.twin_id,
+    world: row.world,
+    question: row.question,
+    options: row.options,
+    twinRecommendation: row.twin_recommendation,
+    userChoice: row.user_choice,
+    chosenAt: row.created_at, // Use created_at as chosenAt
+    context: row.context,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function mapOutcomeRow(row: any): DecisionOutcome {
+  return {
+    id: row.id,
+    decisionId: row.decision_id,
+    followUpDay: row.follow_up_day,
+    feedback: row.feedback,
+    impact: row.impact,
+    lessons: row.lessons,
+    twinConfidence: row.twin_confidence,
+    recordedAt: row.recorded_at,
+  };
+}
+
+function mapFollowUpRow(row: any): FollowUpSchedule {
+  return {
+    id: row.id,
+    decisionId: row.decision_id,
+    day30Due: row.day30_due,
+    day90Due: row.day90_due,
+    day180Due: row.day180_due,
+    day365Due: row.day365_due,
+    day30Completed: row.day30_completed,
+    day90Completed: row.day90_completed,
+    day180Completed: row.day180_completed,
+    day365Completed: row.day365_completed,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/**
+ * Record a new decision made by Twin
+ */
+export async function recordDecision(
+  twinId: string,
+  world: WorldId,
+  question: string,
+  options: string[],
+  twinRecommendation: string,
+  userChoice: string,
+  context?: string
+): Promise<Decision | null> {
+  if (!supabase) return null;
+
   try {
-    if (!userId || !decision.title) {
-      return { success: false, message: 'User ID and decision title required' };
+    const { data, error } = await supabase
+      .from('decision_log')
+      .insert({
+        twin_id: twinId,
+        world,
+        question,
+        options,
+        twin_recommendation: twinRecommendation,
+        user_choice: userChoice,
+        context,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error recording decision:', error);
+      return null;
     }
 
-    const now = new Date().toISOString();
-    const decisionId = `dec_${Date.now()}`;
+    // Schedule follow-ups automatically (30/90/180/365 days)
+    if (data?.id) {
+      await scheduleFollowUps(data.id);
+    }
 
-    // Auto-create 4 follow-ups at 30, 90, 180, 365 days
-    const followUpDays: FollowUpDays[] = [30, 90, 180, 365];
-    const followUps: FollowUp[] = followUpDays.map((days) => ({
-      id: `fu_${decisionId}_${days}`,
-      decisionId,
-      days,
-      scheduledDate: getFollowUpDueDate(decision.decisionDate, days),
-      completed: false,
-      notificationSent: false,
-    }));
-
-    const newDecision: Decision = {
-      ...decision,
-      id: decisionId,
-      userId,
-      followUps,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    // TODO: Insert into Supabase decisions + follow_ups tables
-
-    return {
-      success: true,
-      decision: newDecision,
-      message: `Decision "${decision.title}" created with 4 auto-scheduled follow-ups`,
-    };
-  } catch (error) {
-    console.error('Error creating decision:', error);
-    return {
-      success: false,
-      message: `Creation failed: ${error instanceof Error ? error.message : String(error)}`,
-    };
+    return data ? mapDecisionRow(data) : null;
+  } catch (err) {
+    console.error('Decision recording failed:', err);
+    return null;
   }
 }
 
 /**
- * Get all decisions for user (optionally filtered by world)
- * @param userId - User ID from auth session
- * @param _world - Optional: filter decisions by world context (TODO: implement in Supabase query)
- * @returns Array of decisions (optionally filtered)
+ * Get all decisions for a Twin, optionally filtered by world
  */
-export async function getDecisions(userId: string, _world?: string): Promise<Decision[]> {
+export async function getUserDecisions(
+  twinId: string,
+  world?: WorldId
+): Promise<Decision[]> {
+  if (!supabase) return [];
+
   try {
-    if (!userId) return [];
+    let query = supabase
+      .from('decision_log')
+      .select('*')
+      .eq('twin_id', twinId)
+      .order('created_at', { ascending: false });
 
-    // TODO: Query Supabase
-    // SELECT * FROM decisions WHERE user_id = userId
-    // {_world && 'AND world = ?', _world}
-    // LEFT JOIN follow_ups ...
+    if (world) {
+      query = query.eq('world', world);
+    }
 
-    return [];
-  } catch (error) {
-    console.error('Error fetching decisions:', error);
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Error fetching decisions:', error);
+      return [];
+    }
+
+    return data ? data.map(mapDecisionRow) : [];
+  } catch (err) {
+    console.error('Error getting user decisions:', err);
     return [];
   }
 }
 
 /**
- * Update decision
+ * Record outcome of a decision at a follow-up checkpoint
  */
-export async function updateDecision(
+export async function recordOutcome(
   decisionId: string,
-  _updates: Partial<Decision>
-): Promise<{ success: boolean; message: string }> {
+  feedback: string,
+  impact: 'positive' | 'neutral' | 'negative',
+  lessons: string
+): Promise<DecisionOutcome | null> {
+  if (!supabase) return null;
+
   try {
-    if (!decisionId) {
-      return { success: false, message: 'Decision ID required' };
+    // Determine which day this follow-up is for
+    const scheduleData = await supabase
+      .from('follow_up_schedule')
+      .select('*')
+      .eq('decision_id', decisionId)
+      .single();
+
+    if (scheduleData.error) {
+      console.error('Error fetching follow-up schedule:', scheduleData.error);
+      return null;
     }
 
-    // TODO: Update Supabase decisions table
+    const schedule = scheduleData.data ? mapFollowUpRow(scheduleData.data) : null;
+    if (!schedule) {
+      console.error('Could not map follow-up schedule');
+      return null;
+    }
 
-    return {
-      success: true,
-      message: 'Decision updated',
-    };
-  } catch (error) {
-    console.error('Error updating decision:', error);
-    return {
-      success: false,
-      message: 'Update failed',
-    };
+    const now = new Date();
+    let followUpDay = 30;
+
+    if (schedule.day90Due && now >= new Date(schedule.day90Due)) followUpDay = 90;
+    if (schedule.day180Due && now >= new Date(schedule.day180Due)) followUpDay = 180;
+    if (schedule.day365Due && now >= new Date(schedule.day365Due)) followUpDay = 365;
+
+    const { data, error } = await supabase
+      .from('decision_outcomes')
+      .insert({
+        decision_id: decisionId,
+        follow_up_day: followUpDay,
+        feedback,
+        impact,
+        lessons,
+        twin_confidence: impact === 'positive' ? 75 : impact === 'neutral' ? 50 : 25,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error recording outcome:', error);
+      return null;
+    }
+
+    // Mark follow-up as completed
+    const dayKey = `day${followUpDay}_completed` as keyof typeof schedule;
+    await supabase
+      .from('follow_up_schedule')
+      .update({ [dayKey]: true })
+      .eq('decision_id', decisionId);
+
+    return data ? mapOutcomeRow(data) : null;
+  } catch (err) {
+    console.error('Error recording outcome:', err);
+    return null;
   }
 }
 
 /**
- * Delete decision
+ * Get all outcomes for a decision
  */
-export async function deleteDecision(decisionId: string): Promise<{ success: boolean; message: string }> {
+export async function getDecisionOutcomes(decisionId: string): Promise<DecisionOutcome[]> {
+  if (!supabase) return [];
+
   try {
-    if (!decisionId) {
-      return { success: false, message: 'Decision ID required' };
+    const { data, error } = await supabase
+      .from('decision_outcomes')
+      .select('*')
+      .eq('decision_id', decisionId)
+      .order('follow_up_day', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching outcomes:', error);
+      return [];
     }
 
-    // TODO: Delete from Supabase (cascade to follow_ups)
-
-    return {
-      success: true,
-      message: 'Decision deleted',
-    };
-  } catch (error) {
-    console.error('Error deleting decision:', error);
-    return {
-      success: false,
-      message: 'Delete failed',
-    };
-  }
-}
-
-/**
- * Complete a follow-up with reflection and score
- */
-export async function completeFollowUp(
-  followUpId: string,
-  _reflection: string,
-  resultScore: number
-): Promise<{ success: boolean; milestone?: boolean; message: string }> {
-  try {
-    if (!followUpId || resultScore === undefined) {
-      return { success: false, message: 'Follow-up ID and result score required' };
-    }
-
-    // TODO: Update Supabase follow_ups
-    // - Set completed = true, completed_at = now
-    // - Set reflection, result_score
-
-    // Check if all follow-ups completed (milestone)
-    const allCompleted = false; // TODO: query
-
-    return {
-      success: true,
-      milestone: allCompleted,
-      message: 'Follow-up completed',
-    };
-  } catch (error) {
-    console.error('Error completing follow-up:', error);
-    return {
-      success: false,
-      message: 'Completion failed',
-    };
-  }
-}
-
-/**
- * Get pending follow-ups for user
- */
-export async function getPendingFollowUpsForUser(userId: string): Promise<FollowUp[]> {
-  try {
-    if (!userId) return [];
-
-    const decisions = await getDecisions(userId);
-    return getPendingFollowUps(decisions);
-  } catch (error) {
-    console.error('Error fetching pending follow-ups:', error);
+    return data ? data.map(mapOutcomeRow) : [];
+  } catch (err) {
+    console.error('Error getting outcomes:', err);
     return [];
   }
 }
 
 /**
- * Calculate decision statistics (optionally filtered by world)
- * @param userId - User ID from auth session
- * @param world - Optional: filter stats by world context
- * @returns Decision statistics for the user
+ * Get Twin's confidence level in giving advice for a specific world
  */
-export async function getDecisionStats(userId: string, world?: string): Promise<DecisionStats> {
+export async function getTwinDecisionConfidence(
+  twinId: string,
+  world: WorldId
+): Promise<number> {
+  if (!supabase) return 50; // Default neutral
+
   try {
-    if (!userId) {
-      return {
-        total: 0,
-        completed: 0,
-        pending: 0,
-        pendingFollowUps: 0,
-        averageConfidence: 0,
-        successRate: 0,
-        averageOutcome: 0,
-      };
+    // Get all outcomes in this world
+    const decisions = await getUserDecisions(twinId, world);
+    if (decisions.length === 0) return 50;
+
+    let totalConfidence = 0;
+    let outcomeCount = 0;
+
+    for (const decision of decisions) {
+      const outcomes = await getDecisionOutcomes(decision.id);
+      if (outcomes.length > 0) {
+        const avgConfidence = outcomes.reduce((sum, o) => sum + o.twinConfidence, 0) / outcomes.length;
+        totalConfidence += avgConfidence;
+        outcomeCount++;
+      }
     }
 
-    const decisions = await getDecisions(userId, world);
-    const pending = getPendingFollowUps(decisions);
+    return outcomeCount > 0 ? Math.round(totalConfidence / outcomeCount) : 50;
+  } catch (err) {
+    console.error('Error calculating confidence:', err);
+    return 50;
+  }
+}
 
-    const completed = decisions.filter((d) =>
-      d.followUps?.every((f) => f.completed)
-    ).length;
+/**
+ * Get decision statistics (deprecated, use getDecisionInsights from DecisionLearningService)
+ * Kept for compatibility with existing pages
+ */
+export async function getDecisionStats(_twinId: string, _world?: WorldId) {
+  return {
+    total: 0,
+    completed: 0,
+    pendingFollowUps: 0,
+  };
+}
 
-    const avgConfidence =
-      decisions.length > 0
-        ? Math.round(decisions.reduce((sum, d) => sum + d.confidence, 0) / decisions.length)
-        : 0;
+/**
+ * Create a decision (for compatibility with TwinContext)
+ * TODO: Use recordDecision instead
+ */
+export async function createDecision(data: any) {
+  return recordDecision(
+    data.twinId,
+    data.world,
+    data.question,
+    data.options || [],
+    data.twinRecommendation || '',
+    data.userChoice || ''
+  );
+}
 
-    const successRate = calculateSuccessRate(decisions);
+/**
+ * Schedule follow-up checkpoints (30/90/180/365 days)
+ */
+async function scheduleFollowUps(decisionId: string): Promise<void> {
+  if (!supabase) return;
 
-    const avgOutcome =
-      decisions.length > 0
-        ? Math.round(
-            decisions.reduce((sum, d) => {
-              const scores = d.followUps
-                ?.filter((f) => f.resultScore !== undefined)
-                .map((f) => f.resultScore || 0) || [];
-              return sum + (scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0);
-            }, 0) / decisions.length
-          )
-        : 0;
+  try {
+    const now = new Date();
+    const day30 = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const day90 = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+    const day180 = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
+    const day365 = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
 
-    return {
-      total: decisions.length,
-      completed,
-      pending: decisions.length - completed,
-      pendingFollowUps: pending.length,
-      averageConfidence: avgConfidence,
-      successRate,
-      averageOutcome: avgOutcome,
-    };
-  } catch (error) {
-    console.error('Error calculating stats:', error);
-    return {
-      total: 0,
-      completed: 0,
-      pending: 0,
-      pendingFollowUps: 0,
-      averageConfidence: 0,
-      successRate: 0,
-      averageOutcome: 0,
-    };
+    await supabase.from('follow_up_schedule').insert({
+      decision_id: decisionId,
+      day30_due: day30.toISOString(),
+      day90_due: day90.toISOString(),
+      day180_due: day180.toISOString(),
+      day365_due: day365.toISOString(),
+    });
+  } catch (err) {
+    console.error('Error scheduling follow-ups:', err);
   }
 }

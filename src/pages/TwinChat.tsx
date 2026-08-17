@@ -16,6 +16,7 @@ import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { saveMessage } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
+import * as DecisionService from '../services/DecisionService';
 
 interface Message {
   role: 'user' | 'twin';
@@ -33,6 +34,8 @@ export default function TwinChat() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentWorld, setLocalWorld] = useState<WorldId | null>(null);
+  const [savingDecisionIndex, setSavingDecisionIndex] = useState<number | null>(null);
+  const [savedDecisionIds, setSavedDecisionIds] = useState<Set<number>>(new Set());
 
   // GUARD: Check if Twin exists
   if (!twin) {
@@ -65,6 +68,53 @@ export default function TwinChat() {
     }
   }, [searchParams, setCurrentWorld]);
 
+
+  const handleSaveDecision = async (messageIndex: number) => {
+    if (!session.user?.id || !currentWorld) return;
+
+    setSavingDecisionIndex(messageIndex);
+
+    try {
+      // Find the user message and Twin response
+      let userMessage = '';
+      let twinMessage = '';
+
+      for (let i = messageIndex; i >= 0; i--) {
+        if (messages[i].role === 'user' && !userMessage) {
+          userMessage = messages[i].content;
+        }
+        if (messages[i].role === 'twin' && !twinMessage) {
+          twinMessage = messages[i].content;
+        }
+      }
+
+      if (!userMessage || !twinMessage) {
+        throw new Error('Could not find decision and response');
+      }
+
+      // For now, use the Twin response as recommendation
+      // A future enhancement could parse options from the Twin response
+      const decision = await DecisionService.recordDecision(
+        session.user.id,
+        currentWorld,
+        userMessage, // Use the question as-is
+        ['Option from decision'], // TODO: Extract from Twin response or UI
+        twinMessage, // Twin's full response is the recommendation
+        'Accepted' // TODO: Get user's actual choice
+      );
+
+      if (decision) {
+        // Mark this message index as having a saved decision
+        setSavedDecisionIds(prev => new Set(prev).add(messageIndex));
+      }
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to save decision';
+      console.error('Save decision error:', err);
+      setError(errorMsg);
+    } finally {
+      setSavingDecisionIndex(null);
+    }
+  };
 
   const handleSend = async () => {
     if (!message.trim()) return;
@@ -171,10 +221,29 @@ export default function TwinChat() {
           </div>
         ) : (
           messages.map((msg, idx) => (
-            <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] p-3 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
-                {msg.content}
+            <div key={idx}>
+              <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-3 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                  {msg.content}
+                </div>
               </div>
+              {/* Save Decision button for Twin messages */}
+              {msg.role === 'twin' && currentWorld && !savedDecisionIds.has(idx) && (
+                <div className="flex justify-start mt-1 ml-0">
+                  <button
+                    onClick={() => handleSaveDecision(idx)}
+                    disabled={savingDecisionIndex === idx}
+                    className="text-xs px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50 transition-colors"
+                  >
+                    {savingDecisionIndex === idx ? 'Saving...' : '💾 Save as Decision'}
+                  </button>
+                </div>
+              )}
+              {savedDecisionIds.has(idx) && (
+                <div className="flex justify-start mt-1 ml-0">
+                  <span className="text-xs text-green-600 font-semibold">✅ Decision saved</span>
+                </div>
+              )}
             </div>
           ))
         )}

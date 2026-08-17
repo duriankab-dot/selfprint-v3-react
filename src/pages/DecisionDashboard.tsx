@@ -5,27 +5,21 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { Decision, DecisionStats } from '../types/decision';
+import type { Decision, DecisionInsights } from '../types/decision';
 import type { WorldId } from '../constants/worlds';
 import { WORLDS } from '../constants/worlds';
 import { useAuth } from '../context/AuthContext';
 import { useDecisionStore } from '../store/decisionStore';
 import { useTwin } from '../context/TwinContext';
-import { getDecisionStats } from '../services/DecisionService';
+import * as DecisionLearningService from '../services/DecisionLearningService';
 import '../styles/decision-dashboard.css';
 
 export default function DecisionDashboard() {
   const { session } = useAuth();
   const { currentWorld } = useTwin();
-  const {
-    decisions,
-    loadDecisions,
-    getFilteredDecisions,
-    getPendingCount,
-    getSuccessRate,
-  } = useDecisionStore();
+  const { decisions, loadDecisions, getFilteredDecisions } = useDecisionStore();
 
-  const [stats, setStats] = useState<DecisionStats | null>(null);
+  const [insights, setInsights] = useState<DecisionInsights | null>(null);
   const [showNewDecision, setShowNewDecision] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<WorldId | 'all'>(currentWorld || 'all');
 
@@ -37,14 +31,12 @@ export default function DecisionDashboard() {
 
   useEffect(() => {
     if (session?.user?.id) {
-      const world = selectedWorld === 'all' ? undefined : selectedWorld;
-      getDecisionStats(session.user.id, world).then(setStats);
+      // Load insights from DecisionLearningService
+      DecisionLearningService.getDecisionInsights(session.user.id).then(setInsights);
     }
   }, [session?.user?.id, decisions, selectedWorld]);
 
   const filteredDecisions = getFilteredDecisions();
-  const pendingCount = getPendingCount();
-  const successRate = getSuccessRate();
 
   if (!session?.user?.id) {
     return (
@@ -86,12 +78,12 @@ export default function DecisionDashboard() {
       </div>
 
       {/* Stats Summary */}
-      {stats && (
+      {insights && (
         <div className="dd-stats-grid">
-          <StatCard icon="📝" label="Total Decisions" value={stats.total} />
-          <StatCard icon="✅" label="Completed" value={stats.completed} />
-          <StatCard icon="⏳" label="Pending Follow-ups" value={stats.pendingFollowUps} />
-          <StatCard icon="🎯" label="Success Rate" value={`${successRate}%`} />
+          <StatCard icon="📝" label="Total Decisions" value={insights.totalDecisions} />
+          <StatCard icon="✅" label="Success Rate" value={`${insights.successRate}%`} />
+          <StatCard icon="🌍" label="Best Worlds" value={insights.bestWorlds.join(', ') || 'N/A'} />
+          <StatCard icon="📈" label="Trends" value={insights.trends.substring(0, 20) + '...'} />
         </div>
       )}
 
@@ -117,15 +109,13 @@ export default function DecisionDashboard() {
       )}
 
       {/* Pending Follow-ups Section */}
-      {pendingCount > 0 && (
-        <div className="dd-pending-section">
-          <h2>⏰ Pending Follow-ups ({pendingCount})</h2>
-          <div className="dd-pending-list">
-            {/* TODO: List pending follow-ups */}
-            <p className="placeholder">Pending follow-ups will appear here</p>
-          </div>
+      {/* TODO: Integrated in Phase F Dashboard */}
+      <div className="dd-pending-section">
+        <h2>⏰ Pending Follow-ups</h2>
+        <div className="dd-pending-list">
+          <p className="placeholder">Follow-up tracking available in Phase F Dashboard</p>
         </div>
-      )}
+      </div>
 
       {/* Decisions List */}
       <div className="dd-decisions-section">
@@ -158,49 +148,33 @@ function StatCard({ icon, label, value }: { icon: string; label: string; value: 
 }
 
 function DecisionCard({ decision }: { decision: Decision }) {
-  const completedFollowUps = decision.followUps?.filter((f) => f.completed).length || 0;
-  const totalFollowUps = decision.followUps?.length || 0;
-
   return (
     <div className="decision-card">
       <div className="decision-header">
-        <h3>{decision.title}</h3>
-        <span className="decision-category">{decision.category}</span>
+        <h3>{decision.title || decision.question}</h3>
+        <span className="decision-category">{decision.world}</span>
       </div>
 
-      <p className="decision-description">{decision.description}</p>
+      <p className="decision-description">
+        {decision.description || `Chose: ${decision.userChoice}`}
+      </p>
 
       <div className="decision-meta">
         <div className="meta-item">
-          <span className="meta-label">Confidence:</span>
-          <span className="meta-value">{decision.confidence}%</span>
+          <span className="meta-label">Twin Recommendation:</span>
+          <span className="meta-value">{decision.twinRecommendation}</span>
         </div>
         <div className="meta-item">
           <span className="meta-label">Date:</span>
-          <span className="meta-value">{new Date(decision.decisionDate).toLocaleDateString()}</span>
+          <span className="meta-value">
+            {new Date(decision.decisionDate || decision.createdAt).toLocaleDateString()}
+          </span>
         </div>
       </div>
 
-      {/* Follow-up Progress */}
-      <div className="followup-progress">
-        <div className="progress-label">
-          Follow-ups: {completedFollowUps}/{totalFollowUps}
-        </div>
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${(completedFollowUps / totalFollowUps) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Follow-up Markers */}
-      <div className="followup-markers">
-        {decision.followUps?.map((fu) => (
-          <div key={fu.id} className={`marker ${fu.completed ? 'completed' : 'pending'}`}>
-            {fu.days}d
-          </div>
-        ))}
+      {/* Phase E Integration Note */}
+      <div className="decision-note">
+        <small>Follow-ups managed in Phase F Dashboard</small>
       </div>
     </div>
   );
