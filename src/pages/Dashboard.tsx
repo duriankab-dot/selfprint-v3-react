@@ -10,6 +10,7 @@ import {
 import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useWorld } from '../context/WorldContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { getSeoMetadata } from '../constants/seoMetadata';
 import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
@@ -75,6 +76,7 @@ const Dashboard: React.FC = () => {
   const userId = session?.user?.id || '';
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { currentWorld, worldStats } = useWorld();
   const seoData = getSeoMetadata('dashboard', language);
 
   // § P2 — PersonalContext สำหรับ intelligence panels (shared cache key กับ ExperienceContext)
