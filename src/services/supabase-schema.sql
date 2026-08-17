@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS twins (
   secondary_archetype text,
   maturity_score integer DEFAULT 30 CHECK (maturity_score >= 0 AND maturity_score <= 100),
   evolution_stage integer DEFAULT 1 CHECK (evolution_stage >= 1 AND evolution_stage <= 5),
+  system_prompt text, -- Twin's system prompt with learned patterns (P0 #3)
   awakened_at timestamp DEFAULT now(),
   created_at timestamp DEFAULT now(),
   updated_at timestamp DEFAULT now(),
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS decisions (
   updated_at timestamp DEFAULT now()
 );
 
--- Decision Follow-ups
+-- Decision Follow-ups (legacy name)
 CREATE TABLE IF NOT EXISTS decision_follow_ups (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   decision_id uuid NOT NULL REFERENCES decisions(id) ON DELETE CASCADE,
@@ -52,6 +53,26 @@ CREATE TABLE IF NOT EXISTS decision_follow_ups (
   outcome text, -- 'worked', 'didn\'t work', 'modified'
   notes text,
   created_at timestamp DEFAULT now()
+);
+
+-- Follow-up Schedule (P0 #2: Tracks 30/90/180/365 day follow-ups per decision)
+CREATE TABLE IF NOT EXISTS follow_up_schedule (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  decision_id uuid NOT NULL UNIQUE REFERENCES decisions(id) ON DELETE CASCADE,
+  day30_due timestamp,
+  day30_completed boolean DEFAULT false,
+  day30_sent_at timestamp,
+  day90_due timestamp,
+  day90_completed boolean DEFAULT false,
+  day90_sent_at timestamp,
+  day180_due timestamp,
+  day180_completed boolean DEFAULT false,
+  day180_sent_at timestamp,
+  day365_due timestamp,
+  day365_completed boolean DEFAULT false,
+  day365_sent_at timestamp,
+  created_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now()
 );
 
 -- Twin SICE Scores (track contribution of each intelligence engine)
@@ -114,12 +135,27 @@ CREATE TABLE IF NOT EXISTS personal_contexts (
   updated_at timestamp DEFAULT now()
 );
 
+-- Decision Patterns (P0 #3: Twin learns from decision outcomes)
+CREATE TABLE IF NOT EXISTS decision_patterns (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
+  world text NOT NULL, -- World ID where pattern was detected
+  pattern text NOT NULL, -- Human-readable pattern description
+  success_rate numeric(5,2) DEFAULT 0 CHECK (success_rate >= 0 AND success_rate <= 100),
+  sample_size integer DEFAULT 0 CHECK (sample_size >= 0),
+  confidence numeric(5,2) DEFAULT 0 CHECK (confidence >= 0 AND confidence <= 100),
+  identified_at timestamp DEFAULT now(),
+  updated_at timestamp DEFAULT now(),
+  UNIQUE(twin_id, world) -- One pattern per world per twin
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_twins_user_id ON twins(user_id);
 CREATE INDEX IF NOT EXISTS idx_twin_memories_twin_id ON twin_memories(twin_id);
 CREATE INDEX IF NOT EXISTS idx_twin_memories_world ON twin_memories(world_id);
 CREATE INDEX IF NOT EXISTS idx_decisions_twin_id ON decisions(twin_id);
 CREATE INDEX IF NOT EXISTS idx_decision_follow_ups_decision ON decision_follow_ups(decision_id);
+CREATE INDEX IF NOT EXISTS idx_follow_up_schedule_decision ON follow_up_schedule(decision_id);
 CREATE INDEX IF NOT EXISTS idx_twin_sice_twin_id ON twin_sice_scores(twin_id);
 CREATE INDEX IF NOT EXISTS idx_world_preferences_twin ON world_preferences(twin_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_twin_id ON analytics_events(twin_id);
@@ -127,6 +163,8 @@ CREATE INDEX IF NOT EXISTS idx_awakening_essence_user_id ON awakening_essence(us
 CREATE INDEX IF NOT EXISTS idx_awakening_essence_status ON awakening_essence(status);
 CREATE INDEX IF NOT EXISTS idx_personal_contexts_user_id ON personal_contexts(user_id);
 CREATE INDEX IF NOT EXISTS idx_personal_contexts_essence ON personal_contexts(awakening_essence_id);
+CREATE INDEX IF NOT EXISTS idx_decision_patterns_twin_id ON decision_patterns(twin_id);
+CREATE INDEX IF NOT EXISTS idx_decision_patterns_world ON decision_patterns(world);
 
 -- Row Level Security (RLS) Policies
 ALTER TABLE twins ENABLE ROW LEVEL SECURITY;
@@ -138,6 +176,8 @@ ALTER TABLE world_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE awakening_essence ENABLE ROW LEVEL SECURITY;
 ALTER TABLE personal_contexts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE follow_up_schedule ENABLE ROW LEVEL SECURITY;
+ALTER TABLE decision_patterns ENABLE ROW LEVEL SECURITY;
 
 -- Users can only access their own Twin
 CREATE POLICY "Twin access policy" ON twins
@@ -194,3 +234,21 @@ CREATE POLICY "Users can access own essence" ON awakening_essence
 -- RLS for personal_contexts (P0 #1)
 CREATE POLICY "Users can access own context" ON personal_contexts
   FOR ALL USING (auth.uid() = user_id);
+
+-- RLS for follow_up_schedule (P0 #2)
+CREATE POLICY "Users can access own follow-ups" ON follow_up_schedule
+  FOR ALL USING (
+    decision_id IN (
+      SELECT id FROM decisions WHERE twin_id IN (
+        SELECT id FROM twins WHERE user_id = auth.uid()
+      )
+    )
+  );
+
+-- RLS for decision_patterns (P0 #3)
+CREATE POLICY "Users can access own patterns" ON decision_patterns
+  FOR ALL USING (
+    twin_id IN (
+      SELECT id FROM twins WHERE user_id = auth.uid()
+    )
+  );

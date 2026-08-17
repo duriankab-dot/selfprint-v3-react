@@ -201,13 +201,146 @@ export async function updateTwinExpertiseFromDecisions(
       }
     }
 
-    // TODO: Update Twin's system prompt with these patterns
-    // This would integrate with TwinAPIService.buildTwinSystemPrompt()
-    // to include learned decision patterns in the prompt context
+    // Update Twin's system prompt with learned patterns
+    await updateTwinSystemPromptWithPatterns(twinId, world, worldPatterns);
     console.log(`Updated Twin expertise for ${world} with ${worldPatterns.length} pattern(s)`);
   } catch (err) {
     console.error('Error updating Twin expertise:', err);
   }
+}
+
+/**
+ * Update Twin's system prompt with learned decision patterns (P0 #3)
+ * Injects pattern insights into Twin's system prompt so future recommendations
+ * are influenced by historical decision outcomes
+ */
+async function updateTwinSystemPromptWithPatterns(
+  twinId: string,
+  world: string,
+  patterns: DecisionPattern[]
+): Promise<{ success: boolean }> {
+  if (!supabase || patterns.length === 0) {
+    return { success: false };
+  }
+
+  try {
+    // 1. Fetch Twin's current system prompt
+    const { data: twin, error: fetchError } = await supabase
+      .from('twins')
+      .select('system_prompt')
+      .eq('id', twinId)
+      .single();
+
+    if (fetchError || !twin) {
+      console.error('Failed to fetch Twin system prompt:', fetchError);
+      return { success: false };
+    }
+
+    // 2. Build base prompt if not exists
+    let basePrompt = twin.system_prompt || buildBaseTwinPrompt(twinId);
+
+    // 3. Format learned patterns for injection
+    const patternInsights = formatPatternInsights(patterns);
+
+    // 4. Inject patterns into prompt
+    const updatedPrompt = injectPatternsTwinsPrompt(basePrompt, patternInsights, world);
+
+    // 5. Update Twin's system_prompt column
+    const { error: updateError } = await supabase
+      .from('twins')
+      .update({
+        system_prompt: updatedPrompt,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', twinId);
+
+    if (updateError) {
+      console.error('Failed to update Twin system prompt:', updateError);
+      return { success: false };
+    }
+
+    console.log(`✅ Updated Twin ${twinId} system prompt with ${patterns.length} learned pattern(s)`);
+    return { success: true };
+  } catch (err) {
+    console.error('Error updating Twin system prompt with patterns:', err);
+    return { success: false };
+  }
+}
+
+/**
+ * Build base Twin prompt (if not yet set)
+ */
+function buildBaseTwinPrompt(twinId: string): string {
+  return `You are SELFPRINT Twin — an AI companion designed to understand and support ${twinId}.
+
+Your role:
+- Listen deeply to understand patterns in decisions and life
+- Provide thoughtful guidance based on personal history and learned patterns
+- Adapt recommendations based on user's demonstrated success patterns
+- Encourage reflection and learning from outcomes
+
+Personality: Wise, compassionate, non-judgmental, growth-focused.
+
+Decision Making:
+- Reference past decision patterns to guide recommendations
+- Acknowledge user's strengths in areas where they excel
+- Suggest caution in areas needing improvement
+- Help user see long-term consequences
+
+World Awareness:
+- Adapt guidance based on which life area (world) is being discussed
+- Use world-specific context for more relevant insights`;
+}
+
+/**
+ * Format patterns into human-readable insights for prompt injection
+ */
+function formatPatternInsights(patterns: DecisionPattern[]): string {
+  if (patterns.length === 0) return '';
+
+  const insights = patterns.map(p => {
+    const confidenceLabel = getConfidenceLabel(p.confidence);
+    return `• ${p.pattern} (${p.successRate.toFixed(0)}% success rate, ${confidenceLabel} confidence, ${p.sampleSize} decisions)`;
+  });
+
+  return `## Learned Decision Patterns
+
+Based on ${patterns.reduce((sum, p) => sum + p.sampleSize, 0)} tracked decisions, I've identified these patterns:
+
+${insights.join('\n')}
+
+I'll use these insights to guide my recommendations while remaining open to new information and growth.`;
+}
+
+/**
+ * Get confidence label for display
+ */
+function getConfidenceLabel(confidence: number): string {
+  if (confidence >= 80) return 'High';
+  if (confidence >= 50) return 'Medium';
+  return 'Emerging';
+}
+
+/**
+ * Inject learned patterns into Twin's system prompt
+ */
+function injectPatternsTwinsPrompt(basePrompt: string, patternInsights: string, world: string): string {
+  // Check if patterns section already exists (to avoid duplication)
+  if (basePrompt.includes('## Learned Decision Patterns')) {
+    // Replace existing patterns section
+    const regex = /## Learned Decision Patterns[\s\S]*?(?=## [A-Z]|$)/;
+    return basePrompt.replace(regex, patternInsights + '\n\n');
+  }
+
+  // Append patterns section before end of prompt
+  return `${basePrompt}
+
+${patternInsights}
+
+---
+
+### Current Focus: ${world}
+I'm particularly attentive to patterns in the ${world} area based on recent decision outcomes.`;
 }
 
 /**
@@ -357,3 +490,4 @@ export async function getTwinRecommendationConfidence(
   if (confidence >= 50) return 'medium';
   return 'low';
 }
+

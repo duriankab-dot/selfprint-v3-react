@@ -110,6 +110,7 @@ export async function getNextFollowUpDay(decisionId: string): Promise<number | n
 /**
  * Trigger a follow-up notification for a decision
  * Called when a follow-up is due and ready to send
+ * P0 #2 FIX: Send both in-app + browser push notifications
  */
 export async function triggerFollowUp(decisionId: string): Promise<void> {
   if (!supabase) return;
@@ -134,17 +135,70 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
       return;
     }
 
-    // TODO: Send notification to user
-    // This would integrate with:
-    // - Push notifications
-    // - Email
-    // - In-app notifications
-    // - Scheduled task system
+    const userId = decision.user_id;
+    const title = `ติดตามการตัดสินใจ (Day ${nextDay})`;
+    const message = `ถึงเวลาติดตามการตัดสินใจ: "${decision.question}" (${nextDay} วัน)`;
 
-    console.log(`Follow-up triggered for decision ${decisionId} (day ${nextDay})`);
+    // P0 #2 FIX: Create in-app notification
+    const { error: notifError } = await supabase
+      .from('notification_queue')
+      .insert({
+        user_id: userId,
+        twin_id: decision.twin_id,
+        type: 'decision_follow_up',
+        title,
+        message,
+        status: 'delivered', // Mark as delivered (in-app available immediately)
+        delivered_at: new Date().toISOString(),
+        metadata: { decision_id: decisionId, day: nextDay },
+      });
 
-    // Record that follow-up was triggered (optional - for audit trail)
-    // Could add a follow_up_triggered_at field if needed
+    if (notifError) {
+      console.error('Error creating in-app notification:', notifError);
+    } else {
+      console.log(`In-app notification created for decision ${decisionId} on day ${nextDay}`);
+    }
+
+    // P0 #2 FIX: Send browser push notification (if user has permission)
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      try {
+        if (Notification.permission === 'granted') {
+          // Send push notification immediately
+          new Notification(title, {
+            body: message,
+            tag: `decision-followup-${decisionId}-day${nextDay}`,
+            requireInteraction: false,
+            badge: '/icons/badge.png',
+          });
+          console.log(`Browser push notification sent for decision ${decisionId}`);
+        } else if (Notification.permission !== 'denied') {
+          // Request permission if not yet decided
+          const perm = await Notification.requestPermission();
+          if (perm === 'granted') {
+            new Notification(title, {
+              body: message,
+              tag: `decision-followup-${decisionId}-day${nextDay}`,
+              requireInteraction: false,
+            });
+          }
+        }
+      } catch (pushError) {
+        console.warn('Browser push notification failed (non-blocking):', pushError);
+      }
+    }
+
+    // Update follow-up schedule status for audit trail
+    const dayKey = `day${nextDay}_sent_at` as any;
+    try {
+      await supabase
+        .from('follow_up_schedule')
+        .update({ [dayKey]: new Date().toISOString() })
+        .eq('decision_id', decisionId);
+    } catch (err) {
+      console.warn('Could not update follow-up sent timestamp:', err);
+    }
+
+    console.log(`✅ Follow-up dispatched for decision ${decisionId} (day ${nextDay})`);
   } catch (err) {
     console.error('Error triggering follow-up:', err);
   }

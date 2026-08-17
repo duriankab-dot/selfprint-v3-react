@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase-service';
+import * as DecisionLearning from './DecisionLearningService';
 import type { WorldId } from '../constants/worlds';
 import type { Decision, DecisionOutcome, FollowUpSchedule } from '../types/decision';
 
@@ -198,6 +199,22 @@ export async function recordOutcome(
       .update({ [dayKey]: true })
       .eq('decision_id', decisionId);
 
+    // P0 #3: Trigger Twin learning from this outcome
+    // Get decision details to access twinId + world
+    const decisionData = await supabase
+      .from('decision_log')
+      .select('twin_id, world')
+      .eq('id', decisionId)
+      .single();
+
+    if (decisionData.data) {
+      const { twin_id, world } = decisionData.data;
+      // Asynchronously update Twin's expertise (don't wait for completion)
+      DecisionLearning.updateTwinExpertiseFromDecisions(twin_id, world).catch(err =>
+        console.error('Background: Failed to update Twin expertise:', err)
+      );
+    }
+
     return data ? mapOutcomeRow(data) : null;
   } catch (err) {
     console.error('Error recording outcome:', err);
@@ -277,7 +294,7 @@ export async function getDecisionStats(_twinId: string, _world?: WorldId) {
 
 /**
  * Create a decision (for compatibility with TwinContext)
- * TODO: Use recordDecision instead
+ * Uses recordDecision internally with automatic follow-up scheduling
  */
 export async function createDecision(data: any) {
   return recordDecision(
@@ -286,7 +303,8 @@ export async function createDecision(data: any) {
     data.question,
     data.options || [],
     data.twinRecommendation || '',
-    data.userChoice || ''
+    data.userChoice || '',
+    data.context
   );
 }
 
