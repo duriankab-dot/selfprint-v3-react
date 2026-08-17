@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
+import { WorldTabs } from '../components/WorldTabs';
 import { saveMessage } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import * as DecisionService from '../services/DecisionService';
@@ -22,6 +23,8 @@ interface Message {
   role: 'user' | 'twin';
   content: string;
   world?: WorldId;
+  options?: string[]; // Extracted options from Twin response
+  selectedChoice?: string; // User's selected option
 }
 
 export default function TwinChat() {
@@ -92,15 +95,21 @@ export default function TwinChat() {
         throw new Error('Could not find decision and response');
       }
 
-      // For now, use the Twin response as recommendation
-      // A future enhancement could parse options from the Twin response
+      // Get message data
+      const twinMsg = messages[messageIndex];
+      const options = twinMsg.options && twinMsg.options.length > 0
+        ? twinMsg.options
+        : ['Accepted', 'Deferred', 'Rejected'];
+      const choice = twinMsg.selectedChoice || 'Accepted';
+
+      // Record decision with world context
       const decision = await DecisionService.recordDecision(
         session.user.id,
         currentWorld,
-        userMessage, // Use the question as-is
-        ['Option from decision'], // TODO: Extract from Twin response or UI
-        twinMessage, // Twin's full response is the recommendation
-        'Accepted' // TODO: Get user's actual choice
+        userMessage,
+        options,
+        twinMessage,
+        choice
       );
 
       if (decision) {
@@ -179,11 +188,15 @@ export default function TwinChat() {
         50 // autonomyLevel
       );
 
-      // Add Twin response to messages
+      // Extract options from Twin response
+      const options = extractOptions(twinResponse);
+
+      // Add Twin response to messages with extracted options
       setMessages(prev => [...prev, {
         role: 'twin',
         content: twinResponse,
-        world: currentWorld || undefined
+        world: currentWorld || undefined,
+        options: options.length > 0 ? options : undefined,
       }]);
 
     } catch (err) {
@@ -195,6 +208,44 @@ export default function TwinChat() {
     }
   };
 
+  const handleWorldSelect = (world: WorldId) => {
+    setLocalWorld(world);
+    setCurrentWorld(world);
+  };
+
+  /**
+   * Extract options from Twin response
+   * Looks for numbered lists (1., 2., 3.) or bullet points
+   */
+  const extractOptions = (text: string): string[] => {
+    const lines = text.split('\n');
+    const options: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      // Match "1. Option text" or "- Option text"
+      const numberedMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+      const bulletMatch = trimmed.match(/^[-•]\s+(.+)$/);
+
+      if (numberedMatch) {
+        options.push(numberedMatch[1]);
+      } else if (bulletMatch) {
+        options.push(bulletMatch[1]);
+      }
+    }
+
+    // Return up to 5 options (reasonable limit)
+    return options.slice(0, 5);
+  };
+
+  const handleSelectChoice = (messageIndex: number, choice: string) => {
+    setMessages(prev =>
+      prev.map((msg, idx) =>
+        idx === messageIndex ? { ...msg, selectedChoice: choice } : msg
+      )
+    );
+  };
+
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
       {/* World Context Header */}
@@ -203,6 +254,9 @@ export default function TwinChat() {
       <h1 className="text-2xl font-bold text-center mb-4">
         💫 {twin.name || 'My Twin'}
       </h1>
+
+      {/* World Selector Tabs */}
+      <WorldTabs currentWorld={currentWorld} onWorldSelect={handleWorldSelect} className="mb-4" />
 
       {/* Error Alert */}
       {error && (
@@ -227,13 +281,32 @@ export default function TwinChat() {
                   {msg.content}
                 </div>
               </div>
+              {/* Options selector (if Twin response has options) */}
+              {msg.role === 'twin' && msg.options && msg.options.length > 0 && !savedDecisionIds.has(idx) && (
+                <div className="flex flex-wrap gap-2 justify-start mt-2 ml-0">
+                  {msg.options.map((option, optIdx) => (
+                    <button
+                      key={optIdx}
+                      onClick={() => handleSelectChoice(idx, option)}
+                      className={`text-xs px-3 py-1 rounded border transition-colors ${
+                        msg.selectedChoice === option
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+                      }`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              )}
               {/* Save Decision button for Twin messages */}
               {msg.role === 'twin' && currentWorld && !savedDecisionIds.has(idx) && (
-                <div className="flex justify-start mt-1 ml-0">
+                <div className="flex justify-start mt-2 ml-0">
                   <button
                     onClick={() => handleSaveDecision(idx)}
-                    disabled={savingDecisionIndex === idx}
-                    className="text-xs px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50 transition-colors"
+                    disabled={savingDecisionIndex === idx || (msg.options && msg.options.length > 0 && !msg.selectedChoice)}
+                    className="text-xs px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    title={msg.options && msg.options.length > 0 && !msg.selectedChoice ? 'Select an option first' : 'Save as decision'}
                   >
                     {savingDecisionIndex === idx ? 'Saving...' : '💾 Save as Decision'}
                   </button>
