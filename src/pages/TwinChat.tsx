@@ -208,10 +208,7 @@ export default function TwinChat() {
     }
   };
 
-  const handleWorldSelect = (world: WorldId) => {
-    setLocalWorld(world);
-    setCurrentWorld(world);
-  };
+  // World selection now handled by WorldTabs component using WorldContext
 
   /**
    * Extract options from Twin response
@@ -256,7 +253,7 @@ export default function TwinChat() {
       </h1>
 
       {/* World Selector Tabs */}
-      <WorldTabs currentWorld={currentWorld} onWorldSelect={handleWorldSelect} className="mb-4" />
+      <WorldTabs className="mb-4" />
 
       {/* Error Alert */}
       {error && (
