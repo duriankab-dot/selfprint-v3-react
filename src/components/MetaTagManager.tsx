@@ -3,6 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import {
   generateOrganizationSchema,
   generateBreadcrumbSchema,
+  generateLocalBusinessSchema,
   type BreadcrumbItem,
 } from '../lib/structuredData';
 
@@ -67,6 +68,11 @@ export function MetaTagManager({
       {/* Organization Schema (always present) */}
       <script type="application/ld+json">
         {JSON.stringify(orgSchema)}
+      </script>
+
+      {/* LocalBusiness Schema (for Local SEO/GEO) */}
+      <script type="application/ld+json">
+        {JSON.stringify(generateLocalBusinessSchema())}
       </script>
 
       {/* SoftwareApplication Schema */}
