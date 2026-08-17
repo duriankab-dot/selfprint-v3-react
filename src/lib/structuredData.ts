@@ -175,6 +175,51 @@ export function generateSoftwareApplicationSchema() {
 }
 
 /**
+ * LocalBusiness Schema
+ * For local search visibility (GEO)
+ */
+export function generateLocalBusinessSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'LocalBusiness',
+    name: ORGANIZATION_NAME,
+    url: BASE_URL,
+    logo: ORGANIZATION_LOGO,
+    description: 'Personal intelligence platform powered by AI Twin',
+    telephone: '+66-XX-XXXX-XXXX', // เปลี่ยนตามเบอร์จริง
+    email: ORGANIZATION_EMAIL,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: 'Bangkok, Thailand', // เปลี่ยนตามที่อยู่จริง
+      addressLocality: 'Bangkok',
+      addressRegion: 'Bangkok',
+      postalCode: '10110',
+      addressCountry: 'TH',
+    },
+    sameAs: [
+      'https://twitter.com/selfprintai',
+      'https://linkedin.com/company/selfprint',
+      'https://facebook.com/selfprint',
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Customer Support',
+      email: ORGANIZATION_EMAIL,
+    },
+    areaServed: {
+      '@type': 'Country',
+      name: 'Thailand',
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '18:00',
+    },
+  };
+}
+
+/**
  * Pricing/Offer Schema
  * For pricing page rich results
  */
