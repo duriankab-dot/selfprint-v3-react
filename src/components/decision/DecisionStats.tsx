@@ -1,145 +1,175 @@
 /**
  * DecisionStats.tsx
- * Display key statistics about Twin's decision history
- * Shows: Total decisions, success rate, best worlds, trends
+ * Phase F2a: Statistics card showing decision metrics
+ *
+ * Displays:
+ * - Total decisions count
+ * - Success rate (%)
+ * - Best/worst worlds
+ * - Pending follow-ups
  */
 
 import { useEffect, useState } from 'react';
 import type { DecisionInsights } from '../../types/decision';
 import * as DecisionLearningService from '../../services/DecisionLearningService';
-import '../../styles/decision-stats.css';
+import * as FollowUpScheduler from '../../services/FollowUpScheduler';
 
 interface DecisionStatsProps {
   twinId: string;
 }
 
+interface StatsData {
+  insights: DecisionInsights | null;
+  pendingFollowUps: number;
+  isLoading: boolean;
+  error: string | null;
+}
+
 export default function DecisionStats({ twinId }: DecisionStatsProps) {
-  const [insights, setInsights] = useState<DecisionInsights | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<StatsData>({
+    insights: null,
+    pendingFollowUps: 0,
+    isLoading: true,
+    error: null,
+  });
 
   useEffect(() => {
-    loadInsights();
+    const loadStats = async () => {
+      try {
+        setStats(prev => ({ ...prev, isLoading: true, error: null }));
+
+        // Load insights
+        const insights = await DecisionLearningService.getDecisionInsights(twinId);
+
+        // Load pending follow-ups count
+        const pendingFollowUps = await FollowUpScheduler.getOverdueFollowUps(twinId);
+
+        setStats({
+          insights,
+          pendingFollowUps: pendingFollowUps.length,
+          isLoading: false,
+          error: null,
+        });
+      } catch (err) {
+        setStats(prev => ({
+          ...prev,
+          isLoading: false,
+          error: err instanceof Error ? err.message : 'Failed to load stats',
+        }));
+      }
+    };
+
+    loadStats();
   }, [twinId]);
 
-  async function loadInsights() {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await DecisionLearningService.getDecisionInsights(twinId);
-      setInsights(data);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to load insights';
-      setError(msg);
-      console.error('Error loading decision insights:', err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (loading) {
+  if (stats.isLoading) {
     return (
       <div className="decision-stats-container">
-        <div className="stats-skeleton">Loading stats...</div>
+        <div className="stats-loading">Loading decision statistics...</div>
       </div>
     );
   }
 
-  if (error) {
+  if (stats.error || !stats.insights) {
     return (
       <div className="decision-stats-container">
-        <div className="stats-error">Error: {error}</div>
+        <div className="stats-error">
+          {stats.error || 'Unable to load statistics'}
+        </div>
       </div>
     );
   }
 
-  if (!insights) {
-    return (
-      <div className="decision-stats-container">
-        <div className="stats-empty">No decision data available</div>
-      </div>
-    );
-  }
+  const { insights } = stats;
 
   return (
     <div className="decision-stats-container">
-      <h2 className="stats-title">📊 Decision Intelligence</h2>
-
-      {/* Stats Grid */}
       <div className="stats-grid">
         {/* Total Decisions */}
-        <div className="stat-card">
-          <div className="stat-icon">📝</div>
-          <div className="stat-content">
-            <div className="stat-label">Total Decisions</div>
-            <div className="stat-value">{insights.totalDecisions}</div>
-          </div>
-        </div>
+        <StatCard
+          icon="📋"
+          label="Total Decisions"
+          value={insights.totalDecisions}
+          description={`decisions tracked`}
+        />
 
         {/* Success Rate */}
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-content">
-            <div className="stat-label">Success Rate</div>
-            <div className="stat-value">{insights.successRate}%</div>
-            <div className="stat-bar">
-              <div
-                className="stat-bar-fill"
-                style={{
-                  width: `${insights.successRate}%`,
-                  backgroundColor: getSuccessColor(insights.successRate),
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          icon="✅"
+          label="Success Rate"
+          value={`${Math.round(insights.successRate)}%`}
+          description={`positive outcomes`}
+          color={getSuccessColor(insights.successRate)}
+        />
 
-        {/* Best Worlds */}
-        <div className="stat-card">
-          <div className="stat-icon">🌍</div>
-          <div className="stat-content">
-            <div className="stat-label">Best Worlds</div>
-            <div className="stat-value">
-              {insights.bestWorlds.length > 0 ? insights.bestWorlds.join(', ') : 'N/A'}
-            </div>
-          </div>
-        </div>
+        {/* Best World */}
+        <StatCard
+          icon="🏆"
+          label="Best World"
+          value={insights.bestWorlds[0] || 'N/A'}
+          description={`strongest area`}
+        />
 
-        {/* Improvement Areas */}
-        <div className="stat-card">
-          <div className="stat-icon">🎯</div>
-          <div className="stat-content">
-            <div className="stat-label">Areas to Improve</div>
-            <div className="stat-value">
-              {insights.improvementAreas.length > 0
-                ? insights.improvementAreas.slice(0, 1).join(', ')
-                : 'None identified'}
-            </div>
-          </div>
-        </div>
+        {/* Pending Follow-ups */}
+        <StatCard
+          icon="⏰"
+          label="Pending Follow-ups"
+          value={stats.pendingFollowUps}
+          description={`due for reflection`}
+          color={stats.pendingFollowUps > 0 ? '#f59e0b' : '#10b981'}
+        />
       </div>
 
-      {/* Trends */}
-      <div className="stats-trends">
-        <h3>📈 Trends</h3>
-        <p className="trends-text">{insights.trends}</p>
-      </div>
+      {/* Trends Section */}
+      {insights.trends && (
+        <div className="stats-trends">
+          <h3>📈 Trends</h3>
+          <p>{insights.trends}</p>
+        </div>
+      )}
 
-      {/* Refresh Button */}
-      <div className="stats-actions">
-        <button onClick={loadInsights} className="btn-refresh">
-          🔄 Refresh
-        </button>
+      {/* Improvement Areas */}
+      {insights.improvementAreas && insights.improvementAreas.length > 0 && (
+        <div className="stats-improvements">
+          <h3>🎯 Areas for Growth</h3>
+          <ul>
+            {insights.improvementAreas.map((area, idx) => (
+              <li key={idx}>{area}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface StatCardProps {
+  icon: string;
+  label: string;
+  value: number | string;
+  description: string;
+  color?: string;
+}
+
+function StatCard({ icon, label, value, description, color }: StatCardProps) {
+  return (
+    <div className="stat-card" style={color ? { borderLeftColor: color } : undefined}>
+      <div className="stat-icon">{icon}</div>
+      <div className="stat-content">
+        <div className="stat-label">{label}</div>
+        <div className="stat-value">{value}</div>
+        <div className="stat-description">{description}</div>
       </div>
     </div>
   );
 }
 
 /**
- * Get color based on success rate
+ * Determine color based on success rate
  */
 function getSuccessColor(rate: number): string {
-  if (rate >= 80) return 'var(--success-color, #10b981)';
-  if (rate >= 60) return 'var(--warning-color, #f59e0b)';
-  return 'var(--error-color, #ef4444)';
+  if (rate >= 80) return '#10b981'; // green
+  if (rate >= 60) return '#3b82f6'; // blue
+  if (rate >= 40) return '#f59e0b'; // amber
+  return '#ef4444'; // red
 }

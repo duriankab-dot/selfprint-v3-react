@@ -1,102 +1,80 @@
 /**
  * DecisionInsights.tsx
- * Display detailed insights and learnings from decision history
- * Shows: World-specific insights, patterns, recommendations
+ * Phase F2b: Display world-specific insights and patterns
  */
 
 import { useEffect, useState } from 'react';
 import type { WorldId } from '../../constants/worlds';
+import { WORLDS } from '../../constants/worlds';
 import * as DecisionLearningService from '../../services/DecisionLearningService';
-import TwinConfidenceIndicator from './TwinConfidenceIndicator';
-import '../../styles/decision-insights.css';
 
 interface DecisionInsightsProps {
   twinId: string;
-  world?: WorldId;
+  selectedWorld?: WorldId;
 }
 
-export default function DecisionInsights({ twinId, world }: DecisionInsightsProps) {
-  const [insights, setInsights] = useState<string>('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function DecisionInsights({ twinId, selectedWorld }: DecisionInsightsProps) {
+  const [insights, setInsights] = useState<Map<WorldId, string>>(new Map());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadInsights();
-  }, [twinId, world]);
+    const loadInsights = async () => {
+      try {
+        setIsLoading(true);
+        const insightMap = new Map<WorldId, string>();
 
-  async function loadInsights() {
-    try {
-      setLoading(true);
-      setError(null);
+        // Load insights for each world
+        for (const worldId of Object.keys(WORLDS) as WorldId[]) {
+          const insight = await DecisionLearningService.getWorldSpecificInsights(twinId, worldId);
+          insightMap.set(worldId, insight);
+        }
 
-      if (world) {
-        const worldInsights = await DecisionLearningService.getWorldSpecificInsights(
-          twinId,
-          world
-        );
-        setInsights(worldInsights);
-      } else {
-        // Load general insights
-        const fullInsights = await DecisionLearningService.getDecisionInsights(twinId);
-        setInsights(fullInsights.trends);
+        setInsights(insightMap);
+      } catch (err) {
+        // Error handled silently - display defaults
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Failed to load insights';
-      setError(msg);
-      console.error('Error loading insights:', err);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    loadInsights();
+  }, [twinId]);
+
+  if (isLoading) {
+    return <div className="insights-loading">Loading insights...</div>;
   }
 
-  if (loading) {
+  // If specific world selected, show that insight
+  if (selectedWorld && insights.has(selectedWorld)) {
+    const world = WORLDS[selectedWorld];
     return (
-      <div className="decision-insights-container">
-        <div className="insights-skeleton">
-          <div className="skeleton-line" />
-          <div className="skeleton-line" />
-          <div className="skeleton-line" />
+      <div className="decision-insight-card">
+        <div className="insight-header">
+          <span className="world-emoji">{world.emoji}</span>
+          <h3>{world.name} Insights</h3>
         </div>
+        <p className="insight-text">{insights.get(selectedWorld)}</p>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="decision-insights-container">
-        <div className="insights-error">Error: {error}</div>
-      </div>
-    );
-  }
-
-  if (!insights) {
-    return (
-      <div className="decision-insights-container">
-        <div className="insights-empty">
-          {world
-            ? 'No insights available for this world yet'
-            : 'No decision insights available yet'}
-        </div>
-      </div>
-    );
-  }
-
+  // Show all worlds' insights
   return (
     <div className="decision-insights-container">
-      <div className="insights-header">
-        <h3 className="insights-title">💡 Insights</h3>
-        {world && <TwinConfidenceIndicator twinId={twinId} world={world} size="small" />}
-      </div>
-
-      <div className="insights-content">
-        <p className="insights-text">{insights}</p>
-      </div>
-
-      {/* Refresh Button */}
-      <div className="insights-actions">
-        <button onClick={loadInsights} className="btn-refresh-small">
-          🔄
-        </button>
+      <h2>🔍 World-Specific Insights</h2>
+      <div className="insights-grid">
+        {Array.from(insights.entries()).map(([worldId, insight]) => {
+          const world = WORLDS[worldId as WorldId];
+          return (
+            <div key={worldId} className="insight-card">
+              <div className="insight-header">
+                <span className="world-emoji">{world.emoji}</span>
+                <h3>{world.name}</h3>
+              </div>
+              <p className="insight-text">{insight}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
