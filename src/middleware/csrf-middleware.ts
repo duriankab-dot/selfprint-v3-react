@@ -22,8 +22,7 @@ export interface CSRFMiddlewareResponse {
  * Usage: Apply to POST, PUT, DELETE requests
  */
 export async function csrfMiddleware(
-  req: CSRFMiddlewareRequest,
-  userId: string
+  req: CSRFMiddlewareRequest
 ): Promise<{ valid: boolean; response?: CSRFMiddlewareResponse }> {
   // Skip CSRF check for GET requests
   if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS') {

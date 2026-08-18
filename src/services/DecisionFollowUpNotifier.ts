@@ -8,8 +8,8 @@
  * - Pattern learning (extract insights from outcomes)
  */
 
-import { supabase } from '../lib/supabase/client';
-import { scheduleNotification } from './PushScheduler';
+import { supabase } from '../lib/supabase/client.js';
+import { scheduleNotification } from './PushScheduler.js';
 
 export interface DecisionFollowUp {
   decisionId: string;

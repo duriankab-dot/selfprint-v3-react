@@ -133,7 +133,7 @@ export async function checkSecurityThreats(
       .eq('action', 'csrf_failed')
       .gte('created_at', startTime);
 
-    if (failedAttempts && failedAttempts.length > 10) {
+    if (failedAttempts?.length && failedAttempts.length > 10) {
       alerts.push({
         id: crypto.randomUUID?.() || `alert-${Date.now()}`,
         type: 'security',
@@ -189,7 +189,7 @@ export async function triggerAlert(alert: Alert): Promise<void> {
           metadata: alert.metadata,
           created_at: alert.createdAt,
         });
-    } catch (err) {
+    } catch {
       // Continue silently
     }
   }

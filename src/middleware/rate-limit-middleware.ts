@@ -30,7 +30,6 @@ const ENDPOINT_LIMITS: Record<string, RateLimitConfig> = {
  * Rate limit check middleware
  */
 export async function rateLimitMiddleware(
-  req: RateLimitRequest,
   userId: string,
   endpoint: string,
   ipAddress: string

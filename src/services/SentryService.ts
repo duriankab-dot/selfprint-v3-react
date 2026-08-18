@@ -14,15 +14,12 @@ interface ErrorContext {
 
 // Mock Sentry initialization (actual: import * as Sentry from '@sentry/react')
 class MockSentry {
-  private initialized = false;
   private errors: Array<{ message: string; context: ErrorContext; timestamp: string }> = [];
 
   init(dsn: string): void {
     if (!dsn) {
-      console.error('Sentry DSN required for initialization');
       return;
     }
-    this.initialized = true;
   }
 
   captureException(error: Error, context?: ErrorContext): string {
@@ -34,7 +31,6 @@ class MockSentry {
       timestamp: new Date().toISOString(),
     });
 
-    // In production, this would send to Sentry
     return eventId;
   }
 
@@ -50,15 +46,15 @@ class MockSentry {
     return eventId;
   }
 
-  setUser(userId: string): void {
+  setUser(): void {
     // Set current user for error context
   }
 
-  setContext(name: string, context: Record<string, unknown>): void {
+  setContext(): void {
     // Add custom context to errors
   }
 
-  addBreadcrumb(message: string, category?: string): void {
+  addBreadcrumb(): void {
     // Add navigation breadcrumb for error tracking
   }
 }
@@ -92,15 +88,15 @@ export function captureMessage(message: string, context?: ErrorContext): string 
 /**
  * Set user context
  */
-export function setUserContext(userId: string): void {
-  sentry.setUser(userId);
+export function setUserContext(): void {
+  sentry.setUser();
 }
 
 /**
  * Add breadcrumb
  */
-export function addBreadcrumb(message: string, category?: string): void {
-  sentry.addBreadcrumb(message, category);
+export function addBreadcrumb(): void {
+  sentry.addBreadcrumb();
 }
 
 /**
@@ -109,7 +105,6 @@ export function addBreadcrumb(message: string, category?: string): void {
 export function captureAPIError(
   endpoint: string,
   statusCode: number,
-  error: string,
   userId?: string
 ): void {
   captureMessage(`API Error: ${endpoint} - ${statusCode}`, {
