@@ -8,6 +8,7 @@ import type { SICEInput, OrchestratorResult } from '../../types/sice';
 import type { WorldId } from '../../constants/worlds';
 import { SICEOrchestrator } from '../../services/sice/SICEOrchestrator';
 import { supabase } from '../../lib/supabase/client';
+import { rateLimitMiddleware } from '../../middleware/rate-limit-middleware';
 
 export interface SICEProcessRequest {
   userId: string;
@@ -38,7 +39,14 @@ export async function processSICE(
       };
     }
 
-    // TODO: Validate request (rate limiting, permissions, etc)
+    // Rate limiting — 20 req/min per user for SICE (CPU-heavy endpoint)
+    const rateCheck = await rateLimitMiddleware(userId, '/api/sice/process', '');
+    if (!rateCheck.allowed) {
+      return {
+        success: false,
+        message: `Rate limit exceeded. Retry after ${rateCheck.retryAfter ?? 60}s.`,
+      };
+    }
 
     // Build SICE input
     const input: SICEInput = {

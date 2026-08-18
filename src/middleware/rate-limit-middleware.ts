@@ -24,6 +24,7 @@ const ENDPOINT_LIMITS: Record<string, RateLimitConfig> = {
   '/api/twin': { limitPerMinute: 30, limitPerHour: 500 },
   '/api/decisions': { limitPerMinute: 20, limitPerHour: 300 },
   '/api/feedback': { limitPerMinute: 10, limitPerHour: 100 },
+  '/api/sice/process': { limitPerMinute: 20, limitPerHour: 300 }, // CPU-heavy: 20 req/min
 };
 
 /**

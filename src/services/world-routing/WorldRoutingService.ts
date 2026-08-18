@@ -9,6 +9,7 @@
 import { supabase } from '../supabase-service';
 import { getWorldPrompt, getWorldConfig } from '../world-prompts/WorldExpertPrompts';
 import { getWorldExpertiseScore, inferMoodFromWorld } from '../WorldExpertiseService';
+import { SICEOrchestrator } from '../sice/SICEOrchestrator';
 import type { WorldId } from '../../constants/worlds';
 import type { SICEInput, SICEOutput } from '../../types/sice';
 
@@ -40,21 +41,42 @@ export async function routeToWorld(
   currentWorld: WorldId
 ): Promise<WorldRoutedOutput> {
   try {
-    // Get world context
+    const startTime = performance.now();
+
+    // Get world context (expertise, mood, prompt)
     const worldContext = await getWorldContext(input.userId, currentWorld);
 
-    // Call SICE orchestrator with world-aware config
-    // For now, return stub that shows the routing worked
-    // In full implementation, this would call the SICE orchestrator
+    // Build world-enhanced SICE input
+    const worldInput: SICEInput = {
+      ...input,
+      currentWorld,
+      userContext: {
+        ...(input.userContext ?? {}),
+        worldExpertiseScore: worldContext.expertiseScore,
+        worldMood: worldContext.twinMood,
+        worldInteractionCount: worldContext.interactionCount,
+      },
+    };
+
+    // Call real SICE orchestrator with world context
+    const orchestrator = new SICEOrchestrator();
+    const orchestratorResult = await orchestrator.orchestrate(worldInput);
+
+    // Apply world confidence modifier to orchestrator confidence
+    const rawConfidence = orchestratorResult.personalIntelligence.confidence;
+    const adjustedConfidence = Math.min(
+      100,
+      Math.round(rawConfidence * worldContext.confidenceModifier)
+    );
+
+    const executionTime = Math.round(performance.now() - startTime);
+
     const output: WorldRoutedOutput = {
       engineId: 0,
       engineName: 'WorldRouter',
-      result: {
-        analysis: `Twin expertise in ${worldContext.worldName}: ${worldContext.expertiseScore}%`,
-        worldContext,
-      },
-      confidence: Math.min(100, 50 + (worldContext.expertiseScore * 0.4)),
-      executionTime: 50, // ms
+      result: orchestratorResult,
+      confidence: adjustedConfidence,
+      executionTime,
       worldId: currentWorld,
       worldContext,
     };
