@@ -3,9 +3,9 @@ name: E2E & Load Testing (PHASE 3)
 on:
   push:
     branches: [master, main, develop]
-  schedule:
-    # Run daily at 2 AM UTC
-    - cron: '0 2 * * *'
+  # schedule:
+  #   # Run daily at 2 AM UTC (enable after production deployment)
+  #   - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
       test_type:
