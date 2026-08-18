@@ -14,7 +14,7 @@
  * - Patterns detected (insights)
  */
 
-import { supabase } from '../lib/supabase/client';
+import { supabase } from '../lib/supabase/client.js';
 
 export interface NotificationSchedule {
   id?: string;
