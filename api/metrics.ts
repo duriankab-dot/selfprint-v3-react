@@ -4,7 +4,21 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import * as InputValidation from '../src/services/InputValidation';
+
+function validateTimestamp(timestamp: string): boolean {
+  try {
+    const date = new Date(timestamp);
+    return !Number.isNaN(date.getTime());
+  } catch {
+    return false;
+  }
+}
+
+function validateUserId(userId: string): boolean {
+  if (!userId || typeof userId !== 'string') return false;
+  if (userId.length < 1 || userId.length > 255) return false;
+  return /^[a-zA-Z0-9\-_]+$/.test(userId);
+}
 
 export default async function handler(
   req: VercelRequest,
@@ -26,13 +40,13 @@ export default async function handler(
     }
 
     // Validate timestamp format
-    if (!InputValidation.validateTimestamp(timestamp)) {
+    if (!validateTimestamp(timestamp)) {
       res.status(400).json({ error: 'Invalid timestamp' });
       return;
     }
 
-    // Log metrics (in production, would store to database)
-    if (userId && !InputValidation.validateUserId(userId)) {
+    // Validate user ID
+    if (userId && !validateUserId(userId)) {
       res.status(400).json({ error: 'Invalid user ID' });
       return;
     }
