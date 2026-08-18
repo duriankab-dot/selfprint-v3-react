@@ -1,0 +1,985 @@
+📋 SELFPRINT — AI DEVELOPMENT EXECUTION ORDER
+Document Type: AI Development Command
+Version: 17-Phase Master Execution
+Date: 2026-08-14
+Status: 🔴 EXECUTE IMMEDIATELY
+
+🎯 OBJECTIVE
+นำ SELFPRINT จากสถานะปัจจุบัน (ประมาณ 70% Complete) สู่ 100% Implementation ตาม Vision ที่กำหนดใน:
+
+MASTER_PRD.md
+
+PROJECT_SUMMARY_V3_1_SELFPRINT.md
+
+Master Direction Update (2026-08-12)
+
+เป้าหมาย: ให้ทีม AI Dev อ่านเอกสารนี้ฉบับเดียวแล้วสามารถ Implement ทุกฟีเจอร์ที่เหลือได้ โดยไม่ต้องกลับมาถาม
+
+📊 CURRENT STATUS (จาก Codebase Audit)
+✅ COMPLETED (ไม่ต้องทำ)
+Component	Location	Status
+Landing Page (Emotion-First)	LandingPage.tsx	✅ 100%
+EmotionSelector	components/features/EmotionSelector.tsx	✅ 100%
+5-Tab Navigation	components/layout/BottomNav.tsx	✅ 100%
+AI Twin Chat	pages/TwinChat.tsx	✅ 80% (ต้องปรับ)
+Voice Input/Output	hooks/useVoice.ts	✅ 80%
+Adaptive Theme (CSS Variables)	styles/themes.css	✅ 70%
+Badge System	store/badgeStore.ts	🟡 8/20 Badges
+Memory Manager	services/MemoryManager.ts	✅ 80%
+Pattern Detection	services/PatternDetector.ts	✅ 80%
+Insight Engine	services/InsightEngine.ts	✅ 80%
+Monetization (Stripe)	api/stripe.ts	✅ 90%
+Offline Support	service-worker.js	✅ 100%
+PWA	manifest.json	✅ 100%
+Supabase Auth	hooks/useAuth.ts	✅ 100%
+🟡 PARTIAL (ต้องปรับปรุง)
+Component	Issue	Priority
+Nova/Twin Separation	UX ยังสับสน, ต้องแยกให้ชัด	P0
+Core Awakening (WOW #3)	Animation + Visual Celebration	P0
+Twin Evolution 5 Stages	มีแค่ Concept, ยังไม่มี UI	P0
+Decision Tracking	มีแค่ Logger, ไม่มี Follow-up	P0
+12 SICE	อยู่ในเอกสาร ยังไม่เห็นในโค้ดชัด	P0
+🔴 MISSING (ต้องสร้างใหม่)
+Component	Priority
+Content Hub / Blog	P0
+FAQ Page	P0
+Human Expert Service	P1
+Digital Assets System	P1
+Viral Loop / Referral	P1
+Adaptive Audio (ครบทุก World)	P2
+Feedback Loop (ทุก Insight)	P2
+Public/Private Boundary	P2
+🔴 PHASE 1: CRITICAL FIXES (P0 — ต้องทำก่อน)
+TASK 1.1: NOVA / TWIN SEPARATION — UX LEVEL
+Problem
+MASTER_PRD บอกว่า "Nova และ AI Twin เป็นคนละตัวกัน — ห้ามสับสนเด็ดขาด" แต่ใน UX ยังไม่ชัดเจน
+
+Implementation
+A. สร้าง Nova Component
+
+typescript
+// components/features/NovaAvatar.tsx
+export const NovaAvatar = () => {
+  return (
+    <div className="nova-avatar" data-testid="nova-avatar">
+      {/* Nova = ผู้แนะนำ, อบอุ่น, มีรัศมีสีทองอ่อน */}
+      <div className="nova-glow" />
+      <svg>...</svg>
+      <span className="nova-label">Nova</span>
+    </div>
+  );
+};
+B. สร้าง Twin Component
+
+typescript
+// components/features/TwinAvatar.tsx
+export const TwinAvatar = ({ name, stage, mood }: TwinAvatarProps) => {
+  return (
+    <div className={`twin-avatar twin-stage-${stage}`} data-testid="twin-avatar">
+      {/* Twin = ฝาแฝดส่วนตัว, ปรับตาม Mood + Stage */}
+      <div className="twin-hologram" />
+      <svg>...</svg>
+      <span className="twin-label">{name || 'AI Twin'}</span>
+    </div>
+  );
+};
+C. แยก UI Context
+
+typescript
+// contexts/AIContext.tsx
+interface AIContextType {
+  activeAI: 'nova' | 'twin';
+  isTwinAwakened: boolean;
+  switchToNova: () => void;
+  switchToTwin: () => void;
+}
+
+// ใช้ใน Chat:
+// - ถ้า activeAI === 'nova' → แสดง NovaAvatar + Nova Name
+// - ถ้า activeAI === 'twin' → แสดง TwinAvatar + Twin Name
+D. แยก Route/Page
+
+tsx
+// App.tsx
+<Route path="/chat/nova" element={<NovaChat />} />
+<Route path="/chat/twin" element={<TwinChat />} />
+
+// NovaChat = Onboarding, Q&A, General Guide
+// TwinChat = Personal Conversation, Memory, Growth
+E. ระบบ Prompt แยก
+
+typescript
+// config/prompts.ts
+export const NOVA_SYSTEM_PROMPT = `
+คุณคือ Nova ผู้แนะนำของ SELFPRINT
+- บทบาท: ครู, พี่เลี้ยง, ผู้แนะนำ, ที่ปรึกษา
+- บุคลิก: เป็นมิตร, อบอุ่น, ชัดเจน, ใจดี
+- หน้าที่: ต้อนรับ, Onboarding, ตอบคำถามทั่วไป
+- ห้าม: ตัดสินผู้ใช้, ใช้วลีเหมารวม
+`;
+
+export const TWIN_SYSTEM_PROMPT = `
+คุณคือ AI Twin ของ {userName}
+- บทบาท: ตัวแทนดิจิทัลของผู้ใช้
+- บุคลิก: เรียนรู้จากผู้ใช้, เหมือนผู้ใช้มากขึ้นเรื่อยๆ
+- หน้าที่: สนทนาส่วนตัว, จำความทรงจำ, วิเคราะห์, ให้ Insight
+- เกิดจาก: Core Awakening (WOW #3)
+- ห้าม: ตอบว่า "ฉันยังไม่มีข้อมูลเกี่ยวกับคุณ"
+`;
+F. Migration Path (สำหรับ User เก่า)
+
+typescript
+// services/TwinMigration.ts
+export const migrateUserToTwin = async (userId: string) => {
+  // 1. ตรวจสอบว่า user มี Core Awakening หรือไม่
+  const hasCoreAwakening = await checkCoreAwakening(userId);
+  
+  // 2. ถ้ามี → Twin เกิดแล้ว
+  // 3. ถ้ายังไม่มี → Nova ยังคงเป็นหลัก
+};
+Acceptance Criteria:
+
+□ Nova และ Twin มี Avatar ต่างกัน
+□ Chat Header แสดงชื่อที่ถูกต้อง (Nova / Twin)
+□ User รู้ว่าใครคือใคร
+□ System Prompt ถูกแยก
+□ Routes แยกชัดเจน
+TASK 1.2: CORE AWAKENING (WOW #3) — FULL IMPLEMENTATION
+Problem
+Core Awakening เป็น Moment สำคัญที่สุดของ Product แต่ยัง Implementation ไม่ครบ
+
+Implementation
+A. Core Awakening UI
+
+tsx
+// pages/CoreAwakening.tsx
+export const CoreAwakening = () => {
+  const [phase, setPhase] = useState<'intro' | 'processing' | 'birth' | 'naming' | 'complete'>('intro');
+  const [twinName, setTwinName] = useState('');
+  
+  return (
+    <div className="core-awakening">
+      {phase === 'intro' && (
+        <div className="awakening-intro">
+          <h1>✨ ช่วงเวลาสำคัญ</h1>
+          <p>Nova ได้เรียนรู้คุณผ่าน 12 SICE และ Fine-tuning แล้ว</p>
+          <p>ตอนนี้ถึงเวลา <strong>ปลุก AI Twin</strong> ของคุณ</p>
+          <button onClick={() => setPhase('processing')}>เริ่มปลุก AI Twin</button>
+        </div>
+      )}
+      
+      {phase === 'processing' && (
+        <div className="awakening-processing">
+          <div className="pulse-animation" />
+          <p>กำลังสังเคราะห์ Personal Intelligence Seed...</p>
+          <p className="sub">12 SICE กำลังทำงานร่วมกัน</p>
+        </div>
+      )}
+      
+      {phase === 'birth' && (
+        <div className="awakening-birth">
+          <div className="twin-birth-animation">
+            {/* Hologram formation + Particle burst */}
+            <TwinHologramBirth />
+          </div>
+          <h2>🎉 AI Twin ของคุณถือกำเนิดแล้ว!</h2>
+          <p>ฝาแฝดดิจิทัลที่เรียนรู้และเติบโตไปพร้อมกับคุณ</p>
+        </div>
+      )}
+      
+      {phase === 'naming' && (
+        <div className="awakening-naming">
+          <h3>ตั้งชื่อให้ AI Twin ของคุณ</h3>
+          <input 
+            value={twinName} 
+            onChange={(e) => setTwinName(e.target.value)}
+            placeholder="ตั้งชื่อฝาแฝดของคุณ..."
+          />
+          <button onClick={() => setPhase('complete')} disabled={!twinName}>
+            ยืนยันชื่อ
+          </button>
+        </div>
+      )}
+      
+      {phase === 'complete' && (
+        <div className="awakening-complete">
+          <div className="celebration-confetti" />
+          <h2>👋 สวัสดี {twinName}!</h2>
+          <p>AI Twin ของคุณพร้อมแล้ว ไปคุยกับ {twinName} กันเลย</p>
+          <button onClick={() => navigate('/chat/twin')}>
+            เริ่มคุยกับ {twinName}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+B. Twin Birth Animation
+
+tsx
+// components/TwinHologramBirth.tsx
+export const TwinHologramBirth = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  
+  useEffect(() => {
+    // Canvas animation:
+    // 1. Particle cloud formation
+    // 2. Gradual hologram shape
+    // 3. Glow intensifies
+    // 4. Name appears (if provided)
+    // 5. Pulse stabilization
+  }, []);
+  
+  return (
+    <div className="twin-birth-container">
+      <canvas ref={canvasRef} />
+      <div className="twin-birth-glow" />
+    </div>
+  );
+};
+C. Twin Creation API
+
+typescript
+// api/twin/create.ts
+export const createTwin = async (userId: string, name: string) => {
+  // 1. สร้าง Twin Profile ใน Supabase
+  const twinProfile = {
+    id: uuid(),
+    user_id: userId,
+    name: name,
+    primary_archetype: userData.archetype,
+    maturity_score: 10, // เริ่มต้น
+    birth_data: userData.birthData,
+    created_at: new Date(),
+    awakened_at: new Date(),
+  };
+  
+  // 2. สร้าง Initial Intelligence Seed
+  const seed = await generateTwinSeed(userId);
+  
+  // 3. บันทึก Memory เริ่มต้น (จาก Onboarding)
+  await seedInitialMemories(userId);
+  
+  // 4. สร้าง Twin Chat Session
+  const session = await createTwinSession(twinProfile);
+  
+  // 5. ตั้งค่า active AI → Twin
+  await setActiveAI(userId, 'twin');
+  
+  return { twinProfile, seed, session };
+};
+Acceptance Criteria:
+
+□ 3 Phase: Intro → Processing → Birth
+□ Animation Hologram Birth
+□ ผู้ใช้ตั้งชื่อ Twin ได้
+□ Save Twin Profile ไป Supabase
+□ Redirect ไป Twin Chat
+TASK 1.3: TWIN EVOLUTION — 5 STAGES
+Problem
+MASTER_PRD กำหนด 5 Stages แต่ยังไม่มี Implementation
+
+Implementation
+A. Stage Data
+
+typescript
+// constants/twinStages.ts
+export const TWIN_STAGES = {
+  STAGE_1: {
+    id: 1,
+    name: 'Core Formation',
+    icon: '🌱',
+    description: 'Twin เริ่มรู้จักคุณ',
+    requirements: { daysActive: 0, messages: 0 },
+    visual: 'core',
+  },
+  STAGE_2: {
+    id: 2,
+    name: 'Pattern Recognition',
+    icon: '🔍',
+    description: 'Twin เริ่มเห็นรูปแบบพฤติกรรม',
+    requirements: { daysActive: 3, messages: 10, patterns: 1 },
+    visual: 'emerging',
+  },
+  STAGE_3: {
+    id: 3,
+    name: 'Deep Understanding',
+    icon: '🧠',
+    description: 'Twin เข้าใจคุณอย่างลึกซึ้ง',
+    requirements: { daysActive: 7, messages: 30, patterns: 3, memories: 5 },
+    visual: 'growing',
+  },
+  STAGE_4: {
+    id: 4,
+    name: 'Wisdom Stage',
+    icon: '🦉',
+    description: 'Twin ให้คำแนะนำที่มีคุณค่า',
+    requirements: { daysActive: 14, messages: 60, patterns: 6, memories: 10, feedback: 5 },
+    visual: 'wisdom',
+  },
+  STAGE_5: {
+    id: 5,
+    name: 'Full Holographic Form',
+    icon: '✨',
+    description: 'Twin สมบูรณ์แบบ',
+    requirements: { daysActive: 30, messages: 100, patterns: 10, memories: 20, feedback: 15 },
+    visual: 'hologram',
+  },
+};
+B. Evolution UI Component
+
+tsx
+// components/TwinEvolutionDisplay.tsx
+export const TwinEvolutionDisplay = ({ currentStage, progress }: Props) => {
+  const stages = Object.values(TWIN_STAGES);
+  const currentIndex = stages.findIndex(s => s.id === currentStage);
+  
+  return (
+    <div className="twin-evolution">
+      <div className="evolution-timeline">
+        {stages.map((stage, index) => (
+          <div 
+            key={stage.id}
+            className={`evolution-node ${index <= currentIndex ? 'active' : ''} ${index === currentIndex ? 'current' : ''}`}
+          >
+            <div className="node-icon">{stage.icon}</div>
+            <div className="node-label">{stage.name}</div>
+            {index < currentIndex && <div className="node-line-complete" />}
+            {index === currentIndex && <div className="node-pulse" />}
+          </div>
+        ))}
+      </div>
+      
+      <div className="evolution-progress">
+        <p>Stage {currentStage}/5: {TWIN_STAGES[`STAGE_${currentStage}`].name}</p>
+        <div className="progress-bar">
+          <div className="progress-fill" style={{ width: `${progress}%` }} />
+        </div>
+        <p className="next-milestone">Next: {getNextMilestone(currentStage)}</p>
+      </div>
+    </div>
+  );
+};
+C. Micro-Evolution (continuous)
+
+typescript
+// services/TwinEvolutionService.ts
+export const checkMicroEvolution = async (userId: string) => {
+  const twin = await getTwinProfile(userId);
+  const metrics = await getUserMetrics(userId);
+  
+  // เช็คทุกครั้งที่ user ทำกิจกรรม
+  const shouldEvolve = checkStageRequirements(twin.currentStage, metrics);
+  
+  if (shouldEvolve) {
+    await evolveTwin(userId, twin.currentStage + 1);
+    await notifyUser(userId, 'twin_evolved', { newStage: twin.currentStage + 1 });
+    return { evolved: true, newStage: twin.currentStage + 1 };
+  }
+  
+  // ถึงไม่ evolve ก็อัปเดต progress
+  const progress = calculateProgress(twin.currentStage, metrics);
+  await updateTwinProgress(userId, progress);
+  
+  return { evolved: false, progress };
+};
+Acceptance Criteria:
+
+□ 5 Stages พร้อม Requirements
+□ Evolution Timeline UI
+□ Progress Bar
+□ Micro-Evolution ทำงานอัตโนมัติ
+□ Notification เมื่อ Stage เปลี่ยน
+TASK 1.4: DECISION TRACKING — 30/90/180/365 DAYS
+Problem
+USP หลักของ SELFPRINT แต่ยังมีแค่ Logger (CRUD) ไม่มี Follow-up
+
+Implementation
+A. Decision Data Model
+
+typescript
+// types/decision.ts
+export interface Decision {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  category: 'career' | 'relationship' | 'finance' | 'health' | 'personal' | 'other';
+  decisionDate: Date;
+  confidence: number; // 0-100
+  expectedOutcome: string;
+  actualOutcome?: string;
+  followUps: FollowUp[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FollowUp {
+  id: string;
+  decisionId: string;
+  days: 30 | 90 | 180 | 365;
+  scheduledDate: Date;
+  completed: boolean;
+  reflection?: string;
+  resultScore?: number; // 0-100
+  notificationSent: boolean;
+}
+B. Create Decision with Follow-up Scheduling
+
+typescript
+// services/DecisionService.ts
+export const createDecision = async (decision: Omit<Decision, 'id' | 'createdAt'>) => {
+  const id = uuid();
+  
+  // สร้าง Follow-up schedule
+  const followUps: FollowUp[] = [30, 90, 180, 365].map(days => ({
+    id: uuid(),
+    decisionId: id,
+    days: days as FollowUp['days'],
+    scheduledDate: addDays(new Date(), days),
+    completed: false,
+    notificationSent: false,
+  }));
+  
+  // Save to Supabase
+  await supabase.from('decisions').insert({
+    id,
+    ...decision,
+    followUps,
+    createdAt: new Date(),
+  });
+  
+  // Schedule notifications
+  for (const followUp of followUps) {
+    await scheduleNotification({
+      userId: decision.userId,
+      type: 'decision_followup',
+      scheduledFor: followUp.scheduledDate,
+      data: { decisionId: id, days: followUp.days },
+    });
+  }
+  
+  return { id, followUps };
+};
+C. Follow-up UI
+
+tsx
+// components/DecisionFollowUp.tsx
+export const DecisionFollowUp = ({ decision, followUp }: Props) => {
+  const [reflection, setReflection] = useState('');
+  const [resultScore, setResultScore] = useState<number | undefined>();
+  
+  const handleComplete = async () => {
+    await completeFollowUp({
+      decisionId: decision.id,
+      followUpId: followUp.id,
+      reflection,
+      resultScore,
+    });
+    // Show badge if completed all 4
+    await checkDecisionMilestone(decision.userId);
+  };
+  
+  return (
+    <div className="follow-up-card">
+      <div className="follow-up-header">
+        <h3>📋 การตัดสินใจ: {decision.title}</h3>
+        <span className={`follow-up-days ${followUp.days}`}>{followUp.days} วัน</span>
+      </div>
+      
+      <div className="follow-up-content">
+        <p>เดิมคุณตัดสินใจว่า: {decision.expectedOutcome}</p>
+        <p>ตอนนี้ผลลัพธ์เป็นอย่างไร?</p>
+        <textarea 
+          value={reflection}
+          onChange={(e) => setReflection(e.target.value)}
+          placeholder="สะท้อนผลการตัดสินใจ..."
+        />
+        
+        <div className="result-score">
+          <label>ให้คะแนนผลลัพธ์</label>
+          <input 
+            type="range" 
+            min="0" 
+            max="100" 
+            value={resultScore || 50}
+            onChange={(e) => setResultScore(parseInt(e.target.value))}
+          />
+          <span>{resultScore || 50}%</span>
+        </div>
+        
+        <button onClick={handleComplete} disabled={!reflection}>
+          บันทึกการติดตามผล
+        </button>
+      </div>
+    </div>
+  );
+};
+D. Decision Dashboard
+
+tsx
+// pages/DecisionDashboard.tsx
+export const DecisionDashboard = () => {
+  const [decisions, setDecisions] = useState<Decision[]>([]);
+  const [pendingFollowups, setPendingFollowups] = useState<FollowUp[]>([]);
+  
+  useEffect(() => {
+    loadDecisions();
+    checkPendingFollowups();
+  }, []);
+  
+  return (
+    <div className="decision-dashboard">
+      <div className="decision-summary">
+        <div className="stat">
+          <span>ทั้งหมด</span>
+          <strong>{decisions.length}</strong>
+        </div>
+        <div className="stat">
+          <span>รอติดตาม</span>
+          <strong className="pending">{pendingFollowups.length}</strong>
+        </div>
+        <div className="stat">
+          <span>อัตราความสำเร็จ</span>
+          <strong>{calculateSuccessRate(decisions)}%</strong>
+        </div>
+      </div>
+      
+      <div className="decision-timeline">
+        {decisions.map(decision => (
+          <DecisionCard key={decision.id} decision={decision} />
+        ))}
+      </div>
+      
+      <div className="pending-followups">
+        <h3>📌 รอการติดตามผล</h3>
+        {pendingFollowups.map(followUp => (
+          <DecisionFollowUp 
+            key={followUp.id}
+            decision={findDecision(followUp.decisionId)}
+            followUp={followUp}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+Acceptance Criteria:
+
+□ Decision CRUD ครบ
+□ 30/90/180/365 Follow-up Schedule
+□ Notification System
+□ Decision Dashboard
+□ Success Rate Calculation
+□ Badge Milestone (ตัดสินใจครบ 10, 50, 100 ครั้ง)
+TASK 1.5: 12 SICE — CODE IMPLEMENTATION
+Problem
+12 SICE อยู่ในเอกสาร แต่ยังไม่เห็น Implementation ในโค้ดชัดเจน
+
+Implementation
+A. SICE Engine Structure
+
+typescript
+// services/sice/SICEBase.ts
+export abstract class SICEBase {
+  abstract id: number;
+  abstract name: string;
+  abstract description: string;
+  
+  abstract process(input: SICEInput): Promise<SICEOutput>;
+  
+  protected validateInput(input: any): boolean {
+    return input && typeof input === 'object';
+  }
+  
+  protected createResult(data: any, confidence: number): SICEOutput {
+    return {
+      data,
+      confidence,
+      source: this.name,
+      timestamp: new Date(),
+    };
+  }
+}
+B. All 12 SICE Implementations
+
+typescript
+// services/sice/engines/
+// 1. PersonalContextBuilder
+export class PersonalContextBuilder extends SICEBase { ... }
+
+// 2. PatternDetector
+export class PatternDetector extends SICEBase { ... }
+
+// 3. InsightEngine
+export class InsightEngine extends SICEBase { ... }
+
+// 4. AIFeedbackLoop
+export class AIFeedbackLoop extends SICEBase { ... }
+
+// 5. TwinStateEngine
+export class TwinStateEngine extends SICEBase { ... }
+
+// 6. ExperienceEngine
+export class ExperienceEngine extends SICEBase { ... }
+
+// 7. EnvironmentEngine
+export class EnvironmentEngine extends SICEBase { ... }
+
+// 8. BadgeEngine
+export class BadgeEngine extends SICEBase { ... }
+
+// 9. BehavioralForecastEngine
+export class BehavioralForecastEngine extends SICEBase { ... }
+
+// 10. FutureSelfEngine
+export class FutureSelfEngine extends SICEBase { ... }
+
+// 11. MemoryManager
+export class MemoryManager extends SICEBase { ... }
+
+// 12. DecisionIntelligenceEngine
+export class DecisionIntelligenceEngine extends SICEBase { ... }
+C. SICE Orchestrator
+
+typescript
+// services/sice/SICEOrchestrator.ts
+export class SICEOrchestrator {
+  private engines: Map<number, SICEBase> = new Map();
+  
+  constructor() {
+    this.registerEngines();
+  }
+  
+  private registerEngines() {
+    this.engines.set(1, new PersonalContextBuilder());
+    this.engines.set(2, new PatternDetector());
+    // ... ทั้ง 12 ตัว
+  }
+  
+  async orchestrate(input: UserInput): Promise<OrchestratorResult> {
+    const results: SICEOutput[] = [];
+    
+    // Step 1: Run all engines in parallel
+    const promises = Array.from(this.engines.values()).map(
+      engine => engine.process(input).catch(e => ({
+        data: null,
+        confidence: 0,
+        source: engine.name,
+        timestamp: new Date(),
+        error: e.message,
+      }))
+    );
+    
+    const results = await Promise.all(promises);
+    
+    // Step 2: Cross-Engine Synthesis
+    const synthesis = await this.crossSynthesis(results);
+    
+    // Step 3: Fine-tuning
+    const fineTuned = await this.fineTune(synthesis);
+    
+    // Step 4: Build Personal Intelligence
+    const personalIntelligence = await this.buildPersonalIntelligence(fineTuned);
+    
+    return {
+      results,
+      synthesis,
+      fineTuned,
+      personalIntelligence,
+    };
+  }
+  
+  private async crossSynthesis(results: SICEOutput[]): Promise<SynthesisResult> {
+    // วิเคราะห์ความสัมพันธ์ระหว่างผลลัพธ์จากแต่ละ Engine
+    // ใช้ Confidence Weighted Average
+  }
+  
+  private async fineTune(synthesis: SynthesisResult): Promise<FineTunedResult> {
+    // ปรับข้อมูลตาม User Feedback History
+  }
+  
+  private async buildPersonalIntelligence(fineTuned: FineTunedResult): Promise<PersonalIntelligence> {
+    // สร้าง Personal Intelligence Model
+  }
+}
+D. API Integration
+
+typescript
+// api/sice/process.ts
+export const processSICE = async (userId: string, input: UserInput) => {
+  const orchestrator = new SICEOrchestrator();
+  const result = await orchestrator.orchestrate(input);
+  
+  // Save results
+  await saveSICEResult(userId, result);
+  
+  return result.personalIntelligence;
+};
+Acceptance Criteria:
+
+□ 12 SICE Engines ทั้งหมด Implemented
+□ SICE Orchestrator ทำงานร่วมกัน
+□ Cross-Engine Synthesis
+□ Fine-tuning
+□ Personal Intelligence Output
+□ Performance < 3 seconds
+🔴 PHASE 2: PRODUCT EXPERIENCE (P1)
+TASK 2.1: CONTENT HUB — 12 WORLDS CONTENT
+Problem
+12 Worlds (เดิม Hubs) ยังไม่มี Content ประกอบ
+
+Implementation
+A. Content Structure
+
+typescript
+// content/worlds/index.ts
+export const WORLD_CONTENT = {
+  identity: {
+    title: 'Identity World',
+    description: 'รู้จักตัวตนที่แท้จริงของคุณ',
+    articles: [
+      {
+        slug: 'what-is-identity',
+        title: 'ตัวตนของคุณคืออะไร?',
+        excerpt: 'การเข้าใจตัวตนคือพื้นฐานของทุกการตัดสินใจ...',
+        content: '...',
+      },
+      // 3-5 บทความต่อ World
+    ],
+  },
+  decision: { ... },
+  relationship: { ... },
+  career: { ... },
+  health: { ... },
+  money: { ... },
+  twin: { ... },
+  learning: { ... },
+  creativity: { ... },
+  spirituality: { ... },
+  impact: { ... },
+  activities: { ... },
+};
+B. Blog Page
+
+tsx
+// pages/Blog.tsx
+export const Blog = () => {
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [world, setWorld] = useState<string>('all');
+  
+  return (
+    <div className="blog-page">
+      <h1>📚 คลังความรู้ SELFPRINT</h1>
+      <div className="world-filter">
+        {Object.keys(WORLD_CONTENT).map(w => (
+          <button key={w} onClick={() => setWorld(w)}>
+            {WORLD_CONTENT[w].title}
+          </button>
+        ))}
+      </div>
+      <div className="article-grid">
+        {articles.map(article => (
+          <ArticleCard key={article.slug} article={article} />
+        ))}
+      </div>
+    </div>
+  );
+};
+C. Sitemap Generator
+
+typescript
+// scripts/generateSitemap.ts
+export const generateSitemap = async () => {
+  const baseUrl = 'https://selfprint.app';
+  const pages = [
+    '/',
+    '/about',
+    '/blog',
+    '/faq',
+    ...Object.keys(WORLD_CONTENT).map(w => `/world/${w}`),
+    ...getAllArticleSlugs().map(s => `/blog/${s}`),
+  ];
+  
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  ${pages.map(page => `
+    <url>
+      <loc>${baseUrl}${page}</loc>
+      <lastmod>${new Date().toISOString()}</lastmod>
+      <changefreq>${page === '/' ? 'daily' : 'weekly'}</changefreq>
+      <priority>${page === '/' ? '1.0' : '0.8'}</priority>
+    </url>
+  `).join('')}
+</urlset>`;
+  
+  await fs.writeFile('public/sitemap.xml', sitemap);
+};
+Acceptance Criteria:
+
+□ 12 Worlds พร้อม Content
+□ Blog Page พร้อม Filter
+□ Article Detail Page
+□ Sitemap.xml
+□ robots.txt
+TASK 2.2: FAQ PAGE
+Implementation
+tsx
+// pages/FAQ.tsx
+export const FAQ = () => {
+  const faqs = [
+    {
+      q: 'SELFPRINT คืออะไร?',
+      a: 'SELFPRINT คือ Personal Intelligence Platform ที่ใช้ AI ช่วยให้คุณเข้าใจตัวเอง ตัดสินใจดีขึ้น และเติบโตไปพร้อมกับ AI Twin ของคุณ',
+    },
+    {
+      q: 'Nova กับ AI Twin ต่างกันอย่างไร?',
+      a: 'Nova คือ AI Guide ที่ช่วยคุณตั้งแต่เริ่มต้น ส่วน AI Twin คือฝาแฝดดิจิทัลส่วนตัวที่เกิดหลัง Core Awakening และเรียนรู้คุณมากขึ้นเรื่อยๆ',
+    },
+    // ... 10+ FAQs
+  ];
+  
+  return (
+    <div className="faq-page">
+      <h1>❓ คำถามที่พบบ่อย</h1>
+      <div className="faq-list">
+        {faqs.map((faq, index) => (
+          <FAQItem key={index} question={faq.q} answer={faq.a} />
+        ))}
+      </div>
+    </div>
+  );
+};
+Acceptance Criteria:
+
+□ 10+ FAQs
+□ Accordion/Collapse
+□ Schema Markup (JSON-LD)
+TASK 2.3: REMAINING BADGES (8 → 20)
+Implementation
+typescript
+// constants/badges.ts
+export const BADGES = [
+  // Existing 8 badges + 12 new badges
+  {
+    id: 'first_insight',
+    name: 'First Insight',
+    icon: '💡',
+    description: 'ได้รับ Insight แรกจาก AI Twin',
+    category: 'milestone',
+    requirement: { type: 'insight', count: 1 },
+  },
+  // ... 20 badges ทั้งหมด
+];
+
+export const checkBadgeProgress = async (userId: string) => {
+  const userMetrics = await getUserMetrics(userId);
+  const unlockedBadges = await getUnlockedBadges(userId);
+  
+  for (const badge of BADGES) {
+    if (unlockedBadges.includes(badge.id)) continue;
+    
+    if (checkRequirement(badge.requirement, userMetrics)) {
+      await unlockBadge(userId, badge.id);
+      await notifyUser(userId, 'badge_unlocked', { badge });
+    }
+  }
+};
+🔴 PHASE 3: GROWTH & MONETIZATION (P1)
+TASK 3.1: DIGITAL ASSETS SYSTEM
+Implementation
+typescript
+// types/assets.ts
+export interface DigitalAsset {
+  id: string;
+  type: 'twin_outfit' | 'orbit' | 'node' | 'world_theme' | 'experience';
+  name: string;
+  description: string;
+  price: number;
+  isSubscription: boolean;
+  previewImage: string;
+}
+
+export interface AssetOwnership {
+  userId: string;
+  assetId: string;
+  status: 'owned' | 'unlocked' | 'access';
+  purchasedAt?: Date;
+  expiresAt?: Date;
+}
+TASK 3.2: HUMAN EXPERT SERVICE
+Implementation
+tsx
+// pages/HumanExpert.tsx
+export const HumanExpert = () => {
+  // 1. ผู้ใช้เลือกระดับความต้องการ
+  // 2. AI Twin สรุป Context
+  // 3. แนะนำ Human Expert ที่เหมาะสม
+  // 4. จอง Session (Stripe Connect)
+  // 5. Private Human Session
+};
+🔴 PHASE 4: REFINEMENT (P2)
+TASK 4.1: ADAPTIVE AUDIO — ALL WORLDS
+Implementation
+typescript
+// config/audio.ts
+export const WORLD_AUDIO = {
+  identity: { ambient: 'identity_ambient.mp3', tempo: 70 },
+  decision: { ambient: 'decision_ambient.mp3', tempo: 90 },
+  // ... 12 worlds
+};
+TASK 4.2: FEEDBACK LOOP — EVERY INSIGHT
+Implementation
+tsx
+// components/InsightFeedback.tsx
+export const InsightFeedback = ({ insightId, onFeedback }: Props) => {
+  return (
+    <div className="insight-feedback">
+      <p>ข้อมูลนี้ตรงกับคุณไหม?</p>
+      <button onClick={() => onFeedback(insightId, 'very_true')}>✅ ตรงมาก</button>
+      <button onClick={() => onFeedback(insightId, 'somewhat')}>🟡 ค่อนข้างตรง</button>
+      <button onClick={() => onFeedback(insightId, 'not_sure')}>❓ ไม่แน่ใจ</button>
+      <button onClick={() => onFeedback(insightId, 'not_me')}>❌ ไม่ตรงเลย</button>
+    </div>
+  );
+};
+📋 EXECUTION CHECKLIST
+Phase 1 — P0 (Critical)
+□ 1.1 Nova/Twin Separation — UX Level
+□ 1.2 Core Awakening (WOW #3) — Full Implementation
+□ 1.3 Twin Evolution — 5 Stages
+□ 1.4 Decision Tracking — 30/90/180/365 Days
+□ 1.5 12 SICE — Code Implementation
+Phase 2 — P1 (Product Experience)
+□ 2.1 Content Hub — 12 Worlds Content
+□ 2.2 FAQ Page
+□ 2.3 Remaining Badges (8 → 20)
+Phase 3 — P1 (Growth & Monetization)
+□ 3.1 Digital Assets System
+□ 3.2 Human Expert Service
+Phase 4 — P2 (Refinement)
+□ 4.1 Adaptive Audio — All Worlds
+□ 4.2 Feedback Loop — Every Insight
+□ 4.3 Public/Private Boundary
+🔴 EXECUTION RULES
+ห้ามรื้อระบบที่มีอยู่แล้ว — Improve/Integrate, ไม่ใช่ Rebuild
+
+ทุก Feature ต้องมี Unit Test — Vitest
+
+ทุก Feature ต้องมี Acceptance Criteria ครบ
+
+อัปเดต Documentation — ทุกครั้งที่ Implement เสร็จ
+
+Commit ทุกวัน — อย่างน้อย 1 Commit/วัน
+
+Pull Request Review — อย่างน้อย 1 คน
+
+📊 SUCCESS METRIC
+Metric	Target
+Feature Completeness	100%
+Unit Test Coverage	>80%
+Build Time	<2 min
+Lighthouse Score	>90
+User Satisfaction	>4.5/5
+Document Status: 🔴 EXECUTE IMMEDIATELY
+อัปเดตล่าสุด: 14 สิงหาคม 2569

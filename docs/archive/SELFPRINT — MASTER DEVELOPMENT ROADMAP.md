@@ -1,0 +1,688 @@
+📋 SELFPRINT — MASTER DEVELOPMENT ROADMAP 
+Version: 17-Phase Full Implementation Plan
+Date: 2026-08-15
+Environment: Local Development → Git Push
+Team: AI Dev (Full-Time) + Human (คุณ)
+
+🎯 เป้าหมายหลัก
+ปิด Gap ทั้งหมด ที่พบจากการเปรียบเทียบกับคู่แข่ง 17 ราย
+
+Implement 100% ตาม MASTER_PRD และ Master Direction Update
+
+ทำให้ SELFPRINT อยู่ในตำแหน่งเหนือกว่าคู่แข่ง ในตลาดไทย
+
+📊 GAP SUMMARY — สิ่งที่ต้องพัฒนา (จากรายงาน Gap Analysis)
+Priority	หัวข้อ	สถานะปัจจุบัน	สิ่งที่ต้องพัฒนา	คู่แข่งที่เก่งกว่า
+🔴 P0	Content Hub + SEO	❌ ไม่มี	สร้าง Blog, 12 Worlds Content, sitemap, robots.txt	16P, Co-Star
+🔴 P0	Decision Tracking 30/90/180/365	🟡 Logger เท่านั้น	Follow-up Automation, Notification, Dashboard	ไม่มีใครทำ (Blue Ocean)
+🔴 P0	Social Proof / Trust	❌ ไม่มี	Testimonials, Influencer Reviews, Trust Page	Co-Star, 16P
+🔴 P0	Nova/Twin Separation	🟡 สับสน	แยก UX, Avatar, Routes, System Prompts	-
+🔴 P0	Core Awakening (WOW #3)	🟡 ไม่ชัด	Animation, Naming, Celebration	-
+🔴 P0	12 SICE Implementation	🟡 ในเอกสาร	Code Implementation ทั้ง 12 ตัว	-
+🔴 P0	Twin Evolution 5 Stages	❌ ไม่มี	Stage System, UI, Micro-Evolution	-
+🟡 P1	20 Badges (ปัจจุบัน 8)	🟡 8/20	เพิ่ม 12 Badges	-
+🟡 P1	Digital Assets System	❌ ไม่มี	Asset Model, Purchase Flow, Ownership	-
+🟡 P1	Human Expert Service	❌ ไม่มี	Expert Booking, Session Flow	BetterUp
+🟡 P1	Referral/Viral Loop	❌ ไม่มี	Share, Referral Code, Rewards	-
+🟡 P1	FAQ Page	❌ ไม่มี	12+ FAQs, Schema Markup	16P
+🟢 P2	Adaptive Audio (All Worlds)	🟡 บางส่วน	Audio Files, Integration	-
+🟢 P2	Feedback Loop (Every Insight)	🟡 บางส่วน	Feedback UI, Analysis	-
+🟢 P2	Public/Private Boundary	❌ ไม่มี	Privacy Controls	-
+🔴 PHASE 0: SETUP (Day 1)
+Task 0.1: Environment Setup
+bash
+# Clone repository
+git clone https://github.com/duriankab-dot/selfprint-v3-react.git
+cd selfprint-v3-react
+
+# Install dependencies
+npm install
+
+# Verify environment
+npm run dev
+npm run build
+npm run test
+
+# Setup environment variables
+cp .env.example .env.local
+# Fill in: Supabase URL, Claude API Key, Stripe Keys
+Task 0.2: Create Working Directory Structure
+bash
+# Create missing directories
+mkdir -p src/content/worlds
+mkdir -p src/content/faq
+mkdir -p src/services/sice/engines
+mkdir -p src/components/twin
+mkdir -p src/components/decision
+mkdir -p src/components/feedback
+mkdir -p src/pages/blog
+mkdir -p public/assets/audio
+Deliverables Day 1
+□ Environment พร้อมทำงาน
+□ Directory Structure พร้อม
+□ .env.local configured
+🔴 PHASE 1: P0 CRITICAL FIXES (Day 2-5)
+DAY 2: NOVA/TWIN SEPARATION + CORE AWAKENING
+Morning (4 hrs) — Nova/Twin UX Separation
+yaml
+Task 1.1: Create Nova Avatar Component
+  File: src/components/features/NovaAvatar.tsx
+  Description: Nova = Guide, Warm, Gold Glow
+  
+Task 1.2: Create Twin Avatar Component
+  File: src/components/features/TwinAvatar.tsx
+  Description: Twin = Personal, Hologram, Adapts to Mood
+  
+Task 1.3: Create AIContext
+  File: src/contexts/AIContext.tsx
+  Fields: activeAI: 'nova' | 'twin', isTwinAwakened: boolean
+  
+Task 1.4: Separate Routes
+  - /chat/nova → NovaChat.tsx
+  - /chat/twin → TwinChat.tsx
+  - Update App.tsx routes
+Afternoon (4 hrs) — Core Awakening (WOW #3)
+yaml
+Task 1.5: Core Awakening Page
+  File: src/pages/CoreAwakening.tsx
+  Phases: intro → processing → birth → naming → complete
+  
+Task 1.6: Twin Birth Animation
+  File: src/components/TwinHologramBirth.tsx
+  Canvas: Particle formation, hologram, glow, name
+  
+Task 1.7: Twin Creation API
+  File: src/api/twin/create.ts
+  - Create Twin Profile in Supabase
+  - Generate Initial Intelligence Seed
+  - Set activeAI = 'twin'
+Acceptance Criteria:
+
+□ Nova และ Twin มี Avatar ต่างกัน
+□ Routes แยกชัดเจน
+□ Core Awakening มี 5 Phases
+□ Birth Animation ทำงาน
+□ Twin Profile บันทึกใน Supabase
+DAY 3: TWIN EVOLUTION 5 STAGES
+Morning (4 hrs) — Evolution System
+yaml
+Task 1.8: Twin Stages Constants
+  File: src/constants/twinStages.ts
+  - 5 Stages: Core Formation → Pattern Recognition → Deep Understanding → Wisdom Stage → Full Holographic Form
+  - Each with: requirements (daysActive, messages, patterns, memories, feedback)
+  
+Task 1.9: Evolution Service
+  File: src/services/TwinEvolutionService.ts
+  - checkMicroEvolution(): ตรวจสอบทุกกิจกรรม
+  - calculateProgress(): คำนวณ Progress
+  - evolveTwin(): อัปเกรด Stage
+Afternoon (4 hrs) — Evolution UI
+yaml
+Task 1.10: Evolution Display Component
+  File: src/components/TwinEvolutionDisplay.tsx
+  - Timeline visualization
+  - Progress bar
+  - Current stage indicator
+  - Next milestone
+
+Task 1.11: Integration with Dashboard
+  - Add EvolutionDisplay to Me page
+  - Show notification on evolution
+Acceptance Criteria:
+
+□ 5 Stages พร้อม Requirements
+□ Evolution Timeline UI
+□ Auto-evolution ทำงาน
+□ Notification เมื่อ Stage เปลี่ยน
+DAY 4: DECISION TRACKING (30/90/180/365)
+Morning (4 hrs) — Decision Model + CRUD
+yaml
+Task 1.12: Decision Data Model
+  File: src/types/decision.ts
+  - Decision: id, userId, title, description, category, decisionDate, confidence, expectedOutcome, actualOutcome
+  - FollowUp: id, decisionId, days (30|90|180|365), scheduledDate, completed, reflection, resultScore
+
+Task 1.13: Decision Service
+  File: src/services/DecisionService.ts
+  - createDecision(): สร้างพร้อม Follow-up Schedule
+  - getDecisions(): ดึงรายการ
+  - updateDecision(): แก้ไข
+  - deleteDecision(): ลบ
+  - completeFollowUp(): บันทึกผล
+
+Task 1.14: Decision Store
+  File: src/store/decisionStore.ts
+  - Zustand store for decisions
+  - Pending follow-ups
+  - Stats calculation
+Afternoon (4 hrs) — Decision UI
+yaml
+Task 1.15: Decision Form
+  File: src/components/decision/DecisionForm.tsx
+  - Title, Description, Category, Date, Confidence, Expected Outcome
+
+Task 1.16: Decision Follow-up Component
+  File: src/components/decision/DecisionFollowUp.tsx
+  - Reflection textarea
+  - Result score slider (0-100)
+  - Complete button
+
+Task 1.17: Decision Dashboard
+  File: src/pages/DecisionDashboard.tsx
+  - Summary stats (Total, Pending, Success Rate)
+  - Decision Timeline
+  - Pending Follow-ups List
+Acceptance Criteria:
+
+□ Decision CRUD ครบ
+□ Auto-schedule 30/90/180/365
+□ Follow-up UI พร้อม
+□ Decision Dashboard พร้อม
+□ Notification System
+DAY 5: 12 SICE IMPLEMENTATION + NOTIFICATION
+Morning (4 hrs) — 12 SICE Engines
+yaml
+Task 1.18: SICE Base Class
+  File: src/services/sice/SICEBase.ts
+  - Abstract class with process()
+  - Input validation
+  - Confidence calculation
+
+Task 1.19: Create All 12 SICE Engines
+  Files: src/services/sice/engines/
+  1. PersonalContextBuilder.ts
+  2. PatternDetector.ts
+  3. InsightEngine.ts
+  4. AIFeedbackLoop.ts
+  5. TwinStateEngine.ts
+  6. ExperienceEngine.ts
+  7. EnvironmentEngine.ts
+  8. BadgeEngine.ts
+  9. BehavioralForecastEngine.ts
+  10. FutureSelfEngine.ts
+  11. MemoryManager.ts
+  12. DecisionIntelligenceEngine.ts
+
+Task 1.20: SICE Orchestrator
+  File: src/services/sice/SICEOrchestrator.ts
+  - Register all engines
+  - Parallel processing
+  - Cross-Engine Synthesis
+  - Fine-tuning
+  - Personal Intelligence output
+Afternoon (4 hrs) — Notification + Integration
+yaml
+Task 1.21: Notification System
+  File: src/services/NotificationService.ts
+  - Decision follow-up reminders
+  - Evolution notifications
+  - Badge unlocked notifications
+
+Task 1.22: Integration Points
+  - Dashboard: Show SICE insights
+  - Twin Chat: Use 12 SICE for responses
+  - Decision: Auto-trigger SICE analysis
+Acceptance Criteria:
+
+□ 12 SICE Engines ทั้งหมด Implemented
+□ SICE Orchestrator ทำงาน
+□ Cross-Engine Synthesis
+□ Personal Intelligence Output
+□ Notification System พร้อม
+🔴 PHASE 2: P1 PRODUCT EXPERIENCE (Day 6-9)
+DAY 6: CONTENT HUB + BLOG (SEO Foundation)
+Morning (4 hrs) — Content Structure
+yaml
+Task 2.1: Create Content Data
+  File: src/content/worlds/index.ts
+  - 12 Worlds: identity, decision, relationship, career, health, money, twin, learning, creativity, spirituality, impact, activities
+  - Each with: title, description, icon, color, articles[]
+
+Task 2.2: Create World Content Files
+  Files: src/content/worlds/*.md
+  - 3-5 articles per World
+  - Each: title, excerpt, content, image
+Afternoon (4 hrs) — Blog Pages
+yaml
+Task 2.3: Blog List Page
+  File: src/pages/Blog.tsx
+  - Article grid
+  - World filter
+  - Search functionality
+
+Task 2.4: Article Detail Page
+  File: src/pages/BlogArticle.tsx
+  - Full article display
+  - Related articles
+  - CTA to try feature
+
+Task 2.5: SEO Setup
+  File: scripts/generateSitemap.ts
+  - sitemap.xml generator
+  - robots.txt
+  - Meta tags + Open Graph
+  - JSON-LD Schema
+Acceptance Criteria:
+
+□ 12 Worlds Content พร้อม
+□ Blog List Page
+□ Article Detail Page
+□ sitemap.xml + robots.txt
+□ SEO Meta Tags
+DAY 7: FAQ + REMAINING BADGES (8→20)
+Morning (4 hrs) — FAQ Page
+yaml
+Task 2.6: FAQ Content
+  File: src/content/faq.ts
+  - 12+ FAQs
+  - Categories: General, AI Twin, Privacy, Pricing, Technical
+
+Task 2.7: FAQ Page
+  File: src/pages/FAQ.tsx
+  - Accordion component
+  - Search
+  - Schema markup (JSON-LD)
+Afternoon (4 hrs) — Badge Extension
+yaml
+Task 2.8: Update Badge Constants
+  File: src/constants/badges.ts
+  - Add 12 new badges (total 20)
+  - Categories: Onboarding, Decision, Engagement, Evolution, Social, Premium
+
+Task 2.9: Badge Service
+  File: src/services/BadgeService.ts
+  - checkAllBadges(): ตรวจสอบทุกเงื่อนไข
+  - unlockBadge(): ปลดล็อค
+  - getBadgeProgress(): ดึง Progress
+
+Task 2.10: Badge Display Update
+  - Update BadgeCollection.tsx
+  - Show progress to next badge
+  - Celebration animation on unlock
+Acceptance Criteria:
+
+□ 20 Badges ครบ
+□ FAQ Page พร้อม
+□ Badge Service ทำงาน
+□ Badge Unlock Notification
+DAY 8: DIGITAL ASSETS + HUMAN EXPERT
+Morning (4 hrs) — Digital Assets System
+yaml
+Task 2.11: Asset Model
+  File: src/types/assets.ts
+  - Asset types: twin_outfit, orbit, node, world_theme, experience
+  - Ownership: userId, assetId, status (owned|unlocked|access), purchasedAt, expiresAt
+
+Task 2.12: Asset Store
+  File: src/store/assetStore.ts
+  - List available assets
+  - Check ownership
+  - Purchase flow
+
+Task 2.13: Asset Display
+  - Show owned assets in Me page
+  - Apply asset to Twin
+  - Preview before purchase
+Afternoon (4 hrs) — Human Expert Service
+yaml
+Task 2.14: Human Expert Model
+  File: src/types/humanExpert.ts
+  - Expert profile: id, name, title, expertise, rate, availability
+
+Task 2.15: Human Expert Page
+  File: src/pages/HumanExpert.tsx
+  - Expert list
+  - Availability calendar
+  - Booking flow
+
+Task 2.16: Expert Context
+  - Twin summarizes user context
+  - Send to expert for session prep
+Acceptance Criteria:
+
+□ Digital Assets System พร้อม
+□ Asset Purchase Flow
+□ Human Expert UI
+□ Booking Flow
+DAY 9: REFERRAL + ANALYTICS
+Morning (4 hrs) — Referral/Viral Loop
+yaml
+Task 2.17: Referral Service
+  File: src/services/ReferralService.ts
+  - generateReferralCode()
+  - trackReferralClick()
+  - getReferralRewards()
+
+Task 2.18: Referral UI
+  File: src/pages/Referral.tsx
+  - Share referral link
+  - Track referrals
+  - Rewards display
+
+Task 2.19: Insight Sharing
+  - Create Shareable Insight Card
+  - Facebook/Twitter/Line share/TIKTOK
+  - UTM tracking
+Afternoon (4 hrs) — Analytics Setup
+yaml
+Task 2.20: GA4 Setup
+  - Google Analytics 4 integration
+  - Event tracking: signup, activation, conversion, feature_usage
+
+Task 2.21: Custom Events
+  - Core Awakening completion
+  - Decision creation
+  - Premium conversion
+  - Badge unlock
+  - Evolution stage
+
+Task 2.22: Analytics Dashboard
+  - Admin dashboard (metrics)
+  - User analytics (personal growth)
+Acceptance Criteria:
+
+□ Referral System พร้อม
+□ Insight Sharing
+□ GA4 พร้อม
+□ Custom Events
+□ Analytics Dashboard
+🔴 PHASE 3: P2 REFINEMENT (Day 10-11)
+DAY 10: ADAPTIVE AUDIO + FEEDBACK LOOP
+Morning (4 hrs) — Adaptive Audio
+yaml
+Task 3.1: Audio Files
+  File: public/assets/audio/
+  - 12 World ambient tracks
+  - Mood-adaptive variations
+  - Sound effects
+
+Task 3.2: Audio Service
+  File: src/services/AudioService.ts
+  - playAmbient(world, mood)
+  - duckAudio() (when Twin speaks)
+  - volume control
+
+Task 3.3: Audio Controls
+  - Volume slider
+  - On/Off toggle
+  - World-based auto-play
+Afternoon (4 hrs) — Feedback Loop
+yaml
+Task 3.4: Feedback Component
+  File: src/components/feedback/InsightFeedback.tsx
+  - 4 options: very_true, somewhat, not_sure, not_me
+  - Optional comment
+
+Task 3.5: Feedback Service
+  File: src/services/FeedbackService.ts
+  - saveFeedback()
+  - getFeedbackHistory()
+  - analyzeFeedback() → update Personal Model
+
+Task 3.6: Feedback Integration
+  - Add to every Insight display
+  - Auto-trigger AI model update
+  - Feedback dashboard
+Acceptance Criteria:
+
+□ Adaptive Audio ครบทุก World
+□ Feedback Loop ทำงาน
+□ Personal Model อัปเดตอัตโนมัติ
+DAY 11: UI POLISH + ACCESSIBILITY
+Morning (4 hrs) — UI Polish
+yaml
+Task 3.7: Loading States
+  - Skeleton loaders
+  - Spinner animations
+  - Progress indicators
+
+Task 3.8: Error Handling
+  - Error boundaries
+  - User-friendly error messages
+  - Retry mechanisms
+
+Task 3.9: Empty States
+  - No decisions yet
+  - No memories yet
+  - No badges yet
+  - Empty chat state
+Afternoon (4 hrs) — Accessibility
+yaml
+Task 3.10: ARIA Labels
+  - All interactive elements
+  - Dynamic content updates
+
+Task 3.11: Keyboard Navigation
+  - Tab order
+  - Focus management
+  - Keyboard shortcuts
+
+Task 3.12: Screen Reader Support
+  - Semantic HTML
+  - Live regions
+  - Alt text for images
+
+Task 3.13: Color Contrast
+  - WCAG AA compliance
+  - Dark mode support
+Acceptance Criteria:
+
+□ UI Polished
+□ Accessibility Ready
+□ WCAG AA Compliance
+🔴 PHASE 4: QA + OPTIMIZATION (Day 12-14)
+DAY 12: COMPREHENSIVE TESTING
+Morning (4 hrs) — Unit Tests
+yaml
+Task 4.1: Service Tests
+  - DecisionService.test.ts
+  - TwinEvolutionService.test.ts
+  - ReferralService.test.ts
+  - BadgeService.test.ts
+  - SICEOrchestrator.test.ts
+
+Task 4.2: Store Tests
+  - decisionStore.test.ts
+  - assetStore.test.ts
+  - userStore.test.ts
+Afternoon (4 hrs) — E2E + Integration
+yaml
+Task 4.3: E2E Tests
+  - Landing → Onboarding → Core Awakening → Twin Chat
+  - Decision CRUD → Follow-up
+  - Subscription → Payment
+  - Badge → Evolution
+
+Task 4.4: Cross-Browser Testing
+  - Chrome, Safari, Firefox, Edge
+Acceptance Criteria:
+
+□ Unit Test Coverage >80%
+□ All E2E Tests Pass
+□ Cross-Browser OK
+DAY 13: PERFORMANCE OPTIMIZATION
+Morning (4 hrs) — Lighthouse
+yaml
+Task 4.5: Core Web Vitals
+  - Performance >90
+  - Accessibility >95
+  - Best Practices >95
+  - SEO >90
+
+Task 4.6: Bundle Optimization
+  - Code splitting (React.lazy)
+  - Tree shaking
+  - Image optimization
+  - Font optimization
+Afternoon (4 hrs) — Advanced Optimization
+yaml
+Task 4.7: Memory Optimization
+  - useEffect cleanup
+  - Memory leak detection
+  - Large data pagination
+
+Task 4.8: Network Optimization
+  - API caching
+  - Data prefetching
+  - Offline strategy
+Acceptance Criteria:
+
+□ Lighthouse >90
+□ Bundle Size <200KB
+□ First Load <3s
+DAY 14: SECURITY + PRIVACY
+Morning (4 hrs) — Security Audit
+yaml
+Task 4.9: Input Validation
+  - All user inputs
+  - API request validation
+
+Task 4.10: Security Headers
+  - CSP (Content Security Policy)
+  - HSTS
+  - X-Frame-Options
+
+Task 4.11: Authentication
+  - Session management
+  - Rate limiting
+  - CSRF protection
+Afternoon (4 hrs) — Privacy Compliance
+yaml
+Task 4.12: Privacy Policy
+  File: src/pages/Privacy.tsx
+  - Data collection
+  - Data usage
+  - User rights
+  - Contact
+
+Task 4.13: GDPR/CCPA/PDPA
+  - Consent management
+  - Data export
+  - Data deletion
+  - Cookie consent
+
+Task 4.14: Public/Private Boundary
+  - Clear indicators
+  - User controls
+  - Privacy settings
+Acceptance Criteria:
+
+□ Security Audit Pass
+□ Privacy Policy พร้อม
+□ GDPR/CCPA/PDPA Compliance
+□ Public/Private Boundary Clear
+🔴 PHASE 5: DEPLOYMENT (Day 15)
+DAY 15: LOCAL → GIT → DEPLOYMENT
+Morning (4 hrs) — Git + Documentation
+yaml
+Task 5.1: Final Code Review
+  - npm run lint (0 errors)
+  - npm run test (all pass)
+  - npm run build (success)
+
+Task 5.2: Documentation Update
+  - Update README.md
+  - Update CHANGELOG.md
+  - Update USER_GUIDE_TH.md
+  - Update CONTRIBUTING.md
+
+Task 5.3: Git Commit
+  git add .
+  git commit -m "V3.1 Complete - All P0/P1/P2 Features Implemented"
+  git push origin main
+Afternoon (4 hrs) — Deployment
+yaml
+Task 5.4: Production Setup
+  - Vercel deployment
+  - Environment variables
+  - Custom domain (selfprint.app)
+
+Task 5.5: Monitoring Setup
+  - Sentry (error tracking)
+  - Analytics (GA4)
+  - Uptime monitoring
+
+Task 5.6: Production Verification
+  - Smoke tests
+  - Core features
+  - Payment flow
+  - Auth flow
+Acceptance Criteria:
+
+□ Build Success
+□ All Docs Updated
+□ Git Push Complete
+□ Production Live
+□ Monitoring Active
+📊 COMPLETE TASK SUMMARY
+Phase	Days	Tasks	Priority
+Phase 0: Setup	1	3	-
+Phase 1: P0 Critical	4	22	🔴 P0
+Phase 2: P1 Experience	4	22	🟡 P1
+Phase 3: P2 Refinement	2	13	🟢 P2
+Phase 4: QA + Optimization	3	17	-
+Phase 5: Deployment	1	6	-
+Total	15 Days	83 Tasks	-
+🚀 SUCCESS CRITERIA CHECKLIST
+P0 — Critical (ทั้งหมดต้อง Pass)
+□ Nova/Twin Separation ชัดเจน
+□ Core Awakening (WOW #3) ครบ
+□ Twin Evolution 5 Stages
+□ Decision Tracking 30/90/180/365
+□ Follow-up Automation
+□ 12 SICE Implementation
+□ Content Hub + Blog
+□ SEO (sitemap, robots, meta)
+□ Social Proof / Trust
+□ 20 Badges ครบ
+P1 — Product Experience
+□ FAQ Page
+□ Digital Assets System
+□ Human Expert Service
+□ Referral/Viral Loop
+□ Analytics (GA4)
+P2 — Refinement
+□ Adaptive Audio All Worlds
+□ Feedback Loop
+□ UI Polish
+□ Accessibility
+Quality
+□ Unit Test Coverage >80%
+□ Lighthouse >90
+□ Build Success
+□ Lint 0 Errors
+□ TypeScript 0 Errors
+📋 DAILY REPORT TEMPLATE
+yaml
+## Day X Report
+
+### Completed Today:
+- [ ] Task X.X: ...
+- [ ] Task X.X: ...
+
+### Blockers:
+- (none)
+
+### Tomorrow's Plan:
+- [ ] Task X.X: ...
+- [ ] Task X.X: ...
+
+### Commit:
+- git commit -m "Day X: ..."
+🔔 REMINDERS
+Git Commit ทุกวัน — อย่างน้อย 1 commit
+
+Test ทุกครั้งก่อน push — npm run test
+
+Lint ทุกครั้ง — npm run lint
+
+Build ทุกครั้งก่อน deploy — npm run build
+
+อัปเดต CHANGELOG — ทุกครั้งที่ feature เสร็จ
+
+รายงานทุกวัน — ใช้ Daily Report Template
+
+Document Status: 🔴 READY TO EXECUTE
+Environment: Local Development → Git Push
+Timeline: 15 Days
+อัปเดตล่าสุด: 15 สิงหาคม 2569
