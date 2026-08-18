@@ -71,11 +71,10 @@ jobs:
 
       - name: Notify Slack - E2E Tests
         if: always()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ env.SLACK_WEBHOOK }}
-          payload: |
-            {
+        run: |
+          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
               "text": "E2E Tests Complete",
               "blocks": [
                 {
@@ -86,7 +85,7 @@ jobs:
                   }
                 }
               ]
-            }
+            }'
 
   smoke-test:
     name: Load Test - Smoke (k6)
@@ -129,11 +128,10 @@ jobs:
 
       - name: Notify Slack - Smoke Test
         if: always()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ env.SLACK_WEBHOOK }}
-          payload: |
-            {
+        run: |
+          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
               "text": "Smoke Test Complete",
               "blocks": [
                 {
@@ -144,7 +142,7 @@ jobs:
                   }
                 }
               ]
-            }
+            }'
 
   full-load-test:
     name: Load Test - Full (k6)
@@ -188,11 +186,10 @@ jobs:
 
       - name: Notify Slack - Full Load Test
         if: always()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ env.SLACK_WEBHOOK }}
-          payload: |
-            {
+        run: |
+          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
               "text": "Full Load Test Complete",
               "blocks": [
                 {
@@ -203,7 +200,7 @@ jobs:
                   }
                 }
               ]
-            }
+            }'
 
   report-results:
     name: Generate Test Report
@@ -277,11 +274,10 @@ jobs:
 
       - name: Final Status Notification
         if: always()
-        uses: slackapi/slack-github-action@v1
-        with:
-          webhook-url: ${{ env.SLACK_WEBHOOK }}
-          payload: |
-            {
+        run: |
+          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+            -H 'Content-Type: application/json' \
+            -d '{
               "text": "Test Suite Complete",
               "blocks": [
                 {
@@ -292,4 +288,4 @@ jobs:
                   }
                 }
               ]
-            }
+            }'
