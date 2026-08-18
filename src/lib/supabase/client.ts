@@ -12,11 +12,11 @@ import { createClient } from '@supabase/supabase-js';
  * Falls back to process.env for Vercel serverless environments
  */
 const supabaseUrl = (
-  (typeof import.meta !== 'undefined' && 'env' in import.meta && (import.meta.env as Record<string, string | undefined>)?.VITE_SUPABASE_URL) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
   process.env.VITE_SUPABASE_URL
 );
 const supabaseAnonKey = (
-  (typeof import.meta !== 'undefined' && 'env' in import.meta && (import.meta.env as Record<string, string | undefined>)?.VITE_SUPABASE_ANON_KEY) ||
+  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
   process.env.VITE_SUPABASE_ANON_KEY
 );
 
