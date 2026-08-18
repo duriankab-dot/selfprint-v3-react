@@ -31,11 +31,12 @@ export default async function handler(
   }
 
   try {
-    const { userId, metrics, webVitals, timestamp } = req.body;
+    const body = req.body || {};
+    const { userId, metrics, webVitals, timestamp } = body;
 
     // Validate input
     if (!metrics || !timestamp) {
-      res.status(400).json({ error: 'Missing required fields' });
+      res.status(400).json({ error: 'Missing required fields: metrics and timestamp' });
       return;
     }
 
