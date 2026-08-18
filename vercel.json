@@ -23,6 +23,18 @@
       "destination": "/api/unified-handler?module=sice&action=:action*"
     },
     {
+      "source": "/api/stripe/:action*",
+      "destination": "/api/unified-handler?module=stripe&action=:action*"
+    },
+    {
+      "source": "/api/profile/:action*",
+      "destination": "/api/unified-handler?module=profile&action=:action*"
+    },
+    {
+      "source": "/api/blueprint/:action*",
+      "destination": "/api/unified-handler?module=blueprint&action=:action*"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
