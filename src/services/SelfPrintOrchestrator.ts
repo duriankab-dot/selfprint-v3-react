@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase/client';
 import { PatternDetector } from './sice/engines/PatternDetector';
 import { InsightEngine } from './sice/engines/InsightEngine';
 import { PersonalContextBuilder } from './sice/engines/PersonalContextBuilder';
+import { analyzeTwinDecisionPatterns, getDecisionInsights } from './DecisionLearningService';
 
 // Self Print Lifecycle States
 export type SelfPrintPhase =
@@ -312,11 +313,35 @@ export class SelfPrintOrchestrator {
   private async refinePatterns(
     _responses: Record<string, string>,
     patterns: string[],
-    _userId: string
+    userId: string
   ): Promise<string[]> {
-    // Simple refinement: could use Claude API for more sophisticated analysis
-    // For now, return the same patterns (TODO: implement actual refinement)
-    return patterns;
+    try {
+      // Get twin to cross-reference patterns with actual decision data
+      const { data: twin } = await supabase
+        .from('twins')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (!twin) return patterns;
+
+      // Use DecisionLearningService to get data-backed patterns
+      const learnedPatterns = await analyzeTwinDecisionPatterns(twin.id);
+      if (!learnedPatterns || learnedPatterns.length === 0) return patterns;
+
+      // Merge: keep existing patterns, append learned patterns not already present
+      const learnedDescriptions = learnedPatterns.map(p => p.pattern || p.world);
+      const merged = [...patterns];
+      learnedDescriptions.forEach(desc => {
+        if (desc && !merged.some(p => p.toLowerCase().includes(desc.toLowerCase()))) {
+          merged.push(desc);
+        }
+      });
+
+      return merged.slice(0, 10); // Cap at 10 patterns
+    } catch {
+      return patterns;
+    }
   }
 
   private async generateComprehensiveAnalysis(data: {
@@ -324,9 +349,36 @@ export class SelfPrintOrchestrator {
     patterns: string[];
     userId: string;
   }): Promise<string> {
-    // Generate comprehensive analysis using Claude or similar
-    // TODO: Implement actual analysis
-    return `Comprehensive analysis of user ${data.userId} based on patterns: ${data.patterns.join(', ')}`;
+    try {
+      const { data: twin } = await supabase
+        .from('twins')
+        .select('id')
+        .eq('user_id', data.userId)
+        .single();
+
+      // Build analysis from questionnaire responses
+      const responseCount = Object.keys(data.responses).length;
+      const responseHighlights = Object.entries(data.responses)
+        .slice(0, 3)
+        .map(([k, v]) => `${k}: ${String(v).slice(0, 80)}`)
+        .join('; ');
+
+      let decisionSummary = '';
+      if (twin) {
+        const insights = await getDecisionInsights(twin.id);
+        if (insights && insights.totalDecisions > 0) {
+          decisionSummary = ` Decision track record: ${insights.totalDecisions} decisions logged with ${Math.round(insights.successRate)}% success rate across ${insights.bestWorlds?.join(', ') || 'multiple areas'}.`;
+        }
+      }
+
+      const patternSummary = data.patterns.length > 0
+        ? ` Core patterns identified: ${data.patterns.slice(0, 5).join(', ')}.`
+        : '';
+
+      return `Comprehensive Self-Print Analysis: Based on ${responseCount} questionnaire responses, your authentic self reveals distinctive characteristics.${patternSummary}${decisionSummary} Key response themes: ${responseHighlights}. This blueprint captures your unique decision-making style, values, and growth trajectory.`;
+    } catch {
+      return `Self-Print Analysis: ${data.patterns.length} patterns identified across your responses. Your Twin is ready to guide your growth journey.`;
+    }
   }
 
   private async triggerCeremony(type: 'wow-1' | 'wow-2', blueprintId: string, insight: string): Promise<void> {
