@@ -40,7 +40,7 @@ export async function handler(request: Request): Promise<Response> {
       );
     }
 
-    // Route to appropriate handler
+    // Route to appropriate handler (12 total endpoints)
     switch (module) {
       case 'notifications':
         return handleNotifications(request, action, url);
@@ -48,6 +48,12 @@ export async function handler(request: Request): Promise<Response> {
         return handleTwinEvolution(request, action, url);
       case 'sice':
         return handleSICE(request, action, url);
+      case 'stripe':
+        return handleStripe(request, action, url);
+      case 'profile':
+        return handleProfile(request, action, url);
+      case 'blueprint':
+        return handleBlueprint(request, action, url);
       default:
         return Response.json(
           { success: false, error: `Unknown module: ${module}` } as ApiResponse,
@@ -326,6 +332,197 @@ async function handleSICE(_request: Request, _action: string, url: URL): Promise
   return Response.json(
     { success: false, error: 'Unknown action' } as ApiResponse,
     { status: 400 }
+  );
+}
+
+/**
+ * Handle stripe module
+ */
+async function handleStripe(request: Request, action: string, url: URL): Promise<Response> {
+  if (!supabase) {
+    return Response.json(
+      { success: false, error: 'Database not initialized' } as ApiResponse,
+      { status: 500 }
+    );
+  }
+
+  const userId = url.searchParams.get('userId');
+  if (!userId) {
+    return Response.json({ success: false, error: 'userId required' } as ApiResponse, {
+      status: 400,
+    });
+  }
+
+  if (request.method === 'GET' && action === 'subscription') {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('stripe_customer_id, stripe_subscription_id')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      return Response.json({ success: false, error: error.message } as ApiResponse, {
+        status: 500,
+      });
+    }
+
+    return Response.json({
+      success: true,
+      data: { customerId: data?.stripe_customer_id, subscriptionId: data?.stripe_subscription_id },
+    } as ApiResponse);
+  }
+
+  if (request.method === 'POST' && action === 'create-checkout') {
+    const body = await request.json();
+    const { priceId, successUrl = '/dashboard', cancelUrl = '/plans' } = body;
+
+    if (!priceId) {
+      return Response.json({ success: false, error: 'priceId required' } as ApiResponse, {
+        status: 400,
+      });
+    }
+
+    // Placeholder: actual Stripe integration handled in service
+    return Response.json({
+      success: true,
+      data: {
+        checkoutUrl: '/stripe/checkout',
+        sessionId: 'session_' + Date.now(),
+        successUrl,
+        cancelUrl,
+      },
+    } as ApiResponse);
+  }
+
+  return Response.json(
+    { success: false, error: 'Unknown action' } as ApiResponse,
+    { status: 400 }
+  );
+}
+
+/**
+ * Handle profile module
+ */
+async function handleProfile(request: Request, _action: string, url: URL): Promise<Response> {
+  if (!supabase) {
+    return Response.json(
+      { success: false, error: 'Database not initialized' } as ApiResponse,
+      { status: 500 }
+    );
+  }
+
+  const userId = url.searchParams.get('userId');
+  if (!userId) {
+    return Response.json({ success: false, error: 'userId required' } as ApiResponse, {
+      status: 400,
+    });
+  }
+
+  if (request.method === 'GET') {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error) {
+      return Response.json({ success: false, error: error.message } as ApiResponse, {
+        status: 500,
+      });
+    }
+
+    return Response.json({ success: true, data } as ApiResponse);
+  }
+
+  if (request.method === 'PUT') {
+    const body = await request.json();
+    const { displayName, avatar, preferences } = body;
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ display_name: displayName, avatar_url: avatar, preferences })
+      .eq('id', userId);
+
+    if (error) {
+      return Response.json({ success: false, error: error.message } as ApiResponse, {
+        status: 500,
+      });
+    }
+
+    return Response.json({ success: true, message: 'Profile updated' } as ApiResponse);
+  }
+
+  return Response.json(
+    { success: false, error: 'Method not allowed' } as ApiResponse,
+    { status: 405 }
+  );
+}
+
+/**
+ * Handle blueprint module
+ */
+async function handleBlueprint(request: Request, _action: string, url: URL): Promise<Response> {
+  if (!supabase) {
+    return Response.json(
+      { success: false, error: 'Database not initialized' } as ApiResponse,
+      { status: 500 }
+    );
+  }
+
+  const userId = url.searchParams.get('userId');
+  if (!userId) {
+    return Response.json({ success: false, error: 'userId required' } as ApiResponse, {
+      status: 400,
+    });
+  }
+
+  if (request.method === 'GET') {
+    const { data, error } = await supabase
+      .from('world_blueprints')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      return Response.json({ success: false, error: error.message } as ApiResponse, {
+        status: 500,
+      });
+    }
+
+    return Response.json({ success: true, data } as ApiResponse);
+  }
+
+  if (request.method === 'POST') {
+    const body = await request.json();
+    const { name, description, worldContext } = body;
+
+    const { data, error } = await supabase
+      .from('world_blueprints')
+      .insert({
+        user_id: userId,
+        name,
+        description,
+        world_context: worldContext,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return Response.json({ success: false, error: error.message } as ApiResponse, {
+        status: 500,
+      });
+    }
+
+    return Response.json({
+      success: true,
+      data,
+      message: 'Blueprint created',
+    } as ApiResponse);
+  }
+
+  return Response.json(
+    { success: false, error: 'Method not allowed' } as ApiResponse,
+    { status: 405 }
   );
 }
 
