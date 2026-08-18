@@ -180,14 +180,16 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
       setCurrentWorld(world);
 
-      // TODO: Update visits_count in world_stats
+      const now = new Date().toISOString();
+
+      // Update world_preferences.last_accessed
       const { error: err } = await supabase
         .from('world_preferences')
         .upsert(
           {
             user_id: session.user.id,
             world_id: world,
-            last_accessed: new Date().toISOString(),
+            last_accessed: now,
           },
           { onConflict: 'user_id,world_id' }
         );
@@ -195,8 +197,28 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (err) {
         console.error('Failed to record world visit:', err);
       }
+
+      // Update visits_count in world_stats — used by TwinStateEngine for maturity scoring
+      const currentVisits = worldStats[world]?.visitsCount || 0;
+      const { error: statsErr } = await supabase
+        .from('world_stats')
+        .upsert(
+          {
+            user_id: session.user.id,
+            world_id: world,
+            visits_count: currentVisits + 1,
+            last_accessed: now,
+          },
+          { onConflict: 'user_id,world_id' }
+        );
+
+      if (statsErr) {
+        console.error('Failed to update world stats visits_count:', statsErr);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['worldPreferences', session.user.id] });
+      }
     },
-    [session?.user?.id]
+    [session?.user?.id, worldStats, queryClient]
   );
 
   // Record journal entry for world

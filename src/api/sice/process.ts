@@ -7,6 +7,7 @@
 import type { SICEInput, OrchestratorResult } from '../../types/sice';
 import type { WorldId } from '../../constants/worlds';
 import { SICEOrchestrator } from '../../services/sice/SICEOrchestrator';
+import { supabase } from '../../lib/supabase/client';
 
 export interface SICEProcessRequest {
   userId: string;
@@ -54,19 +55,48 @@ export async function processSICE(
     const orchestrator = new SICEOrchestrator();
     const result = await orchestrator.orchestrate(input);
 
-    // TODO: Save result to Supabase for history
-    // - Store in sice_results table
-    // - Link to user and conversation
+    // Save SICE result summary to twin_memories for history and Twin continuity
+    try {
+      const { data: twin } = await supabase
+        .from('twins')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
 
-    // TODO: Use result to enhance Twin response
-    // - Extract personalIntelligence
-    // - Include confidence scores
-    // - Apply recommendations
+      if (twin) {
+        const pi = result.personalIntelligence;
+        const memorySummary = [
+          `SICE Analysis (${result.results.length} engines, ${result.totalExecutionTime}ms):`,
+          `Understanding: ${pi.userUnderstanding}% | Confidence: ${pi.confidence}%`,
+          `Action: ${pi.recommendedAction}`,
+          pi.insights.length > 0 ? `Insights: ${pi.insights.slice(0, 3).join('; ')}` : '',
+        ].filter(Boolean).join(' | ');
+
+        await supabase.from('twin_memories').insert({
+          twin_id: twin.id,
+          type: 'sice_analysis',
+          content: memorySummary,
+          emotional_valence: (pi.confidence - 50) / 50, // -1 to 1 scale
+          created_at: result.timestamp,
+        });
+      }
+    } catch {
+      // Non-critical — SICE processing already complete
+    }
+
+    // Enhance response with personalIntelligence for Twin to use
+    const enhancedMessage = [
+      `SICE processing complete (${result.totalExecutionTime}ms).`,
+      `Twin understanding: ${result.personalIntelligence.userUnderstanding}%.`,
+      result.personalIntelligence.recommendedAction
+        ? `Focus: ${result.personalIntelligence.recommendedAction}`
+        : '',
+    ].filter(Boolean).join(' ');
 
     return {
       success: true,
       result,
-      message: `SICE processing complete (${result.totalExecutionTime}ms)`,
+      message: enhancedMessage,
     };
   } catch (error) {
     console.error('Error processing SICE:', error);

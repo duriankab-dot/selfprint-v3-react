@@ -9,6 +9,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { supabase } from '../services/supabase-service';
 
 export type ActiveAI = 'nova' | 'twin';
 
@@ -49,12 +50,34 @@ export function AIProvider({ children }: AIProviderProps) {
    * If awakened, default to Twin. Otherwise start with Nova.
    */
   useEffect(() => {
-    if (auth?.session?.user?.id) {
-      // TODO: Fetch Twin status from Supabase
-      // For now, default to Nova for new users
-      setActiveAI('nova');
-      setIsTwinAwakened(false);
-    }
+    const userId = auth?.session?.user?.id;
+    if (!userId) return;
+
+    (async () => {
+      try {
+        // Fetch Twin status from Supabase
+        const { data: twin } = await supabase
+          .from('twins')
+          .select('id, name, awakened_at')
+          .eq('user_id', userId)
+          .single();
+
+        if (twin?.awakened_at) {
+          // Twin is fully awakened — switch to Twin mode
+          setIsTwinAwakened(true);
+          if (twin.name) setTwinName(twin.name);
+          setActiveAI('twin');
+        } else {
+          // No twin or not yet awakened — stay with Nova
+          setActiveAI('nova');
+          setIsTwinAwakened(false);
+        }
+      } catch {
+        // Network error or no twin found — default to Nova
+        setActiveAI('nova');
+        setIsTwinAwakened(false);
+      }
+    })();
   }, [auth?.session?.user?.id]);
 
   const switchToNova = () => {
