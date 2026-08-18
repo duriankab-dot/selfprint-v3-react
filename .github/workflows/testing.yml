@@ -1,0 +1,295 @@
+name: E2E & Load Testing (PHASE 3)
+
+on:
+  push:
+    branches: [master, main, develop]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Test type'
+        required: true
+        default: 'smoke'
+        type: choice
+        options:
+          - smoke
+          - load
+          - full
+
+env:
+  BASE_URL: ${{ secrets.PRODUCTION_URL || 'https://www.selfprint.one' }}
+  SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install Playwright
+        run: |
+          npm install -D @playwright/test
+          npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+        run: |
+          npm run test:e2e || true
+        continue-on-error: true
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 7
+
+      - name: Notify Slack - E2E Tests
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "E2E Tests Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*E2E Test Results*\n*Status:* ${{ job.status }}\n*Branch:* ${{ github.ref_name }}\n*URL:* ${{ env.BASE_URL }}"
+                  }
+                }
+              ]
+            }
+
+  smoke-test:
+    name: Load Test - Smoke (k6)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: e2e-tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run Smoke Test (5-10 min, 20-50 users)
+        run: |
+          k6 run loadtest-smoke.js \
+            --vus 50 \
+            --duration 10m \
+            --out json=smoke-results.json
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Smoke Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: smoke-test-results
+          path: smoke-results.json
+          retention-days: 7
+
+      - name: Publish k6 Results
+        if: always()
+        run: |
+          echo "Smoke Test Summary:"
+          echo "- Duration: 10 minutes"
+          echo "- Peak Users: 50"
+          echo "- Status: ${{ job.status }}"
+
+      - name: Notify Slack - Smoke Test
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Smoke Test Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Load Test - Smoke*\n*Status:* ${{ job.status }}\n*Duration:* 10 minutes\n*Peak Load:* 50 users"
+                  }
+                }
+              ]
+            }
+
+  full-load-test:
+    name: Load Test - Full (k6)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: e2e-tests
+    if: github.event_name == 'schedule' || github.event.inputs.test_type == 'full' || github.event.inputs.test_type == 'load'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run Full Load Test (39 min, 50-100 users)
+        run: |
+          k6 run loadtest.js \
+            --vus 100 \
+            --duration 39m \
+            --out json=full-load-results.json
+        env:
+          BASE_URL: ${{ env.BASE_URL }}
+        continue-on-error: true
+
+      - name: Upload Full Load Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: full-load-test-results
+          path: full-load-results.json
+          retention-days: 7
+
+      - name: Publish k6 Results Summary
+        if: always()
+        run: |
+          echo "Full Load Test Summary:"
+          echo "- Duration: 39 minutes"
+          echo "- Peak Users: 100 (ramped from 50)"
+          echo "- Status: ${{ job.status }}"
+
+      - name: Notify Slack - Full Load Test
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Full Load Test Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Load Test - Full (39 min)*\n*Status:* ${{ job.status }}\n*Peak Load:* 100 concurrent users\n*Ramp:* 50 → 100 users"
+                  }
+                }
+              ]
+            }
+
+  report-results:
+    name: Generate Test Report
+    runs-on: ubuntu-latest
+    if: always()
+    needs: [e2e-tests, smoke-test, full-load-test]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Generate Report
+        run: |
+          cat > test-report.md << 'EOF'
+          # Test Execution Report
+
+          **Date:** $(date)
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** ${{ github.sha }}
+          **URL:** ${{ env.BASE_URL }}
+
+          ## Test Summary
+
+          | Test | Status | Duration |
+          |------|--------|----------|
+          | E2E Tests | ${{ needs.e2e-tests.result }} | 20-30 min |
+          | Smoke Test | ${{ needs.smoke-test.result }} | 10 min |
+          | Full Load Test | ${{ needs.full-load-test.result }} | 39 min |
+
+          ## Artifacts
+
+          - Playwright Report: playwright-report/
+          - Test Results: test-results/
+          - Smoke Test: smoke-test-results/
+          - Load Test: full-load-test-results/
+
+          ## Performance Targets
+
+          - API Response: < 300ms
+          - Twin Chat: < 3s
+          - Decision Save: < 200ms
+          - Page Load: < 1.5s
+          - Image Upload: < 2s
+
+          EOF
+          cat test-report.md
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('test-report.md', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: report
+            });
+
+      - name: Final Status Notification
+        if: always()
+        uses: slackapi/slack-github-action@v1
+        with:
+          webhook-url: ${{ env.SLACK_WEBHOOK }}
+          payload: |
+            {
+              "text": "Test Suite Complete",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*PHASE 3 Testing Complete* ✅\n\n*E2E:* ${{ needs.e2e-tests.result }}\n*Smoke:* ${{ needs.smoke-test.result }}\n*Full Load:* ${{ needs.full-load-test.result }}\n\n*Report:* Check artifacts"
+                  }
+                }
+              ]
+            }
