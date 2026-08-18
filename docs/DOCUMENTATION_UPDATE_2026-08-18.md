@@ -1,6 +1,11 @@
-# 📋 DOCUMENTATION UPDATE — 2026-08-18
+# 📋 DOCUMENTATION UPDATE — 2026-08-18 [HISTORICAL SNAPSHOT]
 
-**Status:** ✅ PHASE F + G IMPLEMENTATION COMPLETE  
+⚠️ **นี่เป็นเอกสารประวัติศาสตร์ (Historical Snapshot)**
+- วันที่สร้าง: 2026-08-18 (Session H0-H2)
+- ใช้เป็นข้อมูลอ้างอิงเท่านั้น
+- **อย่าใช้เป็น Current Status** — ดู: SELFPRINT_PRODUCTION_STATUS_TH.md
+
+**Status (เก่า):** ✅ PHASE F + G IMPLEMENTATION COMPLETE  
 **Commit:** ✅ Pushed to master  
 
 ---
