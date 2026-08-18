@@ -3,6 +3,8 @@
  * Handles migration of existing Twin data to new Nova/Twin separation system
  */
 
+import { supabase } from './supabase-service';
+
 export interface MigrationResult {
   success: boolean;
   isTwinAwakened: boolean;
@@ -11,26 +13,36 @@ export interface MigrationResult {
 }
 
 /**
- * Check if user has an awakened Twin in old system
- * TODO: Connect to Supabase when schema is ready
+ * Check if user has an awakened Twin in the `twins` table
  */
 export async function checkTwinAwakening(userId: string): Promise<MigrationResult> {
   try {
     if (!userId) {
-      return {
-        success: false,
-        isTwinAwakened: false,
-        message: 'User ID required',
-      };
+      return { success: false, isTwinAwakened: false, message: 'User ID required' };
     }
 
-    // TODO: Query Supabase for twin_profiles where user_id = userId and awakened_at IS NOT NULL
-    // For now, return false to indicate no awakened Twin
+    if (!supabase) {
+      return { success: false, isTwinAwakened: false, message: 'Supabase unavailable' };
+    }
+
+    const { data, error } = await supabase
+      .from('twins')
+      .select('id, name, awakened_at')
+      .eq('user_id', userId)
+      .not('awakened_at', 'is', null)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      return { success: true, isTwinAwakened: false, message: 'No awakened Twin found' };
+    }
 
     return {
       success: true,
-      isTwinAwakened: false,
-      message: 'No awakened Twin found',
+      isTwinAwakened: true,
+      twinName: data.name,
+      message: 'Twin found',
     };
   } catch (error) {
     console.error('Error checking Twin awakening:', error);
@@ -44,7 +56,7 @@ export async function checkTwinAwakening(userId: string): Promise<MigrationResul
 
 /**
  * Migrate old Twin data to new system structure
- * Called on first app load if old Twin exists but new system doesn't have it
+ * Upserts into `twins` table (conflict on user_id)
  */
 export async function migrateTwinToNewSystem(
   userId: string,
@@ -52,30 +64,49 @@ export async function migrateTwinToNewSystem(
 ): Promise<MigrationResult> {
   try {
     if (!userId) {
-      return {
-        success: false,
-        isTwinAwakened: false,
-        message: 'User ID required',
-      };
+      return { success: false, isTwinAwakened: false, message: 'User ID required' };
     }
 
     if (!oldTwinData) {
-      return {
-        success: true,
-        isTwinAwakened: false,
-        message: 'No old Twin data to migrate',
-      };
+      return { success: true, isTwinAwakened: false, message: 'No old Twin data to migrate' };
     }
 
-    // TODO: Transform old Twin schema to new system
-    // - Copy over: name, stage, personality, memories
-    // - Initialize: awakened_at, 12 SICE scores, world assignments
-    // - Create: initial Twin profile in new schema
+    if (!supabase) {
+      return { success: false, isTwinAwakened: false, message: 'Supabase unavailable' };
+    }
+
+    // Transform old schema → new `twins` columns
+    const newTwinRow = {
+      user_id: userId,
+      name: String(oldTwinData['name'] ?? 'Twin'),
+      primary_archetype: String(
+        oldTwinData['primaryArchetype'] ?? oldTwinData['primary_archetype'] ?? ''
+      ),
+      secondary_archetype:
+        (oldTwinData['secondaryArchetype'] as string | undefined) ??
+        (oldTwinData['secondary_archetype'] as string | undefined) ??
+        null,
+      maturity_score: Number(
+        oldTwinData['maturityScore'] ?? oldTwinData['maturity_score'] ?? 30
+      ),
+      evolution_stage: Number(
+        oldTwinData['stage'] ?? oldTwinData['evolution_stage'] ?? 1
+      ),
+      awakened_at: String(
+        oldTwinData['awakenedAt'] ?? oldTwinData['awakened_at'] ?? new Date().toISOString()
+      ),
+    };
+
+    const { error } = await supabase
+      .from('twins')
+      .upsert([newTwinRow], { onConflict: 'user_id' });
+
+    if (error) throw error;
 
     return {
       success: true,
       isTwinAwakened: true,
-      twinName: (oldTwinData as any)?.name,
+      twinName: newTwinRow.name,
       message: 'Twin migrated successfully',
     };
   } catch (error) {
@@ -89,16 +120,23 @@ export async function migrateTwinToNewSystem(
 }
 
 /**
- * Get full Twin profile for new system
+ * Get full Twin profile from `twins` table
  */
 export async function getTwinProfile(userId: string) {
   try {
     if (!userId) throw new Error('User ID required');
 
-    // TODO: Query Supabase twin_profiles where user_id = userId
-    // Return profile with: id, name, stage, awakened_at, personality, memories, world_assignments
+    if (!supabase) return null;
 
-    return null;
+    const { data, error } = await supabase
+      .from('twins')
+      .select('*')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data ?? null;
   } catch (error) {
     console.error('Error fetching Twin profile:', error);
     return null;
@@ -106,7 +144,7 @@ export async function getTwinProfile(userId: string) {
 }
 
 /**
- * Initialize new Twin in system
+ * Initialize new Twin row in `twins` table
  */
 export async function initializeTwin(userId: string, twinName: string) {
   try {
@@ -114,12 +152,28 @@ export async function initializeTwin(userId: string, twinName: string) {
       throw new Error('User ID and Twin name required');
     }
 
-    // TODO: Insert new row in twin_profiles
-    // - user_id, name, stage (1), awakened_at (now), personality (empty initially), created_at
+    if (!supabase) {
+      return { success: false, message: 'Supabase unavailable' };
+    }
+
+    const { data, error } = await supabase
+      .from('twins')
+      .insert([
+        {
+          user_id: userId,
+          name: twinName,
+          evolution_stage: 1,
+          awakened_at: new Date().toISOString(),
+        },
+      ])
+      .select('id')
+      .single();
+
+    if (error) throw error;
 
     return {
       success: true,
-      twinId: `twin_${userId}`,
+      twinId: data.id as string,
       message: `Twin "${twinName}" initialized`,
     };
   } catch (error) {
