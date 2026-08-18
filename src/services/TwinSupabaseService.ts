@@ -211,6 +211,48 @@ export async function updateSICEScore(
 }
 
 /**
+ * Delete Twin and all related data from Supabase
+ * Removes: twins, twin_memories (by twin_id), world_stats (by user_id)
+ */
+export async function deleteTwinFromDatabase(
+  twinId: string,
+  userId: string
+): Promise<boolean> {
+  try {
+    if (!twinId || !userId || !supabase) return false;
+
+    // 1. Delete twin_memories (FK → twin_id)
+    const { error: memoriesErr } = await supabase
+      .from('twin_memories')
+      .delete()
+      .eq('twin_id', twinId);
+
+    if (memoriesErr) throw memoriesErr;
+
+    // 2. Delete world_stats (keyed by user_id, not twin_id)
+    const { error: statsErr } = await supabase
+      .from('world_stats')
+      .delete()
+      .eq('user_id', userId);
+
+    if (statsErr) throw statsErr;
+
+    // 3. Delete the Twin row itself
+    const { error: twinErr } = await supabase
+      .from('twins')
+      .delete()
+      .eq('id', twinId);
+
+    if (twinErr) throw twinErr;
+
+    return true;
+  } catch (err) {
+    console.error('Failed to delete Twin from database:', err);
+    return false;
+  }
+}
+
+/**
  * Get Twin SICE scores
  */
 export async function fetchTwinSICEScores(twinId: string): Promise<Record<string, number>> {

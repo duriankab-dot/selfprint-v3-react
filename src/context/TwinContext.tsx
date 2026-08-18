@@ -17,6 +17,7 @@ import {
   fetchUserTwin,
   createTwinInDatabase,
   updateTwinInDatabase,
+  deleteTwinFromDatabase,
 } from '../services/TwinSupabaseService';
 
 // 18 Archetypes (12 base + 6 hybrid)
@@ -213,17 +214,16 @@ export function TwinProvider({ children }: { children: ReactNode }) {
 
   const resetTwin = useCallback(async () => {
     try {
-      // TODO: P1 - Delete Twin from Supabase
-      // if (!supabase || !twin?.id) return;
-      // await supabase.from('twins').delete().eq('id', twin.id);
-
+      if (twin?.id && twin?.userId) {
+        await deleteTwinFromDatabase(twin.id, twin.userId);
+      }
       setTwin(null);
       setError(null);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to reset Twin';
       setError(errorMsg);
     }
-  }, [twin?.id]);
+  }, [twin?.id, twin?.userId]);
 
   // Load Twin from Supabase on mount
   React.useEffect(() => {

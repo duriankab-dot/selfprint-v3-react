@@ -8,6 +8,7 @@
 import { buildTwinSystemPrompt } from '../config/twin-prompts';
 import * as DecisionLearningService from './DecisionLearningService';
 import type { WorldId } from '../constants/worlds';
+import { supabase } from './supabase-service';
 
 /**
  * Input validation helper
@@ -171,9 +172,12 @@ export async function getDecisionInsights(userId: string) {
   // Validate input
   validateUserId(userId);
 
-  // TODO: Phase G — Add auth middleware to verify user context
-  // Currently assumes userId is validated by caller
-  // Should verify: session.user.id === userId
+  // Verify authenticated session matches the requested userId
+  if (!supabase) throw new Error('Supabase unavailable');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session || session.user.id !== userId) {
+    throw new Error('Unauthorized: user session mismatch');
+  }
 
   return DecisionLearningService.getDecisionInsights(userId);
 }
