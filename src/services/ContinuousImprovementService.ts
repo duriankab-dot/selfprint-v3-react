@@ -73,7 +73,7 @@ export async function processImprovementAction(params: {
 /**
  * Get pending improvements for Twin
  */
-export async function getPendingImprovements(twinId: string): Promise<ImprovementAction[]> {
+export async function getPendingImprovements(): Promise<ImprovementAction[]> {
   if (!supabase) {
     return [];
   }
@@ -145,7 +145,6 @@ export async function applyImprovement(improvementId: string): Promise<Improveme
  * Get improvement impact
  */
 export async function getImprovementImpact(
-  _twinId: string,
   days: number = 7
 ): Promise<ImprovementImpact> {
   if (!supabase) {

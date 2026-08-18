@@ -154,7 +154,7 @@ export async function validateSession(userId: string): Promise<boolean> {
       .gt('expires_at', new Date().toISOString())
       .limit(1);
 
-    return data && data.length > 0;
+    return !!(data && data.length > 0);
   } catch (err) {
     return false;
   }

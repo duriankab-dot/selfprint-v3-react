@@ -9,7 +9,7 @@
  * - Analytics dashboard data
  */
 
-import { supabase } from '../lib/supabase/client';
+import { supabase } from '../lib/supabase/client.js';
 
 export interface NotificationEngagement {
   notificationId: string;

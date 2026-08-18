@@ -37,8 +37,8 @@ export function initializePerformanceMonitor(): void {
       // LCP
       new PerformanceObserver(list => {
         const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1];
-        webVitals.LCP = lastEntry.renderTime || lastEntry.loadTime;
+        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
+        webVitals.LCP = lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime;
       }).observe({ entryTypes: ['largest-contentful-paint'] });
 
       // FCP

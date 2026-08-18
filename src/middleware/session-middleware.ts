@@ -14,7 +14,6 @@ export interface SessionRequest {
  * Session validation middleware
  */
 export async function sessionMiddleware(
-  req: SessionRequest,
   userId: string
 ): Promise<{ valid: boolean; message?: string }> {
   if (!InputValidation.validateUserId(userId)) {
