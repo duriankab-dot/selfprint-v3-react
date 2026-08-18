@@ -662,21 +662,52 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
 
 async function handleProfile(request: Request, action: string): Promise<Response> {
   try {
+    if (!supabaseAdmin) {
+      return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
+    }
+    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+    if (!user) {
+      return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+    }
+
     if (request.method === 'GET') {
-      return Response.json({
-        success: true,
-        profile: {
-          id: 'user-id',
-          email: 'user@example.com',
-          name: 'User Name',
-          createdAt: new Date().toISOString()
-        }
-      } as ApiResponse);
+      const { data, error: selectError } = await supabaseAdmin
+        .from('users_profiles')
+        .select()
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (selectError) {
+        console.error('[profile] select error:', selectError);
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+      }
+      return Response.json({ success: true, profile: data || null } as ApiResponse);
     }
-    if (request.method === 'PUT') {
-      return Response.json({ success: true, message: 'Profile updated' } as ApiResponse);
+
+    if (request.method === 'POST') {
+      const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+      const { data, error: upsertError } = await supabaseAdmin
+        .from('users_profiles')
+        .upsert(
+          {
+            user_id: user.id,
+            date_of_birth: (body.dateOfBirth as string) || null,
+            time_of_birth: (body.timeOfBirth as string) || null,
+            place_of_birth: (body.placeOfBirth as string) || null,
+            initial_mood: (body.initialMood as string) || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        )
+        .select()
+        .single();
+      if (upsertError) {
+        console.error('[profile] upsert error:', upsertError);
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+      }
+      return Response.json({ success: true, profileId: (data as any)?.id, message: 'Profile saved' } as ApiResponse);
     }
-    return Response.json({ success: false, error: 'Method not allowed' } as ApiResponse, { status: 405 });
+
+    return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
   } catch (error) {
     console.error('[handleProfile] Error:', error);
     return Response.json({ success: false, error: String(error) } as ApiResponse, { status: 500 });
@@ -685,20 +716,65 @@ async function handleProfile(request: Request, action: string): Promise<Response
 
 async function handleBlueprint(request: Request, action: string): Promise<Response> {
   try {
+    if (!supabaseAdmin) {
+      return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
+    }
+    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+    if (!user) {
+      return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+    }
+
     if (request.method === 'GET') {
-      return Response.json({
-        success: true,
-        blueprints: [{ id: '1', name: 'Default Blueprint', version: '1.0' }]
-      } as ApiResponse);
+      const { data, error: selectError } = await supabaseAdmin
+        .from('blueprints')
+        .select()
+        .eq('user_id', user.id)
+        .eq('is_latest', true)
+        .maybeSingle();
+      if (selectError) {
+        console.error('[blueprint] select error:', selectError);
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+      }
+      return Response.json({ success: true, blueprint: data || null } as ApiResponse);
     }
+
     if (request.method === 'POST') {
-      return Response.json({
-        success: true,
-        blueprintId: 'new-id',
-        message: 'Blueprint created'
-      } as ApiResponse);
+      const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+      const accuracyLevel = body.accuracyLevel as number;
+      if (typeof accuracyLevel !== 'number' || accuracyLevel < 0 || accuracyLevel > 100) {
+        return Response.json({ success: false, error: 'accuracyLevel ต้องเป็น 0-100' } as ApiResponse, { status: 400 });
+      }
+      // Mark previous blueprints as non-latest
+      await supabaseAdmin
+        .from('blueprints')
+        .update({ is_latest: false })
+        .eq('user_id', user.id)
+        .eq('is_latest', true);
+      const { data, error: insertError } = await supabaseAdmin
+        .from('blueprints')
+        .insert({
+          user_id: user.id,
+          profile_id: (body.profileId as string) || null,
+          accuracy_level: accuracyLevel,
+          decision_style: (body.decisionStyle as string) || null,
+          strengths: (body.strengths as string[]) || [],
+          insights: (body.insights as string[]) || [],
+          opportunities: (body.opportunities as string[]) || [],
+          blind_spots: (body.blindSpots as string[]) || [],
+          prototype_core: (body.prototypeCore as string) || null,
+          is_latest: true,
+          source: (body.source as string) || 'initial',
+        })
+        .select()
+        .single();
+      if (insertError) {
+        console.error('[blueprint] insert error:', insertError);
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+      }
+      return Response.json({ success: true, blueprintId: (data as any)?.id, message: 'Blueprint saved' } as ApiResponse);
     }
-    return Response.json({ success: false, error: 'Method not allowed' } as ApiResponse, { status: 405 });
+
+    return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
   } catch (error) {
     console.error('[handleBlueprint] Error:', error);
     return Response.json({ success: false, error: String(error) } as ApiResponse, { status: 500 });
