@@ -6,31 +6,19 @@
 
 ---
 
-## 📊 สถานะจริง (ตรวจสอบแล้ว)
+## 📊 สถานะโปรเจกต์ (LEVEL 2 — Authority)
 
-### Overall Progress: 80% ✅
+⚠️ **สำหรับสถานะจริงเวลาปัจจุบัน:** ดู [SELFPRINT_PRODUCTION_STATUS_TH.md](SELFPRINT_PRODUCTION_STATUS_TH.md)
 
-```
-P0 #1-4 ........................... ✅ COMPLETE
-P0 #5: World Routing .............. ✅ COMPLETE (100%)
-Phase E Step 1 (Schema) ........... ✅ COMPLETE
-Phase E Step 2A-2E (Services) ..... ✅ COMPLETE (100%)
-Phase F: Feedback Loop ............ ⏳ NEXT (5-10 ชม)
-Phase G: Production ............... ⏳ NEXT (5-10 ชม)
+เอกสารนี้ **LEVEL 1 (Master Directive)** เป็น "source of truth" สำหรับ:
+- ✅ ทิศทางโปรเจกต์ (Product Direction)
+- ✅ สถาปัตยกรรมระบบ (System Architecture)
+- ✅ หลักการพื้นฐาน (Core Principles)
 
-รวมประมาณ 80% โปรเจกต์ เสร็จแล้ว
-```
-
-### P0 Blockers: 5/6 ✅ แก้ได้
-
-```
-P0 #1: Twin Persistence ........... ✅ COMPLETE
-P0 #2: Decision Follow-ups ........ ✅ COMPLETE
-P0 #3: Decision Learning .......... ✅ COMPLETE
-P0 #4: SICE Engines (16/16) ....... ✅ COMPLETE
-P0 #5: World Routing (12/12) ...... ✅ COMPLETE
-P0 #6: Documentation .............. ⏳ NEXT (อัพเดททั้งโปรเจค)
-```
+สำหรับข้อมูลสถานะปัจจุบัน (LEVEL 2):
+- 6-state vocabulary: MISSING, PARTIAL, IMPLEMENTED, VERIFIED, PRODUCTION READY, BLOCKED
+- ข้อมูลที่อัพเดทในแต่ละ session
+- Verification gaps และ blockers
 
 ---
 
@@ -243,7 +231,7 @@ LIFETIME (~฿4,900–7,900) . Own Your Twin
 
 ## 🔴 ยังเหลือ 2 Phase
 
-### Phase F: Feedback Loop (5-10 ชม)
+### Phase F: Feedback Loop
 
 ```
 - User feedback integration
@@ -252,7 +240,7 @@ LIFETIME (~฿4,900–7,900) . Own Your Twin
 - Sentiment analysis
 ```
 
-### Phase G: Production (5-10 ชม)
+### Phase G: Production
 
 ```
 - Performance optimization
@@ -323,15 +311,13 @@ LIFETIME (~฿4,900–7,900) . Own Your Twin
 
 ---
 
-## 📊 Timeline เสร็จสิ้น
+## 📊 Timeline & Status
 
-```
-Phase E: ✅ COMPLETE (เสร็จแล้ว)
-Phase F: 5-10 ชม (ประมาณ 1 วัน)
-Phase G: 5-10 ชม (ประมาณ 1 วัน)
+📌 **ข้อมูล Timeline ที่อัพเดท:** ดู [SELFPRINT_PRODUCTION_STATUS_TH.md](SELFPRINT_PRODUCTION_STATUS_TH.md) (LEVEL 2)
 
-รวม: 10-20 ชม → ปล่อยได้ (2-3 วัน)
-```
+สาเหตุ: เอกสารนี้ (LEVEL 1) เป็น Master Direction ไม่ใช่ Status Tracker
+- LEVEL 1: เปลี่ยนแปลง rare (architecture changes only)
+- LEVEL 2: อัพเดท every session (status, blockers, verification gaps)
 
 ---
 
@@ -367,12 +353,12 @@ Phase G: 5-10 ชม (ประมาณ 1 วัน)
 - ✅ Follow-up system verified
 
 **ต่อจากนี้:**
-- Phase F: Feedback Loop (5-10 ชม)
-- Phase G: Production (5-10 ชม)
-- Go-live
+- Phase F: Feedback Loop
+- Phase G: Production
+- Verification (manual on www.selfprint.one)
 
 ---
 
 **Document Status:** ✅ Consolidated, Verified, Ready  
-**Project Status:** 80% Complete → Phase F/G to shipping  
-**Last Updated:** 17 ส.ค. 2026 (HANDOFF verified)
+**Project Status:** See [SELFPRINT_PRODUCTION_STATUS_TH.md](SELFPRINT_PRODUCTION_STATUS_TH.md) for current status (LEVEL 2)  
+**Last Updated:** 17 ส.ค. 2026 | **Reconciled:** 18 ส.ค. 2026 (PHASE 2 Documentation Fix)

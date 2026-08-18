@@ -52,8 +52,8 @@
 | 3 | [PHASE_3_CORE_AWAKENING_TH.md](PHASE_3_CORE_AWAKENING_TH.md) | ✅ | Essence persistence (Supabase) |
 | 4 | [SICE_ARCHITECTURE_TH.md](SICE_ARCHITECTURE_TH.md) | ✅ | 12 SICE engines (9-12 partial) |
 | 5 | [PHASE_5_TWIN_ARCHITECTURE_TH.md](PHASE_5_TWIN_ARCHITECTURE_TH.md) | ✅ | Twin creation + memory + evolution |
-| 6 | [PHASE_6_WORLDS_TH.md](PHASE_6_WORLDS_TH.md) | ✅ | 12 Worlds (30% integrated) |
-| 7 | [PHASE_7_DECISION_INTELLIGENCE_TH.md](PHASE_7_DECISION_INTELLIGENCE_TH.md) | ✅ | Decision loop (3 TODOs: notify, learn, recommend) |
+| 6 | [PHASE_6_WORLDS_TH.md](PHASE_6_WORLDS_TH.md) | ✅ | 12 Worlds context routing |
+| 7 | [PHASE_7_DECISION_INTELLIGENCE_TH.md](PHASE_7_DECISION_INTELLIGENCE_TH.md) | ✅ | Decision loop + intelligence |
 | 8 | [PHASE_8_CONTENT_MONETIZATION_TH.md](PHASE_8_CONTENT_MONETIZATION_TH.md) | ✅ | Stripe + Blog + Testimonials |
 | 9 | [PHASE_9_SECURITY_ERRORS_TH.md](PHASE_9_SECURITY_ERRORS_TH.md) | ✅ | Auth, RLS, validation, error handling |
 | 10 | [PHASE_10_TESTING_TH.md](PHASE_10_TESTING_TH.md) | ✅ | 15+ test files, coverage gaps |
@@ -77,98 +77,11 @@
 
 ---
 
-## 🎯 Current Status by Feature
+## ⚡ Current Project Status
 
-### ✅ VERIFIED (Production Ready)
-- **Twin Creation:** Core Awakening → essence persisted → Twin initialized ✅ VERIFIED
-- **Twin Memory:** Chat saved + world-scoped queries ✅ VERIFIED  
-- **SICE Orchestration:** 12 engines defined, 4 fully verified ✅ VERIFIED (see SERVICES_ENUMERATION.md)
-- **Passkey Auth:** Registration + sign-in + biometric unlock ✅ VERIFIED
-- **Core Chat:** Twin responds to user messages ✅ VERIFIED
-- **World Expertise:** 12-world context routing ✅ VERIFIED
-- **Nova AI Bridge:** Claude API integration ✅ VERIFIED
+**For detailed, real-time status:** See [SELFPRINT_PRODUCTION_STATUS_TH.md](SELFPRINT_PRODUCTION_STATUS_TH.md) (LEVEL 2 — Current Authority)
 
-### ⚠️ IMPLEMENTED (Requires Verification)
-- **Twin Evolution:** Stages 1-5 defined, progression working ⚠️ IMPLEMENTED
-- **Decision Recording:** Save + schedule (30/90/180/365) works ⚠️ IMPLEMENTED
-- **Push Notifications:** Queue + scheduling working ⚠️ IMPLEMENTED
-- **Analytics:** Event tracking implemented ⚠️ IMPLEMENTED
-- **Stripe:** Checkout routes consolidated → unified-handler ⚠️ IMPLEMENTED
-
-### 🔴 PARTIAL (Needs Work Before Production)
-- **Twin Evolution:** Stage triggers not fully automated (⚠️ PARTIAL)
-- **12 Worlds:** Schema ready, content integration 30% ⚠️ PARTIAL
-- **Decision Learning:** Pattern extraction stub only ⚠️ PARTIAL
-- **RLS Policies:** 70% tables covered, audit incomplete ⚠️ PARTIAL
-- **Testing:** 50% unit + 30% integration coverage ⚠️ PARTIAL
-- **Error Tracking:** Sentry integration not initialized ⚠️ PARTIAL
-- **Personal Model:** User learning system stub only ⚠️ PARTIAL
-
-### ❌ Not Started
-- **Decision Notifications:** FollowUpScheduler.triggerFollowUp() stub
-- **Pattern Learning:** DecisionLearningService incomplete
-- **Recommendations:** Not implemented
-- **Testimonials:** Component not created
-- **Error Boundaries:** Component not created
-- **Session Timeout:** Not implemented
-- **Stripe Webhooks:** Signature verification missing
-- **Monitoring:** Sentry/error tracking not setup
-
----
-
-## 📊 Coverage by Layer
-
-```
-SERVICES (44 total)
-├─ VERIFIED ............................ ✅ 18 services
-├─ IMPLEMENTED ......................... ⚠️ 16 services  
-└─ PARTIAL ............................ 🔴 10 services
-(See docs/SERVICES_ENUMERATION.md for full inventory)
-
-Frontend (React)
-├─ Auth (Passkey/Magic Link/OAuth) ......... ✅ 90%
-├─ Twin Chat Interface .................... ✅ 85%
-├─ World Selector ......................... ⚠️ 60%
-├─ Decision Form .......................... ⚠️ 70%
-├─ Blog/Testimonials ...................... ❌ 20%
-└─ Pricing Page ........................... ⚠️ 70%
-
-Backend APIs (12 APIs - Consolidated)
-├─ Unified Handler (api/unified-handler.ts) 
-│  ├─ Stripe (consolidated) ........... ⚠️ IMPLEMENTED
-│  ├─ Profile (consolidated) ......... ⚠️ IMPLEMENTED
-│  ├─ Blueprint (consolidated) ....... ⚠️ IMPLEMENTED
-│  ├─ Notifications .................. ⚠️ IMPLEMENTED
-│  ├─ Twin Evolution ................. ✅ VERIFIED
-│  └─ SICE ........................... ✅ VERIFIED
-
-SICE Engines (12 total)
-├─ VERIFIED ............................ ✅ 4/12 complete
-└─ PARTIAL ............................ ⚠️ 8/12 in development
-(See docs/INTELLIGENCE_SYSTEM_ARCHITECTURE.md for details)
-
-Database (Supabase)
-├─ Tables ............................... ✅ 100%
-├─ RLS Policies ......................... ⚠️ 70% coverage
-├─ Migrations ........................... ✅ 100%
-└─ Backups ............................. ✅ Configured
-
-Security
-├─ HTTPS/TLS ............................ ✅ 100%
-├─ Passkey Auth ......................... ✅ 90%
-├─ Input Validation ..................... ⚠️ 80% (Zod-based)
-├─ Privacy Boundary ..................... ⚠️ 85% (PII masking)
-├─ Session Management ................... ❌ 0% (TODO)
-├─ CSRF Protection ...................... ❌ 0% (TODO)
-├─ Rate Limiting ........................ ❌ 0% (TODO)
-└─ Error Handling ....................... ⚠️ 50% (basic)
-
-Monitoring
-├─ Error Tracking ....................... ⚠️ Partial (Sentry stub)
-├─ Performance Monitoring ............... ⚠️ Partial (basic timing)
-├─ Uptime Monitoring .................... ❌ 0% (needs Datadog/PagerDuty)
-└─ Logging ............................. ⚠️ 70% (console + file)
-```
+This index is **navigation-only**. All status percentages, metrics, and verification data are in the dedicated status document.
 
 ---
 
@@ -239,24 +152,9 @@ Phase 14: Release Gate
 - **Found a bug?** Report in GitHub Issues + check [KNOWN_ISSUES.md](KNOWN_ISSUES.md)
 - **Need API help?** Check [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
----
-
-## 📈 Release Gate Metrics
-
-| Metric | Target | Current | Status | Gate |
-|--------|--------|---------|--------|------|
-| **Code Quality** | 100% | 85% | ⚠️ TypeScript strict mode | ✅ PASS |
-| **API Consolidation** | 12 endpoints | 12 (unified) | ✅ All routed | ✅ PASS |
-| **Core Services** | 44 services | 44 (18 verified) | ⚠️ 10 partial | ⚠️ PARTIAL |
-| **Documentation** | Single source of truth | Contradictions found | 🔴 BLOCKED | 🔴 **BLOCKED** |
-| **Security** | 100% | 70% | ⚠️ Session/CSRF/CORS | ⚠️ PARTIAL |
-| **Monitoring** | Full observability | Sentry stub | ⚠️ Needs setup | ⚠️ PARTIAL |
-| **E2E Testing** | 100% coverage | Skipped (backend req) | 🔴 BLOCKED | 🔴 **BLOCKED** |
-
-**Release Gate Status:** 🔴 **BLOCKED** — Phase H1 documentation cleanup required before proceeding to H2
 
 ---
 
-**Index Updated:** 2026-08-17  
-**Total Documentation:** 25+ files  
-**Coverage:** All phases documented (Thai + English)
+**Index Updated:** 2026-08-18 (PHASE 1: Navigation-only reconciliation)  
+**Purpose:** Navigation hub only — see SELFPRINT_PRODUCTION_STATUS_TH.md for status  
+**Total Documentation:** 25+ files (Thai + English)

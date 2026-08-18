@@ -1,8 +1,15 @@
-# SELFPRINT V3 — API ARCHITECTURE (LOCKED)
+# SELFPRINT V3 — API ARCHITECTURE [HISTORICAL SNAPSHOT]
+
+⚠️ **นี่เป็นเอกสารประวัติศาสตร์**  
+- วันที่สร้าง: 2026-08-17
+- ใช้เป็นข้อมูลอ้างอิงเท่านั้น (implementation architecture changed to unified-api-handler)
+- **ห้ามใช้เป็น Current Status** → ดู: [SELFPRINT_PRODUCTION_STATUS_TH.md](SELFPRINT_PRODUCTION_STATUS_TH.md)
+
+---
 
 **Status:** 🔴 ARCHITECTURE LOCKED — No API #13 allowed  
-**Total APIs:** 12 (fixed)  
-**Last Updated:** 2026-08-17  
+**Total APIs:** 12 (refactored into unified-api-handler.ts)  
+**Last Updated:** 2026-08-17 (marked HISTORICAL: 2026-08-18)  
 **Verified By:** Phase 2 Audit
 
 ---
