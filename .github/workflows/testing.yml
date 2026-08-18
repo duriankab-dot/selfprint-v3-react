@@ -73,6 +73,7 @@ jobs:
 
       - name: Notify Slack - E2E Tests
         if: always() && env.SLACK_WEBHOOK != ''
+        continue-on-error: true
         run: |
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
@@ -132,6 +133,7 @@ jobs:
 
       - name: Notify Slack - Smoke Test
         if: always() && env.SLACK_WEBHOOK != ''
+        continue-on-error: true
         run: |
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
@@ -191,6 +193,7 @@ jobs:
 
       - name: Notify Slack - Full Load Test
         if: always() && env.SLACK_WEBHOOK != ''
+        continue-on-error: true
         run: |
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
@@ -280,6 +283,7 @@ jobs:
 
       - name: Final Status Notification
         if: always() && env.SLACK_WEBHOOK != ''
+        continue-on-error: true
         run: |
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
