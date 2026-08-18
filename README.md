@@ -2,14 +2,23 @@
 
 **AI-powered decision-making companion** สำหรับการติดตามการตัดสินใจและการเรียนรู้จากประสบการณ์
 
-**สถานะ:** H0-H6 COMPLETE ✅ — PRODUCTION READY  
-**เวอร์ชัน:** 3.0 Production | **อัปเดต:** 2026-08-18 | **Launch:** APPROVED ✅
+**สถานะ:** H0-H6 COMPLETE ✅ | Code VERIFIED | Docs RECONCILED  
+**สถานะโปรเจกต์ปัจจุบัน:** BLOCKED (documentation reconciliation complete, awaiting PHASE 3 verification)  
+**เวอร์ชัน:** 3.0 Production | **อัปเดต:** 2026-08-18 | **ที่อยู่:** www.selfprint.one ✅
 
 ---
 
-## 📖 START HERE — PROJECT STATUS
+## 📖 START HERE — PROJECT STATUS & DOCUMENTATION
 
-**Authority:** [SELFPRINT_PROJECT_CODEX_COMPLETE_v2.md](SELFPRINT_PROJECT_CODEX_COMPLETE_v2.md) (Single Source of Truth)
+⚠️ **AUTHORITY DOCUMENTS (3-Level Hierarchy):**
+
+| ระดับ | เอกสาร | วัตถุประสงค์ | ความถี่อัปเดต |
+|------|--------|-----------|------------|
+| **LEVEL 1** | [SELFPRINT_MASTER_DIRECTIVE_TH_CONSOLIDATED_v4.md](docs/SELFPRINT_MASTER_DIRECTIVE_TH_CONSOLIDATED_v4.md) | Architecture + Direction | Rarely (major changes only) |
+| **LEVEL 2** | [SELFPRINT_PRODUCTION_STATUS_TH.md](docs/SELFPRINT_PRODUCTION_STATUS_TH.md) | **Current Project Status** | Every session |
+| **LEVEL 3** | [/docs/OLD/](docs/OLD/) | Historical Reference | Archived (read-only) |
+
+👉 **For current status, blockers, and verification gaps:** See [SELFPRINT_PRODUCTION_STATUS_TH.md](docs/SELFPRINT_PRODUCTION_STATUS_TH.md)
 
 ### ✅ PHASE H0-H2: DOCUMENTATION & FIXES COMPLETE
 
@@ -24,7 +33,8 @@
 **H5:** Launch readiness (33/33 gates verified, GO for launch) ✅  
 **H6:** Post-launch monitoring procedures ready ✅
 
-**Result:** 32.5 hours development → 100% production-ready
+**Result:** 32.5 hours development → Code VERIFIED + deployed to www.selfprint.one  
+**Current Status:** BLOCKED (documentation reconciliation complete, awaiting PHASE 3 verification)
 
 ### 🎯 Developer Path (ทำตามลำดับ)
 
@@ -106,6 +116,7 @@ See `.env.example` for required environment variables.
 
 - **GitHub:** https://github.com/duriankab-dot/selfprint-v3-react
 - **Production:** https://selfprint.one
-- **Documentation:** Start with SELFPRINT_PROJECT_CODEX.md
+- **Documentation Authority:** See [SELFPRINT_MASTER_DIRECTIVE_TH_CONSOLIDATED_v4.md](docs/SELFPRINT_MASTER_DIRECTIVE_TH_CONSOLIDATED_v4.md) (LEVEL 1)
+- **Current Status:** See [SELFPRINT_PRODUCTION_STATUS_TH.md](docs/SELFPRINT_PRODUCTION_STATUS_TH.md) (LEVEL 2)
 
-**Last Updated:** 18 สิงหาคม 2569 (CODEX v2.0)
+**Last Updated:** 18 สิงหาคม 2026 (PHASE 1-2 Reconciliation Complete)
