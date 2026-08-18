@@ -34,6 +34,10 @@
       "destination": "/api/unified-handler?module=blueprint&action=:action*"
     },
     {
+      "source": "/api/share",
+      "destination": "/api/unified-handler?module=share&action=default"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

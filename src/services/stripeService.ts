@@ -126,7 +126,7 @@ export async function createCheckoutSession(
 ): Promise<{ sessionId: string; url: string }> {
   try {
     // Call backend API to create Stripe session
-    const response = await fetch('/api/stripe?action=create-checkout', {
+    const response = await fetch('/api/stripe/create-checkout', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -160,7 +160,7 @@ export async function createCheckoutSession(
  */
 export async function createPortalSession(accessToken: string): Promise<{ portalUrl: string }> {
   try {
-    const response = await fetch('/api/stripe?action=create-portal', {
+    const response = await fetch('/api/stripe/create-portal', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -190,7 +190,7 @@ export async function createPortalSession(accessToken: string): Promise<{ portal
  */
 export async function getSubscriptionStatus(accessToken: string) {
   try {
-    const response = await fetch(`/api/stripe?action=subscription`, {
+    const response = await fetch('/api/stripe/subscription', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
