@@ -12,6 +12,8 @@ import {
   trackNotificationRead,
   trackDecisionOutcome,
 } from '../src/services/NotificationAnalytics.js';
+import Stripe from 'stripe';
+import { verifyUser, supabaseAdmin } from './_utils/verify-user.js';
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -42,6 +44,8 @@ export async function handler(request: Request): Promise<Response> {
         return handleSICE(request, action, url);
       case 'stripe':
         return handleStripe(request, action);
+      case 'share':
+        return handleShare(request, url);
       case 'profile':
         return handleProfile(request, action);
       case 'blueprint':
@@ -318,27 +322,342 @@ async function handleSICE(_request: Request, _action: string, url: URL): Promise
   );
 }
 
+// ── Stripe helpers ────────────────────────────────────────────────────────────
+
+function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error('STRIPE_SECRET_KEY is not configured');
+  return new Stripe(key, { apiVersion: '2024-06-20' });
+}
+
+function getPriceId(tier: string, billingPeriod: string): string {
+  const envKey = (() => {
+    if (tier === 'plus' && billingPeriod === 'monthly') return 'STRIPE_PRICE_PLUS_MONTHLY';
+    if (tier === 'plus' && billingPeriod === 'annual')  return 'STRIPE_PRICE_PLUS_ANNUAL';
+    if (tier === 'pro'  && billingPeriod === 'monthly') return 'STRIPE_PRICE_PRO_MONTHLY';
+    if (tier === 'pro'  && billingPeriod === 'annual')  return 'STRIPE_PRICE_PRO_ANNUAL';
+    if (tier === 'lifetime')                            return 'STRIPE_PRICE_LIFETIME';
+    return null;
+  })();
+  if (!envKey) throw new Error(`Unknown tier/billingPeriod: ${tier}/${billingPeriod}`);
+  const priceId = process.env[envKey];
+  if (!priceId) throw new Error(`Env var ${envKey} is not set`);
+  return priceId;
+}
+
+async function getStripeCustomerId(userId: string): Promise<string | null> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin
+    .from('subscriptions')
+    .select('stripe_customer_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return (data as any)?.stripe_customer_id ?? null;
+}
+
+// ── Stripe webhook handlers ───────────────────────────────────────────────────
+
+async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<void> {
+  if (!supabaseAdmin) return;
+  const userId = session.metadata?.user_id || session.client_reference_id;
+  const tier = session.metadata?.tier;
+  if (!userId || !tier) return;
+  const isLifetime = tier === 'lifetime';
+  await supabaseAdmin.from('subscriptions').upsert(
+    {
+      user_id: userId,
+      tier,
+      status: 'active',
+      stripe_customer_id: session.customer as string,
+      stripe_subscription_id: isLifetime ? null : (session.subscription as string),
+      expires_at: null,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id' }
+  );
+  console.log(`[stripe] Upserted subscription: user=${userId} tier=${tier}`);
+}
+
+async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
+  if (!supabaseAdmin) return;
+  const userId = sub.metadata?.user_id;
+  if (!userId) return;
+  const tier = sub.metadata?.tier || 'free';
+  const status = sub.status === 'active' ? 'active' : 'expired';
+  const expiresAt = sub.current_period_end
+    ? new Date(sub.current_period_end * 1000).toISOString()
+    : null;
+  await supabaseAdmin.from('subscriptions').upsert(
+    {
+      user_id: userId,
+      tier: sub.status === 'active' ? tier : 'free',
+      status,
+      stripe_subscription_id: sub.id,
+      expires_at: expiresAt,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'user_id' }
+  );
+  console.log(`[stripe] Subscription ${sub.status}: user=${userId} tier=${tier}`);
+}
+
+async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  if (!supabaseAdmin) return;
+  const customerId = typeof invoice.customer === 'string'
+    ? invoice.customer
+    : (invoice.customer as any)?.id;
+  if (!customerId) return;
+  const { data } = await supabaseAdmin
+    .from('subscriptions')
+    .select('user_id')
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle();
+  if ((data as any)?.user_id) {
+    await supabaseAdmin
+      .from('subscriptions')
+      .update({ status: 'expired', updated_at: new Date().toISOString() })
+      .eq('user_id', (data as any).user_id);
+    console.log(`[stripe] Payment failed: user=${(data as any).user_id}`);
+  }
+}
+
+// ── handleStripe ─────────────────────────────────────────────────────────────
+
 async function handleStripe(request: Request, action: string): Promise<Response> {
+  try {
+    switch (action) {
+      case 'create-checkout': {
+        if (request.method !== 'POST') {
+          return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
+        }
+        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+        if (!user) {
+          return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+        }
+        const body = await request.json() as { tier: string; billingPeriod?: string; returnUrl?: string };
+        const { tier, billingPeriod = 'monthly', returnUrl } = body;
+        if (!tier) {
+          return Response.json({ success: false, error: 'tier is required' } as ApiResponse, { status: 400 });
+        }
+        const stripe = getStripe();
+        const priceId = getPriceId(tier, billingPeriod);
+        const origin = returnUrl
+          ? new URL(returnUrl).origin
+          : (process.env.FRONTEND_URL || 'https://selfprint.app');
+        const mode: Stripe.Checkout.SessionCreateParams['mode'] =
+          tier === 'lifetime' ? 'payment' : 'subscription';
+        const session = await stripe.checkout.sessions.create({
+          mode,
+          line_items: [{ price: priceId, quantity: 1 }],
+          client_reference_id: user.id,
+          customer_email: user.email,
+          success_url: `${origin}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${origin}/pricing`,
+          metadata: { user_id: user.id, tier, billing_period: billingPeriod },
+          ...(mode === 'subscription'
+            ? { subscription_data: { metadata: { user_id: user.id, tier } } }
+            : {}),
+        });
+        return Response.json({ success: true, sessionId: session.id, url: session.url } as ApiResponse);
+      }
+
+      case 'create-portal': {
+        if (request.method !== 'POST') {
+          return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
+        }
+        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+        if (!user) {
+          return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+        }
+        const stripe = getStripe();
+        const origin = process.env.FRONTEND_URL || 'https://selfprint.app';
+        const customerId = await getStripeCustomerId(user.id);
+        if (!customerId) {
+          return Response.json(
+            { success: false, error: 'No Stripe customer found for this user' } as ApiResponse,
+            { status: 404 }
+          );
+        }
+        const portalSession = await stripe.billingPortal.sessions.create({
+          customer: customerId,
+          return_url: `${origin}/pricing`,
+        });
+        return Response.json({ success: true, portalUrl: portalSession.url } as ApiResponse);
+      }
+
+      case 'subscription': {
+        if (request.method !== 'GET') {
+          return Response.json({ success: false, error: 'GET only' } as ApiResponse, { status: 405 });
+        }
+        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+        if (!user) {
+          return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+        }
+        if (!supabaseAdmin) {
+          return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
+        }
+        const { data, error } = await supabaseAdmin
+          .from('subscriptions')
+          .select('tier, status, expires_at, stripe_customer_id, stripe_subscription_id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (error) {
+          console.error('[stripe] subscription lookup error:', error.message);
+          return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+        }
+        if (!data) {
+          return Response.json({
+            success: true,
+            tier: 'free',
+            status: 'active',
+            stripeCustomerId: null,
+            stripeSubscriptionId: null,
+            expiresAt: null,
+          } as ApiResponse);
+        }
+        return Response.json({
+          success: true,
+          tier: data.tier,
+          status: data.status,
+          expiresAt: data.expires_at,
+          stripeCustomerId: data.stripe_customer_id,
+          stripeSubscriptionId: data.stripe_subscription_id,
+        } as ApiResponse);
+      }
+
+      case 'webhook': {
+        if (request.method !== 'POST') {
+          return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
+        }
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        if (!webhookSecret) {
+          console.error('[stripe] STRIPE_WEBHOOK_SECRET not set');
+          return Response.json({ success: false, error: 'Webhook secret not configured' } as ApiResponse, { status: 500 });
+        }
+        const stripe = getStripe();
+        const sig = request.headers.get('stripe-signature') ?? '';
+        const rawBody = await request.text();
+        let event: Stripe.Event;
+        try {
+          event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Webhook signature error';
+          console.error('[stripe] Webhook verification failed:', msg);
+          return Response.json({ success: false, error: `Webhook error: ${msg}` } as ApiResponse, { status: 400 });
+        }
+        console.log(`[stripe] Webhook received: ${event.type}`);
+        switch (event.type) {
+          case 'checkout.session.completed':
+            await onCheckoutComplete(event.data.object as Stripe.Checkout.Session);
+            break;
+          case 'customer.subscription.updated':
+          case 'customer.subscription.deleted':
+            await onSubscriptionChange(event.data.object as Stripe.Subscription);
+            break;
+          case 'invoice.payment_failed':
+            await onPaymentFailed(event.data.object as Stripe.Invoice);
+            break;
+          default:
+            break;
+        }
+        return Response.json({ success: true, received: true } as ApiResponse);
+      }
+
+      default:
+        return Response.json({ success: false, error: `Unknown stripe action: ${action}` } as ApiResponse, { status: 400 });
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    console.error(`[stripe] ${action} error:`, msg);
+    return Response.json({ success: false, error: msg } as ApiResponse, { status: 500 });
+  }
+}
+
+// ── handleShare ───────────────────────────────────────────────────────────────
+
+function generateShareCode(): string {
+  const bytes = new Uint8Array(6);
+  globalThis.crypto.getRandomValues(bytes);
+  return Buffer.from(bytes).toString('base64url');
+}
+
+async function handleShare(request: Request, url: URL): Promise<Response> {
+  if (!supabaseAdmin) {
+    return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
+  }
+
   if (request.method === 'GET') {
-    if (action === 'subscription') {
-      return Response.json({
-        success: true,
-        status: 'active',
-        plan: 'free',
-        message: 'Subscription retrieved'
-      } as ApiResponse);
+    const code = url.searchParams.get('code') ?? '';
+    if (!code) {
+      return Response.json({ success: false, error: 'code param required' } as ApiResponse, { status: 400 });
     }
+    const { data: link, error: linkErr } = await supabaseAdmin
+      .from('share_links')
+      .select('user_id')
+      .eq('code', code)
+      .maybeSingle();
+    if (linkErr) {
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+    }
+    if (!link) {
+      return Response.json({ success: false, error: 'Share link not found' } as ApiResponse, { status: 404 });
+    }
+    const { data: blueprint, error: bpErr } = await supabaseAdmin
+      .from('blueprints')
+      .select('accuracy_level, decision_style')
+      .eq('user_id', link.user_id)
+      .eq('is_latest', true)
+      .maybeSingle();
+    if (bpErr) {
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+    }
+    if (!blueprint) {
+      return Response.json({ success: false, error: 'Owner has no AI Twin yet' } as ApiResponse, { status: 404 });
+    }
+    return Response.json({
+      success: true,
+      found: true,
+      accuracyLevel: blueprint.accuracy_level,
+      decisionStyle: blueprint.decision_style,
+    } as ApiResponse);
   }
+
   if (request.method === 'POST') {
-    if (action === 'create-checkout') {
-      return Response.json({
-        success: true,
-        checkoutUrl: 'https://checkout.stripe.com/pay/...',
-        message: 'Checkout session created'
-      } as ApiResponse);
+    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+    if (!user) {
+      return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
     }
+    // Return existing code if already has one
+    const { data: existing, error: existingErr } = await supabaseAdmin
+      .from('share_links')
+      .select('code')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (existingErr) {
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+    }
+    if (existing) {
+      return Response.json({ success: true, code: existing.code } as ApiResponse);
+    }
+    // Insert new code (retry on collision)
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const code = generateShareCode();
+      const { error: insertErr } = await supabaseAdmin
+        .from('share_links')
+        .insert({ user_id: user.id, code });
+      if (!insertErr) {
+        return Response.json({ success: true, code } as ApiResponse);
+      }
+      // 23505 = unique_violation — try again
+      if ((insertErr as any).code !== '23505') {
+        console.error('[share] insert error:', insertErr);
+        return Response.json({ success: false, error: 'Failed to create share link' } as ApiResponse, { status: 500 });
+      }
+    }
+    return Response.json({ success: false, error: 'Could not generate unique code' } as ApiResponse, { status: 500 });
   }
-  return Response.json({ success: false, error: `Unknown action: ${action}` } as ApiResponse, { status: 400 });
+
+  return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
 }
 
 async function handleProfile(request: Request, action: string): Promise<Response> {
