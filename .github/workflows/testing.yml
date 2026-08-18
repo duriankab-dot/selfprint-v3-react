@@ -39,18 +39,18 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
-      - name: Install Playwright
-        run: |
-          npm install -D @playwright/test
-          npx playwright install --with-deps chromium
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
 
       - name: Run E2E Tests
         env:
           BASE_URL: ${{ env.BASE_URL }}
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-        run: |
-          npm run test:e2e || true
+        run: npm run test:e2e || true
         continue-on-error: true
 
       - name: Upload Playwright Report
@@ -60,6 +60,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Upload Test Results
         if: always()
@@ -68,11 +69,12 @@ jobs:
           name: test-results
           path: test-results/
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Notify Slack - E2E Tests
-        if: always()
+        if: always() && env.SLACK_WEBHOOK != ''
         run: |
-          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+          curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "E2E Tests Complete",
@@ -92,6 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: e2e-tests
+    if: always()
 
     steps:
       - name: Checkout
@@ -117,6 +120,7 @@ jobs:
           name: smoke-test-results
           path: smoke-results.json
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Publish k6 Results
         if: always()
@@ -127,9 +131,9 @@ jobs:
           echo "- Status: ${{ job.status }}"
 
       - name: Notify Slack - Smoke Test
-        if: always()
+        if: always() && env.SLACK_WEBHOOK != ''
         run: |
-          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+          curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "Smoke Test Complete",
@@ -175,6 +179,7 @@ jobs:
           name: full-load-test-results
           path: full-load-results.json
           retention-days: 7
+          if-no-files-found: ignore
 
       - name: Publish k6 Results Summary
         if: always()
@@ -185,9 +190,9 @@ jobs:
           echo "- Status: ${{ job.status }}"
 
       - name: Notify Slack - Full Load Test
-        if: always()
+        if: always() && env.SLACK_WEBHOOK != ''
         run: |
-          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+          curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "Full Load Test Complete",
@@ -214,6 +219,7 @@ jobs:
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
+        continue-on-error: true
 
       - name: Generate Report
         run: |
@@ -273,9 +279,9 @@ jobs:
             });
 
       - name: Final Status Notification
-        if: always()
+        if: always() && env.SLACK_WEBHOOK != ''
         run: |
-          curl -X POST ${{ env.SLACK_WEBHOOK }} \
+          curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
               "text": "Test Suite Complete",
