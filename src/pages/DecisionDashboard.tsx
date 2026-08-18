@@ -4,7 +4,7 @@
  * Main USP of Selfprint
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { Decision, DecisionInsights } from '../types/decision';
 import type { WorldId } from '../constants/worlds';
 import { WORLDS } from '../constants/worlds';
@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useDecisionStore } from '../store/decisionStore';
 import { useTwin } from '../context/TwinContext';
 import * as DecisionLearningService from '../services/DecisionLearningService';
+import DecisionForm from '../components/features/DecisionForm';
 import '../styles/decision-dashboard.css';
 
 export default function DecisionDashboard() {
@@ -37,6 +38,13 @@ export default function DecisionDashboard() {
   }, [session?.user?.id, decisions, selectedWorld]);
 
   const filteredDecisions = getFilteredDecisions();
+
+  const handleNewDecision = useCallback(() => {
+    setShowNewDecision(false);
+    if (session?.user?.id) {
+      loadDecisions(session.user.id);
+    }
+  }, [session?.user?.id, loadDecisions]);
 
   if (!session?.user?.id) {
     return (
@@ -104,12 +112,14 @@ export default function DecisionDashboard() {
           <p className="form-note">
             Your decision will be tracked with auto-scheduled follow-ups at 30, 90, 180, and 365 days
           </p>
-          {/* TODO: <DecisionForm onSubmit={handleNewDecision} /> */}
+          <DecisionForm
+            userId={session.user.id}
+            onDecisionCreated={handleNewDecision}
+          />
         </div>
       )}
 
-      {/* Pending Follow-ups Section */}
-      {/* TODO: Integrated in Phase F Dashboard */}
+      {/* Pending Follow-ups Section — managed in DecisionCard per Phase F */}
       <div className="dd-pending-section">
         <h2>⏰ Pending Follow-ups</h2>
         <div className="dd-pending-list">
