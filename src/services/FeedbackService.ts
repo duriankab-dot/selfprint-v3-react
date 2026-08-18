@@ -115,6 +115,36 @@ export async function getUserFeedback(
 }
 
 /**
+ * Extract improvement areas from negative feedback comments
+ */
+function extractImprovementAreas(feedbacks: Array<{ sentiment: string; comment?: string }>): string[] {
+  const negativeFeedbacks = feedbacks
+    .filter(f => f.sentiment === 'negative' && f.comment)
+    .map(f => f.comment!.toLowerCase());
+
+  if (negativeFeedbacks.length === 0) return [];
+
+  // Keyword frequency analysis on negative comments
+  const keywords: Record<string, number> = {};
+  const stopWords = new Set(['the', 'a', 'an', 'is', 'it', 'to', 'i', 'and', 'or', 'not', 'this', 'that', 'was', 'are']);
+
+  negativeFeedbacks.forEach(comment => {
+    comment
+      .replace(/[^a-zA-Zก-๙\s]/g, '')
+      .split(/\s+/)
+      .filter(w => w.length > 3 && !stopWords.has(w))
+      .forEach(word => {
+        keywords[word] = (keywords[word] || 0) + 1;
+      });
+  });
+
+  return Object.entries(keywords)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([word]) => word);
+}
+
+/**
  * Get Twin feedback statistics
  */
 export async function getTwinFeedbackStats(twinId: string): Promise<FeedbackStats> {
@@ -130,7 +160,7 @@ export async function getTwinFeedbackStats(twinId: string): Promise<FeedbackStat
   try {
     const { data, error } = await supabase
       .from('user_feedback')
-      .select('sentiment')
+      .select('sentiment, comment')
       .eq('twin_id', twinId);
 
     if (error) {
@@ -162,7 +192,7 @@ export async function getTwinFeedbackStats(twinId: string): Promise<FeedbackStat
       totalFeedback: feedbacks.length,
       sentimentBreakdown: sentimentCounts,
       averageSentimentScore,
-      commonImprovementAreas: [], // TODO: Extract from comments
+      commonImprovementAreas: extractImprovementAreas(feedbacks),
     };
   } catch (err) {
     return {

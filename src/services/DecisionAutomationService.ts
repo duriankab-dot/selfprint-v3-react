@@ -7,6 +7,8 @@
  */
 
 import type { Decision, FollowUpDays } from '../types/decision';
+import { supabase } from '../lib/supabase/client';
+import { getDecisionInsights } from './DecisionLearningService';
 
 export interface ReflectionPrompt {
   followUpDay: FollowUpDays;
@@ -79,15 +81,70 @@ export function generateReflectionPrompt(
 }
 
 /**
- * Placeholder for decision outcome analysis
- * TODO: Implement in Phase F using DecisionLearningService
+ * Analyze decision outcome using DecisionLearningService data
  */
-export function analyzeDecisionOutcome(decision: Decision): DecisionOutcomeAnalysis {
+export async function analyzeDecisionOutcome(decision: Decision): Promise<DecisionOutcomeAnalysis> {
+  try {
+    if (!supabase) return getDefaultOutcomeAnalysis(decision.id);
+
+    // Use twinId directly from decision
+    const insights = await getDecisionInsights(decision.twinId);
+
+    // Calculate consistency from follow-up completions
+    const { data: followUp } = await supabase
+      .from('follow_up_schedule')
+      .select('day30_completed, day90_completed, day180_completed, day365_completed')
+      .eq('decision_id', decision.id)
+      .single();
+
+    const completedFollowUps = followUp
+      ? [
+          followUp.day30_completed,
+          followUp.day90_completed,
+          followUp.day180_completed,
+          followUp.day365_completed,
+        ].filter(Boolean).length
+      : 0;
+    const consistency = Math.round((completedFollowUps / 4) * 100);
+
+    // Build learnings from insights
+    const learnings: string[] = [];
+    if (insights.totalDecisions > 0) {
+      learnings.push(`You have ${insights.totalDecisions} decisions tracked — pattern recognition improves over time`);
+    }
+    if (insights.successRate > 60) {
+      learnings.push(`Your overall success rate is ${Math.round(insights.successRate)}% — above average`);
+    }
+    if (insights.bestWorlds && insights.bestWorlds.length > 0) {
+      learnings.push(`Strongest decision-making in: ${insights.bestWorlds.slice(0, 2).join(', ')}`);
+    }
+    if (learnings.length === 0) {
+      learnings.push('Build decision history for richer analysis');
+    }
+
+    const recommendations: string[] = [];
+    if (completedFollowUps < 2) recommendations.push('Complete follow-up check-ins to track outcome progress');
+    if (insights.successRate < 50) recommendations.push('Review what factors led to less successful decisions');
+    if (recommendations.length === 0) recommendations.push('Continue tracking decisions for deeper pattern insights');
+
+    return {
+      decisionId: decision.id,
+      successRate: insights.successRate || 0,
+      consistency,
+      learnings,
+      recommendations,
+    };
+  } catch {
+    return getDefaultOutcomeAnalysis(decision.id);
+  }
+}
+
+function getDefaultOutcomeAnalysis(decisionId: string): DecisionOutcomeAnalysis {
   return {
-    decisionId: decision.id,
+    decisionId,
     successRate: 0,
     consistency: 0,
-    learnings: ['Analysis available in Phase F Dashboard'],
-    recommendations: ['View Decision Insights for detailed analysis'],
+    learnings: ['Start tracking follow-ups to see outcome analysis'],
+    recommendations: ['Complete 30-day follow-up for this decision'],
   };
 }
