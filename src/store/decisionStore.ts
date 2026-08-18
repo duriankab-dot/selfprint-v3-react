@@ -6,6 +6,8 @@
 import { create } from 'zustand';
 import type { Decision, DecisionFilters } from '../types/decision';
 import { getUserDecisions } from '../services/DecisionService';
+import { getDecisionInsights } from '../services/DecisionLearningService';
+import { supabase } from '../lib/supabase/client';
 
 interface DecisionStore {
   // State
@@ -13,6 +15,8 @@ interface DecisionStore {
   selectedCategory: string | null;
   filters: DecisionFilters;
   isLoading: boolean;
+  pendingFollowUpsCount: number;
+  overallSuccessRate: number;
 
   // Actions
   loadDecisions: (userId: string) => Promise<void>;
@@ -34,6 +38,8 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
   selectedCategory: null,
   filters: {},
   isLoading: false,
+  pendingFollowUpsCount: 0,
+  overallSuccessRate: 0,
 
   // Load decisions from Supabase
   loadDecisions: async (userId: string) => {
@@ -41,7 +47,45 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
     try {
       // userId is same as twinId in Phase E
       const decisions = await getUserDecisions(userId);
-      set({ decisions, isLoading: false });
+
+      // Fetch success rate from DecisionLearningService
+      let overallSuccessRate = 0;
+      try {
+        const insights = await getDecisionInsights(userId);
+        overallSuccessRate = insights.successRate || 0;
+      } catch {
+        // Non-critical
+      }
+
+      // Count pending follow-ups from follow_up_schedule table
+      let pendingFollowUpsCount = 0;
+      try {
+        const decisionIds = decisions.map((d) => d.id);
+        if (decisionIds.length > 0) {
+          const { data: schedules } = await supabase
+            .from('follow_up_schedule')
+            .select('day30_completed, day90_completed, day180_completed, day365_completed, day30_due, day90_due')
+            .in('decision_id', decisionIds);
+
+          if (schedules) {
+            const now = new Date();
+            pendingFollowUpsCount = schedules.filter((s) => {
+              // Pending = due date has passed but not completed
+              const day30Due = s.day30_due ? new Date(s.day30_due) : null;
+              const day90Due = s.day90_due ? new Date(s.day90_due) : null;
+              return (
+                (day30Due && day30Due <= now && !s.day30_completed) ||
+                (day90Due && day90Due <= now && !s.day90_completed) ||
+                (!s.day30_completed && !s.day90_completed && !s.day180_completed && !s.day365_completed)
+              );
+            }).length;
+          }
+        }
+      } catch {
+        // Non-critical
+      }
+
+      set({ decisions, isLoading: false, overallSuccessRate, pendingFollowUpsCount });
     } catch (error) {
       // Error handled silently - logged upstream by service
       set({ decisions: [], isLoading: false });
@@ -81,11 +125,9 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
     set({ selectedCategory: category });
   },
 
-  // Get pending follow-up count (TODO: Integrate with FollowUpScheduler in Phase F)
+  // Get pending follow-up count — populated during loadDecisions from follow_up_schedule
   getPendingCount: () => {
-    // Placeholder: Phase E follow-ups managed separately in FollowUpScheduler
-    // Will be integrated in Phase F Task F2
-    return 0;
+    return get().pendingFollowUpsCount;
   },
 
   // Get filtered decisions
@@ -98,10 +140,12 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
         return false;
       }
 
-      // Status filter: Phase E has status managed in FollowUpScheduler
-      // TODO: Integrate in Phase F
+      // Status filter based on follow-up completion count
       if (filters?.status && filters.status !== 'all') {
-        // Skip status filtering for now
+        const hasFollowUps = d.followUps && d.followUps.length > 0;
+        const allComplete = hasFollowUps && d.followUps!.every((f) => f.completed);
+        if (filters.status === 'completed' && !allComplete) return false;
+        if (filters.status === 'pending' && allComplete) return false;
       }
 
       // World filter
@@ -113,10 +157,8 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
     });
   },
 
-  // Get success rate (TODO: Calculate from DecisionLearningService in Phase F)
+  // Get success rate — populated during loadDecisions from DecisionLearningService
   getSuccessRate: () => {
-    // Phase E success rates calculated by DecisionLearningService
-    // Will be integrated in Phase F Task F2
-    return 0;
+    return get().overallSuccessRate;
   },
 }));
