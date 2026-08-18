@@ -12,21 +12,20 @@ import { createClient } from '@supabase/supabase-js';
  * Falls back to process.env for Vercel serverless environments
  */
 const supabaseUrl = (typeof import.meta !== 'undefined' && (import.meta.env as any)?.VITE_SUPABASE_URL)
-  || process.env.VITE_SUPABASE_URL;
+  || process.env.VITE_SUPABASE_URL
+  || '';
 const supabaseAnonKey = (typeof import.meta !== 'undefined' && (import.meta.env as any)?.VITE_SUPABASE_ANON_KEY)
-  || process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase credentials. Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
-  );
-}
+  || process.env.VITE_SUPABASE_ANON_KEY
+  || '';
 
 /**
  * Supabase client instance
  * Use this to query all tables
+ * Note: Returns null if credentials not available (safe for Vercel cold starts)
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = (supabaseUrl && supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : null;
 
 /**
  * Get current authenticated user
