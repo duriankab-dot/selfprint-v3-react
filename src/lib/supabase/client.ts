@@ -11,10 +11,14 @@ import { createClient } from '@supabase/supabase-js';
  * Uses environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
  * Falls back to process.env for Vercel serverless environments
  */
-const supabaseUrl = (typeof import.meta !== 'undefined' && (import.meta.env as any)?.VITE_SUPABASE_URL)
-  || process.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = (typeof import.meta !== 'undefined' && (import.meta.env as any)?.VITE_SUPABASE_ANON_KEY)
-  || process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = (
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL) ||
+  process.env.VITE_SUPABASE_URL
+);
+const supabaseAnonKey = (
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
+  process.env.VITE_SUPABASE_ANON_KEY
+);
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
