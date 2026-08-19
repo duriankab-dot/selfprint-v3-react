@@ -9,13 +9,14 @@
  * Validation Error
  */
 export class ValidationError extends Error {
-  constructor(
-    public field: string,
-    message: string,
-    public code: string = 'VALIDATION_ERROR'
-  ) {
+  public field: string;
+  public code: string;
+
+  constructor(field: string, message: string, code: string = 'VALIDATION_ERROR') {
     super(message);
     this.name = 'ValidationError';
+    this.field = field;
+    this.code = code;
   }
 }
 
@@ -246,10 +247,11 @@ export const ENDPOINT_SCHEMAS = {
 /**
  * Validate request payload against schema
  */
-export function validateRequest(payload: any, schema: any): Record<string, any> {
+export function validateRequest(payload: any, schema: Record<string, any>): Record<string, any> {
   const validated: Record<string, any> = {};
 
-  for (const [field, fieldConfig] of Object.entries(schema)) {
+  for (const [field, fieldConfigRaw] of Object.entries(schema)) {
+    const fieldConfig = fieldConfigRaw as any;
     const value = payload[field];
 
     // Handle optional fields
@@ -270,7 +272,8 @@ export function validateRequest(payload: any, schema: any): Record<string, any> 
     // Run validator
     if (fieldConfig.validator) {
       try {
-        validated[field] = fieldConfig.validator(value, field, ...fieldConfig.args);
+        const args = fieldConfig.args || [];
+        validated[field] = fieldConfig.validator(value, field, ...args);
       } catch (err) {
         if (err instanceof ValidationError) throw err;
         throw new ValidationError(field, String(err), 'VALIDATION_FAILED');
