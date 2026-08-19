@@ -135,7 +135,7 @@ describe('PersonalContextBuilder', () => {
     it('should mark blind spots with sensitivity level', async () => {
       const blindSpots = await builder.inferBlindSpots('test-user-123');
       blindSpots.forEach((bs) => {
-        expect(['low', 'medium', 'high']).toContain(bs.sensitivityLevel);
+        expect(['low', 'medium', 'high']).toContain(bs.sensitivity);
       });
     });
   });
