@@ -1,192 +1,143 @@
 /**
- * Error Tracking Service (Sentry Integration) - PLACEHOLDER
+ * Error Tracking Service (Sentry Integration)
  *
  * จัดการการติดตามข้อผิดพลาด และส่ง error metrics ไป Sentry
  * เพื่อใช้ในการ production monitoring
  *
- * NOTE: Sentry integration deferred to P0 #6 (production hardening phase)
- * Requires: npm install @sentry/react
+ * Requires: @sentry/react (installed)
+ * Env: VITE_SENTRY_DSN
  */
 
-// import * as Sentry from '@sentry/react';
+import * as Sentry from '@sentry/react';
+
+let initialized = false;
 
 /**
- * Initialize Sentry for error tracking (DEFERRED)
- * เรียกครั้งเดียวเมื่อ app เริ่มต้น
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Initialize Sentry for error tracking
+ * เรียกครั้งเดียวเมื่อ app เริ่มต้น (ใน main.tsx)
  */
 export function initializeSentry() {
-  // Deferred to P0 #6 - requires @sentry/react installation
-  // const env = import.meta.env.MODE || 'development';
-  // const dsn = import.meta.env.VITE_SENTRY_DSN;
-  //
-  // if (!dsn) {
-  //   console.warn('[ErrorTracking] Sentry DSN not configured - error tracking disabled');
-  //   return;
-  // }
-  //
-  // Sentry.init({ ... });
+  const dsn = import.meta.env.VITE_SENTRY_DSN;
+  if (!dsn) {
+    console.warn('[ErrorTracking] VITE_SENTRY_DSN not set — Sentry disabled');
+    return;
+  }
+  if (initialized) return;
+
+  Sentry.init({
+    dsn,
+    environment: import.meta.env.MODE || 'development',
+    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.2 : 1.0,
+    replaysSessionSampleRate: 0.05,
+    replaysOnErrorSampleRate: 1.0,
+    integrations: [
+      Sentry.browserTracingIntegration(),
+    ],
+  });
+
+  initialized = true;
 }
 
 /**
- * Capture exception and send to Sentry (DEFERRED)
- *
- * @param error - Error object
- * @param context - Additional context data
+ * Capture exception and send to Sentry
  *
  * @example
  * try {
  *   await riskyOperation();
  * } catch (error) {
- *   captureException(error, {
- *     component: 'TwinChat',
- *     operation: 'sendMessage',
- *     userId: currentUser.id,
- *   });
+ *   captureException(error, { component: 'TwinChat', userId });
  * }
- *
- * TODO: Implement in P0 #6 (production hardening)
  */
 export function captureException(
-  error: Error | string,
+  error: Error | string | unknown,
   context?: Record<string, unknown>
 ) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.captureException(error, {
-  //   contexts: {
-  //     custom: context,
-  //   },
-  // });
-
-  console.error('[ErrorTracking] Exception captured:', error, context);
+  if (!initialized) {
+    console.error('[ErrorTracking]', error, context);
+    return;
+  }
+  Sentry.withScope((scope) => {
+    if (context) scope.setContext('custom', context);
+    Sentry.captureException(error);
+  });
 }
 
 /**
- * Capture message (non-error event) - DEFERRED
- *
- * @param message - Message text
- * @param level - Log level (info, warning, error)
- * @param data - Additional data
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Capture message (non-error event)
  */
 export function captureMessage(
   message: string,
   level: 'info' | 'warning' | 'error' = 'info',
   data?: Record<string, unknown>
 ) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.captureMessage(message, {
-  //   level,
-  //   tags: data,
-  // });
-
-  console.log(`[ErrorTracking:${level}] ${message}`, data);
+  if (!initialized) {
+    console.log(`[ErrorTracking:${level}] ${message}`, data);
+    return;
+  }
+  Sentry.withScope((scope) => {
+    if (data) scope.setContext('data', data);
+    Sentry.captureMessage(message, level);
+  });
 }
 
 /**
- * Track custom metric - DEFERRED
- *
- * @param name - Metric name
- * @param value - Metric value
- * @param tags - Additional tags
- *
- * @example
- * trackMetric('api_response_time', 245, {
- *   endpoint: '/api/decisions',
- *   status: 200,
- * });
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Track custom metric via Sentry breadcrumb
  */
 export function trackMetric(
-  _name: string,
-  _value: number,
-  _tags?: Record<string, string | number>
+  name: string,
+  value: number,
+  tags?: Record<string, string | number>
 ) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.captureMessage(`Metric: ${_name} = ${_value}`, {
-  //   level: 'info',
-  //   tags: {
-  //     metric: _name,
-  //     value: String(_value),
-  //     ..._tags,
-  //   },
-  // });
+  if (!initialized) return;
+  Sentry.addBreadcrumb({
+    category: 'metric',
+    message: `${name} = ${value}`,
+    data: { value, ...tags },
+    level: 'info',
+  });
 }
 
 /**
- * Start performance monitoring - DEFERRED
- *
- * @param operationName - Operation name
- * @returns Transaction for manual span creation
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Start performance span tracking
  */
-export function startPerformanceTracking(_operationName: string) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // const transaction = Sentry.startTransaction({
-  //   name: _operationName,
-  //   op: 'operation',
-  // });
-  //
-  // return {
-  //   transaction,
-  //   finish: () => transaction.finish(),
-  // };
-
+export function startPerformanceTracking(operationName: string) {
+  if (!initialized) {
+    return { transaction: null, finish: () => {} };
+  }
+  const activeSpan = Sentry.getActiveSpan();
   return {
-    transaction: null,
-    finish: () => { /* no-op */ },
+    transaction: activeSpan ?? null,
+    finish: () => {
+      if (activeSpan) Sentry.getRootSpan(activeSpan)?.end?.();
+    },
+    operationName,
   };
 }
 
 /**
- * Set user context for error reports - DEFERRED
- *
- * @param userId - User ID
- * @param email - User email
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Set user context for error reports
  */
-export function setUserContext(_userId: string, _email?: string) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.setUser({
-  //   id: _userId,
-  //   email: _email,
-  // });
+export function setUserContext(userId: string, email?: string) {
+  if (!initialized) return;
+  Sentry.setUser({ id: userId, email });
 }
 
 /**
- * Clear user context (on logout) - DEFERRED
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Clear user context (call on logout)
  */
 export function clearUserContext() {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.setUser(null);
+  if (!initialized) return;
+  Sentry.setUser(null);
 }
 
 /**
- * Add breadcrumb (debug info for error context) - DEFERRED
- *
- * @param message - Breadcrumb message
- * @param data - Additional data
- * @param category - Breadcrumb category
- *
- * TODO: Implement in P0 #6 (production hardening)
+ * Add breadcrumb (debug info for error context)
  */
 export function addBreadcrumb(
-  _message: string,
-  _data?: Record<string, unknown>,
-  _category: string = 'action'
+  message: string,
+  data?: Record<string, unknown>,
+  category: string = 'action'
 ) {
-  // Deferred to P0 #6 - requires @sentry/react
-  // Sentry.addBreadcrumb({
-  //   message: _message,
-  //   data: _data,
-  //   category: _category,
-  //   level: 'info',
-  // });
+  if (!initialized) return;
+  Sentry.addBreadcrumb({ message, data, category, level: 'info' });
 }
