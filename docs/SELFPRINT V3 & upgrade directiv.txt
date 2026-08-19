@@ -1,0 +1,1280 @@
+SELFPRINT V3
+VISUAL INTELLIGENCE & SMART ENTRY UPGRADE DIRECTIVE
+Companion Directive to SELFPRINT_MASTER_DIRECTIVE_V5_FINAL_INTEGRATION.md
+
+Date: 19 August 2026
+Repository: https://github.com/duriankab-dot/selfprint-v3-react
+Baseline: SELFPRINT V3 — Master Integration Directive V5.0
+Status: IMPLEMENTATION DIRECTIVE
+Priority: HIGH
+Scope: Landing → Entry → Onboarding → Analysis → Awakening → Twin Birth → AI Twin → Dashboard → 12 Worlds → PWA
+
+0. AUTHORITY
+
+เอกสารฉบับนี้เป็น Companion Directive ของ:
+
+SELFPRINT_MASTER_DIRECTIVE_V5_FINAL_INTEGRATION.md
+
+ห้ามใช้เอกสารนี้แทน Master Directive V5
+
+ลำดับความสำคัญ:
+
+MASTER DIRECTIVE V5
+        ↓
+THIS COMPANION DIRECTIVE
+        ↓
+EXISTING PRODUCTION CODE
+        ↓
+DATABASE
+        ↓
+API / EDGE
+        ↓
+TESTS
+        ↓
+PRODUCTION VERIFICATION
+        ↓
+DOCUMENTATION
+
+ห้ามย้อนกลับไป redesign Architecture หลักที่ V5 ล็อกไว้แล้ว เว้นแต่พบหลักฐานจาก Code / DB / API / Tests ว่าจำเป็นจริง
+
+1. OBJECTIVE
+
+ยกระดับ SELFPRINT V3 จากระบบที่มี Functional Flow แล้ว ให้กลายเป็น:
+
+Cohesive Visual Intelligence Experience
+
+ตั้งแต่ผู้ใช้พบ SELFPRINT ครั้งแรกจนถึง:
+
+LANDING
+↓
+NOVA
+↓
+ONBOARDING
+↓
+FULL ANALYSIS
+↓
+CORE AWAKENING
+↓
+TWIN BIRTH
+↓
+AI TWIN
+↓
+WORLD ROUTING
+↓
+12 WORLDS
+↓
+MEMORY
+↓
+LEARNING
+↓
+TWIN EVOLUTION
+
+โดยต้องรองรับ Fast Analysis Path, Returning User, และ PWA Entry อย่างถูกต้อง
+
+2. IMPORTANT EXISTING FUNCTIONALITY
+ห้ามรื้อ Fast Analysis ที่มีอยู่แล้ว
+
+Production src/pages/LandingPage.tsx มีทางลัดด้านล่าง Landing ซึ่งเป็น functional production flow
+
+ปัจจุบัน:
+
+LANDING
+↓
+FORM
+↓
+TUNING QUESTIONS
+↓
+FULL ANALYSIS
+↓
+TWIN GENERATION
+↓
+DASHBOARD
+
+Flow นี้ ทำงานจริงแล้ว
+
+ดังนั้น:
+
+DO NOT
+rewrite flow
+duplicate analysis engine
+duplicate Twin generation
+replace working route
+create parallel implementation
+break existing functionality
+MUST
+
+ตรวจสอบ implementation จริงและ reuse existing production flow
+
+3. ENTRY ARCHITECTURE
+
+SELFPRINT ต้องมี Smart Entry Architecture
+
+                    WEB / PWA ENTRY
+                          │
+                    SESSION CHECK
+                          │
+               ┌──────────┴──────────┐
+               │                     │
+             GUEST               RETURNING
+               │                     │
+            LANDING             STATE RESOLVER
+               │                     │
+       ┌───────┼───────┐             │
+       │       │       │             │
+     FULL    QUICK    TOUR           │
+    JOURNEY ANALYSIS                 │
+       │       │                     │
+       └───┬───┘                     │
+           │                         │
+           ▼                         │
+      FULL ANALYSIS                 │
+           │                         │
+       AWAKENING                    │
+           │                         │
+        TWIN BIRTH                  │
+           │                         │
+           └──────────┬──────────────┘
+                      ▼
+                 TWIN / HOME
+                      │
+             ┌────────┴────────┐
+             │                 │
+          DASHBOARD         12 WORLDS
+4. NEW USER ENTRY
+
+New / unauthenticated users:
+
+LANDING
+↓
+NOVA / ENTRY
+↓
+ONBOARDING
+↓
+FULL ANALYSIS
+↓
+CORE AWAKENING
+↓
+TWIN BIRTH
+↓
+AI TWIN
+↓
+DASHBOARD / WORLDS
+
+Landing ต้องเป็นทั้ง:
+
+Marketing entry
+Product entry
+Intelligence introduction
+Conversion point
+5. QUICK ANALYSIS ENTRY
+
+Quick Analysis ต้องรักษาไว้เป็น Fast Value Entry
+
+LANDING
+↓
+QUICK ANALYSIS
+↓
+TUNING QUESTIONS
+↓
+FULL ANALYSIS
+↓
+TWIN GENERATION
+↓
+DASHBOARD
+
+ห้ามมองเป็นระบบคนละตัวกับ Main Journey
+
+ต้อง converge เข้า core lifecycle เดียวกัน:
+
+FULL JOURNEY ──────┐
+                   ├→ FULL ANALYSIS
+QUICK ANALYSIS ────┘
+                         ↓
+                     TWIN ENGINE
+                         ↓
+                        TWIN
+6. DATA CONTINUITY
+
+ถ้า User เริ่มจาก Quick Analysis แล้วไปต่อ Main Journey:
+
+ห้ามถามข้อมูลเดิมซ้ำโดยไม่จำเป็น
+
+ข้อมูลที่มีอยู่แล้วต้องถูก persisted และ reuse
+
+เช่น:
+
+Birth Data
++
+Tuning Answers
++
+Analysis
+
+ต้องกลายเป็น Existing User Context
+
+แล้ว Onboarding ต่อเฉพาะ:
+
+Missing Context
+
+ไม่ใช่เริ่มจากศูนย์
+
+7. ENTRY PATH STATE
+
+ระบบควรรองรับ state อย่างน้อย:
+
+entry_path:
+  full_journey
+  quick_analysis
+  returning_user
+  pwa
+
+แต่ ห้ามสร้าง Twin คนละระบบตาม entry path
+
+ทุกเส้นต้อง converge เข้า Core Twin Engine เดียวกัน
+
+8. RETURNING USER
+
+Returning User ต้องไม่ถูกบังคับผ่าน Landing → Onboarding ใหม่
+
+เมื่อ Login แล้ว:
+
+AUTH
+↓
+STATE RESOLVER
+↓
+DETERMINE NEXT VALID STATE
+
+ตัวอย่าง:
+
+มี Twin แล้ว
+LOGIN
+↓
+TWIN
+มี Dashboard state
+LOGIN
+↓
+DASHBOARD
+ยังไม่เสร็จ Analysis
+LOGIN
+↓
+RESUME ANALYSIS
+อยู่ระหว่าง Onboarding
+LOGIN
+↓
+RESUME ONBOARDING
+
+Never restart completed work.
+
+9. LANDING FOR RETURNING USERS
+
+Landing ต้องรองรับ Smart Personalization หาก User กลับเข้ามาผ่านเว็บไซต์
+
+Guest
+Understand Yourself.
+Build Your Selfprint.
+
+
+[Start Your Selfprint]
+[Get Your First Analysis]
+Returning + Twin
+Welcome Back.
+
+
+Your Twin is ready.
+
+
+[Enter My Twin]
+[Open Dashboard]
+Returning + Incomplete
+Welcome Back.
+
+
+Continue building your Selfprint.
+
+
+[Continue]
+
+ข้อความจริงให้ใช้ระบบ i18n ของ Project
+
+10. PWA ENTRY
+
+PWA ต้องทำตัวเหมือน Application
+
+ห้ามบังคับ Returning User ผ่าน Landing ทุกครั้ง
+
+Flow:
+
+PWA Launch
+↓
+Session Check
+↓
+State Resolver
+มี Twin
+PWA
+↓
+Twin
+ไม่มี Twin แต่ Journey ค้าง
+PWA
+↓
+Resume State
+New User
+PWA
+↓
+Landing / Welcome
+11. PRIMARY PWA DESTINATION
+
+สำหรับ User ที่มี Twin แล้ว:
+
+Twin เป็น Default Entry
+
+ไม่ใช่ Landing
+
+ไม่จำเป็นต้องเปิด Dashboard ก่อน
+
+หลักการ:
+
+Twin = Living Identity
+Dashboard = Intelligence Command Center
+Worlds = Intelligence Experiences
+
+Dashboard ยังคงมีความสำคัญ แต่ไม่ใช่สิ่งที่ต้องบังคับให้ User เปิดก่อน Twin
+
+12. ENTRY RESOLVER
+
+Implement / verify centralized Entry Resolver
+
+ต้องตรวจอย่างน้อย:
+
+authenticated?
+onboarding_complete?
+analysis_complete?
+awakening_complete?
+twin_exists?
+last_active_world?
+last_session_state?
+preferred_entry?
+locale?
+
+แล้วเลือก destination ที่ถูกต้อง
+
+ห้ามกระจาย routing decision ไปทั่ว application แบบ hard-coded
+
+13. RESUME SYSTEM
+
+User ต้องสามารถกลับเข้ามาแล้ว:
+
+Continue where you left off
+
+โดยไม่เสีย progress
+
+ต้อง persist state ที่จำเป็น
+
+เช่น:
+
+journey_state
+last_completed_step
+last_active_world
+last_session
+twin_exists
+preferred_entry
+locale
+14. LANDING VISUALIZATION
+
+Landing ต้องไม่ใช่เพียง:
+
+Hero
++
+Cards
++
+CTA
+
+แต่เป็นจุดเริ่มของ Visual Narrative
+
+Visual story:
+
+SELFPRINT
+↓
+UNDERSTAND
+↓
+ANALYZE
+↓
+AWAKEN
+↓
+TWIN
+↓
+WORLDS
+
+ผู้ใช้ต้องเข้าใจ Product Value ได้อย่างรวดเร็ว
+
+แต่ห้ามทำให้ Landing กลายเป็น Game / Fantasy / Cheap Sci-Fi
+
+15. VISUAL LANGUAGE
+
+ใช้:
+
+Deep Intelligent Blue
+White / Glass
+Holographic Intelligence
+Data Structures
+Energy
+Light
+Glass / Crystal
+Volumetric-looking light
+Cinematic Depth
+Premium Minimalism
+
+หลีกเลี่ยง:
+
+Game UI
+Excessive Neon
+Anime
+Cartoon
+Fantasy Game
+Cheap Sci-Fi
+Static Avatar aesthetic
+16. RENDERING ARCHITECTURE
+DO NOT BUILD FULL 3D
+
+ไม่ต้องใช้ Full 3D / Three.js เป็น default architecture
+
+เลือก:
+
+React / DOM
++
+CSS Motion
++
+SVG
++
+Canvas 2D
++
+2.5D Layering
++
+PNG/WebP Assets
++
+Video
+17. 2.5D COMPOSITION
+
+ใช้ layer composition:
+
+Background
+↓
+Atmosphere
+↓
+Environment
+↓
+Lighting
+↓
+Twin
+↓
+Particles / FX
+↓
+Foreground
+↓
+UI
+
+Depth สร้างด้วย:
+
+scale
+blur
+opacity
+shadow
+parallax
+perspective
+lighting
+movement
+
+เป้าหมายคือ:
+
+Cinematic depth without full 3D.
+
+18. VISUAL INTELLIGENCE LAYER
+
+สร้าง/ปรับระบบให้เป็น:
+
+PRODUCT STATE
+      │
+      ├── JOURNEY STATE
+      │
+      └── WORLD STATE
+              │
+              ▼
+        VISUAL STATE
+              │
+       ┌──────┼──────┐
+       │      │      │
+      DOM    SVG   Canvas
+       │      │      │
+       └──────┼──────┘
+              ▼
+          2.5D VIEW
+
+Visual ต้องสะท้อน Application State จริง
+
+ไม่สร้าง animation ที่แยกจาก state จริง
+
+19. NOVA
+
+NOVA ต้องมี Visual Identity เดียวกับ SELFPRINT
+
+NOVA ไม่ควรถูกมองเป็นเพียง Chatbot
+
+ให้ทำหน้าที่:
+
+Guide
++
+Explain
++
+Observe
++
+Analyze
++
+Awaken
++
+Introduce Twin
+
+NOVA เป็น bridge ระหว่าง:
+
+MARKETING EXPERIENCE
+        ↓
+PRODUCT EXPERIENCE
+20. ONBOARDING VISUAL EXPERIENCE
+
+Onboarding ไม่ควรให้ความรู้สึกเหมือน Form อย่างเดียว
+
+ต้องสร้าง visual progression:
+
+USER DATA
+↓
+PATTERNS
+↓
+SIGNALS
+↓
+CONNECTIONS
+↓
+SELFPRINT
+
+ผู้ใช้ต้องรู้สึก:
+
+"ระบบกำลังสร้างภาพของฉัน"
+
+ไม่ใช่:
+
+"ฉันกำลังกรอกแบบสอบถาม"
+
+21. GUIDE TOUR
+
+รองรับ:
+
+Quick Tour
+
+ประมาณ 30–60 วินาที
+
+อธิบาย:
+
+SELFPRINT
+NOVA
+ANALYSIS
+TWIN
+WORLDS
+Deep Tour
+
+สำหรับ User ที่ต้องการเข้าใจระบบมากขึ้น
+
+SELFPRINT
+↓
+ANALYSIS
+↓
+AWAKENING
+↓
+TWIN
+↓
+WORLDS
+↓
+MEMORY
+↓
+LEARNING
+
+ต้องมี:
+
+Skip
+
+เสมอ
+
+22. VIDEO TOUR
+
+รองรับ Product Walkthrough Video:
+
+See How SELFPRINT Works
+
+ประมาณ 60–90 วินาที หรือตาม Asset จริง
+
+แสดง:
+
+NOVA
+↓
+YOUR DATA
+↓
+ANALYSIS
+↓
+PATTERNS
+↓
+AWAKENING
+↓
+TWIN
+↓
+WORLDS
+
+ต้องมี:
+
+Skip / Close
+
+ไม่บังคับ User ทุกคน
+
+23. FULL ANALYSIS VISUALIZATION
+
+Full Analysis ต้องไม่ใช้ Loading Spinner เป็นประสบการณ์หลัก
+
+แสดง progression:
+
+ANALYZE
+↓
+CONNECT
+↓
+COMPARE
+↓
+CONVERGE
+↓
+UNDERSTAND
+
+Visual ต้องสะท้อน Analysis State จริง
+
+24. CORE AWAKENING
+
+ต้องเป็น Product Hero Moment
+
+Transition:
+
+ANALYSIS
+↓
+UNDERSTANDING
+↓
+CORE AWAKENING
+
+ต้องให้ความรู้สึก:
+
+SELFPRINT now understands me.
+
+แต่ต้องเป็น:
+
+Intelligent / Premium / Minimal
+
+ไม่ใช่:
+
+Magic / Fantasy / Game Level-up
+
+25. TWIN BIRTH
+
+Twin ต้องเกิดจาก:
+
+Onboarding
++
+Full Analysis
++
+SICE
++
+Initial Context
++
+Initial Memory
++
+Twin Identity
++
+Visual DNA
+
+Twin ที่เกิดแล้วต้อง:
+
+Intelligent from Birth
+
+ห้าม:
+
+Empty Avatar
+Placeholder Character
+Generic Avatar
+Loading Character
+26. AI TWIN
+
+หลัง Twin Birth ต้องมี Persistent Twin Entity:
+
+Twin
+├── Identity
+├── Visual DNA
+├── State
+├── Memory
+├── Context
+├── Learning
+└── Evolution
+
+Twin Identity ต้องคงเดิม
+
+27. VISUAL DNA
+
+Visual DNA ต้องควบคุม:
+
+Identity
+Appearance
+Visual language
+Motion characteristics
+Aura characteristics
+
+World ไม่ควรสร้าง Twin ใหม่
+
+28. WORLD-AWARE TWIN
+
+เมื่อเปลี่ยน World:
+
+SELF
+→
+WEALTH
+→
+CAREER
+→
+DECISION
+→
+FUTURE
+
+ต้องเป็น:
+
+SAME TWIN
++
+NEW WORLD CONTEXT
+
+เปลี่ยน:
+
+Environment
+Lighting
+Mood
+Motion
+Aura
+Interaction State
+World Expertise
+
+ไม่เปลี่ยน Core Identity
+
+29. 12 WORLDS
+
+แต่ละ World ต้องตรวจว่ามี Visual System จริง:
+
+World
+↓
+Environment
+↓
+Twin Placement
+↓
+Lighting
+↓
+Motion
+↓
+Particles / FX
+↓
+Interaction
+↓
+World State
+↓
+AI Context
+
+ห้ามมีเพียง:
+
+world_id
+name
+background_image
+
+แล้วเรียกว่า World Visualization
+
+30. FULL-SCREEN WORLDS
+
+World Experience ควรเป็น Full-screen immersive experience
+
+┌──────────────────────────────┐
+│                              │
+│      WORLD ENVIRONMENT       │
+│                              │
+│            TWIN              │
+│                              │
+│      INTELLIGENCE            │
+│                              │
+│                              │
+└──────────────────────────────┘
+
+ไม่ใช่เพียง Dashboard Card → Page
+
+31. WORLD TRANSITION
+
+เมื่อเปลี่ยน World:
+
+CURRENT WORLD
+↓
+TRANSITION
+↓
+ENVIRONMENT CHANGE
+↓
+LIGHTING CHANGE
+↓
+TWIN MOTION CHANGE
+↓
+AURA CHANGE
+↓
+NEW WORLD
+
+ต้องรู้สึกว่า:
+
+Twin ของฉันกำลังเข้าสู่ World ใหม่
+
+ไม่ใช่เพียง background เปลี่ยน
+
+32. AI ↔ VISUAL SYNCHRONIZATION
+
+ต้องมี Single Source of Truth สำหรับ World State
+
+WORLD STATE
+      │
+      ├────────→ VISUAL ENGINE
+      │
+      └────────→ AI / PROMPT ENGINE
+
+ห้ามเกิด:
+
+UI = WORLD 06
+AI = WORLD 05
+
+World ID, Context, Expertise, Memory และ SICE ต้อง synchronize
+
+33. DASHBOARD ROLE
+
+Dashboard ยังคงเป็น:
+
+Intelligence Command Center
+
+ประกอบด้วย:
+
+Twin
+intelligence overview
+recent insight
+memory
+learning
+world navigation
+Twin status
+
+แต่ Twin เป็น:
+
+Living Identity
+
+34. RETURNING USER UX
+
+หาก User มี Twin:
+
+Welcome Back.
+
+
+Your Twin is ready.
+
+
+[Enter My Twin]
+[Open Dashboard]
+
+หากยังไม่เสร็จ:
+
+Welcome Back.
+
+
+Continue building your Selfprint.
+
+
+[Continue]
+
+ห้ามบังคับเริ่ม Onboarding ใหม่
+
+35. LOCALIZATION
+
+ระบบมี Link ภาษา:
+
+Thai
+English
+
+ปัจจุบัน English ยังไม่สมบูรณ์
+
+ต้อง audit และแก้ให้ครบทั้ง flow
+
+ไม่ใช่แค่ Landing
+
+ต้องครอบ:
+
+Landing
+↓
+Fast Analysis
+↓
+Tuning
+↓
+Full Analysis
+↓
+Awakening
+↓
+Twin Birth
+↓
+Dashboard
+↓
+12 Worlds
+↓
+Memory
+↓
+Settings
+↓
+Errors
+↓
+Loading
+↓
+Empty States
+↓
+Notifications
+36. LOCALE PERSISTENCE
+
+หากเลือก English:
+
+locale = en
+
+ต้องรักษาตลอด lifecycle
+
+ห้าม:
+
+English Landing
+↓
+Thai Tuning
+↓
+English Dashboard
+
+และในทางกลับกัน
+
+37. RESPONSIVE / MOBILE
+
+ทุก Visual Layer ต้อง Mobile-first
+
+ต้องตรวจ:
+
+viewport
+touch
+animation performance
+memory
+asset loading
+reduced motion
+orientation
+text wrapping
+full-screen World
+Twin visibility
+CTA accessibility
+
+ห้ามออกแบบ Desktop ก่อนแล้วค่อยย่อ Mobile
+
+38. PERFORMANCE RULE
+
+2.5D ต้องไม่กลายเป็น performance problem
+
+ใช้:
+
+lazy loading
+asset compression
+dynamic import
+GPU-friendly transforms
+limited particles
+reduced motion
+responsive FX quality
+
+ควรมี quality levels:
+
+HIGH
+MEDIUM
+LOW / REDUCED MOTION
+
+ตาม capability/device
+
+39. ASSET RULE
+
+ห้ามรีบสร้าง Asset ใหม่
+
+ลำดับ:
+
+AUDIT EXISTING
+↓
+REUSE
+↓
+INTEGRATE
+↓
+UPGRADE
+↓
+NEW ASSET ONLY IF REAL GAP
+
+โดยเฉพาะ Twin
+
+ต้องค้นหาของเดิมทั้งหมดก่อน
+
+40. CODE AUDIT ก่อน Implement
+
+AI Dev ต้องตรวจของจริงใน Repository ก่อนแก้:
+
+src/pages/LandingPage.tsx
+
+
+Twin components
+Twin rendering
+Twin generation
+Twin state
+Visual DNA
+World registry
+World components
+World environment
+World routing
+Dashboard
+NOVA
+Onboarding
+Analysis
+Awakening
+PWA
+i18n
+Persistence
+
+ห้าม assume ว่าของไม่มีเพียงเพราะหาไม่เจอจากชื่อที่คาดไว้
+
+41. ห้ามสร้างระบบซ้ำ
+
+ก่อนสร้าง:
+
+EntryResolver
+TwinVisualEngine
+WorldVisualState
+VisualDNA
+LocaleResolver
+ResumeState
+
+ต้องค้นหา Existing implementation ก่อน
+
+ถ้ามี:
+
+Extend / Refactor / Integrate
+
+ไม่สร้าง duplicate
+
+42. TEST REQUIREMENTS
+
+ต้องเพิ่ม/ตรวจ tests สำหรับ:
+
+Entry
+Guest → Landing
+Returning → Twin
+Returning incomplete → Resume
+PWA + Twin → Twin
+PWA + incomplete → Resume
+Fast Path
+Landing Form
+→ Tuning
+→ Full Analysis
+→ Twin
+→ Dashboard
+Locale
+TH → complete flow
+EN → complete flow
+World
+World ID
+→ Visual State
+→ AI Context
+
+ต้องตรงกัน
+
+43. ACCEPTANCE CRITERIA
+
+งานถือว่าสำเร็จเมื่อ:
+
+Entry
+New User เข้า Landing ได้
+Existing User ไม่ถูกบังคับ Onboarding ใหม่
+PWA ไม่ส่ง Returning User กลับ Landing
+User ที่มี Twin เข้า Twin ได้โดยตรง
+Fast Path
+Existing Landing Quick Analysis ยังทำงาน
+Tuning → Full Analysis ยังทำงาน
+Full Analysis → Twin Generation ยังทำงาน
+Twin ถูกสร้างจริง
+Dashboard โหลด Twin จริง
+Visualization
+Landing / NOVA / Analysis / Awakening / Twin / Worlds มี Visual Language เดียวกัน
+Twin มี persistent identity
+Twin มี state
+Twin ตอบสนองต่อ World
+World มี environment จริง
+World มี motion / lighting / FX ตามความเหมาะสม
+Visual State และ AI State ตรงกัน
+Localization
+Thai complete
+English complete
+ไม่มี mixed-language flow โดยไม่ตั้งใจ
+PWA
+Authenticated + Twin → Twin
+Authenticated + incomplete → Resume
+New User → Landing
+44. DO NOT
+
+ห้าม:
+
+ใช้ Full 3D เป็น default
+รื้อ Twin Engine ที่ทำงานอยู่
+รื้อ Landing Quick Analysis ที่ทำงานจริง
+สร้าง Twin Engine ใหม่
+สร้าง World implementation ซ้ำ
+สร้าง duplicate routing
+บังคับ Returning User ผ่าน Onboarding
+ให้ PWA เปิด Landing ทุกครั้ง
+ทำ Twin เป็น Game Character
+เปลี่ยน Twin Identity ตาม World
+สร้าง Asset ใหม่ก่อน audit
+ทำ Animation ที่ไม่สัมพันธ์กับ State จริง
+ให้ AI และ Visual ใช้ World State คนละตัว
+ทำ English แค่ Landing แล้วถือว่า Localization เสร็จ
+ประกาศ Production Ready จากการที่ UI ดูทำงานได้โดยไม่มี test/verification
+45. REQUIRED DELIVERABLES FROM AI DEV
+
+AI Dev ต้องส่งกลับ:
+
+A. Audit Report
+Existing Components
+Existing Routes
+Existing State
+Existing Assets
+Existing Twin System
+Existing World System
+Existing Localization
+Existing PWA
+B. Gap Matrix
+
+แบ่ง:
+
+EXISTS
+PARTIAL
+BROKEN
+MISSING
+DUPLICATE
+NEEDS INTEGRATION
+C. Implementation Plan
+
+แยก:
+
+P0 Critical
+P1 Required
+P2 Enhancement
+D. Code Changes
+
+ต้องระบุ:
+
+file
+change
+reason
+dependency
+test
+E. Test Report
+
+ต้องระบุ:
+
+Unit
+Integration
+E2E
+Mobile
+PWA
+Localization
+Production
+F. Documentation
+
+อัปเดตเอกสารที่เกี่ยวข้องกับ:
+
+Entry Architecture
+User Journey
+Twin Lifecycle
+Visual Architecture
+World Architecture
+PWA
+Localization
+User Guide
+46. FINAL PRODUCT EXPERIENCE
+
+เป้าหมายสุดท้ายคือ:
+
+                    SELFPRINT
+                       │
+                    LANDING
+                       │
+             ┌─────────┴─────────┐
+             │                   │
+          DISCOVER            FAST START
+             │                   │
+            NOVA              TUNING
+             │                   │
+        ONBOARDING               │
+             │                   │
+             └─────────┬─────────┘
+                       │
+                  FULL ANALYSIS
+                       │
+                 CORE AWAKENING
+                       │
+                   TWIN BIRTH
+                       │
+                    AI TWIN
+                       │
+               ┌───────┴───────┐
+               │               │
+           DASHBOARD       12 WORLDS
+               │               │
+               └───────┬───────┘
+                       │
+                    MEMORY
+                       │
+                    LEARNING
+                       │
+                TWIN EVOLUTION
+
+และสำหรับ User ที่กลับมา:
+
+WEB / PWA
+    ↓
+SESSION
+    ↓
+STATE RESOLVER
+    ↓
+    TWIN
+
+นี่คือเป้าหมาย ไม่ใช่การทำหน้า Dashboard ให้สวยขึ้น
+
+เป้าหมายคือทำให้ SELFPRINT รู้สึกเหมือน Personal Intelligence System ที่มีชีวิตและต่อเนื่องตั้งแต่ Landing จนถึง Twin และ 12 Worlds
+
+FINAL DIRECTIVE TO AI DEV
+
+Do not rebuild SELFPRINT.
+
+Integrate and upgrade the existing production system.
+
+Preserve all working functionality, especially the existing Landing Quick Analysis → Tuning → Full Analysis → Twin Generation flow.
+
+Implement Smart Entry for New Users, Returning Users, and PWA.
+
+Make Twin the primary entry point for returning users who already possess a Twin.
+
+Upgrade visualization using 2D + 2.5D, not full 3D.
+
+Establish one coherent Visual Intelligence Language from Landing → NOVA → Onboarding → Analysis → Awakening → Twin → Dashboard → 12 Worlds.
+
+Keep Twin Identity persistent across Worlds while allowing Environment, Lighting, Motion, Aura and World State to change contextually.
+
+Ensure Visual State and AI State always derive from the same World State.
+
+Complete English localization across the entire lifecycle.
+
+Do not create duplicate engines, duplicate routes, duplicate Twin systems, or unnecessary new assets.
+
+Audit first. Reuse second. Integrate third. Upgrade fourth. Build new only where a verified production gap exists.
+
+Production verification is mandatory before declaring completion.
+
+END OF COMPANION DIRECTIVE

@@ -49,6 +49,10 @@ export async function initializeContextFromOnboarding(
 
   const context = response.context;
 
+  // Store onboarding metadata
+  context.birthDate = data.birthDate;
+  context.moodState = data.mood;
+
   // Transform analysis response into context entries
   const inferredValues = transformStrengthsToValues(
     data.analysisResponse.strengths,
@@ -72,10 +76,11 @@ export async function initializeContextFromOnboarding(
 
   // Add decision style from analysis
   context.decisionStyle = {
-    type: (data.analysisResponse.decisionStyle.split('-')[0].toLowerCase() as any as 'analytical' | 'intuitive' | 'collaborative' | 'mixed'),
+    type: data.analysisResponse.decisionStyle as any,
     description: data.analysisResponse.decisionStyle,
     confidence: data.analysisResponse.confidence * 0.9,
     evidence: data.analysisResponse.insights.slice(0, 2),
+    sourceOfTruth: 'onboarding_analysis',
   };
 
   return context;
@@ -103,7 +108,10 @@ function extractActiveHubs(analysisResponse: AnalysisResponse): string[] {
     hubs.push('decision-making');
   }
 
-  if (analysisResponse.insights.some((i) => i.toLowerCase().includes('creative'))) {
+  if (
+    analysisResponse.insights.some((i) => i.toLowerCase().includes('creative')) ||
+    analysisResponse.blindSpots.some((b) => b.toLowerCase().includes('creative'))
+  ) {
     hubs.push('creativity');
   }
 
@@ -125,10 +133,13 @@ function extractActiveHubs(analysisResponse: AnalysisResponse): string[] {
 function transformStrengthsToValues(strengths: string[], confidence: number): Value[] {
   return strengths.map((strength, index) => ({
     id: `strength-${index}`,
+    title: strength.split(':')[0] || strength,
     name: strength.split(':')[0] || strength,
     description: strength,
+    importance: 'high',
     confidence: Math.min(confidence * 0.95, 0.95),
     evidence: [strength],
+    sourceOfTruth: 'onboarding_strengths',
     inferredFromSources: [{
       type: 'question_answer' as const,
       id: `strength-${index}`,
@@ -155,6 +166,7 @@ function transformInsightsToGoals(insights: string[], confidence: number): Goal[
     timeframe: '6-months',
     confidence: Math.min(confidence * 0.85, 0.85),
     evidence: [insight],
+    sourceOfTruth: 'onboarding_insights',
     inferredFromSources: [{
       type: 'question_answer' as const,
       id: `insight-${index}`,
@@ -177,9 +189,11 @@ function transformBlindSpots(blindSpots: string[], confidence: number): BlindSpo
     id: `blindspot-${index}`,
     title: blindSpot.split(':')[0] || blindSpot,
     description: blindSpot,
-    sensitivityLevel: 'medium' as const,
+    potentialImpact: 'medium',
     confidence: Math.min(confidence * 0.75, 0.75),
     evidence: [blindSpot],
+    actionable: true,
+    sourceOfTruth: 'onboarding_blindspots',
     inferredFromSources: [{
       type: 'question_answer' as const,
       id: `blindspot-${index}`,
