@@ -29,9 +29,9 @@ describe('MemoryRecorder Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (MemoryManager as any).mockImplementation(() => ({
-      addMemory: vi.fn().mockResolvedValue(mockMemory),
-    }));
+    (MemoryManager as any).mockImplementation(function () {
+      return { addMemory: vi.fn().mockResolvedValue(mockMemory) };
+    });
   });
 
   describe('Rendering', () => {
@@ -44,8 +44,8 @@ describe('MemoryRecorder Component', () => {
       );
 
       expect(screen.getByText('Record a Memory')).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(/Memory title/i)).toBeInTheDocument();
-      expect(screen.getByPlaceholderText(/What happened/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/Completed project/i)).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/Describe the event/i)).toBeInTheDocument();
       expect(screen.getByText('🎉 Small Win')).toBeInTheDocument();
     });
 
@@ -105,7 +105,7 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
       await user.type(titleInput, 'Test Title');
 
       const submitButton = screen.getByRole('button', { name: /Save Memory/i });
@@ -125,11 +125,13 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i) as HTMLInputElement;
+      const titleInput = screen.getByPlaceholderText(/Completed project/i) as HTMLInputElement;
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
       const longTitle = 'a'.repeat(201);
 
-      await user.clear(titleInput);
-      await user.type(titleInput, longTitle);
+      fireEvent.change(titleInput, { target: { value: longTitle } });
+      // Must also provide content — validation checks content before title length
+      fireEvent.change(contentInput, { target: { value: 'some content' } });
 
       const submitButton = screen.getByRole('button', { name: /Save Memory/i });
       fireEvent.click(submitButton);
@@ -148,12 +150,12 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i) as HTMLTextAreaElement;
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i) as HTMLTextAreaElement;
 
       await user.type(titleInput, 'Test Title');
-      await user.clear(contentInput);
-      await user.type(contentInput, 'a'.repeat(5001));
+      // Use fireEvent.change for large strings — user.type(5001 chars) is too slow
+      fireEvent.change(contentInput, { target: { value: 'a'.repeat(5001) } });
 
       const submitButton = screen.getByRole('button', { name: /Save Memory/i });
       fireEvent.click(submitButton);
@@ -176,8 +178,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} onMemoryCreated={mockOnCreated} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
 
       await user.type(titleInput, 'Test Memory');
       await user.type(contentInput, 'This is test content');
@@ -200,8 +202,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i) as HTMLInputElement;
-      const contentInput = screen.getByPlaceholderText(/What happened/i) as HTMLTextAreaElement;
+      const titleInput = screen.getByPlaceholderText(/Completed project/i) as HTMLInputElement;
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i) as HTMLTextAreaElement;
 
       await user.type(titleInput, 'Test Memory');
       await user.type(contentInput, 'Test content');
@@ -225,8 +227,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
 
       await user.type(titleInput, 'Test Memory');
       await user.type(contentInput, 'Test content');
@@ -246,11 +248,13 @@ describe('MemoryRecorder Component', () => {
      */
     it('should handle IntelligenceError from MemoryManager', async () => {
       const errorMessage = 'Database error';
-      (MemoryManager as any).mockImplementation(() => ({
-        addMemory: vi.fn().mockRejectedValue(
-          new IntelligenceError(errorMessage, 'DB_ERROR')
-        ),
-      }));
+      (MemoryManager as any).mockImplementation(function () {
+        return {
+          addMemory: vi.fn().mockRejectedValue(
+            new IntelligenceError(errorMessage, 'DB_ERROR')
+          ),
+        };
+      });
 
       const user = userEvent.setup();
 
@@ -258,8 +262,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
 
       await user.type(titleInput, 'Test Memory');
       await user.type(contentInput, 'Test content');
@@ -276,9 +280,9 @@ describe('MemoryRecorder Component', () => {
      * Test 12: Handles generic errors from API
      */
     it('should handle generic errors', async () => {
-      (MemoryManager as any).mockImplementation(() => ({
-        addMemory: vi.fn().mockRejectedValue(new Error('Network error')),
-      }));
+      (MemoryManager as any).mockImplementation(function () {
+        return { addMemory: vi.fn().mockRejectedValue(new Error('Network error')) };
+      });
 
       const user = userEvent.setup();
 
@@ -286,8 +290,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
 
       await user.type(titleInput, 'Test Memory');
       await user.type(contentInput, 'Test content');
@@ -315,8 +319,8 @@ describe('MemoryRecorder Component', () => {
       const discoveryButton = screen.getByText('💡 Discovery');
       await user.click(discoveryButton);
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
 
       await user.type(titleInput, 'Discovery');
       await user.type(contentInput, 'Found something new');
@@ -349,8 +353,8 @@ describe('MemoryRecorder Component', () => {
         <MemoryRecorder userId={mockUserId} />
       );
 
-      const titleInput = screen.getByPlaceholderText(/Memory title/i);
-      const contentInput = screen.getByPlaceholderText(/What happened/i);
+      const titleInput = screen.getByPlaceholderText(/Completed project/i);
+      const contentInput = screen.getByPlaceholderText(/Describe the event/i);
       const tagsInput = screen.getByPlaceholderText(/comma-separated/i);
 
       await user.type(titleInput, 'Tagged Memory');
