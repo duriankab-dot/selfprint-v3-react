@@ -45,7 +45,7 @@ describe('ContextDisplay Component', () => {
         confidence: 0.65,
         evidence: ['ref-4'],
         inferredFromSources: [],
-        sensitivityLevel: 'medium',
+        sensitivity: 'medium',
       },
     ],
     emotionalRange: {
