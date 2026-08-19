@@ -1,0 +1,890 @@
+SELFPRINT — FULL PRODUCTION AUDIT & VERIFICATION DIRECTIVE
+
+ถึง: ทีมพัฒนา / Engineering / QA / Product
+โครงการ: SELFPRINT — Living Personal Intelligence Platform
+Repository: https://github.com/duriankab-dot/selfprint-v3-react/
+
+1. วัตถุประสงค์
+
+ขอให้ทีมดำเนินการตรวจสอบ SELFPRINT ในระดับ Full Production Audit โดยตรวจจาก Source Code, Architecture, Runtime Behavior, Database/API Integration และ Production Environment ไม่ใช่ตรวจเฉพาะเอกสารหรือ UI
+
+วัตถุประสงค์หลักคือให้ทราบสถานะจริงของระบบว่า:
+
+อะไรมี implementation แล้ว
+อะไรทำงานจริง
+อะไรผ่านการ verification แล้ว
+และอะไรยังเป็น blocker ก่อนเปิด production
+
+การตรวจครั้งนี้ ไม่ใช่การเพิ่ม Feature
+
+และ ห้ามสร้าง feature ใหม่เพียงเพื่อให้รายงานดูสมบูรณ์
+
+ให้ตรวจและแก้เฉพาะสิ่งที่จำเป็นต่อ:
+
+Correctness
+Reliability
+Security
+UX
+Performance
+SEO/GEO
+Production Readiness
+2. กฎสำคัญของการ Audit
+2.1 Source of Truth
+
+ให้ใช้หลักฐานตามลำดับความน่าเชื่อถือ:
+
+Runtime / Test Evidence
+Current Source Code
+Current Database / API Configuration
+Current Master Directive
+Historical Documentation
+
+ห้ามใช้เอกสารเก่าเป็นหลักฐานยืนยันสถานะปัจจุบัน หากขัดกับ source code หรือ runtime
+
+3. สถานะที่อนุญาต
+
+ในการรายงานผลครั้งนี้ให้ใช้ เพียง 6 สถานะเท่านั้น
+
+MISSING
+PARTIAL
+IMPLEMENTED
+VERIFIED
+PRODUCTION READY
+BLOCKED
+ความหมาย
+
+MISSING
+ยังไม่มี implementation หรือ capability ดังกล่าว
+
+PARTIAL
+มี implementation บางส่วน แต่ยังไม่ครบตาม requirement หรือยังมี dependency/gap สำคัญ
+
+IMPLEMENTED
+มี implementation จริงใน source code แล้ว แต่ยังไม่มีหลักฐานเพียงพอที่จะยืนยันว่า production behavior ถูกต้องครบถ้วน
+
+VERIFIED
+ผ่านการทดสอบ/ตรวจสอบด้วยหลักฐานจริงแล้ว
+
+PRODUCTION READY
+ผ่าน production-critical requirements และ verification ที่จำเป็นทั้งหมดแล้ว
+
+BLOCKED
+มี dependency หรือ critical issue ที่ทำให้ไม่สามารถถือว่าระบบ/feature พร้อม production ได้
+
+ห้ามใช้ DONE, COMPLETE, READY, SHIPPED, 100%, 68% READY หรือ status อื่นแทน 6 สถานะนี้
+
+4. ต้องแยก “Implementation” กับ “Verification”
+
+ห้ามสรุป:
+
+มีไฟล์ service = ทำงานแล้ว
+
+หรือ:
+
+API มี endpoint = API ใช้งานได้
+
+หรือ:
+
+หน้าเว็บเปิดได้ = Product Flow สมบูรณ์
+
+ต้องแยกอย่างชัดเจน:
+
+CODE EXISTS
+        ↓
+IMPLEMENTED
+        ↓
+INTEGRATED
+        ↓
+RUNTIME TESTED
+        ↓
+VERIFIED
+        ↓
+PRODUCTION READY
+
+หากยังไม่มี evidence ให้คงสถานะไว้ที่ IMPLEMENTED หรือ PARTIAL
+
+5. ARCHITECTURE INVENTORY
+
+ให้ตรวจและแยก inventory ต่อไปนี้ออกจากกันอย่างชัดเจน
+
+5.1 APIs
+
+ตรวจจำนวนและรายการ API จาก source code จริง
+
+ต้องรายงาน:
+
+API name
+endpoint
+method
+authentication
+input
+output
+error handling
+caller
+dependency
+runtime status
+5.2 Application Services
+
+ตรวจ /src/services
+
+ห้ามนับ Application Services เป็น API
+
+Current architecture ระบุ Application Services 13 รายการ
+
+ให้ตรวจจาก source code จริงว่า 13 รายการนั้น:
+
+มีอยู่จริงหรือไม่
+ถูก import/use จริงหรือไม่
+มี backend/database dependency หรือไม่
+มี test หรือไม่
+ทำงานจริงหรือไม่
+
+รายงานเป็น inventory รายชื่อ ไม่ใช่เพียงตัวเลข 13/13
+
+5.3 Intelligence Engines
+
+ตรวจ Intelligence Engine ทั้งหมดจาก source code
+
+ต้องแยกจาก:
+
+API
+Application Service
+Edge Function
+
+ตรวจว่าแต่ละ engine:
+
+Input
+ ↓
+Processing
+ ↓
+Output
+ ↓
+Integration
+ ↓
+Persistence / Learning
+
+ทำงานจริงหรือไม่
+
+5.4 Edge Functions
+
+ตรวจ Edge Function ทั้งหมด
+
+แต่ละตัวต้องระบุ:
+
+source file
+trigger
+caller
+authentication
+database access
+external API
+error handling
+retry
+timeout
+runtime verification
+6. LAYER 1 — CORE SYSTEM AUDIT
+
+ตรวจ Core System แบบ end-to-end
+
+6.1 Authentication
+
+ตรวจ:
+
+Signup
+Login
+Logout
+Session restore
+Refresh
+Protected routes
+Password recovery
+Passkey/WebAuthn หากเปิดใช้งาน
+Unauthorized access
+Session expiration
+
+Critical flow:
+
+Signup
+ ↓
+Login
+ ↓
+Refresh
+ ↓
+Session Restore
+ ↓
+Protected Route
+ ↓
+Logout
+ ↓
+Login Again
+ ↓
+User Data Restored
+7. TWIN LIFECYCLE
+
+นี่คือ Critical Product Flow
+
+ตรวจ:
+
+User
+ ↓
+Onboarding
+ ↓
+Baseline
+ ↓
+Core Awakening
+ ↓
+Twin Creation
+ ↓
+Database Persistence
+ ↓
+Reload
+ ↓
+Twin Restoration
+
+ต้องทดสอบว่าข้อมูลไม่หายหลัง:
+
+refresh
+logout/login
+browser reopen
+session restore
+8. AI / SICE / INTELLIGENCE FLOW
+
+ตรวจ actual runtime path:
+
+User Input
+ ↓
+Frontend
+ ↓
+API
+ ↓
+Service
+ ↓
+World Context
+ ↓
+Intelligence Layer
+ ↓
+AI Provider
+ ↓
+Response
+ ↓
+Memory / Twin
+ ↓
+Future Context
+
+ต้องตรวจว่าไม่มี:
+
+fake response
+hard-coded response
+placeholder
+mock data ที่ถูกใช้ใน production path
+silent fallback ที่ทำให้ UI ดูเหมือนทำงาน
+9. WORLD SYSTEM
+
+ตรวจ:
+
+World routing
+World selection
+World context
+World expertise
+interaction tracking
+persistence
+AI context integration
+
+ต้องพิสูจน์ว่า:
+
+User changes World
+ ↓
+System context changes
+ ↓
+Relevant intelligence/context changes
+ ↓
+AI response reflects World
+ ↓
+Interaction is persisted
+10. DECISION INTELLIGENCE
+
+ตรวจ:
+
+Create Decision
+ ↓
+Persist
+ ↓
+Follow-up Scheduling
+ ↓
+Follow-up Delivery
+ ↓
+User Outcome
+ ↓
+Decision Learning
+ ↓
+Twin / Intelligence Update
+
+ต้องตรวจทั้ง frontend + backend + database + scheduler
+
+โดยเฉพาะต้องตรวจว่า follow-up สามารถทำงานได้แม้ user ไม่ได้เปิด browser อยู่
+
+11. MEMORY / LEARNING LOOP
+
+ตรวจว่า system สามารถ:
+
+Interaction
+ ↓
+Memory
+ ↓
+Synthesis
+ ↓
+Twin Context
+ ↓
+Future Interaction
+
+ได้จริงหรือไม่
+
+ห้ามถือว่ามี database table หรือ service แล้วเท่ากับ Memory Loop ทำงานสมบูรณ์
+
+12. MONETIZATION
+
+ตรวจ:
+
+Free User
+ ↓
+Pricing
+ ↓
+Checkout
+ ↓
+Stripe
+ ↓
+Webhook
+ ↓
+Subscription DB
+ ↓
+Entitlement
+ ↓
+Premium Feature
+
+ตรวจ:
+
+checkout
+webhook
+subscription state
+entitlement
+cancellation
+expired subscription
+failed payment
+unauthorized premium access
+13. LAYER 2 — PRODUCT UX AUDIT
+
+ตรวจทุก critical user journey:
+
+Founder Flow
+Landing
+ ↓
+Signup
+ ↓
+Onboarding
+ ↓
+First Value
+ ↓
+Twin
+ ↓
+AI Interaction
+ ↓
+World
+ ↓
+Decision
+ ↓
+Return Visit
+
+ตรวจ:
+
+UX gaps
+dead ends
+broken CTA
+loading states
+empty states
+error states
+mobile usability
+navigation
+information hierarchy
+accessibility
+14. WEB / UI QA
+
+ตรวจทั้ง desktop และ mobile
+
+อย่างน้อย:
+
+Chrome
+Safari
+Firefox
+iOS Safari
+Android Chrome
+
+ตรวจ:
+
+layout
+typography
+overflow
+modal
+button
+forms
+keyboard
+scrolling
+bottom navigation
+responsive breakpoint
+touch interaction
+PWA behavior
+15. LAYER 3 — PUBLIC WEB / SEO / GEO
+
+ตรวจ:
+
+Technical SEO
+title
+meta description
+H1/H2/H3
+canonical
+robots
+sitemap
+hreflang
+Open Graph
+Twitter metadata
+image alt
+structured data
+internal linking
+indexability
+GEO
+
+ตรวจ:
+
+entity consistency
+brand/entity definition
+semantic structure
+authoritative public pages
+FAQ
+structured data
+crawlable content
+article architecture
+internal knowledge graph
+multilingual discoverability
+
+ห้ามสรุปว่า SEO พร้อมเพียงเพราะ <title> และ meta description มีอยู่
+
+16. LAYER 4 — PRODUCTION INFRASTRUCTURE
+
+ตรวจ:
+
+Deployment
+build
+deploy
+environment variables
+Vercel configuration
+API routing
+SPA fallback
+serverless limits
+Security
+authentication
+authorization
+RLS
+endpoint access
+secrets
+CORS
+CSRF ตาม architecture ที่เกี่ยวข้อง
+rate limiting
+input validation
+injection protection
+data ownership
+Reliability
+timeout
+retry
+error handling
+graceful degradation
+external API failure
+database failure
+Monitoring
+
+ตรวจว่ามีจริง ไม่ใช่เพียง documentation:
+
+Error
+ ↓
+Capture
+ ↓
+Logging
+ ↓
+Alert
+ ↓
+Diagnosis
+ ↓
+Recovery
+17. PERFORMANCE
+
+ตรวจ:
+
+LCP
+CLS
+INP
+TTFB
+JS bundle
+code splitting
+lazy loading
+image optimization
+API latency
+unnecessary network requests
+memory usage
+
+ต้องรายงานทั้ง:
+
+Measured Result
+
+และ
+
+Target
+
+ห้ามเดาตัวเลข
+
+18. CONSOLE / RUNTIME ERROR
+
+ตรวจ:
+
+JavaScript exceptions
+React errors
+unhandled promise rejection
+network errors
+failed API calls
+failed asset loads
+hydration/rendering errors
+CORS
+authentication errors
+
+แยก:
+
+Development-only
+Production
+User-facing
+Silent
+Critical
+19. DATABASE / DATA INTEGRITY
+
+ตรวจ:
+
+schema
+foreign keys
+RLS
+ownership
+nullable fields
+duplicate records
+orphan records
+migration consistency
+indexes
+persistence
+concurrent update behavior
+20. TESTING
+
+ตรวจ:
+
+unit tests
+integration tests
+API tests
+component tests
+E2E
+regression tests
+
+แต่ต้องแยก:
+
+มี test file
+
+ออกจาก:
+
+test ผ่านจริง
+
+ต้องรายงาน actual execution result
+
+21. PRODUCTION RELEASE GATE
+
+ห้ามประกาศ PRODUCTION READY จนกว่า critical production gates จะผ่านจริง
+
+อย่างน้อยต้องตรวจ:
+
+Build
+Lint
+Typecheck
+Unit Test
+Integration Test
+E2E
+Security
+Database / RLS
+API
+Performance
+Mobile
+SEO
+Monitoring
+Error Handling
+Critical User Journey
+
+หากมี critical gap:
+
+BLOCKED
+
+22. BUG SEVERITY
+
+สำหรับ issue ให้ใช้ severity:
+
+🔴 Critical
+
+ต้องแก้ก่อน production เพราะทำให้:
+
+application ใช้งานไม่ได้
+data loss
+security breach
+authentication failure
+payment failure
+critical user journey broken
+🟠 Major
+
+มีผลต่อ core functionality หรือ user experience อย่างมีนัยสำคัญ
+
+🟡 Minor
+
+ปัญหาที่ไม่ทำให้ core functionality เสีย
+
+🟢 Improvement
+
+optimization / polish / future enhancement
+
+Severity ใช้สำหรับจัดลำดับ Bug
+ส่วน System Status ต้องใช้เพียง 6 สถานะที่กำหนดไว้ด้านบน
+
+23. ISSUE FORMAT
+
+ทุก issue ต้องรายงาน:
+
+ID:
+Layer:
+Component:
+Severity:
+Status:
+
+Observed:
+Expected:
+Actual:
+
+Root Cause:
+Evidence:
+
+Impact:
+
+Recommended Fix:
+
+Verification Method:
+
+ห้ามรายงานเพียง:
+
+"น่าจะมีปัญหา"
+
+ต้องมี evidence
+
+24. ห้ามเดา
+
+ถ้าตรวจไม่ได้ให้ระบุ:
+
+MISSING
+
+หรือ:
+
+BLOCKED
+
+ห้ามเปลี่ยนเป็น:
+
+VERIFIED
+
+เพียงเพราะ source code ดูถูกต้อง
+
+25. DOCUMENTATION AUDIT
+
+นอกจาก code ให้ตรวจ /docs ด้วย
+
+ต้องค้นหา documentation conflict เช่น:
+
+สถานะเก่า
+ตัวเลขเก่า
+TODO ที่แก้แล้ว
+SICE inventory ไม่ตรงกัน
+API inventory ไม่ตรงกัน
+Services inventory ไม่ตรงกัน
+Production claims ที่ไม่มี evidence
+68% ready
+DONE
+COMPLETE
+READY FOR DEPLOYMENT
+
+ต้องแยก:
+
+Current
+
+ออกจาก
+
+Historical
+
+และห้ามให้เอกสารเก่ากลายเป็น Source of Truth
+
+26. FINAL REPORT
+
+ให้จัดทำ FULL SELFPRINT PRODUCTION AUDIT
+
+โดยแบ่ง 4 ชั้น:
+
+LAYER 1
+
+Core System
+
+LAYER 2
+
+Product UX
+
+LAYER 3
+
+Public Web / SEO / GEO
+
+LAYER 4
+
+Production Infrastructure
+
+แต่ละ layer ต้องมี:
+
+Current Status
+Evidence
+Issues
+Severity
+Remaining Gaps
+Verification State
+27. FINAL STATUS MATRIX
+
+ต้องมีตารางสุดท้ายในรูปแบบ:
+
+Layer	Component	Status	Evidence	Blocker
+Core	Authentication	
+	
+	
+
+Core	Twin	
+	
+	
+
+Core	Intelligence	
+	
+	
+
+Core	Worlds	
+	
+	
+
+Core	Decisions	
+	
+	
+
+Product	Onboarding	
+	
+	
+
+Product	UX	
+	
+	
+
+Public	SEO	
+	
+	
+
+Public	GEO	
+	
+	
+
+Infra	Security	
+	
+	
+
+Infra	Monitoring	
+	
+	
+
+Infra	Performance	
+	
+	
+
+Infra	Deployment	
+	
+	
+
+28. FINAL DECISION
+
+ให้สรุปท้ายรายงานเพียงหนึ่งใน:
+
+PRODUCTION READY
+
+หรือ
+
+BLOCKED
+
+หากยังมี production-critical item ที่ไม่ได้ VERIFIED:
+
+FINAL STATUS = BLOCKED
+
+ห้ามใช้ percentage เป็นตัวตัดสิน production readiness
+
+29. สิ่งที่ต้องส่งกลับ
+
+ขอผลลัพธ์เป็น:
+
+A. Executive Summary
+
+สรุปสถานะระบบสำหรับผู้บริหาร
+
+B. Four-Layer Audit
+
+รายละเอียด Core / Product / Public / Infrastructure
+
+C. Critical Issues
+
+รายการ Critical/Major/Minor/Improvement
+
+D. Evidence Matrix
+
+หลักฐานที่ใช้ยืนยันแต่ละสถานะ
+
+E. E2E Critical Path Result
+
+ผลการทดสอบตั้งแต่:
+
+Signup → Onboarding → Awakening → Twin → AI → World → Decision → Memory → Subscription
+
+F. Production Gate
+
+รายการ Gate ที่ผ่าน/ไม่ผ่าน
+
+G. Documentation Reconciliation
+
+รายการเอกสารที่ current / historical / obsolete / conflicting
+
+H. Final Verdict
+
+สถานะสุดท้ายเพียงหนึ่งเดียว:
+
+PRODUCTION READY หรือ BLOCKED
+
+30. ข้อกำชับสุดท้าย
+
+การ Audit ครั้งนี้มีเป้าหมายเพื่อ หาความจริงของระบบจาก code + runtime
+
+ไม่ใช่เพื่อทำให้รายงานออกมาว่า "พร้อม"
+
+ดังนั้น:
+
+อย่าพยายามเพิ่มสถานะเพื่อให้ระบบดูดีขึ้น
+
+อย่าถือ implementation เป็น verification
+
+อย่าถือ documentation เป็น evidence
+
+อย่าถือ test file เป็น test result
+
+อย่าถือ UI ที่เปิดได้เป็น functional completion
+
+ให้รายงานตามหลักฐานจริงเท่านั้น
+
+เป้าหมายสุดท้ายคือ:
+
+“รู้ให้แน่ชัดว่า Selfprint พร้อม production ตรงไหน และยังไม่พร้อมตรงไหน โดยไม่ให้มี Blind Spot”

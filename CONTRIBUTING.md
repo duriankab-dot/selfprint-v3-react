@@ -22,7 +22,7 @@
 
 | กฎ | รายละเอียด |
 |----|-----------|
-| **§1 Nova ≠ Twin** | Nova และ Twin เป็นคนละตัวกัน — ห้ามสับสนเด็ดขาด |
+| **§1 SelfPrint(Nova) ≠ Twin** | Nova และ Twin เป็นคนละตัวกัน — ห้ามสับสนเด็ดขาด |
 | **§2 Twin เกิดจาก Core Awakening** | Twin เกิดหลัง WOW 3 — ไม่ใช่ระหว่าง Onboarding |
 | **§3 Twin Initial Intelligence** | Twin ได้รับ Seed จาก Nova + 12 SICE — ฉลาดตั้งแต่เกิด |
 | **§4 12 SICE** | 12 SICE เป็นแกน Intelligence — ไม่ใช่ 10 layers |

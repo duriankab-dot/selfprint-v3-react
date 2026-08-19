@@ -138,7 +138,7 @@ export async function createFirstMemory(
   twinName: string
 ): Promise<{ success: boolean; memoryId?: string; message: string }> {
   if (!twinId || !twinName) {
-    throw new Error('twinId and twinName are required');
+    return { success: false, message: 'twinId and twinName are required' };
   }
 
   const now = new Date().toISOString();
