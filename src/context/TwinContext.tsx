@@ -81,7 +81,7 @@ interface TwinContextType {
   resetTwin: () => void;
 }
 
-const TwinContext = createContext<TwinContextType | undefined>(undefined);
+export const TwinContext = createContext<TwinContextType | undefined>(undefined);
 
 export function TwinProvider({ children }: { children: ReactNode }) {
   const [twin, setTwin] = useState<TwinProfile | null>(null);
