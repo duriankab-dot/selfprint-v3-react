@@ -14,6 +14,7 @@ import {
 } from '../src/services/NotificationAnalytics.js';
 import Stripe from 'stripe';
 import { verifyUser, supabaseAdmin } from './_utils/verify-user.js';
+import { rateLimitMiddleware, tooManyRequestsResponse } from './_utils/rate-limit.js';
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -24,6 +25,14 @@ interface ApiResponse<T = any> {
 
 export async function handler(request: Request): Promise<Response> {
   try {
+    // Rate limiting — apply before any business logic
+    const authHeader = request.headers.get('authorization');
+    const user = authHeader ? await verifyUser(authHeader) : null;
+    const rateLimitResult = rateLimitMiddleware(request, user?.id);
+    if (!rateLimitResult.ok) {
+      return tooManyRequestsResponse(rateLimitResult);
+    }
+
     const url = new URL(request.url);
     const module = url.searchParams.get('module');
     const action = url.searchParams.get('action');
@@ -591,6 +600,10 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
     if (!code) {
       return Response.json({ success: false, error: 'code param required' } as ApiResponse, { status: 400 });
     }
+    // Validate code format: exactly 8 chars, base64url safe
+    if (!/^[A-Za-z0-9_-]{8}$/.test(code)) {
+      return Response.json({ success: false, error: 'Invalid share code format' } as ApiResponse, { status: 400 });
+    }
     const { data: link, error: linkErr } = await supabaseAdmin
       .from('share_links')
       .select('user_id')
@@ -685,14 +698,35 @@ async function handleProfile(request: Request, action: string): Promise<Response
 
     if (request.method === 'POST') {
       const body = await request.json().catch(() => ({})) as Record<string, unknown>;
+
+      // ── Input validation ──────────────────────────────────
+      const dateOfBirth  = (body.dateOfBirth  as string) || null;
+      const timeOfBirth  = (body.timeOfBirth  as string) || null;
+      const placeOfBirth = (body.placeOfBirth as string) || null;
+
+      // Validate date format YYYY-MM-DD
+      if (dateOfBirth && !/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
+        return Response.json({ success: false, error: 'dateOfBirth must be YYYY-MM-DD' } as ApiResponse, { status: 400 });
+      }
+      // Validate time format HH:MM
+      if (timeOfBirth && !/^\d{2}:\d{2}$/.test(timeOfBirth)) {
+        return Response.json({ success: false, error: 'timeOfBirth must be HH:MM' } as ApiResponse, { status: 400 });
+      }
+      // Reject strings with HTML injection patterns
+      const INJECTION_RE = /<[^>]*>|javascript:|on\w+\s*=/i;
+      if ((placeOfBirth && INJECTION_RE.test(placeOfBirth))) {
+        return Response.json({ success: false, error: 'placeOfBirth contains invalid characters' } as ApiResponse, { status: 400 });
+      }
+      // ─────────────────────────────────────────────────────
+
       const { data, error: upsertError } = await supabaseAdmin
         .from('users_profiles')
         .upsert(
           {
             user_id: user.id,
-            date_of_birth: (body.dateOfBirth as string) || null,
-            time_of_birth: (body.timeOfBirth as string) || null,
-            place_of_birth: (body.placeOfBirth as string) || null,
+            date_of_birth: dateOfBirth,
+            time_of_birth: timeOfBirth,
+            place_of_birth: placeOfBirth,
             initial_mood: (body.initialMood as string) || null,
             updated_at: new Date().toISOString(),
           },
@@ -743,6 +777,23 @@ async function handleBlueprint(request: Request, action: string): Promise<Respon
       const accuracyLevel = body.accuracyLevel as number;
       if (typeof accuracyLevel !== 'number' || accuracyLevel < 0 || accuracyLevel > 100) {
         return Response.json({ success: false, error: 'accuracyLevel ต้องเป็น 0-100' } as ApiResponse, { status: 400 });
+      }
+
+      // Validate decisionStyle enum
+      const VALID_DECISION_STYLES = ['analytical', 'intuitive', 'collaborative', 'directive', 'exploratory'];
+      const decisionStyle = body.decisionStyle as string | undefined;
+      if (decisionStyle && !VALID_DECISION_STYLES.includes(decisionStyle)) {
+        return Response.json(
+          { success: false, error: `decisionStyle must be one of: ${VALID_DECISION_STYLES.join(', ')}` } as ApiResponse,
+          { status: 400 }
+        );
+      }
+
+      // Validate arrays are arrays (not arbitrary types)
+      for (const field of ['strengths', 'insights', 'opportunities', 'blindSpots'] as const) {
+        if (body[field] !== undefined && !Array.isArray(body[field])) {
+          return Response.json({ success: false, error: `${field} must be an array` } as ApiResponse, { status: 400 });
+        }
       }
       // Mark previous blueprints as non-latest
       await supabaseAdmin

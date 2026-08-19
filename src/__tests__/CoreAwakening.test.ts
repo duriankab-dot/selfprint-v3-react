@@ -13,6 +13,23 @@ import {
 } from '../services/CoreAwakeningService';
 import { createTwin, createFirstMemory } from '../api/twin/create';
 
+// Mock SICEOrchestrator so startAwakening doesn't run real SICE engines
+vi.mock('../services/sice/SICEOrchestrator', () => ({
+  SICEOrchestrator: vi.fn().mockImplementation(() => ({
+    orchestrate: vi.fn().mockResolvedValue({
+      personalIntelligence: {
+        insights: ['You are deeply self-aware'],
+        nextStepsSuggested: ['Continue exploring'],
+        recommendedAction: 'Embrace your journey',
+        warningsOrCautions: [],
+      },
+      synthesis: { themes: ['Growth', 'Self-awareness'] },
+      results: {},
+      totalExecutionTime: 50,
+    }),
+  })),
+}));
+
 describe('CoreAwakeningService', () => {
   const testUserId = 'user_test_123';
   const testTwinName = 'Aria';
@@ -38,7 +55,8 @@ describe('CoreAwakeningService', () => {
     it('should start awakening process successfully', async () => {
       const result = await startAwakening(testUserId);
       expect(result.success).toBe(true);
-      expect(result.message).toContain('initiated');
+      // Message is in Thai: 'กระบวนการ Awakening เริ่มต้น...' — check key word
+      expect(result.message).toContain('Awakening');
     });
   });
 

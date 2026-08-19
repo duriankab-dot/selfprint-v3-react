@@ -1,0 +1,25 @@
+// Add these npm scripts to package.json
+
+{
+  "scripts": {
+    // ... existing scripts ...
+
+    // Testing scripts
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
+
+    "test:load:smoke": "k6 run loadtest-smoke.js --vus 50 --duration 10m",
+    "test:load:full": "k6 run loadtest.js --vus 100 --duration 39m",
+
+    // CI/CD (run from GitHub Actions)
+    "test:ci": "npm run test:e2e && npm run test:load:smoke"
+  },
+
+  "devDependencies": {
+    // Add these:
+    "@playwright/test": "^1.40.0",
+    // k6 is installed via CLI, not npm
+  }
+}
