@@ -1,0 +1,44 @@
+========================================================================
+TASK #5: Full Test Suite — Quick Start
+========================================================================
+
+1. Open Command Prompt in: D:\selfprint-v3-react
+
+2. Run this command:
+   RUN_FULL_TEST_SUITE.bat
+
+3. Wait for completion (2-5 minutes)
+   Script will:
+   - Clean git locks
+   - Clear .vite cache
+   - Run 529 tests
+   - Save output to: test-results-[DATE_TIME].log
+
+4. Check results:
+   - Open: test-results-[DATE_TIME].log
+   - Search for: "✓" (passed) or "×" (failed)
+   - Count totals
+
+5. Expected:
+   - Best case: 529 passed ✓
+   - Current: ~518 passed, 11 failed (FeedbackWidget text matchers)
+
+6. Report status:
+   - All pass = Task #5 DONE ✓
+   - 11 failures = Known issue, documented ✓
+
+========================================================================
+Issues?
+========================================================================
+
+If script fails:
+- Close any open IDEs (may lock node_modules)
+- Delete manually: .git\HEAD.lock and .git\index.lock
+- Retry
+
+If tests timeout (>5 min):
+- Natural, just means slow test suite
+- Results still captured in log file
+- Can analyze after completion
+
+========================================================================

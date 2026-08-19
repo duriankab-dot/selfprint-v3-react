@@ -13,10 +13,13 @@
  */
 export interface Value {
   id?: string;
+  title?: string; // Display name (e.g., from onboarding)
   name: string;
   description?: string;
+  importance?: 'high' | 'medium' | 'low'; // Priority level
   confidence: number; // 0-1, higher = more certain
   evidence: string[]; // Which reflections/decisions led to this
+  sourceOfTruth?: string; // Where this value came from (e.g., 'onboarding_strengths')
   inferredFromSources: EvidenceSource[];
   inferred: boolean; // AI inferred vs user stated
   createdAt?: Date;
@@ -33,6 +36,7 @@ export interface Goal {
   timeframe?: string; // "short-term", "long-term", "ongoing"
   confidence: number;
   evidence: string[];
+  sourceOfTruth?: string; // Where this goal came from (e.g., 'onboarding_insights')
   inferredFromSources: EvidenceSource[];
   relatedHub?: string; // Which life area (Career, Relationship, etc)
   createdAt?: Date;
@@ -63,8 +67,11 @@ export interface BlindSpot {
   description?: string;
   confidence: number;
   evidence: string[];
+  sourceOfTruth?: string; // Where this blind spot came from (e.g., 'onboarding_blindspots')
   inferredFromSources: EvidenceSource[];
-  sensitivityLevel: 'low' | 'medium' | 'high'; // Don't expose high-confidence blind spots rashly
+  sensitivityLevel?: 'low' | 'medium' | 'high'; // Don't expose high-confidence blind spots rashly
+  potentialImpact?: 'low' | 'medium' | 'high'; // How much this affects user
+  actionable?: boolean; // Can user do something about this?
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -88,6 +95,7 @@ export interface DecisionStyle {
   description: string;
   confidence: number;
   evidence: string[];
+  sourceOfTruth?: string; // Where this style came from (e.g., 'onboarding_analysis')
 }
 
 /**
@@ -110,6 +118,8 @@ export interface Relationship {
 export interface PersonalContext {
   id?: string;
   userId: string;
+  birthDate?: string; // ISO date string (e.g., '1990-05-15')
+  moodState?: string; // Current mood (e.g., 'creative', 'contemplative')
   values: Value[];
   goals: Goal[];
   strengths: Strength[];

@@ -63,7 +63,7 @@ export const WORLDS: Record<WorldId, World> = {
     name: 'Love',
     emoji: '💕',
     color: '#f43f5e',
-    description: 'Romance, intimacy, and heart connections',
+    description: 'Love, romance, intimacy, and heart connections',
     tagline: 'Open your heart',
     focusAreas: ['Romance', 'Intimacy', 'Attachment', 'Vulnerability', 'Partnership'],
   },

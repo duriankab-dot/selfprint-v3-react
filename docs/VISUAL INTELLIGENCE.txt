@@ -1,0 +1,1192 @@
+SELFPRINT V3
+VISUAL INTELLIGENCE & SMART ENTRY
+ARCHITECTURE AMENDMENT V1.0
+Companion Document to
+
+SELFPRINT_MASTER_DIRECTIVE_V5_FINAL_INTEGRATION.md
+
+Date: 19 August 2026
+Repository: https://github.com/duriankab-dot/selfprint-v3-react
+Baseline Audit: 6d093e7
+Primary Development AI: Claude
+Status: DEVELOPMENT DIRECTIVE
+Priority: HIGH
+
+0. DOCUMENT AUTHORITY
+
+เอกสารฉบับนี้เป็น Architecture Amendment / Companion Directive สำหรับแนบกับ:
+
+SELFPRINT_MASTER_DIRECTIVE_V5_FINAL_INTEGRATION.md
+
+ไม่ใช่ Master Directive ฉบับใหม่
+
+Master V5 ยังคงเป็นเอกสารสูงสุด
+
+ลำดับการอ้างอิง:
+
+MASTER DIRECTIVE V5
+        ↓
+THIS ARCHITECTURE AMENDMENT
+        ↓
+EXISTING PRODUCTION CODE
+        ↓
+DATABASE
+        ↓
+API / EDGE
+        ↓
+TESTS
+        ↓
+PRODUCTION VERIFICATION
+        ↓
+DOCUMENTATION
+
+หากพบข้อความขัดแย้ง:
+
+V5 เป็น Authority หลัก
+เอกสารนี้มีผลเฉพาะส่วนที่ระบุเป็น Amendment
+เอกสารเก่าที่ขัดกับ V5 หรือ Amendment นี้ให้ถือเป็น OBSOLETE
+1. PURPOSE
+
+เอกสารนี้เกิดจากการทบทวน SELFPRINT V3 หลังจาก Master Directive V5 และมีเป้าหมายเพื่อกำหนด Architecture เพิ่มเติมใน 4 เรื่องหลัก:
+
+1. Smart Entry
+2. Visual Intelligence Layer
+3. Procedural / Generative 2.5D Twin
+4. Full Thai + English Experience
+
+เป้าหมายไม่ใช่การสร้าง Dashboard ใหม่ให้สวยขึ้น
+
+แต่คือ:
+
+สร้าง Visual Intelligence Layer ที่ทำให้ SELFPRINT มีประสบการณ์ต่อเนื่องตั้งแต่ Landing จนถึง Living Twin และ 12 Worlds
+
+2. CORE ARCHITECTURE DECISION
+LOCKED DECISION
+
+SELFPRINT จะใช้:
+
+Procedural-first, Asset-minimal, AI-driven 2D/2.5D Visualization
+
+เป็น Visual Architecture หลัก
+
+ไม่ใช้ Full 3D เป็น Core Architecture
+
+ไม่จำเป็นต้องใช้:
+
+Three.js เป็นแกนหลัก
+3D character
+3D environment
+real-time 3D scene
+
+เว้นแต่ในอนาคตมี Production Requirement ที่พิสูจน์แล้วว่าจำเป็นจริง
+
+3. IMPORTANT: DO NOT BUILD A COLLECTION OF VISUAL PAGES
+
+ห้ามพัฒนาแบบ:
+
+World01.tsx
+World02.tsx
+World03.tsx
+...
+World12.tsx
+
+โดยแต่ละหน้าเขียน visual logic ของตัวเอง
+
+ต้องสร้าง:
+
+Reusable Visual Intelligence Engine
+
+แล้วให้ World เป็น Configuration / State
+
+4. TARGET VISUAL ARCHITECTURE
+                         SELFPRINT
+                             │
+                         USER DATA
+                             │
+                       FULL ANALYSIS
+                             │
+                        TWIN IDENTITY
+                             │
+                         VISUAL DNA
+                             │
+                    ┌────────┴────────┐
+                    │                 │
+                WORLD STATE       TWIN STATE
+                    │                 │
+                    └────────┬────────┘
+                             ▼
+                   VISUAL STATE ENGINE
+                             │
+             ┌───────────────┼───────────────┐
+             │               │               │
+            SVG           CANVAS 2D         CSS
+             │               │               │
+             └───────────────┼───────────────┘
+                             ▼
+                       2.5D COMPOSITOR
+                             │
+                 ┌───────────┼───────────┐
+                 │           │           │
+             Environment   Lighting    FX/Motion
+                 │           │           │
+                 └───────────┼───────────┘
+                             ▼
+                       LIVING TWIN
+                             │
+                         12 WORLDS
+5. VISUALIZATION PRINCIPLE
+
+SELFPRINT ต้องไม่สร้าง:
+
+Static Avatar
+
+แต่ต้องสร้าง:
+
+Living Intelligence Visualization
+
+Twin ประกอบด้วย:
+
+Twin Identity
++
+Visual DNA
++
+Twin State
++
+World State
++
+Motion
++
+Lighting
++
+Aura
++
+Environment
++
+Interaction
+6. TWIN IDENTITY MUST REMAIN CONSTANT
+
+เมื่อ User เปลี่ยน:
+
+SELF
+WEALTH
+CAREER
+DECISION
+FUTURE
+...
+
+ต้องเป็น:
+
+SAME TWIN
++
+NEW CONTEXT
+
+ไม่ใช่:
+
+World A = Twin A
+World B = Twin B
+7. WORLD-AWARE VISUALIZATION
+
+World เป็น Context
+
+Twin เป็น Identity
+
+ดังนั้น:
+
+TWIN IDENTITY
+        +
+WORLD CONTEXT
+        ↓
+VISUAL STATE
+        ↓
+RENDERING
+
+World สามารถเปลี่ยน:
+
+environment
+lighting
+mood
+motion
+aura
+interaction
+expertise state
+visual intensity
+
+แต่ไม่เปลี่ยน Core Twin Identity
+
+8. PROCEDURAL-FIRST PRINCIPLE
+
+นี่คือ Architecture Decision สำคัญที่สุดของ Amendment นี้
+
+ไม่ให้ Asset เป็น Core Dependency
+
+Instead of:
+
+Twin
+↓
+PNG
+↓
+Animation
+
+ใช้:
+
+Twin Identity
++
+Visual DNA
++
+World State
++
+Twin State
+↓
+Procedural Renderer
+↓
+Living Visual
+9. ASSET-MINIMAL POLICY
+
+SELFPRINT ไม่จำเป็นต้องสร้าง Visual Asset จำนวนมากด้วยมือ
+
+และ AI Dev ห้ามเริ่มต้นด้วยการสร้าง Asset จำนวนมาก
+
+ลำดับ:
+
+AUDIT EXISTING
+       ↓
+REUSE
+       ↓
+PROCEDURAL RENDER
+       ↓
+INTEGRATE EXISTING ASSETS
+       ↓
+AI-GENERATED ASSET ONLY IF REQUIRED
+Default
+
+Code generates the visual.
+
+Optional
+
+AI-generated assets ใช้เมื่อ:
+
+procedural rendering ทำไม่ได้ดีพอ
+ต้องการ cinematic hero
+marketing visual
+video
+special illustration
+unique visual ที่มีเหตุผลจริง
+10. GENERATE PARAMETERS, NOT PICTURES
+
+หลักสำคัญ:
+
+AI ควรเป็นผู้กำหนด Visual State / Visual Parameters มากกว่าการสร้างภาพใหม่ทุกครั้ง
+
+ตัวอย่าง:
+
+{
+  "world_id": "decision",
+  "mood": "focused",
+  "energy": 0.72,
+  "motion": "forward",
+  "lighting": "directional",
+  "particle_density": 0.45,
+  "aura_intensity": 0.68,
+  "twin_state": "high_focus"
+}
+
+แล้ว Visual Engine เป็นผู้ render
+
+AI
+ ↓
+Visual Parameters
+ ↓
+Visual State
+ ↓
+Renderer
+ ↓
+Living Twin
+11. NEVER GENERATE A NEW IMAGE ON EVERY PAGE LOAD
+
+ห้าม:
+
+User opens World
+↓
+AI generates image
+↓
+render
+
+ทุกครั้ง
+
+เพราะ:
+
+latency
+cost
+unpredictability
+bandwidth
+visual inconsistency
+
+ต้องใช้:
+
+AI / Logic
+↓
+State
+↓
+Deterministic Renderer
+12. PROCEDURAL VISUAL TOOLKIT
+
+ให้ Claude ประเมินและใช้ตามความเหมาะสม:
+
+SVG
+
+เหมาะกับ:
+
+Twin geometry
+symbols
+holographic structures
+vector shapes
+Canvas 2D
+
+เหมาะกับ:
+
+particles
+energy
+dynamic effects
+procedural fields
+CSS
+
+เหมาะกับ:
+
+motion
+transitions
+glow
+blur
+parallax
+responsive effects
+React
+
+เหมาะกับ:
+
+component architecture
+state binding
+World routing
+lifecycle
+13. 2.5D COMPOSITION
+
+Visual hierarchy:
+
+Background
+↓
+Atmosphere
+↓
+Environment
+↓
+Lighting
+↓
+Twin
+↓
+Particles / FX
+↓
+Foreground
+↓
+Interface
+
+สร้าง depth ด้วย:
+
+scale
+blur
+opacity
+perspective
+parallax
+light
+shadow
+movement
+
+ไม่จำเป็นต้องมี 3D geometry
+
+14. VISUAL STATE ENGINE
+
+ต้องมี Visual State abstraction ที่ชัดเจน
+
+อย่างน้อย:
+
+VisualState
+├── twinIdentity
+├── visualDNA
+├── worldId
+├── environment
+├── mood
+├── energy
+├── focus
+├── motion
+├── lighting
+├── aura
+├── particles
+├── interaction
+└── intensity
+
+ชื่อ field จริงให้สอดคล้องกับ existing code/schema
+
+ห้ามสร้าง duplicate state model หาก V5 / existing implementation มีของเดิมอยู่แล้ว
+
+15. WORLD STATE = SINGLE SOURCE OF TRUTH
+
+ต้องป้องกัน:
+
+UI = World 06
+AI = World 05
+Visual = World 04
+
+ห้ามเกิด
+
+World State เดียวต้องขับ:
+
+World State
+    │
+    ├── Visual Engine
+    │
+    └── AI / Prompt Engine
+16. AI CONTEXT
+
+AI ต้องได้รับ Context ที่เพียงพอ:
+
+User
++
+Twin
++
+SICE
++
+Memory
++
+Learning
++
+World
++
+World Expertise
++
+Visual State
++
+Locale
+
+แต่ห้ามส่งข้อมูลเกินความจำเป็น
+
+17. SMART ENTRY ARCHITECTURE
+
+SELFPRINT ต้องรองรับ 3 กลุ่ม:
+
+NEW USER
+RETURNING USER
+PWA USER
+18. NEW USER
+LANDING
+↓
+NOVA / INTRO
+↓
+ONBOARDING
+↓
+FULL ANALYSIS
+↓
+CORE AWAKENING
+↓
+TWIN BIRTH
+↓
+AI TWIN
+↓
+DASHBOARD / WORLDS
+19. EXISTING LANDING QUICK ANALYSIS
+
+src/pages/LandingPage.tsx มี Functional Quick Analysis Flow
+
+ห้ามรื้อ
+
+Flow:
+
+LANDING
+↓
+QUICK FORM
+↓
+TUNING QUESTIONS
+↓
+FULL ANALYSIS
+↓
+TWIN GENERATION
+↓
+DASHBOARD
+
+ถือเป็น existing production capability
+
+AI Dev ต้อง:
+
+audit
+preserve
+integrate
+
+ไม่สร้างระบบคู่ขนาน
+
+20. RETURNING USER
+
+Returning User ที่มี Twin แล้ว:
+
+LOGIN
+↓
+SESSION CHECK
+↓
+STATE RESOLVER
+↓
+TWIN
+
+ไม่ต้องตอบคำถามใหม่
+
+ไม่ต้อง Onboarding ใหม่
+
+ไม่ต้อง Full Analysis ใหม่
+
+ไม่ต้องสร้าง Twin ใหม่
+
+21. RETURNING USER WITHOUT COMPLETED TWIN
+
+ถ้า Journey ยังไม่เสร็จ:
+
+LOGIN
+↓
+STATE RESOLVER
+↓
+RESUME LAST VALID STATE
+
+ตัวอย่าง:
+
+Onboarding
+Analysis
+Awakening
+Twin Birth
+
+ห้าม reset progress
+
+22. PWA
+
+PWA ต้องทำตัวเหมือน Application
+
+Twin exists
+PWA
+↓
+Twin
+Journey incomplete
+PWA
+↓
+Resume
+New User
+PWA
+↓
+Landing
+23. DASHBOARD VS TWIN
+
+กำหนดบทบาทใหม่ให้ชัด:
+
+Twin
+
+Living Identity
+
+Dashboard
+
+Intelligence Command Center
+
+Worlds
+
+Contextual Intelligence Experiences
+
+ดังนั้น Returning User ที่มี Twin:
+
+Twin = Default Entry
+
+24. LANDING SMART ENTRY
+
+Landing ต้องรองรับ:
+
+Guest
+Start Your Selfprint
+Returning + Twin
+Welcome Back
+[Enter My Twin]
+[Open Dashboard]
+Returning + Incomplete
+Welcome Back
+[Continue]
+
+ข้อความจริงต้องผ่าน i18n
+
+25. NOVA
+
+NOVA ต้องทำหน้าที่เป็น:
+
+Guide
++
+Explainer
++
+Journey Companion
++
+Analysis Interface
++
+Awakening Guide
++
+Twin Introduction
+
+NOVA ไม่ควรถูกทำให้เป็นเพียง Chatbot
+
+26. ONBOARDING
+
+Onboarding ต้องสร้างความรู้สึก:
+
+"SELFPRINT กำลังสร้างความเข้าใจเกี่ยวกับฉัน"
+
+ไม่ใช่เพียง:
+
+"ฉันกำลังกรอก Form"
+
+Visual progression:
+
+USER DATA
+↓
+SIGNALS
+↓
+PATTERNS
+↓
+CONNECTIONS
+↓
+SELFPRINT
+27. GUIDE TOUR
+
+ต้องมี:
+
+Quick Tour
+
+สั้น กระชับ
+
+SELFPRINT
+NOVA
+ANALYSIS
+TWIN
+WORLDS
+
+มี:
+
+Skip
+
+Deep Tour
+
+สำหรับ User ที่ต้องการเข้าใจระบบมากขึ้น
+
+28. VIDEO TOUR
+
+สามารถใช้ Video Walkthrough ได้
+
+ประมาณ:
+
+Landing
+↓
+NOVA
+↓
+Analysis
+↓
+Awakening
+↓
+Twin
+↓
+Worlds
+
+แต่:
+
+ไม่บังคับทุก User
+
+มี Skip / Close
+
+29. CORE AWAKENING
+
+Awakening ต้องเป็น Product Hero Moment
+
+Visual:
+
+Analysis
+↓
+Understanding
+↓
+Awakening
+↓
+Twin
+
+ห้ามใช้ visual language แบบ:
+
+magic spell
+game level up
+fantasy transformation
+
+ต้องเป็น:
+
+Intelligent / Cinematic / Premium
+
+30. TWIN BIRTH
+
+Twin ต้องเกิดพร้อม Intelligence
+
+ใช้:
+
+Onboarding
++
+Full Analysis
++
+SICE
++
+Initial Context
++
+Initial Memory
++
+Twin Identity
++
+Visual DNA
+
+Twin ห้ามเกิดเป็น Empty Avatar
+
+31. 12 WORLDS
+
+World แต่ละตัวต้องมี:
+
+World
+↓
+Environment
+↓
+Twin Placement
+↓
+Lighting
+↓
+Motion
+↓
+FX
+↓
+Interaction
+↓
+World State
+↓
+AI Context
+
+ไม่ใช่เพียง:
+
+world_id
+name
+background_image
+32. FULL-SCREEN WORLD EXPERIENCE
+
+World ควรเป็น immersive full-screen experience:
+
+┌─────────────────────────────┐
+│                             │
+│       WORLD ENVIRONMENT     │
+│                             │
+│            TWIN             │
+│                             │
+│      INTELLIGENCE           │
+│                             │
+└─────────────────────────────┘
+
+Twin ต้องดูเหมือน "อยู่ใน World"
+
+ไม่ใช่ Avatar วางทับ Background
+
+33. PERFORMANCE
+
+Procedural 2.5D ต้อง Mobile-first
+
+ต้องรองรับ:
+
+HIGH
+MEDIUM
+LOW
+REDUCED MOTION
+
+ใช้:
+
+lazy loading
+dynamic import
+GPU-friendly transforms
+limited particles
+efficient canvas
+CSS transforms
+reduced motion
+34. NO UNNECESSARY ASSET PIPELINE
+
+ไม่ต้องสร้าง:
+
+12 Worlds × dozens of images
+
+ถ้า Code สามารถสร้างได้
+
+Prefer:
+
+World Configuration
++
+Procedural Renderer
+
+แทน
+
+World Image Library
+35. LANGUAGE ARCHITECTURE
+
+SELFPRINT ต้องรองรับ:
+
+Thai
+English
+
+เป็น First-Class Languages
+
+ไม่ใช่:
+
+Thai + แปล English ทีหลัง
+
+36. AI LANGUAGE
+
+AI ต้องรับ:
+
+locale = th
+
+หรือ:
+
+locale = en
+
+แล้ว generate response โดยตรงในภาษานั้น
+
+ไม่ควร:
+
+AI → Thai
+↓
+Translator
+↓
+English
+
+เป็น Architecture หลัก
+
+37. LANGUAGE COVERAGE
+
+English ต้องครอบคลุม:
+
+Landing
+Onboarding
+NOVA
+Tuning
+Full Analysis
+Awakening
+Twin Birth
+Twin
+Dashboard
+12 Worlds
+Memory
+Learning
+Settings
+Errors
+Loading
+Empty States
+Notifications
+38. LOCALE CONTINUITY
+
+ถ้า User เลือก English:
+
+Landing
+↓
+Onboarding
+↓
+Analysis
+↓
+Twin
+↓
+World
+↓
+AI
+
+ต้องเป็น English ต่อเนื่อง
+
+ห้ามเกิด Mixed Language โดยไม่ได้ตั้งใจ
+
+39. EXISTING CODE FIRST
+
+ก่อนสร้างสิ่งใหม่ Claude ต้อง:
+
+inspect repository
+inspect current architecture
+locate existing implementation
+identify reusable components
+identify duplicate systems
+identify actual gaps
+implement only verified gaps
+
+ห้ามเดาจากชื่อไฟล์
+
+40. DO NOT CREATE DUPLICATE ENGINES
+
+ห้ามสร้าง:
+
+Twin Engine ใหม่
+Analysis Engine ใหม่
+World Engine ใหม่
+Routing System ใหม่
+i18n System ใหม่
+State Model ใหม่
+
+ถ้ามี Existing Implementation
+
+ให้:
+
+Extend / Refactor / Integrate
+
+41. CLAUDE DEVELOPMENT DIRECTIVE
+
+Claude ต้องทำงานตามลำดับ:
+
+AUDIT
+↓
+MAP
+↓
+GAP ANALYSIS
+↓
+ARCHITECTURE CONFIRMATION
+↓
+IMPLEMENT
+↓
+TEST
+↓
+VERIFY
+↓
+DOCUMENT
+
+ไม่ใช่:
+
+READ REQUEST
+↓
+WRITE NEW CODE
+42. CLAUDE MUST NOT OPTIMIZE FOR VISUAL NOVELTY
+
+ห้ามวัดความสำเร็จจาก:
+
+"สวยขึ้น"
+
+ต้องวัดจาก:
+
+state-driven
+reusable
+performant
+responsive
+accessible
+deterministic
+maintainable
+production-safe
+integrated with AI
+integrated with World State
+43. TEST REQUIREMENTS
+
+ต้องตรวจ:
+
+Entry
+Guest → Landing
+Returning + Twin → Twin
+Returning incomplete → Resume
+PWA + Twin → Twin
+PWA incomplete → Resume
+Fast Path
+Landing
+→ Tuning
+→ Full Analysis
+→ Twin
+→ Dashboard
+Visual
+Twin Identity persists
+World State changes
+Visual State changes
+Motion changes
+Lighting changes
+AI
+Visual World = AI World
+Visual Context = AI Context
+Locale = AI Locale
+44. DOCUMENTATION IMPACT
+
+หลัง Implementation ต้องตรวจและปรับ:
+
+MASTER V5
+       │
+       ├── Visual Architecture
+       ├── Twin Specification
+       ├── World Specification
+       ├── UX / User Journey
+       ├── PWA
+       ├── Localization
+       ├── PRD
+       ├── Project Codex
+       ├── QA / Test Plan
+       └── Documentation Index
+
+ไม่จำเป็นต้องแก้ Master V5 ทั้งฉบับ
+
+ให้ใช้ Amendment นี้เป็น Architecture Extension
+
+45. ASSET POLICY — FINAL
+
+SELFPRINT จะใช้:
+
+Procedural-first
+
+เป็นหลัก
+
+Priority
+1. Existing Code
+2. Procedural Rendering
+3. Existing Assets
+4. AI-Generated Assets
+5. Manual New Assets
+
+Manual Asset Creation เป็นทางเลือกสุดท้าย
+
+46. WHAT WE ARE BUILDING
+
+เราไม่ได้กำลังสร้าง:
+
+Avatar App
+
+ไม่ได้กำลังสร้าง:
+
+Game
+
+ไม่ได้กำลังสร้าง:
+
+3D Character System
+
+แต่กำลังสร้าง:
+
+Personal Intelligence Platform with a Living Visual Intelligence Layer
+
+Twin ต้องให้ความรู้สึก:
+
+"นี่คือ Twin ของฉัน"
+
+และเมื่อเข้าสู่ World:
+
+"นี่คือ Twin ของฉันที่กำลังเข้าสู่โลกนี้ และเข้าใจบริบทของโลกนี้"
+
+47. FINAL TARGET
+                    SELFPRINT
+                        │
+                     LANDING
+                        │
+               ┌────────┴────────┐
+               │                 │
+            DISCOVER          QUICK START
+               │                 │
+              NOVA             TUNING
+               │                 │
+          ONBOARDING             │
+               │                 │
+               └────────┬────────┘
+                        │
+                   FULL ANALYSIS
+                        │
+                  CORE AWAKENING
+                        │
+                    TWIN BIRTH
+                        │
+                     AI TWIN
+                        │
+              ┌─────────┴─────────┐
+              │                   │
+          DASHBOARD            12 WORLDS
+              │                   │
+              └─────────┬─────────┘
+                        │
+                     MEMORY
+                        │
+                     LEARNING
+                        │
+                  TWIN EVOLUTION
+
+Returning User:
+
+WEB / PWA
+    ↓
+SESSION
+    ↓
+STATE RESOLVER
+    ↓
+TWIN
+48. FINAL DIRECTIVE TO DEVELOPMENT TEAM
+
+DO NOT REBUILD SELFPRINT.
+
+DO NOT CREATE A NEW TWIN SYSTEM.
+
+DO NOT CREATE A NEW WORLD SYSTEM.
+
+DO NOT CREATE LARGE STATIC VISUAL ASSET LIBRARIES.
+
+DO NOT USE FULL 3D AS THE DEFAULT SOLUTION.
+
+DO NOT GENERATE NEW IMAGES AT RUNTIME FOR NORMAL USER NAVIGATION.
+
+Build a Procedural-first, Asset-minimal, AI-driven 2D/2.5D Visual Intelligence Engine integrated with the existing SELFPRINT V5 architecture.
+
+Preserve the existing functional Landing → Quick Analysis → Tuning → Full Analysis → Twin Generation flow.
+
+Implement Smart Entry for New Users, Returning Users and PWA.
+
+Returning Users with an existing Twin should enter through their Twin.
+
+Keep Twin Identity persistent across all Worlds.
+
+Use World State as the shared source of truth for both Visual Engine and AI Context.
+
+Make Thai and English first-class experiences across the complete lifecycle.
+
+Use AI to determine Visual State and Visual Parameters, while Code deterministically renders the experience.
+
+Generate parameters, not pictures.
+
+Audit first. Reuse second. Integrate third. Upgrade fourth. Create new only when a verified production gap exists.
+
+Production verification is mandatory.
+
+49. DEFINITION OF DONE
+
+งานส่วนนี้ถือว่าเสร็จเมื่อ:
+
+✓ Existing functionality preserved
+✓ Quick Analysis works
+✓ Full Analysis works
+✓ Awakening works
+✓ Twin Birth works
+✓ Twin has persistent identity
+✓ Twin has Visual DNA
+✓ Visual State is state-driven
+✓ 2D/2.5D renderer works
+✓ No unnecessary full 3D dependency
+✓ No unnecessary asset dependency
+✓ Worlds use shared Visual Engine
+✓ World State synchronizes with AI
+✓ Returning User enters correctly
+✓ PWA enters correctly
+✓ English lifecycle is complete
+✓ Thai lifecycle remains complete
+✓ Mobile performance verified
+✓ E2E verified
+✓ Production verified
+✓ Documentation updated
+FINAL STATUS
+
+This document is an Architecture Amendment to SELFPRINT V3 Master Directive V5.
+
+Master V5 remains authoritative.
+
+This Amendment becomes authoritative for:
+
+SMART ENTRY
++
+VISUAL INTELLIGENCE
++
+PROCEDURAL 2D/2.5D
++
+TWIN VISUALIZATION
++
+WORLD VISUALIZATION
++
+PWA ENTRY
++
+LANGUAGE EXPERIENCE
+
+END OF DOCUMENT

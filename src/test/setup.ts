@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom'
 import { vi } from 'vitest'
 
+// ── Use real timers for now (tests wait for real timeouts) ──────────────────
+// vi.useFakeTimers() — only if tests actually use setTimeout/setInterval
+// For now, keep real timers since async/await in tests need real promises
+
 // ── jsdom fix ────────────────────────────────────────────────────────────────
 if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {}
@@ -8,6 +12,9 @@ if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
 
 // ══════════════════════════════════════════════════════════════════════════════
 // GLOBAL SUPABASE MOCK
+//
+// MUST BE REGISTERED BEFORE ANY TEST FILE IMPORTS SUPABASE
+// This prevents "Missing Supabase credentials" errors during initialization
 //
 // KEY RULES (prevent Worker crash):
 //   ❌ NEVER add a `then` property to the builder object.
@@ -170,35 +177,40 @@ function makeBuilder(tableName: string) {
   let isWriteOp = false
   let eqCount = 0
 
-  // ⚠️  Do NOT add a `then` property here — that would make this a thenable.
-  const builder: Record<string, ReturnType<typeof vi.fn>> = {
-    select:      vi.fn(() => builder),                              // ← does NOT clear isWriteOp
-    insert:      vi.fn(() => { isWriteOp = true; return builder }),
-    upsert:      vi.fn(() => { isWriteOp = true; return builder }),
-    update:      vi.fn(() => { isWriteOp = true; return builder }),
-    delete:      vi.fn(() => { isWriteOp = true; return builder }),
-    eq:          vi.fn(() => { eqCount++; return builder }),
-    neq:         vi.fn(() => builder),
-    order:       vi.fn(() => builder),
-    limit:       vi.fn(() => builder),
-    in:          vi.fn(() => builder),
-    gte:         vi.fn(() => builder),
-    lte:         vi.fn(() => builder),
-    gt:          vi.fn(() => builder),
-    lt:          vi.fn(() => builder),
-    not:         vi.fn(() => builder),
-    is:          vi.fn(() => builder),
-    contains:    vi.fn(() => builder),
-    filter:      vi.fn(() => builder),
-    match:       vi.fn(() => builder),
-    single:      vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null })),
-    maybeSingle: vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null })),
-  }
+  const builder: any = {}
+
+  // Define all methods that forward calls properly
+  builder.select = vi.fn(() => builder)
+  builder.insert = vi.fn(() => { isWriteOp = true; return builder })
+  builder.upsert = vi.fn(() => { isWriteOp = true; return builder })
+  builder.update = vi.fn(() => { isWriteOp = true; return builder })
+  builder.delete = vi.fn(() => { isWriteOp = true; return builder })
+  builder.eq = vi.fn(() => { eqCount++; return builder })
+  builder.neq = vi.fn(() => builder)
+  builder.order = vi.fn(() => builder)
+  builder.limit = vi.fn(() => builder)
+  builder.in = vi.fn(() => builder)
+  builder.gte = vi.fn(() => builder)
+  builder.lte = vi.fn(() => builder)
+  builder.gt = vi.fn(() => builder)
+  builder.lt = vi.fn(() => builder)
+  builder.not = vi.fn(() => builder)
+  builder.is = vi.fn(() => builder)
+  builder.contains = vi.fn(() => builder)
+  builder.filter = vi.fn(() => builder)
+  builder.match = vi.fn(() => builder)
+  builder.single = vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null }))
+  builder.maybeSingle = vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null }))
+
   return builder
 }
 
 const mockSupabaseClient = {
-  from: vi.fn((tableName: string) => makeBuilder(tableName)),
+  from: vi.fn((tableName: string) => {
+    const builder = makeBuilder(tableName)
+    // Ensure all methods exist and are properly callable
+    return Object.freeze(builder) as any
+  }),
   auth: {
     getUser:             vi.fn().mockResolvedValue({ data: { user: { id: 'user_test_123', email: 'test@example.com' } }, error: null }),
     getSession:          vi.fn().mockResolvedValue({ data: { session: { access_token: 'mock-token' } }, error: null }),
@@ -222,7 +234,8 @@ const mockSupabaseClient = {
   }),
 }
 
-// Register mock before any test file imports @supabase/supabase-js
+// Register mock BEFORE any module imports @supabase/supabase-js
+// This is the ONLY vi.mock() in the file — it must be at the end
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => mockSupabaseClient),
 }))
