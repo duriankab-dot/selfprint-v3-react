@@ -157,7 +157,7 @@ function buildGrowth(strengths: Strength[], goals: Goal[], horizon: FutureHorizo
 function buildRisks(blindSpots: BlindSpot[], horizon: FutureHorizon): string[] {
   const risks: string[] = [];
 
-  const visible = blindSpots.filter((b) => b.sensitivityLevel !== 'high');
+  const visible = blindSpots.filter((b) => b.sensitivity !== 'high');
   visible.slice(0, 2).forEach((b) => {
     risks.push(`ระวัง: "${b.title}" — ${b.description ?? 'อาจกระทบการตัดสินใจสำคัญ'}`);
   });
@@ -251,7 +251,7 @@ export class FutureSelfEngine {
 
     // Overall narrative from decision style + top strength
     const leadingStrength = topStrengths[0]?.name ?? null;
-    const primaryRisk     = topBlinds.filter((b) => b.sensitivityLevel !== 'high')[0]?.title ?? null;
+    const primaryRisk     = topBlinds.filter((b) => b.sensitivity !== 'high')[0]?.title ?? null;
 
     const styleDescriptions: Record<string, string> = {
       analytical:    'คุณใช้ข้อมูลและตรรกะเป็นแกนนำ — นี่คือพลังสำคัญของคุณ',

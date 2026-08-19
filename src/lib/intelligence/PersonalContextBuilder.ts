@@ -553,7 +553,7 @@ export class PersonalContextBuilder {
         confidence: e.confidence,
         evidence: [],
         inferredFromSources: e.inferredFrom.sources || [],
-        sensitivityLevel: 'medium',
+        sensitivity: 'medium',
       }));
   }
 

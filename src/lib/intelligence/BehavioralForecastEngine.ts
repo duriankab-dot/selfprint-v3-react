@@ -209,7 +209,7 @@ function buildBehavioralRisks(ctx: PersonalContext): BehavioralRisk[] {
   }
 
   // Risk from blindspots
-  ctx.blindSpots.filter((b) => b.sensitivityLevel !== 'high').slice(0, 2).forEach((b) => {
+  ctx.blindSpots.filter((b) => b.sensitivity !== 'high').slice(0, 2).forEach((b) => {
     risks.push({
       risk: `Pattern "${b.title}" อาจขัดขวางความก้าวหน้า`,
       category: 'mindset',
