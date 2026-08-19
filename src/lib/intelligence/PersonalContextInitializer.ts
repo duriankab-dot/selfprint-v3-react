@@ -189,6 +189,7 @@ function transformBlindSpots(blindSpots: string[], confidence: number): BlindSpo
     id: `blindspot-${index}`,
     title: blindSpot.split(':')[0] || blindSpot,
     description: blindSpot,
+    sensitivity: 'medium',
     potentialImpact: 'medium',
     confidence: Math.min(confidence * 0.75, 0.75),
     evidence: [blindSpot],

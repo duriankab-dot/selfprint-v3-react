@@ -69,7 +69,7 @@ export interface BlindSpot {
   evidence: string[];
   sourceOfTruth?: string; // Where this blind spot came from (e.g., 'onboarding_blindspots')
   inferredFromSources: EvidenceSource[];
-  sensitivityLevel?: 'low' | 'medium' | 'high'; // Don't expose high-confidence blind spots rashly
+  sensitivity: 'low' | 'medium' | 'high'; // Don't expose high-confidence blind spots rashly
   potentialImpact?: 'low' | 'medium' | 'high'; // How much this affects user
   actionable?: boolean; // Can user do something about this?
   createdAt?: Date;

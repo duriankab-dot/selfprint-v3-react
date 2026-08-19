@@ -6,11 +6,9 @@
  */
 
 import { vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface MockBuilderConfig {
   tableName?: string;
-  isWriteOp?: boolean;
   shouldResolveToNull?: boolean;
   customData?: Record<string, unknown>;
 }
@@ -22,7 +20,6 @@ export interface MockBuilderConfig {
 export function createMockBuilder(config: MockBuilderConfig = {}) {
   const {
     tableName = 'test-table',
-    isWriteOp = false,
     shouldResolveToNull = false,
     customData = {},
   } = config;
@@ -38,23 +35,10 @@ export function createMockBuilder(config: MockBuilderConfig = {}) {
 
   // Chainable methods (return builder)
   builder.select = vi.fn(() => builder);
-  builder.insert = vi.fn(function (data) {
-    // Mark as write operation
-    Object.defineProperty(this, '_isWriteOp', { value: true, writable: false });
-    return builder;
-  });
-  builder.upsert = vi.fn(function () {
-    Object.defineProperty(this, '_isWriteOp', { value: true, writable: false });
-    return builder;
-  });
-  builder.update = vi.fn(function () {
-    Object.defineProperty(this, '_isWriteOp', { value: true, writable: false });
-    return builder;
-  });
-  builder.delete = vi.fn(function () {
-    Object.defineProperty(this, '_isWriteOp', { value: true, writable: false });
-    return builder;
-  });
+  builder.insert = vi.fn(() => builder);
+  builder.upsert = vi.fn(() => builder);
+  builder.update = vi.fn(() => builder);
+  builder.delete = vi.fn(() => builder);
   builder.eq = vi.fn(() => builder);
   builder.neq = vi.fn(() => builder);
   builder.order = vi.fn(() => builder);
