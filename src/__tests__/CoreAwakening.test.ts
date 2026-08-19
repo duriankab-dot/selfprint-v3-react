@@ -14,20 +14,23 @@ import {
 import { createTwin, createFirstMemory } from '../api/twin/create';
 
 // Mock SICEOrchestrator so startAwakening doesn't run real SICE engines
+// ⚠️  Must use regular function (not arrow) — arrow functions cannot be `new`-ed
 vi.mock('../services/sice/SICEOrchestrator', () => ({
-  SICEOrchestrator: vi.fn().mockImplementation(() => ({
-    orchestrate: vi.fn().mockResolvedValue({
-      personalIntelligence: {
-        insights: ['You are deeply self-aware'],
-        nextStepsSuggested: ['Continue exploring'],
-        recommendedAction: 'Embrace your journey',
-        warningsOrCautions: [],
-      },
-      synthesis: { themes: ['Growth', 'Self-awareness'] },
-      results: {},
-      totalExecutionTime: 50,
-    }),
-  })),
+  SICEOrchestrator: vi.fn().mockImplementation(function () {
+    return {
+      orchestrate: vi.fn().mockResolvedValue({
+        personalIntelligence: {
+          insights: ['You are deeply self-aware'],
+          nextStepsSuggested: ['Continue exploring'],
+          recommendedAction: 'Embrace your journey',
+          warningsOrCautions: [],
+        },
+        synthesis: { themes: ['Growth', 'Self-awareness'] },
+        results: {},
+        totalExecutionTime: 50,
+      }),
+    };
+  }),
 }));
 
 describe('CoreAwakeningService', () => {

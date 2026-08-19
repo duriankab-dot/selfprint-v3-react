@@ -48,21 +48,21 @@ const detectPatternsMock = vi.fn();
 const getAccuracyMetricsMock = vi.fn();
 
 vi.mock('@/lib/intelligence/PersonalContextBuilder', () => ({
-  PersonalContextBuilder: vi.fn().mockImplementation(() => ({
-    getContext: getContextMock,
-  })),
+  PersonalContextBuilder: vi.fn().mockImplementation(function () {
+    return { getContext: getContextMock };
+  }),
 }));
 
 vi.mock('@/lib/intelligence/PatternDetector', () => ({
-  PatternDetector: vi.fn().mockImplementation(() => ({
-    detectPatterns: detectPatternsMock,
-  })),
+  PatternDetector: vi.fn().mockImplementation(function () {
+    return { detectPatterns: detectPatternsMock };
+  }),
 }));
 
 vi.mock('@/lib/intelligence/AIFeedbackLoop', () => ({
-  AIFeedbackLoop: vi.fn().mockImplementation(() => ({
-    getAccuracyMetrics: getAccuracyMetricsMock,
-  })),
+  AIFeedbackLoop: vi.fn().mockImplementation(function () {
+    return { getAccuracyMetrics: getAccuracyMetricsMock };
+  }),
 }));
 
 // Stub heavy child components to focus tests on IntelligencePanel logic
