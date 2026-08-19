@@ -205,7 +205,7 @@ export class InsightEngine {
 
     // 5. Blind spot mention (sensitive — only if high confidence)
     const topBlindSpot = context?.blindSpots
-      ?.filter((b) => b.confidence > 0.65 && b.sensitivityLevel !== 'high')
+      ?.filter((b) => b.confidence > 0.65 && b.sensitivity !== 'high')
       .sort((a, b) => b.confidence - a.confidence)[0];
     if (topBlindSpot && lines.length < 4) {
       lines.push({
@@ -264,11 +264,11 @@ export class InsightEngine {
         evidence: s.evidence,
       })),
       blindSpots: (context.blindSpots ?? [])
-        .filter((b) => b.sensitivityLevel !== 'high' || b.confidence > 0.75)
+        .filter((b) => b.sensitivity !== 'high' || b.confidence > 0.75)
         .map((b) => ({
           title: b.title,
           description: b.description ?? '',
-          sensitivity: b.sensitivityLevel,
+          sensitivity: b.sensitivity,
           confidence: b.confidence,
         })),
       trends: this.buildTrends(patterns),
@@ -338,7 +338,7 @@ export class InsightEngine {
       growing: context.strengths?.map((s) => s.name) ?? [],
       changing: patterns.filter((p) => p.patternType === 'changing').map((p) => p.patternName),
       stillWorking: context.blindSpots
-        ?.filter((b) => b.sensitivityLevel !== 'high')
+        ?.filter((b) => b.sensitivity !== 'high')
         .map((b) => b.title) ?? [],
     };
   }
@@ -361,7 +361,7 @@ export class InsightEngine {
 
     // From blind spots
     const actionableBlindSpot = context.blindSpots
-      ?.filter((b) => b.confidence > 0.5 && b.sensitivityLevel !== 'high')[0];
+      ?.filter((b) => b.confidence > 0.5 && b.sensitivity !== 'high')[0];
     if (actionableBlindSpot) {
       guidance.push(`ลองสังเกตตัวเองเรื่อง: ${actionableBlindSpot.title}`);
     }

@@ -454,7 +454,7 @@ export class LifeIntelligencePackEngine {
 
     // Inject blindspot warning for decision hub
     if (hub === 'decision' && ctx.blindSpots.length > 0) {
-      const topBlind = ctx.blindSpots.find((b) => b.sensitivityLevel !== 'high');
+      const topBlind = ctx.blindSpots.find((b) => b.sensitivity !== 'high');
       if (topBlind) {
         keyQuestions = [
           `"${topBlind.title}" กำลังส่งผลต่อการตัดสินใจของฉันอย่างไร?`,

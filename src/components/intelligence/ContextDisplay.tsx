@@ -321,7 +321,7 @@ export const ContextDisplay: React.FC<ContextDisplayProps> = ({
                       )}
                     </div>
                     <Badge variant="default">
-                      {spot.sensitivityLevel}
+                      {spot.sensitivity}
                     </Badge>
                   </div>
                   <div className="mt-2 flex items-center justify-between text-xs">
