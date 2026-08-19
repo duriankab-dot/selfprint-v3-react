@@ -645,7 +645,7 @@ export function getNovaPrompt(config: NovaPromptConfig): string {
     hub,
     mood,
     archetype,
-    language: _language = 'en', // TODO: Use for English prompt selection
+    language = 'en', // 'th' | 'en' — used for guardrail language selection
     userProfile,
     maturityScore = 50
   } = config;
@@ -657,13 +657,9 @@ export function getNovaPrompt(config: NovaPromptConfig): string {
     ARCHETYPE_VOICES[archetype] || ARCHETYPE_VOICES.sage,
     getUserInsights(userProfile),
     getMaturityAdjustment(maturityScore),
-    `\nGuardrails:
-- Never prescribe (ทำเอง)
-- Never judge (ตัดสิน)
-- Always use user's name if known
-- Reference past context
-- Return agency to user
-- End with 1 thoughtful question`
+    language === 'en'
+      ? `\nGuardrails:\n- Never prescribe\n- Never judge\n- Always use user's name if known\n- Reference past context\n- Return agency to user\n- End with 1 thoughtful question`
+      : `\nGuardrails:\n- Never prescribe (ทำเอง)\n- Never judge (ตัดสิน)\n- Always use user's name if known\n- Reference past context\n- Return agency to user\n- End with 1 thoughtful question`
   ].filter(Boolean);
 
   // Debug: log components lengths
