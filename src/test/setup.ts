@@ -234,8 +234,19 @@ const mockSupabaseClient = {
   }),
 }
 
-// Register mock BEFORE any module imports @supabase/supabase-js
-// This is the ONLY vi.mock() in the file — it must be at the end
+// Register mocks BEFORE any module imports
+// Order matters: Mock the base library first, then the services that use it
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => mockSupabaseClient),
+}))
+
+// Mock the supabase client service that gets imported by application code
+vi.mock('@/lib/supabase/client', () => ({
+  default: mockSupabaseClient,
+  supabase: mockSupabaseClient,
+}))
+
+// Mock the services/supabase-service re-export for backward compatibility
+vi.mock('@/services/supabase-service', () => ({
+  supabase: mockSupabaseClient,
 }))
