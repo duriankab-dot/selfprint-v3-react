@@ -240,13 +240,13 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => mockSupabaseClient),
 }))
 
-// Mock the supabase client service that gets imported by application code
-vi.mock('@/lib/supabase/client', () => ({
+// Mock the supabase client service using FULL relative paths (@ alias may not resolve in vi.mock)
+vi.mock('../../lib/supabase/client', () => ({
   default: mockSupabaseClient,
   supabase: mockSupabaseClient,
 }))
 
 // Mock the services/supabase-service re-export for backward compatibility
-vi.mock('@/services/supabase-service', () => ({
+vi.mock('../../services/supabase-service', () => ({
   supabase: mockSupabaseClient,
 }))
