@@ -1,5 +1,5 @@
-import '@testing-library/jest-dom'
 import { vi } from 'vitest'
+import '@testing-library/jest-dom'
 
 // ── Use real timers for now (tests wait for real timeouts) ──────────────────
 // vi.useFakeTimers() — only if tests actually use setTimeout/setInterval
@@ -69,7 +69,7 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   twin_capabilities: { id: 'twin-cap-id', twin_id: 'mock-twin-id', created_at: NOW },
   twin_evolution_progress: { id: 'twin-evo-id', twin_id: 'mock-twin-id', created_at: NOW },
   twin_evolution_history: { id: 'twin-hist-id', twin_id: 'mock-twin-id', created_at: NOW },
-  twin_prompt_updates: { id: 'twin-prompt-id', twin_id: 'mock-twin-id', created_at: NOW },
+  twin_prompt_updates: { id: 'twin-prompt-id', twin_id: 'mock-twin-id', version: 1, created_at: NOW },
   twin_world_expertise: { id: 'twin-exp-id', twin_id: 'mock-twin-id', created_at: NOW },
 
   // ── Intelligence & Feedback ────────────────────────────────────────────────
@@ -88,32 +88,87 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
     execution_time: 50,
     created_at: NOW,
   },
-  personal_contexts: { id: 'mock-ctx-id', user_id: 'user_test_123', created_at: NOW },
+  personal_contexts: {
+    id: 'mock-ctx-id',
+    user_id: 'user_test_123',
+    birthDate: '1990-05-15',
+    values: [{ title: 'Growth', importance: 'high', confidence: 0.9 }],
+    goals: [{ title: 'Learn', timeframe: '6-months', sourceOfTruth: 'onboarding_insights', confidence: 0.8 }],
+    blindSpots: [{ title: 'Impatience', potentialImpact: 'medium', confidence: 0.7, actionable: true }],
+    decisionStyle: { type: 'Intuitive-Analytical', confidence: 0.8, sourceOfTruth: 'onboarding_analysis' },
+    hubsActive: ['personal-growth', 'career', 'creativity'],
+    moodState: 'balanced',
+    created_at: NOW,
+  },
   personal_context: { id: 'pers-ctx-id', user_id: 'user_test_123', created_at: NOW },
   personal_memory: { id: 'pers-mem-id', user_id: 'user_test_123', created_at: NOW },
   behavioral_patterns: { id: 'behavior-id', user_id: 'user_test_123', created_at: NOW },
   detected_patterns: { id: 'detect-id', user_id: 'user_test_123', created_at: NOW },
   pattern_analysis: { id: 'pattern-id', user_id: 'user_test_123', created_at: NOW },
-  insight_feedback: { id: 'insight-fb-id', user_id: 'user_test_123', created_at: NOW },
-  user_feedback: { id: 'user-fb-id', user_id: 'user_test_123', created_at: NOW },
+  insight_feedback: {
+    id: 'insight-fb-id',
+    user_id: 'user_test_123',
+    insight_id: 'insight_123',
+    sentiment: 'positive',
+    confidence: 0.85,
+    created_at: NOW,
+  },
+  user_feedback: { id: 'user-fb-id', user_id: 'user_test_123', sentiment: 'positive', created_at: NOW },
   sice_feedback: { id: 'sice-fb-id', user_id: 'user_test_123', created_at: NOW },
 
   // ── Decisions & Outcomes ───────────────────────────────────────────────────
-  decision_logs: { id: 'decision-log-id', user_id: 'user_test_123', created_at: NOW },
-  decision_log: { id: 'dec-log-id', user_id: 'user_test_123', created_at: NOW },
+  decision_logs: {
+    id: 'decision-log-id',
+    user_id: 'user_test_123',
+    title: 'Career Decision',
+    context: 'Job opportunity',
+    confidence: 0.8,
+    autonomy_level: 70,
+    mood: 'thoughtful',
+    hub: 'career',
+    created_at: NOW,
+  },
+  decision_log: {
+    id: 'dec-log-id',
+    user_id: 'user_test_123',
+    decision_text: 'Decision made',
+    autonomy_level: 70,
+    confidence: 0.8,
+    hub: 'personal-growth',
+    mood: 'positive',
+    created_at: NOW,
+  },
   decisions: { id: 'decision-id', user_id: 'user_test_123', created_at: NOW },
   decision_outcomes: { id: 'mock-outcome-id', created_at: NOW },
   decision_patterns: { id: 'dec-pattern-id', user_id: 'user_test_123', created_at: NOW },
   decision_follow_ups: { id: 'dec-followup-id', created_at: NOW },
   follow_up_schedule: { id: 'followup-sched-id', created_at: NOW },
-  improvement_actions: { id: 'improve-id', created_at: NOW },
+  improvement_actions: {
+    id: 'improve-id',
+    status: 'pending',
+    improvementArea: 'response_length',
+    targetChange: 'Make responses more concise',
+    severity: 'medium',
+    createdAt: NOW,
+    description: 'Improve brevity',
+    feedbackId: 'feedback-123',
+  },
 
   // ── Conversations & Chat ───────────────────────────────────────────────────
   conversations: { id: 'conv-id', user_id: 'user_test_123', created_at: NOW },
   conversations_messages: { id: 'conv-msg-id', conversation_id: 'conv-id', created_at: NOW },
   conversation_memory: { id: 'conv-mem-id', conversation_id: 'conv-id', created_at: NOW },
   conversation_settings: { id: 'conv-set-id', conversation_id: 'conv-id', created_at: NOW },
-  chat_messages: { id: 'chat-msg-id', user_id: 'user_test_123', created_at: NOW },
+  chat_messages: {
+    id: 'chat-msg-id',
+    user_id: 'user_test_123',
+    hub: 'career',
+    mood: 'thoughtful',
+    role: 'user',
+    content: 'Test message',
+    autonomy_at_time: 50,
+    created_at: NOW,
+  },
   messages: { id: 'msg-id', user_id: 'user_test_123', created_at: NOW },
 
   // ── Worlds & Preferences ───────────────────────────────────────────────────
@@ -134,7 +189,13 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   notification_analytics: { id: 'notif-anal-id', created_at: NOW },
   analytics_events: { id: 'mock-event-id', created_at: NOW },
   performance_metrics: { id: 'perf-metric-id', created_at: NOW },
-  quality_metrics: { id: 'quality-id', created_at: NOW },
+  quality_metrics: {
+    id: 'quality-id',
+    twinId: 'twin-456',
+    qualityScore: 85,
+    world: 'career',
+    created_at: NOW,
+  },
 
   // ── Sharing & Profiles ─────────────────────────────────────────────────────
   share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user_test_123' },
@@ -172,35 +233,41 @@ function resolveData(tableName: string, isWriteOp: boolean, eqCount: number): Re
 }
 
 function makeBuilder(tableName: string) {
-  // isWriteOp: set by insert/upsert/update/delete — NEVER reset by select.
-  // This ensures .insert().select().single() is still treated as a write op.
   let isWriteOp = false
   let eqCount = 0
 
   const builder: any = {}
 
-  // Define all methods that forward calls properly
-  builder.select = vi.fn(() => builder)
-  builder.insert = vi.fn(() => { isWriteOp = true; return builder })
-  builder.upsert = vi.fn(() => { isWriteOp = true; return builder })
-  builder.update = vi.fn(() => { isWriteOp = true; return builder })
-  builder.delete = vi.fn(() => { isWriteOp = true; return builder })
-  builder.eq = vi.fn(() => { eqCount++; return builder })
-  builder.neq = vi.fn(() => builder)
-  builder.order = vi.fn(() => builder)
-  builder.limit = vi.fn(() => builder)
-  builder.in = vi.fn(() => builder)
-  builder.gte = vi.fn(() => builder)
-  builder.lte = vi.fn(() => builder)
-  builder.gt = vi.fn(() => builder)
-  builder.lt = vi.fn(() => builder)
-  builder.not = vi.fn(() => builder)
-  builder.is = vi.fn(() => builder)
-  builder.contains = vi.fn(() => builder)
-  builder.filter = vi.fn(() => builder)
-  builder.match = vi.fn(() => builder)
-  builder.single = vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null }))
-  builder.maybeSingle = vi.fn(() => Promise.resolve({ data: resolveData(tableName, isWriteOp, eqCount), error: null }))
+  // Chainable methods (return builder for method chaining)
+  const chainMethods = ['select', 'insert', 'upsert', 'update', 'delete', 'eq', 'neq',
+    'order', 'limit', 'in', 'gte', 'lte', 'gt', 'lt', 'not', 'is', 'contains', 'filter', 'match']
+
+  chainMethods.forEach(method => {
+    builder[method] = function() {
+      if (method === 'insert' || method === 'upsert' || method === 'update' || method === 'delete') {
+        isWriteOp = true
+      }
+      if (method === 'eq') {
+        eqCount++
+      }
+      return builder
+    }
+  })
+
+  // Terminal methods (return Promises immediately)
+  builder.single = function() {
+    return Promise.resolve({
+      data: resolveData(tableName, isWriteOp, eqCount),
+      error: null
+    })
+  }
+
+  builder.maybeSingle = function() {
+    return Promise.resolve({
+      data: resolveData(tableName, isWriteOp, eqCount),
+      error: null
+    })
+  }
 
   return builder
 }
@@ -240,7 +307,7 @@ vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => mockSupabaseClient),
 }))
 
-// Mock the supabase client service using FULL relative paths (@ alias may not resolve in vi.mock)
+// Mock the supabase client service using relative paths (Vitest vi.mock cannot resolve @ aliases)
 vi.mock('../../lib/supabase/client', () => ({
   default: mockSupabaseClient,
   supabase: mockSupabaseClient,
