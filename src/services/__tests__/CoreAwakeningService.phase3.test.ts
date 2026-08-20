@@ -3,33 +3,33 @@
  * ทดสอบ essence persistence (Supabase) แทน sessionStorage
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { startAwakening, initializeTwin, checkReadyForAwakening } from '../CoreAwakeningService';
-import { supabase } from '../supabase-service';
-import { createMockBuilder } from '../../test/supabase-mock-helper';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 
-// Mock Supabase
-vi.mock('../supabase-service', () => ({
-  supabase: {
-    from: vi.fn(),
-  },
-}));
-
-// Mock SICEOrchestrator — use regular function (arrow functions cannot be `new`-ed)
-vi.mock('../sice/SICEOrchestrator', () => ({
-  SICEOrchestrator: vi.fn().mockImplementation(function () {
-    return {
-      orchestrate: vi.fn().mockResolvedValue({
-        personalIntelligence: { test: 'intelligence' },
-        results: { engine1: 'result1' },
-        synthesis: { combined: 'intelligence' },
-        totalExecutionTime: 2500,
-      }),
-    };
-  }),
-}));
+// Import globals AFTER mocks are set up in beforeAll
+let startAwakening: any;
+let initializeTwin: any;
+let checkReadyForAwakening: any;
+let supabase: any;
+let createMockBuilder: any;
 
 describe('Phase 3: CoreAwakeningService — Essence Persistence', () => {
+
+  beforeAll(async () => {
+    // Clear module cache to force re-imports with mocks applied
+    vi.resetModules();
+
+    // Dynamically import AFTER mocks are applied
+    const CoreAwakening = await import('../CoreAwakeningService');
+    startAwakening = CoreAwakening.startAwakening;
+    initializeTwin = CoreAwakening.initializeTwin;
+    checkReadyForAwakening = CoreAwakening.checkReadyForAwakening;
+
+    const SupabaseService = await import('../supabase-service');
+    supabase = SupabaseService.supabase;
+
+    const MockHelper = await import('../../test/supabase-mock-helper');
+    createMockBuilder = MockHelper.createMockBuilder;
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
