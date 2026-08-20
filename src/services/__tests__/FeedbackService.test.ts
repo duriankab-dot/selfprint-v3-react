@@ -9,10 +9,6 @@ import * as FeedbackService from '../FeedbackService';
 describe('FeedbackService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mock database between tests
-    if (typeof global !== 'undefined' && (global as any).__resetMockDatabase) {
-      (global as any).__resetMockDatabase()
-    }
   });
 
   describe('saveFeedback', () => {
