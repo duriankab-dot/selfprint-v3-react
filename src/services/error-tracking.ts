@@ -9,6 +9,7 @@
  */
 
 import * as Sentry from '@sentry/react';
+import type { Scope } from '@sentry/types';
 
 let initialized = false;
 
@@ -56,7 +57,7 @@ export function captureException(
     console.error('[ErrorTracking]', error, context);
     return;
   }
-  Sentry.withScope((scope) => {
+  Sentry.withScope((scope: Scope) => {
     if (context) scope.setContext('custom', context);
     Sentry.captureException(error);
   });
@@ -74,7 +75,7 @@ export function captureMessage(
     console.log(`[ErrorTracking:${level}] ${message}`, data);
     return;
   }
-  Sentry.withScope((scope) => {
+  Sentry.withScope((scope: Scope) => {
     if (data) scope.setContext('data', data);
     Sentry.captureMessage(message, level);
   });
