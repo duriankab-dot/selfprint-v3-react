@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_xJxieO0yRSqeJkIKmcwOswgQJy6l",
+      "name": "selfprint-v3-react",
+      "directory": ".",
+      "orgId": "team_edOuxEsMiF6EGWYJ0jl2389l"
+    }
+  ]
+}
