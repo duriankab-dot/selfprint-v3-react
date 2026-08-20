@@ -18,6 +18,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
     "@sentry/react": "^10.70.0",
+    "@sentry/types": "^10.70.0",
     "@simplewebauthn/browser": "^9.0.1",
     "@simplewebauthn/server": "^9.0.3",
     "@supabase/supabase-js": "^2.112.1",
