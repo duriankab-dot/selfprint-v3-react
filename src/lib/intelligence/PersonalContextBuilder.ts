@@ -132,20 +132,23 @@ export class PersonalContextBuilder {
         user_id: userId,
       });
 
+      // Guard: ensure entries is array
+      const safeEntries = Array.isArray(entries) ? entries : [];
+
       // Organize by type
       const context: PersonalContext = {
         userId,
-        values: this.extractValues(entries),
-        goals: this.extractGoals(entries),
-        strengths: this.extractStrengths(entries),
-        blindSpots: this.extractBlindSpots(entries),
-        emotionalRange: this.extractEmotionalRange(entries),
-        decisionStyle: this.extractDecisionStyle(entries),
-        relationships: this.extractRelationships(entries),
+        values: this.extractValues(safeEntries),
+        goals: this.extractGoals(safeEntries),
+        strengths: this.extractStrengths(safeEntries),
+        blindSpots: this.extractBlindSpots(safeEntries),
+        emotionalRange: this.extractEmotionalRange(safeEntries),
+        decisionStyle: this.extractDecisionStyle(safeEntries),
+        relationships: this.extractRelationships(safeEntries),
         lastUpdated: new Date(),
         modelVersion: 1,
-        confidenceOverall: this.calculateOverallConfidence(entries),
-        sourceCount: entries.length,
+        confidenceOverall: this.calculateOverallConfidence(safeEntries),
+        sourceCount: safeEntries.length,
       };
 
       return context;
@@ -165,7 +168,8 @@ export class PersonalContextBuilder {
       user_id: userId,
     });
 
-    return this.extractValues(entries);
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    return this.extractValues(safeEntries);
   }
 
   /**
@@ -176,7 +180,8 @@ export class PersonalContextBuilder {
       user_id: userId,
     });
 
-    return this.extractGoals(entries);
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    return this.extractGoals(safeEntries);
   }
 
   /**
@@ -187,7 +192,8 @@ export class PersonalContextBuilder {
       user_id: userId,
     });
 
-    return this.extractBlindSpots(entries);
+    const safeEntries = Array.isArray(entries) ? entries : [];
+    return this.extractBlindSpots(safeEntries);
   }
 
   // =========================================================================
@@ -499,13 +505,13 @@ export class PersonalContextBuilder {
    */
   private extractValues(entries: PersonalContextEntry[]): Value[] {
     return entries
-      .filter((e) => e.contextType === 'value')
+      .filter((e) => e?.contextType === 'value')
       .map((e) => ({
-        name: e.title,
-        description: e.description,
-        confidence: e.confidence,
+        name: e?.title || '',
+        description: e?.description,
+        confidence: e?.confidence ?? 0.5,
         evidence: [],
-        inferredFromSources: e.inferredFrom.sources || [],
+        inferredFromSources: e?.inferredFrom?.sources || [],
         inferred: true,
       }));
   }
@@ -515,13 +521,13 @@ export class PersonalContextBuilder {
    */
   private extractGoals(entries: PersonalContextEntry[]): Goal[] {
     return entries
-      .filter((e) => e.contextType === 'goal')
+      .filter((e) => e?.contextType === 'goal')
       .map((e) => ({
-        title: e.title,
-        description: e.description,
-        confidence: e.confidence,
+        title: e?.title || '',
+        description: e?.description,
+        confidence: e?.confidence ?? 0.5,
         evidence: [],
-        inferredFromSources: e.inferredFrom.sources || [],
+        inferredFromSources: e?.inferredFrom?.sources || [],
       }));
   }
 
@@ -530,13 +536,13 @@ export class PersonalContextBuilder {
    */
   private extractStrengths(entries: PersonalContextEntry[]): Strength[] {
     return entries
-      .filter((e) => e.contextType === 'strength')
+      .filter((e) => e?.contextType === 'strength')
       .map((e) => ({
-        name: e.title,
-        description: e.description,
-        confidence: e.confidence,
+        name: e?.title || '',
+        description: e?.description,
+        confidence: e?.confidence ?? 0.5,
         evidence: [],
-        inferredFromSources: e.inferredFrom.sources || [],
+        inferredFromSources: e?.inferredFrom?.sources || [],
         relatedPatterns: [],
       }));
   }
@@ -546,13 +552,13 @@ export class PersonalContextBuilder {
    */
   private extractBlindSpots(entries: PersonalContextEntry[]): BlindSpot[] {
     return entries
-      .filter((e) => e.contextType === 'blind_spot')
+      .filter((e) => e?.contextType === 'blind_spot')
       .map((e) => ({
-        title: e.title,
-        description: e.description,
-        confidence: e.confidence,
+        title: e?.title || '',
+        description: e?.description,
+        confidence: e?.confidence ?? 0.5,
         evidence: [],
-        inferredFromSources: e.inferredFrom.sources || [],
+        inferredFromSources: e?.inferredFrom?.sources || [],
         sensitivity: 'medium',
       }));
   }

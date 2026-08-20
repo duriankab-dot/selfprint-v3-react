@@ -235,6 +235,7 @@ function resolveData(tableName: string, isWriteOp: boolean, eqCount: number): Re
 function makeBuilder(tableName: string) {
   let isWriteOp = false
   let eqCount = 0
+  let insertData: Record<string, unknown> | null = null
 
   const builder: any = {}
 
@@ -243,9 +244,14 @@ function makeBuilder(tableName: string) {
     'order', 'limit', 'in', 'gte', 'lte', 'gt', 'lt', 'not', 'is', 'contains', 'filter', 'match']
 
   chainMethods.forEach(method => {
-    builder[method] = function() {
-      if (method === 'insert' || method === 'upsert' || method === 'update' || method === 'delete') {
+    builder[method] = function(arg?: any) {
+      if (method === 'insert' || method === 'upsert') {
         isWriteOp = true
+        insertData = arg
+      }
+      if (method === 'update') {
+        isWriteOp = true
+        insertData = arg
       }
       if (method === 'eq') {
         eqCount++
@@ -256,15 +262,24 @@ function makeBuilder(tableName: string) {
 
   // Terminal methods (return Promises immediately)
   builder.single = function() {
+    let data = resolveData(tableName, isWriteOp, eqCount)
+    // For inserts/updates, merge input data with defaults to preserve user input
+    if (isWriteOp && insertData && data) {
+      data = { ...data, ...insertData }
+    }
     return Promise.resolve({
-      data: resolveData(tableName, isWriteOp, eqCount),
+      data,
       error: null
     })
   }
 
   builder.maybeSingle = function() {
+    let data = resolveData(tableName, isWriteOp, eqCount)
+    if (isWriteOp && insertData && data) {
+      data = { ...data, ...insertData }
+    }
     return Promise.resolve({
-      data: resolveData(tableName, isWriteOp, eqCount),
+      data,
       error: null
     })
   }

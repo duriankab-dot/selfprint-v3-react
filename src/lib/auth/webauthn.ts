@@ -27,7 +27,7 @@ export function base64UrlToArrayBuffer(str: string): ArrayBuffer {
   const binary = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
+    bytes[i] = binary.charCodeAt(i) & 0xFF; // Mask to 8-bit unsigned
   }
   return bytes.buffer;
 }
