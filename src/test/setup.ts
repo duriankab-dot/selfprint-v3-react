@@ -314,13 +314,13 @@ function makeBuilder(tableName: string) {
     filters.push({ column: col, value: val })
     return selectBuilder
   }
-  selectBuilder.order = function(col: string, opts?: any) {
+  selectBuilder.order = function(_col: string, _opts?: any) {
     return selectBuilder
   }
-  selectBuilder.limit = function(n: number) {
+  selectBuilder.limit = function(_n: number) {
     return selectBuilder
   }
-  selectBuilder.not = function(col: string, op: string, val: any) {
+  selectBuilder.not = function(_col: string, _op: string, _val: any) {
     return selectBuilder
   }
 
@@ -355,7 +355,7 @@ function makeBuilder(tableName: string) {
   }
 
   // Allow .select() to return this chained builder
-  builder.select = function(columns?: string) {
+  builder.select = function(_columns?: string) {
     return selectBuilder
   }
 
