@@ -9,6 +9,8 @@
  */
 
 import { supabase } from '../lib/supabase/client';
+import { rateLimitMiddleware } from '../middleware/rate-limit-middleware';
+import * as InputValidation from '../services/InputValidation';
 import { scheduleNotification } from '../services/PushScheduler';
 import { scheduleDecisionFollowUps } from '../services/DecisionFollowUpNotifier';
 import {
@@ -32,11 +34,27 @@ export async function handler(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const module = url.searchParams.get('module');
     const action = url.searchParams.get('action');
+    const userId = url.searchParams.get('userId') || 'anonymous';
 
     if (!module || !action) {
       return Response.json(
         { success: false, error: 'module and action parameters required' } as ApiResponse,
         { status: 400 }
+      );
+    }
+
+    // Check rate limiting (P3.2 - Security hardening)
+    const endpoint = `/api/${module}/${action}`;
+    const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimitCheck = await rateLimitMiddleware(userId, endpoint, ipAddress);
+
+    if (!rateLimitCheck.allowed) {
+      return Response.json(
+        { success: false, error: 'Rate limit exceeded. Please try again later.' } as ApiResponse,
+        {
+          status: 429,
+          headers: { 'Retry-After': String(rateLimitCheck.retryAfter || 60) }
+        }
       );
     }
 
