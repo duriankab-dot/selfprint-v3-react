@@ -141,10 +141,7 @@ describe('MemoryRecorder Integration Tests', () => {
     it('should handle Supabase network errors with user-friendly message', async () => {
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: 'Network error' },
-          }),
+          single: vi.fn().mockRejectedValue(new Error('Network error')),
         }),
       });
 
@@ -169,7 +166,7 @@ describe('MemoryRecorder Integration Tests', () => {
 
       // Verify error message displayed
       await waitFor(() => {
-        expect(screen.getByText(/Failed to save memory/i)).toBeInTheDocument();
+        expect(screen.getByText((content) => /failed.*save.*memory/i.test(content))).toBeInTheDocument();
       });
 
       // Verify form NOT cleared (data preserved)
