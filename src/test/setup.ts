@@ -35,7 +35,7 @@ const NOW = new Date().toISOString()
 
 const TWIN_DATA = {
   id: 'mock-twin-id',
-  user_id: 'user_test_123',
+  user_id: 'user-test-123',
   name: 'Aria',
   stage: 1,
   awakened_at: NOW,
@@ -50,17 +50,17 @@ const TWIN_DATA = {
 const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   // ── Core Identity ─────────────────────────────────────────────────────────
   user_profiles: {
-    id: 'user_test_123',
+    id: 'user-test-123',
     full_analysis_completed: true,
     full_analysis_completed_at: NOW,
     created_at: NOW,
     updated_at: NOW,
   },
-  profiles: { id: 'profile_test_123', user_id: 'user_test_123', created_at: NOW },
-  personal_profiles: { id: 'pers-prof-id', user_id: 'user_test_123', created_at: NOW },
+  profiles: { id: 'profile_test_123', user_id: 'user-test-123', created_at: NOW },
+  personal_profiles: { id: 'pers-prof-id', user_id: 'user-test-123', created_at: NOW },
 
   // ── Twin System ───────────────────────────────────────────────────────────
-  twins: { id: 'mock-twin-id', user_id: 'user_test_123', name: 'Aria', stage: 1, created_at: NOW },
+  twins: { id: 'mock-twin-id', user_id: 'user-test-123', name: 'Aria', stage: 1, created_at: NOW },
   twin_memories: { id: 'mock-memory-id', twin_id: 'mock-twin-id', created_at: NOW },
   twin_memory: { id: 'twin-mem-id', twin_id: 'mock-twin-id', created_at: NOW },
   twin_sice_scores: { id: 'mock-score-id', twin_id: 'mock-twin-id', created_at: NOW },
@@ -75,7 +75,7 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   // ── Intelligence & Feedback ────────────────────────────────────────────────
   awakening_essence: {
     id: 'mock-essence-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     status: 'pending',
     personal_intelligence: {
       insights: ['You are deeply self-aware'],
@@ -90,7 +90,7 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   },
   personal_contexts: {
     id: 'mock-ctx-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     birthDate: '1990-05-15',
     values: [{ title: 'Growth', importance: 'high', confidence: 0.9 }],
     goals: [{ title: 'Learn', timeframe: '6-months', sourceOfTruth: 'onboarding_insights', confidence: 0.8 }],
@@ -100,26 +100,36 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
     moodState: 'balanced',
     created_at: NOW,
   },
-  personal_context: { id: 'pers-ctx-id', user_id: 'user_test_123', created_at: NOW },
-  personal_memory: { id: 'pers-mem-id', user_id: 'user_test_123', created_at: NOW },
-  behavioral_patterns: { id: 'behavior-id', user_id: 'user_test_123', created_at: NOW },
-  detected_patterns: { id: 'detect-id', user_id: 'user_test_123', created_at: NOW },
-  pattern_analysis: { id: 'pattern-id', user_id: 'user_test_123', created_at: NOW },
+  personal_context: { id: 'pers-ctx-id', user_id: 'user-test-123', created_at: NOW },
+  personal_memory: { id: 'pers-mem-id', user_id: 'user-test-123', created_at: NOW },
+  behavioral_patterns: { id: 'behavior-id', user_id: 'user-test-123', created_at: NOW },
+  detected_patterns: { id: 'detect-id', user_id: 'user-test-123', created_at: NOW },
+  pattern_analysis: { id: 'pattern-id', user_id: 'user-test-123', created_at: NOW },
   insight_feedback: {
     id: 'insight-fb-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     insight_id: 'insight_123',
     sentiment: 'positive',
     confidence: 0.85,
     created_at: NOW,
   },
-  user_feedback: { id: 'user-fb-id', user_id: 'user_test_123', sentiment: 'positive', created_at: NOW },
-  sice_feedback: { id: 'sice-fb-id', user_id: 'user_test_123', created_at: NOW },
+  user_feedback: {
+    id: 'user-fb-id',
+    user_id: 'user-test-123',
+    twin_id: 'twin-456',
+    response_id: 'response-789',
+    feedback_type: 'quality',
+    sentiment: 'positive',
+    created_at: NOW,
+    updated_at: NOW,
+    // comment is intentionally omitted — will be set by insertData if provided
+  },
+  sice_feedback: { id: 'sice-fb-id', user_id: 'user-test-123', created_at: NOW },
 
   // ── Decisions & Outcomes ───────────────────────────────────────────────────
   decision_logs: {
     id: 'decision-log-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     title: 'Career Decision',
     context: 'Job opportunity',
     confidence: 0.8,
@@ -130,7 +140,7 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   },
   decision_log: {
     id: 'dec-log-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     decision_text: 'Decision made',
     autonomy_level: 70,
     confidence: 0.8,
@@ -138,9 +148,9 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
     mood: 'positive',
     created_at: NOW,
   },
-  decisions: { id: 'decision-id', user_id: 'user_test_123', created_at: NOW },
+  decisions: { id: 'decision-id', user_id: 'user-test-123', created_at: NOW },
   decision_outcomes: { id: 'mock-outcome-id', created_at: NOW },
-  decision_patterns: { id: 'dec-pattern-id', user_id: 'user_test_123', created_at: NOW },
+  decision_patterns: { id: 'dec-pattern-id', user_id: 'user-test-123', created_at: NOW },
   decision_follow_ups: { id: 'dec-followup-id', created_at: NOW },
   follow_up_schedule: { id: 'followup-sched-id', created_at: NOW },
   improvement_actions: {
@@ -155,13 +165,13 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   },
 
   // ── Conversations & Chat ───────────────────────────────────────────────────
-  conversations: { id: 'conv-id', user_id: 'user_test_123', created_at: NOW },
+  conversations: { id: 'conv-id', user_id: 'user-test-123', created_at: NOW },
   conversations_messages: { id: 'conv-msg-id', conversation_id: 'conv-id', created_at: NOW },
   conversation_memory: { id: 'conv-mem-id', conversation_id: 'conv-id', created_at: NOW },
   conversation_settings: { id: 'conv-set-id', conversation_id: 'conv-id', created_at: NOW },
   chat_messages: {
     id: 'chat-msg-id',
-    user_id: 'user_test_123',
+    user_id: 'user-test-123',
     hub: 'career',
     mood: 'thoughtful',
     role: 'user',
@@ -169,21 +179,21 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
     autonomy_at_time: 50,
     created_at: NOW,
   },
-  messages: { id: 'msg-id', user_id: 'user_test_123', created_at: NOW },
+  messages: { id: 'msg-id', user_id: 'user-test-123', created_at: NOW },
 
   // ── Worlds & Preferences ───────────────────────────────────────────────────
-  world_stats: { id: 'mock-wstat-id', user_id: 'user_test_123', created_at: NOW },
-  world_preferences: { id: 'world-pref-id', user_id: 'user_test_123', created_at: NOW },
-  world_blueprints: { id: 'world-bp-id', user_id: 'user_test_123', created_at: NOW },
-  user_journeys: { id: 'journey-id', user_id: 'user_test_123', created_at: NOW },
+  world_stats: { id: 'mock-wstat-id', user_id: 'user-test-123', created_at: NOW },
+  world_preferences: { id: 'world-pref-id', user_id: 'user-test-123', created_at: NOW },
+  world_blueprints: { id: 'world-bp-id', user_id: 'user-test-123', created_at: NOW },
+  user_journeys: { id: 'journey-id', user_id: 'user-test-123', created_at: NOW },
 
   // ── Gamification & Badges ──────────────────────────────────────────────────
-  unlocked_badges: { id: 'badge-id', user_id: 'user_test_123', created_at: NOW },
-  user_badges: { id: 'user-badge-id', user_id: 'user_test_123', created_at: NOW },
-  user_insights: { id: 'insight-id', user_id: 'user_test_123', created_at: NOW },
+  unlocked_badges: { id: 'badge-id', user_id: 'user-test-123', created_at: NOW },
+  user_badges: { id: 'user-badge-id', user_id: 'user-test-123', created_at: NOW },
+  user_insights: { id: 'insight-id', user_id: 'user-test-123', created_at: NOW },
 
   // ── Notifications & Analytics ──────────────────────────────────────────────
-  notifications: { id: 'notif-id', user_id: 'user_test_123', created_at: NOW },
+  notifications: { id: 'notif-id', user_id: 'user-test-123', created_at: NOW },
   notification_queue: { id: 'mock-notif-id', created_at: NOW },
   notification_schedule: { id: 'notif-sched-id', created_at: NOW },
   notification_analytics: { id: 'notif-anal-id', created_at: NOW },
@@ -198,27 +208,42 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   },
 
   // ── Sharing & Profiles ─────────────────────────────────────────────────────
-  share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user_test_123' },
-  profiles_blueprints: { id: 'prof-bp-id', user_id: 'user_test_123', created_at: NOW },
-  blueprints: { id: 'mock-bp-id', accuracy_level: 80, is_latest: true, user_id: 'user_test_123' },
+  share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user-test-123' },
+  profiles_blueprints: { id: 'prof-bp-id', user_id: 'user-test-123', created_at: NOW },
+  blueprints: { id: 'mock-bp-id', accuracy_level: 80, is_latest: true, user_id: 'user-test-123' },
 
   // ── Privacy & Security ─────────────────────────────────────────────────────
-  user_privacy_settings: { id: 'privacy-set-id', user_id: 'user_test_123', created_at: NOW },
-  privacy_consent_log: { id: 'consent-id', user_id: 'user_test_123', created_at: NOW },
-  privacy_audit_log: { id: 'audit-id', user_id: 'user_test_123', created_at: NOW },
+  user_privacy_settings: { id: 'privacy-set-id', user_id: 'user-test-123', created_at: NOW },
+  privacy_consent_log: { id: 'consent-id', user_id: 'user-test-123', created_at: NOW },
+  privacy_audit_log: { id: 'audit-id', user_id: 'user-test-123', created_at: NOW },
   security_audit_log: { id: 'sec-audit-id', created_at: NOW },
   rate_limit_log: { id: 'rate-limit-id', created_at: NOW },
   error_logs: { id: 'error-log-id', created_at: NOW },
 
   // ── Sessions & Auth ────────────────────────────────────────────────────────
-  sessions: { id: 'session-id', user_id: 'user_test_123', created_at: NOW },
+  sessions: { id: 'session-id', user_id: 'user-test-123', created_at: NOW },
   csrf_tokens: { id: 'csrf-id', created_at: NOW },
 
   // ── Subscriptions ──────────────────────────────────────────────────────────
-  subscriptions: { id: 'mock-sub-id', tier: 'free', status: 'active', user_id: 'user_test_123' },
+  subscriptions: { id: 'mock-sub-id', tier: 'free', status: 'active', user_id: 'user-test-123' },
 
   // ── Alerts (fallback for unknowns) ─────────────────────────────────────────
-  alerts: { id: 'alert-id', user_id: 'user_test_123', created_at: NOW },
+  alerts: { id: 'alert-id', user_id: 'user-test-123', created_at: NOW },
+}
+
+// ── In-memory mock database ─────────────────────────────────────────────────
+const testDataStore: Record<string, Array<Record<string, unknown>>> = {
+  user_feedback: [],  // Will store inserted feedback
+}
+
+// Export for test cleanup
+if (typeof global !== 'undefined') {
+  (global as any).__testDataStore = testDataStore
+  (global as any).__resetMockDatabase = () => {
+    for (const table in testDataStore) {
+      testDataStore[table] = []
+    }
+  }
 }
 
 function resolveData(tableName: string, isWriteOp: boolean, eqCount: number): Record<string, unknown> | null {
@@ -236,6 +261,7 @@ function makeBuilder(tableName: string) {
   let isWriteOp = false
   let eqCount = 0
   let insertData: Record<string, unknown> | null = null
+  let filters: Array<{ column: string; value: any }> = []
 
   const builder: any = {}
 
@@ -244,7 +270,7 @@ function makeBuilder(tableName: string) {
     'order', 'limit', 'in', 'gte', 'lte', 'gt', 'lt', 'not', 'is', 'contains', 'filter', 'match']
 
   chainMethods.forEach(method => {
-    builder[method] = function(arg?: any) {
+    builder[method] = function(arg?: any, arg2?: any) {
       if (method === 'insert' || method === 'upsert') {
         isWriteOp = true
         insertData = arg
@@ -255,6 +281,7 @@ function makeBuilder(tableName: string) {
       }
       if (method === 'eq') {
         eqCount++
+        filters.push({ column: arg, value: arg2 })
       }
       return builder
     }
@@ -265,7 +292,13 @@ function makeBuilder(tableName: string) {
     let data = resolveData(tableName, isWriteOp, eqCount)
     // For inserts/updates, merge input data with defaults to preserve user input
     if (isWriteOp && insertData && data) {
+      // Merge insertData into defaults (including undefined to reset optional fields)
       data = { ...data, ...insertData }
+      // Store in mock database for future queries
+      if (!testDataStore[tableName]) {
+        testDataStore[tableName] = []
+      }
+      testDataStore[tableName].push(data)
     }
     return Promise.resolve({
       data,
@@ -284,6 +317,58 @@ function makeBuilder(tableName: string) {
     })
   }
 
+  // For SELECT, override to return array-based builder
+  const selectBuilder = Object.assign({}, builder)
+  selectBuilder.eq = function(col: string, val: any) {
+    eqCount++
+    filters.push({ column: col, value: val })
+    return selectBuilder
+  }
+  selectBuilder.order = function(col: string, opts?: any) {
+    return selectBuilder
+  }
+  selectBuilder.limit = function(n: number) {
+    return selectBuilder
+  }
+  selectBuilder.not = function(col: string, op: string, val: any) {
+    return selectBuilder
+  }
+
+  // Terminal: awaitable for SELECT
+  selectBuilder.then = function(onFulfilled?: any, onRejected?: any) {
+    let arrayData: Array<Record<string, unknown>> = []
+
+    // First, try mock database (inserted data)
+    if (testDataStore[tableName] && testDataStore[tableName].length > 0) {
+      arrayData = testDataStore[tableName]
+    } else {
+      // Fall back to default data
+      const data = DEFAULT_DATA[tableName]
+      if (data) {
+        arrayData = [data]
+      }
+    }
+
+    // Apply filters
+    if (filters.length > 0) {
+      arrayData = arrayData.filter(item => {
+        for (const filter of filters) {
+          if (item[filter.column] !== filter.value) {
+            return false
+          }
+        }
+        return true
+      })
+    }
+
+    return Promise.resolve({ data: arrayData, error: null }).then(onFulfilled, onRejected)
+  }
+
+  // Allow .select() to return this chained builder
+  builder.select = function(columns?: string) {
+    return selectBuilder
+  }
+
   return builder
 }
 
@@ -294,11 +379,11 @@ const mockSupabaseClient = {
     return Object.freeze(builder) as any
   }),
   auth: {
-    getUser:             vi.fn().mockResolvedValue({ data: { user: { id: 'user_test_123', email: 'test@example.com' } }, error: null }),
+    getUser:             vi.fn().mockResolvedValue({ data: { user: { id: 'user-test-123', email: 'test@example.com' } }, error: null }),
     getSession:          vi.fn().mockResolvedValue({ data: { session: { access_token: 'mock-token' } }, error: null }),
     signOut:             vi.fn().mockResolvedValue({ error: null }),
-    signUp:              vi.fn().mockResolvedValue({ data: { user: { id: 'user_test_123' } }, error: null }),
-    signInWithPassword:  vi.fn().mockResolvedValue({ data: { user: { id: 'user_test_123' }, session: {} }, error: null }),
+    signUp:              vi.fn().mockResolvedValue({ data: { user: { id: 'user-test-123' } }, error: null }),
+    signInWithPassword:  vi.fn().mockResolvedValue({ data: { user: { id: 'user-test-123' }, session: {} }, error: null }),
     onAuthStateChange:   vi.fn().mockReturnValue({ data: { subscription: { unsubscribe: vi.fn() } } }),
   },
   storage: {

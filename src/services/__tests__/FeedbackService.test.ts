@@ -9,12 +9,16 @@ import * as FeedbackService from '../FeedbackService';
 describe('FeedbackService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset mock database between tests
+    if (typeof global !== 'undefined' && (global as any).__resetMockDatabase) {
+      (global as any).__resetMockDatabase()
+    }
   });
 
   describe('saveFeedback', () => {
     it('should save user feedback with sentiment', async () => {
       const feedback = await FeedbackService.saveFeedback({
-        userId: 'user-123',
+        userId: 'user-test-123',
         twinId: 'twin-456',
         responseId: 'response-789',
         feedbackType: 'quality',
@@ -25,12 +29,12 @@ describe('FeedbackService', () => {
       expect(feedback).toBeDefined();
       expect(feedback.id).toBeDefined();
       expect(feedback.sentiment).toBe('positive');
-      expect(feedback.userId).toBe('user-123');
+      expect(feedback.userId).toBe('user-test-123');
     });
 
     it('should handle neutral sentiment', async () => {
       const feedback = await FeedbackService.saveFeedback({
-        userId: 'user-123',
+        userId: 'user-test-123',
         twinId: 'twin-456',
         responseId: 'response-789',
         feedbackType: 'relevance',
@@ -42,7 +46,7 @@ describe('FeedbackService', () => {
 
     it('should handle negative sentiment', async () => {
       const feedback = await FeedbackService.saveFeedback({
-        userId: 'user-123',
+        userId: 'user-test-123',
         twinId: 'twin-456',
         responseId: 'response-789',
         feedbackType: 'accuracy',
@@ -67,9 +71,9 @@ describe('FeedbackService', () => {
 
     it('should save feedback without comment', async () => {
       const feedback = await FeedbackService.saveFeedback({
-        userId: 'user-123',
-        twinId: 'twin-456',
-        responseId: 'response-789',
+        userId: 'user-test-123',
+        twinId: 'twin-457',
+        responseId: 'response-790',
         feedbackType: 'quality',
         sentiment: 'positive',
       });
@@ -83,7 +87,7 @@ describe('FeedbackService', () => {
     it('should retrieve user feedback history', async () => {
       // Setup
       await FeedbackService.saveFeedback({
-        userId: 'user-123',
+        userId: 'user-test-123',
         twinId: 'twin-456',
         responseId: 'response-1',
         feedbackType: 'quality',
@@ -91,7 +95,7 @@ describe('FeedbackService', () => {
       });
 
       // Retrieve
-      const feedbacks = await FeedbackService.getUserFeedback('user-123');
+      const feedbacks = await FeedbackService.getUserFeedback('user-test-123');
 
       expect(Array.isArray(feedbacks)).toBe(true);
       expect(feedbacks.length).toBeGreaterThan(0);
@@ -103,7 +107,15 @@ describe('FeedbackService', () => {
     });
 
     it('should filter feedback by Twin', async () => {
-      const feedbacks = await FeedbackService.getUserFeedback('user-123', 'twin-456');
+      await FeedbackService.saveFeedback({
+        userId: 'user-test-123',
+        twinId: 'twin-456',
+        responseId: 'response-2',
+        feedbackType: 'quality',
+        sentiment: 'positive',
+      });
+      const feedbacks = await FeedbackService.getUserFeedback('user-test-123', 'twin-456');
+      expect(feedbacks.length).toBeGreaterThan(0);
       expect(feedbacks.every(f => f.twinId === 'twin-456')).toBe(true);
     });
   });
@@ -121,7 +133,8 @@ describe('FeedbackService', () => {
     });
 
     it('should return zero stats for Twin with no feedback', async () => {
-      const stats = await FeedbackService.getTwinFeedbackStats('nonexistent-twin');
+      // Query for twin that doesn't exist in test data
+      const stats = await FeedbackService.getTwinFeedbackStats('nonexistent-twin-9999');
 
       expect(stats.totalFeedback).toBe(0);
       expect(stats.sentimentBreakdown.positive).toBe(0);
