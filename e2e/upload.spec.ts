@@ -6,7 +6,7 @@ import fs from 'fs';
 test.describe('Image Upload & Handling', () => {
   let testImagePath: string;
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ _page }) => {
     // Create a temporary test image
     const testDir = path.join(process.cwd(), 'e2e', 'fixtures');
     if (!fs.existsSync(testDir)) {
@@ -60,7 +60,7 @@ test.describe('Image Upload & Handling', () => {
         }
 
         expect(duration).toBeLessThan(PERFORMANCE_LIMITS.IMAGE_UPLOAD + 500);
-      } catch (e) {
+      } catch (_e) {
         console.log('Image upload API call may have timed out or not found');
       }
     }

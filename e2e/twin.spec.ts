@@ -54,7 +54,7 @@ test.describe('Twin Creation & Chat Flow', () => {
       }
 
       expect(response.ok()).toBeTruthy();
-    } catch (e) {
+    } catch (_e) {
       console.log('Chat API call may be streaming - checking for visible response');
     }
 

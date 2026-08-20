@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page } from '@playwright/test';
 
 export const PERFORMANCE_LIMITS = {
   API_RESPONSE: 300, // ms
@@ -11,7 +11,7 @@ export const PERFORMANCE_LIMITS = {
 export async function performanceAssertion(
   page: Page,
   metricName: string,
-  limit: number
+  _limit: number
 ) {
   const metrics = await page.evaluate(() => {
     const perf = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
@@ -59,7 +59,7 @@ export async function login(page: Page, email: string, password: string) {
   await page.waitForURL(/\/home|\/today/);
 }
 
-export async function createTestUser(page: Page) {
+export async function createTestUser(_page: Page) {
   const timestamp = Date.now();
   const email = `test-${timestamp}@selfprint.one`;
   const password = `TestPass123!${timestamp}`;
