@@ -66,9 +66,9 @@ npm audit             # Security check
   - @vercel/node@5.10.1 required for api/unified-handler.ts
   - All CVEs are build/dev-time only (no runtime exposure)
   - Safe to keep; monitor for @vercel updates
-**Priority 4:** 🟡 Linting — 395 issues (unused vars), need IDE bulk find-replace
-**Priority 5:** 🔴 E2E Tests — Not started (Playwright)
-**Priority 6:** 🔴 Documentation — Not started (reconcile docs)
+**Priority 4:** ⏸️ Linting DEFERRED — 318 warnings (unused vars), not blocking build. Tech debt revisit later.
+**Priority 5:** 🟡 E2E Tests — STARTING (Playwright critical flows)
+**Priority 6:** 🔴 Documentation — Next after P5
 
 ---
 Full glossary and deep context: `memory/`

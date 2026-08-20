@@ -407,3 +407,21 @@ vi.mock('../../lib/supabase/client', () => ({
 vi.mock('../../services/supabase-service', () => ({
   supabase: mockSupabaseClient,
 }))
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Mock SICEOrchestrator globally so CoreAwakeningService gets the mock version
+// This prevents "() => ({...}) is not a constructor" errors
+// ═══════════════════════════════════════════════════════════════════════════════
+vi.mock('../services/sice/SICEOrchestrator', () => {
+  class MockSICEOrchestrator {
+    orchestrate = vi.fn().mockResolvedValue({
+      personalIntelligence: { test: 'intelligence' },
+      results: { engine1: 'result1' },
+      synthesis: { combined: 'intelligence' },
+      totalExecutionTime: 2500,
+    });
+  }
+  return {
+    SICEOrchestrator: MockSICEOrchestrator,
+  };
+})
