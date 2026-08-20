@@ -25,7 +25,7 @@
 ## Projects
 | Name | Status |
 |------|--------|
-| **SELFPRINT V3** | Production - P1 Data Persistence ✅, P2-6 in progress |
+| **SELFPRINT V3** | Production - P1 ✅, P2 ✅, P3 CVE + .npmrc ⏳, P4-6 blocked |
 
 ## Active Workflows
 ```
