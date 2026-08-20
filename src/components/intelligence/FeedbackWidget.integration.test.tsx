@@ -10,20 +10,40 @@ import userEvent from '@testing-library/user-event';
 import FeedbackWidget from './FeedbackWidget';
 import { InsightFeedback, FeedbackType } from '@/lib/intelligence/types';
 
-// Mock Supabase client
-vi.mock('@/lib/supabase/client', () => ({
-  supabase: {
-    from: vi.fn(),
-  },
-}));
-
-// Import after mock
+// Supabase client imported after setup.ts global mock (setup.ts handles vi.mock)
 import { supabase } from '@/lib/supabase/client';
+import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
+
+// Mock AIFeedbackLoop to allow Supabase mock to work
+// Don't mock the class — let real AIFeedbackLoop call mocked Supabase
+// vi.mock for AIFeedbackLoop removed — test will use real class with mocked supabase
 
 describe('FeedbackWidget Integration Tests', () => {
   const mockUserId = 'test-user-123';
   const mockInsightId = 'insight-456';
   const mockInsightText = 'You tend to analyze problems deeply before making decisions';
+
+  // Helper: Setup Supabase mock BEFORE any render
+  const setupSupabaseMock = (
+    data: any = {
+      id: 'feedback-default',
+      user_id: mockUserId,
+      insight_id: mockInsightId,
+      feedback_type: 'very_true',
+      comment: '',
+      created_at: new Date().toISOString(),
+    },
+    error: any = null
+  ) => {
+    const mockInsert = vi.fn().mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        single: vi.fn().mockResolvedValue({ data, error }),
+      }),
+    });
+    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+    (supabase.from as any).mockImplementation(mockFrom);
+    return { mockFrom, mockInsert };
+  };
 
   const mockFeedbackResponse: InsightFeedback = {
     id: 'feedback-789',
@@ -48,28 +68,15 @@ describe('FeedbackWidget Integration Tests', () => {
      * Verifies: feedback selection → validation → loop call → Supabase save → component state
      */
     it('should record feedback end-to-end with real AIFeedbackLoop', async () => {
-      // Mock Supabase response for feedback storage
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: {
-              id: mockFeedbackResponse.id,
-              user_id: mockUserId,
-              insight_id: mockInsightId,
-              feedback_type: 'very_true',
-              comment: 'Yes, I definitely do this',
-              created_at: mockFeedbackResponse.createdAt.toISOString(),
-            },
-            error: null,
-          }),
-        }),
+      // Setup mock BEFORE render
+      const { mockFrom: testMockFrom, mockInsert: testMockInsert } = setupSupabaseMock({
+        id: mockFeedbackResponse.id,
+        user_id: mockUserId,
+        insight_id: mockInsightId,
+        feedback_type: 'very_true',
+        comment: 'Yes, I definitely do this',
+        created_at: mockFeedbackResponse.createdAt.toISOString(),
       });
-
-      const mockFrom = vi.fn().mockReturnValue({
-        insert: mockInsert,
-      });
-
-      (supabase.from as any).mockImplementation(mockFrom);
 
       const onFeedbackSubmitted = vi.fn();
 
@@ -83,25 +90,27 @@ describe('FeedbackWidget Integration Tests', () => {
         />
       );
 
-      // Verify insight text displayed
-      expect(screen.getByText(mockInsightText)).toBeInTheDocument();
+      // Verify insight text displayed (use regex to match text with surrounding quotes)
+      expect(screen.getByText(new RegExp(mockInsightText))).toBeInTheDocument();
 
       // Select "Very True" feedback
       const veryTrueButton = screen.getByRole('button', { name: /Very True/i });
       fireEvent.click(veryTrueButton);
 
+      // Wait for Submit button to appear (depends on selectedFeedback state)
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
+
       // Add optional comment
-      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      const commentInput = await screen.findByPlaceholderText(/additional context/i);
       await userEvent.type(commentInput, 'Yes, I definitely do this');
 
       // Submit feedback
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify Supabase was called with feedback data
       await waitFor(() => {
-        expect(mockFrom).toHaveBeenCalledWith('insight_feedback');
-        expect(mockInsert).toHaveBeenCalledWith({
+        expect(testMockFrom).toHaveBeenCalledWith('insight_feedback');
+        expect(testMockInsert).toHaveBeenCalledWith({
           id: expect.any(String),
           user_id: mockUserId,
           insight_id: mockInsightId,
@@ -135,27 +144,14 @@ describe('FeedbackWidget Integration Tests', () => {
       for (const { key, label } of feedbackTypes) {
         vi.clearAllMocks();
 
-        const mockInsert = vi.fn().mockReturnValue({
-          select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
-              data: {
-                id: `feedback-${key}`,
-                user_id: mockUserId,
-                insight_id: mockInsightId,
-                feedback_type: key,
-                comment: null,
-                created_at: new Date().toISOString(),
-              },
-              error: null,
-            }),
-          }),
+        const { mockFrom, mockInsert } = setupSupabaseMock({
+          id: `feedback-${key}`,
+          user_id: mockUserId,
+          insight_id: mockInsightId,
+          feedback_type: key,
+          comment: null,
+          created_at: new Date().toISOString(),
         });
-
-        const mockFrom = vi.fn().mockReturnValue({
-          insert: mockInsert,
-        });
-
-        (supabase.from as any).mockImplementation(mockFrom);
 
         const onFeedbackSubmitted = vi.fn();
 
@@ -174,7 +170,7 @@ describe('FeedbackWidget Integration Tests', () => {
         fireEvent.click(typeButton);
 
         // Submit
-        const submitButton = screen.getByRole('button', { name: /Submit/i });
+        const submitButton = await screen.findByRole('button', { name: /Submit/i });
         fireEvent.click(submitButton);
 
         // Verify correct type sent
@@ -196,27 +192,14 @@ describe('FeedbackWidget Integration Tests', () => {
      * Verifies: comment is optional field
      */
     it('should submit feedback without comment when allowComment=false', async () => {
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: {
-              id: 'feedback-no-comment',
-              user_id: mockUserId,
-              insight_id: mockInsightId,
-              feedback_type: 'somewhat',
-              comment: null,
-              created_at: new Date().toISOString(),
-            },
-            error: null,
-          }),
-        }),
+      const { mockFrom, mockInsert } = setupSupabaseMock({
+        id: 'feedback-no-comment',
+        user_id: mockUserId,
+        insight_id: mockInsightId,
+        feedback_type: 'somewhat',
+        comment: null,
+        created_at: new Date().toISOString(),
       });
-
-      const mockFrom = vi.fn().mockReturnValue({
-        insert: mockInsert,
-      });
-
-      (supabase.from as any).mockImplementation(mockFrom);
 
       const onFeedbackSubmitted = vi.fn();
 
@@ -238,7 +221,7 @@ describe('FeedbackWidget Integration Tests', () => {
       fireEvent.click(somewhatButton);
 
       // Submit
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify feedback sent without comment
@@ -284,12 +267,12 @@ describe('FeedbackWidget Integration Tests', () => {
       const veryTrueButton = screen.getByRole('button', { name: /Very True/i });
       fireEvent.click(veryTrueButton);
 
-      // Add comment
-      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      // Wait for comment input to appear (rendered after feedback selected)
+      const commentInput = await screen.findByPlaceholderText(/additional context/i);
       await userEvent.type(commentInput, 'Test comment');
 
       // Submit
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify error message shown
@@ -345,7 +328,7 @@ describe('FeedbackWidget Integration Tests', () => {
       fireEvent.click(notSureButton);
 
       // Submit
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify integration worked
@@ -396,11 +379,11 @@ describe('FeedbackWidget Integration Tests', () => {
       fireEvent.click(veryTrueButton);
 
       // Add comment
-      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      const commentInput = await screen.findByPlaceholderText(/additional context/i);
       await userEvent.type(commentInput, 'Perfect insight');
 
       // Submit
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify feedback data structure correct
@@ -458,10 +441,10 @@ describe('FeedbackWidget Integration Tests', () => {
       const notMeButton = screen.getByRole('button', { name: /Not Me/i });
       fireEvent.click(notMeButton);
 
-      const commentInput = screen.getByPlaceholderText(/optional feedback/i);
+      const commentInput = await screen.findByPlaceholderText(/additional context/i);
       await userEvent.type(commentInput, 'This is not how I am');
 
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify "not_me" feedback accepted and processed
@@ -499,7 +482,7 @@ describe('FeedbackWidget Integration Tests', () => {
       );
 
       // Try to submit without selecting feedback
-      const submitButton = screen.getByRole('button', { name: /Submit/i });
+      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
       // Verify Supabase NOT called (validation failed)

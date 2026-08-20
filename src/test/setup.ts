@@ -199,13 +199,64 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   notification_analytics: { id: 'notif-anal-id', created_at: NOW },
   analytics_events: { id: 'mock-event-id', created_at: NOW },
   performance_metrics: { id: 'perf-metric-id', created_at: NOW },
-  quality_metrics: {
-    id: 'quality-id',
-    twinId: 'twin-456',
-    qualityScore: 85,
-    world: 'career',
-    created_at: NOW,
-  },
+  quality_metrics: [
+    {
+      id: 'quality-id-1',
+      twin_id: 'twin-456',
+      quality_score: 75,
+      user_rating: 3,
+      world: 'career',
+      created_at: NOW,
+    },
+    {
+      id: 'quality-id-2',
+      twin_id: 'twin-456',
+      quality_score: 85,
+      user_rating: 4,
+      world: 'career',
+      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'quality-id-stable-1',
+      twin_id: 'nonexistent-twin',
+      quality_score: 75,
+      user_rating: 3,
+      world: 'career',
+      created_at: NOW,
+    },
+    {
+      id: 'quality-id-stable-2',
+      twin_id: 'nonexistent-twin',
+      quality_score: 75,
+      user_rating: 3,
+      world: 'career',
+      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'quality-id-improving-1',
+      twin_id: 'twin-improving',
+      quality_score: 60,
+      user_rating: 3,
+      world: 'health',
+      created_at: NOW,
+    },
+    {
+      id: 'quality-id-improving-2',
+      twin_id: 'twin-improving',
+      quality_score: 70,
+      user_rating: 4,
+      world: 'health',
+      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: 'quality-id-improving-3',
+      twin_id: 'twin-improving',
+      quality_score: 80,
+      user_rating: 5,
+      world: 'health',
+      created_at: new Date(new Date(NOW).getTime() + 48 * 60 * 60 * 1000).toISOString(),
+    },
+  ],
 
   // ── Sharing & Profiles ─────────────────────────────────────────────────────
   share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user-test-123' },
@@ -251,13 +302,13 @@ function makeBuilder(tableName: string) {
   let isWriteOp = false
   let eqCount = 0
   let insertData: Record<string, unknown> | null = null
-  let filters: Array<{ column: string; value: any }> = []
+  let filters: Array<{ column: string; value: any; operator?: string }> = []
 
   const builder: any = {}
 
   // Chainable methods (return builder for method chaining)
   const chainMethods = ['select', 'insert', 'upsert', 'update', 'delete', 'eq', 'neq',
-    'order', 'limit', 'in', 'gte', 'lte', 'gt', 'lt', 'not', 'is', 'contains', 'filter', 'match']
+    'order', 'limit', 'in', 'gte', 'lte', 'gt', 'lt', 'not', 'is', 'contains', 'filter', 'match', 'or']
 
   chainMethods.forEach(method => {
     builder[method] = function(arg?: any, arg2?: any) {
@@ -271,7 +322,19 @@ function makeBuilder(tableName: string) {
       }
       if (method === 'eq') {
         eqCount++
-        filters.push({ column: arg, value: arg2 })
+        filters.push({ column: arg, value: arg2, operator: 'eq' })
+      }
+      if (method === 'gte') {
+        filters.push({ column: arg, value: arg2, operator: 'gte' })
+      }
+      if (method === 'lte') {
+        filters.push({ column: arg, value: arg2, operator: 'lte' })
+      }
+      if (method === 'gt') {
+        filters.push({ column: arg, value: arg2, operator: 'gt' })
+      }
+      if (method === 'lt') {
+        filters.push({ column: arg, value: arg2, operator: 'lt' })
       }
       return builder
     }
@@ -311,7 +374,26 @@ function makeBuilder(tableName: string) {
   const selectBuilder = Object.assign({}, builder)
   selectBuilder.eq = function(col: string, val: any) {
     eqCount++
-    filters.push({ column: col, value: val })
+    filters.push({ column: col, value: val, operator: 'eq' })
+    return selectBuilder
+  }
+  selectBuilder.gte = function(col: string, val: any) {
+    filters.push({ column: col, value: val, operator: 'gte' })
+    return selectBuilder
+  }
+  selectBuilder.lte = function(col: string, val: any) {
+    filters.push({ column: col, value: val, operator: 'lte' })
+    return selectBuilder
+  }
+  selectBuilder.gt = function(col: string, val: any) {
+    filters.push({ column: col, value: val, operator: 'gt' })
+    return selectBuilder
+  }
+  selectBuilder.lt = function(col: string, val: any) {
+    filters.push({ column: col, value: val, operator: 'lt' })
+    return selectBuilder
+  }
+  selectBuilder.select = function(_columns?: string) {
     return selectBuilder
   }
   selectBuilder.order = function(_col: string, _opts?: any) {
@@ -335,16 +417,34 @@ function makeBuilder(tableName: string) {
       // Fall back to default data
       const data = DEFAULT_DATA[tableName]
       if (data) {
-        arrayData = [data]
+        // If data is already an array, use it; otherwise wrap in array
+        arrayData = Array.isArray(data) ? data : [data]
       }
     }
 
-    // Apply filters
+    // Apply filters with operator support
     if (filters.length > 0) {
       arrayData = arrayData.filter(item => {
         for (const filter of filters) {
-          if (item[filter.column] !== filter.value) {
-            return false
+          const itemValue = item[filter.column]
+          switch (filter.operator) {
+            case 'eq':
+              if (itemValue !== filter.value) return false
+              break
+            case 'gte':
+              if (!(itemValue >= filter.value)) return false
+              break
+            case 'lte':
+              if (!(itemValue <= filter.value)) return false
+              break
+            case 'gt':
+              if (!(itemValue > filter.value)) return false
+              break
+            case 'lt':
+              if (!(itemValue < filter.value)) return false
+              break
+            default:
+              if (itemValue !== filter.value) return false
           }
         }
         return true
@@ -365,8 +465,8 @@ function makeBuilder(tableName: string) {
 const mockSupabaseClient = {
   from: vi.fn((tableName: string) => {
     const builder = makeBuilder(tableName)
-    // Ensure all methods exist and are properly callable
-    return Object.freeze(builder) as any
+    // Return builder without freeze to preserve method chain
+    return builder as any
   }),
   auth: {
     getUser:             vi.fn().mockResolvedValue({ data: { user: { id: 'user-test-123', email: 'test@example.com' } }, error: null }),
