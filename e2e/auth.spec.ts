@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { PERFORMANCE_LIMITS, createTestUser, navigateToHub } from './utils';
+import { PERFORMANCE_LIMITS, createTestUser } from './utils';
 
 test.describe('Authentication Flow', () => {
   test('signup with email', async ({ page }) => {

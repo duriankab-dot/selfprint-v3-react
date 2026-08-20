@@ -51,7 +51,7 @@ test.describe('Decision Logging & Intelligence', () => {
         }
 
         expect(response.ok()).toBeTruthy();
-      } catch (e) {
+      } catch (_e) {
         console.log('Decision save API call timeout - may be processing');
       }
     } else {

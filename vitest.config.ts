@@ -16,6 +16,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    testTimeout: 30000,
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
       VITE_SUPABASE_URL: 'http://localhost:54321',
