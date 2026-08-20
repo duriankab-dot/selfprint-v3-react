@@ -89,11 +89,13 @@ export interface DecisionStats {
  * Follow-up item
  */
 export interface FollowUp {
+  id: string;
   decisionId: string;
-  dayOffset: number;
-  dueDate: string;
+  days: number;
+  scheduledDate: string;
   completed: boolean;
-  scheduledDate?: string;
+  resultScore?: number; // 0-100, populated when follow-up completed
+  notificationSent?: boolean;
 }
 
 /**

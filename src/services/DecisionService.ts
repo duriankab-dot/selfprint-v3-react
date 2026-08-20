@@ -367,3 +367,54 @@ async function scheduleFollowUps(decisionId: string): Promise<void> {
     console.error('Error scheduling follow-ups:', err);
   }
 }
+
+/**
+ * Helper: Calculate follow-up due date
+ * @param baseDate YYYY-MM-DD format
+ * @param days Number of days to add
+ * @returns Due date in YYYY-MM-DD format
+ */
+export function getFollowUpDueDate(baseDate: string, days: number): string {
+  const date = new Date(baseDate);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
+}
+
+/**
+ * Helper: Calculate success rate from decisions
+ * @param decisions Array of decisions with outcomes
+ * @returns Success rate 0-100
+ */
+export function calculateSuccessRate(decisions: Decision[]): number {
+  if (decisions.length === 0) return 0;
+
+  let totalScore = 0;
+  let outcomeCount = 0;
+
+  for (const decision of decisions) {
+    if (decision.followUps && decision.followUps.length > 0) {
+      for (const followUp of decision.followUps) {
+        if (followUp.completed && followUp.resultScore !== undefined) {
+          totalScore += followUp.resultScore;
+          outcomeCount++;
+        }
+      }
+    }
+  }
+
+  return outcomeCount > 0 ? Math.round(totalScore / outcomeCount) : 0;
+}
+
+/**
+ * Helper: Get pending follow-ups for a decision
+ * @param decision Decision with follow-up schedule
+ * @returns Array of pending follow-ups
+ */
+export function getPendingFollowUps(decision: Decision) {
+  if (!decision.followUps) return [];
+
+  const now = new Date().toISOString();
+  return decision.followUps.filter(
+    fu => !fu.completed && fu.scheduledDate && fu.scheduledDate <= now
+  );
+}
