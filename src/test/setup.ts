@@ -199,64 +199,7 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   notification_analytics: { id: 'notif-anal-id', created_at: NOW },
   analytics_events: { id: 'mock-event-id', created_at: NOW },
   performance_metrics: { id: 'perf-metric-id', created_at: NOW },
-  quality_metrics: [
-    {
-      id: 'quality-id-1',
-      twin_id: 'twin-456',
-      quality_score: 75,
-      user_rating: 3,
-      world: 'career',
-      created_at: NOW,
-    },
-    {
-      id: 'quality-id-2',
-      twin_id: 'twin-456',
-      quality_score: 85,
-      user_rating: 4,
-      world: 'career',
-      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 'quality-id-stable-1',
-      twin_id: 'nonexistent-twin',
-      quality_score: 75,
-      user_rating: 3,
-      world: 'career',
-      created_at: NOW,
-    },
-    {
-      id: 'quality-id-stable-2',
-      twin_id: 'nonexistent-twin',
-      quality_score: 75,
-      user_rating: 3,
-      world: 'career',
-      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 'quality-id-improving-1',
-      twin_id: 'twin-improving',
-      quality_score: 60,
-      user_rating: 3,
-      world: 'health',
-      created_at: NOW,
-    },
-    {
-      id: 'quality-id-improving-2',
-      twin_id: 'twin-improving',
-      quality_score: 70,
-      user_rating: 4,
-      world: 'health',
-      created_at: new Date(new Date(NOW).getTime() + 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: 'quality-id-improving-3',
-      twin_id: 'twin-improving',
-      quality_score: 80,
-      user_rating: 5,
-      world: 'health',
-      created_at: new Date(new Date(NOW).getTime() + 48 * 60 * 60 * 1000).toISOString(),
-    },
-  ],
+  quality_metrics: {} as any,
 
   // ── Sharing & Profiles ─────────────────────────────────────────────────────
   share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user-test-123' },
@@ -432,16 +375,16 @@ function makeBuilder(tableName: string) {
               if (itemValue !== filter.value) return false
               break
             case 'gte':
-              if (!(itemValue >= filter.value)) return false
+              if (!((itemValue as any) >= filter.value)) return false
               break
             case 'lte':
-              if (!(itemValue <= filter.value)) return false
+              if (!((itemValue as any) <= filter.value)) return false
               break
             case 'gt':
-              if (!(itemValue > filter.value)) return false
+              if (!((itemValue as any) > filter.value)) return false
               break
             case 'lt':
-              if (!(itemValue < filter.value)) return false
+              if (!((itemValue as any) < filter.value)) return false
               break
             default:
               if (itemValue !== filter.value) return false

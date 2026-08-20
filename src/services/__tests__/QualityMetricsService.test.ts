@@ -102,7 +102,18 @@ describe('QualityMetricsService', () => {
     });
 
     it('should return stable trend for Twin with no quality change', async () => {
-      const trend = await QualityMetricsService.getQualityTrend('nonexistent-twin', 'career', 7);
+      // Setup: Record stable quality scores (same score twice)
+      for (let i = 0; i < 2; i++) {
+        await QualityMetricsService.recordQualityMetric({
+          twinId: 'twin-stable',
+          world: 'career',
+          qualityScore: 75, // Same score
+          userRating: 3,
+          feedbackCount: 1,
+        });
+      }
+
+      const trend = await QualityMetricsService.getQualityTrend('twin-stable', 'career', 7);
 
       expect(trend.direction).toBe('stable');
       expect(trend.dataPoints.length).toBeGreaterThan(0);
