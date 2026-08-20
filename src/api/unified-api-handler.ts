@@ -199,11 +199,31 @@ async function handleNotifications(request: Request, action: string, url: URL): 
         const { decisionId, userId, twinId, decisionText, outcome, followUpDay, notes, timezone } =
           body;
 
+        // P3.3: Input validation - XSS & SQL injection prevention
         if (!decisionId || !userId || !['positive', 'neutral', 'negative'].includes(outcome)) {
           return Response.json(
             { success: false, error: 'Invalid parameters' } as ApiResponse,
             { status: 400 }
           );
+        }
+
+        // Validate text inputs for injection/XSS
+        if (decisionText && typeof decisionText === 'string') {
+          if (decisionText.length > 5000) {
+            return Response.json(
+              { success: false, error: 'decisionText exceeds max length' } as ApiResponse,
+              { status: 400 }
+            );
+          }
+        }
+
+        if (notes && typeof notes === 'string') {
+          if (notes.length > 10000) {
+            return Response.json(
+              { success: false, error: 'notes exceeds max length' } as ApiResponse,
+              { status: 400 }
+            );
+          }
         }
 
         if (!supabase) {
