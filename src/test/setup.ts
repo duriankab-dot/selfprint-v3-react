@@ -236,16 +236,6 @@ const testDataStore: Record<string, Array<Record<string, unknown>>> = {
   user_feedback: [],  // Will store inserted feedback
 }
 
-// Export for test cleanup
-if (typeof global !== 'undefined') {
-  (global as any).__testDataStore = testDataStore
-  (global as any).__resetMockDatabase = () => {
-    for (const table in testDataStore) {
-      testDataStore[table] = []
-    }
-  }
-}
-
 function resolveData(tableName: string, isWriteOp: boolean, eqCount: number): Record<string, unknown> | null {
   // twins table has special logic
   if (tableName === 'twins') {
