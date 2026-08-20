@@ -1,0 +1,34 @@
+# Selfprint SEO Configuration
+User-agent: *
+Allow: /
+Allow: /en/
+Allow: /th/
+Allow: /share/
+Allow: /compare
+
+# Disallow private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /*.json$
+
+# Allow AI crawlers for indexing
+User-agent: GPTBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://selfprint.one/sitemap.xml
+Sitemap: https://selfprint.one/sitemap-th.xml

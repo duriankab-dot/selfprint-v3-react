@@ -1,0 +1,17 @@
+{
+  "name": "Selfprint - AI Twin Platform",
+  "short_name": "Selfprint",
+  "description": "ปัญญาประดิษฐ์ครอบครัว ที่เข้าใจตัวคุณเหมือนครอบครัว",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "lang": "th-TH",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle"],
+  "screenshots": [],
+  "icons": [],
+  "shortcuts": []
+}
