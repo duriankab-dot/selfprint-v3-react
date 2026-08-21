@@ -28,6 +28,7 @@ import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { Alert } from '@/components/composites/Alert';
+import { useAnalysisStore } from '@/store/analysisStore';
 import '../styles/analysis.css';
 
 // ============================================================================
@@ -54,6 +55,7 @@ const AnalysisPage: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
+  const setAnalysis = useAnalysisStore((state) => state.setAnalysis);
 
   // Stable instances
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
@@ -100,6 +102,19 @@ const AnalysisPage: React.FC = () => {
   }, [context, patterns, metrics, insightEngine]);
 
   const isLoading = ctxLoading || patLoading;
+
+  // --------------------------------------------------------------------------
+  // Handlers
+  // --------------------------------------------------------------------------
+
+  const handleAwakeTwin = () => {
+    if (analysis) {
+      // Save analysis to store for CoreAwakening to use
+      setAnalysis(analysis);
+      // Navigate to Twin birth ceremony
+      navigate('/core-awakening');
+    }
+  };
 
   // --------------------------------------------------------------------------
   // Guards
@@ -440,12 +455,23 @@ const AnalysisPage: React.FC = () => {
                 การวิเคราะห์นี้สร้างจากข้อมูลจริงที่ ฝาแฝดของคุณ เรียนรู้จากการใช้งานของคุณ
                 ยิ่งใช้ Selfprint มาก ฝาแฝด ยิ่งเข้าใจคุณได้มากขึ้น
               </p>
-              <button
-                className="analysis__back-to-dashboard"
-                onClick={() => navigate('/dashboard')}
-              >
-                ← กลับ Dashboard
-              </button>
+              <div className="analysis__footer-buttons">
+                <button
+                  className="analysis__back-to-dashboard"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  ← กลับ Dashboard
+                </button>
+                {analysis && (
+                  <button
+                    className="analysis__awaken-twin-btn"
+                    onClick={handleAwakeTwin}
+                    aria-label="ตื่นตัวฝาแฝดของคุณ"
+                  >
+                    ✨ ความรู้ของคุณพร้อมแล้ว → ตื่นตัวฝาแฝด
+                  </button>
+                )}
+              </div>
             </div>
 
           </div>
