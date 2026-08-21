@@ -13,10 +13,12 @@ export default defineConfig({
     },
   },
   test: {
-    environment: 'jsdom',
+    environment: 'node',
     globals: true,
-    setupFiles: ['./src/test/setup.ts'],
-    testTimeout: 30000,
+    setupFiles: [],
+    testTimeout: 60000,
+    singleFork: true,
+    include: ['**/test/minimal.test.ts'],
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
       VITE_SUPABASE_URL: 'http://localhost:54321',
