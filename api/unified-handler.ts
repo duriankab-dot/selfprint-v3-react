@@ -657,12 +657,12 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
       const code = generateShareCode();
       const { error: insertErr } = await supabaseAdmin
         .from('share_links')
-        .insert({ user_id: user.id, code });
+        .insert({ user_id: user.id, code } as any);
       if (!insertErr) {
         return Response.json({ success: true, code } as ApiResponse);
       }
       // 23505 = unique_violation — try again
-      if ((insertErr as any).code !== '23505') {
+      if (((insertErr as any)?.code) !== '23505') {
         console.error('[share] insert error:', insertErr);
         return Response.json({ success: false, error: 'Failed to create share link' } as ApiResponse, { status: 500 });
       }
@@ -729,7 +729,7 @@ async function handleProfile(request: Request, action: string): Promise<Response
             place_of_birth: placeOfBirth,
             initial_mood: (body.initialMood as string) || null,
             updated_at: new Date().toISOString(),
-          },
+          } as any,
           { onConflict: 'user_id' }
         )
         .select()
@@ -759,12 +759,12 @@ async function handleBlueprint(request: Request, action: string): Promise<Respon
     }
 
     if (request.method === 'GET') {
-      const { data, error: selectError } = await supabaseAdmin
+      const { data, error: selectError } = (await supabaseAdmin
         .from('blueprints')
         .select()
         .eq('user_id', user.id)
-        .eq('is_latest', true)
-        .maybeSingle();
+        .eq('is_latest', true as any)
+        .maybeSingle()) as any;
       if (selectError) {
         console.error('[blueprint] select error:', selectError);
         return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
