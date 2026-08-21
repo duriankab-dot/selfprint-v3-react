@@ -25,6 +25,7 @@ import { BehavioralForecastEngine } from './engines/BehavioralForecastEngine';
 import { FutureSelfEngine } from './engines/FutureSelfEngine';
 import { MemoryManagerEngine } from './engines/MemoryManagerEngine';
 import { DecisionIntelligenceEngineAdapter } from './engines/DecisionIntelligenceEngineAdapter';
+import { sICEBridge } from './SICEBridge';
 
 export class SICEOrchestrator {
   private engines: Map<number, SICEBase> = new Map();
@@ -96,7 +97,7 @@ export class SICEOrchestrator {
 
     const totalExecutionTime = performance.now() - startTime;
 
-    return {
+    const orchestratorResult = {
       userId: input.userId,
       timestamp: new Date().toISOString(),
       results,
@@ -105,6 +106,25 @@ export class SICEOrchestrator {
       personalIntelligence,
       totalExecutionTime: Math.round(totalExecutionTime),
     };
+
+    // Wire results through SICEBridge to feed intelligence layer
+    // Non-blocking: don't wait for bridge operations to complete
+    // This ensures UI gets response quickly while bridging happens in background
+    try {
+      // Trigger bridge operations without blocking
+      Promise.all([
+        sICEBridge.bridgePatternResults(orchestratorResult),
+        sICEBridge.bridgeBadgeResults(orchestratorResult),
+        sICEBridge.persistOrchestrationResults(orchestratorResult),
+      ]).catch((err) => {
+        console.warn('SICEBridge operations failed (non-critical):', err);
+      });
+    } catch (err) {
+      console.warn('Error initiating SICEBridge:', err);
+      // Continue — bridge failure should not block orchestration response
+    }
+
+    return orchestratorResult;
   }
 
   /**
