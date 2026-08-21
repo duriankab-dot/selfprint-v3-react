@@ -6,7 +6,7 @@ import fs from 'fs';
 test.describe('Image Upload & Handling', () => {
   let testImagePath: string;
 
-  test.beforeEach(async () => {
+  test.beforeEach(async ({ page }) => {
     // Create a temporary test image
     const testDir = path.join(process.cwd(), 'e2e', 'fixtures');
     if (!fs.existsSync(testDir)) {
@@ -32,7 +32,7 @@ test.describe('Image Upload & Handling', () => {
 
   test('upload profile picture', async ({ page }) => {
     // Navigate to profile
-    await page.goto('/profile');
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
     await page.waitForLoadState('networkidle').catch(() => {});
 
     // Find upload button
@@ -67,7 +67,7 @@ test.describe('Image Upload & Handling', () => {
   });
 
   test('upload validation - file type', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     const fileInput = page.locator('input[type="file"]').first();
 
@@ -83,7 +83,7 @@ test.describe('Image Upload & Handling', () => {
   });
 
   test('upload validation - file size', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     const fileInput = page.locator('input[type="file"]').first();
 
@@ -95,7 +95,7 @@ test.describe('Image Upload & Handling', () => {
   });
 
   test('image rendering after upload', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/profile', { waitUntil: 'domcontentloaded' });
 
     // Look for profile image
     const profileImg = page.locator('img[alt="Profile"], [data-testid="profile-image"]').first();

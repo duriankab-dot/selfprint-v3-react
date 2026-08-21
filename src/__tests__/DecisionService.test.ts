@@ -13,12 +13,12 @@
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import * as DecisionService from '../services/DecisionService';
-import type { Decision, DecisionOutcome } from '../types/decision';
+import type { Decision } from '../types/decision';
 
 describe('Phase E: DecisionService', () => {
   const testTwinId = 'test-user-' + Date.now(); // Unique per test run
   let testDecisionId: string | undefined;
-  let testDecision: Decision | null = null;
+  let _testDecision: Decision | null = null;
 
   describe('Decision Recording', () => {
     it('should record a decision and return the created decision', async () => {
@@ -42,7 +42,7 @@ describe('Phase E: DecisionService', () => {
 
       // Store for subsequent tests
       testDecisionId = decision?.id;
-      testDecision = decision;
+      _testDecision = decision;
     });
 
     it('should handle null supabase gracefully', async () => {
@@ -166,7 +166,7 @@ describe('Phase E: DecisionService', () => {
         'Some lesson'
       );
       // Should not throw, handles gracefully
-      expect(outcome === null || outcome !== null).toBe(true);
+      expect(outcome).toBeDefined();
     });
   });
 
