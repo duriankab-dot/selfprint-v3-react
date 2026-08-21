@@ -89,6 +89,110 @@ export class PatternDetector {
   }
 
   /**
+   * Accept SICE results and merge with lib analysis
+   * Called by SICEBridge during orchestration
+   *
+   * Algorithm:
+   * 1. For each SICE pattern, check if it exists in behavioral_patterns
+   * 2. If exists: merge SICE evidence + recalculate confidence
+   * 3. If not: create new pattern record
+   * 4. Persist all updates
+   *
+   * This ensures SICE patterns feed into persistent storage
+   */
+  async acceptSICEResults(
+    userId: string,
+    sicePatterns: Array<{
+      name: string;
+      frequency: number;
+      lastObserved: string;
+      impact: 'positive' | 'neutral' | 'negative';
+      examples: string[];
+      confidence: number;
+    }>
+  ): Promise<{ processed: number; merged: number; created: number }> {
+    if (!userId) throw new IntelligenceError('User ID required', 'MISSING_USER_ID');
+    if (!sicePatterns?.length) return { processed: 0, merged: 0, created: 0 };
+
+    let merged = 0;
+    let created = 0;
+
+    try {
+      for (const sicePattern of sicePatterns) {
+        // Create evidence point from SICE observation
+        const siceEvidence: EvidencePoint = {
+          date: new Date(sicePattern.lastObserved),
+          source: 'explicit_statement', // SICE detections are explicit
+          sourceId: `sice-${sicePattern.name}-${Date.now()}`,
+          excerpt: sicePattern.examples.slice(0, 2).join('; '),
+          confidence: Math.min(sicePattern.confidence / 100, 1),
+        };
+
+        // Try to get existing pattern
+        const existingPattern = await this.getPattern(userId, sicePattern.name);
+
+        if (existingPattern) {
+          // Merge SICE evidence with existing
+          const updatedPattern = await this.updatePattern(
+            userId,
+            sicePattern.name,
+            [siceEvidence]
+          );
+
+          // Update confidence based on SICE signal
+          if (updatedPattern) {
+            // Recalculate confidence incorporating SICE signal
+            const newConfidence = Math.min(
+              (updatedPattern.confidence + sicePattern.confidence / 100) / 2,
+              1
+            ); // Average the confidences
+
+            // Persist updated confidence
+            const { error } = await supabase
+              .from('behavioral_patterns')
+              .update({
+                confidence: newConfidence,
+                last_detected: new Date().toISOString(),
+              })
+              .eq('user_id', userId)
+              .eq('pattern_name', sicePattern.name);
+
+            if (!error) {
+              merged++;
+            }
+          }
+        } else {
+          // Create new pattern from SICE detection
+          const newPattern = await this.createPatternRecord(userId, {
+            name: sicePattern.name,
+            type: this.frequencyToPatternType(sicePattern.frequency),
+            frequency: 1,
+            daysSpan: 0,
+            confidence: Math.min(sicePattern.confidence / 100, 1),
+            evidence: [siceEvidence],
+            trend: 'stable',
+          });
+
+          if (newPattern) {
+            created++;
+          }
+        }
+      }
+
+      return {
+        processed: sicePatterns.length,
+        merged,
+        created,
+      };
+    } catch (error) {
+      throw new IntelligenceError(
+        `Failed to accept SICE results: ${error}`,
+        'ACCEPT_SICE_FAILED'
+      );
+    }
+  }
+
+  /**
    * Detect only emerging patterns (NEW)
    * Patterns that appeared in last 30 days but weren't there before
    */
@@ -446,6 +550,16 @@ export class PatternDetector {
     if (freq >= 0.2) return 'weekly';
     if (freq >= 0.05) return 'occasionally';
     return 'rarely';
+  }
+
+  /**
+   * Convert frequency count → pattern type
+   * Used when accepting SICE results
+   */
+  private frequencyToPatternType(frequency: number): PatternType {
+    if (frequency >= 3) return 'repeating'; // Frequent = repeating
+    if (frequency >= 1) return 'emerging'; // Few occurrences = emerging
+    return 'emerging';
   }
 
   /**

@@ -210,4 +210,55 @@ export class BadgeEngine {
 
     return unlocked;
   }
+
+  /**
+   * Unlock badges from SICE signals (SICEBridge integration)
+   * Converts SICE badge signals → lib badge unlocks (idempotent)
+   *
+   * SICE may detect different badge criteria; we map them to lib equivalents
+   * Examples:
+   *   SICE: "first_chat" → lib: "first_reflection"
+   *   SICE: "pattern_master" → lib: "pattern_finder"
+   */
+  async unlockFromSICESignal(badgeIds: string[]): Promise<number> {
+    const unlocked: BadgeId[] = [];
+
+    // Map SICE badge names → lib BadgeId
+    const siceToLib: Record<string, BadgeId> = {
+      first_chat: 'first_reflection',
+      tenth_interaction: 'pattern_finder', // Mapping to first meaningful pattern detection
+      fiftieth_interaction: 'journey_explorer',
+      decision_master: 'decision_maker',
+      world_explorer: 'journey_explorer',
+      self_aware: 'self_mirror',
+      pattern_master: 'pattern_finder',
+      pattern_finder: 'pattern_finder', // Direct mapping
+      journey_explorer: 'journey_explorer',
+      self_mirror: 'self_mirror',
+      deep_thinker: 'deep_thinker',
+      decision_maker: 'decision_maker',
+      twin_awakening: 'twin_awakening',
+      selfprint_complete: 'selfprint_complete',
+    };
+
+    for (const badgeId of badgeIds) {
+      const libBadgeId = siceToLib[badgeId] || (badgeId as BadgeId);
+
+      // Verify this is a valid lib badge
+      if (!Object.keys(BADGE_DEFINITIONS).includes(libBadgeId)) {
+        console.warn(`Unknown badge ID from SICE: ${badgeId}, skipping`);
+        continue;
+      }
+
+      try {
+        await this.unlock(libBadgeId);
+        unlocked.push(libBadgeId);
+      } catch (error) {
+        console.warn(`Failed to unlock badge ${libBadgeId}:`, error);
+        // Continue to next badge
+      }
+    }
+
+    return unlocked.length;
+  }
 }
