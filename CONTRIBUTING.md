@@ -5,16 +5,16 @@
 
 ---
 
-## 🔴 ก่อนเริ่มงาน — อ่านให้ครบ (CODEX v2.0)
+## 🔴 ก่อนเริ่มงาน — อ่านให้ครบ 
 
 ### เอกสารที่ต้องอ่านก่อนทำงานทุกครั้ง
 
 | ลำดับ | เอกสาร | เหตุผล |
 |-------|--------|--------|
-| 1 | `docs/SELFPRINT_PROJECT_CODEX.md` | **SOURCE OF TRUTH** — Complete project blueprint |
-| 2 | `docs/onboarding/READING_LIST.md` | Recommended reading order for new developers |
-| 3 | `AI_CONTEXT.md` | AI rules, skills, structure — for Claude context |
-| 4 | `docs/SELFPRINT_EXECUTION_CHECKLIST_v1.0.md` | Development phases & checklist |
+| 1 | `docs/SELFPRINT_MASTER_DIRECTIVE_V5_THAI` | **SOURCE OF TRUTH** — Complete project blueprint |
+| 2 | `SELFPRINT_MASTER_COMMAND_AI_DEV` | Recommended reading order for new developers |
+| 3 | `Selfprint_seniour_DEV_SKILL.txt ` | AI rules, skills, structure — for Claude context |
+| 4 | `SELFPRINT_AUDIT_REPORT_20260821` | Development phases & checklist |
 
 ---
 
@@ -89,10 +89,10 @@ src/
 └── styles/             # Global Styles
 
 docs/
-├── AI_CONTEXT.md       # Operational AI Constitution
-├── MASTER_PRD.md       # Product Source of Truth
-├── PROJECT_SUMMARY.md  # Project Overview
-├── CODEBASE_MAP.md     # Code Structure
+├── SELFPRINT_MASTER_DIRECTIVE_V5_THAI.md       # Product Source of Truth
+├── Selfprint_seniour_DEV_SKILL.txt       # Development rules
+├── Database Migrations  # Schema authority 
+├── Code Repository     # Code Structure
 └── ... (other docs)
 🧠 12 SICE — Core Intelligence
 #	Engine	หน้าที่
