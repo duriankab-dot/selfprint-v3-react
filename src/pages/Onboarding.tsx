@@ -5,8 +5,9 @@
  * 7 steps: Emotion → Nova Conversation → AI Creation → Blueprint → Fine-tune → Analysis → Home
  */
 
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLifecycleStore } from '@/store/lifecycleStore';
 import { EmotionSelector } from '@/components/features/EmotionSelector';
 import { BirthdateInput } from '@/components/onboarding/BirthdateInput';
 import { NovaConversation } from '@/components/onboarding/NovaConversation';
@@ -77,6 +78,14 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const navigate = useNavigate();
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
+
+  // NEW: Guard against re-entry — if user already passed ONBOARDING, redirect
+  const status = useLifecycleStore((state) => state.status);
+  useEffect(() => {
+    if (status && status !== 'ONBOARDING') {
+      navigate('/analysis', { replace: true });
+    }
+  }, [status, navigate]);
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
   const [siceResult, setSiceResult] = useState<{

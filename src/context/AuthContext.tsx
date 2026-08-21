@@ -2,6 +2,7 @@ import React, { createContext, useState, useCallback, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/services/supabase-service';
+import { useLifecycleStore } from '@/store/lifecycleStore';
 
 interface AuthContextType {
   session: Session | null;
@@ -56,10 +57,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
       setSession(data.session);
       setLoading(false);
+
+      // NEW: Load lifecycle if user is authenticated
+      if (data.session?.user?.id) {
+        const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
+        loadLifecycle(data.session.user.id).catch(err =>
+          console.error('Failed to load lifecycle:', err)
+        );
+      }
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event: string, newSession: Session | null) => {
       setSession(newSession);
+
+      // NEW: Reload lifecycle when auth state changes
+      if (newSession?.user?.id) {
+        const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
+        loadLifecycle(newSession.user.id).catch(err =>
+          console.error('Failed to load lifecycle:', err)
+        );
+      }
     });
 
     return () => {

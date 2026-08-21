@@ -222,6 +222,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
 
   /**
    * Load lifecycle record from database
+   * If user has no record, auto-initialize as ONBOARDING
    */
   loadLifecycle: async (userId: string): Promise<LifecycleRecord | null> => {
     try {
@@ -259,6 +260,39 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
           twinCreatedAt: data.twin_created_at ? new Date(data.twin_created_at) : undefined,
           resumedAt: data.resumed_at ? new Date(data.resumed_at) : undefined,
           lastActivityAt: new Date(data.last_activity_at),
+        };
+      }
+
+      // NEW: If no existing record, auto-initialize new user as ONBOARDING
+      console.log(`[Lifecycle] New user ${userId}, auto-initializing as ONBOARDING`);
+
+      const { error: insertError } = await supabase
+        .from('user_lifecycle')
+        .insert({
+          user_id: userId,
+          status: 'ONBOARDING',
+          last_activity_at: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        console.error('Failed to auto-initialize lifecycle:', insertError);
+      } else {
+        set({
+          status: 'ONBOARDING',
+          twinId: null,
+          twinCreatedAt: null,
+          resumedAt: null,
+          lastActivityAt: new Date(),
+          isLoading: false,
+        });
+
+        return {
+          userId,
+          status: 'ONBOARDING',
+          twinId: undefined,
+          twinCreatedAt: undefined,
+          resumedAt: undefined,
+          lastActivityAt: new Date(),
         };
       }
 

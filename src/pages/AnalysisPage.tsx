@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { useLifecycleStore } from '@/store/lifecycleStore';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
@@ -56,6 +57,7 @@ const AnalysisPage: React.FC = () => {
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
   const setAnalysis = useAnalysisStore((state) => state.setAnalysis);
+  const transitionTo = useLifecycleStore((state) => state.transitionTo);
 
   // Stable instances
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
@@ -107,10 +109,12 @@ const AnalysisPage: React.FC = () => {
   // Handlers
   // --------------------------------------------------------------------------
 
-  const handleAwakeTwin = () => {
-    if (analysis) {
+  const handleAwakeTwin = async () => {
+    if (analysis && userId) {
       // Save analysis to store for CoreAwakening to use
       setAnalysis(analysis);
+      // NEW: Transition lifecycle to ANALYSIS
+      await transitionTo(userId, 'ANALYSIS');
       // Navigate to Twin birth ceremony
       navigate('/core-awakening');
     }
