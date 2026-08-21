@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { HelmetProvider } from 'react-helmet-async';
 import { useContext } from 'react';
 import { validateWorldPersonalities } from './constants/worldPersonalities';
+import { useRecoveryRoute } from './hooks/useRecoveryRoute';
 import { AuthContext } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -145,6 +146,15 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
   return routes;
 }
 
+/**
+ * RecoveryRouteHandler — Call useRecoveryRoute hook inside AuthProvider
+ * This component handles recovery routing after auth + lifecycle load
+ */
+function RecoveryRouteHandler() {
+  useRecoveryRoute();
+  return null;
+}
+
 function App() {
   // Validate world personalities on app startup
   useEffect(() => {
@@ -158,6 +168,7 @@ function App() {
     <HelmetProvider>
         <ThemeProvider>
           <AuthProvider>
+            <RecoveryRouteHandler />
             <AIProvider>
               <PendingOnboardingSaver />
               <EmotionProvider>
