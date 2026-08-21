@@ -57,6 +57,9 @@ const HUB_GLOW_COLOR: Record<Hub, string> = {
   spirituality: 'rgba(167, 139, 250, 0.65)',
   impact:       'rgba(20, 184, 166, 0.65)',
   activities:   'rgba(245, 158, 11, 0.65)',
+  finance:      'rgba(34, 197, 94, 0.65)',
+  adventure:    'rgba(168, 85, 247, 0.65)',
+  community:    'rgba(59, 130, 246, 0.65)',
 };
 
 // ============================================================================

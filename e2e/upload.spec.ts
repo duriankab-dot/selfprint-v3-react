@@ -6,7 +6,7 @@ import fs from 'fs';
 test.describe('Image Upload & Handling', () => {
   let testImagePath: string;
 
-  test.beforeEach(async ({ _page }) => {
+  test.beforeEach(async () => {
     // Create a temporary test image
     const testDir = path.join(process.cwd(), 'e2e', 'fixtures');
     if (!fs.existsSync(testDir)) {

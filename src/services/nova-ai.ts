@@ -184,6 +184,30 @@ export function getStarterMessage(hub: Hub, mood: Mood): string {
       ready: "You're in flow. What will you accomplish?",
       reflective: "Good time to reflect on how you spend your time.",
     },
+    finance: {
+      stressed: "Financial stress is paralyzing. What's the immediate worry?",
+      confused: "Numbers can be confusing. What's unclear?",
+      confident: "You have financial clarity. What's your next move?",
+      drained: "Money matters exhaust the spirit. What relief would help?",
+      ready: "You're financially grounded. What opportunity calls?",
+      reflective: "Good time to reflect on your relationship with money.",
+    },
+    adventure: {
+      stressed: "Adventure and stress don't mix. What kind of freedom are you seeking?",
+      confused: "Unclear on direction? The world is open.",
+      confident: "You're bold. What adventure calls to you?",
+      drained: "Rest restores the adventurous spirit. What would refresh you?",
+      ready: "You're ready to explore. What's next?",
+      reflective: "Good moment to reflect on your path forward.",
+    },
+    community: {
+      stressed: "Connection can ease stress. Who could you reach out to?",
+      confused: "Community questions are identity questions. Who are your people?",
+      confident: "You belong here. How do you want to contribute?",
+      drained: "Community gives and takes energy. What balance do you need?",
+      ready: "You're in your people. What matters to this group?",
+      reflective: "Good time to deepen community roots.",
+    },
   };
 
   const baseMessage = starters[hub]?.[mood] || "I'm here. What's on your mind?";

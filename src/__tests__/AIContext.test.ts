@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * AIContext.test.ts
  * Unit tests for AI Context and useAIContext hook

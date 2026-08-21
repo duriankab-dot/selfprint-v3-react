@@ -10,11 +10,11 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { getAnalyticsSummary, type AnalyticsSummary as Summary } from '@/services/analytics';
-import { HUB_OPTIONS } from '@/components/features/HubSwitcher';
+import { HUB_OPTIONS } from '@/constants/hubs';
 import './AnalyticsSummary.css';
 
 function hubLabel(hubId: string): string {
-  const hub = HUB_OPTIONS.find((h) => h.id === hubId);
+  const hub = HUB_OPTIONS.find((h: { id: string; label: string; description: string; icon: string }) => h.id === hubId);
   return hub ? `${hub.icon} ${hub.label}` : hubId;
 }
 

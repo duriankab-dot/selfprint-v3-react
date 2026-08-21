@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { SelfPrintOrchestrator } from '../src/services/SelfPrintOrchestrator';
 
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+const _supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 const orchestrator = new SelfPrintOrchestrator();
 
 export async function POST(req: Request) {
