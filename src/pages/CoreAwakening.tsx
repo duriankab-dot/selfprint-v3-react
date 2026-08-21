@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
 import { useNova } from '../context/NovaContext';
@@ -24,6 +25,7 @@ export default function CoreAwakening() {
   const { createTwin } = useTwin();
   const { completeAnalysis } = useNova();
   const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
+  const transitionTo = useLifecycleStore((state) => state.transitionTo);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +87,9 @@ export default function CoreAwakening() {
       celebrateTwinAwakening();
 
       // Redirect to Twin chat
-      setTimeout(() => {
+      setTimeout(async () => {
+        // NEW: Transition lifecycle to AWAKENING
+        await transitionTo(session.user.id, 'AWAKENING');
         setPhase('complete');
         navigate('/chat/twin', { replace: true });
       }, 4000);

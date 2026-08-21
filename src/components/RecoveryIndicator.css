@@ -1,0 +1,49 @@
+/* RecoveryIndicator.css — Journey progress display */
+
+.recovery-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-md, 1rem);
+  background: var(--bg-secondary, #f9f9f9);
+  border-radius: var(--radius-md, 8px);
+  margin: var(--spacing-md, 1rem) 0;
+}
+
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 0.5rem);
+  align-items: center;
+  text-align: center;
+}
+
+.progress-bar {
+  font-size: var(--font-size-lg, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--text-primary, #333);
+  font-family: 'Courier New', monospace;
+}
+
+.progress-text {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-secondary, #666);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .recovery-indicator {
+    padding: var(--spacing-sm, 0.75rem);
+    margin: var(--spacing-sm, 0.75rem) 0;
+  }
+
+  .progress-bar {
+    font-size: var(--font-size-md, 1rem);
+  }
+
+  .progress-text {
+    font-size: var(--font-size-xs, 0.75rem);
+  }
+}
