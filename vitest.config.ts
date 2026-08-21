@@ -18,7 +18,7 @@ export default defineConfig({
     setupFiles: [],
     testTimeout: 60000,
     singleFork: true,
-    include: ['**/test/minimal.test.ts'],
+    include: ['**/test/minimal.test.ts', '**/sice/__tests__/SICEEngines.test.ts'],
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
       VITE_SUPABASE_URL: 'http://localhost:54321',

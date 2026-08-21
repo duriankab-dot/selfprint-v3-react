@@ -12,7 +12,9 @@ export interface TwinState {
   maturityScore: number; // 0-100
   worldSpecialization?: string; // How Twin specializes per world
   mood: string;
+  responseStyle: string; // How Twin communicates
   nextMilestone: string;
+  energy?: number; // Energy level 0-100
 }
 
 export class TwinStateEngine extends SICEBase {
@@ -36,7 +38,9 @@ export class TwinStateEngine extends SICEBase {
           stage: 1,
           maturityScore: 0,
           mood: 'attentive',
+          responseStyle: 'guiding',
           nextMilestone: 'First interaction',
+          energy: 50,
         };
       }
 
@@ -67,7 +71,9 @@ export class TwinStateEngine extends SICEBase {
           maturityScore,
           worldSpecialization,
           mood,
+          responseStyle: stage > 2 ? 'conversational' : 'guiding',
           nextMilestone,
+          energy: Math.min(100, maturityScore + 20),
         };
 
         return twinState;
@@ -77,7 +83,9 @@ export class TwinStateEngine extends SICEBase {
           stage: 1,
           maturityScore: 0,
           mood: 'attentive',
+          responseStyle: 'guiding',
           nextMilestone: 'First interaction',
+          energy: 50,
         };
       }
     });
