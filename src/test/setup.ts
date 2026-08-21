@@ -199,7 +199,16 @@ const DEFAULT_DATA: Record<string, Record<string, unknown>> = {
   notification_analytics: { id: 'notif-anal-id', created_at: NOW },
   analytics_events: { id: 'mock-event-id', created_at: NOW },
   performance_metrics: { id: 'perf-metric-id', created_at: NOW },
-  quality_metrics: {} as any,
+  quality_metrics: {
+    id: 'quality-metric-id',
+    user_id: 'user-test-123',
+    twin_id: 'mock-twin-id',
+    accuracy_level: 85,
+    feedback_count: 3,
+    avg_confidence: 0.82,
+    last_measured: NOW,
+    created_at: NOW,
+  },
 
   // ── Sharing & Profiles ─────────────────────────────────────────────────────
   share_links: { id: 'mock-share-id', code: 'AAAAAAAA', user_id: 'user-test-123' },
