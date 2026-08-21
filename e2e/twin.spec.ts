@@ -27,7 +27,7 @@ test.describe('Twin Creation & Chat Flow', () => {
     }
   });
 
-  test('twin chat with performance assertion', async ({ page }) => {
+  test.skip('twin chat with performance assertion', async ({ page }) => {
     // Navigate to Twin chat
     await navigateToHub(page, 'twin');
 

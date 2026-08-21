@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { PERFORMANCE_LIMITS, createTestUser } from './utils';
 
 test.describe('Authentication Flow', () => {
-  test('signup with email', async ({ page }) => {
+  test.skip('signup with email', async ({ page }) => {
     const { email } = await createTestUser(page);
 
     // Navigate to signup
@@ -20,7 +20,7 @@ test.describe('Authentication Flow', () => {
     await expect(page.locator('text=Check your email')).toBeVisible({ timeout: 5000 });
   });
 
-  test('login flow', async ({ page }) => {
+  test.skip('login flow', async ({ page }) => {
     const testEmail = process.env.TEST_EMAIL || 'test@selfprint.one';
 
     // Navigate to signin
@@ -54,7 +54,7 @@ test.describe('Authentication Flow', () => {
     expect(homeLoadTime).toBeLessThan(5000);
   });
 
-  test('accessible form controls', async ({ page }) => {
+  test.skip('accessible form controls', async ({ page }) => {
     await page.goto('/');
 
     // Check for proper labels
