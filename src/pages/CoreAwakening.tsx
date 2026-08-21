@@ -7,12 +7,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
 import { useNova } from '../context/NovaContext';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { saveTwinProfile, celebrateTwinAwakening } from '../services/CoreAwakeningService';
+import { useAnalysisStore } from '../store/analysisStore';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
 
@@ -22,6 +24,8 @@ export default function CoreAwakening() {
   const { setTwinAwakened } = useAIContext();
   const { createTwin } = useTwin();
   const { completeAnalysis } = useNova();
+  const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
+  const transitionTo = useLifecycleStore((state) => state.transitionTo);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
@@ -56,10 +60,17 @@ export default function CoreAwakening() {
         throw new Error('User session lost');
       }
 
-      // Save Twin profile
+      // Save Twin profile with analysis context
+      // If analysis is available, use it to ground the Twin
+      // Otherwise, use defaults
+      const maturityScore = currentAnalysis
+        ? Math.max(30, Math.min(80, currentAnalysis.sourceCount * 5)) // Scale by data depth
+        : 30;
+
       const twinProfile = await saveTwinProfile(session.user.id, twinName, {
         userId: session.user.id,
-        maturityScore: 30,
+        maturityScore,
+        analysisContext: currentAnalysis || undefined,
       });
 
       if (!twinProfile) {
@@ -76,7 +87,9 @@ export default function CoreAwakening() {
       celebrateTwinAwakening();
 
       // Redirect to Twin chat
-      setTimeout(() => {
+      setTimeout(async () => {
+        // NEW: Transition lifecycle to AWAKENING
+        await transitionTo(session.user.id, 'AWAKENING');
         setPhase('complete');
         navigate('/chat/twin', { replace: true });
       }, 4000);

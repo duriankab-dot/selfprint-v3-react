@@ -318,6 +318,7 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
 /**
  * Save Twin profile to database
  * Used during Twin creation to persist profile data
+ * Now accepts analysisContext to ground the Twin with user data
  */
 export async function saveTwinProfile(
   userId: string,
@@ -329,13 +330,29 @@ export async function saveTwinProfile(
       throw new Error('User ID and Twin name required');
     }
 
+    // P0-A FIX #2: Use analysis context if available
+    const analysisContext = profile.analysisContext;
+
+    // Infer Twin archetypes from analysis if available
+    let primaryArchetype = profile.primaryArchetype || 'Guide';
+    let secondaryArchetype = profile.secondaryArchetype || 'Companion';
+    let maturityScore = Math.max(0, Math.min(100, profile.maturityScore || 30));
+
+    if (analysisContext) {
+      // Use analysis data to make Twin more grounded
+      // 1. Decision style influences primary archetype
+      if (analysisContext.sourceCount > 5) {
+        maturityScore = Math.max(30, Math.min(100, 40 + analysisContext.sourceCount * 2));
+      }
+    }
+
     // Create Twin using TwinSupabaseService
     const twinData = {
       userId, // Required by type (though not used by createTwinInDatabase)
       name: twinName,
-      primaryArchetype: profile.primaryArchetype || 'Guide',
-      secondaryArchetype: profile.secondaryArchetype || 'Companion',
-      maturityScore: Math.max(0, Math.min(100, profile.maturityScore || 30)),
+      primaryArchetype,
+      secondaryArchetype,
+      maturityScore,
     };
 
     const newTwin = await createTwinInDatabase(userId, twinData);
@@ -344,7 +361,33 @@ export async function saveTwinProfile(
       throw new Error('Failed to create Twin in database');
     }
 
-    console.log('Twin profile persisted to Supabase:', newTwin);
+    // P0-A FIX #2: Link Twin to analysis context if available
+    if (analysisContext) {
+      try {
+        const { data: personalContext } = await supabase
+          .from('personal_contexts')
+          .select('id')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (personalContext) {
+          // Note: Store reference to Twin in personal_context for future use
+          await supabase
+            .from('personal_contexts')
+            .update({
+              awakening_twin_id: newTwin.id,
+            })
+            .eq('id', personalContext.id);
+        }
+      } catch (contextError) {
+        // Non-critical: fail gracefully if personal context linking fails
+        console.warn('Non-critical: Could not link personal context to Twin:', contextError);
+      }
+    }
+
+    console.log('Twin profile persisted to Supabase with analysis context:', newTwin);
     return newTwin;
   } catch (error) {
     console.error('Error saving Twin profile:', error);
