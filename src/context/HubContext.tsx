@@ -15,7 +15,10 @@ export const HUBS = [
   'creativity',
   'spirituality',
   'impact',
-  'activities', // NEW: Activities hub (engagement + habit-building)
+  'activities',
+  'finance',
+  'adventure',
+  'community',
 ] as const;
 
 export type Hub = typeof HUBS[number];
