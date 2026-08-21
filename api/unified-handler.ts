@@ -381,7 +381,7 @@ async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<voi
       stripe_subscription_id: isLifetime ? null : (session.subscription as string),
       expires_at: null,
       updated_at: new Date().toISOString(),
-    },
+    } as any,
     { onConflict: 'user_id' }
   );
   console.log(`[stripe] Upserted subscription: user=${userId} tier=${tier}`);
@@ -404,7 +404,7 @@ async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
       stripe_subscription_id: sub.id,
       expires_at: expiresAt,
       updated_at: new Date().toISOString(),
-    },
+    } as any,
     { onConflict: 'user_id' }
   );
   console.log(`[stripe] Subscription ${sub.status}: user=${userId} tier=${tier}`);
@@ -424,7 +424,7 @@ async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
   if ((data as any)?.user_id) {
     await supabaseAdmin
       .from('subscriptions')
-      .update({ status: 'expired', updated_at: new Date().toISOString() })
+      .update({ status: 'expired', updated_at: new Date().toISOString() } as any)
       .eq('user_id', (data as any).user_id);
     console.log(`[stripe] Payment failed: user=${(data as any).user_id}`);
   }

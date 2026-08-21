@@ -1,12 +1,12 @@
 {
   "config": {
     "argv": [
-      "/usr/bin/node",
-      "/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/node_modules/@playwright/test/cli.js",
+      "C:\\Program Files\\nodejs\\node.exe",
+      "D:\\selfprint-v3-react\\node_modules\\@playwright\\test\\cli.js",
       "test"
     ],
-    "configFile": "/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/playwright.config.ts",
-    "rootDir": "/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/e2e",
+    "configFile": "D:\\selfprint-v3-react\\playwright.config.ts",
+    "rootDir": "D:/selfprint-v3-react/e2e",
     "failOnFlakyTests": false,
     "forbidOnly": false,
     "fullyParallel": true,
@@ -16,17 +16,21 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 4
+    },
     "preserveOutput": "always",
     "projects": [
       {
-        "outputDir": "/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/test-results",
+        "outputDir": "D:/selfprint-v3-react/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 4
+        },
         "id": "chromium",
         "name": "chromium",
-        "testDir": "/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/e2e",
+        "testDir": "D:/selfprint-v3-react/e2e",
         "testIgnore": [],
         "testMatch": [
           "**/*.spec.ts"
@@ -62,22 +66,872 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.62.1",
-    "workers": 1,
+    "workers": 4,
     "webServer": null
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: EPERM: operation not permitted, rmdir '/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/test-results/.playwright-artifacts-0'",
-      "stack": "Error: EPERM: operation not permitted, rmdir '/sessions/funny-sharp-johnson/mnt/selfprint-v3-react/test-results/.playwright-artifacts-0'"
+      "title": "auth.spec.ts",
+      "file": "auth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Authentication Flow",
+          "file": "auth.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "signup with email",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 62810,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                            "column": 16,
+                            "line": 10
+                          },
+                          "message": "Error: page.click: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=Get Started')\u001b[22m\n\n\n\u001b[0m \u001b[90m  8 |\u001b[39m     \u001b[90m// Navigate to signup\u001b[39m\n \u001b[90m  9 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgoto(\u001b[32m'/'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 10 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mclick(\u001b[32m'text=Get Started'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 11 |\u001b[39m\n \u001b[90m 12 |\u001b[39m     \u001b[90m// Expect signup page\u001b[39m\n \u001b[90m 13 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page)\u001b[33m.\u001b[39mtoHaveURL(\u001b[35m/signup|auth/\u001b[39m)\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:10:16\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:12.339Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-signup-with-email-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-signup-with-email-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-signup-with-email-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-8e5cbbb791327ba8396c",
+              "file": "auth.spec.ts",
+              "line": 5,
+              "column": 3
+            },
+            {
+              "title": "login flow",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 10330,
+                      "error": {
+                        "message": "TimeoutError: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=/Sign in|Login/')\u001b[22m\n",
+                        "stack": "TimeoutError: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=/Sign in|Login/')\u001b[22m\n\n    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:31:21",
+                        "location": {
+                          "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                          "column": 21,
+                          "line": 31
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 29 |\u001b[39m     \u001b[90m// Click signin button\u001b[39m\n \u001b[90m 30 |\u001b[39m     \u001b[36mconst\u001b[39m signinBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=/Sign in|Login/'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m     \u001b[36mawait\u001b[39m signinBtn\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 32 |\u001b[39m\n \u001b[90m 33 |\u001b[39m     \u001b[90m// Fill email\u001b[39m\n \u001b[90m 34 |\u001b[39m     \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                            "column": 21,
+                            "line": 31
+                          },
+                          "message": "TimeoutError: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('text=/Sign in|Login/')\u001b[22m\n\n\n\u001b[0m \u001b[90m 29 |\u001b[39m     \u001b[90m// Click signin button\u001b[39m\n \u001b[90m 30 |\u001b[39m     \u001b[36mconst\u001b[39m signinBtn \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=/Sign in|Login/'\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 31 |\u001b[39m     \u001b[36mawait\u001b[39m signinBtn\u001b[33m.\u001b[39mclick({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                     \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 32 |\u001b[39m\n \u001b[90m 33 |\u001b[39m     \u001b[90m// Fill email\u001b[39m\n \u001b[90m 34 |\u001b[39m     \u001b[36mconst\u001b[39m emailInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[type=\"email\"]'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:31:21\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:12.396Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-login-flow-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-login-flow-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-login-flow-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                        "column": 21,
+                        "line": 31
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-e2c5613d9586b506e34e",
+              "file": "auth.spec.ts",
+              "line": 23,
+              "column": 3
+            },
+            {
+              "title": "page performance on auth pages",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 5735,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2000\u001b[39m\nReceived:   \u001b[31m5073\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2000\u001b[39m\nReceived:   \u001b[31m5073\u001b[39m\n    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:57:26",
+                        "location": {
+                          "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                          "column": 26,
+                          "line": 57
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 55 |\u001b[39m     }\n \u001b[90m 56 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m     expect(homeLoadTime)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[33mPERFORMANCE_LIMITS\u001b[39m\u001b[33m.\u001b[39m\u001b[33mPAGE_LOAD\u001b[39m \u001b[33m+\u001b[39m \u001b[35m500\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// 500ms buffer for first load\u001b[39m\n \u001b[90m    |\u001b[39m                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m\n \u001b[90m 60 |\u001b[39m   test(\u001b[32m'accessible form controls'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                            "column": 26,
+                            "line": 57
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeLessThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: < \u001b[32m2000\u001b[39m\nReceived:   \u001b[31m5073\u001b[39m\n\n\u001b[0m \u001b[90m 55 |\u001b[39m     }\n \u001b[90m 56 |\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 57 |\u001b[39m     expect(homeLoadTime)\u001b[33m.\u001b[39mtoBeLessThan(\u001b[33mPERFORMANCE_LIMITS\u001b[39m\u001b[33m.\u001b[39m\u001b[33mPAGE_LOAD\u001b[39m \u001b[33m+\u001b[39m \u001b[35m500\u001b[39m)\u001b[33m;\u001b[39m \u001b[90m// 500ms buffer for first load\u001b[39m\n \u001b[90m    |\u001b[39m                          \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 58 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 59 |\u001b[39m\n \u001b[90m 60 |\u001b[39m   test(\u001b[32m'accessible form controls'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({ page }) \u001b[33m=>\u001b[39m {\u001b[0m\n\u001b[2m    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:57:26\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "Home page load: 5073ms (limit: 1500ms)\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "⚠️ Slow page load: 5073ms > 1500ms\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:12.413Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                        "column": 26,
+                        "line": 57
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-fd8044ca3698eef16283",
+              "file": "auth.spec.ts",
+              "line": 45,
+              "column": 3
+            },
+            {
+              "title": "accessible form controls",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 4901,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:65:20",
+                        "location": {
+                          "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                          "column": 20,
+                          "line": 65
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 63 |\u001b[39m     \u001b[90m// Check for proper labels\u001b[39m\n \u001b[90m 64 |\u001b[39m     \u001b[36mconst\u001b[39m inputs \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input'\u001b[39m)\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 65 |\u001b[39m     expect(inputs)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 66 |\u001b[39m\n \u001b[90m 67 |\u001b[39m     \u001b[90m// Check for buttons\u001b[39m\n \u001b[90m 68 |\u001b[39m     \u001b[36mconst\u001b[39m buttons \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'button'\u001b[39m)\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                            "column": 20,
+                            "line": 65
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBeGreaterThan\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m\n\nExpected: > \u001b[32m0\u001b[39m\nReceived:   \u001b[31m0\u001b[39m\n\n\u001b[0m \u001b[90m 63 |\u001b[39m     \u001b[90m// Check for proper labels\u001b[39m\n \u001b[90m 64 |\u001b[39m     \u001b[36mconst\u001b[39m inputs \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input'\u001b[39m)\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 65 |\u001b[39m     expect(inputs)\u001b[33m.\u001b[39mtoBeGreaterThan(\u001b[35m0\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                    \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 66 |\u001b[39m\n \u001b[90m 67 |\u001b[39m     \u001b[90m// Check for buttons\u001b[39m\n \u001b[90m 68 |\u001b[39m     \u001b[36mconst\u001b[39m buttons \u001b[33m=\u001b[39m \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'button'\u001b[39m)\u001b[33m.\u001b[39mcount()\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at D:\\selfprint-v3-react\\e2e\\auth.spec.ts:65:20\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:12.472Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-accessible-form-controls-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-accessible-form-controls-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\selfprint-v3-react\\test-results\\auth-Authentication-Flow-accessible-form-controls-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\selfprint-v3-react\\e2e\\auth.spec.ts",
+                        "column": 20,
+                        "line": 65
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d748ac400d08b85935ef-8dd54a9205f51d50112a",
+              "file": "auth.spec.ts",
+              "line": 60,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "decision.spec.ts",
+      "file": "decision.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Decision Logging & Intelligence",
+          "file": "decision.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "log a decision with performance assertion",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 1847,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Decision logging not yet implemented\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:19.426Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f2a856cf2cd05c9ecfaa-fc4ab2d7b67fbd853e4c",
+              "file": "decision.spec.ts",
+              "line": 9,
+              "column": 3
+            },
+            {
+              "title": "decision follow-ups scheduling",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1768,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:20.277Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f2a856cf2cd05c9ecfaa-8f69d5869f4693e222b9",
+              "file": "decision.spec.ts",
+              "line": 62,
+              "column": 3
+            },
+            {
+              "title": "decision learning & patterns",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2103,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "✓ Decision analytics visible\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:21.558Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f2a856cf2cd05c9ecfaa-c909b0b401f1972e3e5f",
+              "file": "decision.spec.ts",
+              "line": 72,
+              "column": 3
+            },
+            {
+              "title": "decision world expertise routing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2069,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:22.298Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "f2a856cf2cd05c9ecfaa-7a6864324c5e68c92b44",
+              "file": "decision.spec.ts",
+              "line": 82,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "twin.spec.ts",
+      "file": "twin.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Twin Creation & Chat Flow",
+          "file": "twin.spec.ts",
+          "line": 4,
+          "column": 6,
+          "specs": [
+            {
+              "title": "core awakening flow - twin creation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2208,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:23.704Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1e10c342a39bf96f7a5e-13e3b3950379dec880f2",
+              "file": "twin.spec.ts",
+              "line": 11,
+              "column": 3
+            },
+            {
+              "title": "twin chat with performance assertion",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 8271,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[placeholder*=\"message\"], textarea').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[placeholder*=\"message\"], textarea').first()\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[placeholder*=\"message\"], textarea').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[placeholder*=\"message\"], textarea').first()\u001b[22m\n\n    at D:\\selfprint-v3-react\\e2e\\twin.spec.ts:36:29",
+                        "location": {
+                          "file": "D:\\selfprint-v3-react\\e2e\\twin.spec.ts",
+                          "column": 29,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[90m// Ensure chat interface loads\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mconst\u001b[39m chatInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[placeholder*=\"message\"], textarea'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(chatInput)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m\n \u001b[90m 38 |\u001b[39m     \u001b[90m// Send a message\u001b[39m\n \u001b[90m 39 |\u001b[39m     \u001b[36mconst\u001b[39m message \u001b[33m=\u001b[39m \u001b[32m'Hello Twin, what are you thinking?'\u001b[39m\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "D:\\selfprint-v3-react\\e2e\\twin.spec.ts",
+                            "column": 29,
+                            "line": 36
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('input[placeholder*=\"message\"], textarea').first()\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('input[placeholder*=\"message\"], textarea').first()\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[90m// Ensure chat interface loads\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mconst\u001b[39m chatInput \u001b[33m=\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m'input[placeholder*=\"message\"], textarea'\u001b[39m)\u001b[33m.\u001b[39mfirst()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(chatInput)\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                             \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m\n \u001b[90m 38 |\u001b[39m     \u001b[90m// Send a message\u001b[39m\n \u001b[90m 39 |\u001b[39m     \u001b[36mconst\u001b[39m message \u001b[33m=\u001b[39m \u001b[32m'Hello Twin, what are you thinking?'\u001b[39m\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at D:\\selfprint-v3-react\\e2e\\twin.spec.ts:36:29\u001b[22m"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:24.978Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "D:\\selfprint-v3-react\\test-results\\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\\test-failed-1.png"
+                        },
+                        {
+                          "name": "video",
+                          "contentType": "video/webm",
+                          "path": "D:\\selfprint-v3-react\\test-results\\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\\video.webm"
+                        },
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "D:\\selfprint-v3-react\\test-results\\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "D:\\selfprint-v3-react\\e2e\\twin.spec.ts",
+                        "column": 29,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1e10c342a39bf96f7a5e-02d9f342ced17d0d75a5",
+              "file": "twin.spec.ts",
+              "line": 30,
+              "column": 3
+            },
+            {
+              "title": "twin personality context switching (Hubs)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 2145,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:24.414Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1e10c342a39bf96f7a5e-fe4a0f538f8ee0d04cf0",
+              "file": "twin.spec.ts",
+              "line": 66,
+              "column": 3
+            },
+            {
+              "title": "twin memory persistence",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 2805,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:25.947Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1e10c342a39bf96f7a5e-189f78cdee1278d1e2a4",
+              "file": "twin.spec.ts",
+              "line": 80,
+              "column": 3
+            },
+            {
+              "title": "twin evolution stages",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1906,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:26.589Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1e10c342a39bf96f7a5e-790f12423d65924eafed",
+              "file": "twin.spec.ts",
+              "line": 93,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "upload.spec.ts",
+      "file": "upload.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Image Upload & Handling",
+          "file": "upload.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "upload profile picture",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1991,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:28.535Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "64f97298e5aac3754605-27338cf9db50b8a658cf",
+              "file": "upload.spec.ts",
+              "line": 33,
+              "column": 3
+            },
+            {
+              "title": "upload validation - file type",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 853,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:28.801Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "64f97298e5aac3754605-46285097e4cc31283d21",
+              "file": "upload.spec.ts",
+              "line": 69,
+              "column": 3
+            },
+            {
+              "title": "upload validation - file size",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 3,
+                      "status": "passed",
+                      "duration": 890,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:29.677Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "64f97298e5aac3754605-d4de57b75f5331240e62",
+              "file": "upload.spec.ts",
+              "line": 85,
+              "column": 3
+            },
+            {
+              "title": "image rendering after upload",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 2,
+                      "status": "passed",
+                      "duration": 1016,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-08-21T05:02:30.556Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "64f97298e5aac3754605-8dadd519bd36ec63fe2f",
+              "file": "upload.spec.ts",
+              "line": 97,
+              "column": 3
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2026-08-21T04:42:27.734Z",
-    "duration": 68331.88,
-    "expected": 0,
+    "startTime": "2026-08-21T05:02:11.322Z",
+    "duration": 65268.219000000005,
+    "expected": 12,
     "skipped": 0,
-    "unexpected": 0,
+    "unexpected": 5,
     "flaky": 0
   }
 }

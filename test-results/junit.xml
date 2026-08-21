@@ -1,2 +1,251 @@
-<testsuites id="" name="" tests="0" failures="0" skipped="0" errors="0" time="68.33188">
+<testsuites id="" name="" tests="17" failures="3" skipped="0" errors="2" time="65.268219">
+<testsuite name="auth.spec.ts" timestamp="2026-08-21T05:02:11.555Z" hostname="chromium" tests="4" failures="2" skipped="0" time="83.776" errors="2">
+<testcase name="Authentication Flow › signup with email" classname="auth.spec.ts" time="62.81">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-Authentication-Flow-signup-with-email-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|auth-Authentication-Flow-signup-with-email-chromium\video.webm]]
+
+[[ATTACHMENT|auth-Authentication-Flow-signup-with-email-chromium\error-context.md]]
+]]>
+</system-out>
+<error message="Test timeout of 60000ms exceeded." type="Error">
+<![CDATA[  [chromium] › auth.spec.ts:5:3 › Authentication Flow › signup with email ──────────────────────────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: page.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for locator('text=Get Started')
+
+
+       8 |     // Navigate to signup
+       9 |     await page.goto('/');
+    > 10 |     await page.click('text=Get Started');
+         |                ^
+      11 |
+      12 |     // Expect signup page
+      13 |     await expect(page).toHaveURL(/signup|auth/);
+        at D:\selfprint-v3-react\e2e\auth.spec.ts:10:16
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-signup-with-email-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-signup-with-email-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\auth-Authentication-Flow-signup-with-email-chromium\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Authentication Flow › login flow" classname="auth.spec.ts" time="10.33">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-Authentication-Flow-login-flow-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|auth-Authentication-Flow-login-flow-chromium\video.webm]]
+
+[[ATTACHMENT|auth-Authentication-Flow-login-flow-chromium\error-context.md]]
+]]>
+</system-out>
+<error message="locator.click: Timeout 5000ms exceeded." type="TimeoutError">
+<![CDATA[  [chromium] › auth.spec.ts:23:3 › Authentication Flow › login flow ────────────────────────────────
+
+    TimeoutError: locator.click: Timeout 5000ms exceeded.
+    Call log:
+      - waiting for locator('text=/Sign in|Login/')
+
+
+      29 |     // Click signin button
+      30 |     const signinBtn = page.locator('text=/Sign in|Login/');
+    > 31 |     await signinBtn.click({ timeout: 5000 });
+         |                     ^
+      32 |
+      33 |     // Fill email
+      34 |     const emailInput = page.locator('input[type="email"]').first();
+        at D:\selfprint-v3-react\e2e\auth.spec.ts:31:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-login-flow-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-login-flow-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\auth-Authentication-Flow-login-flow-chromium\error-context.md
+]]>
+</error>
+</testcase>
+<testcase name="Authentication Flow › page performance on auth pages" classname="auth.spec.ts" time="5.735">
+<system-out>
+<![CDATA[Home page load: 5073ms (limit: 1500ms)
+
+[[ATTACHMENT|auth-Authentication-Flow-page-performance-on-auth-pages-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|auth-Authentication-Flow-page-performance-on-auth-pages-chromium\video.webm]]
+
+[[ATTACHMENT|auth-Authentication-Flow-page-performance-on-auth-pages-chromium\error-context.md]]
+]]>
+</system-out>
+<system-err>
+<![CDATA[⚠️ Slow page load: 5073ms > 1500ms
+]]>
+</system-err>
+<failure message="expect(received).toBeLessThan(expected)" type="expect.toBeLessThan">
+<![CDATA[  [chromium] › auth.spec.ts:45:3 › Authentication Flow › page performance on auth pages ────────────
+
+    Error: expect(received).toBeLessThan(expected)
+
+    Expected: < 2000
+    Received:   5073
+
+      55 |     }
+      56 |
+    > 57 |     expect(homeLoadTime).toBeLessThan(PERFORMANCE_LIMITS.PAGE_LOAD + 500); // 500ms buffer for first load
+         |                          ^
+      58 |   });
+      59 |
+      60 |   test('accessible form controls', async ({ page }) => {
+        at D:\selfprint-v3-react\e2e\auth.spec.ts:57:26
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\auth-Authentication-Flow-page-performance-on-auth-pages-chromium\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="Authentication Flow › accessible form controls" classname="auth.spec.ts" time="4.901">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|auth-Authentication-Flow-accessible-form-controls-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|auth-Authentication-Flow-accessible-form-controls-chromium\video.webm]]
+
+[[ATTACHMENT|auth-Authentication-Flow-accessible-form-controls-chromium\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(received).toBeGreaterThan(expected)" type="expect.toBeGreaterThan">
+<![CDATA[  [chromium] › auth.spec.ts:60:3 › Authentication Flow › accessible form controls ──────────────────
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 0
+    Received:   0
+
+      63 |     // Check for proper labels
+      64 |     const inputs = await page.locator('input').count();
+    > 65 |     expect(inputs).toBeGreaterThan(0);
+         |                    ^
+      66 |
+      67 |     // Check for buttons
+      68 |     const buttons = await page.locator('button').count();
+        at D:\selfprint-v3-react\e2e\auth.spec.ts:65:20
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-accessible-form-controls-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\auth-Authentication-Flow-accessible-form-controls-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\auth-Authentication-Flow-accessible-form-controls-chromium\error-context.md
+]]>
+</failure>
+</testcase>
+</testsuite>
+<testsuite name="decision.spec.ts" timestamp="2026-08-21T05:02:11.555Z" hostname="chromium" tests="4" failures="0" skipped="0" time="7.787" errors="0">
+<testcase name="Decision Logging &amp; Intelligence › log a decision with performance assertion" classname="decision.spec.ts" time="1.847">
+<system-out>
+<![CDATA[Decision logging not yet implemented
+]]>
+</system-out>
+</testcase>
+<testcase name="Decision Logging &amp; Intelligence › decision follow-ups scheduling" classname="decision.spec.ts" time="1.768">
+</testcase>
+<testcase name="Decision Logging &amp; Intelligence › decision learning &amp; patterns" classname="decision.spec.ts" time="2.103">
+<system-out>
+<![CDATA[✓ Decision analytics visible
+]]>
+</system-out>
+</testcase>
+<testcase name="Decision Logging &amp; Intelligence › decision world expertise routing" classname="decision.spec.ts" time="2.069">
+</testcase>
+</testsuite>
+<testsuite name="twin.spec.ts" timestamp="2026-08-21T05:02:11.555Z" hostname="chromium" tests="5" failures="1" skipped="0" time="17.335" errors="0">
+<testcase name="Twin Creation &amp; Chat Flow › core awakening flow - twin creation" classname="twin.spec.ts" time="2.208">
+</testcase>
+<testcase name="Twin Creation &amp; Chat Flow › twin chat with performance assertion" classname="twin.spec.ts" time="8.271">
+<system-out>
+<![CDATA[
+[[ATTACHMENT|twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\test-failed-1.png]]
+
+[[ATTACHMENT|twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\video.webm]]
+
+[[ATTACHMENT|twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\error-context.md]]
+]]>
+</system-out>
+<failure message="expect(locator).toBeVisible() failed" type="expect.toBeVisible">
+<![CDATA[  [chromium] › twin.spec.ts:30:3 › Twin Creation & Chat Flow › twin chat with performance assertion 
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('input[placeholder*="message"], textarea').first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" with timeout 5000ms
+      - waiting for locator('input[placeholder*="message"], textarea').first()
+
+
+      34 |     // Ensure chat interface loads
+      35 |     const chatInput = page.locator('input[placeholder*="message"], textarea').first();
+    > 36 |     await expect(chatInput).toBeVisible({ timeout: 5000 });
+         |                             ^
+      37 |
+      38 |     // Send a message
+      39 |     const message = 'Hello Twin, what are you thinking?';
+        at D:\selfprint-v3-react\e2e\twin.spec.ts:36:29
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    ..\test-results\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    ..\test-results\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: ..\test-results\twin-Twin-Creation-Chat-Fl-f6d5a--with-performance-assertion-chromium\error-context.md
+]]>
+</failure>
+</testcase>
+<testcase name="Twin Creation &amp; Chat Flow › twin personality context switching (Hubs)" classname="twin.spec.ts" time="2.145">
+</testcase>
+<testcase name="Twin Creation &amp; Chat Flow › twin memory persistence" classname="twin.spec.ts" time="2.805">
+</testcase>
+<testcase name="Twin Creation &amp; Chat Flow › twin evolution stages" classname="twin.spec.ts" time="1.906">
+</testcase>
+</testsuite>
+<testsuite name="upload.spec.ts" timestamp="2026-08-21T05:02:11.555Z" hostname="chromium" tests="4" failures="0" skipped="0" time="4.75" errors="0">
+<testcase name="Image Upload &amp; Handling › upload profile picture" classname="upload.spec.ts" time="1.991">
+</testcase>
+<testcase name="Image Upload &amp; Handling › upload validation - file type" classname="upload.spec.ts" time="0.853">
+</testcase>
+<testcase name="Image Upload &amp; Handling › upload validation - file size" classname="upload.spec.ts" time="0.89">
+</testcase>
+<testcase name="Image Upload &amp; Handling › image rendering after upload" classname="upload.spec.ts" time="1.016">
+</testcase>
+</testsuite>
 </testsuites>
