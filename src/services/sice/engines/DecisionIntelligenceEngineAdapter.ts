@@ -26,7 +26,7 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
   constructor() {
     super(
       12,
-      'DecisionIntelligenceEngine',
+      'DecisionIntelligenceEngineAdapter',
       'Synthesizes decision patterns and provides guidance'
     );
   }
