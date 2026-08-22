@@ -18,11 +18,23 @@
  * Directive §18 rule respected: this is a PURE visual layer. No navigation,
  * buttons, cards, text, logo, UI, chat bubbles, or avatars are drawn here —
  * those are a separate UI layer composed by the caller on top.
+ *
+ * VISUAL-DIRECTIVE-001: now consumes the real EnvironmentEngine (via
+ * EnvironmentContext, rekeyed to WorldId in the Hub→World merge) so the
+ * background actually adapts to time-of-day and mood — not just world color —
+ * per directive §37 ("World Transition: lighting/motion/aura must change, not
+ * just background"): LightingEngine's --lighting-filter (hue/saturation by
+ * time of day) is applied to the whole layer, TimeOfDayEngine's --tod-bg-tint
+ * renders as a soft overlay, and ParticleSystemEngine's mood-driven speed +
+ * TimeOfDayEngine's energyLevel drive the existing SVG pattern animation
+ * durations (previously hardcoded to fixed 90s/6s/10s).
  */
 
 import { useMemo } from 'react';
+import type { CSSProperties } from 'react';
 import { WORLDS, DEEP_INTELLIGENT_BLUE, type WorldId, type WorldArchetype } from '../../constants/worlds';
 import { useAudio } from '../../context/AudioContext';
+import { useEnvironment } from '../../context/EnvironmentContext';
 
 interface WorldEnvironmentProps {
   worldId: WorldId;
@@ -254,6 +266,19 @@ export function WorldEnvironment({ worldId, position = 'fixed' }: WorldEnvironme
   const audio = useAudio();
   const animate = !audio.state.reduceMotion;
 
+  // EnvironmentContext computes against WorldContext.currentWorld (set by
+  // WorldDetail.tsx's recordWorldVisit()) — real-time-of-day + real-mood
+  // driven, not this component re-deriving anything on its own.
+  const { environment } = useEnvironment();
+
+  // Fallback to neutral values before the first compute tick resolves —
+  // EnvironmentContext computes synchronously on mount, so this is only
+  // ever momentary.
+  const lightingFilter = environment?.lighting.cssVars['--lighting-filter'] ?? 'none';
+  const bgTint = environment?.timeOfDay.cssVars['--tod-bg-tint'] ?? 'rgba(0,0,0,0)';
+  const energyLevel = environment?.timeOfDay.energyLevel ?? 1;
+  const particleSpeed = environment?.particles.speed ?? 1;
+
   const layerStyle = useMemo(
     () => ({
       position,
@@ -261,23 +286,35 @@ export function WorldEnvironment({ worldId, position = 'fixed' }: WorldEnvironme
       zIndex: 0,
       pointerEvents: 'none' as const,
       overflow: 'hidden' as const,
+      filter: lightingFilter,
+      transition: 'filter 800ms ease',
       background: `
         radial-gradient(ellipse at 50% 40%, ${hexToRgba(world.color, 0.16)} 0%, transparent 55%),
-        linear-gradient(160deg, ${DEEP_INTELLIGENT_BLUE} 0%, #060F26 100%)
+        linear-gradient(160deg, ${DEEP_INTELLIGENT_BLUE} 0%, #060F26 100%),
+        linear-gradient(${bgTint}, ${bgTint})
       `,
     }),
-    [world.color, position]
+    [world.color, position, lightingFilter, bgTint]
   );
 
+  // Motion speed now reflects real state instead of fixed durations —
+  // higher time-of-day energy / mood-driven particle speed = faster drift,
+  // pulse, and spin (directive §37: "aura must change").
+  const durationVars = {
+    '--world-env-spin-duration': `${(90 / energyLevel).toFixed(1)}s`,
+    '--world-env-pulse-duration': `${(6 / particleSpeed).toFixed(1)}s`,
+    '--world-env-drift-duration': `${(10 / particleSpeed).toFixed(1)}s`,
+  } as CSSProperties;
+
   return (
-    <div aria-hidden="true" style={layerStyle}>
+    <div aria-hidden="true" style={{ ...layerStyle, ...durationVars }}>
       <style>{`
         @keyframes world-env-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes world-env-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
         @keyframes world-env-drift { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2%); } }
-        .world-env-spin { animation: world-env-spin 90s linear infinite; }
-        .world-env-pulse { animation: world-env-pulse 6s ease-in-out infinite; }
-        .world-env-drift { animation: world-env-drift 10s ease-in-out infinite; }
+        .world-env-spin { animation: world-env-spin var(--world-env-spin-duration, 90s) linear infinite; }
+        .world-env-pulse { animation: world-env-pulse var(--world-env-pulse-duration, 6s) ease-in-out infinite; }
+        .world-env-drift { animation: world-env-drift var(--world-env-drift-duration, 10s) ease-in-out infinite; }
       `}</style>
       <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">
         <ArchetypePattern archetype={world.archetype} color={world.color} animate={animate} />

@@ -19,7 +19,10 @@ import { useWorld } from '../context/WorldContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { WorldEnvironment } from '../components/world/WorldEnvironment';
+import { TwinPresence } from '../components/twin/TwinPresence';
 import { useWorldAmbientTone } from '../hooks/useWorldAmbientTone';
+import { useEnvironment } from '../context/EnvironmentContext';
+import { useTwin } from '../context/TwinContext';
 import '../styles/worlds-hub.css';
 
 function isValidWorldId(id: string | undefined): id is WorldId {
@@ -41,6 +44,18 @@ export default function WorldDetail() {
   // this ever renders anything audible.
   const ambientWorldId = valid ? worldId : 'self';
   const ambientTone = useWorldAmbientTone(ambientWorldId);
+
+  // VISUAL-DIRECTIVE-001: EnvironmentEngine's soundscape recommendation
+  // (real time-of-day + mood driven, via WorldContext.currentWorld — set by
+  // recordWorldVisit() below) — surfaced next to the sound toggle so the
+  // "SOUND ADAPT" beat (directive §23) is actually visible, not just computed
+  // and discarded onto unread CSS vars.
+  const { environment } = useEnvironment();
+
+  // TWIN-PRESENCE-001: Twin's own Visual DNA (archetype-driven, constant
+  // across worlds per §34) — null-safe, TwinPresence falls back to a
+  // neutral default if a twin hasn't loaded yet.
+  const { twin } = useTwin();
 
   // GUARD: unknown world id → back to selector, don't render a broken page
   useEffect(() => {
@@ -73,6 +88,13 @@ export default function WorldDetail() {
           layered behind all content, pointer-events disabled so it never
           intercepts clicks. */}
       <WorldEnvironment worldId={world.id} />
+      {/* TWIN-PRESENCE-001: Twin appears in the world (directive §23/§35/§36)
+          — composited above the environment, below the text/UI column. */}
+      <TwinPresence
+        primaryArchetype={twin?.primaryArchetype}
+        secondaryArchetype={twin?.secondaryArchetype}
+        worldColor={world.color}
+      />
       <div
         className="world-detail"
         style={{ '--world-color': world.color } as React.CSSProperties}
@@ -84,7 +106,11 @@ export default function WorldDetail() {
             </button>
             <button
               onClick={ambientTone.toggle}
-              title={ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'}
+              title={
+                environment
+                  ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
+                  : ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'
+              }
               style={{
                 background: 'none',
                 border: '1px solid rgba(255,255,255,0.25)',
@@ -95,12 +121,19 @@ export default function WorldDetail() {
                 cursor: 'pointer',
               }}
             >
-              {ambientTone.isPlaying ? '🔊 เสียงบรรยากาศ' : '🔈 เสียงบรรยากาศ'}
+              {ambientTone.isPlaying
+                ? `🔊 ${environment?.soundscape.labelThai ?? 'เสียงบรรยากาศ'}`
+                : `🔈 ${environment?.soundscape.labelThai ?? 'เสียงบรรยากาศ'}`}
             </button>
           </div>
           <div className="wd-emoji">{world.emoji}</div>
           <h1>{world.name}</h1>
           <p className="wd-tagline">{world.tagline} · {world.mood}</p>
+          {environment && (
+            <p className="wd-tagline" style={{ fontSize: '0.85rem', opacity: 0.75 }}>
+              {environment.ambientDescription}
+            </p>
+          )}
           <p className="wd-description">{world.description}</p>
 
           <div className="wh-focus-areas">
