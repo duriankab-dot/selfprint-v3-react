@@ -45,23 +45,17 @@ export default function TwinChat() {
   const [savedDecisionIds, setSavedDecisionIds] = useState<Set<number>>(new Set());
   const autoSentInitialMessage = useRef(false);
 
-  // GUARD: Check if Twin exists
-  if (!twin) {
-    return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Your Twin hasn't awakened yet. Complete Core Awakening first.</p>
-      </div>
-    );
-  }
-
-  // GUARD: Check if user is logged in
-  if (!session?.user?.id) {
-    return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Please login to chat with your Twin</p>
-      </div>
-    );
-  }
+  // TWINCHAT-HOOKS-001 FIX: these two effects used to sit *after* the
+  // "GUARD: Check if Twin exists" / "GUARD: Check if user is logged in"
+  // early returns below — a Rules of Hooks violation. If twin/session
+  // ever flip from null -> defined between renders of this same mounted
+  // instance (e.g. TwinContext finishes its async load slightly after
+  // this page mounts), the early return means React sees fewer hooks
+  // called on the first render than on the next one, and throws
+  // "Rendered more hooks than during the previous render." Every hook
+  // must run unconditionally on every render, so both effects moved
+  // above the guards; each effect now checks twin/session for itself
+  // before touching them, and the guards moved below, after all hooks.
 
   // Extract and validate world param from URL
   // DISCONNECT-001 FIX: also sync WorldContext's currentWorld here, so
@@ -89,13 +83,32 @@ export default function TwinChat() {
   // silently vanished and the user landed on an empty chat instead of the
   // activity they picked. Auto-send it once on arrival.
   useEffect(() => {
+    if (!twin || !session?.user?.id) return;
     const initial = (location.state as { initialMessage?: string } | null)?.initialMessage;
     if (initial && !autoSentInitialMessage.current) {
       autoSentInitialMessage.current = true;
       handleSend(initial);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state]);
+  }, [location.state, twin, session]);
+
+  // GUARD: Check if Twin exists
+  if (!twin) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="text-gray-500 mb-4">Your Twin hasn't awakened yet. Complete Core Awakening first.</p>
+      </div>
+    );
+  }
+
+  // GUARD: Check if user is logged in
+  if (!session?.user?.id) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="text-gray-500 mb-4">Please login to chat with your Twin</p>
+      </div>
+    );
+  }
 
   const handleSaveDecision = async (messageIndex: number) => {
     if (!session.user?.id || !currentWorld) return;
