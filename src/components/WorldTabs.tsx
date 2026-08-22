@@ -15,6 +15,15 @@ import { WORLDS, type WorldId } from '../constants/worlds';
 
 interface WorldTabsProps {
   className?: string;
+  /**
+   * DISCONNECT-001 FIX: called in addition to the internal WorldContext
+   * update. Callers that keep their own "current world" state (e.g.
+   * TwinChat.tsx, which uses a local variable to build the actual AI
+   * prompt) must pass this — otherwise clicking a tab here visually
+   * "switches worlds" but the AI prompt silently keeps using whatever
+   * world was active before, because it never reads WorldContext at all.
+   */
+  onWorldSelect?: (world: WorldId) => void;
 }
 
 /**
@@ -24,7 +33,7 @@ interface WorldTabsProps {
  * Allows switching between worlds and tracks visits
  * @param className - Optional CSS classes for styling
  */
-export function WorldTabs({ className = '' }: WorldTabsProps) {
+export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
   const {
     currentWorld,
     setCurrentWorld,
@@ -38,6 +47,7 @@ export function WorldTabs({ className = '' }: WorldTabsProps) {
    */
   const handleWorldSelect = async (world: WorldId) => {
     setCurrentWorld(world);
+    onWorldSelect?.(world);
     await recordWorldVisit(world);
   };
 

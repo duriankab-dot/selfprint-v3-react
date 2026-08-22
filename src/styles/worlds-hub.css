@@ -9,6 +9,53 @@
   padding: var(--spacing-lg);
 }
 
+/* ===== WORLD DETAIL (P0-D full-screen entry point) ===== */
+
+.world-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-lg);
+  min-height: 100vh;
+}
+
+.wd-header {
+  text-align: center;
+  padding: var(--spacing-xl) 0;
+}
+
+.wd-back {
+  display: inline-block;
+  margin-bottom: var(--spacing-lg);
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.wd-emoji {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.wd-header h1 {
+  font-size: 2.25rem;
+  color: var(--world-color, #a78bfa);
+  margin-bottom: var(--spacing-xs);
+}
+
+.wd-tagline {
+  font-style: italic;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.wd-description {
+  color: var(--color-text-primary);
+  max-width: 600px;
+  margin: 0 auto var(--spacing-md);
+}
+
 /* ===== HEADER ===== */
 
 .wh-header {

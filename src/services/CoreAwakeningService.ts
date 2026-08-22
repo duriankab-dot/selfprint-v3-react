@@ -553,14 +553,20 @@ export async function completeCoreAwakening(
     }
 
     // Log analytics event
+    // SCHEMA FIX: analytics_events is keyed by user_id with an event_data
+    // jsonb column (supabase/migrations/007_analytics_events.sql) — there is
+    // no twin_id/world_id/metadata column. The old insert here used a
+    // different, never-applied schema (src/services/supabase-schema.sql's
+    // version) and would have failed silently against the real table.
     const { error: analyticsError } = await supabase
       .from('analytics_events')
       .insert({
-        twin_id: twin.id,
+        user_id: userId,
         event_type: 'twin_awakened',
-        world_id: 'self',
-        metadata: {
+        event_data: {
+          twinId: twin.id,
           twinName,
+          worldId: 'self',
           timestamp: new Date().toISOString(),
         },
       });
