@@ -86,28 +86,24 @@ CREATE TABLE IF NOT EXISTS twin_sice_scores (
   UNIQUE(twin_id, sice_name)
 );
 
--- World Preferences (user preferences per world)
-CREATE TABLE IF NOT EXISTS world_preferences (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
-  world_id text NOT NULL, -- 'self', 'mind', etc.
-  last_visited timestamp,
-  visit_count integer DEFAULT 0,
-  preferences jsonb, -- World-specific settings
-  created_at timestamp DEFAULT now(),
-  updated_at timestamp DEFAULT now(),
-  UNIQUE(twin_id, world_id)
-);
-
--- Analytics Events (for tracking usage + insights)
-CREATE TABLE IF NOT EXISTS analytics_events (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  twin_id uuid NOT NULL REFERENCES twins(id) ON DELETE CASCADE,
-  event_type text NOT NULL, -- 'decision_logged', 'world_visited', 'insight_generated', 'twin_evolved'
-  world_id text,
-  metadata jsonb,
-  created_at timestamp DEFAULT now()
-);
+-- world_preferences and analytics_events INTENTIONALLY SKIPPED HERE.
+-- 2026-08-22 SCHEMA COLLISION FOUND: both names already exist in production
+-- with a different, actively-used, user_id-keyed schema:
+--   world_preferences  <- supabase/migrations/20260816_world_preferences.sql
+--                          (id, user_id, world_id, is_favorite, last_accessed,
+--                           engagement_score) — used live by WorldContext.tsx
+--                           and WorldRoutingService.ts
+--   analytics_events    <- supabase/migrations/007_analytics_events.sql
+--                          (id, user_id, event_type, event_data, created_at)
+--                          — used live by src/services/analytics.ts and
+--                           TwinEvolutionService.ts
+-- The twin_id-keyed versions originally defined here were never applied
+-- (CREATE TABLE IF NOT EXISTS silently no-ops against the real tables), and
+-- the CREATE INDEX / RLS statements below that assumed a twin_id column on
+-- these two tables would fail with "column twin_id does not exist" against
+-- the real, already-live tables. Do NOT re-add twin_id-keyed versions of
+-- these two names — if Twin-scoped world/analytics data is ever needed,
+-- give it a distinct table name instead of colliding with these.
 
 -- Awakening Essence (Twin birth seed data - P0 #1 fix)
 CREATE TABLE IF NOT EXISTS awakening_essence (
@@ -157,8 +153,6 @@ CREATE INDEX IF NOT EXISTS idx_decisions_twin_id ON decisions(twin_id);
 CREATE INDEX IF NOT EXISTS idx_decision_follow_ups_decision ON decision_follow_ups(decision_id);
 CREATE INDEX IF NOT EXISTS idx_follow_up_schedule_decision ON follow_up_schedule(decision_id);
 CREATE INDEX IF NOT EXISTS idx_twin_sice_twin_id ON twin_sice_scores(twin_id);
-CREATE INDEX IF NOT EXISTS idx_world_preferences_twin ON world_preferences(twin_id);
-CREATE INDEX IF NOT EXISTS idx_analytics_twin_id ON analytics_events(twin_id);
 CREATE INDEX IF NOT EXISTS idx_awakening_essence_user_id ON awakening_essence(user_id);
 CREATE INDEX IF NOT EXISTS idx_awakening_essence_status ON awakening_essence(status);
 CREATE INDEX IF NOT EXISTS idx_personal_contexts_user_id ON personal_contexts(user_id);
@@ -172,8 +166,8 @@ ALTER TABLE twin_memories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE decision_follow_ups ENABLE ROW LEVEL SECURITY;
 ALTER TABLE twin_sice_scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE world_preferences ENABLE ROW LEVEL SECURITY;
-ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+-- world_preferences / analytics_events RLS already set by their real
+-- migrations (see the skip note above) — not touched here.
 ALTER TABLE awakening_essence ENABLE ROW LEVEL SECURITY;
 ALTER TABLE personal_contexts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follow_up_schedule ENABLE ROW LEVEL SECURITY;
@@ -207,20 +201,6 @@ CREATE POLICY "Follow-ups access" ON decision_follow_ups
   );
 
 CREATE POLICY "SICE scores access" ON twin_sice_scores
-  FOR ALL USING (
-    twin_id IN (
-      SELECT id FROM twins WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "World preferences access" ON world_preferences
-  FOR ALL USING (
-    twin_id IN (
-      SELECT id FROM twins WHERE user_id = auth.uid()
-    )
-  );
-
-CREATE POLICY "Analytics access" ON analytics_events
   FOR ALL USING (
     twin_id IN (
       SELECT id FROM twins WHERE user_id = auth.uid()

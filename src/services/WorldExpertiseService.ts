@@ -26,6 +26,12 @@ export interface TwinWorldPreferences {
 
 /**
  * Record a world interaction and update expertise
+ *
+ * P0-D FIX: the previous version upserted interaction_count: 1 and
+ * expertise_score: expertiseGain on every call — a flat RESET, not an
+ * increment (the comment even admitted it relied on "a trigger" that never
+ * existed). Now reads the current row first and accumulates, the same
+ * read-then-upsert pattern already used by WorldContext.recordWorldVisit().
  */
 export async function recordWorldInteraction(
   twinId: string,
@@ -35,17 +41,26 @@ export async function recordWorldInteraction(
   if (!supabase) return;
 
   try {
-    // Update or insert world expertise
+    const { data: existing } = await supabase
+      .from('twin_world_expertise')
+      .select('interaction_count, expertise_score')
+      .eq('twin_id', twinId)
+      .eq('world', world)
+      .single();
+
+    const nextInteractionCount = (existing?.interaction_count || 0) + 1;
+    const nextExpertiseScore = Math.min(100, (existing?.expertise_score ?? 0) + expertiseGain);
+
     const { error } = await supabase
       .from('twin_world_expertise')
       .upsert(
         {
           twin_id: twinId,
           world,
-          interaction_count: 1, // Will be incremented by trigger or manual increment
+          interaction_count: nextInteractionCount,
           last_interaction_at: new Date().toISOString(),
-          expertise_score: Math.min(100, expertiseGain),
-          confidence: Math.min(100, expertiseGain * 0.8),
+          expertise_score: nextExpertiseScore,
+          confidence: Math.min(100, Math.round(nextExpertiseScore * 0.8)),
         },
         { onConflict: 'twin_id,world' }
       );

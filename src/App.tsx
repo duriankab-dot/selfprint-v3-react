@@ -68,6 +68,7 @@ const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
 const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
+const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 
 /**
@@ -140,7 +141,9 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     <Route key="en-twin-personality" path="/en/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />,
     <Route key="th-twin-personality" path="/th/twin/personality" element={<ProtectedRoute><TwinPersonalityPage /></ProtectedRoute>} />,
     <Route key="en-worlds" path="/en/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />,
-    <Route key="th-worlds" path="/th/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />
+    <Route key="th-worlds" path="/th/worlds" element={<ProtectedRoute><WorldsHub /></ProtectedRoute>} />,
+    <Route key="en-world-detail" path="/en/worlds/:worldId" element={<ProtectedRoute><WorldDetail /></ProtectedRoute>} />,
+    <Route key="th-world-detail" path="/th/worlds/:worldId" element={<ProtectedRoute><WorldDetail /></ProtectedRoute>} />
   );
 
   return routes;

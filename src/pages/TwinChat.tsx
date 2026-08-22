@@ -12,11 +12,13 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
+import { useWorld } from '../context/WorldContext';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
 import { saveMessage } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
+import { recordWorldInteraction } from '../services/WorldExpertiseService';
 import * as DecisionService from '../services/DecisionService';
 
 interface Message {
@@ -30,6 +32,7 @@ interface Message {
 export default function TwinChat() {
   const { session } = useAuth();
   const { twin, setCurrentWorld } = useTwin();
+  const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
   const [searchParams] = useSearchParams();
 
   const [message, setMessage] = useState('');
@@ -59,6 +62,12 @@ export default function TwinChat() {
   }
 
   // Extract and validate world param from URL
+  // DISCONNECT-001 FIX: also sync WorldContext's currentWorld here, so
+  // WorldTabs (which reads WorldContext, not this component's local state)
+  // correctly highlights the world that arrived via ?world= — previously
+  // only TwinContext's copy was set, leaving WorldTabs looking stale/wrong
+  // on arrival even though the AI prompt itself was already using the
+  // right world.
   useEffect(() => {
     const worldParam = searchParams.get('world');
     if (worldParam && typeof worldParam === 'string') {
@@ -67,9 +76,10 @@ export default function TwinChat() {
         const world = worldParam as WorldId;
         setLocalWorld(world);
         setCurrentWorld(world);
+        setWorldContextCurrentWorld(world);
       }
     }
-  }, [searchParams, setCurrentWorld]);
+  }, [searchParams, setCurrentWorld, setWorldContextCurrentWorld]);
 
 
   const handleSaveDecision = async (messageIndex: number) => {
@@ -199,6 +209,17 @@ export default function TwinChat() {
         options: options.length > 0 ? options : undefined,
       }]);
 
+      // P0-D: record real per-world expertise growth. WorldExpertiseService
+      // existed and was fully built (twin_world_expertise table) but had
+      // zero production callers — expertise never actually accumulated with
+      // use. Non-blocking: a failure here must not break the chat response
+      // the user already received.
+      if (currentWorld) {
+        recordWorldInteraction(twin.id, currentWorld).catch((err) =>
+          console.error('Failed to record world interaction:', err)
+        );
+      }
+
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
       setError(errorMsg);
@@ -253,7 +274,17 @@ export default function TwinChat() {
       </h1>
 
       {/* World Selector Tabs */}
-      <WorldTabs className="mb-4" />
+      {/* DISCONNECT-001 FIX: onWorldSelect keeps this page's own local
+          currentWorld (the one actually sent to callTwinAPI) in sync with
+          the tab that was clicked — previously only WorldContext updated,
+          so switching tabs here never changed the AI's world context. */}
+      <WorldTabs
+        className="mb-4"
+        onWorldSelect={(world) => {
+          setLocalWorld(world);
+          setCurrentWorld(world);
+        }}
+      />
 
       {/* Error Alert */}
       {error && (
