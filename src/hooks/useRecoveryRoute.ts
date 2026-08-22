@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
@@ -18,11 +18,30 @@ export function useRecoveryRoute() {
   const { session, loading: authLoading } = useAuth();
   const status = useLifecycleStore((state) => state.status);
   const isLoading = useLifecycleStore((state) => state.isLoading);
+  const recoveredForUserId = useRef<string | null>(null);
 
   useEffect(() => {
     // Wait for auth and lifecycle to load
     if (authLoading || isLoading) return;
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      recoveredForUserId.current = null; // logged out — re-arm for next login
+      return;
+    }
+
+    // LOOP-002 FIX: this used to re-run on every `status` change, not just
+    // once after login. This component is mounted once for the whole app
+    // (never unmounts between routes), so once ROUTELOOP-001 was fixed and
+    // navigate() actually worked, every legitimate in-session status
+    // transition (finishing onboarding -> ANALYSIS, Twin birth ->
+    // TWIN_ALIVE, etc.) ALSO re-fired this "send the user to their resume
+    // point" redirect — fighting with whatever navigate() the current
+    // page's own step logic had just called, and producing a visible
+    // back-and-forth loop between pages (e.g. onboarding <-> analysis).
+    // This hook's job is to send a RETURNING user to their resume point
+    // once, right after login — not to keep overriding navigation for the
+    // rest of the session as status advances normally.
+    if (recoveredForUserId.current === session.user.id) return;
+    recoveredForUserId.current = session.user.id;
 
     // Route based on lifecycle status
     const routeMap: Record<string, string> = {

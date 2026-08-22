@@ -62,13 +62,27 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
 
-  // NEW: Guard against re-entry — if user already passed ONBOARDING, redirect
+  // Guard against re-entry — if user already passed ONBOARDING, redirect.
+  // LOOP-002 FIX: this used to depend on [status, navigate] and re-fire on
+  // EVERY status change, not just check once on arrival. lifecycleStore's
+  // status is loaded async (starts at the store's default, then updates
+  // once loadLifecycle() resolves) — reacting to every change meant that if
+  // status ever briefly disagreed with "still onboarding" while the person
+  // was actively answering questions, this bounced them to /analysis mid
+  // quiz, and the guard on /analysis had nothing to show yet (analysis
+  // data lives in this component's own local state), producing the
+  // reported back-and-forth loop between onboarding and analysis. Now it
+  // only checks once, right when the page first has a real status.
   const status = useLifecycleStore((state) => state.status);
+  const isLifecycleLoading = useLifecycleStore((state) => state.isLoading);
+  const hasCheckedReentry = useRef(false);
   useEffect(() => {
+    if (isLifecycleLoading || hasCheckedReentry.current) return;
+    hasCheckedReentry.current = true;
     if (status && status !== 'ONBOARDING') {
       navigate('/analysis', { replace: true });
     }
-  }, [status, navigate]);
+  }, [status, isLifecycleLoading, navigate]);
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
   const [siceResult, setSiceResult] = useState<{
