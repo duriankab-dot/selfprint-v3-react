@@ -8,8 +8,8 @@
  * QUERY PARAM: ?world=<worldId> (optional)
  */
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useWorld } from '../context/WorldContext';
@@ -34,6 +34,7 @@ export default function TwinChat() {
   const { twin, setCurrentWorld } = useTwin();
   const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
   const [searchParams] = useSearchParams();
+  const location = useLocation();
 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -42,6 +43,7 @@ export default function TwinChat() {
   const [currentWorld, setLocalWorld] = useState<WorldId | null>(null);
   const [savingDecisionIndex, setSavingDecisionIndex] = useState<number | null>(null);
   const [savedDecisionIds, setSavedDecisionIds] = useState<Set<number>>(new Set());
+  const autoSentInitialMessage = useRef(false);
 
   // GUARD: Check if Twin exists
   if (!twin) {
@@ -81,6 +83,19 @@ export default function TwinChat() {
     }
   }, [searchParams, setCurrentWorld, setWorldContextCurrentWorld]);
 
+  // CHATROUTE-001 FIX: several entry points (Today section, Activities,
+  // Explore) navigate here with { state: { initialMessage } } to start a
+  // specific guided prompt — but nothing ever read it, so the prompt
+  // silently vanished and the user landed on an empty chat instead of the
+  // activity they picked. Auto-send it once on arrival.
+  useEffect(() => {
+    const initial = (location.state as { initialMessage?: string } | null)?.initialMessage;
+    if (initial && !autoSentInitialMessage.current) {
+      autoSentInitialMessage.current = true;
+      handleSend(initial);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state]);
 
   const handleSaveDecision = async (messageIndex: number) => {
     if (!session.user?.id || !currentWorld) return;
@@ -135,10 +150,11 @@ export default function TwinChat() {
     }
   };
 
-  const handleSend = async () => {
-    if (!message.trim()) return;
+  const handleSend = async (overrideText?: string) => {
+    const textToSend = overrideText ?? message;
+    if (!textToSend.trim()) return;
 
-    const userMessage = message.trim();
+    const userMessage = textToSend.trim();
     setMessage('');
     setIsSending(true);
     setError(null);
@@ -373,7 +389,7 @@ export default function TwinChat() {
           className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 text-sm"
         />
         <button
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={isSending || !message.trim()}
           className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
         >

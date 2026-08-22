@@ -58,7 +58,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'สะท้อนคิดตอนเย็น',
         description: 'ทบทวนวันนี้: สิ่งที่ดี สิ่งที่เรียนรู้ สิ่งที่อยากเปลี่ยน',
         duration: '5 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ขอทำ Evening Reflection กับคุณ — วันนี้เป็นอย่างไรบ้าง? มีอะไรที่ดีเกิดขึ้น อะไรที่เรียนรู้ และอะไรที่อยากปรับในวันพรุ่งนี้?',
       },
       {
@@ -67,7 +69,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'ทบทวนสัปดาห์',
         description: 'มองภาพรวมสัปดาห์ที่ผ่านมาว่าคุณเดินหน้าไปทิศไหน',
         duration: '10 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ขอทำ Weekly Review กับคุณ — สัปดาห์นี้เป็นอย่างไรบ้าง? มีความสำเร็จอะไร มีอุปสรรคอะไร และสัปดาห์หน้าจะโฟกัสที่อะไร?',
       },
     ],
@@ -92,7 +96,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'ค้นหาคุณค่าชีวิต',
         description: 'สำรวจว่าอะไรสำคัญที่สุดสำหรับคุณจริงๆ',
         duration: '10 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ช่วยฉันค้นหาคุณค่าชีวิตที่แท้จริงของฉัน ด้วยการถามคำถามแบบ Socratic — ถามทีละข้อ รอฟังคำตอบ แล้วค่อยถามต่อ',
       },
       {
@@ -101,7 +107,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'สำรวจจุดแข็ง',
         description: 'ค้นพบสิ่งที่คุณทำได้ดีโดยธรรมชาติ',
         duration: '7 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ช่วยฉันสำรวจจุดแข็งของตัวเอง — ถามฉันเกี่ยวกับสถานการณ์ที่ฉันรู้สึกว่าตัวเองทำได้ดี และช่วยสรุปรูปแบบที่เห็น',
       },
     ],
@@ -118,7 +126,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'โค้ชตัดสินใจ',
         description: 'คุยกับ AI ฝาแฝดเพื่อคิดทบทวนการตัดสินใจที่กำลังเผชิญ',
         duration: '10 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ฉันมีการตัดสินใจที่ต้องคิด — ช่วยโค้ชฉันแบบถามคำถามที่ทำให้ฉันเห็นมุมมองที่หลากหลายได้ไหม? ไม่ต้องบอกว่าฉันควรทำอะไร แค่ช่วยให้ฉันคิดได้รอบด้านขึ้น',
       },
       {
@@ -127,7 +137,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'วิเคราะห์ข้อดี-ข้อเสีย',
         description: 'ใช้ AI ช่วยจัดระเบียบความคิดก่อนตัดสินใจ',
         duration: '8 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ช่วยฉันทำ Pros & Cons Analysis — บอกฉันมาก่อนว่าคุณกำลังพิจารณาตัดสินใจเรื่องอะไร แล้วฉันจะช่วยจัดระเบียบความคิด',
       },
     ],
@@ -160,7 +172,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'สำรวจความสัมพันธ์',
         description: 'คุยกับ AI เพื่อทำความเข้าใจพลวัตในความสัมพันธ์ของคุณ',
         duration: '10 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ฉันอยากสำรวจเรื่องความสัมพันธ์ในชีวิตของฉัน — ช่วยถามคำถามที่ทำให้ฉันเข้าใจรูปแบบในความสัมพันธ์ที่ฉันมีกับคนรอบข้าง',
       },
     ],
@@ -201,7 +215,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'ตั้งเป้าหมาย',
         description: 'คุยกับ AI เพื่อสร้างเป้าหมายที่ตรงกับตัวตนของคุณจริงๆ',
         duration: '10 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ช่วยฉันตั้งเป้าหมายที่ตรงกับคุณค่าและตัวตนของฉัน — ถามฉันก่อนว่าฉันอยากเติบโตด้านไหน แล้วช่วยทำให้เป้าหมายนั้นชัดเจนและจริงจัง',
       },
       {
@@ -226,7 +242,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'ตั้งเจตนาเช้า',
         description: 'เริ่มวันด้วยการชัดเจนว่าวันนี้คุณต้องการอะไร',
         duration: '3 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ช่วยฉันตั้งเจตนาสำหรับวันนี้ — ถามฉันเกี่ยวกับสิ่งที่ต้องการทำสำเร็จ ความรู้สึกที่อยากมี และสิ่งที่จะหลีกเลี่ยง',
       },
       {
@@ -235,7 +253,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'บันทึกความขอบคุณ',
         description: '3 สิ่งที่คุณรู้สึกขอบคุณในวันนี้',
         duration: '3 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'ขอทำ Gratitude Practice กัน — ช่วยถามฉัน 3 คำถามเกี่ยวกับสิ่งที่ฉันรู้สึกขอบคุณในวันนี้ ทีละข้อ แล้วช่วยสรุปสิ่งที่ฉันพูดถึง',
       },
       {
@@ -244,7 +264,9 @@ const CATEGORIES: ActivityCategory[] = [
         title: 'เช็คอินด่วน',
         description: 'บอก AI ว่าตอนนี้รู้สึกอย่างไร — รับ insight ทันที',
         duration: '2 นาที',
-        route: '/chat',
+        // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+        // (pre-Twin guide) — wrong assistant once a Twin exists.
+        route: '/chat/twin',
         chatPrompt: 'เช็คอินด่วน — ตอนนี้ฉันรู้สึก...',
       },
     ],
@@ -262,8 +284,8 @@ export default function ActivitiesPage() {
 
   const handleActivity = (activity: Activity) => {
     if (!activity.route) return;
-    if (activity.route === '/chat' && activity.chatPrompt) {
-      navigate('/chat', { state: { initialMessage: activity.chatPrompt } });
+    if (activity.route === '/chat/twin' && activity.chatPrompt) {
+      navigate('/chat/twin', { state: { initialMessage: activity.chatPrompt } });
     } else {
       navigate(activity.route);
     }
