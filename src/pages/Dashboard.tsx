@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useQuery } from '@tanstack/react-query';
 import {
   getDashboardInsights,

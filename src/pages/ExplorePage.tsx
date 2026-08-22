@@ -11,7 +11,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
 import { useAuth } from '../context/AuthContext';

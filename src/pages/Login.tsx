@@ -19,7 +19,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { PasskeyLogin } from '@/components/auth/PasskeyLogin';
 

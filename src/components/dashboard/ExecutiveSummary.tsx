@@ -19,7 +19,7 @@
 
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';

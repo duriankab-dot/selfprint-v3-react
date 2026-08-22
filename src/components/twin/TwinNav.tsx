@@ -4,7 +4,8 @@
  * Tabs: Chat | Personality | Settings
  */
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '../../context/AuthContext';
 import { useTwin } from '../../context/TwinContext';
 import '../../styles/twin-nav.css';

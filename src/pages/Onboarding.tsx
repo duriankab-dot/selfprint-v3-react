@@ -6,7 +6,7 @@
  */
 
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { EmotionSelector } from '@/components/features/EmotionSelector';
 import { BirthdateInput } from '@/components/onboarding/BirthdateInput';
@@ -25,39 +25,22 @@ import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 
-// Calls backend /api/intelligence (Phase 5.2 — Astrovera Psychology via Claude)
+// The standalone Express backend (server/, POST /api/intelligence) that this
+// used to call has been retired — the 12-SICE analysis now runs client-side
+// via src/services/sice/SICEOrchestrator.ts. This function always used to
+// fail in production anyway (VITE_BACKEND_URL was never set, so it fell
+// back to http://localhost:3001, which every visitor's browser refused to
+// connect to). Confirmed with the project owner 2026-08-22 that the old
+// backend is not coming back. Removed the dead network call entirely —
+// callers already fall back to buildFallbackResponse(), so behavior for the
+// end user is unchanged, just without the wasted round trip and console
+// error on every onboarding.
 async function analyzeWithAstrovera(
-  answers: Record<string, string>,
-  mood: Mood,
-  birthDate: string
+  _answers: Record<string, string>,
+  _mood: Mood,
+  _birthDate: string
 ): Promise<AnalysisResponse | null> {
-  try {
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
-    const res = await fetch(`${backendUrl}/api/intelligence`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mood, birthDate, finetuneAnswers: answers }),
-      signal: AbortSignal.timeout(15000),
-    });
-
-    if (!res.ok) return null;
-
-    const data = await res.json();
-    if (
-      typeof data.decisionStyle !== 'string' ||
-      !Array.isArray(data.strengths) ||
-      !Array.isArray(data.insights) ||
-      !Array.isArray(data.opportunities) ||
-      !Array.isArray(data.blindSpots) ||
-      typeof data.confidence !== 'number'
-    ) {
-      return null;
-    }
-
-    return data as AnalysisResponse;
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 type OnboardingStep =
