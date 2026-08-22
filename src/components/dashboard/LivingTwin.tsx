@@ -217,7 +217,9 @@ const LivingTwin: React.FC = () => {
         </button>
         <button
           className="living-twin__btn living-twin__btn--outline"
-          onClick={() => navigate('/chat')}
+          // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin
+          // guide), wrong assistant for a "คุยกับ Twin" button.
+          onClick={() => navigate('/chat/twin')}
         >
           💬 คุยกับ Twin
         </button>

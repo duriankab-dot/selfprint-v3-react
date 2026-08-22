@@ -37,7 +37,9 @@ const FEATURES: Feature[] = [
     icon: '💬',
     title: 'คุยกับ AI ฝาแฝด',
     description: 'สนทนากับ AI ที่เข้าใจรูปแบบการตัดสินใจของคุณ ปรับระดับความเป็นอิสระได้เอง',
-    to: '/chat',
+    // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin guide),
+    // wrong assistant — this card is explicitly labeled "AI ฝาแฝด" (Twin).
+    to: '/chat/twin',
   },
   {
     icon: '📊',

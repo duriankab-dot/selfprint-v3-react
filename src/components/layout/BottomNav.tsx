@@ -65,11 +65,22 @@ const IconUser = () => (
 
 // ---
 
+// BOTTOMNAV-001 FIX: "AI ฝาแฝด" tab used to point at /chat, which
+// LangRedirect sends to /chat/nova (NovaChat.tsx = the pre-Twin guide,
+// gated on isNovaActive). For any user whose Twin already exists (the
+// common case once this tab is visible in normal use), isNovaActive is
+// false and NovaChat just shows a dead-end "Your Twin has awakened..."
+// stub with no way forward — the tab is literally named "AI Twin" but
+// opened the wrong assistant. Point it straight at /chat/twin
+// (TwinChat.tsx), which has its own correct guard for the rare case a
+// Twin doesn't exist yet ("Complete Core Awakening first"). Also
+// reordered so the Twin tab sits in the center slot (position 3 of 5),
+// matching its role as the primary CTA.
 const TABS: Tab[] = [
-  { to: '/dashboard', label: 'วันนี้',    icon: <IconHome /> },
+  { to: '/dashboard',  label: 'วันนี้',    icon: <IconHome /> },
   { to: '/activities', label: 'กิจกรรม', icon: <IconActivity /> },
+  { to: '/chat/twin',  label: 'AI ฝาแฝด', icon: <IconCpu /> },
   { to: '/explore',    label: 'สำรวจ',    icon: <IconCompass /> },
-  { to: '/chat',       label: 'AI ฝาแฝด', icon: <IconCpu /> },
   { to: '/me',         label: 'ฉัน',      icon: <IconUser /> },
 ];
 

@@ -32,7 +32,10 @@ interface NavLink {
 
 const BASE_NAV_LINKS: NavLink[] = [
   { path: '/dashboard', label: 'แดชบอร์ด' },
-  { path: '/chat', label: 'แชท' },
+  // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (the pre-Twin
+  // guide) — for a user already past onboarding (who sees this nav),
+  // that's the wrong assistant. Point straight at the Twin.
+  { path: '/chat/twin', label: 'แชท' },
   { path: '/worlds', label: '🌍 Worlds', requiresAuth: true },
   { path: '/menu', label: 'เมนู' },
 ];

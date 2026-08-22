@@ -10,7 +10,9 @@ import { useLanguage } from '../../context/LanguageContext';
 const FOOTER_LINKS = [
   { to: '/', label: 'หน้าแรก' },
   { to: '/dashboard', label: 'แดชบอร์ด' },
-  { to: '/chat', label: 'แชท' },
+  // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin guide),
+  // wrong assistant for a user who already has a Twin.
+  { to: '/chat/twin', label: 'แชท' },
   { to: '/menu', label: 'เมนูฟีเจอร์' },
   { to: '/onboarding', label: 'เริ่มต้นใช้งาน' },
 ];

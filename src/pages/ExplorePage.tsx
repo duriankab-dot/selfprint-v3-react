@@ -90,7 +90,9 @@ export default function ExplorePage() {
   const handleSendToChat = () => {
     if (!reflectionText.trim()) return;
     setReflectionDone(true);
-    navigate('/chat', {
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    navigate('/chat/twin', {
       state: {
         initialMessage: `คำถามประจำวัน: "${todayQuestion}"\n\nความคิดของฉัน: ${reflectionText}`,
       },
@@ -208,7 +210,7 @@ export default function ExplorePage() {
 
             <button
               onClick={() =>
-                navigate('/chat', {
+                navigate('/chat/twin', {
                   state: {
                     initialMessage: `รูปแบบที่ AI วิเคราะห์ได้: "${hexagram.thaiName}" (${hexagram.theme}) — ช่วยเชื่อมโยงกับสิ่งที่ฉันกำลังเผชิญในชีวิตจริงได้ไหม?`,
                   },

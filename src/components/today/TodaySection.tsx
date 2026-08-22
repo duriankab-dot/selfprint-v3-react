@@ -52,7 +52,9 @@ const SECTION_LIBRARY: SectionCard[] = [
     title: 'ตั้งเจตนาเช้า',
     description: 'ชัดเจนว่าวันนี้คุณต้องการอะไรก่อนเริ่มวัน',
     cta: 'เริ่มเลย',
-    route: '/chat',
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    route: '/chat/twin',
     chatPrompt: 'ช่วยฉันตั้งเจตนาสำหรับวันนี้ — ถามฉันเกี่ยวกับสิ่งที่ต้องการทำสำเร็จ ความรู้สึกที่อยากมี และสิ่งที่จะหลีกเลี่ยง',
     priority: 9,
   },
@@ -71,7 +73,9 @@ const SECTION_LIBRARY: SectionCard[] = [
     title: 'เช็คอินด่วน',
     description: 'บอก AI ว่าตอนนี้รู้สึกอย่างไร รับ insight ทันที',
     cta: 'เช็คอิน',
-    route: '/chat',
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    route: '/chat/twin',
     chatPrompt: 'เช็คอินด่วน — ตอนนี้ฉันรู้สึก...',
     priority: 8,
   },
@@ -90,7 +94,9 @@ const SECTION_LIBRARY: SectionCard[] = [
     title: 'สะท้อนคิดตอนเย็น',
     description: 'ทบทวนวันนี้: สิ่งที่ดี สิ่งที่เรียนรู้',
     cta: 'เริ่มสะท้อนคิด',
-    route: '/chat',
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    route: '/chat/twin',
     chatPrompt: 'ขอทำ Evening Reflection — วันนี้เป็นอย่างไรบ้าง? มีอะไรที่ดีเกิดขึ้น อะไรที่เรียนรู้ และอะไรที่อยากปรับในวันพรุ่งนี้?',
     priority: 9,
   },
@@ -109,7 +115,9 @@ const SECTION_LIBRARY: SectionCard[] = [
     title: 'บันทึกความขอบคุณ',
     description: '3 สิ่งที่คุณรู้สึกขอบคุณในวันนี้',
     cta: 'บันทึก',
-    route: '/chat',
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    route: '/chat/twin',
     chatPrompt: 'ขอทำ Gratitude Practice กัน — ถามฉัน 3 คำถามเกี่ยวกับสิ่งที่ฉันรู้สึกขอบคุณในวันนี้ ทีละข้อ แล้วช่วยสรุป',
     priority: 7,
   },
@@ -119,7 +127,9 @@ const SECTION_LIBRARY: SectionCard[] = [
     title: 'เตรียมพร้อมพรุ่งนี้',
     description: 'วางแผนวันพรุ่งนี้กับ AI ฝาแฝดของคุณ',
     cta: 'วางแผน',
-    route: '/chat',
+    // BOTTOMNAV-001/CHATROUTE-001 FIX: '/chat' redirects to /chat/nova
+    // (pre-Twin guide) — wrong assistant once a Twin exists.
+    route: '/chat/twin',
     chatPrompt: 'ช่วยฉันวางแผนสำหรับวันพรุ่งนี้ — ถามฉันเกี่ยวกับสิ่งที่ต้องทำ และช่วยจัดลำดับความสำคัญ',
     priority: 8,
   },
@@ -207,8 +217,8 @@ export function TodaySection({ hasHistory = false }: TodaySectionProps) {
   const sections = selectSections(timeSlot, hasHistory);
 
   const handleSection = (section: SectionCard) => {
-    if (section.route === '/chat' && section.chatPrompt) {
-      navigate('/chat', { state: { initialMessage: section.chatPrompt } });
+    if (section.route === '/chat/twin' && section.chatPrompt) {
+      navigate('/chat/twin', { state: { initialMessage: section.chatPrompt } });
     } else {
       navigate(section.route);
     }
