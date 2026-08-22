@@ -6,13 +6,80 @@
 import { supabase } from './supabase-service';
 import { SICEOrchestrator } from '../services/sice/SICEOrchestrator';
 import { createTwinInDatabase } from './TwinSupabaseService';
+import type { Twin } from './TwinSupabaseService';
 import { ensureUserProfile } from './database-init';
+import { calculateInitialDisciplines } from '../lib/astrology';
 import type { SICEInput } from '../types/sice';
+import type { Archetype } from '../context/TwinContext';
 
 export interface AwakeningResult {
   success: boolean;
   message: string;
   twinId?: string;
+  /** P0-C: full Twin record, so callers don't need a second fetch */
+  twin?: Twin;
+  /** P0-C Gap #4: one grounded insight, for the UI to show instead of a generic line */
+  firstInsight?: string;
+}
+
+/**
+ * P0-C Gap #1: The 12 real SICE engine names, exactly as SICEOrchestrator emits
+ * them (see registerEngines()). The previous baseline-seeding list used
+ * 'MemoryManager' / 'DecisionIntelligenceEngine' — neither matches the real
+ * engine names ('MemoryManagerEngine' / 'DecisionIntelligenceEngineAdapter'),
+ * so any lookup by name would have silently missed those two engines.
+ */
+const REAL_SICE_ENGINE_NAMES = [
+  'PersonalContextBuilder',
+  'PatternDetector',
+  'InsightEngine',
+  'AIFeedbackLoop',
+  'TwinStateEngine',
+  'ExperienceEngine',
+  'EnvironmentEngine',
+  'BadgeEngine',
+  'BehavioralForecastEngine',
+  'FutureSelfEngine',
+  'MemoryManagerEngine',
+  'DecisionIntelligenceEngineAdapter',
+] as const;
+
+/**
+ * P0-C Gap #1: Deterministic, grounded secondary-archetype inference.
+ * Matches keywords already present in the user's own SICE essence text
+ * (recommendedAction + insights) — never fabricates new content, only
+ * picks among the 18 valid archetypes based on what the engines actually
+ * said. Falls back to a neutral, valid archetype (never the primary) if
+ * nothing matches.
+ */
+const ARCHETYPE_KEYWORDS: Record<string, string[]> = {
+  explorer: ['explore', 'discover', 'curious', 'adventure'],
+  sage: ['wisdom', 'wise', 'understand', 'insight', 'knowledge'],
+  caregiver: ['help', 'care', 'support', 'nurture'],
+  ruler: ['lead', 'control', 'structure', 'organize'],
+  creator: ['create', 'build', 'design', 'craft'],
+  hero: ['brave', 'overcome', 'challenge', 'achieve'],
+  outlaw: ['different', 'unconventional', 'rebel', 'break'],
+  everyman: ['connect', 'belong', 'relate', 'community'],
+  lover: ['relationship', 'connection', 'passion', 'intimacy'],
+  jester: ['fun', 'playful', 'humor', 'joy'],
+  magician: ['transform', 'change', 'vision', 'possibility'],
+  innocent: ['simple', 'pure', 'trust', 'optimis'],
+};
+
+function inferSecondaryArchetype(essenceText: string, primary: string): Archetype {
+  const lower = essenceText.toLowerCase();
+  let best = { archetype: '', hits: 0 };
+
+  for (const [archetype, keywords] of Object.entries(ARCHETYPE_KEYWORDS)) {
+    if (archetype === primary) continue; // secondary must differ from primary
+    const hits = keywords.filter((k) => lower.includes(k)).length;
+    if (hits > best.hits) best = { archetype, hits };
+  }
+
+  if (best.hits > 0) return best.archetype as Archetype;
+  // Safe, always-valid fallback that never equals primary
+  return (primary === 'everyman' ? 'sage' : 'everyman') as Archetype;
 }
 
 /**
@@ -148,7 +215,12 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
  * - Atomic transaction: create Twin + mark essence as used
  * - Link essence to Twin
  */
-export async function initializeTwin(userId: string, twinName: string, essenceId?: string): Promise<AwakeningResult> {
+export async function initializeTwin(
+  userId: string,
+  twinName: string,
+  essenceId?: string,
+  birthDate?: string | null
+): Promise<AwakeningResult> {
   try {
     if (!userId || !twinName || !supabase) {
       return { success: false, message: 'ต้องมี User ID และชื่อ Twin' };
@@ -194,13 +266,38 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
       essence = data;
     }
 
+    // P0-C Gap #1: personal_intelligence is the essence's synthesized output —
+    // read it now so archetype, maturity, and birth memory all ground in the
+    // same real data instead of hardcoded values.
+    const personalIntel = (essence.personal_intelligence ?? null) as {
+      userUnderstanding?: number;
+      recommendedAction?: string;
+      insights?: string[];
+    } | null;
+
+    // primaryArchetype: deterministic from the user's real birth date
+    // (numerology life-path → Jungian archetype, already computed elsewhere
+    // in the app for Analysis — see src/lib/astrology.ts). Not fabricated.
+    const disciplines = calculateInitialDisciplines(birthDate);
+    const primaryArchetype = disciplines.prototypeCore.toLowerCase() as Archetype;
+
+    // secondaryArchetype: grounded in the essence's own text (SICE synthesis)
+    const essenceText = [personalIntel?.recommendedAction, ...(personalIntel?.insights ?? [])]
+      .filter((v): v is string => Boolean(v))
+      .join(' ');
+    const secondaryArchetype = inferSecondaryArchetype(essenceText, primaryArchetype);
+
+    // maturityScore: from the orchestration's own confidence in how well it
+    // understands the user, not a flat 30 for everyone
+    const maturityScore = Math.max(0, Math.min(100, personalIntel?.userUnderstanding ?? 30));
+
     // Create Twin record in database
     const twinData = {
       userId,
       name: twinName,
-      primaryArchetype: 'sage' as const,
-      secondaryArchetype: 'explorer' as const,
-      maturityScore: 30,
+      primaryArchetype,
+      secondaryArchetype,
+      maturityScore,
     };
 
     const newTwin = await createTwinInDatabase(userId, twinData);
@@ -250,26 +347,27 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
       // ไม่ fail process
     }
 
-    // Initialize SICE baseline scores for this Twin
-    const siceEngines = [
-      'PersonalContextBuilder',
-      'PatternDetector',
-      'InsightEngine',
-      'AIFeedbackLoop',
-      'TwinStateEngine',
-      'ExperienceEngine',
-      'EnvironmentEngine',
-      'BadgeEngine',
-      'BehavioralForecastEngine',
-      'FutureSelfEngine',
-      'MemoryManager',
-      'DecisionIntelligenceEngine',
-    ];
+    // P0-C Gap #2: baseline SICE scores from the real orchestration run,
+    // keyed by the engines' actual names (REAL_SICE_ENGINE_NAMES — see
+    // top of file for why the previous list silently mismatched 2 of 12).
+    const sicResultsArr: Array<{ engineName?: string; confidence?: number }> = Array.isArray(
+      essence.sice_results
+    )
+      ? essence.sice_results
+      : [];
+    const confidenceByEngine = new Map<string, number>();
+    sicResultsArr.forEach((r) => {
+      if (r?.engineName && typeof r.confidence === 'number') {
+        confidenceByEngine.set(r.engineName, r.confidence);
+      }
+    });
 
-    const baselineScores = siceEngines.map((engineName) => ({
+    const baselineScores = REAL_SICE_ENGINE_NAMES.map((engineName) => ({
       twin_id: newTwin.id,
       sice_name: engineName,
-      contribution_score: 50,
+      // Fall back to 50 only for an engine essence genuinely has no score for
+      // (e.g. it errored during orchestration) — not as the default for all.
+      contribution_score: Math.max(0, Math.min(100, confidenceByEngine.get(engineName) ?? 50)),
       last_active: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
@@ -283,17 +381,24 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
       console.error('คำเตือน: ไม่สามารถเตรียม SICE baseline scores:', scoresError);
     }
 
-    // Create initial Twin memory entry: "I was born"
+    // P0-C Gap #4: birth memory grounded in the actual essence insight when
+    // available, instead of a generic line with no real user context.
+    const groundedInsight = personalIntel?.insights?.[0];
+    const memoryContent = groundedInsight
+      ? `ฉันเกิดมาในชื่อ ${twinName} ฉันรู้แล้วว่า: ${groundedInsight} ฉันพร้อมเติบโตไปกับคุณ`
+      : `ฉันเกิดมาในชื่อ ${twinName} ฉันอยู่ที่นี่เพื่อเติบโตไปกับคุณ`;
+
     const { error: memoryError } = await supabase
       .from('twin_memories')
       .insert({
         twin_id: newTwin.id,
         world_id: 'self',
         role: 'system',
-        content: `ฉันเกิดมาในชื่อ ${twinName} ฉันอยู่ที่นี่เพื่อเติบโตไปกับคุณ`,
+        content: memoryContent,
         metadata: {
           eventType: 'awakening',
           timestamp: new Date().toISOString(),
+          grounded: Boolean(groundedInsight),
         },
       });
 
@@ -305,6 +410,8 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
       success: true,
       message: `Twin "${twinName}" ได้ตื่นตัวแล้ว! 🎉 Essence บันทึกในฐานข้อมูล ✨`,
       twinId: newTwin.id,
+      twin: newTwin,
+      firstInsight: groundedInsight,
     };
   } catch (error) {
     console.error('ข้อผิดพลาดในการ initialize Twin:', error);
@@ -315,85 +422,12 @@ export async function initializeTwin(userId: string, twinName: string, essenceId
   }
 }
 
-/**
- * Save Twin profile to database
- * Used during Twin creation to persist profile data
- * Now accepts analysisContext to ground the Twin with user data
- */
-export async function saveTwinProfile(
-  userId: string,
-  twinName: string,
-  profile: any
-): Promise<any> {
-  try {
-    if (!userId || !twinName || !supabase) {
-      throw new Error('User ID and Twin name required');
-    }
-
-    // P0-A FIX #2: Use analysis context if available
-    const analysisContext = profile.analysisContext;
-
-    // Infer Twin archetypes from analysis if available
-    let primaryArchetype = profile.primaryArchetype || 'Guide';
-    let secondaryArchetype = profile.secondaryArchetype || 'Companion';
-    let maturityScore = Math.max(0, Math.min(100, profile.maturityScore || 30));
-
-    if (analysisContext) {
-      // Use analysis data to make Twin more grounded
-      // 1. Decision style influences primary archetype
-      if (analysisContext.sourceCount > 5) {
-        maturityScore = Math.max(30, Math.min(100, 40 + analysisContext.sourceCount * 2));
-      }
-    }
-
-    // Create Twin using TwinSupabaseService
-    const twinData = {
-      userId, // Required by type (though not used by createTwinInDatabase)
-      name: twinName,
-      primaryArchetype,
-      secondaryArchetype,
-      maturityScore,
-    };
-
-    const newTwin = await createTwinInDatabase(userId, twinData);
-
-    if (!newTwin) {
-      throw new Error('Failed to create Twin in database');
-    }
-
-    // P0-A FIX #2: Link Twin to analysis context if available
-    if (analysisContext) {
-      try {
-        const { data: personalContext } = await supabase
-          .from('personal_contexts')
-          .select('id')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (personalContext) {
-          // Note: Store reference to Twin in personal_context for future use
-          await supabase
-            .from('personal_contexts')
-            .update({
-              awakening_twin_id: newTwin.id,
-            })
-            .eq('id', personalContext.id);
-        }
-      } catch (contextError) {
-        // Non-critical: fail gracefully if personal context linking fails
-        console.warn('Non-critical: Could not link personal context to Twin:', contextError);
-      }
-    }
-
-    console.log('Twin profile persisted to Supabase with analysis context:', newTwin);
-    return newTwin;
-  } catch (error) {
-    console.error('Error saving Twin profile:', error);
-    throw error;
-  }
-}
+// NOTE: saveTwinProfile() was removed in P0-C. It was the shallow Twin-creation
+// path (hardcoded 'Guide'/'Companion' archetypes — not even valid Archetype
+// enum values — and maturityScore from analysisContext.sourceCount only). It
+// had exactly one caller, CoreAwakening.tsx, which now calls startAwakening()
+// + initializeTwin() instead — the SICE-essence-grounded path defined above.
+// Removed rather than kept as dead code, per project rules.
 
 /**
  * Celebrate Twin awakening with effects

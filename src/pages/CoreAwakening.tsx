@@ -11,10 +11,10 @@ import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
 import { useNova } from '../context/NovaContext';
+import { useUserStore } from '../store/userStore';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
-import { saveTwinProfile, celebrateTwinAwakening } from '../services/CoreAwakeningService';
-import { useAnalysisStore } from '../store/analysisStore';
+import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
 
@@ -22,15 +22,19 @@ export default function CoreAwakening() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const { setTwinAwakened } = useAIContext();
-  const { createTwin } = useTwin();
+  const { hydrateTwin } = useTwin();
   const { completeAnalysis } = useNova();
-  const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
+  const birthDate = useUserStore((state) => state.profile.birthDate);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // P0-C: essenceId from startAwakening(), fed forward into initializeTwin()
+  // so the Twin is grounded in real SICE orchestration output, not stubs.
+  const [essenceId, setEssenceId] = useState<string | undefined>(undefined);
+  const [firstInsight, setFirstInsight] = useState<string | undefined>(undefined);
 
   // GUARD: Redirect if not authenticated
   useEffect(() => {
@@ -61,6 +65,24 @@ export default function CoreAwakening() {
 
   const handleIntroComplete = () => {
     setPhase('birth');
+
+    // P0-C: kick off SICE orchestration as early as possible (in the
+    // background, during the ~12s HologramBirth animation + naming step)
+    // so the essence is ready by the time the user finishes naming their
+    // Twin. Non-blocking: if it fails, initializeTwin() falls back to the
+    // latest pending essence, or reports a clear error — it does not
+    // silently fabricate a Twin.
+    if (session?.user?.id) {
+      startAwakening(session.user.id)
+        .then((result) => {
+          if (result.success && result.essenceId) {
+            setEssenceId(result.essenceId);
+          } else {
+            console.warn('SICE essence generation did not complete:', result.message);
+          }
+        })
+        .catch((err) => console.error('startAwakening failed:', err));
+    }
   };
 
   const handleBirthComplete = () => {
@@ -81,33 +103,30 @@ export default function CoreAwakening() {
         throw new Error('User session lost');
       }
 
-      // Save Twin profile with analysis context
-      // If analysis is available, use it to ground the Twin
-      // Otherwise, use defaults
-      const maturityScore = currentAnalysis
-        ? Math.max(30, Math.min(80, currentAnalysis.sourceCount * 5)) // Scale by data depth
-        : 30;
+      // P0-C: initializeTwin() grounds the Twin in the real SICE essence
+      // (archetype from birth-date numerology + essence text, baseline
+      // scores from actual engine confidence, birth memory from an actual
+      // insight) instead of the previous saveTwinProfile() shallow path.
+      const result = await initializeTwin(session.user.id, twinName, essenceId, birthDate);
 
-      const twinProfile = await saveTwinProfile(session.user.id, twinName, {
-        userId: session.user.id,
-        maturityScore,
-        analysisContext: currentAnalysis || undefined,
-      });
-
-      if (!twinProfile || !twinProfile.id) {
-        throw new Error('Failed to create Twin');
+      if (!result.success || !result.twin || !result.twinId) {
+        throw new Error(result.message || 'Failed to create Twin');
       }
 
-      // Update contexts
-      createTwin(twinProfile);
+      // DUP-001 FIX: hydrateTwin() sets context state from the record
+      // initializeTwin() already persisted — it does NOT insert again.
+      // (The old createTwin() call here always inserted, which double-wrote
+      // and violated twins.user_id UNIQUE, failing silently.)
+      hydrateTwin(session.user.id, result.twin);
       completeAnalysis();
       setTwinAwakened(true, twinName);
+      setFirstInsight(result.firstInsight);
 
       // LIFE-001 FIX: Twin now exists in DB — lifecycle must advance to TWIN_ALIVE
       // (setTwinCreated persists twin_id + status='TWIN_ALIVE' to Supabase).
       // This was previously never called anywhere in production code, so the
       // lifecycle state stayed at AWAKENING forever even after Twin creation.
-      await setTwinCreated(session.user.id, twinProfile.id);
+      await setTwinCreated(session.user.id, result.twinId);
 
       // Celebration phase
       setPhase('celebration');
@@ -181,8 +200,10 @@ export default function CoreAwakening() {
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
           <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 Your Twin Awakens!</h2>
+          {/* P0-C Gap #4: show the actual grounded insight when we have one —
+              falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
-            "I know you. I've been learning you. I'm ready to grow with you."
+            {firstInsight ? `"${firstInsight}"` : '"I know you. I\'ve been learning you. I\'m ready to grow with you."'}
           </p>
           <p className="text-gray-400">Entering Twin world...</p>
         </div>

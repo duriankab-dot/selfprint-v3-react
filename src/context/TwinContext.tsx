@@ -19,6 +19,7 @@ import {
   updateTwinInDatabase,
   deleteTwinFromDatabase,
 } from '../services/TwinSupabaseService';
+import type { Twin } from '../services/TwinSupabaseService';
 
 // 18 Archetypes (12 base + 6 hybrid)
 export const ARCHETYPES = [
@@ -70,6 +71,14 @@ interface TwinContextType {
   error: string | null;
   currentWorld: WorldId | null;
   createTwin: (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  /**
+   * P0-C DUP-001 fix: set Twin state from a record that was ALREADY persisted
+   * elsewhere (e.g. CoreAwakeningService.initializeTwin()) — does NOT insert.
+   * createTwin() always INSERTs; calling it after the Twin already exists in
+   * DB violates the twins.user_id UNIQUE constraint and fails silently
+   * (caught internally, never thrown), leaving `twin` stuck at null.
+   */
+  hydrateTwin: (userId: string, savedTwin: Twin) => void;
   updateTwin: (updates: Partial<TwinProfile>) => void;
   setMaturityScore: (score: number) => void;
   setCurrentWorld: (world: WorldId | null) => void;
@@ -89,6 +98,13 @@ export function TwinProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [currentWorld, setCurrentWorld] = useState<WorldId | null>(null);
 
+  // NOTE (P0-C): as of this fix, no production code calls createTwin() —
+  // CoreAwakening.tsx now uses hydrateTwin() (see above) because the Twin
+  // is already persisted by CoreAwakeningService.initializeTwin() by the
+  // time the UI needs to update context state. Left in place as public
+  // Context API (not an internal-only helper) rather than deleted, in case
+  // a future flow legitimately needs to create-and-persist a Twin from a
+  // bare profile in one call. Flagging rather than silently leaving unnoted.
   const createTwin = useCallback(
     async (profile: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>) => {
       try {
@@ -129,6 +145,25 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     },
     []
   );
+
+  const hydrateTwin = useCallback((userId: string, savedTwin: Twin) => {
+    // NOTE: savedTwin is the raw Supabase row (snake_case columns) even
+    // though its TS type claims TwinProfile shape — same runtime mismatch
+    // createTwin() already works around below via `as any`. userId comes
+    // from the caller (not savedTwin.userId) for the same reason.
+    const newTwin: TwinProfile = {
+      id: savedTwin.id,
+      userId,
+      name: savedTwin.name,
+      primaryArchetype: (savedTwin as any).primary_archetype,
+      secondaryArchetype: (savedTwin as any).secondary_archetype,
+      maturityScore: Math.max(0, Math.min(100, (savedTwin as any).maturity_score || 30)),
+      createdAt: new Date((savedTwin as any).awakened_at).getTime(),
+      updatedAt: Date.now(),
+    };
+    setTwin(newTwin);
+    setError(null);
+  }, []);
 
   const updateTwin = useCallback((updates: Partial<TwinProfile>) => {
     setTwin(prev => {
@@ -258,6 +293,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     error,
     currentWorld,
     createTwin,
+    hydrateTwin,
     updateTwin,
     setMaturityScore,
     setCurrentWorld,
