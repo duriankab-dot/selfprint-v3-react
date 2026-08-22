@@ -40,7 +40,6 @@ export interface LifecycleStoreState {
   error: string | null;
 
   // Actions
-  initializeLifecycle: (userId: string, initialStatus: LifecycleStatus) => Promise<void>;
   transitionTo: (userId: string, newStatus: LifecycleStatus) => Promise<void>;
   setTwinCreated: (userId: string, twinId: string) => Promise<void>;
   markActivity: (userId: string) => Promise<void>;
@@ -56,69 +55,6 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
   lastActivityAt: new Date(),
   isLoading: false,
   error: null,
-
-  /**
-   * Initialize lifecycle state for a new user or resume existing
-   */
-  initializeLifecycle: async (userId: string, initialStatus: LifecycleStatus) => {
-    try {
-      set({ isLoading: true, error: null });
-
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
-
-      // Check if user already has lifecycle record
-      const { data: existing } = await supabase
-        .from('user_lifecycle')
-        .select('*')
-        .eq('user_id', userId)
-        .single();
-
-      if (existing) {
-        // Resume existing user
-        set({
-          status: existing.status,
-          twinId: existing.twin_id,
-          twinCreatedAt: existing.twin_created_at ? new Date(existing.twin_created_at) : null,
-          resumedAt: new Date(),
-          lastActivityAt: existing.last_activity_at ? new Date(existing.last_activity_at) : new Date(),
-          isLoading: false,
-        });
-
-        // Update resumed_at
-        await supabase
-          .from('user_lifecycle')
-          .update({ resumed_at: new Date().toISOString() })
-          .eq('user_id', userId);
-      } else {
-        // Create new lifecycle record
-        const { error } = await supabase
-          .from('user_lifecycle')
-          .insert({
-            user_id: userId,
-            status: initialStatus,
-            last_activity_at: new Date().toISOString(),
-          });
-
-        if (error) {
-          throw new Error(`Failed to create lifecycle record: ${error.message}`);
-        }
-
-        set({
-          status: initialStatus,
-          twinId: null,
-          twinCreatedAt: null,
-          resumedAt: null,
-          lastActivityAt: new Date(),
-          isLoading: false,
-        });
-      }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to initialize lifecycle';
-      set({ error: errorMsg, isLoading: false });
-    }
-  },
 
   /**
    * Transition to next lifecycle state
@@ -244,22 +180,38 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       }
 
       if (data) {
+        const now = new Date();
+
         set({
           status: data.status,
           twinId: data.twin_id,
           twinCreatedAt: data.twin_created_at ? new Date(data.twin_created_at) : null,
-          resumedAt: data.resumed_at ? new Date(data.resumed_at) : null,
+          resumedAt: now,
           lastActivityAt: new Date(data.last_activity_at),
           isLoading: false,
         });
+
+        // Mark resume: existing user returned — update resumed_at + activity
+        // (merged from the former, unused initializeLifecycle() — see LIFE-001 trace)
+        const { error: resumeError } = await supabase
+          .from('user_lifecycle')
+          .update({
+            resumed_at: now.toISOString(),
+            last_activity_at: now.toISOString(),
+          })
+          .eq('user_id', userId);
+
+        if (resumeError) {
+          console.warn('Failed to update resumed_at:', resumeError);
+        }
 
         return {
           userId,
           status: data.status,
           twinId: data.twin_id,
           twinCreatedAt: data.twin_created_at ? new Date(data.twin_created_at) : undefined,
-          resumedAt: data.resumed_at ? new Date(data.resumed_at) : undefined,
-          lastActivityAt: new Date(data.last_activity_at),
+          resumedAt: now,
+          lastActivityAt: now,
         };
       }
 

@@ -11,6 +11,7 @@ import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useWorld } from '../context/WorldContext';
+import { useLifecycleStore } from '../store/lifecycleStore';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { getSeoMetadata } from '../constants/seoMetadata';
 import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
@@ -78,6 +79,8 @@ const Dashboard: React.FC = () => {
   const { language } = useLanguage();
   // P0 #5: World context for world-specific insights (reserved for future use)
   useWorld();
+  // RECOVERY-001: lifecycle status drives the resume entry banner below
+  const lifecycleStatus = useLifecycleStore((state) => state.status);
   const seoData = getSeoMetadata('dashboard', language);
 
   // § P2 — PersonalContext สำหรับ intelligence panels (shared cache key กับ ExperienceContext)
@@ -186,6 +189,31 @@ const Dashboard: React.FC = () => {
         // Twin evolved
       }} />
       <div className="dashboard" style={{ flex: 1 }}>
+
+      {/* RECOVERY-001: Resume entry — V5 §4 requires existing users get a clear
+          continuation point instead of repeating a completed journey */}
+      {lifecycleStatus === 'TWIN_ALIVE' && (
+        <div className="dashboard-resume-banner">
+          <p className="dashboard-resume-banner__text">✨ Twin ของคุณพร้อมแล้ว</p>
+          <button
+            className="dashboard-resume-banner__cta"
+            onClick={() => navigate('/chat/twin')}
+          >
+            เข้าสู่ Twin ของคุณ →
+          </button>
+        </div>
+      )}
+      {lifecycleStatus === 'WORLD_ACTIVE' && (
+        <div className="dashboard-resume-banner">
+          <p className="dashboard-resume-banner__text">🌍 ไปต่อในโลกของคุณ</p>
+          <button
+            className="dashboard-resume-banner__cta"
+            onClick={() => navigate('/worlds')}
+          >
+            ไปต่อยัง Worlds →
+          </button>
+        </div>
+      )}
 
       {/* §5.2 Dynamic วันนี้ Home — AI Orchestrator เลือก sections ตามเวลาและบริบท */}
       <TodaySection hasHistory={logs.length > 0} />

@@ -26,6 +26,7 @@ export default function CoreAwakening() {
   const { completeAnalysis } = useNova();
   const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
+  const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +38,26 @@ export default function CoreAwakening() {
       navigate('/login', { replace: true });
     }
   }, [session, navigate]);
+
+  // LIFE-001 FIX: Entering the Core Awakening ceremony = lifecycle enters AWAKENING.
+  // This must happen on arrival, not after the Twin already exists — the previous
+  // code called transitionTo('AWAKENING') AFTER Twin creation, which left the
+  // lifecycle permanently stuck at AWAKENING and never reached TWIN_ALIVE.
+  //
+  // GUARD: never downgrade a user who already passed this stage (TWIN_ALIVE /
+  // WORLD_ACTIVE). Without this guard, a user landing here via stale URL/back
+  // button — before the global recovery redirect fires — would have their
+  // lifecycle silently reset backwards.
+  useEffect(() => {
+    if (!session?.user?.id) return;
+    const currentStatus = useLifecycleStore.getState().status;
+    if (currentStatus === 'TWIN_ALIVE' || currentStatus === 'WORLD_ACTIVE') return;
+
+    transitionTo(session.user.id, 'AWAKENING').catch((err) =>
+      console.error('Failed to transition lifecycle to AWAKENING:', err)
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
 
   const handleIntroComplete = () => {
     setPhase('birth');
@@ -73,7 +94,7 @@ export default function CoreAwakening() {
         analysisContext: currentAnalysis || undefined,
       });
 
-      if (!twinProfile) {
+      if (!twinProfile || !twinProfile.id) {
         throw new Error('Failed to create Twin');
       }
 
@@ -82,14 +103,18 @@ export default function CoreAwakening() {
       completeAnalysis();
       setTwinAwakened(true, twinName);
 
+      // LIFE-001 FIX: Twin now exists in DB — lifecycle must advance to TWIN_ALIVE
+      // (setTwinCreated persists twin_id + status='TWIN_ALIVE' to Supabase).
+      // This was previously never called anywhere in production code, so the
+      // lifecycle state stayed at AWAKENING forever even after Twin creation.
+      await setTwinCreated(session.user.id, twinProfile.id);
+
       // Celebration phase
       setPhase('celebration');
       celebrateTwinAwakening();
 
       // Redirect to Twin chat
-      setTimeout(async () => {
-        // NEW: Transition lifecycle to AWAKENING
-        await transitionTo(session.user.id, 'AWAKENING');
+      setTimeout(() => {
         setPhase('complete');
         navigate('/chat/twin', { replace: true });
       }, 4000);
