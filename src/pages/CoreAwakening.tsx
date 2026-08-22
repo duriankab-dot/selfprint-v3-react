@@ -4,7 +4,7 @@
  * Intro → Birth (animation) → Naming → Celebration → Complete
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
 import { useLifecycleStore } from '../store/lifecycleStore';
@@ -15,6 +15,9 @@ import { useUserStore } from '../store/userStore';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
+import { calculateInitialDisciplines } from '../lib/astrology';
+import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
+import type { Archetype } from '../context/TwinContext';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
 
@@ -35,6 +38,18 @@ export default function CoreAwakening() {
   // so the Twin is grounded in real SICE orchestration output, not stubs.
   const [essenceId, setEssenceId] = useState<string | undefined>(undefined);
   const [firstInsight, setFirstInsight] = useState<string | undefined>(undefined);
+
+  // TWIN-PRESENCE-001: HologramBirth's glow color used to be a fixed
+  // '#3b82f6' for every user. primaryArchetype is deterministic from
+  // birthDate alone (numerology life-path → archetype — same pure function
+  // initializeTwin() below calls once the Twin record is actually created),
+  // so it can be computed here too, before naming, without creating the
+  // Twin early or duplicating the derivation logic.
+  const birthArchetype = useMemo(
+    () => calculateInitialDisciplines(birthDate).prototypeCore.toLowerCase() as Archetype,
+    [birthDate]
+  );
+  const birthColor = useMemo(() => getTwinVisualDNA(birthArchetype).coreColor, [birthArchetype]);
 
   // GUARD: Redirect if not authenticated
   useEffect(() => {
@@ -185,7 +200,7 @@ export default function CoreAwakening() {
       {/* BIRTH PHASE */}
       {phase === 'birth' && (
         <div className="flex-1 flex items-center justify-center">
-          <HologramBirth onComplete={handleBirthComplete} color="#3b82f6" />
+          <HologramBirth onComplete={handleBirthComplete} color={birthColor} />
         </div>
       )}
 

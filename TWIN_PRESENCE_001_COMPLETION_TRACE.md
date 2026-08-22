@@ -97,12 +97,39 @@ Null-safe — falls back to a neutral default DNA if `twin` hasn't loaded yet.
    `secondaryArchetype`) from `TwinContext.tsx` before wiring, rather than
    guessing.
 
+## Addendum — HologramBirth now uses the real archetype color
+
+User confirmed this is exactly "core awakening" and asked to bind the
+archetype in before moving to Entry Resolver / World Transition. Done:
+
+**`CoreAwakening.tsx`** — `HologramBirth`'s `color` prop was hardcoded to
+`'#3b82f6'` for every user. `primaryArchetype` is only actually assigned
+inside `initializeTwin()` (after the 'naming' phase, once the Twin record is
+created) — but it's derived there by a pure, synchronous function,
+`calculateInitialDisciplines(birthDate).prototypeCore` (numerology life-path
+→ archetype), fed only by `birthDate`, which is already available at
+`CoreAwakening` mount via `useUserStore`. So the exact same archetype the
+Twin will actually be assigned can be (and now is) computed during the
+'birth' phase too — no duplicate derivation logic, no early/side-effecting
+Twin creation, just calling the same existing pure function earlier via
+`useMemo`. `getTwinVisualDNA(birthArchetype).coreColor` now feeds
+`HologramBirth`'s glow color, so the birth ceremony's light is the user's
+actual archetype color, not an arbitrary fixed blue.
+
+**Deliberately not touched:** `HologramBirth.tsx`'s internal canvas drawing
+— the hologram is always a converging-particle circle, never varies by
+`coreShape` (crystal/ring/diamond/etc.) per archetype. Making the shape
+itself vary would mean rewriting the canvas animation logic in an
+already-working, emotionally-significant ceremony component — a materially
+bigger and riskier change than "bind archetype," and wasn't asked for.
+Flagging as a real, visible next option if wanted later, not doing it
+silently.
+
 ## Explicit scope boundaries (not done this pass)
-- **Not done:** Twin placement/rendering on `TwinChat.tsx`, `Dashboard.tsx`
-  (`LivingTwin.tsx`), or `CoreAwakening.tsx`'s birth ceremony
-  (`HologramBirth.tsx` still uses a hardcoded color, not archetype-driven —
-  flagged, not touched, since changing the birth ceremony's visual was not
-  part of this ask and risks the emotionally-significant birth moment).
+- Twin placement/rendering on `TwinChat.tsx` or `Dashboard.tsx`
+  (`LivingTwin.tsx`) — still their own separate, unrelated engagement-state
+  visuals (see audit above); not archetype/Visual-DNA-driven, not touched.
+- `HologramBirth.tsx`'s shape (see addendum above) — color only, not shape.
 - **Not done:** any of the other UNIFIED-doc Phase 4/6/9/11+ items (Entry
   Resolver, shared 2D/2.5D compositor, World Transition animations, PWA
   entry) — user explicitly deferred these in favor of this slice.
