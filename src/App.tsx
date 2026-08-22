@@ -169,6 +169,16 @@ function App() {
 
   return (
     <HelmetProvider>
+      {/* ROUTER-001 FIX: Router must wrap the whole tree. RecoveryRouteHandler
+          (and TwinEvolution/ContextualPopup/TwinEvolutionSceneWrapper below)
+          call hooks that need Router context (useRecoveryRoute -> useNavigate)
+          and were previously rendered above <Router>, which threw
+          "useNavigate() may be used only in the context of a <Router>
+          component" on every single page load — the entire app crashed to a
+          blank white screen in production. Moving Router to the outermost
+          wrapper (instead of only around <LanguageProvider>/<Routes>) fixes
+          this without changing any provider order below. */}
+      <Router>
         <ThemeProvider>
           <AuthProvider>
             <RecoveryRouteHandler />
@@ -187,8 +197,7 @@ function App() {
                               <TwinEvolution />
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />
-                              <Router>
-                                <LanguageProvider>
+                              <LanguageProvider>
                               <Suspense fallback={null}>
                                 <Routes>
                                   {getLanguagePrefixedRoutes()}
@@ -197,7 +206,6 @@ function App() {
                                 </Routes>
                               </Suspense>
                                 </LanguageProvider>
-                              </Router>
                             </PopupProvider>
                           </EvolutionProvider>
                         </EnvironmentProvider>
@@ -211,6 +219,7 @@ function App() {
           </AIProvider>
         </AuthProvider>
       </ThemeProvider>
+      </Router>
     </HelmetProvider>
   );
 }
