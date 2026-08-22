@@ -6,7 +6,7 @@
  * React context layer ที่ขับเคลื่อน EnvironmentEngine
  *
  * ทำหน้าที่:
- *   1. คำนวณ EnvironmentConfig จาก hub + mood + time (ทุก 60 วินาที)
+ *   1. คำนวณ EnvironmentConfig จาก world + mood + time (ทุก 60 วินาที)
  *   2. Inject --tod-* / --env-* / --lighting-* / --particles-* / --twin-* CSS vars ลงใน :root
  *   3. Set data-tod attribute บน <html> (สำหรับ time-of-day CSS selectors)
  *   4. Set data-twin-state attribute บน <html> (สำหรับ Twin avatar styling)
@@ -18,6 +18,19 @@
  * §19 Rule: User Preference > AI Personalization
  *   - ไม่ force-set audio ถ้า musicEnabled = false
  *   - soundscape เป็นแค่ recommendation — user ควบคุม on/off ได้ใน AudioContext
+ *
+ * P0-H / VISUAL-DIRECTIVE-001: previously driven by HubContext's `currentHub`
+ * (a 15-id taxonomy unreachable from any live route — verified end to end:
+ * switchHub() is only called by ExperienceContext.tsx and HubSwitcher.tsx,
+ * and HubSwitcher.tsx is only imported by a commented-out route and a route
+ * never registered in App.tsx). Rewired to WorldContext's `currentWorld`
+ * (WorldId) — the real, live, Supabase-persisted single source of truth for
+ * "what world is the user in," per the UNIFIED directive §38 ("World State —
+ * Single Source of Truth": UI/AI/Visual must never use different world ids).
+ * `currentWorld` is nullable (no world selected outside /worlds/:worldId) —
+ * falls back to 'self' so this engine still has ambient output on other pages.
+ * HubContext itself is untouched — still used by ExperienceContext.tsx,
+ * HubSwitcher.tsx, hub-themes.css; only this consumer was rewired.
  */
 
 import {
@@ -31,7 +44,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
-import { useHub } from './HubContext';
+import { useWorld } from './WorldContext';
 import { useEmotion } from './EmotionContext';
 import { useAudio } from './AudioContext';
 import { EnvironmentEngine } from '@/lib/experience/EnvironmentEngine';
@@ -67,7 +80,10 @@ const TICK_INTERVAL_MS = 60_000;
 const TRANSITION_DURATION_MS = 800;
 
 export function EnvironmentProvider({ children }: { children: ReactNode }) {
-  const { currentHub } = useHub();
+  const { currentWorld } = useWorld();
+  // No world selected outside /worlds/:worldId (e.g. dashboard, chat) —
+  // fall back to 'self' so the engine still produces ambient output.
+  const worldForEnv = currentWorld ?? 'self';
   const { mood } = useEmotion();
   const audio = useAudio();
 
@@ -87,7 +103,7 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
 
   const compute = useCallback(() => {
     const config = engine.compute({
-      hub:        currentHub,
+      world:      worldForEnv,
       mood,
       prevPeriod: prevPeriodRef.current,
     });
@@ -123,7 +139,7 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
 
     prevPeriodRef.current = config.timePeriod;
     setEnvironment(config);
-  }, [engine, currentHub, mood, audio]);
+  }, [engine, worldForEnv, mood, audio]);
 
   // ─── Initial compute + periodic tick ──────────────────────────────────────
 
@@ -141,15 +157,15 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // mount only — recompute via hub/mood effects below
 
-  // ─── Recompute on hub/mood change ─────────────────────────────────────────
-  // (period transitions already handled by timer; hub/mood changes recompute immediately)
+  // ─── Recompute on world/mood change ────────────────────────────────────────
+  // (period transitions already handled by timer; world/mood changes recompute immediately)
 
   useEffect(() => {
     if (environment !== null) {
       compute();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentHub, mood]);
+  }, [worldForEnv, mood]);
 
   // ─── Sync initial audio experience on first mount ─────────────────────────
   // (ไม่ใช่ transition — แค่ set initial experience ถ้า user เปิด music)

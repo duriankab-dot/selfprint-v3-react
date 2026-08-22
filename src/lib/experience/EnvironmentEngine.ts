@@ -6,7 +6,7 @@
  * Orchestrates: TimeOfDayEngine + SoundscapeEngine → EnvironmentConfig
  *
  * Input:
- *   - hub (current user hub)
+ *   - world (current user World — WorldId, see src/constants/worlds.ts)
  *   - mood (current user mood)
  *   - now? (Date — defaults to new Date(), injectable for testing)
  *
@@ -18,9 +18,16 @@
  *   - EnvironmentContext ใช้ flag นี้เพื่อ trigger CSS transition animation
  *
  * ไม่มี side effects — pure computation only.
+ *
+ * P0-H: input rekeyed from `Hub` (src/context/HubContext.tsx, a 15-id
+ * taxonomy unreachable from any live route) to `WorldId` (src/constants/
+ * worlds.ts, the 12-id taxonomy actually driven by real routing —
+ * /worlds/:worldId, TwinChat.tsx's ?world= param, WorldContext.currentWorld)
+ * so this engine's output can actually be driven by real user state. See
+ * SoundscapeEngine.ts's header for the same rationale.
  */
 
-import type { Hub } from '@/context/HubContext';
+import type { WorldId } from '@/constants/worlds';
 import type { Mood } from '@/context/EmotionContext';
 import type { MusicExperience } from '@/context/AudioContext';
 import { TimeOfDayEngine } from './TimeOfDayEngine';
@@ -68,7 +75,7 @@ export interface EnvironmentConfig {
 }
 
 interface EnvironmentInput {
-  hub: Hub;
+  world: WorldId;
   mood: Mood;
   now?: Date;
   prevPeriod?: TimePeriod;
@@ -84,14 +91,14 @@ export class EnvironmentEngine {
   private twinEngine    = new TwinStateEngine();
 
   compute(input: EnvironmentInput): EnvironmentConfig {
-    const { hub, mood, now = new Date(), prevPeriod } = input;
+    const { world, mood, now = new Date(), prevPeriod } = input;
 
     // 1. Compute time-of-day
     const timeOfDay = this.todEngine.compute(now);
     const { period } = timeOfDay;
 
     // 2. Recommend soundscape
-    const soundscape = this.soundEngine.recommend(hub, mood, period);
+    const soundscape = this.soundEngine.recommend(world, mood, period);
 
     // 3. Compute lighting
     const lighting = this.lightEngine.compute(period);
