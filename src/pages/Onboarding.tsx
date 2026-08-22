@@ -224,21 +224,27 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     },
   };
 
-  // Handle completion — take the person to the Dashboard so they land on
-  // the AI Twin they just built (the "Go to Your Dashboard" button in
-  // FullAnalysis promises exactly this). Previously this navigated to
-  // /chat instead, which skipped the payoff screen entirely.
+  // Handle completion — take the person into Core Awakening (wow2: "your
+  // intelligence awakens" -> wow3: Twin birth ceremony), not straight to
+  // the dashboard. WOW-CONNECT-001 FIX: this used to skip Core Awakening
+  // entirely and land on an empty dashboard with no Twin, even though
+  // CoreAwakening.tsx (intro -> HologramBirth -> naming -> celebration,
+  // full-screen) was already fully built — nothing ever routed here after
+  // onboarding finished. CoreAwakening.tsx's own guard already handles the
+  // ANALYSIS -> AWAKENING transition on arrival and won't downgrade a user
+  // who's already past this stage (TWIN_ALIVE/WORLD_ACTIVE), so this
+  // handler only needs to get them there.
   const handleComplete = () => {
     // LIFECYCLE-002 FIX: nothing anywhere in the onboarding -> claim-account
     // path ever advanced user_lifecycle.status past 'ONBOARDING'. That
     // meant useRecoveryRoute — which faithfully sends the user to
     // routeMap[status] once per fresh page load — kept bouncing people
     // right back to /onboarding on every refresh even after they'd
-    // finished the wizard and reached the dashboard, because the DB
-    // record genuinely still said ONBOARDING. Advancing to ANALYSIS here
-    // (mirroring the ONBOARDING -> ANALYSIS -> AWAKENING -> TWIN_ALIVE ->
-    // WORLD_ACTIVE machine in lifecycleStore.ts) is what should have
-    // happened the moment onboarding actually completed.
+    // finished the wizard, because the DB record genuinely still said
+    // ONBOARDING. Advancing to ANALYSIS here (mirroring the ONBOARDING ->
+    // ANALYSIS -> AWAKENING -> TWIN_ALIVE -> WORLD_ACTIVE machine in
+    // lifecycleStore.ts) is what should have happened the moment
+    // onboarding actually completed.
     if (session?.user?.id) {
       transitionTo(session.user.id, 'ANALYSIS').catch((err) =>
         console.warn('Failed to transition lifecycle to ANALYSIS:', err)
@@ -248,7 +254,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     if (onComplete) {
       onComplete();
     } else {
-      navigate('/dashboard');
+      navigate('/core-awakening');
     }
   };
 
