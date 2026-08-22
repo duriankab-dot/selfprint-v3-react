@@ -74,6 +74,19 @@ const FAQPage = lazy(() => import('./pages/FAQPage'));
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
  */
+/**
+ * LangRedirect — ROUTELOOP-002 FIX: the /chat and /twin shortcut routes
+ * below redirect to another internal page, but the same <Route element>
+ * is reused for both the /en/* and /th/* registrations (see
+ * publicPages.forEach), so a static <Navigate to="/chat/nova"> can't know
+ * which language prefix it's currently matched under. This reads it from
+ * the live URL at render time instead.
+ */
+function LangRedirect({ to }: { to: string }) {
+  const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+  return <Navigate to={`${langPrefix}${to}`} replace />;
+}
+
 function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
   const auth = useContext(AuthContext);
   if (auth?.loading) return null;
@@ -107,10 +120,10 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
   const publicPages = [
     { path: '/onboarding', element: <Onboarding /> },
     { path: '/core-awakening', element: <CoreAwakening /> },
-    { path: '/chat', element: <Navigate to="/chat/nova" replace /> },
+    { path: '/chat', element: <LangRedirect to="/chat/nova" /> },
     { path: '/chat/nova', element: <NovaChat /> },
     { path: '/chat/twin', element: <TwinChat /> },
-    { path: '/twin', element: <Navigate to="/chat/twin" replace /> },
+    { path: '/twin', element: <LangRedirect to="/chat/twin" /> },
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/analysis', element: <AnalysisPage /> },
     { path: '/privacy', element: <PrivacyCenter /> },

@@ -105,7 +105,7 @@ export default function WorldDetail() {
           <p className="guidance-text">
             Twin adapts expertise to {world.name} — insights and advice grounded in this world's focus.
           </p>
-          <Link to={`/chat/twin?world=${world.id}`} className="btn-explore">
+          <Link to={`/${language}/chat/twin?world=${world.id}`} className="btn-explore">
             Chat with Twin about {world.name.toLowerCase()} →
           </Link>
         </div>

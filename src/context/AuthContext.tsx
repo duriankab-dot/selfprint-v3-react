@@ -155,10 +155,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!supabase) {
       return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
     }
+    // ROUTELOOP-002 FIX: bare "/dashboard" isn't a real route (every route
+    // lives under /en or /th) — after OAuth, Supabase would land the
+    // browser on the catch-all, which self-heals via HomeRoute but wastes
+    // a redirect hop. Send it straight to the right place instead.
+    const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}${langPrefix}/dashboard`,
       },
     });
     return { error: error?.message };

@@ -21,7 +21,11 @@ export function ProtectedRoute({ children, fallback = null }: ProtectedRouteProp
   }
 
   if (!session) {
-    return <Navigate to="/login" replace />;
+    // ROUTELOOP-002 FIX: bare "/login" isn't a real route (every route
+    // lives under /en or /th) — it hit the catch-all and landed on the
+    // landing page instead of the login form.
+    const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+    return <Navigate to={`${langPrefix}/login`} replace />;
   }
 
   return <>{children}</>;

@@ -303,8 +303,10 @@ export const ChatPage: React.FC = () => {
         </button>
 
         {/* Dashboard link */}
+        {/* ROUTELOOP-002 FIX: bare "/dashboard" isn't a real route (every
+            route lives under /en or /th) — it hit the catch-all instead. */}
         <Link
-          to="/dashboard"
+          to={window.location.pathname.startsWith('/th') ? '/th/dashboard' : '/en/dashboard'}
           style={{
             display: 'block',
             padding: '10px 12px',

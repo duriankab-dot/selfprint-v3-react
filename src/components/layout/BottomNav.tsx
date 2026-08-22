@@ -76,10 +76,17 @@ const TABS: Tab[] = [
 export function BottomNav() {
   const { pathname } = useLocation();
 
-  const isActive = (tab: Tab) =>
-    tab.exact
-      ? pathname === tab.to
-      : pathname === tab.to || pathname.startsWith(tab.to + '/');
+  // ROUTELOOP-002 FIX: every real route lives under /en or /th (see
+  // App.tsx) — these tabs used bare paths, which hit the app's catch-all
+  // route and bounced every tap to /en/ -> dashboard, making all 5 tabs
+  // behave identically instead of going to their own destination.
+  const langPrefix = pathname.startsWith('/th') ? '/th' : '/en';
+  const prefixedTo = (to: string) => `${langPrefix}${to}`;
+
+  const isActive = (tab: Tab) => {
+    const to = prefixedTo(tab.to);
+    return tab.exact ? pathname === to : pathname === to || pathname.startsWith(to + '/');
+  };
 
   return (
     <>
@@ -116,7 +123,7 @@ export function BottomNav() {
           return (
             <Link
               key={tab.to}
-              to={tab.to}
+              to={prefixedTo(tab.to)}
               className="sp-bn-tab"
               style={{
                 display: 'flex',

@@ -23,7 +23,11 @@ export default function PricingSuccessPage() {
       )}
       <button
         className="pricing-cta-btn pricing-cta-btn--primary"
-        onClick={() => (window.location.href = '/dashboard')}
+        onClick={() => {
+          // ROUTELOOP-002 FIX: bare "/dashboard" hits the catch-all
+          const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+          window.location.href = `${langPrefix}/dashboard`;
+        }}
       >
         เปิด Dashboard
       </button>
