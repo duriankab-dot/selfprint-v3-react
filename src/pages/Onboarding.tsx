@@ -8,6 +8,7 @@
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useLifecycleStore } from '@/store/lifecycleStore';
+import { useAuth } from '@/context/AuthContext';
 import { EmotionSelector } from '@/components/features/EmotionSelector';
 import { BirthdateInput } from '@/components/onboarding/BirthdateInput';
 import { NovaConversation } from '@/components/onboarding/NovaConversation';
@@ -61,6 +62,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const navigate = useNavigate();
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
+  const { session } = useAuth();
+  const transitionTo = useLifecycleStore((state) => state.transitionTo);
 
   // Guard against re-entry — if user already passed ONBOARDING, redirect.
   // LOOP-002 FIX: this used to depend on [status, navigate] and re-fire on
@@ -226,6 +229,22 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // FullAnalysis promises exactly this). Previously this navigated to
   // /chat instead, which skipped the payoff screen entirely.
   const handleComplete = () => {
+    // LIFECYCLE-002 FIX: nothing anywhere in the onboarding -> claim-account
+    // path ever advanced user_lifecycle.status past 'ONBOARDING'. That
+    // meant useRecoveryRoute — which faithfully sends the user to
+    // routeMap[status] once per fresh page load — kept bouncing people
+    // right back to /onboarding on every refresh even after they'd
+    // finished the wizard and reached the dashboard, because the DB
+    // record genuinely still said ONBOARDING. Advancing to ANALYSIS here
+    // (mirroring the ONBOARDING -> ANALYSIS -> AWAKENING -> TWIN_ALIVE ->
+    // WORLD_ACTIVE machine in lifecycleStore.ts) is what should have
+    // happened the moment onboarding actually completed.
+    if (session?.user?.id) {
+      transitionTo(session.user.id, 'ANALYSIS').catch((err) =>
+        console.warn('Failed to transition lifecycle to ANALYSIS:', err)
+      );
+    }
+
     if (onComplete) {
       onComplete();
     } else {

@@ -373,7 +373,7 @@ export default function Login() {
         <div style={footerLink}>
           ยังไม่มีบัญชีใช่ไหม?{' '}
           <Link
-            to="/onboarding"
+            to={window.location.pathname.startsWith('/th') ? '/th/onboarding' : '/en/onboarding'}
             style={{ color: 'var(--color-accent-primary)', textDecoration: 'none', fontWeight: 600 }}
           >
             สร้าง AI ฝาแฝด ของคุณ →

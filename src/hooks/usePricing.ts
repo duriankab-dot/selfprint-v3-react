@@ -32,7 +32,9 @@ export function usePricing() {
       const accessToken = auth?.session?.access_token;
       if (!accessToken) {
         console.error('[Pricing] User not authenticated, redirect to onboarding');
-        window.location.href = '/onboarding';
+        // ROUTELOOP-002 FIX: bare "/onboarding" hits the catch-all
+        const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+        window.location.href = `${langPrefix}/onboarding`;
         return;
       }
 
@@ -53,7 +55,9 @@ export function usePricing() {
       const accessToken = auth?.session?.access_token;
       if (!accessToken) {
         console.error('[Pricing] User not authenticated');
-        window.location.href = '/onboarding';
+        // ROUTELOOP-002 FIX: bare "/onboarding" hits the catch-all
+        const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+        window.location.href = `${langPrefix}/onboarding`;
         return;
       }
 

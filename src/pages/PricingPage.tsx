@@ -163,7 +163,9 @@ export default function PricingPage() {
 
   const handleCTA = async (plan: typeof PLANS[number]) => {
     if (plan.tier === 'free') {
-      window.location.href = '/onboarding';
+      // ROUTELOOP-002 FIX: bare "/onboarding" hits the catch-all
+      const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+      window.location.href = `${langPrefix}/onboarding`;
       return;
     }
     if (!canUpgrade(plan.tier as 'plus' | 'pro' | 'lifetime')) {
@@ -355,7 +357,11 @@ export function PricingSuccessPage() {
       )}
       <button
         className="pricing-cta-btn pricing-cta-btn--primary"
-        onClick={() => (window.location.href = '/dashboard')}
+        onClick={() => {
+          // ROUTELOOP-002 FIX: bare "/dashboard" hits the catch-all
+          const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+          window.location.href = `${langPrefix}/dashboard`;
+        }}
       >
         เปิด Dashboard
       </button>

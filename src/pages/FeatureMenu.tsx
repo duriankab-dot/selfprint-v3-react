@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Feature {
   icon: string;
@@ -47,6 +48,10 @@ const FEATURES: Feature[] = [
 ];
 
 export default function FeatureMenu() {
+  const { language } = useLanguage();
+  // ROUTELOOP-002 FIX: bare paths hit the app's catch-all route instead of
+  // the intended page. "/" is left alone (own dedicated redirect rule).
+  const prefixedTo = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <NavBar />
@@ -85,7 +90,7 @@ export default function FeatureMenu() {
             {FEATURES.map((feature) => (
               <Link
                 key={feature.title}
-                to={feature.to}
+                to={prefixedTo(feature.to)}
                 className="sp-feature-card"
                 style={{
                   display: 'block',

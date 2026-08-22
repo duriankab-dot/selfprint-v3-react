@@ -5,6 +5,7 @@
  */
 
 import { Link } from 'react-router-dom';
+import { useLanguage } from '../../context/LanguageContext';
 
 const FOOTER_LINKS = [
   { to: '/', label: 'หน้าแรก' },
@@ -16,6 +17,11 @@ const FOOTER_LINKS = [
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { language } = useLanguage();
+  // ROUTELOOP-002 FIX: these were bare paths with no /en or /th prefix,
+  // which hit the app's catch-all route instead of the intended page.
+  // "/" is left alone — it has its own dedicated redirect rule in App.tsx.
+  const prefixedTo = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
 
   return (
     <footer
@@ -108,7 +114,7 @@ export function Footer() {
           {FOOTER_LINKS.map((link) => (
             <Link
               key={link.to}
-              to={link.to}
+              to={prefixedTo(link.to)}
               className="sp-footer-link"
               style={{
                 fontSize: '14px',
