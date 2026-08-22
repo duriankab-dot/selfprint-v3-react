@@ -5,7 +5,7 @@
  * Sub-feature: Personalized Soundscapes
  *
  * Recommends a named soundscape based on:
- *   - Hub (user's current life domain)
+ *   - World (user's current world — WorldId, see src/constants/worlds.ts)
  *   - Mood (user's emotional state)
  *   - TimePeriod (morning / afternoon / evening / night)
  *
@@ -13,13 +13,25 @@
  * AudioContext.setExperience() และ UI แสดงชื่อ soundscape
  *
  * Mapping logic:
- *   Priority 1: exact (hub × mood × period) match
- *   Priority 2: (hub × mood) match — ignore period
- *   Priority 3: (mood × period) match — ignore hub
+ *   Priority 1: exact (world × mood × period) match
+ *   Priority 2: (world × mood) match — ignore period
+ *   Priority 3: (mood × period) match — ignore world
  *   Priority 4: fallback to 'ambient-minimal'
+ *
+ * P0-H: previously keyed to `Hub` (src/context/HubContext.tsx) — a 15-id
+ * taxonomy ('identity', 'money', 'ai-twin', …) completely separate from the
+ * 12-id `WorldId` actually used by live routing/AI (/worlds/:worldId,
+ * TwinChat.tsx's ?world= param, WorldContext.currentWorld). HubContext was
+ * traced end to end and found unreachable from any live route — this engine
+ * was correct in design but silently disconnected from the real app.
+ * Rekeyed to WorldId so it can actually be driven by the real world state.
+ * `matchHubs` entries below were remapped by closest concept (e.g.
+ * 'money'→'wealth', 'identity'→'self', 'health'→'wellbeing'); ids with no
+ * real-world equivalent ('ai-twin', 'activities') were dropped rather than
+ * force-mapped.
  */
 
-import type { Hub } from '@/context/HubContext';
+import type { WorldId } from '@/constants/worlds';
 import type { Mood } from '@/context/EmotionContext';
 import type { MusicExperience } from '@/context/AudioContext';
 import type { TimePeriod, AudioCharacter } from './TimeOfDayEngine';
@@ -43,8 +55,8 @@ export interface SoundscapeConfig {
   audioStyle: string;
   /** Mood ที่เหมาะสม */
   matchMoods: Mood[];
-  /** Hub ที่เหมาะสม (undefined = match any hub) */
-  matchHubs?: Hub[];
+  /** World ที่เหมาะสม (undefined = match any world) */
+  matchHubs?: WorldId[];
   /** TimePeriod ที่เหมาะสม (undefined = match any period) */
   matchPeriods?: TimePeriod[];
 }
@@ -75,7 +87,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'lofi-acoustic',
     matchMoods: ['confident', 'ready'],
     matchPeriods: ['morning'],
-    matchHubs: ['career', 'decision', 'learning', 'money'],
+    matchHubs: ['career', 'decision', 'growth', 'wealth'],
   },
   {
     id: 'morning-gentle',
@@ -100,7 +112,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'minimal-pulse',
     matchMoods: ['confident', 'ready'],
     matchPeriods: ['afternoon'],
-    matchHubs: ['career', 'decision', 'learning', 'money'],
+    matchHubs: ['career', 'decision', 'growth', 'wealth'],
   },
   {
     id: 'afternoon-creative',
@@ -112,7 +124,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'indie-synth',
     matchMoods: ['confident', 'ready'],
     matchPeriods: ['afternoon'],
-    matchHubs: ['creativity', 'learning', 'impact'],
+    matchHubs: ['growth', 'purpose'],
   },
   {
     id: 'afternoon-calm',
@@ -135,7 +147,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'cosmic-ambient',
     matchMoods: ['confident', 'ready', 'reflective'],
     matchPeriods: ['afternoon'],
-    matchHubs: ['learning', 'spirituality', 'identity', 'ai-twin'],
+    matchHubs: ['growth', 'purpose', 'self'],
   },
 
   // ── Evening Wind-Down ──────────────────────────────────────────────────────
@@ -160,7 +172,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'warm-acoustic',
     matchMoods: ['reflective', 'ready', 'confident'],
     matchPeriods: ['evening'],
-    matchHubs: ['relationship', 'health', 'activities'],
+    matchHubs: ['relationship', 'wellbeing', 'life'],
   },
   {
     id: 'evening-release',
@@ -183,7 +195,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'meditative',
     matchMoods: ['reflective', 'confused'],
     matchPeriods: ['evening'],
-    matchHubs: ['spirituality', 'identity', 'ai-twin'],
+    matchHubs: ['purpose', 'self'],
   },
 
   // ── Night Deep ─────────────────────────────────────────────────────────────
@@ -208,7 +220,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'minimal-electronic',
     matchMoods: ['confident', 'ready'],
     matchPeriods: ['night'],
-    matchHubs: ['career', 'learning', 'creativity', 'decision'],
+    matchHubs: ['career', 'growth', 'decision'],
   },
   {
     id: 'night-identity',
@@ -220,7 +232,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioStyle: 'sparse-cosmic',
     matchMoods: ['reflective', 'confused'],
     matchPeriods: ['night'],
-    matchHubs: ['identity', 'spirituality', 'ai-twin'],
+    matchHubs: ['self', 'purpose'],
   },
   {
     id: 'night-wind-down',
@@ -256,7 +268,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioCharacter: 'ambient-warm',
     audioStyle: 'nature-healing',
     matchMoods: ['stressed', 'drained', 'reflective', 'confident', 'ready', 'confused'],
-    matchHubs: ['health'],
+    matchHubs: ['wellbeing'],
   },
   {
     id: 'money-clarity',
@@ -267,7 +279,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioCharacter: 'energetic',
     audioStyle: 'minimal-clean',
     matchMoods: ['confident', 'ready', 'stressed'],
-    matchHubs: ['money'],
+    matchHubs: ['wealth'],
   },
   {
     id: 'creativity-flow',
@@ -278,7 +290,7 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
     audioCharacter: 'energetic',
     audioStyle: 'creative-ambient',
     matchMoods: ['confident', 'ready', 'reflective'],
-    matchHubs: ['creativity', 'impact'],
+    matchHubs: ['growth', 'purpose'],
   },
 
   // ── Universal Fallbacks ────────────────────────────────────────────────────
@@ -310,26 +322,26 @@ export class SoundscapeEngine {
 
   /**
    * หา SoundscapeConfig ที่ match ที่สุด
-   * Priority: exact(hub+mood+period) > (hub+mood) > (mood+period) > (mood only) > fallback
+   * Priority: exact(world+mood+period) > (world+mood) > (mood+period) > (mood only) > fallback
    */
-  recommend(hub: Hub, mood: Mood, period: TimePeriod): SoundscapeConfig {
-    // Pass 1: hub + mood + period ตรงทั้งหมด
+  recommend(worldId: WorldId, mood: Mood, period: TimePeriod): SoundscapeConfig {
+    // Pass 1: world + mood + period ตรงทั้งหมด
     const exactMatch = SOUNDSCAPE_LIBRARY.find((s) =>
       s.matchMoods.includes(mood) &&
-      s.matchHubs?.includes(hub) &&
+      s.matchHubs?.includes(worldId) &&
       s.matchPeriods?.includes(period)
     );
     if (exactMatch) return exactMatch;
 
-    // Pass 2: hub + mood (ไม่ต้อง period ตรง)
+    // Pass 2: world + mood (ไม่ต้อง period ตรง)
     const hubMoodMatch = SOUNDSCAPE_LIBRARY.find((s) =>
       s.matchMoods.includes(mood) &&
-      s.matchHubs?.includes(hub) &&
+      s.matchHubs?.includes(worldId) &&
       !s.matchPeriods
     );
     if (hubMoodMatch) return hubMoodMatch;
 
-    // Pass 3: mood + period (ไม่ต้อง hub ตรง, ไม่มี matchHubs)
+    // Pass 3: mood + period (ไม่ต้อง world ตรง, ไม่มี matchHubs)
     const moodPeriodMatch = SOUNDSCAPE_LIBRARY.find((s) =>
       s.matchMoods.includes(mood) &&
       s.matchPeriods?.includes(period) &&
