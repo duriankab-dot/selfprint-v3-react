@@ -18,6 +18,8 @@ import { WORLDS, getWorldArticles, type WorldId } from '../constants/worlds';
 import { useWorld } from '../context/WorldContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
+import { WorldEnvironment } from '../components/world/WorldEnvironment';
+import { useWorldAmbientTone } from '../hooks/useWorldAmbientTone';
 import '../styles/worlds-hub.css';
 
 function isValidWorldId(id: string | undefined): id is WorldId {
@@ -33,6 +35,12 @@ export default function WorldDetail() {
   const valid = isValidWorldId(worldId);
   const world = valid ? WORLDS[worldId] : null;
   const articles = valid ? getWorldArticles(worldId) : [];
+
+  // Hook must run unconditionally (Rules of Hooks) — falls back to 'self'
+  // when the id is invalid; the invalid-id branch redirects away before
+  // this ever renders anything audible.
+  const ambientWorldId = valid ? worldId : 'self';
+  const ambientTone = useWorldAmbientTone(ambientWorldId);
 
   // GUARD: unknown world id → back to selector, don't render a broken page
   useEffect(() => {
@@ -61,17 +69,38 @@ export default function WorldDetail() {
         description={world.description}
         canonicalUrl={`/${language}/worlds/${world.id}`}
       />
+      {/* P0-H: full-screen procedural environment (directive §17/§23) —
+          layered behind all content, pointer-events disabled so it never
+          intercepts clicks. */}
+      <WorldEnvironment worldId={world.id} />
       <div
         className="world-detail"
         style={{ '--world-color': world.color } as React.CSSProperties}
       >
         <div className="wd-header">
-          <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
-            ← All Worlds
-          </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
+              ← All Worlds
+            </button>
+            <button
+              onClick={ambientTone.toggle}
+              title={ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'}
+              style={{
+                background: 'none',
+                border: '1px solid rgba(255,255,255,0.25)',
+                borderRadius: 8,
+                color: 'rgba(255,255,255,0.75)',
+                fontSize: 13,
+                padding: '4px 10px',
+                cursor: 'pointer',
+              }}
+            >
+              {ambientTone.isPlaying ? '🔊 เสียงบรรยากาศ' : '🔈 เสียงบรรยากาศ'}
+            </button>
+          </div>
           <div className="wd-emoji">{world.emoji}</div>
           <h1>{world.name}</h1>
-          <p className="wd-tagline">{world.tagline}</p>
+          <p className="wd-tagline">{world.tagline} · {world.mood}</p>
           <p className="wd-description">{world.description}</p>
 
           <div className="wh-focus-areas">

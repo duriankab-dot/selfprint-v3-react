@@ -11,11 +11,46 @@ export interface World {
   id: WorldId;
   name: string;
   emoji: string;
+  /** Secondary accent per SELFPRINT — 12 HUB WORLDS VISUAL & EXPERIENCE
+   *  DIRECTIVE §16 ("Visual Color System"). Contextual color — never
+   *  replaces the shared Deep Intelligent Blue brand base (see
+   *  DEEP_INTELLIGENT_BLUE below), only accents it per world. */
   color: string;
+  /** Mood keyword per directive §4 (one per world, e.g. "Reflective / Introspective"). */
+  mood: string;
+  /** Procedural background pattern family per directive §4's "Visual" notes
+   *  for this world — used by WorldEnvironment.tsx to pick a shape system
+   *  since no illustrated 4096×4096 background assets exist yet (directive
+   *  §17 target, not yet produced). */
+  archetype: WorldArchetype;
   description: string;
   tagline: string;
   focusAreas: string[];
 }
+
+/** Procedural visual pattern families — one per world, loosely derived from
+ *  each world's directive §4 "Visual" description. Not a 1:1 replacement for
+ *  the spec's illustrated background assets — a same-architecture placeholder
+ *  (swap WorldEnvironment.tsx's pattern renderer for real art later without
+ *  touching any call site). */
+export type WorldArchetype =
+  | 'core'          // SELF — crystal core, concentric rings
+  | 'network'       // MIND — neural nodes, orbital structures
+  | 'constellation' // RELATIONSHIP — luminous nodes + connecting paths
+  | 'heart'         // LOVE — soft radial heart-energy glow
+  | 'city'          // CAREER — vertical structures, branching paths
+  | 'crystal'       // WEALTH — quantum grid, crystalline facets
+  | 'path'          // LIFE — cosmic pathway, horizon, energy trails
+  | 'organic'       // GROWTH — bioluminescent growth forms
+  | 'branch'        // DECISION — origin branching into option paths
+  | 'temple'        // PURPOSE — monumental cosmic geometry
+  | 'sanctuary'     // WELLBEING — flowing organic/digital curves
+  | 'horizon';       // FUTURE — expansive horizon, energy arcs
+
+/** Shared brand foundation color — directive §2 "Brand Foundation": must
+ *  stay present in every Hub. Every world's environment layers its accent
+ *  on top of this, never replaces it. */
+export const DEEP_INTELLIGENT_BLUE = '#0A1A3F';
 
 export interface Article {
   slug: string;
@@ -35,7 +70,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'self',
     name: 'Self',
     emoji: '🪞',
-    color: '#6366f1',
+    color: '#22D3EE', // Cyan
+    mood: 'Reflective / Introspective',
+    archetype: 'core',
     description: 'Understanding who you are at your core',
     tagline: 'Know thyself',
     focusAreas: ['Identity', 'Values', 'Beliefs', 'Self-awareness', 'Authenticity'],
@@ -44,7 +81,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'mind',
     name: 'Mind',
     emoji: '🧠',
-    color: '#8b5cf6',
+    color: '#A855F7', // Electric Violet
+    mood: 'Curious / Intelligent',
+    archetype: 'network',
     description: 'Thoughts, emotions, and mental clarity',
     tagline: 'Master your mind',
     focusAreas: ['Thoughts', 'Emotions', 'Clarity', 'Focus', 'Mental health'],
@@ -53,7 +92,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'relationship',
     name: 'Relationships',
     emoji: '🤝',
-    color: '#ec4899',
+    color: '#67E8F9', // Soft Cyan
+    mood: 'Connected / Warm',
+    archetype: 'constellation',
     description: 'Connections with others and social bonds',
     tagline: 'Build meaningful bonds',
     focusAreas: ['Communication', 'Boundaries', 'Trust', 'Conflict', 'Connection'],
@@ -62,7 +103,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'love',
     name: 'Love',
     emoji: '💕',
-    color: '#f43f5e',
+    color: '#8B5CF6', // Violet
+    mood: 'Deep / Intimate',
+    archetype: 'heart',
     description: 'Love, romance, intimacy, and heart connections',
     tagline: 'Open your heart',
     focusAreas: ['Romance', 'Intimacy', 'Attachment', 'Vulnerability', 'Partnership'],
@@ -71,7 +114,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'career',
     name: 'Career',
     emoji: '💼',
-    color: '#06b6d4',
+    color: '#B8C0CC', // Silver
+    mood: 'Focused / Ambitious',
+    archetype: 'city',
     description: 'Work, purpose, and professional growth',
     tagline: 'Build your legacy',
     focusAreas: ['Purpose', 'Skills', 'Leadership', 'Growth', 'Impact'],
@@ -80,7 +125,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'wealth',
     name: 'Wealth',
     emoji: '💰',
-    color: '#10b981',
+    color: '#E8B33D', // Gold (used as a limited secondary accent per directive §9)
+    mood: 'Strategic / Precise',
+    archetype: 'crystal',
     description: 'Financial health, abundance, and resources',
     tagline: 'Create prosperity',
     focusAreas: ['Money', 'Abundance', 'Security', 'Investment', 'Generosity'],
@@ -89,7 +136,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'life',
     name: 'Life',
     emoji: '🌍',
-    color: '#f59e0b',
+    color: '#4A90E2', // Azure
+    mood: 'Expansive / Contemplative',
+    archetype: 'path',
     description: 'Balance, lifestyle, and life satisfaction',
     tagline: 'Live fully',
     focusAreas: ['Balance', 'Lifestyle', 'Health', 'Adventure', 'Fulfillment'],
@@ -98,7 +147,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'growth',
     name: 'Growth',
     emoji: '🌱',
-    color: '#34d399',
+    color: '#10B981', // Emerald (restrained, per directive §11)
+    mood: 'Inspiring / Evolving',
+    archetype: 'organic',
     description: 'Learning, development, and transformation',
     tagline: 'Never stop growing',
     focusAreas: ['Learning', 'Skills', 'Habits', 'Mindset', 'Evolution'],
@@ -107,7 +158,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'decision',
     name: 'Decisions',
     emoji: '⚖️',
-    color: '#a78bfa',
+    color: '#B6E3FF', // Ice Blue
+    mood: 'Analytical / Strategic',
+    archetype: 'branch',
     description: 'Choices, wisdom, and decision-making',
     tagline: 'Choose wisely',
     focusAreas: ['Choices', 'Consequences', 'Wisdom', 'Timing', 'Confidence'],
@@ -116,7 +169,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'purpose',
     name: 'Purpose',
     emoji: '✨',
-    color: '#fbbf24',
+    color: '#6366F1', // Indigo
+    mood: 'Profound / Contemplative',
+    archetype: 'temple',
     description: 'Meaning, mission, and life direction',
     tagline: 'Find your why',
     focusAreas: ['Mission', 'Meaning', 'Values', 'Impact', 'Direction'],
@@ -125,7 +180,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'wellbeing',
     name: 'Wellbeing',
     emoji: '🧘',
-    color: '#f87171',
+    color: '#14B8A6', // Teal (soft accent, per directive §14)
+    mood: 'Calm / Restorative',
+    archetype: 'sanctuary',
     description: 'Health, wellness, and self-care',
     tagline: 'Prioritize yourself',
     focusAreas: ['Physical', 'Mental', 'Emotional', 'Spiritual', 'Recovery'],
@@ -134,7 +191,9 @@ export const WORLDS: Record<WorldId, World> = {
     id: 'future',
     name: 'Future',
     emoji: '🚀',
-    color: '#60a5fa',
+    color: '#EAF4FF', // Blue-White
+    mood: 'Visionary / Expansive',
+    archetype: 'horizon',
     description: 'Vision, goals, and what\'s ahead',
     tagline: 'Create your future',
     focusAreas: ['Vision', 'Goals', 'Planning', 'Potential', 'Legacy'],

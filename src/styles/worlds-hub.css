@@ -56,6 +56,36 @@
   margin: 0 auto var(--spacing-md);
 }
 
+/* P0-H: WorldDetail is now a full-screen immersive page over WorldEnvironment
+   (a dark Deep-Intelligent-Blue gradient, directive §2) regardless of the
+   site's light/dark theme setting — same approach CoreAwakening.tsx already
+   uses for its own always-dark ceremony screen. Theme-variable text colors
+   (--color-text-primary/secondary/tertiary) can be near-black in light theme,
+   so this page's text is pinned to light values instead. Scoped under
+   .world-detail only — WorldsHub.tsx's card grid (which reuses some of the
+   same .wh-* class names) is untouched and stays theme-aware. */
+.world-detail {
+  position: relative;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.92);
+}
+.world-detail .wd-tagline,
+.world-detail .wd-back,
+.world-detail .fa-label,
+.world-detail .article-excerpt,
+.world-detail .article-meta,
+.world-detail .guidance-text {
+  color: rgba(255, 255, 255, 0.6);
+}
+.world-detail .wd-description,
+.world-detail .wh-articles h3,
+.world-detail .article-card h4 {
+  color: rgba(255, 255, 255, 0.92);
+}
+.world-detail .wd-back:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 /* ===== HEADER ===== */
 
 .wh-header {

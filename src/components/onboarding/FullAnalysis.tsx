@@ -454,6 +454,12 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
         </div>
 
         {/* Action Buttons */}
+        {/* WOW-CONNECT-001 FIX: this used to render two buttons that both
+            called the same onHome() (one mislabeled "กลับหน้าแรก" / back to
+            home, but it didn't — it did the exact same thing as the first
+            button). onHome() now leads into Core Awakening (Twin birth),
+            not the dashboard, so this is the wow2 invite moment — one
+            clear CTA instead of a confusing duplicate. */}
         <div
           style={{
             display: 'flex',
@@ -478,26 +484,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
-            → ไปที่แดชบอร์ดของคุณ
-          </button>
-          <button
-            onClick={onHome}
-            style={{
-              width: '100%',
-              padding: '14px 24px',
-              borderRadius: '8px',
-              border: '2px solid var(--color-border)',
-              background: 'transparent',
-              color: 'var(--color-text-primary)',
-              fontWeight: 600,
-              fontSize: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-          >
-            ← กลับหน้าแรก
+            ✨ สร้าง AI Twin ของคุณ →
           </button>
         </div>
       </div>
