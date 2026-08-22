@@ -77,7 +77,15 @@ const FAQPage = lazy(() => import('./pages/FAQPage'));
 function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
   const auth = useContext(AuthContext);
   if (auth?.loading) return null;
-  if (auth?.session) return <Navigate to="/dashboard" replace />;
+  if (auth?.session) {
+    // ROUTELOOP-001 FIX: every registered route lives under /en or /th —
+    // there is no bare "/dashboard" route, so this used to hit the
+    // catch-all (-> /en/ -> HomeRoute -> here again), an infinite redirect
+    // loop that rendered a blank page (Chrome's navigation throttling
+    // protection was the visible symptom).
+    const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
+    return <Navigate to={`${langPrefix}/dashboard`} replace />;
+  }
   return <LandingPage onStartOnboarding={onStartOnboarding} />;
 }
 

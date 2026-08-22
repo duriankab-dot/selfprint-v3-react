@@ -5,7 +5,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 
 export function ExplorWorldsCard(): ReactNode {
   const navigate = useNavigate();

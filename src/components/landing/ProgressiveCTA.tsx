@@ -7,7 +7,7 @@
  * - Navigates to onboarding with context
  */
 
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useEmotion } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
 import type { CTASource } from '@/store/userStore';

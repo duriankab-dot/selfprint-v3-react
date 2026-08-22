@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
 import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';

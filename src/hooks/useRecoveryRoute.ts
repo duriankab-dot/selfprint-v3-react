@@ -36,9 +36,20 @@ export function useRecoveryRoute() {
     const targetRoute = routeMap[status] || '/dashboard';
     const currentPath = window.location.pathname;
 
+    // ROUTELOOP-001 FIX: every real route in App.tsx is registered under a
+    // /en or /th language prefix — there is no bare "/dashboard" route.
+    // navigate('/dashboard') with no prefix hit the catch-all
+    // (<Route path="*" element={<Navigate to="/en/" replace />} />), which
+    // sent the user to /en/ -> HomeRoute saw an active session and
+    // redirected straight back to /dashboard -> catch-all again, forever.
+    // This is what Chrome's "Throttling navigation to prevent the browser
+    // from hanging" warning was catching, and why the page rendered blank.
+    const langPrefix = currentPath.startsWith('/th') ? '/th' : '/en';
+    const prefixedTarget = `${langPrefix}${targetRoute}`;
+
     // Only navigate if not already on target page
     if (!currentPath.includes(targetRoute)) {
-      navigate(targetRoute, { replace: true });
+      navigate(prefixedTarget, { replace: true });
     }
   }, [session, authLoading, status, isLoading, navigate]);
 }

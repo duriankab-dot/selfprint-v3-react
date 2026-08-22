@@ -12,7 +12,8 @@
  */
 
 import { useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { WORLDS, getWorldArticles, type WorldId } from '../constants/worlds';
 import { useWorld } from '../context/WorldContext';
 import { MetaTagManager } from '../components/MetaTagManager';
