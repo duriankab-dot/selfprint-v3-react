@@ -11,3 +11,6 @@ build
 out
 coverage
 .DS_Store
+
+# P0-J: og.tsx is a local helper only — og.ts is the actual Vercel Edge endpoint
+api/og.tsx
