@@ -7,6 +7,14 @@
     "api/unified-handler.ts": {
       "maxDuration": 10,
       "regions": ["hnd1"]
+    },
+    "api/twin.ts": {
+      "maxDuration": 10,
+      "regions": ["hnd1"]
+    },
+    "api/nova.ts": {
+      "maxDuration": 10,
+      "regions": ["hnd1"]
     }
   },
   "rewrites": [
