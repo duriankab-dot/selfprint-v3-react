@@ -135,6 +135,27 @@ export async function POST(request: Request): Promise<Response> {
 `action` ออกจากเงื่อนไข required เหลือแค่ `module` — เช็คแล้วไม่มี module
 ไหนใน switch มี `case 'default'` ที่จะชนกัน
 
+**ผล**: deploy แล้วรีเทสต์ — `/api/profile` ตอบ 200 แล้ว! `/api/blueprint`
+ยัง 400 อยู่แต่เป็นคนละ error แล้ว (ไม่ใช่ "module and action" อีกต่อไป)
+
+## API504-005 — decisionStyle enum ไม่ตรงกับข้อมูลจริงที่แอปสร้าง
+
+Response body จริงจาก `/api/blueprint`:
+```json
+{"success":false,"error":"decisionStyle must be one of: analytical, intuitive, collaborative, directive, exploratory"}
+```
+
+**สาเหตุ**: backend validate `decisionStyle` เป็น enum ภาษาอังกฤษ 5 ค่า
+แต่ grep ทั้งโปรเจกต์แล้วพบว่าแอปไม่เคยสร้างค่าพวกนี้เลย —
+`src/lib/astrology.ts`'s `getLifePathProfile()` สร้าง `decisionStyle`
+เป็นวลีบรรยายภาษาไทย (เช่น "นักวางกลยุทธ์เชิงวิเคราะห์") ที่ใช้แสดงผลจริง
+ใน `InitialBlueprint.tsx`, `FullAnalysis.tsx`, `Share.tsx` — validation
+enum นี้ผิดตั้งแต่ต้น ไม่เคยตรงกับข้อมูลจริงเลย
+
+**แก้**: เปลี่ยนจาก enum check เป็น free-text validation แบบเดียวกับ
+`placeOfBirth` (limit ความยาว 200 ตัวอักษร + กัน HTML/script injection)
+แทนที่จะบังคับ enum ที่ผิดตั้งแต่ต้น
+
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error
 2. `npx oxlint api/unified-handler.ts` — 0 warnings, 0 errors
