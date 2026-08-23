@@ -828,4 +828,23 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
   }
 }
 
-export default handler;
+// API504-002 follow-up: `export default handler;` alone (handler defined via
+// `export async function handler(request: Request)` above, referenced here
+// only by identifier) was NOT enough for Vercel's Node.js runtime
+// (/opt/rust/nodejs.js) to detect this as a Web Fetch-style function —
+// confirmed live via Vercel Runtime Logs: it invoked handler() with a
+// legacy Node `(req, res)` pair instead (req.headers has no `.get()`),
+// threw at request.headers.get(), and since a legacy-mode function's
+// return value is ignored (must call res.end() instead), nothing was ever
+// sent back — every request hit the 10s function timeout → 504.
+// Vercel's own runtime warning prescribes the fix directly: real named
+// HTTP-method function exports (`export function GET(request) {...}`),
+// not a const alias to an existing function. Only GET and POST are used
+// anywhere in this file (see the request.method checks throughout).
+export async function GET(request: Request): Promise<Response> {
+  return handler(request);
+}
+
+export async function POST(request: Request): Promise<Response> {
+  return handler(request);
+}
