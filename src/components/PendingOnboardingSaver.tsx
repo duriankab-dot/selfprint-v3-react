@@ -44,7 +44,7 @@ export function PendingOnboardingSaver() {
         });
         const profileJson = await profileRes.json().catch(() => null);
 
-        await fetch('/api/blueprint', {
+        const blueprintRes = await fetch('/api/blueprint', {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -52,6 +52,22 @@ export function PendingOnboardingSaver() {
             profileId: profileJson?.profileId,
           }),
         });
+
+        // ONBOARDING-LOOP-001: this used to clear localStorage regardless of
+        // whether either fetch actually succeeded — a 504/500 response is
+        // still a resolved (non-throwing) fetch, so this file's own comment
+        // ("will retry next session") was never actually true: the pending
+        // data was deleted on the very first attempt even when both API
+        // calls failed (confirmed live: /api/profile and /api/blueprint
+        // both 504'd in the same test session). Only clear it once both
+        // writes are confirmed to have succeeded — otherwise leave it in
+        // localStorage so the next time this effect runs (next login, or
+        // this session if `session` changes again) it actually retries.
+        if (!profileRes.ok || !blueprintRes.ok) {
+          throw new Error(
+            `Pending onboarding save failed: profile=${profileRes.status} blueprint=${blueprintRes.status}`
+          );
+        }
 
         localStorage.removeItem(STORAGE_KEY);
 

@@ -35,19 +35,19 @@ export interface PageMetadata {
  * - Keywords: 3-5 keywords per page
  */
 export const SEO_METADATA: Record<string, PageMetadata> = {
-  // Home Page
+  // Home Page — P0-J updated for GEO/AEO + performance
   home: {
     en: {
-      title: 'SelfPrint — Discover Your Future Self',
-      description: 'Meet your AI Twin and explore multiple life scenarios. Make better decisions with confidence-rated insights from your future selves.',
-      keywords: ['AI twin', 'future self', 'decision making', 'personal growth', 'self-discovery'],
-      ogImage: '/og-home-en.jpg',
+      title: 'SELFPRINT | Your Living Personal Intelligence Platform & AI Twin',
+      description: "Stop guessing your life. SELFPRINT's 12 SICE Core Engines analyze behavioral patterns, detect blind spots, and evolve your AI Twin in real-time. Start free.",
+      keywords: ['AI twin', 'personal intelligence platform', 'decision making AI', 'behavioral pattern analysis', 'SELFPRINT', 'MBTI alternative'],
+      ogImage: '/api/og?lang=en&segment=default',
     },
     th: {
-      title: 'SelfPrint — ค้นพบตัวตนของคุณในอนาคต',
-      description: 'พบกับ AI Twin ของคุณและสำรวจสถานการณ์ชีวิตต่างๆ ตัดสินใจได้ดีขึ้นด้วยข้อมูลเชิงลึก',
-      keywords: ['AI Twin', 'อนาคต', 'ตัดสินใจ', 'พัฒนาตัวเอง', 'ค้นหาตัวตน'],
-      ogImage: '/og-home-th.jpg',
+      title: 'SELFPRINT | สร้าง AI Twin ภาษาไทย — วิเคราะห์ชีวิต ไม่ใช่ดูดวง',
+      description: 'เลิกเดาทิศทาง ให้ SELFPRINT วิเคราะห์ 12 มิติชีวิตด้วย AI Twin ที่เรียนรู้จากคุณจริงๆ ตรวจจับ Blind Spots และช่วยตัดสินใจแม่น ทดลองฟรี',
+      keywords: ['AI Twin ไทย', 'วิเคราะห์ชีวิต', 'ตัดสินใจด้วย AI', 'SELFPRINT', 'ดูดวงด้วย AI', 'พัฒนาตัวเอง', 'behavioral AI ไทย'],
+      ogImage: '/api/og?lang=th&segment=th-self',
     },
   },
 

@@ -39,9 +39,9 @@
 ```
 cd D:\selfprint-v3-react
 git add src/lib/twin/twinUniqueness.ts src/lib/twin/twinVoice.ts src/lib/twin/twinWorldContext.ts ^
-  src/components/twin/TwinPresence.tsx src/components/twin/HologramBirth.tsx ^
-  src/pages/CoreAwakening.tsx src/pages/WorldDetail.tsx src/pages/ComponentShowcase.tsx ^
-  e2e/world-visual.spec.ts TWINPRESENCE_005_TRACE.md P0H_COMPLETION_TRACE.md HANDOFF_2026-08-23_P0H_CLOSED.md
+  git add src/components/twin/TwinPresence.tsx src/components/twin/HologramBirth.tsx ^
+  git add src/pages/CoreAwakening.tsx src/pages/WorldDetail.tsx src/pages/ComponentShowcase.tsx ^
+  git add e2e/world-visual.spec.ts TWINPRESENCE_005_TRACE.md P0H_COMPLETION_TRACE.md HANDOFF_2026-08-23_P0H_CLOSED.md
 git commit -m "TWINPRESENCE-005 + P0-H close: per-user unique Twin, free voice greeting, per-world posture/accessory/expression"
 git push
 ```
