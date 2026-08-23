@@ -35,6 +35,16 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Bridge content: Trojan Horse segment (AI ดูดวง → behavioral science) -->
+  <url>
+    <loc>https://selfprint.one/en/vs-astrology</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/vs-astrology" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/vs-astrology" />
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <url>
     <loc>https://selfprint.one/en/privacy</loc>
     <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/privacy" />

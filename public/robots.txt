@@ -5,6 +5,7 @@ Allow: /en/
 Allow: /th/
 Allow: /share/
 Allow: /compare
+Allow: /llms.txt
 
 # Disallow private areas
 Disallow: /admin/
