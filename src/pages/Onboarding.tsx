@@ -598,7 +598,18 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         >
           <FinetuningQuestions
             onSubmit={handleFinetuneSubmit}
-            onSkip={() => setStep('complete')}
+            onSkip={() => {
+              // GAP-RESUME fix: when restored from localStorage, analysisProfile is null
+              // (not persisted — AnalysisResponse is too complex). Generate a fallback
+              // before advancing so the 'complete' step always has a profile to render.
+              if (!analysisProfile) {
+                const birthDate = birthData?.dob ?? '';
+                setAnalysisProfile(
+                  buildFallbackResponse({ mood, birthDate, finetuneAnswers: {} })
+                );
+              }
+              setStep('complete');
+            }}
           />
         </div>
       )}
