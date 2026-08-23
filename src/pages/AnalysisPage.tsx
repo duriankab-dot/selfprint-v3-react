@@ -106,6 +106,17 @@ const AnalysisPage: React.FC = () => {
   const isLoading = ctxLoading || patLoading;
 
   // --------------------------------------------------------------------------
+  // Redirect unauthenticated users — /analysis requires auth
+  // --------------------------------------------------------------------------
+
+  // Must come before early-return guards to satisfy React's Rules of Hooks
+  React.useEffect(() => {
+    if (!userId) {
+      navigate('/onboarding', { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // --------------------------------------------------------------------------
   // Handlers
   // --------------------------------------------------------------------------
 
@@ -125,16 +136,8 @@ const AnalysisPage: React.FC = () => {
   // --------------------------------------------------------------------------
 
   if (!userId) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <NavBar />
-        <div className="analysis__page">
-          <Alert variant="warning" message="กรุณาเข้าสู่ระบบ SELFPRINT" />
-        </div>
-        <Footer />
-        <BottomNav />
-      </div>
-    );
+    // useEffect above is already redirecting to /onboarding — show nothing
+    return null;
   }
 
   // --------------------------------------------------------------------------

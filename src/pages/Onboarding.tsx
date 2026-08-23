@@ -25,6 +25,8 @@ import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology
 import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
+// GAP-2: Quick Analysis → Full Journey data continuity
+import { useAnalysisStore } from '@/store/analysisStore';
 
 // The standalone Express backend (server/, POST /api/intelligence) that this
 // used to call has been retired — the 12-SICE analysis now runs client-side
@@ -126,6 +128,79 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     place?: string;
   } | null>(null);
   const [analysisProfile, setAnalysisProfile] = useState<AnalysisResponse | null>(null);
+
+  // GAP-2: Quick Analysis → Full Journey data continuity
+  // If the user completed a Quick Analysis (AnalysisPage → analysisStore) before
+  // entering the Full Onboarding, we can skip the analysis re-generation step
+  // and pre-populate disciplines. This runs once on mount.
+  const quickAnalysisData = useAnalysisStore((state) => state.currentAnalysis);
+  const hasInitializedFromQuick = useRef(false);
+  useEffect(() => {
+    if (hasInitializedFromQuick.current) return;
+    if (!quickAnalysisData) return;
+    hasInitializedFromQuick.current = true;
+
+    // Transfer birth data from userStore if available (set during quick analysis BirthDataInput)
+    const storedDob = profile.birthDate ?? localStorage.getItem('birth_dob') ?? '';
+    if (storedDob && !birthData) {
+      setBirthData({
+        dob: storedDob,
+        time: profile.birthTime ?? localStorage.getItem('birth_time') ?? undefined,
+        place: profile.birthPlace ?? localStorage.getItem('birth_place') ?? undefined,
+      });
+    }
+
+    // Pre-populate siceResult from quick analysis confidence so onboarding
+    // shows the user's real accuracy level instead of the default 60%.
+    const disciplines = calculateInitialDisciplines(profile.birthDate ?? storedDob);
+    const accuracy = Math.round((quickAnalysisData as { confidence?: number }).confidence ?? 0.6 * 100);
+    setSiceResult({ accuracy, disciplines });
+    // Note: setAnalysisProfile not populated here — AnalysisResponse ≠ FullAnalysisOutput.
+    // The user will still go through fine-tuning for maximum accuracy.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // GAP-RESUME: Persist step so user can resume onboarding from where they left off.
+  // Saves a lightweight snapshot whenever step advances; restores it on mount
+  // for returning ONBOARDING-status users who closed mid-flow.
+  const RESUME_STORAGE_KEY = 'selfprint_onboarding_resume';
+  const hasRestoredStep = useRef(false);
+
+  // Save step + birth data on every step change (skip initial 'emotion' state — nothing to resume from there)
+  useEffect(() => {
+    if (step === 'emotion') return;
+    try {
+      localStorage.setItem(RESUME_STORAGE_KEY, JSON.stringify({
+        step,
+        dob: birthData?.dob ?? profile.birthDate ?? '',
+        time: birthData?.time ?? profile.birthTime,
+        place: birthData?.place ?? profile.birthPlace,
+        accuracy: siceResult?.accuracy,
+      }));
+    } catch { /* storage unavailable — silent ignore */ }
+  }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore saved step on mount. Skips if GAP-2 quick-analysis init already populated state.
+  // Only restores steps that have enough prior state data (sice-result, fine-tune, complete).
+  useEffect(() => {
+    if (hasRestoredStep.current || hasInitializedFromQuick.current) return;
+    hasRestoredStep.current = true;
+    try {
+      const saved = localStorage.getItem(RESUME_STORAGE_KEY);
+      if (!saved) return;
+      const data = JSON.parse(saved) as {
+        step: OnboardingStep; dob?: string; time?: string; place?: string; accuracy?: number;
+      };
+      const resumable: OnboardingStep[] = ['sice-result', 'fine-tune', 'complete'];
+      if (!resumable.includes(data.step)) return;
+      const dob = data.dob || profile.birthDate || localStorage.getItem('birth_dob') || '';
+      if (!dob) return;
+      if (!birthData) setBirthData({ dob, time: data.time, place: data.place });
+      if (!siceResult) setSiceResult({ accuracy: data.accuracy ?? 65, disciplines: calculateInitialDisciplines(dob) });
+      setStep(data.step);
+    } catch { /* corrupted data — start fresh */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ONBOARDING-LOOP-001: see withLifecycleRetry() above.
   const [lifecycleError, setLifecycleError] = useState<string | null>(null);
@@ -266,6 +341,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // who's already past this stage (TWIN_ALIVE/WORLD_ACTIVE), so this
   // handler only needs to get them there.
   const handleComplete = async () => {
+    // GAP-RESUME: onboarding done — clear the resume snapshot so a future visit starts fresh
+    try { localStorage.removeItem(RESUME_STORAGE_KEY); } catch { /* ignore */ }
+
     // LIFECYCLE-002 FIX: nothing anywhere in the onboarding -> claim-account
     // path ever advanced user_lifecycle.status past 'ONBOARDING'. That
     // meant useRecoveryRoute — which faithfully sends the user to
