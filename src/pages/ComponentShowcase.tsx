@@ -8,6 +8,8 @@ import { useState } from 'react';
 import { Button, Input, Card, Badge, Text, Divider, Checkbox, Radio, Toggle } from '@/components/primitives';
 import { useEmotion } from '@/context/EmotionContext';
 import { useHub } from '@/context/HubContext';
+import { TwinPresence } from '@/components/twin/TwinPresence';
+import { getAllWorlds } from '@/constants/worlds';
 
 export default function ComponentShowcase() {
   const { mood } = useEmotion();
@@ -124,6 +126,68 @@ export default function ComponentShowcase() {
               <Radio label="Choice B" name="test" />
             </div>
             <Toggle label="Toggle me" checked={toggle} onChange={setToggle} />
+          </div>
+        </section>
+
+        <Divider />
+
+        {/* P0-H Gap 4 (Visual Tests): "Twin per World" preview — same Twin
+            (fixed archetype + seedKey), one card per World, so the
+            contextual posture/accessory/expression layer (twinWorldContext.ts)
+            is inspectable and Playwright-testable without needing an
+            authenticated session or a real Twin (this route is public,
+            unlike /worlds/:worldId). Only the World changes between cards —
+            core color/shape/facets stay identical, demonstrating "Twin
+            identity recognizable across all worlds" from the P0-H checklist. */}
+        <section data-testid="twin-world-preview-grid" style={{ marginBottom: 'var(--space-2xl)' }}>
+          <Text as="h2" variant="h2">
+            Twin per World (P0-H visual QA)
+          </Text>
+          <Text variant="body-small" style={{ color: 'var(--color-text-secondary)' }}>
+            Same Twin (sage archetype, fixed seed) across all 12 Worlds — posture, accessory, and
+            expression are the only things that change.
+          </Text>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+              gap: 'var(--space-md)',
+              marginTop: 'var(--space-md)',
+            }}
+          >
+            {getAllWorlds().map((world) => (
+              <div
+                key={world.id}
+                data-testid={`twin-world-preview-${world.id}`}
+                style={{
+                  position: 'relative',
+                  height: '180px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  background: '#0A1A3F',
+                }}
+              >
+                <TwinPresence
+                  primaryArchetype="sage"
+                  worldColor={world.color}
+                  seedKey="showcase-preview"
+                  worldId={world.id}
+                  contained
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 8,
+                    bottom: 6,
+                    fontSize: '12px',
+                    color: 'rgba(255,255,255,0.85)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {world.name}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 

@@ -102,6 +102,7 @@ export default function WorldDetail() {
         secondaryArchetype={twin?.secondaryArchetype}
         worldColor={world.color}
         seedKey={session?.user?.id ?? twin?.id}
+        worldId={world.id}
       />
       <div
         className="world-detail"
