@@ -56,11 +56,16 @@ export function AIProvider({ children }: AIProviderProps) {
     (async () => {
       try {
         // Fetch Twin status from Supabase
+        // TWINS406-001: .single() throws PGRST116 ("0 rows") for any user
+        // who hasn't created a Twin yet — the normal case pre-Core-Awakening
+        // — producing a noisy 406 in the console on every load even though
+        // the catch block below already handles it gracefully. maybeSingle()
+        // returns `data: null` instead, with no error, for the same case.
         const { data: twin } = await supabase
           .from('twins')
           .select('id, name, awakened_at')
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (twin?.awakened_at) {
           // Twin is fully awakened — switch to Twin mode

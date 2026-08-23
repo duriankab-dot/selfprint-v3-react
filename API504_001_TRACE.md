@@ -156,6 +156,38 @@ enum นี้ผิดตั้งแต่ต้น ไม่เคยตร�
 `placeOfBirth` (limit ความยาว 200 ตัวอักษร + กัน HTML/script injection)
 แทนที่จะบังคับ enum ที่ผิดตั้งแต่ต้น
 
+## API504-006 — DB schema drift: blueprints.prototype_core หายจริง
+
+`[blueprint] insert error: { code: 'PGRST204', message: "Could not find
+the 'prototype_core' column of 'blueprints' in the schema cache" }`
+
+ไม่ใช่ bug โค้ด — เจอว่ามี migration เตรียมไว้แล้วในโปรเจกต์
+(`supabase/migrations/006_blueprint_prototype_core.sql`) แต่ไม่เคย apply
+เข้า production DB จริง ให้ user รัน SQL เองใน Supabase SQL Editor
+(อยู่ในโซน "ห้ามแตะ migration" ตามกติกาโปรเจกต์ ผมไม่มีสิทธิ์รันเอง):
+```sql
+ALTER TABLE selfprint.blueprints
+  ADD COLUMN IF NOT EXISTS prototype_core VARCHAR(50);
+```
+User ยืนยันรันแล้ว
+
+## TWINS406-001 — twins query 406 (PGRST116) ที่ค้างมาตั้งแต่ ONBOARDING-LOOP-001
+
+pinpoint สำเร็จ: `src/context/AIContext.tsx` line 59-63 — query เช็คว่า
+user มี Twin หรือยัง (`select('id, name, awakened_at').eq('user_id',
+userId).single()`) รันทุกครั้งที่ auth state เปลี่ยน ใช้ `.single()` ซึ่ง
+throw PGRST116 "0 rows" ทันทีที่ user ยังไม่เคยสร้าง Twin (กรณีปกติของ
+user ใหม่ก่อนทำ Core Awakening) — แม้ error ถูก catch แล้ว fallback ไป
+โหมด Nova อย่างถูกต้องอยู่แล้ว (ไม่กระทบ UX) แต่ยิง 406 error ที่ console
+ทุกครั้งโดยไม่จำเป็น
+
+**แก้**: เปลี่ยน `.single()` เป็น `.maybeSingle()` — คืน `data: null`
+เฉยๆ เมื่อไม่มีแถว ไม่ throw error เลย (พฤติกรรมเดิมของโค้ดที่เหลือไม่
+เปลี่ยน เพราะ `if (twin?.awakened_at)` ทำงานถูกต้องกับ `null` อยู่แล้ว)
+ตรงกับ pattern ที่ `TwinSupabaseService.fetchUserTwin()` ใช้ถูกต้องอยู่
+แล้วในไฟล์อื่น — build ผ่าน, lint 0 error (มี warning fast-refresh เดิม
+ของไฟล์ ไม่เกี่ยวกับการแก้นี้)
+
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error
 2. `npx oxlint api/unified-handler.ts` — 0 warnings, 0 errors
