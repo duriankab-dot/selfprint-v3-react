@@ -89,9 +89,13 @@ export default function NovaChat() {
         .concat([{ role: 'user' as const, content: userMessage }]);
 
       // Call Nova API to generate response
+      // P0-E: use sophisticated hub×mood×archetype prompt builder.
+      // Nova is always pre-Twin (maturityScore=0, hub='identity').
+      // Archetype defaults to 'sage' — unknown until analysis completes.
       const novaResponse = await callNovaAPI(
         apiMessages,
-        'onboarding' // Phase for system prompt
+        'onboarding', // kept for compat (ignored internally now)
+        { hub: 'identity', mood: 'ready', archetype: 'sage', maturityScore: 0 }
       );
 
       // Save Nova's response to database (role must be 'user' | 'assistant')

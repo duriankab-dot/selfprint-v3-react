@@ -1,6 +1,14 @@
 /**
  * prompts.ts
- * System prompts for Nova (Guide) and Twin (Personal AI)
+ * @deprecated P0-E (2026-08-23): This file is dead code — no callers import it.
+ *
+ * Canonical sources:
+ *  - Nova: `src/lib/nova-prompts/getNovaPrompt.ts` (hub×mood×archetype builder)
+ *          `src/config/nova-prompts.ts` (static phase prompts for NovaChat)
+ *  - Twin: `src/config/twin-prompts.ts` (buildTwinSystemPrompt + world prompts)
+ *
+ * Do NOT add new callers here. Safe to delete once confirmed no external
+ * references remain (grep: "from.*config/prompts").
  */
 
 /**
