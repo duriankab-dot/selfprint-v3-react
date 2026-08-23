@@ -22,6 +22,7 @@ export default defineConfig({
       '**/test/minimal.test.ts',
       '**/sice/__tests__/SICEEngines.test.ts',
       '**/lib/prompts/__tests__/promptBuilder.test.ts', // P0-F
+      '**/lib/worlds/__tests__/worldsVerification.test.ts', // P0-G
     ],
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
