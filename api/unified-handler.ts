@@ -785,12 +785,21 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
         return Response.json({ success: false, error: 'accuracyLevel ต้องเป็น 0-100' } as ApiResponse, { status: 400 });
       }
 
-      // Validate decisionStyle enum
-      const VALID_DECISION_STYLES = ['analytical', 'intuitive', 'collaborative', 'directive', 'exploratory'];
+      // API504-005: decisionStyle was validated against a fixed English enum
+      // (analytical/intuitive/collaborative/directive/exploratory), but the
+      // app has never produced those values — src/lib/astrology.ts's
+      // getLifePathProfile() generates Thai descriptive phrases (e.g.
+      // "นักวางกลยุทธ์เชิงวิเคราะห์") used for display everywhere
+      // (InitialBlueprint.tsx, FullAnalysis.tsx, Share.tsx). Confirmed live:
+      // every real blueprint save 400'd with "decisionStyle must be one
+      // of: ...". It's genuinely free text, not an enum — validate it like
+      // the other free-text field (placeOfBirth) instead: reasonable length,
+      // no HTML/script injection.
       const decisionStyle = body.decisionStyle as string | undefined;
-      if (decisionStyle && !VALID_DECISION_STYLES.includes(decisionStyle)) {
+      const INJECTION_RE_DS = /<[^>]*>|javascript:|on\w+\s*=/i;
+      if (decisionStyle && (decisionStyle.length > 200 || INJECTION_RE_DS.test(decisionStyle))) {
         return Response.json(
-          { success: false, error: `decisionStyle must be one of: ${VALID_DECISION_STYLES.join(', ')}` } as ApiResponse,
+          { success: false, error: 'decisionStyle contains invalid characters or is too long' } as ApiResponse,
           { status: 400 }
         );
       }
