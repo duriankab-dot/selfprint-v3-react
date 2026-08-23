@@ -18,6 +18,7 @@ import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
 import { saveMessage } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
+import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
 import { recordWorldInteraction } from '../services/WorldExpertiseService';
 import * as DecisionService from '../services/DecisionService';
 
@@ -204,7 +205,14 @@ export default function TwinChat() {
         }))
         .concat([{ role: 'user' as const, content: userMessage }]);
 
-      // Call Twin API with world-aware expertise
+      // P0-I: Load recent twin_memories for context injection
+      // Fire-and-forget: if fetch fails, memories = [] and Twin still responds
+      const recentMemories = await loadRecentMemories(
+        twin.id,
+        currentWorld ?? null,
+      );
+
+      // Call Twin API with world-aware expertise + memory context
       const twinProfile = JSON.stringify({
         name: twin.name,
         maturityScore: twin.maturityScore || 30,
@@ -214,7 +222,8 @@ export default function TwinChat() {
         apiMessages,
         twin.name || 'Twin',
         twinProfile,
-        currentWorld || undefined // World-aware system prompt (or undefined)
+        currentWorld || undefined,
+        recentMemories,             // P0-I: inject memories into [RELEVANT MEMORY]
       );
 
       // Save Twin's response to database (role must be 'user' | 'assistant')

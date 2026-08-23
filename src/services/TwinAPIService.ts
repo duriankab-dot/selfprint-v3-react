@@ -6,6 +6,8 @@
  */
 
 import { buildTwinSystemPrompt } from '../config/twin-prompts';
+import { buildPrompt } from '../lib/prompts/promptBuilder';
+import type { Memory } from '../lib/prompts/promptBuilder';
 import * as DecisionLearningService from './DecisionLearningService';
 import type { WorldId } from '../constants/worlds';
 import { supabase } from './supabase-service';
@@ -49,25 +51,37 @@ export async function callTwinAPI(
   messages: Message[],
   twinName: string,
   twinProfile: string,
-  worldId?: string
+  worldId?: string,
+  memories?: Memory[],  // P0-I: inject twin_memories into system prompt
 ): Promise<string> {
   try {
     if (!messages.length) {
       throw new Error('No messages to process');
     }
 
-    // Build world-aware system prompt
-    const systemPrompt = buildTwinSystemPrompt(
-      twinName,
-      twinProfile,
-      worldId,
-      undefined, // currentMood
-      messages
-        .filter(m => m.role === 'user')
-        .slice(-3)
-        .map(m => m.content)
-        .join(' | ')
-    );
+    // P0-I: Use buildPrompt() for unified prompt assembly (world + memories).
+    // Falls back to raw buildTwinSystemPrompt when buildPrompt throws (safety net).
+    let systemPrompt: string;
+    try {
+      systemPrompt = buildPrompt({
+        role: 'TWIN',
+        world: worldId,
+        memories: memories ?? [],
+        twinState: {
+          name: twinName,
+          profile: twinProfile,
+        },
+      });
+    } catch {
+      // Fallback: legacy builder (no memory injection)
+      systemPrompt = buildTwinSystemPrompt(
+        twinName,
+        twinProfile,
+        worldId,
+        undefined,
+        messages.filter(m => m.role === 'user').slice(-3).map(m => m.content).join(' | '),
+      );
+    }
 
     // Call Claude API
     const response = await fetch('/api/twin', {
