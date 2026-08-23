@@ -12,11 +12,13 @@ import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
 import { useNova } from '../context/NovaContext';
 import { useUserStore } from '../store/userStore';
+import { useLanguage } from '../context/LanguageContext';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
+import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
 import type { Archetype } from '../context/TwinContext';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
@@ -52,6 +54,7 @@ export default function CoreAwakening() {
   const { setTwinAwakened } = useAIContext();
   const { hydrateTwin } = useTwin();
   const { completeAnalysis } = useNova();
+  const { language } = useLanguage();
   const birthDate = useUserStore((state) => state.profile.birthDate);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
@@ -75,6 +78,7 @@ export default function CoreAwakening() {
     [birthDate]
   );
   const birthColor = useMemo(() => getTwinVisualDNA(birthArchetype).coreColor, [birthArchetype]);
+  const birthShape = useMemo(() => getTwinVisualDNA(birthArchetype).coreShape, [birthArchetype]);
 
   // GUARD: Redirect if not authenticated
   useEffect(() => {
@@ -82,6 +86,10 @@ export default function CoreAwakening() {
       navigate('/login', { replace: true });
     }
   }, [session, navigate]);
+
+  // TWINPRESENCE-005: stop any in-progress/queued greeting if the user
+  // navigates away mid-speech — it must not keep talking on the next page.
+  useEffect(() => stopTwinVoice, []);
 
   // LIFE-001 FIX: Entering the Core Awakening ceremony = lifecycle enters AWAKENING.
   // This must happen on arrival, not after the Twin already exists — the previous
@@ -205,6 +213,14 @@ export default function CoreAwakening() {
       setPhase('celebration');
       celebrateTwinAwakening();
 
+      // TWINPRESENCE-005: free (Web Speech API) voice greeting — the Twin
+      // speaks its own name back at the moment of celebration. Fire-and-
+      // forget: speakTwinGreeting() never throws and a missing/unsupported
+      // voice must not block or delay the redirect below.
+      void speakTwinGreeting(buildTwinGreeting(twinName, language), {
+        lang: language === 'th' ? 'th-TH' : 'en-US',
+      });
+
       // Redirect to Twin chat
       setTimeout(() => {
         setPhase('complete');
@@ -258,7 +274,12 @@ export default function CoreAwakening() {
       {/* BIRTH PHASE */}
       {phase === 'birth' && (
         <div className="flex-1 flex items-center justify-center">
-          <HologramBirth onComplete={handleBirthComplete} color={birthColor} />
+          <HologramBirth
+            onComplete={handleBirthComplete}
+            color={birthColor}
+            shape={birthShape}
+            seedKey={session.user.id}
+          />
         </div>
       )}
 

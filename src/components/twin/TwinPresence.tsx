@@ -29,12 +29,19 @@
 import { useMemo } from 'react';
 import type { Archetype } from '@/context/TwinContext';
 import { getTwinVisualDNA, type TwinCoreShape } from '@/lib/twin/twinVisualDNA';
+import { getUniqueTwinTraits, shiftHue, type TwinUniqueTraits } from '@/lib/twin/twinUniqueness';
 
 interface TwinPresenceProps {
   primaryArchetype?: Archetype;
   secondaryArchetype?: Archetype;
   /** Current world's accent color — used only as a thin contextual aura tint. */
   worldColor: string;
+  /** TWINPRESENCE-005: stable per-user key (session.user.id) used to derive
+   *  this Twin's unique traits on top of its archetype's shared base DNA —
+   *  same seed HologramBirth.tsx uses during the birth ceremony, so the
+   *  Twin looks like the same one the user watched being born. Falls back
+   *  to the archetype name if a session id isn't available yet. */
+  seedKey?: string;
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -46,22 +53,99 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+/** TWINPRESENCE-005: perturb a regular polygon's vertex radii using the
+ *  Twin's shapeJitterSeed so no two same-archetype crystal/diamond Twins
+ *  share an identical silhouette — still reads as "the same shape family",
+ *  just subtly, permanently one-of-a-kind. */
+function jitteredPolygonPoints(
+  vertexCount: number,
+  baseRadius: number,
+  startAngleDeg: number,
+  jitterSeed: number,
+  jitterAmount = 0.14
+): string {
+  const points: string[] = [];
+  for (let i = 0; i < vertexCount; i++) {
+    const angle = ((startAngleDeg + (360 / vertexCount) * i) * Math.PI) / 180;
+    // Deterministic per-vertex wobble derived from the seed, not random.
+    const wobble = 1 + jitterAmount * Math.sin(jitterSeed * 100 + i * 2.4);
+    const r = baseRadius * wobble;
+    const x = 50 + r * Math.cos(angle);
+    const y = 50 + r * Math.sin(angle);
+    points.push(`${x.toFixed(2)},${y.toFixed(2)}`);
+  }
+  return points.join(' ');
+}
+
+/** TWINPRESENCE-005: small orbiting facets ringing the core glyph — count,
+ *  radius, size, spin direction and starting angle all come from this
+ *  Twin's unique traits, so the "constellation" around the core is never
+ *  identical between two Twins of the same archetype. */
+function OrbitFacets({ color, traits, orbitId }: { color: string; traits: TwinUniqueTraits; orbitId: string }) {
+  const facetRadius = 26 * traits.facetRadiusRatio + 10;
+  const facetSize = 3.2 * traits.facetSizeRatio;
+  const facets = Array.from({ length: traits.facetCount }, (_, i) => {
+    const angle = (360 / traits.facetCount) * i + traits.rotationOffsetDeg;
+    const rad = (angle * Math.PI) / 180;
+    const x = 50 + facetRadius * Math.cos(rad);
+    const y = 50 + facetRadius * Math.sin(rad);
+    return (
+      <circle
+        key={i}
+        cx={x.toFixed(2)}
+        cy={y.toFixed(2)}
+        r={facetSize.toFixed(2)}
+        fill={color}
+        opacity={0.55 + (i % 3) * 0.12}
+      />
+    );
+  });
+
+  return (
+    <g style={{ transformOrigin: '50px 50px', animation: `${orbitId} calc(9s / var(--twin-pulse-speed, 1)) linear infinite` }}>
+      {facets}
+      <style>{`
+        @keyframes ${orbitId} {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(${traits.orbitDirection * 360}deg); }
+        }
+      `}</style>
+    </g>
+  );
+}
+
 /** One SVG core glyph per shape family — deliberately simple/abstract
  *  (directive §2: procedural, no illustrated character), reusing the same
- *  visual grammar as WorldEnvironment's ArchetypePattern. */
-function CoreGlyph({ shape, color }: { shape: TwinCoreShape; color: string }) {
+ *  visual grammar as WorldEnvironment's ArchetypePattern. Per-Twin unique
+ *  traits (TWINPRESENCE-005) add polygon jitter + a starting rotation so
+ *  the same archetype never renders pixel-identical across two Twins. */
+function CoreGlyph({ shape, color, traits }: { shape: TwinCoreShape; color: string; traits: TwinUniqueTraits }) {
+  const rot = `rotate(${traits.rotationOffsetDeg} 50 50)`;
   switch (shape) {
     case 'sphere':
       return <circle cx="50" cy="50" r="26" fill={color} opacity="0.9" />;
     case 'crystal':
-      return <polygon points="50,16 74,50 50,84 26,50" fill={color} opacity="0.88" />;
+      return (
+        <polygon
+          points={jitteredPolygonPoints(4, 26, -90 + traits.rotationOffsetDeg, traits.shapeJitterSeed)}
+          fill={color}
+          opacity="0.88"
+        />
+      );
     case 'ring':
       return <circle cx="50" cy="50" r="24" fill="none" stroke={color} strokeWidth="9" opacity="0.9" />;
     case 'diamond':
-      return <polygon points="50,20 68,50 50,80 32,50" fill={color} opacity="0.92" transform="rotate(45 50 50)" />;
+      return (
+        <polygon
+          points={jitteredPolygonPoints(4, 24, traits.rotationOffsetDeg, traits.shapeJitterSeed)}
+          fill={color}
+          opacity="0.92"
+          transform={rot}
+        />
+      );
     case 'bloom':
       return (
-        <g opacity="0.9">
+        <g opacity="0.9" transform={rot}>
           {[0, 60, 120, 180, 240, 300].map((deg) => (
             <ellipse
               key={deg}
@@ -90,11 +174,20 @@ function CoreGlyph({ shape, color }: { shape: TwinCoreShape; color: string }) {
   }
 }
 
-export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor }: TwinPresenceProps) {
+export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor, seedKey }: TwinPresenceProps) {
   const dna = useMemo(
     () => getTwinVisualDNA(primaryArchetype, secondaryArchetype),
     [primaryArchetype, secondaryArchetype]
   );
+
+  // TWINPRESENCE-005: per-user variation layered on the archetype's shared
+  // base DNA — same archetype, never the same Twin. See twinUniqueness.ts.
+  const traits = useMemo(
+    () => getUniqueTwinTraits(seedKey ?? primaryArchetype ?? 'default-twin'),
+    [seedKey, primaryArchetype]
+  );
+  const uniqueCoreColor = useMemo(() => shiftHue(dna.coreColor, traits.hueShiftDeg), [dna.coreColor, traits.hueShiftDeg]);
+  const uniqueAuraColor = useMemo(() => shiftHue(dna.auraColor, traits.hueShiftDeg), [dna.auraColor, traits.hueShiftDeg]);
 
   // TWINPRESENCE-004: previous gradient faded all the way to `transparent`,
   // which read as "see-through to the World background" instead of a solid
@@ -106,7 +199,7 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
   // box-shadow below (not this gradient) is what supplies the soft outer
   // falloff, exactly like the Dashboard orb.
   const auraGradient = `
-    radial-gradient(circle at 38% 35%, ${hexToRgba('#ffffff', 0.3)} 0%, ${hexToRgba(dna.coreColor, 0.85)} 35%, ${hexToRgba(dna.auraColor, 0.55)} 70%, ${hexToRgba(worldColor, 0.35)} 100%)
+    radial-gradient(circle at 38% 35%, ${hexToRgba('#ffffff', 0.3)} 0%, ${hexToRgba(uniqueCoreColor, 0.85)} 35%, ${hexToRgba(uniqueAuraColor, 0.55)} 70%, ${hexToRgba(worldColor, 0.35)} 100%)
   `;
 
   return (
@@ -143,13 +236,18 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
             // presence — same glow strength as the Dashboard orb
             // (living-twin.css's .living-twin__orb box-shadow) so both
             // read as the same Twin.
-            boxShadow: `0 0 0 1px ${hexToRgba(dna.coreColor, 0.55)}, 0 0 32px ${hexToRgba(dna.coreColor, 0.55)}, 0 0 64px ${hexToRgba(dna.coreColor, 0.3)}, inset 0 0 32px ${hexToRgba('#ffffff', 0.08)}`,
+            boxShadow: `0 0 0 1px ${hexToRgba(uniqueCoreColor, 0.55)}, 0 0 32px ${hexToRgba(uniqueCoreColor, 0.55)}, 0 0 64px ${hexToRgba(uniqueCoreColor, 0.3)}, inset 0 0 32px ${hexToRgba('#ffffff', 0.08)}`,
             // Contextual state — read live from EnvironmentEngine's already-
             // computed, previously-unconsumed --twin-* vars (see file header).
             opacity: 'var(--twin-opacity, 0.92)',
             transform: 'scale(var(--twin-scale, 1)) rotate(var(--twin-rotation, 0deg))',
             transition: 'opacity 500ms ease, transform var(--twin-transition-duration, 500ms) ease',
-            animationDuration: 'var(--twin-breathing-duration, 2500ms)',
+            // TWINPRESENCE-005: per-Twin breathing speed variance (0.85–1.2x)
+            // — read by both the CSS breathing animation below and by
+            // OrbitFacets' spin duration, so the whole Twin feels like one
+            // coherent "creature" with its own tempo.
+            animationDuration: 'calc(var(--twin-breathing-duration, 2500ms) / var(--twin-pulse-speed, 1))',
+            ['--twin-pulse-speed' as string]: traits.pulseSpeedFactor,
           }}
         >
           <style>{`
@@ -175,10 +273,13 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
             height="100%"
             viewBox="0 0 100 100"
             style={{
-              filter: `drop-shadow(0 0 calc(22px * var(--twin-glow-intensity, 0.85)) ${hexToRgba(dna.coreColor, 0.75)})`,
+              filter: `drop-shadow(0 0 calc(22px * var(--twin-glow-intensity, 0.85)) ${hexToRgba(uniqueCoreColor, 0.75)})`,
             }}
           >
-            <CoreGlyph shape={dna.coreShape} color={dna.coreColor} />
+            <CoreGlyph shape={dna.coreShape} color={uniqueCoreColor} traits={traits} />
+            {/* TWINPRESENCE-005: orbiting facets — this Twin's own
+                "constellation", never identical to another Twin's. */}
+            <OrbitFacets color={uniqueAuraColor} traits={traits} orbitId="twin-orbit-facets" />
           </svg>
         </div>
       </div>
