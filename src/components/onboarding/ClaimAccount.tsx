@@ -10,7 +10,7 @@
  * ผ่าน <PendingOnboardingSaver /> (ดู src/components/PendingOnboardingSaver.tsx)
  */
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 // ─── Icon SVGs (inline, no deps) ─────────────────────────────────────────────
@@ -61,10 +61,20 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null);
 
+  // ONBOARDING-LOOP-001: guards against calling onDone() more than once —
+  // `session` can get a new object reference (e.g. on a token-refresh tick)
+  // and re-trigger this render-time branch while onDone() (now an async,
+  // retrying lifecycle write — see Onboarding.tsx) is still in flight from
+  // the first call, which would fire a redundant concurrent write.
+  const hasCalledOnDone = useRef(false);
+
   // ถ้า login อยู่แล้ว (กลับมาทำ onboarding ซ้ำ) ไม่ต้องถามอีเมลอีก
   if (session) {
-    localStorage.setItem('pending_onboarding_save', JSON.stringify(data));
-    onDone();
+    if (!hasCalledOnDone.current) {
+      hasCalledOnDone.current = true;
+      localStorage.setItem('pending_onboarding_save', JSON.stringify(data));
+      onDone();
+    }
     return null;
   }
 

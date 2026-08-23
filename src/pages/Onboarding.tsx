@@ -44,6 +44,33 @@ async function analyzeWithAstrovera(
   return null;
 }
 
+/**
+ * ONBOARDING-LOOP-001: lifecycleStore.transitionTo() never rejects — on
+ * failure it catches internally and sets `error` on the store instead
+ * (see src/store/lifecycleStore.ts). handleComplete() previously called it
+ * fire-and-forget and navigated to /core-awakening regardless, so a failed
+ * write (backend slow/timeout — confirmed via live testing, multiple 504s
+ * across /api/profile, /api/blueprint, /api/stripe/subscription at the same
+ * time) left user_lifecycle.status stuck at 'ONBOARDING' in the database
+ * while the UI had already moved on. Any later fresh app mount (magic-link
+ * email opened in a new tab, mobile tab reload, hard refresh) re-fires
+ * useRecoveryRoute.ts, which reads that stale DB status and sends the user
+ * straight back to /onboarding — this is the "onboarding วนซ้ำ ข้ามไม่ได้"
+ * loop reported during testing.
+ *
+ * Retries a few times (transient timeouts are exactly what's happening
+ * right now) before surfacing a visible retry UI — never silently
+ * navigating forward on a write we don't actually know succeeded.
+ */
+async function withLifecycleRetry(attempt: () => Promise<void>, maxAttempts = 3): Promise<boolean> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await attempt();
+    if (!useLifecycleStore.getState().error) return true;
+    if (i < maxAttempts - 1) await new Promise((resolve) => setTimeout(resolve, 600));
+  }
+  return false;
+}
+
 type OnboardingStep =
   | 'emotion'
   | 'nova-conversation'
@@ -99,6 +126,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     place?: string;
   } | null>(null);
   const [analysisProfile, setAnalysisProfile] = useState<AnalysisResponse | null>(null);
+
+  // ONBOARDING-LOOP-001: see withLifecycleRetry() above.
+  const [lifecycleError, setLifecycleError] = useState<string | null>(null);
+  const [isCompletingLifecycle, setIsCompletingLifecycle] = useState(false);
 
   // Handle emotion selection and proceed to Nova.
   // If the person already gave their birth date on the landing page
@@ -234,7 +265,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // ANALYSIS -> AWAKENING transition on arrival and won't downgrade a user
   // who's already past this stage (TWIN_ALIVE/WORLD_ACTIVE), so this
   // handler only needs to get them there.
-  const handleComplete = () => {
+  const handleComplete = async () => {
     // LIFECYCLE-002 FIX: nothing anywhere in the onboarding -> claim-account
     // path ever advanced user_lifecycle.status past 'ONBOARDING'. That
     // meant useRecoveryRoute — which faithfully sends the user to
@@ -245,10 +276,26 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // ANALYSIS -> AWAKENING -> TWIN_ALIVE -> WORLD_ACTIVE machine in
     // lifecycleStore.ts) is what should have happened the moment
     // onboarding actually completed.
+    //
+    // ONBOARDING-LOOP-001 FIX: this used to fire transitionTo() and
+    // navigate() immediately regardless of whether the write succeeded —
+    // see withLifecycleRetry()'s comment above for the full loop this
+    // caused. Now it retries, and only navigates once the write is
+    // confirmed (or gives the user a visible, retryable error instead of
+    // silently proceeding into a state the database doesn't reflect).
+    setLifecycleError(null);
+
     if (session?.user?.id) {
-      transitionTo(session.user.id, 'ANALYSIS').catch((err) =>
-        console.warn('Failed to transition lifecycle to ANALYSIS:', err)
-      );
+      setIsCompletingLifecycle(true);
+      const ok = await withLifecycleRetry(() => transitionTo(session.user.id, 'ANALYSIS'));
+      setIsCompletingLifecycle(false);
+
+      if (!ok) {
+        setLifecycleError(
+          useLifecycleStore.getState().error || 'ไม่สามารถบันทึกความคืบหน้าได้ กรุณาลองอีกครั้ง'
+        );
+        return;
+      }
     }
 
     if (onComplete) {
@@ -257,6 +304,54 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       navigate('/core-awakening');
     }
   };
+
+  // ONBOARDING-LOOP-001: shown instead of the claim-account step when the
+  // lifecycle write fails even after retries — visible + retryable, not a
+  // silent forward-navigation into a state the database doesn't reflect.
+  if (lifecycleError) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '48px 24px',
+          textAlign: 'center',
+          backgroundColor: 'var(--color-bg-primary)',
+          color: 'var(--color-text-primary)',
+        }}
+      >
+        <div style={{ maxWidth: '440px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
+            บันทึกความคืบหน้าไม่สำเร็จ
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
+            {lifecycleError} — เชื่อมต่อกับเซิร์ฟเวอร์ช้าหรือขาดหาย ข้อมูล AI Twin ของคุณยังอยู่
+            ลองอีกครั้งได้เลย
+          </p>
+          <button
+            onClick={handleComplete}
+            disabled={isCompletingLifecycle}
+            style={{
+              padding: '12px 32px',
+              borderRadius: '8px',
+              border: 'none',
+              background: 'var(--color-accent-primary)',
+              color: 'white',
+              fontWeight: 600,
+              cursor: isCompletingLifecycle ? 'not-allowed' : 'pointer',
+              fontSize: '15px',
+              opacity: isCompletingLifecycle ? 0.7 : 1,
+            }}
+          >
+            {isCompletingLifecycle ? 'กำลังลองอีกครั้ง...' : 'ลองอีกครั้ง'}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

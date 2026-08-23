@@ -21,6 +21,31 @@ import type { Archetype } from '../context/TwinContext';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
 
+/**
+ * ONBOARDING-LOOP-001: lifecycleStore.transitionTo()/setTwinCreated() never
+ * reject on failure — they catch internally and set `error` on the store
+ * instead (see src/store/lifecycleStore.ts). This file previously called
+ * transitionTo('AWAKENING') fire-and-forget on arrival and awaited
+ * setTwinCreated() without ever checking whether it actually succeeded —
+ * so a transient backend timeout (confirmed via live testing: /api/profile,
+ * /api/blueprint, /api/stripe/subscription all 504'd in the same session)
+ * left user_lifecycle.status stale in the database while the UI proceeded
+ * as if it had advanced, and any later fresh app mount (useRecoveryRoute.ts)
+ * would misroute the user based on the stale status. See the matching fix
+ * + full writeup in Onboarding.tsx's handleComplete().
+ *
+ * Retries a few times — transient timeouts are exactly what's happening
+ * right now — before giving up.
+ */
+async function withLifecycleRetry(attempt: () => Promise<void>, maxAttempts = 3): Promise<boolean> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await attempt();
+    if (!useLifecycleStore.getState().error) return true;
+    if (i < maxAttempts - 1) await new Promise((resolve) => setTimeout(resolve, 600));
+  }
+  return false;
+}
+
 export default function CoreAwakening() {
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -72,9 +97,19 @@ export default function CoreAwakening() {
     const currentStatus = useLifecycleStore.getState().status;
     if (currentStatus === 'TWIN_ALIVE' || currentStatus === 'WORLD_ACTIVE') return;
 
-    transitionTo(session.user.id, 'AWAKENING').catch((err) =>
-      console.error('Failed to transition lifecycle to AWAKENING:', err)
-    );
+    // ONBOARDING-LOOP-001: retries on transient failure; non-blocking for
+    // the ceremony itself (arrival bookkeeping, not a user-gated action) —
+    // if it still fails after retries, setTwinCreated() below (which sets
+    // status straight to TWIN_ALIVE, not conditioned on AWAKENING) can
+    // still recover a correct final status, so this is logged, not fatal.
+    withLifecycleRetry(() => transitionTo(session.user.id, 'AWAKENING')).then((ok) => {
+      if (!ok) {
+        console.error(
+          'Failed to transition lifecycle to AWAKENING after retries:',
+          useLifecycleStore.getState().error
+        );
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
 
@@ -141,7 +176,30 @@ export default function CoreAwakening() {
       // (setTwinCreated persists twin_id + status='TWIN_ALIVE' to Supabase).
       // This was previously never called anywhere in production code, so the
       // lifecycle state stayed at AWAKENING forever even after Twin creation.
-      await setTwinCreated(session.user.id, result.twinId);
+      //
+      // ONBOARDING-LOOP-001: this was already awaited, but setTwinCreated()
+      // never rejects on failure (see withLifecycleRetry()'s comment above)
+      // — a failed write here used to go completely unnoticed and the
+      // celebration proceeded as if it succeeded. Retries first (transient
+      // timeouts are exactly what's happening right now). If it still fails
+      // after retries: the Twin record itself was already created
+      // successfully above (createTwinInDatabase, inside initializeTwin())
+      // — only the lifecycle status write failed — so the celebration still
+      // deserves to happen rather than blocking a real, created Twin behind
+      // a background sync failure. Logged loudly instead so it's not lost;
+      // a stale status here is the one gap this pass doesn't fully close
+      // (see ONBOARDING_LOOP_001_TRACE.md) — closing it properly means the
+      // recovery route should fall back to checking for an actual twins row
+      // when status looks stale, which is Entry Resolver work, not this fix.
+      const twinCreatedOk = await withLifecycleRetry(() =>
+        setTwinCreated(session.user.id, result.twinId!)
+      );
+      if (!twinCreatedOk) {
+        console.error(
+          'Failed to sync lifecycle to TWIN_ALIVE after retries (Twin record itself was created successfully):',
+          useLifecycleStore.getState().error
+        );
+      }
 
       // Celebration phase
       setPhase('celebration');
