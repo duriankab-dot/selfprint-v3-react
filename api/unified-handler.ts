@@ -36,11 +36,21 @@ export async function handler(request: Request): Promise<Response> {
 
     const url = new URL(request.url);
     const module = url.searchParams.get('module');
-    const action = url.searchParams.get('action');
+    // API504-004: vercel.json's rewrite for /api/profile and /api/blueprint
+    // is "/api/profile/:action*" → "...&action=:action*" — when the caller
+    // hits the plain path with no extra segment (which PendingOnboardingSaver.tsx
+    // does: fetch('/api/profile', ...)), `:action*` substitutes to an empty
+    // string, so `action` here is '' (falsy). handleProfile/handleBlueprint
+    // never branch on `action` at all, so requiring it was too strict and
+    // rejected every real call with "module and action parameters required"
+    // (confirmed via live Network tab response body). Default to 'default',
+    // matching the same convention already used for the `share` rewrite
+    // ("...&module=share&action=default").
+    const action = url.searchParams.get('action') || 'default';
 
-    if (!module || !action) {
+    if (!module) {
       return Response.json(
-        { success: false, error: 'module and action parameters required' } as ApiResponse,
+        { success: false, error: 'module parameter required' } as ApiResponse,
         { status: 400 }
       );
     }
