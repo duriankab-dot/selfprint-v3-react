@@ -5,7 +5,8 @@
   "framework": "vite",
   "functions": {
     "api/unified-handler.ts": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "regions": ["hnd1"]
     }
   },
   "rewrites": [

@@ -14,7 +14,7 @@ import {
   trackDecisionOutcome,
 } from '../src/services/NotificationAnalytics.js';
 import Stripe from 'stripe';
-import { verifyUser, supabaseAdmin } from './_utils/verify-user.js';
+import { verifyUser, supabaseAdmin, type VerifiedUser } from './_utils/verify-user.js';
 import { rateLimitMiddleware, tooManyRequestsResponse } from './_utils/rate-limit.js';
 
 interface ApiResponse<T = any> {
@@ -53,13 +53,13 @@ export async function handler(request: Request): Promise<Response> {
       case 'sice':
         return handleSICE(request, action, url);
       case 'stripe':
-        return handleStripe(request, action);
+        return handleStripe(request, action, user);
       case 'share':
         return handleShare(request, url);
       case 'profile':
-        return handleProfile(request, action);
+        return handleProfile(request, action, user);
       case 'blueprint':
-        return handleBlueprint(request, action);
+        return handleBlueprint(request, action, user);
       default:
         return Response.json(
           { success: false, error: `Unknown module: ${module}` } as ApiResponse,
@@ -433,14 +433,13 @@ async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
 
 // ── handleStripe ─────────────────────────────────────────────────────────────
 
-async function handleStripe(request: Request, action: string): Promise<Response> {
+async function handleStripe(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
   try {
     switch (action) {
       case 'create-checkout': {
         if (request.method !== 'POST') {
           return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
         }
-        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
@@ -475,7 +474,6 @@ async function handleStripe(request: Request, action: string): Promise<Response>
         if (request.method !== 'POST') {
           return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
         }
-        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
@@ -499,7 +497,6 @@ async function handleStripe(request: Request, action: string): Promise<Response>
         if (request.method !== 'GET') {
           return Response.json({ success: false, error: 'GET only' } as ApiResponse, { status: 405 });
         }
-        const user = await verifyUser(request.headers.get('authorization') ?? undefined);
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
@@ -674,12 +671,11 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
   return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
 }
 
-async function handleProfile(request: Request, action: string): Promise<Response> {
+async function handleProfile(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
   try {
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
-    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
     }
@@ -749,12 +745,11 @@ async function handleProfile(request: Request, action: string): Promise<Response
   }
 }
 
-async function handleBlueprint(request: Request, action: string): Promise<Response> {
+async function handleBlueprint(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
   try {
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
-    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
     }
