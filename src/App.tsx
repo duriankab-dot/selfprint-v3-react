@@ -70,6 +70,7 @@ const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
+const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
@@ -143,6 +144,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/decisions', element: <DecisionDashboard /> },
     { path: '/decision-log', element: <DecisionLoggerPage /> },
     { path: '/faq', element: <FAQPage /> },
+    { path: '/vs-astrology', element: <VsAstrologyPage /> },
     { path: '/menu', element: <FeatureMenu /> },
     { path: '/components', element: <ComponentShowcase /> },
   ];

@@ -1,8 +1,9 @@
 /**
- * LandingPage.tsx — P0-J
+ * LandingPage.tsx — P0-J + GAP-1
  *
  * Smart Entry:   auto-detect language + segment variant (utm/ref)
  * Hybrid Funnel: Quick Analysis (2 min) vs Full Journey
+ * Returning:     session + twin → WelcomeBackHero; session + no twin → ResumeHero
  * Visual:        scientific icons only — Brain, Network, Radar, Atom, Waves
  *                NO astrology/fortune-telling icons
  * SEO:           bilingual meta, JSON-LD, hreflang via MetaTagManager
@@ -17,6 +18,9 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
 import { useEmotion } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
+import { useAuth } from '@/context/AuthContext';
+import { useTwin } from '@/context/TwinContext';
+import { useLifecycleStore } from '@/store/lifecycleStore';
 
 // Lazy-load below-fold sections
 const EmotionSelector = lazy(() =>
@@ -330,6 +334,69 @@ interface LandingPageProps {
   onStartOnboarding?: () => void;
 }
 
+// ─── WelcomeBackHero — returning user with existing Twin ──────────────────────
+
+function WelcomeBackHero({ lang, twinName, onEnter }: { lang: 'th' | 'en'; twinName?: string; onEnter: () => void }) {
+  const name = twinName ?? (lang === 'th' ? 'Twin ของคุณ' : 'Your Twin');
+  return (
+    <section style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: 'clamp(48px,8vw,96px) clamp(20px,5vw,48px)', background: 'linear-gradient(135deg,var(--color-bg-primary) 0%,var(--color-bg-secondary) 100%)' }}>
+      <span style={{ display: 'inline-block', background: 'var(--color-accent-primary)', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 24 }}>
+        {lang === 'th' ? 'ยินดีต้อนรับกลับ' : 'Welcome Back'}
+      </span>
+      <h1 style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 800, lineHeight: 1.25, marginBottom: 16, color: 'var(--color-text-primary)' }}>
+        {lang === 'th' ? `${name} รอคุณอยู่` : `${name} is waiting for you`}
+      </h1>
+      <p style={{ fontSize: '18px', color: 'var(--color-text-secondary)', maxWidth: 520, lineHeight: 1.8, marginBottom: 40 }}>
+        {lang === 'th'
+          ? 'Twin ของคุณเรียนรู้และพัฒนาไปพร้อมกับคุณ — กลับมาสนทนาต่อได้เลย'
+          : 'Your Twin has been learning and evolving. Pick up right where you left off.'}
+      </p>
+      <button
+        onClick={onEnter}
+        style={{ padding: '16px 40px', borderRadius: '12px', fontWeight: 700, fontSize: '18px', cursor: 'pointer', background: 'var(--color-accent-primary)', color: 'white', border: 'none' }}
+      >
+        {lang === 'th' ? 'เข้าหา Twin ของฉัน →' : 'Enter My Twin →'}
+      </button>
+    </section>
+  );
+}
+
+// ─── ResumeHero — logged-in but Twin not created yet ─────────────────────────
+
+function ResumeHero({ lang, onResume, onRestart }: { lang: 'th' | 'en'; onResume: () => void; onRestart: () => void }) {
+  return (
+    <section style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: 'clamp(48px,8vw,96px) clamp(20px,5vw,48px)', background: 'linear-gradient(135deg,var(--color-bg-primary) 0%,var(--color-bg-secondary) 100%)' }}>
+      <span style={{ display: 'inline-block', background: 'var(--color-bg-secondary)', color: 'var(--color-accent-primary)', border: '1.5px solid var(--color-accent-primary)', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 24 }}>
+        {lang === 'th' ? 'เกือบเสร็จแล้ว!' : 'Almost there!'}
+      </span>
+      <h1 style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 800, lineHeight: 1.25, marginBottom: 16, color: 'var(--color-text-primary)' }}>
+        {lang === 'th' ? 'AI Twin ของคุณยังไม่สมบูรณ์' : 'Your AI Twin isn\'t complete yet'}
+      </h1>
+      <p style={{ fontSize: '18px', color: 'var(--color-text-secondary)', maxWidth: 520, lineHeight: 1.8, marginBottom: 40 }}>
+        {lang === 'th'
+          ? 'คุณเริ่มสร้าง Twin ไว้แล้ว — ต่อจากที่ค้างไว้เพื่อเปิดใช้งานระบบเต็มรูปแบบ'
+          : 'You\'ve started creating your Twin — resume where you left off to activate the full system.'}
+      </p>
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <button
+          onClick={onResume}
+          style={{ padding: '15px 32px', borderRadius: '10px', fontWeight: 700, fontSize: '16px', cursor: 'pointer', background: 'var(--color-accent-primary)', color: 'white', border: 'none' }}
+        >
+          {lang === 'th' ? 'ต่อจากที่ค้างไว้ →' : 'Resume Setup →'}
+        </button>
+        <button
+          onClick={onRestart}
+          style={{ padding: '15px 32px', borderRadius: '10px', fontWeight: 600, fontSize: '15px', cursor: 'pointer', background: 'transparent', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)' }}
+        >
+          {lang === 'th' ? 'เริ่มใหม่ตั้งแต่ต้น' : 'Start Over'}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const { language } = useLanguage();
   const navigate = useLangNavigate();
@@ -338,13 +405,24 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const { segment } = useSmartEntry();
   const [birthVisible, setBirthVisible] = useState(false);
 
+  // GAP-1: Returning user detection
+  const { session } = useAuth();
+  const { twin } = useTwin();
+  const lifecycleStatus = useLifecycleStore((state) => state.status);
+
   const lang = (language === 'th' ? 'th' : 'en') as 'th' | 'en';
   const copy = COPY[lang][segment] ?? COPY[lang]['default'];
   const ogUrl = `https://selfprint.one/api/og?lang=${lang}&segment=${segment}`;
 
   const goQuick = () => {
     setLandingContext({ mood });
-    navigate('/analysis');
+    // /analysis requires auth — unauthenticated users route to /onboarding instead
+    // (Onboarding works without login and pre-populates from BirthDataInput data)
+    if (!session) {
+      navigate('/onboarding');
+    } else {
+      navigate('/analysis');
+    }
   };
 
   const goFull = () => {
@@ -396,6 +474,40 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
       name: 'วิทยา', role: 'Entrepreneur, E-commerce',
     },
   ];
+
+  // GAP-1: Returning user gate — show personalized hero before main landing content.
+  // Lifecycle must be loaded (not null) before checking to avoid flash-redirects.
+  if (session && lifecycleStatus && twin) {
+    // User is fully set up — direct them to their Twin
+    return (
+      <>
+        <NavBar position="fixed" />
+        <WelcomeBackHero
+          lang={lang}
+          twinName={twin.name ?? undefined}
+          onEnter={() => navigate('/twin')}
+        />
+        <Footer />
+        <BottomNav />
+      </>
+    );
+  }
+
+  if (session && lifecycleStatus && lifecycleStatus === 'ONBOARDING') {
+    // Signed in but Twin not created — offer to resume or restart
+    return (
+      <>
+        <NavBar position="fixed" />
+        <ResumeHero
+          lang={lang}
+          onResume={() => navigate('/onboarding')}
+          onRestart={() => navigate('/onboarding')}
+        />
+        <Footer />
+        <BottomNav />
+      </>
+    );
+  }
 
   return (
     <>
