@@ -75,9 +75,37 @@ Functions inside of the `pages/api` ... directory instead of `api`"
 ไม่มีที่ไหน import มาใช้ (Vercel function ถูกเรียกผ่าน file convention
 ไม่ใช่ import ตรงๆ)
 
-**แก้**: ลบ `export const GET = handler;` กับ `export const POST = handler;`
-ออก เหลือแค่ `export default handler;` เท่านั้น — กลับไปเป็น convention
-ที่ถูกต้องของ Vercel Function แบบ Fetch API ธรรมดา (ไม่ใช่ Next.js)
+**แก้ (ครั้งที่ 1 — ผิด)**: ลบ `export const GET = handler;` กับ
+`export const POST = handler;` ออก เหลือแค่ `export default handler;`
+เดาว่า Next.js-style export ทำให้ Vercel เข้าใจผิด — **deploy แล้วรีเทสต์
+ยัง error เดิมทุกตัวอักษรเป๊ะ** (เห็นจาก log commit `99adf15` ที่ deploy
+จริงหลังแก้) พิสูจน์ว่าเดาผิด: `export const GET = handler` (const alias
+ไปยัง identifier) กับ `export default handler` (ก็ identifier เดียวกัน)
+ไม่ต่างกันเลยในสายตา Vercel build analysis — ไม่มีอะไรเปลี่ยนจริง
+
+**สาเหตุจริงกว่านั้น (ครั้งที่ 2 — ตาม log ของ Vercel เองบอกตรงๆ)**:
+runtime warning บอกวิธีแก้ไว้ชัดเจนอยู่แล้วว่า:
+```
+Fix: export a `fetch` function or a named HTTP method:
+        export function GET(request) { return new Response('ok') }
+```
+คือต้องเป็น **function declaration จริงตรง export** ไม่ใช่ const ที่ไป
+alias identifier ของฟังก์ชันที่ประกาศไว้ที่อื่น — Vercel build-time
+analysis (`@vercel/node`) ต้องเห็น shape ของฟังก์ชันตรงจุด export ถึงจะ
+สร้าง Web Fetch API adapter ให้ถูก ถ้าเป็นแค่ identifier reference มันไม่
+รู้จัก เลย fallback ไปใช้ legacy `(req,res)` adapter เหมือนเดิม
+
+**แก้จริง**: เปลี่ยนจาก `export const GET/POST = handler;` เป็น
+function declaration จริง:
+```ts
+export async function GET(request: Request): Promise<Response> {
+  return handler(request);
+}
+export async function POST(request: Request): Promise<Response> {
+  return handler(request);
+}
+```
+(grep ยืนยันทั้งไฟล์ใช้แค่ GET/POST เท่านั้น ไม่มี PUT/DELETE/PATCH)
 
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error
