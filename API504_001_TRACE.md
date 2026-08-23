@@ -107,6 +107,34 @@ export async function POST(request: Request): Promise<Response> {
 ```
 (grep ยืนยันทั้งไฟล์ใช้แค่ GET/POST เท่านั้น ไม่มี PUT/DELETE/PATCH)
 
+**ผล**: deploy แล้วรีเทสต์จริง — 504 หายจริง เห็นจาก Vercel Logs:
+`GET /api/stripe/subscription` ตอบ 200, `POST /api/profile`/`POST /api/blueprint`
+ตอบ 400 (ไม่ใช่ 504) → **504 root cause ปิดเคสแล้ว**
+
+## API504-004 — ตามมาติดๆ: 400 Bad Request บน /api/profile, /api/blueprint
+
+หลัง 504 หาย เจอปัญหาใหม่ (เล็กกว่ามาก): `POST /api/profile` และ
+`POST /api/blueprint` ตอบ 400 ทุกครั้งที่ `PendingOnboardingSaver.tsx`
+ยิงหลัง login ผ่าน magic link (เช็ค Network tab response body จริงแล้ว):
+
+```json
+{"success":false,"error":"module and action parameters required"}
+```
+
+**สาเหตุ**: `vercel.json` rewrite `/api/profile/:action*` →
+`...&module=profile&action=:action*` — ตอน frontend เรียก `/api/profile`
+เฉยๆ (ไม่มี segment ต่อท้าย, ดู `PendingOnboardingSaver.tsx`:
+`fetch('/api/profile', ...)`) `:action*` แทนค่าเป็น string ว่าง `action=`
+→ `url.searchParams.get('action')` คืนค่า `''` (falsy) → ชนเงื่อนไข
+`if (!module || !action)` ที่ handler() บนสุดของไฟล์ ทั้งที่
+`handleProfile`/`handleBlueprint` ไม่เคยใช้ค่า `action` ตัดสินใจอะไรเลย
+(branch แค่จาก `request.method`)
+
+**แก้**: default `action` เป็น `'default'` เมื่อไม่มีค่า (ตรงกับ convention
+ที่ `/api/share` ใช้อยู่แล้ว: `...&module=share&action=default`) เอา
+`action` ออกจากเงื่อนไข required เหลือแค่ `module` — เช็คแล้วไม่มี module
+ไหนใน switch มี `case 'default'` ที่จะชนกัน
+
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error
 2. `npx oxlint api/unified-handler.ts` — 0 warnings, 0 errors
