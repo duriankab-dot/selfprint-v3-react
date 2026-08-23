@@ -36,13 +36,48 @@ Supabase อยู่ Tokyo (Northeast Asia)**
 `api/unified-handler.ts` (Hobby plan รองรับ 1 region ต่อ deployment —
 เช็คกับ Vercel docs แล้ว) ให้ function รันใกล้ Supabase มากขึ้น
 
-## หมายเหตุ — นี่คือการลด latency ที่สะสม ไม่ใช่ fix ที่ยืนยัน 100%
-โค้ดทุกจุดที่อ่านมา fail แบบเร็ว ไม่มี infinite loop/deadlock ให้เจอ
-เพราะงั้น 504 ที่เกิดน่าจะมาจาก latency สะสม (auth call ซ้ำ + ข้าม
-continent + cold start) ไม่ใช่ bug ที่ทำให้ค้างตรงๆ การแก้ 2 จุดนี้
-ลด latency ได้จริงแต่ยังต้อง**รีเทสต์หลัง deploy**เพื่อยืนยันว่า 504
-หายจริงหรือลดลงแค่ไหน — ถ้ายังเจอ 504 อยู่ ต้องดู Vercel function logs
-ตรงเวลาที่ error เกิดเพื่อหาสาเหตุจริงต่อ
+## หมายเหตุ — deploy แล้วรีเทสต์ ยัง 504 เหมือนเดิม
+Deploy commit `6008cad` (dedupe verifyUser + region hnd1) สำเร็จ ยืนยันเป็น
+Production จริง แต่รีเทสต์แล้ว 504 เกิดเหมือนเดิมทุกจุด — แปลว่า 2 จุดนี้
+ไม่ใช่สาเหตุจริง (ยังคุ้มเก็บไว้เป็น latency optimization) ต้องขุดต่อด้วย
+Vercel runtime logs จริง
+
+## ROOT CAUSE จริง (พบจาก Vercel Runtime Logs, ไม่ใช่เดา) — API504-002
+
+Log จริงตอน 504 เกิด:
+```
+Error in unified handler: TypeError: request.headers.get is not a function
+    at handler (/vercel/path0/api/unified-handler.ts:30:40)
+WARN: default export returned a `Response`.
+├▶ The default-export signature is `(req, res) => void` — returns are
+│  ignored. You likely meant the Web `fetch`-style API.
+Vercel Runtime Timeout Error: Task timed out after 10 seconds
+```
+
+**สาเหตุจริง**: ไฟล์มี `export default handler;` ควบคู่กับ
+`export const GET = handler;` และ `export const POST = handler;` —
+รูปแบบ named-export ตาม HTTP method (`GET`/`POST`) นี้คือ convention ของ
+**Next.js App Router route handlers** ไม่ใช่ของ Vite/Vercel Function ธรรมดา
+ตอน build เองก็มี warning เตือนอยู่แล้ว:
+"WARNING! When using Next.js, it is recommended to place JavaScript
+Functions inside of the `pages/api` ... directory instead of `api`"
+
+ผลคือ Vercel เข้าใจไฟล์นี้ผิด แล้ว invoke ด้วย signature แบบเก่า
+`(req, res)` แทนที่จะเป็น Web Fetch API `(request: Request) => Response`
+ที่โค้ดเขียนไว้จริง — `request.headers.get()` เลย throw ทันทีตั้งแต่บรรทัดแรกๆ
+ของ `handler()` (บรรทัด 30) ก่อนจะได้ตอบอะไรกลับไปเลย เพราะ signature
+`(req,res)` ไม่รองรับการ `return Response.json(...)` (ค่า return ถูกทิ้ง)
+ต้องเรียก `res.end()` ถึงจะตอบกลับได้ — โค้ดนี้ไม่เคยเรียก `res` เลย
+ทุก request เลยค้างจน Vercel ตัดที่ 10 วินาที = **504 ที่เห็นทุกจุด**
+(`/api/profile`, `/api/blueprint`, `/api/stripe/subscription`)
+
+`GET`/`POST` สอง export นี้เป็น dead code จริงๆ — grep ทั้งโปรเจกต์แล้ว
+ไม่มีที่ไหน import มาใช้ (Vercel function ถูกเรียกผ่าน file convention
+ไม่ใช่ import ตรงๆ)
+
+**แก้**: ลบ `export const GET = handler;` กับ `export const POST = handler;`
+ออก เหลือแค่ `export default handler;` เท่านั้น — กลับไปเป็น convention
+ที่ถูกต้องของ Vercel Function แบบ Fetch API ธรรมดา (ไม่ใช่ Next.js)
 
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error
