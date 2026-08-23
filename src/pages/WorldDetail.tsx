@@ -23,6 +23,7 @@ import { TwinPresence } from '../components/twin/TwinPresence';
 import { useWorldAmbientTone } from '../hooks/useWorldAmbientTone';
 import { useEnvironment } from '../context/EnvironmentContext';
 import { useTwin } from '../context/TwinContext';
+import { useAuth } from '../context/AuthContext';
 import '../styles/worlds-hub.css';
 
 function isValidWorldId(id: string | undefined): id is WorldId {
@@ -56,6 +57,12 @@ export default function WorldDetail() {
   // across worlds per §34) — null-safe, TwinPresence falls back to a
   // neutral default if a twin hasn't loaded yet.
   const { twin } = useTwin();
+  // TWINPRESENCE-005: seed for this Twin's unique traits — session.user.id
+  // (not twin.id), so the exact same traits shown here also drove the
+  // birth-ceremony visuals in CoreAwakening.tsx (which runs before the
+  // twins row/id exists and seeds off the same session id) — the Twin the
+  // user watched being born is the one they see in the World.
+  const { session } = useAuth();
 
   // GUARD: unknown world id → back to selector, don't render a broken page
   useEffect(() => {
@@ -94,6 +101,7 @@ export default function WorldDetail() {
         primaryArchetype={twin?.primaryArchetype}
         secondaryArchetype={twin?.secondaryArchetype}
         worldColor={world.color}
+        seedKey={session?.user?.id ?? twin?.id}
       />
       <div
         className="world-detail"
