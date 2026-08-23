@@ -159,3 +159,79 @@ per-world-distinct, animated, sound-capable environment, built to the same archi
 can replace the procedural layer later without new call sites. The wow1→wow2→wow3 journey (separately
 requested) is now one continuous flow with no dead-end. A significant duplicate-system finding was
 surfaced with full trace evidence rather than silently worked around or silently fixed.
+
+---
+
+## Part C — Closing the remaining SELFPRINT_MASTER_COMMAND_AI_DEV.md P0-H checklist (2026-08-23)
+
+Re-checked this pass against the Master Command doc's literal P0-H checklist (not just the directive
+prose above) and found four real gaps — genuinely missing behavior, not just unverified:
+Twin motion/posture didn't change per World, no clothing/accessory system, no per-World "expression",
+and no formal render/mobile/consistency test. User confirmed (via AskUserQuestion) to close all four
+properly rather than descope, and confirmed keeping the literal clothing/accessories checklist item.
+
+### Gap 1 — Twin motion/posture changes per World
+New `src/lib/twin/twinWorldContext.ts`: a `TWIN_WORLD_CONTEXT` table, one entry per `WorldId`, each
+value derived from that World's own `mood` string in `worlds.ts` (documented per-entry, not arbitrary —
+e.g. Wellbeing/"Calm, Restorative" gets the gentlest+slowest bob in the set, Future/"Visionary,
+Expansive" the most dynamic). Three fields: `bobMultiplier` + `breatheMultiplier` (compose with
+`TwinPresence.tsx`'s existing bob/breathe CSS animations via new `--twin-bob-mult` /
+`--twin-world-breathe-mult` custom properties — same pattern as the existing per-user
+`--twin-pulse-speed`) and `tiltDeg` (a static posture lean, applied via a new outer wrapper `<div>` so
+it composes with, rather than fights, the existing animated transforms). This is explicitly sanctioned
+by directive §34 ("only contextual layers — lighting, mood, aura tint, **motion** — change per world");
+Core Visual DNA (`twinVisualDNA.ts`) and per-user uniqueness (`twinUniqueness.ts`) are untouched.
+
+### Gap 2 — Clothing/Accessories change contextually
+New `TwinAccessory` component in `TwinPresence.tsx` — one abstract, procedural SVG glyph per World
+(`TwinAccessoryKind`, defined alongside the table in `twinWorldContext.ts`), matching this codebase's
+existing no-illustration art style (same reasoning as `WorldEnvironment.tsx`'s `ArchetypePattern` and
+`CoreGlyph`) rather than literal illustrated clothing — e.g. Career gets a horizontal bar + notch
+("collar-bar", the abstract read of "business suit"), Wealth gets small faceted studs ("halo-facets"),
+Wellbeing gets soft fanned petals ("lotus-petal"). All 12 documented with their one-line rationale in
+`twinWorldContext.ts`.
+
+### Gap 3 — Expressions adapt to World context
+This Twin has no illustrated face — "expression" is reinterpreted honestly rather than faked: a new
+`ExpressionGlint` (small pulsing highlight circle) whose color blends toward white or toward the Twin's
+own core color (`expressionWarmth`, 0–1) and whose blink speed (`expressionPulseMs`) both come from
+`twinWorldContext.ts`, e.g. Love is the warmest/slowest glint in the set, Mind the coolest/quickest
+(alert, curious).
+
+### Gap 4 — Visual Tests (render / performance / mobile / consistency)
+Two things, both honestly reported:
+1. **`e2e/world-visual.spec.ts`** (Playwright) — written and type-checked, but **could not be executed
+   in this sandbox**: `npx playwright install chromium` fails with `403 Connection blocked by network
+   allowlist` (confirmed by direct attempt, not assumed). Targets the public `/components` route (no
+   auth needed) rather than `/worlds/:worldId`, since the existing E2E suite's own `login()` helper
+   needs real credentials this environment doesn't have (same reason `auth.spec.ts`'s login tests are
+   already `test.skip`'d). Needs a real run — locally, in CI, or wherever browsers can download — before
+   this file can be called verified.
+2. **Actually executed instead**: added a "Twin per World" preview grid to `ComponentShowcase.tsx`
+   (public `/components` route, `data-testid`-tagged per World) — this is what `world-visual.spec.ts`
+   targets once it can run, and is also the fastest way for a human to eyeball all 12 Worlds' posture/
+   accessory/expression side by side without needing a login or a real Twin. Then ran a one-off
+   `ReactDOMServer.renderToStaticMarkup()` script (no browser/jsdom needed — Vitest's own `include` glob
+   deliberately excludes component tests project-wide, and adding a jsdom environment for one new test
+   was judged out of surgical scope) rendering `TwinPresence` for all 12 Worlds: confirmed every World
+   renders an `<svg>` without throwing, all 12 produce genuinely distinct markup (uniqueness/consistency
+   check), the full-screen (non-`contained`) and no-archetype fallback paths don't throw either, and
+   spot-checked that Career/Self/Wellbeing/Purpose each contain their expected accessory shape (not
+   silently falling through to `default: null`). All passed. Script was scratch-only, not committed.
+
+### Honest status
+Gaps 1–3: built, wired into `WorldDetail.tsx` (`worldId={world.id}` now passed to `TwinPresence`), and
+genuinely execution-verified via the SSR script above. Gap 4: the showcase/test infrastructure is built
+and the component logic is execution-verified, but the actual Playwright browser run — the literal
+"Performance: Frame rate >60fps" / "Mobile: responsive on all screen sizes" checklist items — has not
+happened and needs someone with a working browser/CI to run `npx playwright test e2e/world-visual.spec.ts`
+(or just open `/en/components` and look). Not claiming that sub-item is 100% verified because it isn't.
+
+## Verification performed (this pass)
+1. `npm run build` — clean, `✓ built in 21.95s`, 0 TypeScript errors.
+2. `npx oxlint` on all new/changed files — 0 warnings, 0 errors.
+3. `npx tsc --noEmit` — 0 errors project-wide.
+4. `ReactDOMServer.renderToStaticMarkup()` one-off script — all 12 Worlds render, all distinct, no
+   throws, accessory spot-checks pass (see Gap 4 above). Not committed (scratch verification only).
+5. Playwright (`e2e/world-visual.spec.ts`) — written, NOT executed (sandbox network blocks browser
+   download). Flagged, not silently skipped.
