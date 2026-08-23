@@ -211,6 +211,18 @@ default) **ไม่สามารถยืนยันด้วยตาจร
 รอบ aura + เพิ่ม opacity/glow เริ่มต้น ให้เห็นเป็นรูปทรงชัดแม้สีจะกลืนกับพื้นหลัง
 — ต้องให้ user ยืนยันด้วยตาจริงหลัง deploy ว่าดีขึ้นไหม
 
+## TWINPRESENCE-003/004 — unify Twin motion + fix overflow/see-through
+
+003: เพิ่ม breathing-scale + vertical bob ให้ทั้ง Dashboard orb และ World's
+TwinPresence เหมือนกัน (4s ease-in-out) + เพิ่มความเข้ม glow ให้เท่ากัน
+
+004 (feedback หลัง deploy): Dashboard orb ล้นกรอบการ์ด (การ์ด overflow:hidden
++ padding-top 28px แคบไปเทียบกับ ring inset -24px) แก้ padding-top เป็น 44px
++ ลด bob 10px→6px, scale 1.05→1.03 ทั้งสองที่ให้ตรงกัน — World's aura เดิม
+จางถึง transparent เต็มๆ ดูเหมือนวัตถุโปร่งใส เปลี่ยน gradient ให้ไม่มีจุดไหน
+transparent 100% (จบต่ำสุดที่ระดับทึบหนึ่ง) เหมือนโครงสร้าง gradient ของ
+Dashboard orb จริงๆ ให้ box-shadow ทำหน้าที่ฟุ้งด้านนอกแทน
+
 ## WORLDSTATS-001 — เข้าโลกแล้ว error ทุกโลก (world_stats)
 
 หลัง blueprint หาย พบ error ใหม่ตอนกดเข้า World ใดๆ — Network tab แสดง
