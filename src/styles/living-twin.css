@@ -44,6 +44,17 @@
   height: 120px;
   margin-bottom: 20px;
   flex-shrink: 0;
+  /* TWINPRESENCE-002: gentle vertical bob, matching the same motion added
+     to the World-page Twin presence (TwinPresence.tsx's twin-presence-bob)
+     so the Twin reads as the same living thing in both places. Layered on
+     the wrap so it doesn't fight the ring-pulse/orb-breathe animations
+     already running on the nested elements below. */
+  animation: twin-orb-bob 4s ease-in-out infinite;
+}
+
+@keyframes twin-orb-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
 }
 
 /* Outer glow ring */

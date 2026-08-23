@@ -118,48 +118,62 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
         paddingTop: '30vh',
       }}
     >
-      <div
-        className="twin-presence-breathe"
-        style={{
-          width: 'min(46vmin, 420px)',
-          height: 'min(46vmin, 420px)',
-          borderRadius: '50%',
-          background: auraGradient,
-          // TWINPRESENCE-002: on some Worlds the aura color sits close
-          // enough to WorldEnvironment's own ambient palette that the glow
-          // read as "part of the background" rather than a distinct Twin
-          // presence — a thin bright edge gives the silhouette a boundary
-          // that holds up regardless of how close the two colors are.
-          boxShadow: `0 0 0 1px ${hexToRgba(dna.coreColor, 0.5)}, 0 0 40px 6px ${hexToRgba(dna.coreColor, 0.35)}`,
-          // Contextual state — read live from EnvironmentEngine's already-
-          // computed, previously-unconsumed --twin-* vars (see file header).
-          opacity: 'var(--twin-opacity, 0.92)',
-          transform: 'scale(var(--twin-scale, 1)) rotate(var(--twin-rotation, 0deg))',
-          transition: 'opacity 500ms ease, transform var(--twin-transition-duration, 500ms) ease',
-          animationDuration: 'var(--twin-breathing-duration, 2500ms)',
-        }}
-      >
-        <style>{`
-          @keyframes twin-presence-breathe {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(calc(1 + var(--twin-breathing-intensity, 0.08))); }
-          }
-          .twin-presence-breathe {
-            animation-name: twin-presence-breathe;
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-          }
-        `}</style>
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 100 100"
+      {/* TWINPRESENCE-002: same breathing-scale + gentle vertical bob as the
+          Dashboard orb (LivingTwin.tsx's twin-orb-breathe, 4s ease-in-out,
+          scale 1→1.05) — kept on its own wrapper so it composes with, rather
+          than overwrites, the state-driven scale/rotate transform below. */}
+      <div className="twin-presence-bob" style={{ width: 'min(46vmin, 420px)', height: 'min(46vmin, 420px)' }}>
+        <div
+          className="twin-presence-breathe"
           style={{
-            filter: `drop-shadow(0 0 calc(22px * var(--twin-glow-intensity, 0.85)) ${hexToRgba(dna.coreColor, 0.75)})`,
+            width: '100%',
+            height: '100%',
+            borderRadius: '50%',
+            background: auraGradient,
+            // TWINPRESENCE-002: on some Worlds the aura color sits close
+            // enough to WorldEnvironment's own ambient palette that the glow
+            // read as "part of the background" rather than a distinct Twin
+            // presence — same glow strength as the Dashboard orb
+            // (living-twin.css's .living-twin__orb box-shadow) so both
+            // read as the same Twin.
+            boxShadow: `0 0 0 1px ${hexToRgba(dna.coreColor, 0.55)}, 0 0 32px ${hexToRgba(dna.coreColor, 0.55)}, 0 0 64px ${hexToRgba(dna.coreColor, 0.3)}, inset 0 0 32px ${hexToRgba('#ffffff', 0.08)}`,
+            // Contextual state — read live from EnvironmentEngine's already-
+            // computed, previously-unconsumed --twin-* vars (see file header).
+            opacity: 'var(--twin-opacity, 0.92)',
+            transform: 'scale(var(--twin-scale, 1)) rotate(var(--twin-rotation, 0deg))',
+            transition: 'opacity 500ms ease, transform var(--twin-transition-duration, 500ms) ease',
+            animationDuration: 'var(--twin-breathing-duration, 2500ms)',
           }}
         >
-          <CoreGlyph shape={dna.coreShape} color={dna.coreColor} />
-        </svg>
+          <style>{`
+            @keyframes twin-presence-breathe {
+              0%, 100% { filter: brightness(1); }
+              50% { filter: brightness(calc(1 + var(--twin-breathing-intensity, 0.08))); }
+            }
+            .twin-presence-breathe {
+              animation-name: twin-presence-breathe;
+              animation-timing-function: ease-in-out;
+              animation-iteration-count: infinite;
+            }
+            @keyframes twin-presence-bob {
+              0%, 100% { transform: translateY(0) scale(1); }
+              50% { transform: translateY(-10px) scale(1.05); }
+            }
+            .twin-presence-bob {
+              animation: twin-presence-bob 4s ease-in-out infinite;
+            }
+          `}</style>
+          <svg
+            width="100%"
+            height="100%"
+            viewBox="0 0 100 100"
+            style={{
+              filter: `drop-shadow(0 0 calc(22px * var(--twin-glow-intensity, 0.85)) ${hexToRgba(dna.coreColor, 0.75)})`,
+            }}
+          >
+            <CoreGlyph shape={dna.coreShape} color={dna.coreColor} />
+          </svg>
+        </div>
       </div>
     </div>
   );
