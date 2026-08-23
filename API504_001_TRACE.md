@@ -171,6 +171,9 @@ ALTER TABLE selfprint.blueprints
 ```
 User ยืนยันรันแล้ว
 
+**อัปเดต**: user รัน SQL ซ้ำ (รอบแรกลืมกด save) แล้ว `/api/blueprint` ผ่าน
+100% แล้ว — API504-006 ปิดเคส
+
 ## TWINS406-001 — twins query 406 (PGRST116) ที่ค้างมาตั้งแต่ ONBOARDING-LOOP-001
 
 pinpoint สำเร็จ: `src/context/AIContext.tsx` line 59-63 — query เช็คว่า
@@ -186,7 +189,50 @@ user ใหม่ก่อนทำ Core Awakening) — แม้ error ถู�
 เปลี่ยน เพราะ `if (twin?.awakened_at)` ทำงานถูกต้องกับ `null` อยู่แล้ว)
 ตรงกับ pattern ที่ `TwinSupabaseService.fetchUserTwin()` ใช้ถูกต้องอยู่
 แล้วในไฟล์อื่น — build ผ่าน, lint 0 error (มี warning fast-refresh เดิม
-ของไฟล์ ไม่เกี่ยวกับการแก้นี้)
+ของไฟล์ ไม่เกี่ยวกับการแก้นี้) — deploy แล้วยืนยัน 406 หายจริง
+
+## API504-006 — บทสรุปตัวจริง (แก้ผิดที่มา 2 รอบ)
+
+`prototype_core` ที่หายไม่ใช่ cache ค้าง (ลอง NOTIFY, pg_notification_queue_usage,
+restart project ครบทั้ง 3 วิธีไม่ผล) — สาเหตุจริงคือ `public.blueprints`
+(table ที่ API ใช้จริง เพราะ client ไม่เคยระบุ schema จะ default ไป `public`
+เสมอ) เป็นคนละ table กับ `selfprint.blueprints` (ที่แก้ไปตอนแรกแบบผิดที่)
+ยืนยันด้วย query ตรงเทียบคอลัมน์ทั้งสอง schema แล้วเจอว่า `public.blueprints`
+ไม่มี `prototype_core` แก้ที่ table ตัวจริงแล้วผ่าน 100%
+
+## TWINPRESENCE-002 — Twin glow ไม่เห็นชัดใน World pages
+
+ไม่ใช่ z-index bug (เช็คโค้ดแล้ว: WorldEnvironment/TwinPresence z-index
+เท่ากัน TwinPresence render หลังจึงอยู่บนถูกต้อง, `.world-detail` เอง
+transparent) — สาเหตุน่าจะเป็นสีของ aura กลืนไปกับพื้นหลัง WorldEnvironment
+ที่มีโทนสีใกล้เคียงกัน โดยเฉพาะตอนยังไม่มี Twin ที่ตั้งชื่อแล้ว (ใช้สี
+default) **ไม่สามารถยืนยันด้วยตาจริงได้ — หน้า World ต้อง login ซึ่งผมเข้าไม่ได้
+(ตามกติกาห้าม)** จึงแก้แบบ code-reasoning: เพิ่มขอบสว่าง (`boxShadow` ring)
+รอบ aura + เพิ่ม opacity/glow เริ่มต้น ให้เห็นเป็นรูปทรงชัดแม้สีจะกลืนกับพื้นหลัง
+— ต้องให้ user ยืนยันด้วยตาจริงหลัง deploy ว่าดีขึ้นไหม
+
+## WORLDSTATS-001 — เข้าโลกแล้ว error ทุกโลก (world_stats)
+
+หลัง blueprint หาย พบ error ใหม่ตอนกดเข้า World ใดๆ — Network tab แสดง
+`world_stats?on_conflict=user_id%2Cworld_id` ตอบ 400 ทุกครั้ง (ขณะที่
+`world_preferences` upsert ผ่าน 200/201 ปกติ)
+
+**สาเหตุ (2 จุด พบจากอ่าน migration + โค้ดจริง)**:
+1. migration `20260816_world_preferences.sql` สร้าง `public.world_stats`
+   โดยไม่มีคอลัมน์ `last_accessed` แต่ `WorldContext.tsx`'s
+   `recordWorldVisit`/`recordJournalEntry`/`recordDecision` upsert ฟิลด์
+   นี้ทุกครั้ง — PostgREST ปฏิเสธด้วย PGRST204 (ปัญหาเดิมที่เคยพบตั้งแต่
+   ต้น session แต่ยังไม่เคยแก้)
+2. migration เดียวกันสร้าง RLS policy ให้ `world_stats` แค่ SELECT/UPDATE
+   ไม่มี INSERT (ต่างจาก `world_preferences` ที่มีครบ) — upsert ครั้งแรกที่
+   ยังไม่มีแถว (user เข้าโลกนั้นครั้งแรก) ต้องการสิทธิ์ INSERT จะโดน RLS
+   บล็อกอยู่ดีแม้แก้ข้อ 1 แล้ว
+
+**แก้**: สร้าง migration ใหม่
+`supabase/migrations/007_world_stats_fixes.sql` — เพิ่มคอลัมน์
+`last_accessed` + เพิ่ม INSERT policy + `NOTIFY pgrst, 'reload schema'`
+ในตัว (กันปัญหา cache ค้างแบบที่เจอกับ blueprint) ให้ user รันเองใน SQL
+Editor (โซนห้ามแตะ migration ตามกติกาโปรเจกต์)
 
 ## Verification
 1. `npm run build` (`tsc -b && vite build`) — ผ่าน, 0 error

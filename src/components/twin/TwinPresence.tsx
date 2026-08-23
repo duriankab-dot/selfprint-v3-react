@@ -125,9 +125,15 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
           height: 'min(46vmin, 420px)',
           borderRadius: '50%',
           background: auraGradient,
+          // TWINPRESENCE-002: on some Worlds the aura color sits close
+          // enough to WorldEnvironment's own ambient palette that the glow
+          // read as "part of the background" rather than a distinct Twin
+          // presence — a thin bright edge gives the silhouette a boundary
+          // that holds up regardless of how close the two colors are.
+          boxShadow: `0 0 0 1px ${hexToRgba(dna.coreColor, 0.5)}, 0 0 40px 6px ${hexToRgba(dna.coreColor, 0.35)}`,
           // Contextual state — read live from EnvironmentEngine's already-
           // computed, previously-unconsumed --twin-* vars (see file header).
-          opacity: 'var(--twin-opacity, 0.85)',
+          opacity: 'var(--twin-opacity, 0.92)',
           transform: 'scale(var(--twin-scale, 1)) rotate(var(--twin-rotation, 0deg))',
           transition: 'opacity 500ms ease, transform var(--twin-transition-duration, 500ms) ease',
           animationDuration: 'var(--twin-breathing-duration, 2500ms)',
@@ -149,7 +155,7 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
           height="100%"
           viewBox="0 0 100 100"
           style={{
-            filter: `drop-shadow(0 0 calc(18px * var(--twin-glow-intensity, 0.7)) ${hexToRgba(dna.coreColor, 0.6)})`,
+            filter: `drop-shadow(0 0 calc(22px * var(--twin-glow-intensity, 0.85)) ${hexToRgba(dna.coreColor, 0.75)})`,
           }}
         >
           <CoreGlyph shape={dna.coreShape} color={dna.coreColor} />
