@@ -829,5 +829,3 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
 }
 
 export default handler;
-export const POST = handler;
-export const GET = handler;
