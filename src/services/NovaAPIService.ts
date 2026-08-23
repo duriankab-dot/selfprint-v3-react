@@ -1,9 +1,16 @@
 /**
  * NovaAPIService.ts
- * Claude API integration for Nova responses
+ * Claude API integration for Nova responses.
+ *
+ * P0-E: Nova prompt now uses the sophisticated hub×mood×archetype builder
+ * (`lib/nova-prompts/getNovaPrompt`) so every Nova call adapts to the user's
+ * current context — not just a static phase string.
+ *
+ * Backward-compatible: `phase` param kept for callers that haven't migrated
+ * yet; `context` param is additive and optional.
  */
 
-import { NOVA_SYSTEM_PROMPT } from '../config/nova-prompts';
+import { getNovaPrompt, AVAILABLE_HUBS, AVAILABLE_MOODS, AVAILABLE_ARCHETYPES } from '../lib/nova-prompts/getNovaPrompt';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -11,24 +18,64 @@ interface Message {
 }
 
 /**
- * Call Claude API for Nova response
+ * Rich context for Nova prompt composition.
+ * All fields optional — safe defaults applied when omitted.
+ */
+export interface NovaCallContext {
+  /** Which of the 12 hubs the user is currently exploring. Default: 'identity'. */
+  hub?: string;
+  /** User's current emotional/readiness state. Default: 'ready'. */
+  mood?: string;
+  /** User's primary archetype (from analysis). Default: 'sage'. */
+  archetype?: string;
+  /** Language for guardrail text. Default: 'en'. */
+  language?: 'en' | 'th';
+  /** Maturity score 0-100 (how far along the Twin journey). Default: 0 (pre-Twin). */
+  maturityScore?: number;
+  userProfile?: {
+    decisionStyle?: string;
+    primaryArchetype?: string;
+    secondaryArchetype?: string;
+    strengths?: string[];
+    blindSpots?: string[];
+  };
+}
+
+/** Validate + coerce context values to known valid options. */
+function resolveContext(ctx?: NovaCallContext): Parameters<typeof getNovaPrompt>[0] {
+  const hub = ctx?.hub && AVAILABLE_HUBS.includes(ctx.hub) ? ctx.hub : 'identity';
+  const mood = ctx?.mood && AVAILABLE_MOODS.includes(ctx.mood) ? ctx.mood : 'ready';
+  const archetype = ctx?.archetype && AVAILABLE_ARCHETYPES.includes(ctx.archetype) ? ctx.archetype : 'sage';
+  return {
+    hub: hub as Parameters<typeof getNovaPrompt>[0]['hub'],
+    mood: mood as Parameters<typeof getNovaPrompt>[0]['mood'],
+    archetype,
+    language: ctx?.language ?? 'en',
+    maturityScore: ctx?.maturityScore ?? 0,
+    userProfile: ctx?.userProfile,
+  };
+}
+
+/**
+ * Call Claude API for Nova response.
+ *
+ * @param messages  Conversation history
+ * @param _phase    Kept for backward-compat, no longer used (ignored)
+ * @param context   Hub/mood/archetype context for prompt adaptation
  */
 export async function callNovaAPI(
   messages: Message[],
-  phase?: string
+  _phase?: string,
+  context?: NovaCallContext
 ): Promise<string> {
   try {
     if (!messages.length) {
       throw new Error('No messages to process');
     }
 
-    // Format system prompt with context
-    const systemPrompt = NOVA_SYSTEM_PROMPT
-      .replace('{{ phase }}', phase || 'onboarding')
-      .replace('{{ userDataCollected }}', '{}')
-      .replace('{{ insightsGenerated }}', '[]');
+    // P0-E: sophisticated hub×mood×archetype prompt — replaces static template
+    const systemPrompt = getNovaPrompt(resolveContext(context));
 
-    // Call Claude API (via backend proxy to avoid CORS)
     const response = await fetch('/api/nova', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,18 +103,21 @@ export async function callNovaAPI(
 }
 
 /**
- * Stream Nova response (for real-time feedback)
+ * Stream Nova response (for real-time feedback).
+ *
+ * @param messages   Conversation history
+ * @param _phase     Kept for backward-compat, no longer used
+ * @param onChunk    Called with each streamed chunk
+ * @param context    Hub/mood/archetype context for prompt adaptation
  */
 export async function streamNovaResponse(
   messages: Message[],
-  phase: string,
-  onChunk: (chunk: string) => void
+  _phase: string,
+  onChunk: (chunk: string) => void,
+  context?: NovaCallContext
 ): Promise<void> {
   try {
-    const systemPrompt = NOVA_SYSTEM_PROMPT
-      .replace('{{ phase }}', phase)
-      .replace('{{ userDataCollected }}', '{}')
-      .replace('{{ insightsGenerated }}', '[]');
+    const systemPrompt = getNovaPrompt(resolveContext(context));
 
     const response = await fetch('/api/nova-stream', {
       method: 'POST',
