@@ -11,6 +11,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '../services/supabase-service';
+import type { EntryPath } from '../lib/entry/entryResolver';
 
 export type LifecycleStatus =
   | 'ONBOARDING'
@@ -26,6 +27,7 @@ export interface LifecycleRecord {
   twinCreatedAt?: Date;
   resumedAt?: Date;
   lastActivityAt: Date;
+  entryPath?: EntryPath;
   metadata?: Record<string, any>;
 }
 
@@ -36,6 +38,7 @@ export interface LifecycleStoreState {
   twinCreatedAt: Date | null;
   resumedAt: Date | null;
   lastActivityAt: Date;
+  entryPath: EntryPath | null;
   isLoading: boolean;
   error: string | null;
 
@@ -44,6 +47,7 @@ export interface LifecycleStoreState {
   setTwinCreated: (userId: string, twinId: string) => Promise<void>;
   markActivity: (userId: string) => Promise<void>;
   loadLifecycle: (userId: string) => Promise<LifecycleRecord | null>;
+  setEntryPath: (userId: string, path: EntryPath) => void;
   reset: () => void;
 }
 
@@ -53,6 +57,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
   twinCreatedAt: null,
   resumedAt: null,
   lastActivityAt: new Date(),
+  entryPath: null,
   isLoading: false,
   error: null,
 
@@ -258,6 +263,24 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
   },
 
   /**
+   * Classify and store entry_path for this session. Writes to DB non-blocking.
+   * §ENTRY-RESOLVER-001
+   */
+  setEntryPath: (userId: string, path: EntryPath) => {
+    set({ entryPath: path });
+    // Fire-and-forget: non-critical, don't block routing on this
+    if (supabase) {
+      void supabase
+        .from('user_lifecycle')
+        .update({ entry_path: path })
+        .eq('user_id', userId)
+        .then(({ error }) => {
+          if (error) console.warn('[Lifecycle] Failed to persist entry_path:', error.message);
+        });
+    }
+  },
+
+  /**
    * Reset lifecycle state
    */
   reset: () =>
@@ -267,6 +290,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       twinCreatedAt: null,
       resumedAt: null,
       lastActivityAt: new Date(),
+      entryPath: null,
       isLoading: false,
       error: null,
     }),
