@@ -54,6 +54,10 @@ interface TwinPresenceProps {
    *  World pages never pass this — default is the existing full-screen
    *  behavior. */
   contained?: boolean;
+  /** TWIN-VISUAL-001: 0–100 maturity score drives visual evolution —
+   *  nascent (0-25) is subtle, evolved (75-100) is radiant.
+   *  Defaults to 30 (nascent-growing boundary) when not provided. */
+  maturityScore?: number;
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -312,7 +316,25 @@ function ExpressionGlint({ color, warmth, pulseMs, animId }: { color: string; wa
   );
 }
 
-export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor, seedKey, worldId, contained }: TwinPresenceProps) {
+export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor, seedKey, worldId, contained, maturityScore = 30 }: TwinPresenceProps) {
+  // TWIN-VISUAL-001: map 0-100 score → 4 evolution stages that drive
+  // glow intensity and outer ring visibility. Deliberately wide bands so
+  // transitions feel earned, not arbitrary.
+  //   1 nascent  0-25   : subtle glow, single ring
+  //   2 growing  25-50  : moderate glow, single ring
+  //   3 active   50-75  : strong glow, inner + outer ring
+  //   4 evolved  75-100 : maximum glow, full outer halo ring
+  const evolutionStage = useMemo(() => {
+    const s = Math.max(0, Math.min(100, maturityScore));
+    if (s >= 75) return 4;
+    if (s >= 50) return 3;
+    if (s >= 25) return 2;
+    return 1;
+  }, [maturityScore]);
+
+  // Glow intensity multiplier per stage (applied to boxShadow radii)
+  const glowMult = useMemo(() => [0, 0.7, 0.9, 1.15, 1.45][evolutionStage], [evolutionStage]);
+
   const dna = useMemo(
     () => getTwinVisualDNA(primaryArchetype, secondaryArchetype),
     [primaryArchetype, secondaryArchetype]
@@ -405,7 +427,17 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor,
             // presence — same glow strength as the Dashboard orb
             // (living-twin.css's .living-twin__orb box-shadow) so both
             // read as the same Twin.
-            boxShadow: `0 0 0 1px ${hexToRgba(uniqueCoreColor, 0.55)}, 0 0 32px ${hexToRgba(uniqueCoreColor, 0.55)}, 0 0 64px ${hexToRgba(uniqueCoreColor, 0.3)}, inset 0 0 32px ${hexToRgba('#ffffff', 0.08)}`,
+            // TWIN-VISUAL-001: glow scales with evolution stage — nascent twins
+            // are dim, evolved twins are radiant. glowMult drives spread radii.
+            boxShadow: [
+              `0 0 0 1px ${hexToRgba(uniqueCoreColor, 0.3 + 0.25 * glowMult)}`,
+              `0 0 ${Math.round(32 * glowMult)}px ${hexToRgba(uniqueCoreColor, 0.4 + 0.15 * glowMult)}`,
+              `0 0 ${Math.round(64 * glowMult)}px ${hexToRgba(uniqueCoreColor, 0.2 + 0.1 * glowMult)}`,
+              evolutionStage >= 4
+                ? `0 0 ${Math.round(110 * glowMult)}px ${hexToRgba(uniqueAuraColor, 0.18)}`
+                : null,
+              `inset 0 0 32px ${hexToRgba('#ffffff', 0.08)}`,
+            ].filter(Boolean).join(', '),
             // Contextual state — read live from EnvironmentEngine's already-
             // computed, previously-unconsumed --twin-* vars (see file header).
             opacity: 'var(--twin-opacity, 0.92)',
@@ -454,6 +486,43 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor,
             {/* TWINPRESENCE-005: orbiting facets — this Twin's own
                 "constellation", never identical to another Twin's. */}
             <OrbitFacets color={uniqueAuraColor} traits={traits} orbitId="twin-orbit-facets" />
+            {/* TWIN-VISUAL-001: outer evolution ring — appears at stage 3+.
+                A slow-rotating dashed ring that signals the Twin has grown
+                beyond nascent. Stage 4 gets a second, wider ring. */}
+            {evolutionStage >= 3 && (
+              <>
+                <style>{`
+                  @keyframes twin-evo-ring-spin {
+                    from { transform: rotate(0deg) translate(-50%, -50%); }
+                    to   { transform: rotate(360deg) translate(-50%, -50%); }
+                  }
+                `}</style>
+                <circle
+                  cx="50" cy="50" r="46"
+                  fill="none"
+                  stroke={hexToRgba(uniqueCoreColor, evolutionStage >= 4 ? 0.45 : 0.28)}
+                  strokeWidth="0.6"
+                  strokeDasharray={evolutionStage >= 4 ? '4 3' : '3 5'}
+                  style={{
+                    transformOrigin: '50px 50px',
+                    animation: `twin-evo-ring-spin ${evolutionStage >= 4 ? '18s' : '24s'} linear infinite`,
+                  }}
+                />
+                {evolutionStage >= 4 && (
+                  <circle
+                    cx="50" cy="50" r="49"
+                    fill="none"
+                    stroke={hexToRgba(uniqueAuraColor, 0.22)}
+                    strokeWidth="0.4"
+                    strokeDasharray="2 6"
+                    style={{
+                      transformOrigin: '50px 50px',
+                      animation: 'twin-evo-ring-spin 32s linear infinite reverse',
+                    }}
+                  />
+                )}
+              </>
+            )}
             {/* P0-H Gap 2: contextual accessory for the active World. */}
             <TwinAccessory kind={worldCtx.accessory} color={uniqueAuraColor} />
             {/* P0-H Gap 3: contextual "expression" glint for the active World. */}

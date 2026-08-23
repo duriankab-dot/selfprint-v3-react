@@ -13,6 +13,8 @@ import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useWorld } from '../context/WorldContext';
+import { useUserStore } from '../store/userStore';
+import { useAnalysisStore } from '../store/analysisStore';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
@@ -34,6 +36,10 @@ export default function TwinChat() {
   const { session } = useAuth();
   const { twin, setCurrentWorld } = useTwin();
   const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
+  // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
+  // "intelligent from birth" — knows the user before the first message.
+  const userProfile = useUserStore(s => s.profile);
+  const currentAnalysis = useAnalysisStore(s => s.currentAnalysis);
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -212,10 +218,24 @@ export default function TwinChat() {
         currentWorld ?? null,
       );
 
-      // Call Twin API with world-aware expertise + memory context
+      // TWIN-MEMORY-001: rich profile — Twin knows the user from Nova onboarding.
+      // Includes archetype identity, birth data, and the top behavioral insights
+      // Nova surfaced during SICE analysis. All fields null-guarded so missing
+      // data degrades gracefully without breaking the API call.
       const twinProfile = JSON.stringify({
         name: twin.name,
-        maturityScore: twin.maturityScore || 30,
+        primaryArchetype: twin.primaryArchetype ?? null,
+        secondaryArchetype: twin.secondaryArchetype ?? null,
+        maturityScore: twin.maturityScore ?? 30,
+        // Birth data from onboarding (may be absent if user skipped)
+        birthDate: userProfile.birthDate ?? null,
+        birthTime: userProfile.birthTime ?? null,
+        birthPlace: userProfile.birthPlace ?? null,
+        // Top behavioral insights from Nova's SICE analysis
+        strengths: currentAnalysis?.strengths?.slice(0, 3).map(s => s.name) ?? [],
+        blindSpots: currentAnalysis?.blindSpots?.slice(0, 2).map(b => b.title) ?? [],
+        selfOverview: currentAnalysis?.selfOverview ?? null,
+        guidance: currentAnalysis?.guidance?.slice(0, 2) ?? [],
       });
 
       const twinResponse = await callTwinAPI(

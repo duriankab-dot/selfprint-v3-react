@@ -103,6 +103,7 @@ export default function WorldDetail() {
         worldColor={world.color}
         seedKey={session?.user?.id ?? twin?.id}
         worldId={world.id}
+        maturityScore={twin?.maturityScore}
       />
       <div
         className="world-detail"
