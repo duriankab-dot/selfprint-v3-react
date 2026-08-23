@@ -96,10 +96,17 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
     [primaryArchetype, secondaryArchetype]
   );
 
-  // Aura ring blends: mostly the Twin's own Identity aura color, with a
-  // thin contextual tint from the current world — never the reverse.
+  // TWINPRESENCE-004: previous gradient faded all the way to `transparent`,
+  // which read as "see-through to the World background" instead of a solid
+  // presence — same complaint didn't apply to the Dashboard orb because
+  // living-twin.css's .living-twin__orb gradient never goes past 20% alpha
+  // even at its outer edge. Matched that structure here: an off-center
+  // white highlight (same "glossy sphere" look) through to a solid-ish
+  // core, ending at a non-zero edge alpha instead of `transparent` — the
+  // box-shadow below (not this gradient) is what supplies the soft outer
+  // falloff, exactly like the Dashboard orb.
   const auraGradient = `
-    radial-gradient(circle, ${hexToRgba(dna.coreColor, 0.55)} 0%, ${hexToRgba(dna.auraColor, 0.28)} 38%, ${hexToRgba(worldColor, 0.16)} 62%, transparent 78%)
+    radial-gradient(circle at 38% 35%, ${hexToRgba('#ffffff', 0.3)} 0%, ${hexToRgba(dna.coreColor, 0.85)} 35%, ${hexToRgba(dna.auraColor, 0.55)} 70%, ${hexToRgba(worldColor, 0.35)} 100%)
   `;
 
   return (
@@ -157,7 +164,7 @@ export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor 
             }
             @keyframes twin-presence-bob {
               0%, 100% { transform: translateY(0) scale(1); }
-              50% { transform: translateY(-10px) scale(1.05); }
+              50% { transform: translateY(-6px) scale(1.03); }
             }
             .twin-presence-bob {
               animation: twin-presence-bob 4s ease-in-out infinite;
