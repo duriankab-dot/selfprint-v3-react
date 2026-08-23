@@ -15,8 +15,26 @@ import { useLanguage } from '../context/LanguageContext';
 import { getSeoMetadata } from '../constants/seoMetadata';
 import '../styles/worlds-hub.css';
 
-export default function WorldsHub() {
+/**
+ * §37 World Transition: wrap navigate() with the View Transitions API so the
+ * browser captures the current frame, runs the navigation, then crossfades.
+ * Falls back to a plain navigate() on browsers that don't support it yet.
+ * Progressive enhancement — no deps, no extra bundle size.
+ */
+function useWorldNavigate() {
   const navigate = useNavigate();
+  return (path: string) => {
+    if ('startViewTransition' in document) {
+      (document as Document & { startViewTransition: (cb: () => void) => unknown })
+        .startViewTransition(() => { navigate(path); });
+    } else {
+      navigate(path);
+    }
+  };
+}
+
+export default function WorldsHub() {
+  const navigate = useWorldNavigate();
   const worlds = getAllWorlds();
   const { language } = useLanguage();
   const seoData = getSeoMetadata('worlds', language);
