@@ -72,7 +72,9 @@
 
 .living-twin__orb-ring--outer {
   inset: -24px;
-  opacity: 0.4;
+  /* TWIN-VISUAL-001: opacity scales with evolution stage.
+     Nascent (stage 1-2): hidden; Active (3+): visible and scales */
+  opacity: var(--twin-outer-ring-opacity, 0);
   animation-delay: 1s;
 }
 
@@ -92,9 +94,11 @@
     var(--twin-glow, rgba(79, 70, 229, 0.5)) 40%,
     rgba(79, 70, 229, 0.2) 100%
   );
+  /* TWIN-VISUAL-001: glow scales with evolution stage via --twin-glow-intensity.
+     Base radii 24/48 are scaled by glowMult (0.7-1.45 per stage). */
   box-shadow:
-    0 0 24px var(--twin-glow, rgba(79, 70, 229, 0.4)),
-    0 0 48px var(--twin-glow, rgba(79, 70, 229, 0.2)),
+    0 0 calc(24px * var(--twin-glow-intensity, 0.7)) var(--twin-glow, rgba(79, 70, 229, 0.4)),
+    0 0 calc(48px * var(--twin-glow-intensity, 0.7)) var(--twin-glow, rgba(79, 70, 229, 0.2)),
     inset 0 0 24px rgba(255, 255, 255, 0.08);
   animation: twin-orb-breathe 4s ease-in-out infinite;
   position: relative;

@@ -18,7 +18,7 @@ import { useAnalysisStore } from '../store/analysisStore';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
-import { saveMessage } from '@/services/supabase-service';
+import { saveMessage, supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
 import { recordWorldInteraction } from '../services/WorldExpertiseService';
@@ -40,6 +40,7 @@ export default function TwinChat() {
   // "intelligent from birth" — knows the user before the first message.
   const userProfile = useUserStore(s => s.profile);
   const currentAnalysis = useAnalysisStore(s => s.currentAnalysis);
+  const setCurrentAnalysis = useAnalysisStore(s => s.setCurrentAnalysis);
   const [searchParams] = useSearchParams();
   const location = useLocation();
 
@@ -98,6 +99,64 @@ export default function TwinChat() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, twin, session]);
+
+  // ANALYSIS-PERSIST-001 FIX: fetch analysis from database when store is empty.
+  // Without this, Twin is only smart in the first session — on reload,
+  // currentAnalysis becomes null and Twin loses all strengths/blindSpots context.
+  useEffect(() => {
+    if (currentAnalysis || !session?.user?.id || !supabase) return;
+
+    const fetchAnalysisFromDB = async () => {
+      try {
+        // Fetch latest blueprint with analysis for this user
+        const { data, error } = await supabase
+          .from('profiles_blueprints')
+          .select('final_analysis, sice_results')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error) {
+          console.warn('Failed to fetch analysis from DB:', error.message);
+          return;
+        }
+
+        if (data?.final_analysis) {
+          // final_analysis should already be a FullAnalysisOutput object
+          // but ensure dates are properly parsed
+          const analysis = typeof data.final_analysis === 'string'
+            ? JSON.parse(data.final_analysis)
+            : data.final_analysis;
+
+          // Ensure date fields are Date objects
+          if (analysis && typeof analysis === 'object') {
+            if (analysis.generatedAt && typeof analysis.generatedAt === 'string') {
+              analysis.generatedAt = new Date(analysis.generatedAt);
+            }
+            analysis.behavioralPatterns?.forEach((p: any) => {
+              if (p.lastDetected && typeof p.lastDetected === 'string') {
+                p.lastDetected = new Date(p.lastDetected);
+              }
+            });
+            analysis.trends?.forEach((t: any) => {
+              if (t.since && typeof t.since === 'string') {
+                t.since = new Date(t.since);
+              }
+            });
+          }
+
+          setCurrentAnalysis(analysis);
+        }
+      } catch (err) {
+        console.error('Error fetching analysis from DB:', err);
+      }
+    };
+
+    fetchAnalysisFromDB();
+    // Run once on mount; dependencies are controlled by the early return
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
 
   // GUARD: Check if Twin exists
   if (!twin) {

@@ -11,6 +11,7 @@ import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useWorld } from '../context/WorldContext';
+import { useTwin } from '../context/TwinContext';
 import { useLifecycleStore } from '../store/lifecycleStore';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { getSeoMetadata } from '../constants/seoMetadata';
@@ -79,6 +80,8 @@ const Dashboard: React.FC = () => {
   const { language } = useLanguage();
   // P0 #5: World context for world-specific insights (reserved for future use)
   useWorld();
+  // TWIN-VISUAL-001: get maturityScore for LivingTwin evolution
+  const { twin } = useTwin();
   // RECOVERY-001: lifecycle status drives the resume entry banner below
   const lifecycleStatus = useLifecycleStore((state) => state.status);
   const seoData = getSeoMetadata('dashboard', language);
@@ -228,7 +231,8 @@ const Dashboard: React.FC = () => {
       <ExecutiveSummary />
 
       {/* Living AI Twin — §3 states, §4 cosmic visual, §5 processing states */}
-      <LivingTwin />
+      {/* TWIN-VISUAL-001: pass maturityScore to enable evolution */}
+      <LivingTwin maturityScore={twin?.maturityScore ?? 30} />
 
       {/* P0 #7 — Explore Worlds quick action */}
       <ExplorWorldsCard />
