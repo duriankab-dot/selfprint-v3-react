@@ -238,7 +238,7 @@ export default function VsAstrologyPage() {
             {c.closing}
           </p>
           <button
-            onClick={() => navigate('/onboarding')}
+            onClick={() => navigate('/onboarding?ref=astrology')}
             style={{
               padding: '16px 40px',
               borderRadius: 12,

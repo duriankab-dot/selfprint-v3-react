@@ -181,7 +181,7 @@ const HeroNetworkSvg = () => (
 
 // ─── Smart Entry Hook ─────────────────────────────────────────────────────────
 
-type Segment = 'th-self' | 'mbti' | 'tech' | 'default';
+type Segment = 'th-self' | 'mbti' | 'tech' | 'astrology' | 'default';
 
 function useSmartEntry() {
   const { language } = useLanguage();
@@ -190,12 +190,13 @@ function useSmartEntry() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    // 1. Segment from URL param (?ref=mbti|tech)
+    // 1. Segment from URL param (?ref=mbti|tech|astrology)
     const params = new URLSearchParams(window.location.search);
     const ref = params.get('ref');
     let seg: Segment = 'default';
     if (ref === 'mbti') seg = 'mbti';
     else if (ref === 'tech') seg = 'tech';
+    else if (ref === 'astrology') seg = 'astrology';
     else if (language === 'th' || navigator.language.startsWith('th')) seg = 'th-self';
 
     setSegment(seg);
@@ -260,6 +261,16 @@ const COPY: Record<'th' | 'en', Record<Segment, LangCopy>> = {
       seoTitle: 'SELFPRINT | Decision Intelligence Platform — AI Twin Thailand',
       seoDesc: 'Living Personal Intelligence Platform. 12 SICE Core Engines. Behavioral pattern simulation. Real-time Twin evolution.',
     },
+    astrology: {
+      badge: 'วิทยาศาสตร์พฤติกรรม ไม่ใช่โชคชะตา',
+      h1: 'คุณไม่ได้มาเพื่อดูดวง\nคุณมาเพื่อเข้าใจตัวเอง',
+      sub: 'SELFPRINT วิเคราะห์พฤติกรรมจริง — ไม่ใช่ดาวจรัส แต่เป็นสถิติที่ทำนายได้เพราะมาจากตัวคุณจริง',
+      quickCta: 'วิเคราะห์เบื้องต้น 2 นาที',
+      fullCta: 'สร้าง AI Twin',
+      watchDemo: 'ดูเปรียบเทียบ vs ดูดวง',
+      seoTitle: 'SELFPRINT vs ดูดวง AI — ต่างกันอย่างไร? | SELFPRINT',
+      seoDesc: 'ต้องการเข้าใจตัวเอง? SELFPRINT วิเคราะห์พฤติกรรมจริง ไม่ใช่โชคชะตา — แม่นกว่าเพราะเรียนรู้จากคุณ',
+    },
     default: {
       badge: 'Living AI ภาษาไทยหนึ่งเดียว',
       h1: 'เลิกเดาทิศทางของชีวิต\nให้ AI ช่วยคิดและตัดสินใจ',
@@ -301,6 +312,16 @@ const COPY: Record<'th' | 'en', Record<Segment, LangCopy>> = {
       watchDemo: 'View Architecture',
       seoTitle: 'SELFPRINT | AI Twin & Decision Intelligence Platform',
       seoDesc: 'Living Personal Intelligence Platform. 12 SICE Core Engines. Real-time behavioral learning. Decision simulation.',
+    },
+    astrology: {
+      badge: 'Behavioral science, not destiny',
+      h1: 'You didn\'t come here for horoscopes\nYou came to understand yourself',
+      sub: 'SELFPRINT analyzes your real behavioral patterns — not stars. More accurate because it learns from your actual decisions.',
+      quickCta: 'Quick Analysis (2 min)',
+      fullCta: 'Build Your AI Twin',
+      watchDemo: 'See the difference',
+      seoTitle: 'SELFPRINT vs Astrology AI — What\'s the Difference? | SELFPRINT',
+      seoDesc: 'Looking to understand yourself? SELFPRINT analyzes real behavior — not destiny. More accurate because it learns from you.',
     },
     default: {
       badge: 'Living Personal Intelligence Platform',

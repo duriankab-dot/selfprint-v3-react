@@ -91,7 +91,14 @@ const Ladder: React.FC<{ current: TwinState; engine: TwinStateEngine }> = ({
 // Main component
 // ============================================================================
 
-const LivingTwin: React.FC = () => {
+interface LivingTwinProps {
+  /** TWIN-VISUAL-001: optional maturityScore drives visual evolution
+   *  (0-100). If provided, scales glow and rings. If not provided,
+   *  derives state from PersonalContext. */
+  maturityScore?: number;
+}
+
+const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
@@ -111,6 +118,21 @@ const LivingTwin: React.FC = () => {
     () => engine.computeState(context ?? null),
     [context, engine]
   );
+
+  // TWIN-VISUAL-001: map maturityScore to evolution stage for glow scaling
+  // Same logic as TwinPresence — 4 stages: nascent (0-25), growing (25-50),
+  // active (50-75), evolved (75-100)
+  const evolutionStage = useMemo(() => {
+    if (!maturityScore) return 1; // default to nascent if not provided
+    const s = Math.max(0, Math.min(100, maturityScore));
+    if (s >= 75) return 4;
+    if (s >= 50) return 3;
+    if (s >= 25) return 2;
+    return 1;
+  }, [maturityScore]);
+
+  // Glow intensity multiplier per stage — same as TwinPresence
+  const glowMult = useMemo(() => [0, 0.7, 0.9, 1.15, 1.45][evolutionStage], [evolutionStage]);
 
   // Auth guard
   if (!userId) {
@@ -160,10 +182,22 @@ const LivingTwin: React.FC = () => {
     particleIntensity,
   } = twinResult;
 
+  // Calculate CSS variables for glow scaling based on evolution stage
+  const glowOpacity = useMemo(
+    () => 0.35 + (glowMult - 0.7) * 0.2, // Scale opacity based on stage
+    [glowMult]
+  );
+
   return (
     <div
       className={`living-twin living-twin--intensity-${particleIntensity}`}
-      style={{ '--twin-glow': glowColor } as React.CSSProperties}
+      style={{
+        '--twin-glow': glowColor,
+        // Scale glow intensity CSS vars based on maturityScore evolution
+        '--twin-glow-intensity': glowMult.toString(),
+        '--twin-glow-opacity': glowOpacity.toString(),
+        '--twin-outer-ring-opacity': (evolutionStage >= 3 ? 0.4 * glowMult : 0).toString(),
+      } as React.CSSProperties}
     >
       {/* Orb */}
       <div className="living-twin__orb-wrap">

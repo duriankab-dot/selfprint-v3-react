@@ -14,6 +14,7 @@ export interface AnalysisStoreState {
 
   // Actions
   setAnalysis: (analysis: FullAnalysisOutput) => void;
+  setCurrentAnalysis: (analysis: FullAnalysisOutput | null) => void;
   clearAnalysis: () => void;
 }
 
@@ -25,6 +26,12 @@ export const useAnalysisStore = create<AnalysisStoreState>((set) => ({
     set({
       currentAnalysis: analysis,
       isReadyForAwakening: analysis.sourceCount > 0,
+    }),
+
+  setCurrentAnalysis: (analysis: FullAnalysisOutput | null) =>
+    set({
+      currentAnalysis: analysis,
+      isReadyForAwakening: analysis ? analysis.sourceCount > 0 : false,
     }),
 
   clearAnalysis: () =>
