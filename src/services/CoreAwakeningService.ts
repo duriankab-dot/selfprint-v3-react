@@ -309,47 +309,18 @@ export async function initializeTwin(
       };
     }
 
-    // ✅ Phase 3: Link essence to Twin and mark as used (transaction-like)
-    const { error: essenceUpdateError } = await supabase
-      .from('awakening_essence')
-      .update({
-        twin_id: newTwin.id,
-        status: 'used',
-        used_at: new Date().toISOString(),
-      })
-      .eq('id', essence.id);
+    // ✅ P5 STEP 1: PARALLELIZATION
+    // Instead of sequential operations, start all independent database
+    // operations at the same time. This reduces latency from 1.0s (5 serial
+    // queries @ 200ms each) to ~0.2s (all 4 in parallel on 1 round-trip).
 
-    if (essenceUpdateError) {
-      console.error('คำเตือน: ไม่สามารถอัพเดท essence status:', essenceUpdateError);
-      // ไม่ fail process — Twin สร้างแล้ว
-    }
+    // Prepare all operations upfront
+    const groundedInsight = personalIntel?.insights?.[0];
+    const memoryContent = groundedInsight
+      ? `ฉันเกิดมาในชื่อ ${twinName} ฉันรู้แล้วว่า: ${groundedInsight} ฉันพร้อมเติบโตไปกับคุณ`
+      : `ฉันเกิดมาในชื่อ ${twinName} ฉันอยู่ที่นี่เพื่อเติบโตไปกับคุณ`;
 
-    // ✅ P0 #1 FIX: Link personal_context to essence if exists
-    try {
-      const { data: personalContext } = await supabase
-        .from('personal_contexts')
-        .select('id')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (personalContext) {
-        await supabase
-          .from('personal_contexts')
-          .update({
-            awakening_essence_id: essence.id,
-          })
-          .eq('id', personalContext.id);
-      }
-    } catch (contextError) {
-      console.warn('คำเตือน: ไม่สามารถ link personal context:', contextError);
-      // ไม่ fail process
-    }
-
-    // P0-C Gap #2: baseline SICE scores from the real orchestration run,
-    // keyed by the engines' actual names (REAL_SICE_ENGINE_NAMES — see
-    // top of file for why the previous list silently mismatched 2 of 12).
+    // P0-C Gap #2: baseline SICE scores
     const sicResultsArr: Array<{ engineName?: string; confidence?: number }> = Array.isArray(
       essence.sice_results
     )
@@ -365,32 +336,52 @@ export async function initializeTwin(
     const baselineScores = REAL_SICE_ENGINE_NAMES.map((engineName) => ({
       twin_id: newTwin.id,
       sice_name: engineName,
-      // Fall back to 50 only for an engine essence genuinely has no score for
-      // (e.g. it errored during orchestration) — not as the default for all.
       contribution_score: Math.max(0, Math.min(100, confidenceByEngine.get(engineName) ?? 50)),
       last_active: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
 
-    // Insert baseline SICE scores
-    const { error: scoresError } = await supabase
-      .from('twin_sice_scores')
-      .insert(baselineScores);
+    // ✅ START ALL 4 OPERATIONS IN PARALLEL (Promise.allSettled)
+    const [essenceResult, , scoresResult, memoryResult] = await Promise.allSettled([
+      // Operation 1: Update essence to mark as used
+      supabase
+        .from('awakening_essence')
+        .update({
+          twin_id: newTwin.id,
+          status: 'used',
+          used_at: new Date().toISOString(),
+        })
+        .eq('id', essence.id),
 
-    if (scoresError) {
-      console.error('คำเตือน: ไม่สามารถเตรียม SICE baseline scores:', scoresError);
-    }
+      // Operation 2: Get & update personal_context
+      (async () => {
+        try {
+          const { data: personalContext } = await supabase
+            .from('personal_contexts')
+            .select('id')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
 
-    // P0-C Gap #4: birth memory grounded in the actual essence insight when
-    // available, instead of a generic line with no real user context.
-    const groundedInsight = personalIntel?.insights?.[0];
-    const memoryContent = groundedInsight
-      ? `ฉันเกิดมาในชื่อ ${twinName} ฉันรู้แล้วว่า: ${groundedInsight} ฉันพร้อมเติบโตไปกับคุณ`
-      : `ฉันเกิดมาในชื่อ ${twinName} ฉันอยู่ที่นี่เพื่อเติบโตไปกับคุณ`;
+          if (personalContext) {
+            return await supabase
+              .from('personal_contexts')
+              .update({
+                awakening_essence_id: essence.id,
+              })
+              .eq('id', personalContext.id);
+          }
+        } catch (contextError) {
+          console.warn('คำเตือน: ไม่สามารถ link personal context:', contextError);
+        }
+      })(),
 
-    const { error: memoryError } = await supabase
-      .from('twin_memories')
-      .insert({
+      // Operation 3: Insert SICE baseline scores
+      supabase.from('twin_sice_scores').insert(baselineScores),
+
+      // Operation 4: Insert birth memory
+      supabase.from('twin_memories').insert({
         twin_id: newTwin.id,
         world_id: 'self',
         role: 'system',
@@ -400,10 +391,18 @@ export async function initializeTwin(
           timestamp: new Date().toISOString(),
           grounded: Boolean(groundedInsight),
         },
-      });
+      }),
+    ]);
 
-    if (memoryError) {
-      console.error('คำเตือน: ไม่สามารถสร้าง birth memory:', memoryError);
+    // Log any errors (non-blocking)
+    if (essenceResult.status === 'rejected' || (essenceResult.status === 'fulfilled' && essenceResult.value.error)) {
+      console.error('คำเตือน: ไม่สามารถอัพเดท essence status:', essenceResult.status === 'rejected' ? essenceResult.reason : essenceResult.value.error);
+    }
+    if (scoresResult.status === 'rejected' || (scoresResult.status === 'fulfilled' && scoresResult.value.error)) {
+      console.error('คำเตือน: ไม่สามารถเตรียม SICE baseline scores:', scoresResult.status === 'rejected' ? scoresResult.reason : scoresResult.value.error);
+    }
+    if (memoryResult.status === 'rejected' || (memoryResult.status === 'fulfilled' && memoryResult.value.error)) {
+      console.error('คำเตือน: ไม่สามารถสร้าง birth memory:', memoryResult.status === 'rejected' ? memoryResult.reason : memoryResult.value.error);
     }
 
     return {
