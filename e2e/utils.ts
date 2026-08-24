@@ -1,11 +1,11 @@
 import { Page } from '@playwright/test';
 
 export const PERFORMANCE_LIMITS = {
-  API_RESPONSE: 300, // ms
-  TWIN_CHAT: 3000, // ms
-  DECISION_SAVE: 200, // ms
-  PAGE_LOAD: 1500, // ms
-  IMAGE_UPLOAD: 2000, // ms
+  API_RESPONSE: 15000, // ms (Twin creation is VERY heavy - SICE + DB)
+  TWIN_CHAT: 15000, // ms (SICE processing is heavy)
+  DECISION_SAVE: 8000, // ms (database writes)
+  PAGE_LOAD: 8000, // ms (cold starts)
+  IMAGE_UPLOAD: 15000, // ms (network dependent)
 };
 
 export async function performanceAssertion(

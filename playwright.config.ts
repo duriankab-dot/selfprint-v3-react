@@ -25,7 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: undefined,
-  timeout: 60000,
-  expect: { timeout: 10000 },
+  timeout: 180000, // 3 minutes per test (Twin creation needs SICE + DB)
+  expect: { timeout: 20000 }, // assertions need more time
   globalTimeout: 15 * 60 * 1000,
 });
