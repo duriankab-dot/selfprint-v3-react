@@ -152,9 +152,9 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
   const getIcon = (): string => {
     switch (stage) {
       case 0:
-        return '🔍'; // Analyzing
+        return '🔬'; // Analyzing (science)
       case 1:
-        return '✨'; // Creating
+        return '⚡'; // Creating (energy, not magic)
       case 2:
         return '🧠'; // Connecting
       default:
@@ -329,7 +329,7 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
                 margin: 0,
               }}
             >
-              ✨ AI Twin ของคุณถือกำเนิดแล้ว! มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...
+              ⚡ AI Twin ของคุณถือกำเนิดแล้ว! มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...
             </p>
           </div>
         )}

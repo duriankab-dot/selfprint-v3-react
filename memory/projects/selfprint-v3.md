@@ -8,7 +8,7 @@
 Personal Intelligence Platform—a React-based mobile/web app for self-aware decision-making, powered by AI and data persistence.
 
 ## Tech Stack
-- **Frontend:** React 18, TypeScript, Tailwind CSS
+- **Frontend:** React 19, TypeScript, Tailwind CSS
 - **Backend:** Node.js APIs, Edge Functions
 - **Database:** PostgreSQL (or current setup)
 - **Testing:** Vitest (unit), Playwright (E2E)

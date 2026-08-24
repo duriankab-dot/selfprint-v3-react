@@ -132,7 +132,7 @@ export async function getSICEStatus(): Promise<{
       engines,
       message: `${engines.length} SICE engines ready`,
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: 'Failed to get SICE status',

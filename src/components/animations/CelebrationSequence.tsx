@@ -44,6 +44,7 @@ export const CelebrationSequence: React.FC<CelebrationSequenceProps> = ({
     if (!canvasRef.current || !containerRef.current) return;
 
     const canvas = canvasRef.current;
+    const container = containerRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -136,8 +137,8 @@ export const CelebrationSequence: React.FC<CelebrationSequenceProps> = ({
 
       // Screen shake effect
       const shakeIntensity = Math.sin(progress * Math.PI * 8) * (1 - progress) * 3;
-      if (containerRef.current) {
-        containerRef.current.style.transform = `translate(${shakeIntensity}px, 0)`;
+      if (container) {
+        container.style.transform = `translate(${shakeIntensity}px, 0)`;
       }
 
       // Color flash overlay (gentle, not rapid)
@@ -151,8 +152,8 @@ export const CelebrationSequence: React.FC<CelebrationSequenceProps> = ({
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         // Final cleanup
-        if (containerRef.current) {
-          containerRef.current.style.transform = 'translate(0, 0)';
+        if (container) {
+          container.style.transform = 'translate(0, 0)';
         }
       }
     };
@@ -165,8 +166,8 @@ export const CelebrationSequence: React.FC<CelebrationSequenceProps> = ({
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (containerRef.current) {
-        containerRef.current.style.transform = 'translate(0, 0)';
+      if (container) {
+        container.style.transform = 'translate(0, 0)';
       }
     };
   }, [duration, particleCount]);

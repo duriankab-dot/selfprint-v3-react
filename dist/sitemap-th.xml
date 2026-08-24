@@ -42,6 +42,17 @@
     <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/faq" />
   </url>
 
+  <!-- Bridge content: ดูดวง AI → behavioral science (high-traffic Thai segment) -->
+  <url>
+    <loc>https://selfprint.one/th/vs-astrology</loc>
+    <lastmod>2026-08-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/vs-astrology" />
+    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/vs-astrology" />
+    <hreflang:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/vs-astrology" />
+  </url>
+
   <!-- Privacy -->
   <url>
     <loc>https://selfprint.one/th/privacy</loc>

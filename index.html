@@ -41,11 +41,19 @@
       media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
       href="/icons/splash-750x1334.png" />
 
-    <!-- P0-J: Preconnect for critical third-party origins -->
+    <!-- P0-J + GAP-4: Preconnect for critical third-party origins -->
     <link rel="preconnect" href="https://api.anthropic.com" crossorigin />
     <link rel="dns-prefetch" href="https://api.anthropic.com" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Supabase: replace xxxx with your project ref if known -->
+    <link rel="dns-prefetch" href="https://supabase.co" />
+    <link rel="preconnect" href="https://supabase.co" crossorigin />
+    <!-- Stripe: preconnect for payment intent creation -->
+    <link rel="preconnect" href="https://api.stripe.com" crossorigin />
+    <link rel="dns-prefetch" href="https://api.stripe.com" />
+    <link rel="preconnect" href="https://js.stripe.com" crossorigin />
+    <link rel="dns-prefetch" href="https://js.stripe.com" />
 
     <!-- Open Graph / Social — updated for GEO/AEO (MetaTagManager overrides per-page) -->
     <meta property="og:type" content="website" />
