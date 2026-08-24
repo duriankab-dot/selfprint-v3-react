@@ -27,8 +27,8 @@ import { buildPrompt, validate } from '../src/lib/astrovera-brain/psychology/ind
 import { safetyCheck, SAFETY_SYSTEM_DIRECTIVE } from './middleware/safety';
 import * as decisions from '../api/decisions';
 // ✅ P0-B SECURITY MIDDLEWARE
-import { configureSecurityMiddleware, applyAuth, applyOwnershipCheck } from './middleware/security-config';
-import { validateDecisionData, validateUserId } from './middleware/validate';
+import { configureSecurityMiddleware, applyAuth } from './middleware/security-config';
+import { validateDecisionData } from './middleware/validate';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -328,7 +328,7 @@ app.use((req: Request, res: Response) => {
 
 // ─── Error Handler ────────────────────────────────────────────────────────
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
   console.error('[Server Error]', err);
   res.status(500).json({ error: 'Internal server error' });
 });

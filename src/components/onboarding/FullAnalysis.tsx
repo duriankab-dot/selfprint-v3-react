@@ -59,7 +59,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
               color: 'var(--color-text-primary)',
             }}
           >
-            ✨ AI Twin ฉบับสมบูรณ์ของคุณ
+            ⚡ AI Twin ฉบับสมบูรณ์ของคุณ
           </h1>
           <p
             style={{
@@ -358,7 +358,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                         fontWeight: 700,
                       }}
                     >
-                      ⭐
+                      →
                     </span>
                     {opportunity}
                   </li>
@@ -484,7 +484,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
-            ✨ สร้าง AI Twin ของคุณ →
+            สร้าง AI Twin ของคุณ →
           </button>
         </div>
       </div>

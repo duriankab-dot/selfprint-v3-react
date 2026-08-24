@@ -6,7 +6,7 @@ Complete decoder ring for SELFPRINT project terminology, acronyms, and internal 
 | Term | Meaning |
 |------|---------|
 | SELFPRINT | Personal Intelligence Platform |
-| V3 | Current production version (React 18 + TypeScript) |
+| V3 | Current production version (React 19 + TypeScript) |
 | Production Ready | Fully tested, verified, secured, documented, deployable |
 
 ## Roles & People
