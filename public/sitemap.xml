@@ -20,14 +20,6 @@
   </url>
 
   <url>
-    <loc>https://selfprint.one/en/compare</loc>
-    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/compare" />
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-
-  <url>
     <loc>https://selfprint.one/en/faq</loc>
     <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/faq" />
     <lastmod>2026-08-17</lastmod>
@@ -127,17 +119,9 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Blog (5 articles) -->
-  <url>
-    <loc>https://selfprint.one/en/blog/career/career-goals-setting</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://selfprint.one/en/blog/relationships/relationship-decisions-guide</loc>
-    <lastmod>2026-08-17</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
+  <!-- Blog pages — reserved for future implementation
+       Commented out until blog pages are built:
+       - /en/blog/career/career-goals-setting
+       - /en/blog/relationships/relationship-decisions-guide
+  -->
 </urlset>
