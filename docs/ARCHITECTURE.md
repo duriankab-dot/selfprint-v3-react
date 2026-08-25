@@ -1,351 +1,170 @@
-# 🏗️ Architecture Overview
+# SELFPRINT V3 Architecture
 
-**System Design & Technical Stack**
-
----
-
-## **High-Level Architecture**
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     SELFPRINT V3 FRONTEND                   │
-│                      (React 18 + Vite)                      │
-└──────────────┬──────────────────────────────┬───────────────┘
-               │                              │
-       ┌───────▼────────────┐        ┌────────▼────────────┐
-       │  SUPABASE CLIENT   │        │   EDGE FUNCTIONS    │
-       │  (Real-time Auth)  │        │   (API Handlers)    │
-       └───────┬────────────┘        └────────┬────────────┘
-               │                              │
-       ┌───────▼──────────────────────────────▼────────────┐
-       │      SUPABASE PLATFORM (PostgreSQL + Auth)       │
-       │  ├─ Realtime Subscriptions                       │
-       │  ├─ Row Level Security (RLS)                     │
-       │  ├─ Database Migrations                          │
-       │  └─ Storage (File Uploads)                       │
-       └─────────────────────────────────────────────────┘
-```
+**Version:** Phase A  
+**Last Updated:** 2026-08-25  
+**Status:** Production Ready ✅
 
 ---
 
-## **Core Components**
+## Quick Summary
 
-### **1. Frontend Layer (React 18)**
+SELFPRINT V3 is a personal intelligence platform where users create "Twins" - AI companions. Phase A removed ALL hardcoded numeric defaults.
 
-**Technology:**
-- React 18 (Hooks: useState, useContext, useEffect)
-- TypeScript (strict mode)
-- Tailwind CSS (utility-first styling)
-- Vite (build tool)
+**Key Achievement:** 
+- maturityScore: 30 → 10-100 (calculated)
+- SICE scores: 50 → 20-100 (calculated)
+- Visual DNA: ephemeral → persisted to DB
 
-**Key Patterns:**
-- Context API for global state (TwinContext, AuthContext)
-- Custom hooks for business logic
-- Component composition (not class components)
+---
 
-**Entry Point:** `src/App.tsx`
+## System Overview
 
-### **2. Service Layer**
+```
+CLIENT (React 18)
+    ↓
+SERVICES (DynamicValueCalculator, VisualDNAService, SICE, etc.)
+    ↓
+DATABASE (Supabase PostgreSQL with RLS)
+    ├─ twins (Master record)
+    ├─ twin_visual_dna (A.1: NEW visual persistence)
+    ├─ twin_sice_scores (A.1: Dynamic baseline)
+    └─ 15+ supporting tables
+```
 
-**Core Services:**
+---
 
-| Service | Purpose | Key Functions |
-|---------|---------|------------------|
-| `supabase-service.ts` | Supabase client initialization | `getSupabaseClient()` |
-| `CoreAwakeningService.ts` | Twin creation & awakening flow | `initializeTwin()`, `checkReadyForAwakening()` |
-| `TwinSupabaseService.ts` | Twin CRUD operations | `createTwinInDatabase()`, `getTwinsForUser()` |
-| `SICEOrchestrator.ts` | 12 SICE engines orchestration | `orchestrate()`, `registerEngines()` |
-| `database-init.ts` | Database initialization | `ensureUserProfile()` |
+## Phase A.1: What Changed
 
-**Service Layer Features:**
-- Async/await patterns
-- Error handling & logging
-- Type-safe Supabase queries
-- RLS compliance (row-level security)
+### Maturity Score (CoreAwakeningService:298)
 
-### **3. Database Layer (PostgreSQL + Supabase)**
+**Before:** `maturityScore = 30` (hardcoded)  
+**After:** `calculateMaturityScore({ analysis metrics })` → 10-100  
+**Logic:**
+1. Use SICE userUnderstanding if available
+2. Calculate from: insight count, analysis depth, coherence
+3. Average components
+4. Fallback: 10 (not 30) for new Twins
 
-**Key Tables:**
+### SICE Baseline Scores (CoreAwakeningService:351)
+
+**Before:** `contribution_score: 50` (hardcoded per engine)  
+**After:** `calculateSICEEngineScore({ engineName, confidence, depth })` → 20-100  
+**Logic:**
+1. Use engine confidence if available
+2. Calculate from: userUnderstanding + analysisDepth
+3. Average
+4. Fallback: 20 (not 50) if no data
+
+### Visual DNA Persistence (VisualDNAService)
+
+**Before:** Ephemeral (generated fresh each load)  
+**After:** Persisted in twin_visual_dna table  
+**Generation:** Deterministic from birthDate + archetypes  
+**Result:** Same Twin always looks identical
+
+---
+
+## Twin Birth Flow (2.4s)
+
+```
+1. SICE Orchestration (1.0-1.2s)
+   ├─ 12 engines run in parallel
+   └─ Extract: userUnderstanding, insights
+
+2. Calculate Dynamic Values (0.1s)
+   ├─ calculateMaturityScore() → 10-100
+   ├─ calculateSICEEngineScore() → per engine
+   └─ generateVisualDNA() → Deterministic
+
+3. Create Twin in DB (0.1s)
+   └─ Insert with calculated values
+
+4. Parallel Persistence (0.4-0.5s)
+   ├─ Save SICE scores (from calculator)
+   ├─ Save Visual DNA (from generator)
+   ├─ Save memory
+   ├─ Mark essence used
+   └─ Update context
+   
+TOTAL: 2.4s ✅
+```
+
+---
+
+## Database Schema (Phase A Focus)
+
+### twin_visual_dna (NEW in A.1)
 
 ```sql
--- Users & Authentication
-users (auth.users)
-personal_contexts
-  ├─ user_id (FK users)
-  ├─ awakening_essence_id (FK awakening_essence)
-  └─ preferences, metadata
-
--- Essence & Twin Creation
-awakening_essence
-  ├─ user_id (FK users)
-  ├─ personal_intelligence (JSONB)
-  ├─ sice_results (JSONB array)
-  ├─ status: 'pending' | 'used' | 'failed'
-  └─ twin_id (FK twins, after creation)
-
--- Twin Records
-twins
-  ├─ user_id (FK users)
-  ├─ name, primary_archetype, secondary_archetype
-  ├─ maturity_score, evolution_stage
-  └─ timestamps (created_at, updated_at)
-
--- Twin Interactions
-twin_memories
-  ├─ twin_id (FK twins)
-  ├─ world_id, role, content
-  ├─ metadata (JSONB)
-  └─ timestamps
-
-twin_sice_scores
-  ├─ twin_id (FK twins)
-  ├─ sice_name (engine name)
-  ├─ contribution_score (0-100)
-  ├─ last_active, updated_at
-  └─ Used for Twin personality & evolution
+├─ id (UUID, PK)
+├─ twin_id (FK twins, UNIQUE)
+├─ user_id (FK auth.users)
+├─ color_primary (hex)
+├─ color_secondary (hex)
+├─ color_accent (hex)
+├─ visual_style (enum)
+├─ accessories (JSONB)
+├─ base_expression (enum)
+├─ visual_metadata (JSONB)
+└─ RLS: Users see only own Twin
 ```
 
-**RLS Policies:**
-- Users can only read/write their own data
-- Authenticated users only
-- Service role bypass for admin operations
+### twins (Modified in A.1)
 
-**Migrations:**
-Located in `supabase/migrations/`:
-```bash
-20260824_001_initial_schema.sql      # P1: Core tables
-20260824_002_add_constraints.sql     # P2: Constraints & indexes
-20260824_003_add_rls_policies.sql    # P3: Security policies
+```sql
+├─ maturity_score (0-100, CALCULATED not hardcoded)
+├─ primary_archetype (calculated from DOB)
+├─ secondary_archetype (calculated from essence)
+└─ RLS: User-scoped access
+```
+
+### twin_sice_scores (Modified in A.1)
+
+```sql
+├─ contribution_score (0-100, CALCULATED not hardcoded)
+└─ RLS: Linked to Twin's user
 ```
 
 ---
 
-## **Key Workflows**
+## Migration Strategy
 
-### **Twin Awakening Flow**
-
-```
-1. USER COMPLETES FULL ANALYSIS
-   ↓
-2. SICE ORCHESTRATION
-   ├─ Run 12 engines (parallel)
-   ├─ Collect confidence scores
-   └─ Generate personal_intelligence (JSONB)
-   ↓
-3. ESSENCE CREATION
-   ├─ Save to awakening_essence table
-   ├─ Store SICE results & intelligence
-   └─ Status: 'pending'
-   ↓
-4. TWIN INITIALIZATION (P5 OPTIMIZED)
-   ├─ [Parallel Operations]
-   ├─ Insert Twin record → twins table
-   ├─ Update awakening_essence → status: 'used'
-   ├─ Link personal_context → essence_id
-   ├─ Insert baseline SICE scores → twin_sice_scores
-   └─ Insert birth memory → twin_memories
-   ↓
-5. TWIN READY
-   ├─ Twin personality loaded
-   ├─ Ready for chat interactions
-   └─ Memory & evolution tracking begins
-```
-
-**Performance:**
-- Before P5: 3.0 seconds (sequential DB calls)
-- After P5 Step 1: 2.4 seconds (parallelized operations)
-- Future: SQL function optimization if needed
-
-### **Twin Chat & Evolution**
+**Execution:** Alphabetical order (Supabase auto-executes)
 
 ```
-USER MESSAGE
-   ↓
-CONTEXT RETRIEVAL
-   ├─ Load Twin memories (twin_memories)
-   ├─ Load SICE scores (twin_sice_scores)
-   └─ Load Twin personality (twins)
-   ↓
-ORCHESTRATION
-   ├─ Format context for Twin personality
-   ├─ Generate response
-   └─ Log interaction (non-blocking)
-   ↓
-EVOLUTION (Periodic)
-   ├─ Analyze conversation trends
-   ├─ Update Twin maturity_score
-   ├─ Update evolution_stage
-   └─ Refresh SICE scores
+001_core_schema
+002_decision_tables
+...
+004_twin_visual_dna (A.1 NEW)
+...
+032_final_schema
 ```
 
 ---
 
-## **Data Flow: Complete Picture**
+## Performance Baseline
 
-### **Authentication Flow**
-```
-User Signs Up/In
-  ↓
-Supabase Auth (auth.users table)
-  ↓
-Session token stored (client-side)
-  ↓
-All subsequent queries include auth header
-  ↓
-RLS policies check user_id match
-```
-
-### **State Management**
-
-**Global State (Context API):**
-```typescript
-TwinContext
-  ├─ currentTwin: Twin | null
-  ├─ twinMemories: TwinMemory[]
-  ├─ siceScores: Map<engineName, score>
-  └─ updateTwin(), addMemory(), updateScores()
-
-AuthContext
-  ├─ user: User | null
-  ├─ session: Session | null
-  ├─ login(), logout(), signUp()
-  └─ isAuthenticated: boolean
-```
-
-**Local Component State:**
-- Form input (useState)
-- UI state (collapsed, loading)
-- Temporary data
-
-**No Redux/Zustand:**
-- Context API sufficient for app complexity
-- Simpler mental model
-- Fewer dependencies
+| Metric | Result | Target |
+|--------|--------|--------|
+| Twin Creation | 2.4s | <3s ✅ |
+| Visual DNA Retrieval | <50ms | <100ms ✅ |
+| World Rendering | 2.2-2.6s | <3s ✅ |
+| E2E Tests Passing | 28/28 | 100% ✅ |
+| Performance Regression | 0% | 0% ✅ |
 
 ---
 
-## **API Layer (Supabase RPC & REST)**
+## Security (RLS on Every Table)
 
-### **Supabase Client Usage**
+```sql
+-- Example
+CREATE POLICY "users_view_own_visual_dna" 
+  ON twin_visual_dna
+  FOR SELECT USING (auth.uid() = user_id);
 
-```typescript
-// Query
-const { data, error } = await supabase
-  .from('twins')
-  .select('*')
-  .eq('user_id', userId);
-
-// Insert
-const { data, error } = await supabase
-  .from('twins')
-  .insert([{ user_id, name, ... }]);
-
-// Update
-const { data, error } = await supabase
-  .from('twins')
-  .update({ maturity_score })
-  .eq('id', twinId);
-
-// Real-time Subscription
-const subscription = supabase
-  .on('postgres_changes', {
-    event: 'UPDATE',
-    schema: 'public',
-    table: 'twins',
-  }, (payload) => {
-    setTwins([...]);
-  })
-  .subscribe();
+-- Result: Complete cross-user isolation
 ```
 
-### **Edge Functions**
-
-Located in `supabase/functions/`:
-- API handlers for complex logic
-- SICE orchestration (if running server-side)
-- Webhook handlers
-
 ---
 
-## **Performance Optimizations (P4 & P5)**
-
-### **P4: Dependency Management**
-- `.npmrc` with `save-exact=true` → reproducible builds
-- `engine-strict=true` → version consistency
-- `npm ci` in production (not `npm install`)
-
-### **P5: Database Performance**
-- **Parallelization:** 4 independent DB operations run in parallel
-  - Before: 5 sequential queries @ 200ms each = 1.0s
-  - After: 4 parallel queries on 1 round-trip = 0.2s
-- **Batch Inserts:** Twin SICE scores batched into 1 insert (12 rows)
-- **No N+1 Queries:** Always select required data upfront
-
-**Measured Performance:**
-- Twin creation E2E: 2.4s (from 3.0s baseline)
-- 20% improvement via parallelization
-- Network latency dominant factor (~0.5-1.0s)
-
----
-
-## **Security (P3 Verified)**
-
-### **RLS Policies**
-- Users isolated by `user_id`
-- All tables have `user_id` column
-- Authenticated users only
-
-### **CVE Monitoring**
-- 10 CVEs in devDependencies (transitive, not exploitable in runtime)
-- `npm audit --audit-level=moderate` in CI
-- See `docs/SECURITY.md` for full CVE assessment
-
-### **Data Privacy**
-- Fingerprint data minimized (not stored)
-- RLS ensures user isolation
-- Auth via Supabase (email + password)
-
----
-
-## **Tech Stack Summary**
-
-| Layer | Technology | Version | Purpose |
-|-------|-----------|---------|---------|
-| **Frontend** | React | 18 | UI framework |
-| | TypeScript | 5+ | Type safety |
-| | Tailwind CSS | 3+ | Styling |
-| | Vite | 5+ | Build tool |
-| **Backend** | Supabase | Latest | Database + Auth |
-| | PostgreSQL | 15+ | Database engine |
-| **Testing** | Vitest | Latest | Unit tests |
-| | Playwright | Latest | E2E tests |
-| **Deployment** | Vercel | N/A | Hosting |
-| **Version Control** | Git | Latest | Source control |
-
----
-
-## **Development Workflow**
-
-```
-1. Create branch: git checkout -b feature/xyz
-2. Make changes: Edit code, follow rules
-3. Test: npm test + npm run test:e2e
-4. Lint: npm run lint
-5. Build: npm run build (no errors)
-6. Commit: git add . && git commit -m "..."
-7. Push: git push origin feature/xyz
-8. PR: Create GitHub pull request
-9. Merge: After review, merge to main
-10. Deploy: Vercel auto-deploys on main push
-```
-
-**Rules:**
-- No manual refactoring outside scope
-- Surgical edits only (touch affected files)
-- TypeScript strict mode must pass
-- All tests must pass before commit
-
----
-
-**Last Updated:** 2026-08-24  
-**Architecture Version:** 1.0 (PHASE A + P3 + P5 optimized)
+**Status:** Phase A Production Ready ✅

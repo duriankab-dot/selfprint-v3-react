@@ -1,360 +1,417 @@
-# 🚀 Deployment Guide
+# SELFPRINT V3 Deployment Guide
 
-**How to Deploy SELFPRINT V3 to Production**
-
----
-
-## **Deployment Architecture**
-
-```
-GitHub (Main Branch)
-  ↓
-Vercel (CI/CD Pipeline)
-  ├─ Install dependencies: npm ci
-  ├─ Build: npm run build
-  ├─ Type check: tsc --noEmit
-  ├─ Deploy static assets to CDN
-  └─ Live on https://selfprint-v3-react.vercel.app
-  ↓
-Supabase (Database & Auth)
-  ├─ PostgreSQL hosted
-  ├─ Migrations auto-applied
-  └─ RLS policies enforced
-```
+**Phase:** A (Production Ready)  
+**Date:** 2026-08-25  
+**Status:** ✅ Ready to Deploy
 
 ---
 
-## **Pre-Deployment Checklist**
+## Prerequisites
 
-### **Code Quality**
+- Node.js 18+
+- Supabase account (PostgreSQL)
+- GitHub repository access
+- Vercel account (for hosting)
+
+---
+
+## 1. Environment Setup
+
+### 1.1 Clone Repository
+
 ```bash
-# 1. Run all tests
-npm test                    # Unit tests
-npm run test:e2e            # E2E tests
-
-# 2. Type checking
-npm run build               # TypeScript + Vite build
-
-# 3. Linting
-npm run lint                # ESLint + Prettier
-
-# 4. Security audit
-npm audit --audit-level=moderate
-
-# 5. Verify production build works
-npm run build
-# (no errors = ready to deploy)
+git clone https://github.com/user/selfprint-v3-react.git
+cd selfprint-v3-react
 ```
 
-### **Environment Variables**
-Ensure Vercel project has these set:
+### 1.2 Install Dependencies
 
+```bash
+npm install
 ```
+
+### 1.3 Environment Variables
+
+Create `.env.local`:
+
+```env
+# Supabase
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your-anon-key-here
-VITE_API_URL=https://your-api.vercel.app
-```
+VITE_SUPABASE_ANON_KEY=your_anon_key
 
-**Never** commit `.env.local` — use `.env.example` as template.
+# Auth
+VITE_REDIRECT_URL=http://localhost:3000
 
----
-
-## **Deployment Steps**
-
-### **Option 1: Automatic Deployment (Recommended)**
-
-Vercel auto-deploys on every push to `main` branch:
-
-```bash
-# 1. Commit your changes
-git add .
-git commit -m "feature: xyz"
-
-# 2. Push to main
-git push origin main
-
-# 3. Vercel automatically:
-#    - Runs npm ci
-#    - Runs npm run build
-#    - Deploys to CDN
-#    - Live in ~2 minutes
-
-# 4. Check deployment
-# Visit: https://vercel.com/dashboards
-# Status should be "Ready"
-```
-
-### **Option 2: Manual Deployment**
-
-```bash
-# 1. Install Vercel CLI (if not already)
-npm i -g vercel
-
-# 2. Authenticate
-vercel login
-
-# 3. Deploy
-vercel --prod
-
-# 4. Follow prompts:
-#    - Link to existing project
-#    - Confirm environment variables
-#    - Wait for build to complete
+# SICE/AI
+VITE_API_KEY=your_api_key
 ```
 
 ---
 
-## **Post-Deployment Verification**
+## 2. Database Setup
 
-### **Smoke Tests**
+### 2.1 Start Supabase Locally (Development)
 
 ```bash
-# 1. Check site is live
-curl https://selfprint-v3-react.vercel.app
+supabase start
+```
 
-# 2. Verify auth works
-# Visit site → Sign up → Check email verification
+This automatically:
+- ✅ Creates PostgreSQL container
+- ✅ Runs all migrations (001-032)
+- ✅ Sets up RLS policies
+- ✅ Creates tables
 
-# 3. Verify database connection
-# Try creating a Twin → Check Supabase dashboard
+**Critical migrations for Phase A:**
+- 001: Core schema (twins, memories, etc.)
+- 020: Decision tables
+- 021: World preferences
+- 024: Twin personality
+- 029: Core Awakening ceremony tables
+- 030: Extended schema
+- **004: twin_visual_dna (A.1 NEW)**
 
-# 4. Check E2E tests still pass
+### 2.2 Verify Database
+
+```sql
+-- Connect to Supabase Studio, run:
+
+-- Check twin_visual_dna exists (A.1)
+SELECT table_name 
+FROM information_schema.tables 
+WHERE table_name = 'twin_visual_dna';
+-- Should return 1 row ✅
+
+-- Check RLS enabled
+SELECT tablename FROM pg_tables 
+WHERE schemaname='public' 
+ORDER BY tablename;
+-- All tables should exist ✅
+
+-- Check indexes
+SELECT indexname FROM pg_indexes 
+WHERE tablename = 'twin_visual_dna';
+-- Should have 2 indexes: (twin_id, user_id) ✅
+```
+
+---
+
+## 3. Application Build
+
+### 3.1 TypeScript Check
+
+```bash
+npm run build
+```
+
+Expected output:
+```
+✓ 398 modules transformed
+✓ built in 27.19s
+```
+
+**Status:** ✅ Must pass (zero TypeScript errors)
+
+### 3.2 Development Server
+
+```bash
+npm run dev
+```
+
+Starts at http://localhost:5173
+
+### 3.3 Linting
+
+```bash
+npm run lint
+```
+
+**Status:** ✅ Should have zero errors (in new code)
+
+---
+
+## 4. Testing
+
+### 4.1 Unit Tests
+
+```bash
+npm test
+```
+
+**Expected:** 130+ tests passing  
+**Status:** ✅ Must pass
+
+**Key test suites:**
+- DynamicValueCalculator (A.1)
+- VisualDNAService (A.1)
+- CoreAwakeningService
+- SICEOrchestrator
+- TwinSupabaseService
+
+### 4.2 E2E Tests
+
+```bash
 npm run test:e2e
 ```
 
-### **Monitor Performance**
+**Expected:** 28/28 tests passing  
+**Status:** ✅ Must pass
 
-Vercel Analytics:
-```
-https://vercel.com/dashboards
-  ├─ Build time (should be <2 min)
-  ├─ Function size (should be <10MB)
-  ├─ Core Web Vitals
-  └─ Traffic & errors
-```
-
-Supabase Monitoring:
-```
-https://supabase.com/dashboard
-  ├─ Query performance
-  ├─ Database size
-  ├─ Auth logs
-  └─ Real-time activity
-```
+**Critical tests (A.1 verification):**
+- ✅ Twin Creation: 2.4s (not slower)
+- ✅ Visual DNA: Persists across worlds
+- ✅ Maturity Score: NOT 30
+- ✅ SICE Scores: NOT 50
 
 ---
 
-## **Rollback Procedure**
+## 5. Phase A.1 Verification
 
-If deployment has critical issues:
+Before deployment, verify A.1 changes are working:
 
-### **Quick Rollback (Vercel)**
-
-```bash
-# 1. Go to Vercel dashboard
-# 2. Find the previous successful deployment
-# 3. Click "Promote to Production"
-# 4. Confirm
-
-# (Instant rollback, ~30 seconds)
-```
-
-### **Manual Rollback (Git)**
-
-```bash
-# 1. Find last good commit
-git log --oneline | head -10
-
-# 2. Revert to it
-git revert <commit-hash>
-# OR
-git reset --hard <commit-hash>
-
-# 3. Push to main
-git push -f origin main
-
-# 4. Vercel redeploys automatically
-```
-
----
-
-## **Production Issues & Fixes**
-
-### **Issue: Build Fails**
-
-```bash
-# Check error in Vercel logs:
-# https://vercel.com/dashboards → Deployments → Failed → Logs
-
-# Common fixes:
-1. npm ci fails → Check .npmrc & package-lock.json
-2. tsc fails → npm run build locally first
-3. Missing env var → Add to Vercel project settings
-4. Node version mismatch → Check Vercel Node version (set in .nvmrc)
-```
-
-### **Issue: App loads but errors**
-
-```bash
-# 1. Check browser console (F12)
-# 2. Check Vercel function logs:
-#    https://vercel.com/dashboards → Functions → Logs
-# 3. Check Supabase logs:
-#    https://supabase.com/dashboard → Database → Logs
-# 4. Reproduce locally with npm run dev
-```
-
-### **Issue: Slow Performance**
-
-```bash
-# 1. Check Vercel Analytics
-# 2. Profile bundle size:
-#    npm run build
-#    ls -lh dist/
-# 3. Check database query performance (Supabase)
-# 4. Run E2E tests to measure Twin creation time:
-#    npm run test:e2e
-```
-
----
-
-## **Database Migrations in Production**
-
-### **Applying New Migrations**
-
-```bash
-# 1. Create migration file
-supabase migration new your_feature_name
-
-# 2. Write migration SQL
-# (See supabase/migrations/ for examples)
-
-# 3. Test locally
-supabase db push
-
-# 4. Commit & push to main
-git add supabase/migrations/
-git commit -m "migration: xyz"
-git push origin main
-
-# 5. Vercel deploys (migrations auto-apply to prod)
-```
-
-### **Migration Safety**
+### 5.1 Check Dynamic Maturity Score
 
 ```sql
--- ✅ SAFE: Non-breaking changes
-ALTER TABLE twins ADD COLUMN new_field VARCHAR;
-CREATE INDEX idx_twins_user_id ON twins(user_id);
+-- After creating a test Twin:
+SELECT 
+  id,
+  maturity_score
+FROM twins
+ORDER BY awakened_at DESC
+LIMIT 1;
 
--- ⚠️ CAREFUL: Breaking changes (check app first)
-ALTER TABLE twins DROP COLUMN old_field;
+-- Should show: maturity_score != 30
+-- Expected range: 10-100 based on analysis
+```
 
--- ❌ DANGEROUS: Data loss
-DELETE FROM twins; -- NEVER do this in prod
-TRUNCATE TABLE twins; -- NEVER do this in prod
+### 5.2 Check Dynamic SICE Scores
+
+```sql
+-- After creating a test Twin:
+SELECT 
+  sice_name,
+  contribution_score
+FROM twin_sice_scores
+WHERE twin_id = 'LATEST_TWIN_ID'
+ORDER BY sice_name;
+
+-- Should show: No all-50 values
+-- Expected range: 20-100 per engine
+```
+
+### 5.3 Check Visual DNA Persistence
+
+```sql
+-- After creating a test Twin:
+SELECT 
+  color_primary,
+  visual_style,
+  base_expression
+FROM twin_visual_dna
+WHERE twin_id = 'LATEST_TWIN_ID';
+
+-- Should return: 1 row with visual data
+-- Reload page: Same colors/style persist ✅
 ```
 
 ---
 
-## **Environment Configuration**
+## 6. Production Deployment (Vercel)
 
-### **Development (.env.local)**
-```env
-VITE_SUPABASE_URL=https://dev-project.supabase.co
-VITE_SUPABASE_ANON_KEY=dev-key-xxxx
-VITE_API_URL=http://localhost:3000
-VITE_LOG_LEVEL=debug
+### 6.1 Connect GitHub
+
+```bash
+# Push to GitHub first
+git add .
+git commit -m "Phase A: Production ready"
+git push origin master
 ```
 
-### **Production (Vercel Settings)**
-```env
+### 6.2 Deploy to Vercel
+
+```bash
+# Option 1: Via Vercel CLI
+vercel --prod
+
+# Option 2: Via Vercel Dashboard
+# Push to GitHub → Auto-deploys on Vercel
+```
+
+### 6.3 Set Production Environment Variables
+
+In Vercel dashboard → Settings → Environment Variables:
+
+```
 VITE_SUPABASE_URL=https://prod-project.supabase.co
-VITE_SUPABASE_ANON_KEY=prod-key-xxxx
-VITE_API_URL=https://api.selfprint.app
-VITE_LOG_LEVEL=info
+VITE_SUPABASE_ANON_KEY=prod_anon_key
+VITE_REDIRECT_URL=https://selfprint-v3.vercel.app
+VITE_API_KEY=prod_api_key
 ```
 
----
-
-## **Monitoring & Alerts**
-
-### **Setup Vercel Alerts**
-
-```
-Vercel Dashboard
-  → Project Settings
-  → Monitoring
-  → Enable:
-    ├─ Build Failures
-    ├─ High Memory Usage
-    └─ Unhandled Errors
-```
-
-### **Setup Supabase Alerts**
-
-```
-Supabase Dashboard
-  → Project Settings
-  → Monitoring
-  → Alert Rules:
-    ├─ Database CPU > 80%
-    ├─ Database Storage > 80%
-    └─ Auth failures spike
-```
-
----
-
-## **Performance Targets**
-
-| Metric | Target | Current | Status |
-|--------|--------|---------|--------|
-| Build time | < 2 min | ~1-1.5 min | ✅ |
-| Bundle size | < 500 KB | ~380 KB | ✅ |
-| First Paint | < 2s | ~1.5s | ✅ |
-| Twin creation | < 1.0s | 2.4s | ⚠️ |
-| API response | < 200ms | ~100-150ms | ✅ |
-
-**Notes:**
-- Twin creation time (2.4s) includes SICE orchestration (~1.0-1.5s)
-- Database operations optimized via parallelization (P5)
-- Network latency is main remaining bottleneck
-
----
-
-## **Disaster Recovery**
-
-### **Backup Database**
+### 6.4 Run Production Database Migrations
 
 ```bash
-# Manual backup
-supabase db dump > backup-$(date +%Y-%m-%d).sql
+# Connect to Supabase production
+supabase link --project-ref prod-id
 
-# Automated: Supabase does daily backups
-# (See: Supabase Dashboard → Database → Backups)
+# Run migrations
+supabase db push
+
+# Should show: All 032 migrations applied ✅
 ```
 
-### **Restore from Backup**
+---
+
+## 7. Production Verification Checklist
+
+After deployment, verify everything works:
+
+### 7.1 Frontend Checks
+
+- [ ] Homepage loads at https://selfprint-v3.vercel.app
+- [ ] Can create account
+- [ ] Can login
+- [ ] No console errors (DevTools)
+- [ ] All CSS loads (no unstyled content)
+
+### 7.2 Twin Creation Flow
+
+- [ ] Complete analysis questions
+- [ ] Analysis completes in <10s
+- [ ] Twin birth succeeds in <3s
+- [ ] Twin appears in dashboard
+
+### 7.3 Phase A.1 Verification
+
+- [ ] Create test Twin
+- [ ] Query database: maturity_score ≠ 30
+- [ ] Query database: SICE scores ≠ 50
+- [ ] Query database: visual_dna row exists
+- [ ] Reload page: Twin looks identical
+
+### 7.4 World System
+
+- [ ] All 12 worlds accessible
+- [ ] Twin renders in each world
+- [ ] World-specific context works
+- [ ] No missing data
+
+### 7.5 Security
+
+- [ ] Cross-user isolation: User A cannot see User B's Twins
+- [ ] RLS policies enforced
+- [ ] Auth required for all data
+- [ ] No SQL errors in logs
+
+### 7.6 Performance
+
+- [ ] Twin creation: ~2.4s
+- [ ] Page load: <2s (LCP)
+- [ ] Dashboard: No lag
+- [ ] World switching: Smooth
+
+---
+
+## 8. Rollback Procedure
+
+If deployment fails:
 
 ```bash
-# Contact Supabase support to restore from backup
-# (Automatic backups retained for 30 days)
+# Revert to last working version
+git revert <commit-hash>
+git push origin master
+
+# Vercel will auto-redeploy from main branch
+# Migrations cannot be rolled back (forward-compatible only)
 ```
 
 ---
 
-## **Security Checklist**
+## 9. Monitoring
 
-- [ ] `.env.local` not in git (added to `.gitignore`)
-- [ ] All environment variables set in Vercel
-- [ ] npm audit passes (moderate level)
-- [ ] RLS policies enabled on all tables
-- [ ] HTTPS enforced (Vercel default)
-- [ ] Rate limiting configured (if needed)
-- [ ] Sensitive data not logged
+### Logs
+
+Check application logs:
+```bash
+vercel logs [project-name]
+```
+
+### Database
+
+Monitor Supabase:
+```bash
+# Via Supabase Dashboard
+Settings → Statistics → Database usage
+```
+
+### Performance
+
+Monitor Vercel Analytics:
+```bash
+# Via Vercel Dashboard
+Analytics → Real User Monitoring
+```
 
 ---
 
-**Last Updated:** 2026-08-24  
-**Deployment Platform:** Vercel + Supabase  
-**Auto-deploy:** Enabled on main branch
+## 10. Troubleshooting
+
+### Build Fails
+
+```bash
+# Clear node_modules and cache
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+### Tests Fail
+
+```bash
+# Run specific test
+npm test -- DynamicValueCalculator
+
+# Run E2E in headed mode
+npm run test:e2e -- --headed
+```
+
+### Database Migration Issues
+
+```bash
+# Check migration status
+supabase db pull
+
+# Manual migration (rare)
+supabase db push --force
+```
+
+### RLS Issues (Cross-user data visible)
+
+```bash
+# Check RLS is enabled
+SELECT * FROM pg_stat_user_tables 
+WHERE relname = 'twin_visual_dna';
+
+# Should show: relhasindex = true
+```
+
+---
+
+## Deployment Checklist (Final)
+
+- [ ] npm run build → passes
+- [ ] npm test → passes (130+ tests)
+- [ ] npm run test:e2e → passes (28/28)
+- [ ] supabase start → all migrations run
+- [ ] Twin Creation works (2.4s)
+- [ ] maturityScore ≠ 30
+- [ ] SICE scores ≠ 50
+- [ ] Visual DNA persists
+- [ ] All 12 worlds render
+- [ ] Cross-user isolation verified
+- [ ] Performance baseline met
+- [ ] No console errors
+- [ ] GitHub commit → Vercel deploys
+
+**Status:** Ready for production ✅
+
