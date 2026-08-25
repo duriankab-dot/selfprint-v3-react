@@ -9,6 +9,8 @@ import { createTwinInDatabase } from './TwinSupabaseService';
 import type { Twin } from './TwinSupabaseService';
 import { ensureUserProfile } from './database-init';
 import { calculateInitialDisciplines } from '../lib/astrology';
+import { calculateMaturityScore, calculateSICEEngineScore, calculateAnalysisDepth } from './DynamicValueCalculator';
+import { generateVisualDNA, saveVisualDNA } from './VisualDNAService';
 import type { SICEInput } from '../types/sice';
 import type { Archetype } from '../context/TwinContext';
 
@@ -287,9 +289,17 @@ export async function initializeTwin(
       .join(' ');
     const secondaryArchetype = inferSecondaryArchetype(essenceText, primaryArchetype);
 
-    // maturityScore: from the orchestration's own confidence in how well it
-    // understands the user, not a flat 30 for everyone
-    const maturityScore = Math.max(0, Math.min(100, personalIntel?.userUnderstanding ?? 30));
+    // maturityScore: Phase A.1 - Dynamic calculation instead of hardcoded 30
+    // Calculate from: userUnderstanding, analysis depth, insight count, coherence
+    const analysisDepth = calculateAnalysisDepth({
+      insightCount: personalIntel?.insights?.length ?? 0,
+      analysisTimeMs: essence.execution_time ?? 0,
+    });
+    const maturityScore = calculateMaturityScore({
+      userUnderstanding: personalIntel?.userUnderstanding,
+      analysisInsightCount: personalIntel?.insights?.length,
+      analysisCoherence: analysisDepth,
+    });
 
     // Create Twin record in database
     const twinData = {
@@ -333,16 +343,30 @@ export async function initializeTwin(
       }
     });
 
+    // Phase A.1: Dynamic SICE scores instead of hardcoded 50
     const baselineScores = REAL_SICE_ENGINE_NAMES.map((engineName) => ({
       twin_id: newTwin.id,
       sice_name: engineName,
-      contribution_score: Math.max(0, Math.min(100, confidenceByEngine.get(engineName) ?? 50)),
+      contribution_score: calculateSICEEngineScore({
+        engineName,
+        engineConfidence: confidenceByEngine.get(engineName),
+        analysisDepth,
+        userUnderstanding: personalIntel?.userUnderstanding,
+      }),
       last_active: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     }));
 
-    // ✅ START ALL 4 OPERATIONS IN PARALLEL (Promise.allSettled)
-    const [essenceResult, , scoresResult, memoryResult] = await Promise.allSettled([
+    // Phase A: Generate Visual DNA for consistent rendering across worlds
+    const visualDNA = generateVisualDNA({
+      birthDate: birthDate || new Date().toISOString().split('T')[0],
+      primaryArchetype,
+      secondaryArchetype,
+      maturityScore,
+    });
+
+    // ✅ START ALL 5 OPERATIONS IN PARALLEL (Promise.allSettled)
+    const [essenceResult, , scoresResult, memoryResult, visualDnaResult] = await Promise.allSettled([
       // Operation 1: Update essence to mark as used
       supabase
         .from('awakening_essence')
@@ -392,6 +416,9 @@ export async function initializeTwin(
           grounded: Boolean(groundedInsight),
         },
       }),
+
+      // Operation 5: Save Visual DNA for consistent Twin visuals
+      saveVisualDNA(userId, newTwin.id, visualDNA),
     ]);
 
     // Log any errors (non-blocking)
@@ -403,6 +430,10 @@ export async function initializeTwin(
     }
     if (memoryResult.status === 'rejected' || (memoryResult.status === 'fulfilled' && memoryResult.value.error)) {
       console.error('คำเตือน: ไม่สามารถสร้าง birth memory:', memoryResult.status === 'rejected' ? memoryResult.reason : memoryResult.value.error);
+    }
+    if (visualDnaResult.status === 'rejected' || (visualDnaResult.status === 'fulfilled' && !visualDnaResult.value?.success)) {
+      const reason = visualDnaResult.status === 'rejected' ? visualDnaResult.reason : visualDnaResult.value?.error;
+      console.error('คำเตือน: ไม่สามารถบันทึก Visual DNA:', reason);
     }
 
     return {
