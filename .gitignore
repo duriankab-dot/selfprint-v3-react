@@ -36,3 +36,4 @@ tsconfig.api-check.tmp.json
 
 .vercel
 .env*
+"supabase/.temp/" 
