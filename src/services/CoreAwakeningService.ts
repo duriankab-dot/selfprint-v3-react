@@ -256,6 +256,10 @@ export async function initializeTwin(
       hexagramNumber: disciplines.hexagramNumber,
       moonFullDegree: disciplines.moonFullDegree,
       sunFullDegree: disciplines.sunFullDegree,
+      // Western Natal Chart — all personal planets
+      mercurySign: disciplines.mercurySign,
+      venusSign: disciplines.venusSign,
+      marsSign: disciplines.marsSign,
     });
     const primaryArchetype   = archetypeResult.primary   as Archetype;
     const secondaryArchetype = archetypeResult.secondary as Archetype;

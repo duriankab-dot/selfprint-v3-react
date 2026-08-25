@@ -48,15 +48,15 @@ export type HybridArchetype =
 export interface ArchetypeInput {
   /** YYYY-MM-DD */
   birthDate: string;
-  /** HH:MM — improves Human Design + Thai Planet accuracy */
+  /** HH:MM — increases confidence for Moon/Nakshatra/Thai Planet */
   birthTime?: string;
-  /** City name — used for timezone offset in natal calc */
+  /** City name — reserved for future Ascendant calculation */
   birthPlace?: string;
   /** 'male'|'female'|'m'|'f'|'ชาย'|'หญิง' — required for Kua */
   gender?: string;
   /** Blood type: A/B/O/AB */
   bloodType?: string;
-  /** Pre-computed values (skip recalculation if already available) */
+  // ── Pre-computed astronomical values ──────────────────────────────
   moonFullDegree?: number;
   sunFullDegree?: number;
   moonSign?: string;
@@ -68,6 +68,12 @@ export interface ArchetypeInput {
   baziYearElement?: string;
   /** 1-64 */
   hexagramNumber?: number;
+  // ── Western Natal Chart planet signs (from InitialDisciplines) ────
+  mercurySign?: string;  // cognitive/communication style
+  venusSign?: string;    // values/relationship style
+  marsSign?: string;     // drive/action style
+  jupiterSign?: string;  // growth orientation (optional, lower weight)
+  saturnSign?: string;   // discipline style (optional, lower weight)
 }
 
 export interface ArchetypeResult {
@@ -427,6 +433,102 @@ function detectHybrid(
 }
 
 // ─────────────────────────────────────────────────────────────────
+// Mercury / Venus / Mars sign → archetype maps
+// (personal planets that reveal cognitive, relational, action style)
+// ─────────────────────────────────────────────────────────────────
+
+/** Mercury sign → thinking/communication archetype tendency */
+const MERCURY_MAP: Record<string, ScoreMap> = {
+  Aries:       { hero: 0.5,     outlaw: 0.3,   explorer: 0.2   },
+  Taurus:      { everyman: 0.5, caregiver: 0.3, ruler: 0.2     },
+  Gemini:      { jester: 0.5,  explorer: 0.3,  sage: 0.2       },
+  Cancer:      { caregiver: 0.5, innocent: 0.3, lover: 0.2     },
+  Leo:         { ruler: 0.5,   creator: 0.3,   hero: 0.2       },
+  Virgo:       { sage: 0.5,    caregiver: 0.3, creator: 0.2    },
+  Libra:       { lover: 0.4,   everyman: 0.3,  sage: 0.3       },
+  Scorpio:     { magician: 0.5, outlaw: 0.3,   sage: 0.2       },
+  Sagittarius: { explorer: 0.5, sage: 0.3,     jester: 0.2     },
+  Capricorn:   { ruler: 0.5,   sage: 0.3,      everyman: 0.2   },
+  Aquarius:    { outlaw: 0.4,  magician: 0.4,  sage: 0.2       },
+  Pisces:      { magician: 0.4, innocent: 0.3, caregiver: 0.3  },
+};
+
+/** Venus sign → values/relationship archetype tendency */
+const VENUS_MAP: Record<string, ScoreMap> = {
+  Aries:       { hero: 0.5,     outlaw: 0.3,   explorer: 0.2   },
+  Taurus:      { lover: 0.5,   caregiver: 0.3, creator: 0.2    },
+  Gemini:      { jester: 0.4,  explorer: 0.4,  lover: 0.2      },
+  Cancer:      { caregiver: 0.6, innocent: 0.2, lover: 0.2     },
+  Leo:         { ruler: 0.4,   creator: 0.4,   lover: 0.2      },
+  Virgo:       { caregiver: 0.5, sage: 0.3,    everyman: 0.2   },
+  Libra:       { lover: 0.6,   everyman: 0.2,  caregiver: 0.2  },
+  Scorpio:     { magician: 0.4, lover: 0.4,    outlaw: 0.2     },
+  Sagittarius: { explorer: 0.5, jester: 0.3,  lover: 0.2       },
+  Capricorn:   { ruler: 0.5,   caregiver: 0.3, everyman: 0.2   },
+  Aquarius:    { outlaw: 0.4,  explorer: 0.4,  jester: 0.2     },
+  Pisces:      { innocent: 0.4, lover: 0.4,   caregiver: 0.2   },
+};
+
+/** Mars sign → drive/action archetype tendency */
+const MARS_MAP: Record<string, ScoreMap> = {
+  Aries:       { hero: 0.6,     outlaw: 0.3,   explorer: 0.1   },
+  Taurus:      { ruler: 0.4,   caregiver: 0.3, creator: 0.3    },
+  Gemini:      { explorer: 0.4, jester: 0.3,  outlaw: 0.3      },
+  Cancer:      { caregiver: 0.5, innocent: 0.3, hero: 0.2      },
+  Leo:         { hero: 0.4,    ruler: 0.4,     creator: 0.2    },
+  Virgo:       { sage: 0.5,    caregiver: 0.3, creator: 0.2    },
+  Libra:       { lover: 0.4,   everyman: 0.3,  ruler: 0.3      },
+  Scorpio:     { magician: 0.5, outlaw: 0.3,   hero: 0.2       },
+  Sagittarius: { explorer: 0.6, hero: 0.2,    jester: 0.2      },
+  Capricorn:   { ruler: 0.6,   hero: 0.2,      sage: 0.2       },
+  Aquarius:    { outlaw: 0.5,  magician: 0.3,  explorer: 0.2   },
+  Pisces:      { magician: 0.4, innocent: 0.3, caregiver: 0.3  },
+};
+
+// ─────────────────────────────────────────────────────────────────
+// Confidence Multiplier — SELFPRINT-specific weighting
+//
+// Data completeness → confidence → effective weight.
+// Sciences that need birthTime for precision get 0.70 base confidence
+// and reach 1.0 only when birthTime is provided.
+// Fixed sciences (numerology, Chinese zodiac, I Ching) stay at 1.0.
+// Loose correlations (blood type) are capped at 0.70.
+// ─────────────────────────────────────────────────────────────────
+
+function scienceConfidence(
+  key: string,
+  hasBirthTime: boolean,
+  hasBirthDate: boolean,
+): number {
+  if (!hasBirthDate) return 0;
+  switch (key) {
+    // Always exact (only DOB needed, deterministic formula)
+    case 'numerology':    return 1.00;
+    case 'westernZodiac': return 1.00;
+    case 'chineseZodiac': return 1.00;
+    case 'baziElement':   return 1.00;
+    case 'hexagram':      return 0.80; // abstract / metaphorical
+    // Time-sensitive — moon moves ~13°/day, sign boundary matters
+    case 'moonSign':      return hasBirthTime ? 1.00 : 0.72;
+    case 'nakshatra':     return hasBirthTime ? 1.00 : 0.72;
+    // Moderate time-sensitivity
+    case 'natalElement':  return hasBirthTime ? 0.95 : 0.80;
+    case 'mercury':       return hasBirthTime ? 0.90 : 0.78;
+    // Venus/Mars move slowly, sign stable for days-weeks
+    case 'venus':         return 0.90;
+    case 'mars':          return 0.92;
+    // Sun moves ~1°/day — Human Design sign rarely crosses boundary
+    case 'humanDesign':   return 0.95;
+    // Thai planet: only Wed-night Rahu ambiguous without time
+    case 'thaiPlanet':    return hasBirthTime ? 1.00 : 0.85;
+    // Optional sciences with known data limitations
+    case 'kua':           return 0.88; // gender-derived, culturally contextual
+    case 'bloodType':     return 0.68; // loose personality correlation
+    default:              return 0.80;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
 // Main export
 // ─────────────────────────────────────────────────────────────────
 
@@ -434,92 +536,119 @@ export function calculateArchetypes(input: ArchetypeInput): ArchetypeResult {
   const scores       = emptyScores();
   const sciencesUsed: string[] = [];
 
-  // Science weights
-  const W: Record<string, number> = {
-    numerology:   0.20,
-    westernZodiac:0.12,
-    moonSign:     0.10,
-    natalElement: 0.08,
-    chineseZodiac:0.07,
-    baziElement:  0.07,
-    nakshatra:    0.08,
-    humanDesign:  0.08,
-    kua:          0.05,
-    thaiPlanet:   0.05,
-    hexagram:     0.04,
-    bloodType:    0.06,
+  const hasBirthDate = !!input.birthDate;
+  const hasBirthTime = !!input.birthTime;
+
+  // ── Base weights (SELFPRINT philosophy) ──────────────────────────
+  // Numerology: highest — deterministic, time-tested, core to SELFPRINT
+  // Western Natal (Sun): strong — familiar, sign-level reliable
+  // Moon Sign / Nakshatra: high — emotional/unconscious self
+  // Human Design: high — decision-making oriented (SELFPRINT core)
+  // Mercury/Venus/Mars: medium — personal planet depth layer
+  // Chinese / BaZi: medium — cultural pattern layer
+  // Kua / Thai Planet / Hexagram: lower — supplementary
+  // Blood Type: low — loosest correlation
+  // ─────────────────────────────────────────────────────────────────
+  const BASE_W: Record<string, number> = {
+    numerology:   0.18,
+    westernZodiac:0.10,
+    moonSign:     0.09,
+    natalElement: 0.07,
+    chineseZodiac:0.06,
+    baziElement:  0.06,
+    nakshatra:    0.07,
+    humanDesign:  0.09, // boosted: decision-making is SELFPRINT's core
+    mercury:      0.07, // new: cognitive style
+    venus:        0.06, // new: values/relationship
+    mars:         0.06, // new: action/drive
+    kua:          0.04,
+    thaiPlanet:   0.04,
+    hexagram:     0.03,
+    bloodType:    0.04,
   };
 
-  // Compute missing degrees from birth date
-  const moonFull: number =
-    input.moonFullDegree ??
-    (input.birthDate ? calcMoonFullDegree(input.birthDate, input.birthTime) : 0);
-  const sunFull: number =
-    input.sunFullDegree ??
-    (input.birthDate ? calcSunFullDegree(input.birthDate, input.birthTime) : 0);
+  // ── Apply confidence multipliers → effective weights ─────────────
+  const effectiveW: Record<string, number> = {};
+  for (const [key, bw] of Object.entries(BASE_W)) {
+    effectiveW[key] = bw * scienceConfidence(key, hasBirthTime, hasBirthDate);
+  }
 
-  // Determine which sciences are available → normalise weight total
-  const avail = {
+  // ── Data availability gates ───────────────────────────────────────
+  const avail: Record<string, boolean> = {
     numerology:   typeof input.lifePathNumber === 'number',
     westernZodiac:!!input.westernZodiac,
     moonSign:     !!input.moonSign,
     natalElement: !!input.natalDominantElement,
     chineseZodiac:!!input.chineseZodiac,
     baziElement:  !!input.baziYearElement,
-    nakshatra:    !!input.birthDate,
-    humanDesign:  !!input.birthDate,
-    kua:          !!input.gender && !!input.birthDate,
-    thaiPlanet:   !!input.birthDate,
+    nakshatra:    hasBirthDate,
+    humanDesign:  hasBirthDate,
+    mercury:      !!input.mercurySign,
+    venus:        !!input.venusSign,
+    mars:         !!input.marsSign,
+    kua:          !!input.gender && hasBirthDate,
+    thaiPlanet:   hasBirthDate,
     hexagram:     typeof input.hexagramNumber === 'number',
-    bloodType:    !!input.bloodType && !!BLOOD_TYPE_MAP[input.bloodType.toUpperCase()],
+    bloodType:    !!input.bloodType && !!BLOOD_TYPE_MAP[(input.bloodType ?? '').toUpperCase()],
   };
 
-  const totalW = Object.entries(W).reduce(
-    (sum, [k, w]) => sum + (avail[k as keyof typeof avail] ? w : 0),
+  // Normalize: sum of effective weights for available sciences only
+  const totalW = Object.entries(effectiveW).reduce(
+    (sum, [k, w]) => sum + (avail[k] ? w : 0),
     0,
   ) || 1;
+
+  // ── Compute missing degrees ───────────────────────────────────────
+  const moonFull: number =
+    input.moonFullDegree ??
+    (hasBirthDate ? calcMoonFullDegree(input.birthDate, input.birthTime) : 0);
+  const sunFull: number =
+    input.sunFullDegree ??
+    (hasBirthDate ? calcSunFullDegree(input.birthDate, input.birthTime) : 0);
+
+  // ── Science scoring ───────────────────────────────────────────────
 
   // 1. Numerology
   if (avail.numerology && input.lifePathNumber) {
     const m = NUMEROLOGY_MAP[input.lifePathNumber];
-    if (m) { addWeighted(scores, m, W.numerology / totalW); sciencesUsed.push('Numerology'); }
+    if (m) { addWeighted(scores, m, effectiveW.numerology / totalW); sciencesUsed.push('Numerology'); }
   }
 
   // 2. Western Zodiac (Sun Sign)
   if (avail.westernZodiac && input.westernZodiac) {
     const m = ZODIAC_MAP[input.westernZodiac];
-    if (m) { addWeighted(scores, m, W.westernZodiac / totalW); sciencesUsed.push('Western Astrology'); }
+    if (m) { addWeighted(scores, m, effectiveW.westernZodiac / totalW); sciencesUsed.push('Western Astrology'); }
   }
 
   // 3. Moon Sign
   if (avail.moonSign && input.moonSign) {
     const m = ZODIAC_MAP[input.moonSign];
-    if (m) { addWeighted(scores, m, W.moonSign / totalW); sciencesUsed.push('Moon Sign'); }
+    if (m) { addWeighted(scores, m, effectiveW.moonSign / totalW); sciencesUsed.push('Moon Sign'); }
   }
 
   // 4. Natal Dominant Element
   if (avail.natalElement && input.natalDominantElement) {
     const m = NATAL_ELEMENT_MAP[input.natalDominantElement];
-    if (m) { addWeighted(scores, m, W.natalElement / totalW); sciencesUsed.push('Natal Chart Element'); }
+    if (m) { addWeighted(scores, m, effectiveW.natalElement / totalW); sciencesUsed.push('Natal Chart Element'); }
   }
 
   // 5. Chinese Zodiac
   if (avail.chineseZodiac && input.chineseZodiac) {
     const m = CHINESE_ZODIAC_MAP[input.chineseZodiac];
-    if (m) { addWeighted(scores, m, W.chineseZodiac / totalW); sciencesUsed.push('Chinese Zodiac'); }
+    if (m) { addWeighted(scores, m, effectiveW.chineseZodiac / totalW); sciencesUsed.push('Chinese Zodiac'); }
   }
 
   // 6. BaZi Year Element
   if (avail.baziElement && input.baziYearElement) {
     const m = BAZI_ELEMENT_MAP[input.baziYearElement];
-    if (m) { addWeighted(scores, m, W.baziElement / totalW); sciencesUsed.push('BaZi Element'); }
+    if (m) { addWeighted(scores, m, effectiveW.baziElement / totalW); sciencesUsed.push('BaZi Element'); }
   }
 
   // 7. Vedic Nakshatra (from Moon longitude)
   if (avail.nakshatra) {
     const nIdx = getNakshatraIndex(moonFull);
     const m    = getNakshatraArchetypeMap(nIdx);
-    addWeighted(scores, m, W.nakshatra / totalW);
+    addWeighted(scores, m, effectiveW.nakshatra / totalW);
     sciencesUsed.push('Vedic Nakshatra');
   }
 
@@ -527,38 +656,56 @@ export function calculateArchetypes(input: ArchetypeInput): ArchetypeResult {
   if (avail.humanDesign) {
     const hdType = calcHDType(sunFull);
     const m = HD_TYPE_MAP[hdType];
-    if (m) { addWeighted(scores, m, W.humanDesign / totalW); sciencesUsed.push('Human Design'); }
+    if (m) { addWeighted(scores, m, effectiveW.humanDesign / totalW); sciencesUsed.push('Human Design'); }
   }
 
-  // 9. Kua Number
+  // 9. Mercury Sign — cognitive / communication style
+  if (avail.mercury && input.mercurySign) {
+    const m = MERCURY_MAP[input.mercurySign];
+    if (m) { addWeighted(scores, m, effectiveW.mercury / totalW); sciencesUsed.push('Mercury Sign'); }
+  }
+
+  // 10. Venus Sign — values / relationship style
+  if (avail.venus && input.venusSign) {
+    const m = VENUS_MAP[input.venusSign];
+    if (m) { addWeighted(scores, m, effectiveW.venus / totalW); sciencesUsed.push('Venus Sign'); }
+  }
+
+  // 11. Mars Sign — drive / action style
+  if (avail.mars && input.marsSign) {
+    const m = MARS_MAP[input.marsSign];
+    if (m) { addWeighted(scores, m, effectiveW.mars / totalW); sciencesUsed.push('Mars Sign'); }
+  }
+
+  // 12. Kua Number (Feng Shui)
   if (avail.kua && input.gender && input.birthDate) {
     const kua = calcKuaNumber(input.birthDate, input.gender);
     if (kua !== null) {
       const m = KUA_MAP[kua];
-      if (m) { addWeighted(scores, m, W.kua / totalW); sciencesUsed.push('Kua Number (Feng Shui)'); }
+      if (m) { addWeighted(scores, m, effectiveW.kua / totalW); sciencesUsed.push('Kua Number (Feng Shui)'); }
     }
   }
 
-  // 10. Thai Planet นพเคราะห์
+  // 13. Thai Planet นพเคราะห์
   if (avail.thaiPlanet && input.birthDate) {
     const pIdx = calcThaiPlanetIndex(input.birthDate, input.birthTime);
     if (pIdx !== null) {
       const m = THAI_PLANET_MAP[pIdx];
-      if (m) { addWeighted(scores, m, W.thaiPlanet / totalW); sciencesUsed.push('Thai Astrology (นพเคราะห์)'); }
+      if (m) { addWeighted(scores, m, effectiveW.thaiPlanet / totalW); sciencesUsed.push('Thai Astrology (นพเคราะห์)'); }
     }
   }
 
-  // 11. I Ching Hexagram
+  // 14. I Ching Hexagram
   if (avail.hexagram && input.hexagramNumber) {
     const zoneIdx = ((input.hexagramNumber - 1) % HEX_ZONE_MAPS.length);
     const m = HEX_ZONE_MAPS[zoneIdx];
-    if (m) { addWeighted(scores, m, W.hexagram / totalW); sciencesUsed.push('I Ching'); }
+    if (m) { addWeighted(scores, m, effectiveW.hexagram / totalW); sciencesUsed.push('I Ching'); }
   }
 
-  // 12. Blood Type
+  // 15. Blood Type
   if (avail.bloodType && input.bloodType) {
     const m = BLOOD_TYPE_MAP[input.bloodType.toUpperCase()];
-    if (m) { addWeighted(scores, m, W.bloodType / totalW); sciencesUsed.push('Blood Type'); }
+    if (m) { addWeighted(scores, m, effectiveW.bloodType / totalW); sciencesUsed.push('Blood Type'); }
   }
 
   // ── Determine result ──────────────────────────────────────────

@@ -22,15 +22,27 @@ export interface InitialDisciplines {
   chineseZodiac: string;
   baziYearElement: string;
   prototypeCore: string;
-  /** Natal chart dominant element (Fire/Earth/Air/Water) from NatalChartEngine */
+  /** Natal chart dominant element (Fire/Earth/Air/Water) */
   natalDominantElement?: string;
-  /** Moon sign from NatalChartEngine (approximate) */
+  /** Moon sign (approximate, sign-level) */
   moonSign?: string;
-  /** Full Moon longitude (0-360°) — used by ArchetypeScoreEngine for Nakshatra */
+  /** Full Moon longitude 0-360° — Nakshatra + ArchetypeScoreEngine */
   moonFullDegree?: number;
-  /** Full Sun longitude (0-360°) — used by ArchetypeScoreEngine for Human Design */
+  /** Full Sun longitude 0-360° — Human Design + ArchetypeScoreEngine */
   sunFullDegree?: number;
-  /** I Ching hexagram number (1-64) from HexagramEngine */
+  // ── Western Natal Chart — full planet signs ─────────────────────────
+  /** Mercury sign — cognitive/communication style */
+  mercurySign?: string;
+  /** Venus sign — values/relationship style */
+  venusSign?: string;
+  /** Mars sign — drive/action style */
+  marsSign?: string;
+  /** Jupiter sign — growth/opportunity style */
+  jupiterSign?: string;
+  /** Saturn sign — structure/discipline style */
+  saturnSign?: string;
+  // ────────────────────────────────────────────────────────────────────
+  /** I Ching hexagram number (1-64) */
   hexagramNumber?: number;
   /** I Ching hexagram Thai name */
   hexagramThai?: string;
@@ -336,6 +348,13 @@ export function calculateInitialDisciplines(dob: string | null | undefined): Ini
     prototypeCore: getPrototypeCore(lifePathNumber),
     natalDominantElement: natal.element,
     moonSign: natal.moonSign,
+    moonFullDegree: natal.moonFullDegree,
+    sunFullDegree: natal.sunFullDegree,
+    mercurySign: natal.mercurySign,
+    venusSign: natal.venusSign,
+    marsSign: natal.marsSign,
+    jupiterSign: natal.jupiterSign,
+    saturnSign: natal.saturnSign,
     hexagramNumber: hex.number,
     hexagramThai: hex.thai,
     hexagramTheme: hex.theme,
@@ -371,25 +390,62 @@ const ELEMENT_OF: Record<string, string> = {
   Cancer:'Water', Scorpio:'Water', Pisces:'Water',
 };
 
-function calculateNatalChartInline(dob: string): { element: string; moonSign: string } {
+interface NatalChartResult {
+  element: string;
+  moonSign: string;
+  sunFullDegree: number;
+  moonFullDegree: number;
+  mercurySign: string;
+  venusSign: string;
+  marsSign: string;
+  jupiterSign: string;
+  saturnSign: string;
+}
+
+function normLon(lon: number): number {
+  return ((lon % 360) + 360) % 360;
+}
+
+function calculateNatalChartInline(dob: string): NatalChartResult {
   const d = daysSinceJ2000Astro(dob);
-  // Sun
-  const sunLon = 280.46 + 0.985647 * d;
-  const sunSign = lonToSign(sunLon);
-  // Moon
-  const moonLon = 218.32 + 13.176396 * d;
-  const moonSign = lonToSign(moonLon);
-  // Venus
-  const venusLon = 181.0 + 1.602130 * d;
-  const venusSign = lonToSign(venusLon);
-  // Tally elements to find dominant
+
+  // ── Planet mean longitudes (days since J2000, ~sign-level accuracy ±5°) ──
+  // Source: simplified VSOP / low-precision almanac formulae (noon UT)
+  const sunLon     = normLon(280.46    + 0.985647  * d);  // Sun
+  const moonLon    = normLon(218.32    + 13.176396 * d);  // Moon
+  const mercuryLon = normLon(252.25    + 4.092336  * d);  // Mercury
+  const venusLon   = normLon(181.97    + 1.602130  * d);  // Venus
+  const marsLon    = normLon(355.43    + 0.524040  * d);  // Mars
+  const jupiterLon = normLon(34.35     + 0.083056  * d);  // Jupiter
+  const saturnLon  = normLon(50.08     + 0.033460  * d);  // Saturn
+
+  const sunSign     = lonToSign(sunLon);
+  const moonSign    = lonToSign(moonLon);
+  const mercurySign = lonToSign(mercuryLon);
+  const venusSign   = lonToSign(venusLon);
+  const marsSign    = lonToSign(marsLon);
+  const jupiterSign = lonToSign(jupiterLon);
+  const saturnSign  = lonToSign(saturnLon);
+
+  // Dominant element: tally Sun + Moon + Mercury + Venus + Mars (5 personal planets)
   const count: Record<string, number> = { Fire: 0, Earth: 0, Air: 0, Water: 0 };
-  for (const s of [sunSign, moonSign, venusSign]) {
+  for (const s of [sunSign, moonSign, mercurySign, venusSign, marsSign]) {
     const el = ELEMENT_OF[s];
     if (el) count[el]++;
   }
   const element = Object.keys(count).reduce((a, b) => count[a] >= count[b] ? a : b);
-  return { element, moonSign };
+
+  return {
+    element,
+    moonSign,
+    sunFullDegree: sunLon,
+    moonFullDegree: moonLon,
+    mercurySign,
+    venusSign,
+    marsSign,
+    jupiterSign,
+    saturnSign,
+  };
 }
 
 function calculateHexagramInline(dob: string): { number: number; thai: string; theme: string } {
