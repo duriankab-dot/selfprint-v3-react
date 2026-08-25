@@ -9,6 +9,7 @@ import { createTwinInDatabase } from './TwinSupabaseService';
 import type { Twin } from './TwinSupabaseService';
 import { ensureUserProfile } from './database-init';
 import { calculateInitialDisciplines } from '../lib/astrology';
+import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
 import { calculateMaturityScore, calculateSICEEngineScore, calculateAnalysisDepth } from './DynamicValueCalculator';
 import { generateVisualDNA, saveVisualDNA } from './VisualDNAService';
 import type { SICEInput } from '../types/sice';
@@ -45,47 +46,6 @@ const REAL_SICE_ENGINE_NAMES = [
   'MemoryManagerEngine',
   'DecisionIntelligenceEngineAdapter',
 ] as const;
-
-/**
- * P0-C Gap #1: Deterministic, grounded secondary-archetype inference.
- * Matches keywords already present in the user's own SICE essence text
- * (recommendedAction + insights) — never fabricates new content, only
- * picks among the 18 valid archetypes based on what the engines actually
- * said. Falls back to a neutral, valid archetype (never the primary) if
- * nothing matches.
- */
-const ARCHETYPE_KEYWORDS: Record<string, string[]> = {
-  explorer: ['explore', 'discover', 'curious', 'adventure'],
-  sage: ['wisdom', 'wise', 'understand', 'insight', 'knowledge'],
-  caregiver: ['help', 'care', 'support', 'nurture'],
-  ruler: ['lead', 'control', 'structure', 'organize'],
-  creator: ['create', 'build', 'design', 'craft'],
-  hero: ['brave', 'overcome', 'challenge', 'achieve'],
-  outlaw: ['different', 'unconventional', 'rebel', 'break'],
-  everyman: ['connect', 'belong', 'relate', 'community'],
-  lover: ['relationship', 'connection', 'passion', 'intimacy'],
-  jester: ['fun', 'playful', 'humor', 'joy'],
-  magician: ['transform', 'change', 'vision', 'possibility'],
-  innocent: ['simple', 'pure', 'trust', 'optimis'],
-};
-
-function inferSecondaryArchetype(essenceText: string, primary: string): Archetype {
-  const lower = essenceText.toLowerCase();
-  let best = { archetype: '', hits: 0 };
-
-  for (const [archetype, keywords] of Object.entries(ARCHETYPE_KEYWORDS)) {
-    if (archetype === primary) continue; // secondary must differ from primary
-    const hits = keywords.filter((k) => lower.includes(k)).length;
-    if (hits > best.hits) best = { archetype, hits };
-  }
-
-  if (best.hits > 0) return best.archetype as Archetype;
-
-  // P0 FIX: Fallback to random secondary ≠ primary (not hardcoded)
-  const candidates = Object.keys(ARCHETYPE_KEYWORDS).filter((a) => a !== primary);
-  const randomIdx = Math.floor(Math.random() * candidates.length);
-  return candidates[randomIdx] as Archetype;
-}
 
 /**
  * Check if user is ready for Core Awakening
@@ -280,17 +240,25 @@ export async function initializeTwin(
       insights?: string[];
     } | null;
 
-    // primaryArchetype: deterministic from the user's real birth date
-    // (numerology life-path → Jungian archetype, already computed elsewhere
-    // in the app for Analysis — see src/lib/astrology.ts). Not fabricated.
+    // primaryArchetype + secondaryArchetype: computed from all 12 sciences
+    // via ArchetypeScoreEngine — weighted fusion of Numerology, Western Zodiac,
+    // Moon Sign, Natal Element, Chinese Zodiac, BaZi, Nakshatra, Human Design,
+    // Thai Planet, I Ching, and optionally Kua + Blood Type.
     const disciplines = calculateInitialDisciplines(birthDate);
-    const primaryArchetype = disciplines.prototypeCore.toLowerCase() as Archetype;
-
-    // secondaryArchetype: grounded in the essence's own text (SICE synthesis)
-    const essenceText = [personalIntel?.recommendedAction, ...(personalIntel?.insights ?? [])]
-      .filter((v): v is string => Boolean(v))
-      .join(' ');
-    const secondaryArchetype = inferSecondaryArchetype(essenceText, primaryArchetype);
+    const archetypeResult = calculateArchetypes({
+      birthDate: birthDate || new Date().toISOString().split('T')[0],
+      lifePathNumber: disciplines.lifePathNumber,
+      westernZodiac: disciplines.westernZodiac,
+      moonSign: disciplines.moonSign,
+      natalDominantElement: disciplines.natalDominantElement,
+      chineseZodiac: disciplines.chineseZodiac,
+      baziYearElement: disciplines.baziYearElement,
+      hexagramNumber: disciplines.hexagramNumber,
+      moonFullDegree: disciplines.moonFullDegree,
+      sunFullDegree: disciplines.sunFullDegree,
+    });
+    const primaryArchetype   = archetypeResult.primary   as Archetype;
+    const secondaryArchetype = archetypeResult.secondary as Archetype;
 
     // maturityScore: Phase A.1 - Dynamic calculation instead of hardcoded 30
     // Calculate from: userUnderstanding, analysis depth, insight count, coherence

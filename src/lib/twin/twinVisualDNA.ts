@@ -66,12 +66,12 @@ export const TWIN_VISUAL_DNA: Record<Archetype, TwinVisualDNA> = {
   caregiver:  { archetype: 'caregiver',  coreColor: '#10B981', auraColor: '#6EE7B7', coreShape: 'bloom',   auraStyle: 'โอบอุ้ม อบอุ่น',     motionSpeed: 0.8  },
   creator:    { archetype: 'creator',    coreColor: '#F97316', auraColor: '#FDBA74', coreShape: 'wave',    auraStyle: 'ลื่นไหล สร้างสรรค์',  motionSpeed: 1.1  },
   ruler:      { archetype: 'ruler',      coreColor: '#EAB308', auraColor: '#FDE047', coreShape: 'ring',    auraStyle: 'สมดุล ทรงพลัง',      motionSpeed: 0.9  },
-  alchemist:  { archetype: 'alchemist',  coreColor: '#8B5CF6', auraColor: '#C4B5FD', coreShape: 'crystal', auraStyle: 'แปรเปลี่ยน คมชัด',   motionSpeed: 1.0  },
-  dreamer:    { archetype: 'dreamer',    coreColor: '#C084FC', auraColor: '#E9D5FF', coreShape: 'bloom',   auraStyle: 'ฝัน อ่อนโยน',       motionSpeed: 0.75 },
-  maverick:   { archetype: 'maverick',   coreColor: '#FB7185', auraColor: '#FDA4AF', coreShape: 'diamond', auraStyle: 'อิสระ คมชัด',        motionSpeed: 1.3  },
-  strategist: { archetype: 'strategist', coreColor: '#3B82F6', auraColor: '#93C5FD', coreShape: 'crystal', auraStyle: 'เป็นระบบ มั่นคง',    motionSpeed: 0.85 },
-  diplomat:   { archetype: 'diplomat',   coreColor: '#2DD4BF', auraColor: '#99F6E4', coreShape: 'ring',    auraStyle: 'สมดุล ประสาน',       motionSpeed: 0.9  },
-  artisan:    { archetype: 'artisan',    coreColor: '#D97706', auraColor: '#FBBF24', coreShape: 'wave',    auraStyle: 'ลื่นไหล ประณีต',     motionSpeed: 0.95 },
+  strategic_warrior:  { archetype: 'strategic_warrior',  coreColor: '#D32F2F', auraColor: '#EF9A9A', coreShape: 'diamond', auraStyle: 'เด็ดเดี่ยว ทรงภูมิ',   motionSpeed: 1.1  },
+  benevolent_leader:  { archetype: 'benevolent_leader',  coreColor: '#F57C00', auraColor: '#FFCC80', coreShape: 'ring',    auraStyle: 'อบอุ่น ทรงพลัง',      motionSpeed: 0.9  },
+  visionary_artist:   { archetype: 'visionary_artist',   coreColor: '#7B1FA2', auraColor: '#CE93D8', coreShape: 'crystal', auraStyle: 'เนรมิต ลึกลับ',       motionSpeed: 1.0  },
+  wandering_rebel:    { archetype: 'wandering_rebel',    coreColor: '#00695C', auraColor: '#80CBC4', coreShape: 'wave',    auraStyle: 'อิสระ แหกกฎ',        motionSpeed: 1.2  },
+  warm_flirt:         { archetype: 'warm_flirt',         coreColor: '#E91E63', auraColor: '#F48FB1', coreShape: 'bloom',   auraStyle: 'เล่นสนุก อบอุ่น',    motionSpeed: 1.15 },
+  relatable_neighbor: { archetype: 'relatable_neighbor', coreColor: '#5C85D6', auraColor: '#B3C7EE', coreShape: 'sphere',  auraStyle: 'ใสซื่อ เป็นมิตร',    motionSpeed: 0.85 },
 };
 
 /** Universal fallback — used when a Twin has no primaryArchetype yet

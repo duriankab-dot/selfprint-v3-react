@@ -37,13 +37,13 @@ export const ARCHETYPES = [
   'caregiver',
   'creator',
   'ruler',
-  // Hybrid 6
-  'alchemist',
-  'dreamer',
-  'maverick',
-  'strategist',
-  'diplomat',
-  'artisan',
+  // Hybrid 6 (pair-detected: base1 + base2 → hybrid)
+  'strategic_warrior',   // hero + sage
+  'benevolent_leader',   // caregiver + ruler
+  'visionary_artist',    // creator + magician
+  'wandering_rebel',     // explorer + outlaw
+  'warm_flirt',          // lover + jester
+  'relatable_neighbor',  // everyman + innocent
 ] as const;
 
 export type Archetype = typeof ARCHETYPES[number];
