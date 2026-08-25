@@ -30,21 +30,36 @@ export interface AudioLoaderState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-// Multiple CDN fallbacks for robustness
+// Primary CDN for soundscape audio
 const PRIMARY_CDN_URL = import.meta.env.VITE_SOUNDSCAPE_CDN_URL || 'https://res.cloudinary.com/selfprint/video/upload/soundscapes';
-const FALLBACK_CDN_URL = 'https://cdn.example.com/soundscapes'; // Fallback CDN (can be configured)
 const CACHE_DB_NAME = 'selfprint-audio-cache';
 const CACHE_STORE_NAME = 'soundscapes';
 const CACHE_TTL_DAYS = 30;
 
-// Soundscape registry — map IDs to available sources
-const SOUNDSCAPE_SOURCES: Record<string, { primary: string; fallback?: string }> = {
+// Soundscape registry — map world IDs to available sources
+// Each of the 12 Intelligence Worlds has a unique soundscape
+const SOUNDSCAPE_SOURCES: Record<string, { primary: string }> = {
+  // Generic ambient soundscapes (fallback)
   'morning-forest': { primary: 'morning-forest.mp3' },
   'afternoon-calm': { primary: 'afternoon-calm.mp3' },
   'evening-breeze': { primary: 'evening-breeze.mp3' },
   'night-ambient': { primary: 'night-ambient.mp3' },
   'rain-sounds': { primary: 'rain-sounds.mp3' },
   'ocean-waves': { primary: 'ocean-waves.mp3' },
+
+  // 12 Intelligence Worlds soundscapes
+  'self': { primary: 'self-world.mp3' },
+  'mind': { primary: 'mind-world.mp3' },
+  'relationship': { primary: 'relationship-world.mp3' },
+  'love': { primary: 'love-world.mp3' },
+  'career': { primary: 'career-world.mp3' },
+  'wealth': { primary: 'wealth-world.mp3' },
+  'life': { primary: 'life-world.mp3' },
+  'growth': { primary: 'growth-world.mp3' },
+  'decision': { primary: 'decision-world.mp3' },
+  'purpose': { primary: 'purpose-world.mp3' },
+  'wellbeing': { primary: 'wellbeing-world.mp3' },
+  'future': { primary: 'future-world.mp3' },
 };
 
 // ─── IndexedDB Initialization ──────────────────────────────────────────────────
@@ -182,23 +197,14 @@ async function fetchAudioBuffer(
   const primaryUrl = `${PRIMARY_CDN_URL}/${filename}`;
   console.log(`[useSoundscapeAudioLoader] Fetching from primary CDN: ${primaryUrl}`);
 
-  let buffer = await tryFetchFromUrl(primaryUrl, audioContext, onProgress);
+  const buffer = await tryFetchFromUrl(primaryUrl, audioContext, onProgress);
   if (buffer) {
     await saveCachedAudio(soundscapeId, buffer);
     return buffer;
   }
 
-  // Try fallback CDN if primary fails
-  const fallbackUrl = `${FALLBACK_CDN_URL}/${filename}`;
-  console.warn(`[useSoundscapeAudioLoader] Primary CDN failed, trying fallback: ${fallbackUrl}`);
-  buffer = await tryFetchFromUrl(fallbackUrl, audioContext, onProgress);
-  if (buffer) {
-    await saveCachedAudio(soundscapeId, buffer);
-    return buffer;
-  }
-
-  // All CDN attempts failed — use fallback silence
-  console.error(`[useSoundscapeAudioLoader] All CDN attempts failed for ${soundscapeId}`);
+  // Primary CDN failed — throw to trigger fallback silence
+  console.error(`[useSoundscapeAudioLoader] CDN failed for ${soundscapeId}`);
   throw new Error(`Could not load soundscape: ${soundscapeId}`);
 }
 
