@@ -1,0 +1,23 @@
+-- MIGRATION 003: RESCHEDULED
+--
+-- Original content moved to: 20260825_002_phase_a_core_schema.sql
+--
+-- Reason: Dependencies on twins(id) table required reordering
+-- Migration 003 originally tried to create dependent tables before twins existed
+--
+-- This file now serves as historical marker only
+-- The actual migration runs as 20260825_002 (after twins table is created)
+--
+-- Timeline:
+-- - 001-009: Old migrations (including this placeholder)
+-- - 20260824_001: Creates twins table ← REQUIRED FIRST
+-- - 20260824_002: Creates awakening_essence table
+-- - 20260824_003: Twin complete function
+-- - 20260825_001: Consolidate Phase A schema (fixes twin_memory → twin_memories)
+-- - 20260825_002: Phase A core schema (replaces this 003)
+--
+-- No-op migration: This file contains no SQL statements
+-- All functionality preserved in 20260825_002
+
+-- End of migration marker
+SELECT 'Migration 003 rescheduled - see 20260825_002' as migration_status;
