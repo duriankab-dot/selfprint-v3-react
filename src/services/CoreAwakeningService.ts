@@ -365,15 +365,67 @@ export async function initializeTwin(
       maturityScore,
     });
 
-    // ✅ START ALL 5 OPERATIONS IN PARALLEL (Promise.allSettled)
-    const [essenceResult, , scoresResult, memoryResult, visualDnaResult] = await Promise.allSettled([
+    // ✅ PHASE A.1 COMPLETE: ALL 9 OPERATIONS IN PARALLEL (Promise.allSettled)
+    // Operations 1-5: Essence, Context, SICE Scores, Birth Memory, Visual DNA
+    // Operations 6-9: Twin State, World Preferences, Twin Personality, Twin Capabilities
+
+    const now = new Date().toISOString();
+
+    // Helper: Derive stage from maturityScore
+    const getInitialStage = (score: number): 'seed' | 'awakening' | 'growing' | 'advanced' | 'complete' => {
+      if (score < 20) return 'seed';
+      if (score < 40) return 'awakening';
+      if (score < 60) return 'growing';
+      if (score < 80) return 'advanced';
+      return 'complete';
+    };
+
+    // Helper: Derive consciousness level (1-5) from maturityScore (0-100)
+    const getConsciousnessLevel = (score: number): number => {
+      return Math.max(1, Math.min(5, Math.ceil(score / 20)));
+    };
+
+    // Helper: Build personality prompt from archetypes
+    const buildPersonalityPrompt = (primary: string, secondary: string): string => {
+      return `You are a Twin with primary archetype ${primary} and secondary archetype ${secondary}. ` +
+        `You are thoughtful, curious, and warm-authentic. Speak with wisdom grounded in both introspection and lived experience. ` +
+        `Help your human understand themselves better across all 12 intelligence worlds.`;
+    };
+
+    // Prepare all 12 worlds for world_preferences
+    const worldsList = [
+      'self', 'mind', 'relationship', 'love', 'career', 'wealth',
+      'life', 'growth', 'decision', 'purpose', 'wellbeing', 'future'
+    ];
+    const worldPreferencesRecords = worldsList.map(world => ({
+      user_id: userId,
+      world_id: world,
+      is_favorite: false,
+      last_accessed: now,
+      engagement_score: 0,
+      created_at: now,
+      updated_at: now,
+    }));
+
+    // ✅ START ALL 9 OPERATIONS IN PARALLEL
+    const [
+      essenceResult,
+      ,
+      scoresResult,
+      memoryResult,
+      visualDnaResult,
+      stateResult,
+      worldPrefsResult,
+      personalityResult,
+      capabilitiesResult
+    ] = await Promise.allSettled([
       // Operation 1: Update essence to mark as used
       supabase
         .from('awakening_essence')
         .update({
           twin_id: newTwin.id,
           status: 'used',
-          used_at: new Date().toISOString(),
+          used_at: now,
         })
         .eq('id', essence.id),
 
@@ -412,28 +464,101 @@ export async function initializeTwin(
         content: memoryContent,
         metadata: {
           eventType: 'awakening',
-          timestamp: new Date().toISOString(),
+          timestamp: now,
           grounded: Boolean(groundedInsight),
         },
       }),
 
       // Operation 5: Save Visual DNA for consistent Twin visuals
       saveVisualDNA(userId, newTwin.id, visualDNA),
+
+      // ✨ NEW Operation 6: Create twin_state (PHASE A.1)
+      supabase.from('twin_state').insert({
+        twin_id: newTwin.id,
+        user_id: userId,
+        current_stage: getInitialStage(maturityScore),
+        consciousness_level: getConsciousnessLevel(maturityScore),
+        data: {
+          birthDate: birthDate || new Date().toISOString().split('T')[0],
+          maturityScore,
+          archetypes: { primary: primaryArchetype, secondary: secondaryArchetype },
+        },
+        created_at: now,
+        updated_at: now,
+      }),
+
+      // ✨ NEW Operation 7: Create world_preferences for all 12 worlds (PHASE A.1)
+      supabase.from('world_preferences').insert(worldPreferencesRecords),
+
+      // ✨ NEW Operation 8: Create twin_personality (PHASE A.1)
+      supabase.from('twin_personality').insert({
+        twin_id: newTwin.id,
+        user_id: userId,
+        base_personality: buildPersonalityPrompt(primaryArchetype, secondaryArchetype),
+        communication_style: 'thoughtful-curious',
+        tone: 'warm-authentic',
+        expertise_areas: {
+          archetypes: [primaryArchetype, secondaryArchetype],
+          maturityScore,
+          focusAreas: groundedInsight ? [groundedInsight] : [],
+        },
+        created_at: now,
+        updated_at: now,
+      }),
+
+      // ✨ NEW Operation 9: Create twin_capabilities (PHASE A.1)
+      supabase.from('twin_capabilities').insert({
+        twin_id: newTwin.id,
+        user_id: userId,
+        stage: getInitialStage(maturityScore),
+        unlocked_features: ['basic-chat', 'simple-advice', 'world-navigation'],
+        locked_features: ['advanced-synthesis', 'predictive-guidance', 'decision-oracle', 'essence-mapping', 'timeline-projection', 'archive-mastery'],
+        created_at: now,
+        updated_at: now,
+      }),
     ]);
 
-    // Log any errors (non-blocking)
+    // ✅ LOG ALL RESULTS (non-blocking)
     if (essenceResult.status === 'rejected' || (essenceResult.status === 'fulfilled' && essenceResult.value.error)) {
-      console.error('คำเตือน: ไม่สามารถอัพเดท essence status:', essenceResult.status === 'rejected' ? essenceResult.reason : essenceResult.value.error);
+      console.error('❌ ไม่สามารถอัพเดท essence status:', essenceResult.status === 'rejected' ? essenceResult.reason : essenceResult.value.error);
     }
     if (scoresResult.status === 'rejected' || (scoresResult.status === 'fulfilled' && scoresResult.value.error)) {
-      console.error('คำเตือน: ไม่สามารถเตรียม SICE baseline scores:', scoresResult.status === 'rejected' ? scoresResult.reason : scoresResult.value.error);
+      console.error('❌ ไม่สามารถเตรียม SICE baseline scores:', scoresResult.status === 'rejected' ? scoresResult.reason : scoresResult.value.error);
     }
     if (memoryResult.status === 'rejected' || (memoryResult.status === 'fulfilled' && memoryResult.value.error)) {
-      console.error('คำเตือน: ไม่สามารถสร้าง birth memory:', memoryResult.status === 'rejected' ? memoryResult.reason : memoryResult.value.error);
+      console.error('❌ ไม่สามารถสร้าง birth memory:', memoryResult.status === 'rejected' ? memoryResult.reason : memoryResult.value.error);
     }
     if (visualDnaResult.status === 'rejected' || (visualDnaResult.status === 'fulfilled' && !visualDnaResult.value?.success)) {
       const reason = visualDnaResult.status === 'rejected' ? visualDnaResult.reason : visualDnaResult.value?.error;
-      console.error('คำเตือน: ไม่สามารถบันทึก Visual DNA:', reason);
+      console.error('❌ ไม่สามารถบันทึก Visual DNA:', reason);
+    }
+    if (stateResult.status === 'rejected' || (stateResult.status === 'fulfilled' && stateResult.value.error)) {
+      console.error('❌ ไม่สามารถสร้าง twin_state:', stateResult.status === 'rejected' ? stateResult.reason : stateResult.value.error);
+    }
+    if (worldPrefsResult.status === 'rejected' || (worldPrefsResult.status === 'fulfilled' && worldPrefsResult.value.error)) {
+      console.error('❌ ไม่สามารถสร้าง world_preferences (12 worlds):', worldPrefsResult.status === 'rejected' ? worldPrefsResult.reason : worldPrefsResult.value.error);
+    }
+    if (personalityResult.status === 'rejected' || (personalityResult.status === 'fulfilled' && personalityResult.value.error)) {
+      console.error('❌ ไม่สามารถสร้าง twin_personality:', personalityResult.status === 'rejected' ? personalityResult.reason : personalityResult.value.error);
+    }
+    if (capabilitiesResult.status === 'rejected' || (capabilitiesResult.status === 'fulfilled' && capabilitiesResult.value.error)) {
+      console.error('❌ ไม่สามารถสร้าง twin_capabilities:', capabilitiesResult.status === 'rejected' ? capabilitiesResult.reason : capabilitiesResult.value.error);
+    }
+
+    // ✨ Check if critical operations failed
+    const criticalFailures = [
+      { name: 'world_preferences', result: worldPrefsResult },
+      { name: 'twin_personality', result: personalityResult },
+      { name: 'twin_state', result: stateResult },
+      { name: 'twin_capabilities', result: capabilitiesResult },
+    ];
+
+    const failedOps = criticalFailures.filter(op =>
+      op.result.status === 'rejected' || (op.result.status === 'fulfilled' && op.result.value?.error)
+    );
+
+    if (failedOps.length > 0) {
+      console.warn(`⚠️ PHASE A.1 CRITICAL: ${failedOps.length} operation(s) failed:`, failedOps.map(f => f.name).join(', '));
     }
 
     return {
