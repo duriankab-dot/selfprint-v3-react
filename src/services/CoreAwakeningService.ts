@@ -310,12 +310,21 @@ export async function initializeTwin(
       maturityScore,
     };
 
-    const newTwin = await createTwinInDatabase(userId, twinData);
+    let newTwin: Twin | null = null;
+    try {
+      newTwin = await createTwinInDatabase(userId, twinData);
+    } catch (twinCreateError) {
+      console.error('❌ Twin creation failed:', twinCreateError);
+      return {
+        success: false,
+        message: `Twin record creation failed: ${twinCreateError instanceof Error ? twinCreateError.message : String(twinCreateError)}`,
+      };
+    }
 
     if (!newTwin) {
       return {
         success: false,
-        message: 'ไม่สามารถสร้าง Twin record ใน database',
+        message: 'ไม่สามารถสร้าง Twin record ใน database (returned null)',
       };
     }
 
