@@ -10,7 +10,8 @@ import { useAuth } from '../context/AuthContext';
 import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
-import { useNova } from '../context/NovaContext';
+// P0 FIX: CoreAwakening ทำงานสร้าง Twin ไม่ใช่ Nova - ไม่ต้อง useNova()
+// (useNova เรียกใน NovaChat เท่านั้น ที่ wrap ใน NovaProvider)
 import { useUserStore } from '../store/userStore';
 import { useLanguage } from '../context/LanguageContext';
 import { HologramBirth } from '../components/twin/HologramBirth';
@@ -53,7 +54,7 @@ export default function CoreAwakening() {
   const { session } = useAuth();
   const { setTwinAwakened } = useAIContext();
   const { hydrateTwin } = useTwin();
-  const { completeAnalysis } = useNova();
+  // P0 FIX: Removed useNova() — CoreAwakening creates Twin, not Nova
   const { language } = useLanguage();
   const birthDate = useUserStore((state) => state.profile.birthDate);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
@@ -176,7 +177,8 @@ export default function CoreAwakening() {
       // (The old createTwin() call here always inserted, which double-wrote
       // and violated twins.user_id UNIQUE, failing silently.)
       hydrateTwin(session.user.id, result.twin);
-      completeAnalysis();
+      // P0 FIX: Removed completeAnalysis() — not needed for Twin creation
+      // (This was a Nova context method, not related to Twin birth)
       setTwinAwakened(true, twinName);
       setFirstInsight(result.firstInsight);
 
