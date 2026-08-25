@@ -9,15 +9,15 @@ import { createClient } from '@supabase/supabase-js';
 /**
  * Initialize Supabase client with project URL and anon key
  * Uses environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
- * Falls back to process.env for Vercel serverless environments
+ * Vite provides env via import.meta.env; process.env used in Node.js environments
  */
 const supabaseUrl = (
   (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
-  process.env.VITE_SUPABASE_URL
+  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL)
 );
 const supabaseAnonKey = (
   (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
-  process.env.VITE_SUPABASE_ANON_KEY
+  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY)
 );
 
 if (!supabaseUrl || !supabaseAnonKey) {

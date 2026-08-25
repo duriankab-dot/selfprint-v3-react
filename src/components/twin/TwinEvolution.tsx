@@ -20,7 +20,7 @@
  *   aligned     → "Selfprint Complete"
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/AuthContext';
@@ -95,10 +95,13 @@ export function TwinEvolution({}: TwinEvolutionProps) {
 
   const engineRef = useRef(new TwinStateEngine());
 
-  const currentResult: TwinStateResult = engineRef.current.computeState(
-    personalContext ?? null
-  );
-  const currentState = currentResult.state;
+  // ✅ MEMOIZE currentState to prevent dependency loop
+  const { currentState, currentResult } = useMemo(() => {
+    const result: TwinStateResult = engineRef.current.computeState(
+      personalContext ?? null
+    );
+    return { currentState: result.state, currentResult: result };
+  }, [personalContext]);
 
   // ── Evolution state ───────────────────────────────────────────────────────
   const [visible, setVisible] = useState(false);
