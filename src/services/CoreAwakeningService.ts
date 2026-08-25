@@ -393,6 +393,7 @@ export async function initializeTwin(
     };
 
     // Prepare all 12 worlds for world_preferences
+    // ✅ PHASE A.1: Include archetype columns for persistence
     const worldsList = [
       'self', 'mind', 'relationship', 'love', 'career', 'wealth',
       'life', 'growth', 'decision', 'purpose', 'wellbeing', 'future'
@@ -400,6 +401,8 @@ export async function initializeTwin(
     const worldPreferencesRecords = worldsList.map(world => ({
       user_id: userId,
       world_id: world,
+      primary_archetype: primaryArchetype,  // ✅ NEW: Persist primary archetype
+      secondary_archetype: secondaryArchetype,  // ✅ NEW: Persist secondary archetype
       is_favorite: false,
       last_accessed: now,
       engagement_score: 0,
