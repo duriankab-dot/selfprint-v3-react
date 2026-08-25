@@ -30,10 +30,22 @@ export interface AudioLoaderState {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CDN_URL = import.meta.env.VITE_SOUNDSCAPE_CDN_URL || 'https://res.cloudinary.com/selfprint/video/upload/soundscapes';
+// Multiple CDN fallbacks for robustness
+const PRIMARY_CDN_URL = import.meta.env.VITE_SOUNDSCAPE_CDN_URL || 'https://res.cloudinary.com/selfprint/video/upload/soundscapes';
+const FALLBACK_CDN_URL = 'https://cdn.example.com/soundscapes'; // Fallback CDN (can be configured)
 const CACHE_DB_NAME = 'selfprint-audio-cache';
 const CACHE_STORE_NAME = 'soundscapes';
 const CACHE_TTL_DAYS = 30;
+
+// Soundscape registry — map IDs to available sources
+const SOUNDSCAPE_SOURCES: Record<string, { primary: string; fallback?: string }> = {
+  'morning-forest': { primary: 'morning-forest.mp3' },
+  'afternoon-calm': { primary: 'afternoon-calm.mp3' },
+  'evening-breeze': { primary: 'evening-breeze.mp3' },
+  'night-ambient': { primary: 'night-ambient.mp3' },
+  'rain-sounds': { primary: 'rain-sounds.mp3' },
+  'ocean-waves': { primary: 'ocean-waves.mp3' },
+};
 
 // ─── IndexedDB Initialization ──────────────────────────────────────────────────
 
@@ -111,6 +123,48 @@ async function saveCachedAudio(soundscapeId: string, buffer: AudioBuffer): Promi
 
 // ─── Audio Loading ────────────────────────────────────────────────────────────
 
+async function tryFetchFromUrl(url: string, audioContext: AudioContext, onProgress?: (progress: number) => void): Promise<AudioBuffer | null> {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!response.ok) {
+      console.warn(`[useSoundscapeAudioLoader] CDN returned ${response.status}: ${url}`);
+      return null;
+    }
+
+    const contentLength = response.headers.get('content-length');
+    if (!contentLength) {
+      const arrayBuffer = await response.arrayBuffer();
+      return await audioContext.decodeAudioData(arrayBuffer);
+    }
+
+    const total = parseInt(contentLength, 10);
+    let loaded = 0;
+    const reader = response.body?.getReader();
+    if (!reader) return null;
+
+    const chunks: Uint8Array[] = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      onProgress?.(Math.round((loaded / total) * 100));
+    }
+
+    const arrayBuffer = new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.length, 0));
+    let offset = 0;
+    for (const chunk of chunks) {
+      arrayBuffer.set(chunk, offset);
+      offset += chunk.length;
+    }
+
+    return await audioContext.decodeAudioData(arrayBuffer.buffer);
+  } catch (err) {
+    console.warn(`[useSoundscapeAudioLoader] Failed to fetch from ${url}:`, err);
+    return null;
+  }
+}
+
 async function fetchAudioBuffer(
   soundscapeId: string,
   audioContext: AudioContext,
@@ -123,53 +177,29 @@ async function fetchAudioBuffer(
     return cached.buffer;
   }
 
-  // Fetch from CDN
-  const url = `${CDN_URL}/${soundscapeId}.mp3`;
-  console.log(`[useSoundscapeAudioLoader] Fetching from CDN: ${url}`);
+  // Try primary CDN
+  const filename = SOUNDSCAPE_SOURCES[soundscapeId]?.primary || `${soundscapeId}.mp3`;
+  const primaryUrl = `${PRIMARY_CDN_URL}/${filename}`;
+  console.log(`[useSoundscapeAudioLoader] Fetching from primary CDN: ${primaryUrl}`);
 
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch soundscape: ${response.statusText}`);
-  }
-
-  // Handle download progress
-  const contentLength = response.headers.get('content-length');
-  if (!contentLength) {
-    // No progress info, just read
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = await audioContext.decodeAudioData(arrayBuffer);
+  let buffer = await tryFetchFromUrl(primaryUrl, audioContext, onProgress);
+  if (buffer) {
     await saveCachedAudio(soundscapeId, buffer);
     return buffer;
   }
 
-  // Stream with progress tracking
-  const total = parseInt(contentLength, 10);
-  let loaded = 0;
-
-  const reader = response.body?.getReader();
-  if (!reader) throw new Error('Response body unavailable');
-
-  const chunks: Uint8Array[] = [];
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    chunks.push(value);
-    loaded += value.length;
-    const progress = Math.round((loaded / total) * 100);
-    onProgress?.(progress);
+  // Try fallback CDN if primary fails
+  const fallbackUrl = `${FALLBACK_CDN_URL}/${filename}`;
+  console.warn(`[useSoundscapeAudioLoader] Primary CDN failed, trying fallback: ${fallbackUrl}`);
+  buffer = await tryFetchFromUrl(fallbackUrl, audioContext, onProgress);
+  if (buffer) {
+    await saveCachedAudio(soundscapeId, buffer);
+    return buffer;
   }
 
-  const arrayBuffer = new Uint8Array(chunks.reduce((acc, chunk) => acc + chunk.length, 0));
-  let offset = 0;
-  for (const chunk of chunks) {
-    arrayBuffer.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  const buffer = await audioContext.decodeAudioData(arrayBuffer.buffer);
-  await saveCachedAudio(soundscapeId, buffer);
-  return buffer;
+  // All CDN attempts failed — use fallback silence
+  console.error(`[useSoundscapeAudioLoader] All CDN attempts failed for ${soundscapeId}`);
+  throw new Error(`Could not load soundscape: ${soundscapeId}`);
 }
 
 // ─── Fallback: Synthesize audio if CDN fails ──────────────────────────────────

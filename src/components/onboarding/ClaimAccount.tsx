@@ -10,7 +10,7 @@
  * ผ่าน <PendingOnboardingSaver /> (ดู src/components/PendingOnboardingSaver.tsx)
  */
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 
 // ─── Icon SVGs (inline, no deps) ─────────────────────────────────────────────
@@ -60,6 +60,7 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<'google' | 'apple' | null>(null);
+  const [resendCountdown, setResendCountdown] = useState(0);
 
   // ONBOARDING-LOOP-001: guards against calling onDone() more than once —
   // `session` can get a new object reference (e.g. on a token-refresh tick)
@@ -109,7 +110,33 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
     }
 
     setSent(true);
+    setResendCountdown(60); // 60-second cooldown
   };
+
+  // Handle resend email
+  const handleResend = async () => {
+    if (resendCountdown > 0 || !email.trim()) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    const result = await signInWithMagicLink(email.trim());
+    setSubmitting(false);
+
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
+
+    setResendCountdown(60);
+  };
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCountdown]);
 
   return (
     <div
@@ -131,10 +158,33 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
               เราส่งลิงก์เข้าสู่ระบบไปที่ <strong>{email}</strong> แล้ว
               คลิกลิงก์ในอีเมลเพื่อบันทึก AI Twin ของคุณไว้ถาวร
             </p>
+            {error && (
+              <p style={{ color: '#E24B4A', fontSize: '13px', marginBottom: '12px' }}>{error}</p>
+            )}
+            <button
+              onClick={() => handleResend()}
+              disabled={resendCountdown > 0 || submitting}
+              style={{
+                marginTop: '16px',
+                padding: '10px 24px',
+                borderRadius: '8px',
+                border: '2px solid var(--color-accent-primary)',
+                background: 'transparent',
+                color: resendCountdown > 0 ? 'var(--color-text-secondary)' : 'var(--color-accent-primary)',
+                fontWeight: 600,
+                cursor: resendCountdown > 0 ? 'not-allowed' : 'pointer',
+                fontSize: '14px',
+                opacity: resendCountdown > 0 ? 0.5 : 1,
+              }}
+            >
+              {submitting ? 'กำลังส่ง...' : resendCountdown > 0 ? `ส่งใหม่ใน ${resendCountdown}s` : 'ส่งลิงก์ใหม่'}
+            </button>
             <button
               onClick={onDone}
               style={{
-                marginTop: '24px',
+                marginTop: '12px',
+                display: 'block',
+                width: '100%',
                 padding: '10px 24px',
                 borderRadius: '8px',
                 border: '2px solid var(--color-border)',

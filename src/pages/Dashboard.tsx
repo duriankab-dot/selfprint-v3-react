@@ -151,7 +151,14 @@ const Dashboard: React.FC = () => {
   // Phase 5.4: Pattern Detection — pure, deterministic, computed client-side
   // from the same trendData already fetched for the chart above. No new
   // Supabase query needed.
-  const patterns = useMemo(() => detectPatterns(trendData), [trendData]);
+  const patterns = useMemo(() => {
+    try {
+      return detectPatterns(trendData);
+    } catch (err) {
+      console.warn('[Dashboard] Pattern detection error:', err);
+      return [];
+    }
+  }, [trendData]);
 
   const handleExport = async (format: 'csv' | 'json') => {
     if (!userId) return;
@@ -188,9 +195,11 @@ const Dashboard: React.FC = () => {
       )}
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <NavBar />
-      <TwinEvolution onEvolved={() => {
-        // Twin evolved
-      }} />
+        {userId && (
+          <TwinEvolution onEvolved={() => {
+            // Twin evolved
+          }} />
+        )}
       <div className="dashboard" style={{ flex: 1 }}>
 
       {/* RECOVERY-001: Resume entry — V5 §4 requires existing users get a clear
