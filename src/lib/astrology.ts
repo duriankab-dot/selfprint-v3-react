@@ -26,6 +26,10 @@ export interface InitialDisciplines {
   natalDominantElement?: string;
   /** Moon sign from NatalChartEngine (approximate) */
   moonSign?: string;
+  /** Full Moon longitude (0-360°) — used by ArchetypeScoreEngine for Nakshatra */
+  moonFullDegree?: number;
+  /** Full Sun longitude (0-360°) — used by ArchetypeScoreEngine for Human Design */
+  sunFullDegree?: number;
   /** I Ching hexagram number (1-64) from HexagramEngine */
   hexagramNumber?: number;
   /** I Ching hexagram Thai name */

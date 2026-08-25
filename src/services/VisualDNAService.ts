@@ -67,12 +67,12 @@ export function generateVisualDNA(params: {
     caregiver: '#3498DB',
     creator: '#E67E22',
     ruler: '#F39C12',
-    alchemist: '#1ABC9C',
-    dreamer: '#B19CD9',
-    maverick: '#C0392B',
-    strategist: '#16A085',
-    diplomat: '#D35400',
-    artisan: '#27AE60',
+    strategic_warrior: '#D32F2F',
+    benevolent_leader: '#F57C00',
+    visionary_artist: '#7B1FA2',
+    wandering_rebel: '#00695C',
+    warm_flirt: '#E91E63',
+    relatable_neighbor: '#5C85D6',
   };
 
   const primaryColor = archetypeColors[params.primaryArchetype] || '#3498DB';
@@ -98,12 +98,12 @@ export function generateVisualDNA(params: {
     caregiver: 'ethereal',
     creator: 'vibrant',
     ruler: 'grounded',
-    alchemist: 'ethereal',
-    dreamer: 'ethereal',
-    maverick: 'grounded',
-    strategist: 'grounded',
-    diplomat: 'vibrant',
-    artisan: 'subtle',
+    strategic_warrior: 'grounded',
+    benevolent_leader: 'ethereal',
+    visionary_artist: 'ethereal',
+    wandering_rebel: 'vibrant',
+    warm_flirt: 'vibrant',
+    relatable_neighbor: 'subtle',
   };
 
   const visualStyle = archetypeStyles[params.primaryArchetype] || 'subtle';
@@ -130,12 +130,12 @@ export function generateVisualDNA(params: {
     caregiver: 'serene',
     creator: 'curious',
     ruler: 'serene',
-    alchemist: 'contemplative',
-    dreamer: 'serene',
-    maverick: 'curious',
-    strategist: 'contemplative',
-    diplomat: 'bright',
-    artisan: 'curious',
+    strategic_warrior: 'contemplative',
+    benevolent_leader: 'serene',
+    visionary_artist: 'contemplative',
+    wandering_rebel: 'curious',
+    warm_flirt: 'bright',
+    relatable_neighbor: 'serene',
   };
 
   const baseExpression = archetypeExpressions[params.primaryArchetype] || 'serene';
@@ -185,12 +185,12 @@ function generateAccessories(params: {
     caregiver: ['healing-hands-glow', 'nurture-pendant'],
     creator: ['brush-aura', 'creative-spark'],
     ruler: ['crown', 'scepter-aura'],
-    alchemist: ['transmutation-orb', 'element-spiral'],
-    dreamer: ['dream-wisps', 'moon-crown'],
-    maverick: ['rebellion-mark', 'wild-energy'],
-    strategist: ['tactical-sigil', 'calculation-aura'],
-    diplomat: ['peace-symbol', 'harmony-aura'],
-    artisan: ['craft-tool-accent', 'inspiration-glow'],
+    strategic_warrior: ['war-sigil', 'wisdom-crown'],
+    benevolent_leader: ['blessing-hands', 'ruler-aura'],
+    visionary_artist: ['dream-brush', 'creation-spark'],
+    wandering_rebel: ['rebel-compass', 'freedom-cloak'],
+    warm_flirt: ['heart-bells', 'flirt-aura'],
+    relatable_neighbor: ['warmth-pendant', 'simple-light'],
   };
 
   const primaryAccs = archetypeAccessories[params.primaryArchetype] || [];
