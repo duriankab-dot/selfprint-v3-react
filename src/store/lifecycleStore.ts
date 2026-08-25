@@ -63,6 +63,8 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
 
   /**
    * Transition to next lifecycle state
+   * P0 FIX: Use upsert (not update) to handle new users who don't have a row yet
+   * (409 Conflict if row missing) + to auto-create if missing (e.g., Onboarding)
    */
   transitionTo: async (userId: string, newStatus: LifecycleStatus) => {
     try {
@@ -72,10 +74,12 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
         throw new Error('Supabase client not initialized');
       }
 
-      // Update lifecycle status in database
+      // Upsert lifecycle status in database
+      // If row exists → update; if not → insert with default values
       const { error } = await supabase
         .from('user_lifecycle')
-        .update({
+        .upsert({
+          user_id: userId,
           status: newStatus,
           last_activity_at: new Date().toISOString(),
         })
@@ -98,6 +102,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
 
   /**
    * Mark Twin as created and update lifecycle
+   * P0 FIX: Use upsert (not update) to handle row that might not exist yet
    */
   setTwinCreated: async (userId: string, twinId: string) => {
     try {
@@ -109,10 +114,11 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
 
       const now = new Date();
 
-      // Update database
+      // Upsert database (create if missing, update if exists)
       const { error } = await supabase
         .from('user_lifecycle')
-        .update({
+        .upsert({
+          user_id: userId,
           twin_id: twinId,
           twin_created_at: now.toISOString(),
           status: 'TWIN_ALIVE',
