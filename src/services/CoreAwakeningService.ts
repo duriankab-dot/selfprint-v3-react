@@ -80,8 +80,11 @@ function inferSecondaryArchetype(essenceText: string, primary: string): Archetyp
   }
 
   if (best.hits > 0) return best.archetype as Archetype;
-  // Safe, always-valid fallback that never equals primary
-  return (primary === 'everyman' ? 'sage' : 'everyman') as Archetype;
+
+  // P0 FIX: Fallback to random secondary ≠ primary (not hardcoded)
+  const candidates = Object.keys(ARCHETYPE_KEYWORDS).filter((a) => a !== primary);
+  const randomIdx = Math.floor(Math.random() * candidates.length);
+  return candidates[randomIdx] as Archetype;
 }
 
 /**
