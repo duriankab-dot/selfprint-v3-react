@@ -33,8 +33,8 @@ const supabase = createClient(
 );
 
 describe('PHASE A.1: CoreAwakeningService Complete Initialization', () => {
-  let testUserId: string;
-  let testTwinId: string;
+  let testUserId: string = '';
+  let testTwinId: string = '';
 
   beforeEach(async () => {
     // Create test user
@@ -106,7 +106,7 @@ describe('PHASE A.1: CoreAwakeningService Complete Initialization', () => {
 
     it('verifies world_preferences table has 12 worlds per Twin', async () => {
       // Count world_preferences for test user
-      const { data, error, count } = await supabase
+      const { data, error } = await supabase
         .from('world_preferences')
         .select('*', { count: 'exact' })
         .eq('user_id', testUserId);
