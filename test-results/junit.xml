@@ -1,5 +1,5 @@
-<testsuites id="" name="" tests="32" failures="0" skipped="4" errors="0" time="20.863822">
-<testsuite name="auth.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="4" failures="0" skipped="3" time="5.051" errors="0">
+<testsuites id="" name="" tests="32" failures="0" skipped="4" errors="0" time="25.607502999999998">
+<testsuite name="auth.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="4" failures="0" skipped="3" time="5.536" errors="0">
 <testcase name="Authentication Flow › signup with email" classname="auth.spec.ts">
 <properties>
 <property name="skip" value="">
@@ -16,9 +16,9 @@
 <skipped>
 </skipped>
 </testcase>
-<testcase name="Authentication Flow › page performance on auth pages" classname="auth.spec.ts" time="5.051">
+<testcase name="Authentication Flow › page performance on auth pages" classname="auth.spec.ts" time="5.536">
 <system-out>
-<![CDATA[Home page load: 3348ms (limit: 5000ms for first load)
+<![CDATA[Home page load: 4507ms (limit: 5000ms for first load)
 ]]>
 </system-out>
 </testcase>
@@ -31,105 +31,105 @@
 </skipped>
 </testcase>
 </testsuite>
-<testsuite name="decision.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="4" failures="0" skipped="0" time="20.471" errors="0">
-<testcase name="Decision Logging &amp; Intelligence › log a decision with performance assertion" classname="decision.spec.ts" time="5.425">
+<testsuite name="decision.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="4" failures="0" skipped="0" time="23.92" errors="0">
+<testcase name="Decision Logging &amp; Intelligence › log a decision with performance assertion" classname="decision.spec.ts" time="7.162">
 <system-out>
 <![CDATA[Decision logging not yet implemented
 ]]>
 </system-out>
 </testcase>
-<testcase name="Decision Logging &amp; Intelligence › decision follow-ups scheduling" classname="decision.spec.ts" time="5.993">
+<testcase name="Decision Logging &amp; Intelligence › decision follow-ups scheduling" classname="decision.spec.ts" time="7.495">
 </testcase>
-<testcase name="Decision Logging &amp; Intelligence › decision learning &amp; patterns" classname="decision.spec.ts" time="6.185">
+<testcase name="Decision Logging &amp; Intelligence › decision learning &amp; patterns" classname="decision.spec.ts" time="6.96">
 <system-out>
 <![CDATA[✓ Decision analytics visible
 ]]>
 </system-out>
 </testcase>
-<testcase name="Decision Logging &amp; Intelligence › decision world expertise routing" classname="decision.spec.ts" time="2.868">
+<testcase name="Decision Logging &amp; Intelligence › decision world expertise routing" classname="decision.spec.ts" time="2.303">
 </testcase>
 </testsuite>
-<testsuite name="smoke.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="12" failures="0" skipped="0" time="20.819" errors="0">
-<testcase name="SK-01 LandingPage /en loads and shows primary CTA" classname="smoke.spec.ts" time="2.428">
+<testsuite name="smoke.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="12" failures="0" skipped="0" time="26.105" errors="0">
+<testcase name="SK-01 LandingPage /en loads and shows primary CTA" classname="smoke.spec.ts" time="2.979">
 <system-out>
 <![CDATA[SK-01 ✓  H1: "The Only AI Twin
 That's Actually Intelligent at Birth"
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-02 LandingPage /th loads with Thai H1" classname="smoke.spec.ts" time="2.155">
+<testcase name="SK-02 LandingPage /th loads with Thai H1" classname="smoke.spec.ts" time="2.895">
 <system-out>
 <![CDATA[SK-02 ✓  TH H1: "เลิกเดาทิศทางของชีวิต
 ให้ AI วิเคราะห์แทนดูดวง"
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-03 LandingPage has no &quot;ดูดวง&quot; in visible body text" classname="smoke.spec.ts" time="1.528">
+<testcase name="SK-03 LandingPage has no &quot;ดูดวง&quot; in visible body text" classname="smoke.spec.ts" time="1.823">
 <system-out>
 <![CDATA[SK-03 ✓  No "ดูดวง" in visible body
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-04 Root / redirects to /en or /th" classname="smoke.spec.ts" time="1.143">
+<testcase name="SK-04 Root / redirects to /en or /th" classname="smoke.spec.ts" time="1.942">
 <system-out>
 <![CDATA[SK-04 ✓  Root loaded (SPA will redirect client-side): https://www.selfprint.one/
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-05 /api/og returns 200 image response" classname="smoke.spec.ts" time="0.464">
+<testcase name="SK-05 /api/og returns 200 image response" classname="smoke.spec.ts" time="3.405">
 <system-out>
 <![CDATA[SK-05 ✓  /api/og: 200, 85829 bytes, image/png
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-06 /llms.txt serves correctly with SICE keyword" classname="smoke.spec.ts" time="0.339">
+<testcase name="SK-06 /llms.txt serves correctly with SICE keyword" classname="smoke.spec.ts" time="0.501">
 <system-out>
 <![CDATA[SK-06 ✓  /llms.txt: 200, 4984 chars
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-07 /en/login loads and has email input" classname="smoke.spec.ts" time="1.271">
+<testcase name="SK-07 /en/login loads and has email input" classname="smoke.spec.ts" time="0.973">
 <system-out>
 <![CDATA[SK-07 ✓  Login page redirected (user may be logged in): https://www.selfprint.one/en/login
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-08 LandingPage /en has no critical JS errors" classname="smoke.spec.ts" time="3.599">
+<testcase name="SK-08 LandingPage /en has no critical JS errors" classname="smoke.spec.ts" time="3.645">
 <system-out>
 <![CDATA[SK-08 ✓  No critical JS errors on /en
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-09 LandingPage cold-start loads within 6s" classname="smoke.spec.ts" time="2.611">
+<testcase name="SK-09 LandingPage cold-start loads within 6s" classname="smoke.spec.ts" time="2.604">
 <system-out>
-<![CDATA[SK-09  Time to H1: 1641ms (limit: 6000ms)
-SK-09 ✓  Time to H1: 1641ms
+<![CDATA[SK-09  Time to H1: 1974ms (limit: 6000ms)
+SK-09 ✓  Time to H1: 1974ms
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-10 /en/components public page loads" classname="smoke.spec.ts" time="1.379">
+<testcase name="SK-10 /en/components public page loads" classname="smoke.spec.ts" time="1.111">
 <system-out>
 <![CDATA[SK-10 ✓  /en/components: HTTP 200
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-11 LandingPage has a NavBar with brand name" classname="smoke.spec.ts" time="2.57">
+<testcase name="SK-11 LandingPage has a NavBar with brand name" classname="smoke.spec.ts" time="2.655">
 <system-out>
 <![CDATA[SK-11 ✓  NavBar + SELFPRINT brand visible
 ]]>
 </system-out>
 </testcase>
-<testcase name="SK-12 /en/pricing page loads without 5xx" classname="smoke.spec.ts" time="1.332">
+<testcase name="SK-12 /en/pricing page loads without 5xx" classname="smoke.spec.ts" time="1.572">
 <system-out>
 <![CDATA[SK-12 ✓  /en/pricing: HTTP 200
 ]]>
 </system-out>
 </testcase>
 </testsuite>
-<testsuite name="twin.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="5" failures="0" skipped="1" time="11.62" errors="0">
-<testcase name="Twin Creation &amp; Chat Flow › core awakening flow - twin creation" classname="twin.spec.ts" time="2.394">
+<testsuite name="twin.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="5" failures="0" skipped="1" time="15.135" errors="0">
+<testcase name="Twin Creation &amp; Chat Flow › core awakening flow - twin creation" classname="twin.spec.ts" time="2.676">
 <system-out>
-<![CDATA[Twin creation took 132ms
+<![CDATA[Twin creation took 175ms
 ]]>
 </system-out>
 </testcase>
@@ -141,29 +141,29 @@ SK-09 ✓  Time to H1: 1641ms
 <skipped>
 </skipped>
 </testcase>
-<testcase name="Twin Creation &amp; Chat Flow › twin personality context switching (Hubs)" classname="twin.spec.ts" time="2.552">
+<testcase name="Twin Creation &amp; Chat Flow › twin personality context switching (Hubs)" classname="twin.spec.ts" time="2.345">
 </testcase>
-<testcase name="Twin Creation &amp; Chat Flow › twin memory persistence" classname="twin.spec.ts" time="3.987">
+<testcase name="Twin Creation &amp; Chat Flow › twin memory persistence" classname="twin.spec.ts" time="4.923">
 </testcase>
-<testcase name="Twin Creation &amp; Chat Flow › twin evolution stages" classname="twin.spec.ts" time="2.687">
-</testcase>
-</testsuite>
-<testsuite name="upload.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="4" failures="0" skipped="0" time="9.068" errors="0">
-<testcase name="Image Upload &amp; Handling › upload profile picture" classname="upload.spec.ts" time="3.292">
-</testcase>
-<testcase name="Image Upload &amp; Handling › upload validation - file type" classname="upload.spec.ts" time="2.106">
-</testcase>
-<testcase name="Image Upload &amp; Handling › upload validation - file size" classname="upload.spec.ts" time="2.191">
-</testcase>
-<testcase name="Image Upload &amp; Handling › image rendering after upload" classname="upload.spec.ts" time="1.479">
+<testcase name="Twin Creation &amp; Chat Flow › twin evolution stages" classname="twin.spec.ts" time="5.191">
 </testcase>
 </testsuite>
-<testsuite name="world-visual.spec.ts" timestamp="2026-08-25T03:45:53.116Z" hostname="chromium" tests="3" failures="0" skipped="0" time="7.083" errors="0">
-<testcase name="P0-H: Twin per World visual checks › all 12 Worlds render their Twin preview without console errors" classname="world-visual.spec.ts" time="2.6">
+<testsuite name="upload.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="4" failures="0" skipped="0" time="14.633" errors="0">
+<testcase name="Image Upload &amp; Handling › upload profile picture" classname="upload.spec.ts" time="5.814">
 </testcase>
-<testcase name="P0-H: Twin per World visual checks › preview grid has no horizontal overflow at mobile width" classname="world-visual.spec.ts" time="2.239">
+<testcase name="Image Upload &amp; Handling › upload validation - file type" classname="upload.spec.ts" time="4.469">
 </testcase>
-<testcase name="P0-H: Twin per World visual checks › each World produces a visually distinct Twin card (posture/accessory/expression vary)" classname="world-visual.spec.ts" time="2.244">
+<testcase name="Image Upload &amp; Handling › upload validation - file size" classname="upload.spec.ts" time="2.014">
+</testcase>
+<testcase name="Image Upload &amp; Handling › image rendering after upload" classname="upload.spec.ts" time="2.336">
+</testcase>
+</testsuite>
+<testsuite name="world-visual.spec.ts" timestamp="2026-08-25T05:23:34.594Z" hostname="chromium" tests="3" failures="0" skipped="0" time="7.932" errors="0">
+<testcase name="P0-H: Twin per World visual checks › all 12 Worlds render their Twin preview without console errors" classname="world-visual.spec.ts" time="2.822">
+</testcase>
+<testcase name="P0-H: Twin per World visual checks › preview grid has no horizontal overflow at mobile width" classname="world-visual.spec.ts" time="2.619">
+</testcase>
+<testcase name="P0-H: Twin per World visual checks › each World produces a visually distinct Twin card (posture/accessory/expression vary)" classname="world-visual.spec.ts" time="2.491">
 </testcase>
 </testsuite>
 </testsuites>
