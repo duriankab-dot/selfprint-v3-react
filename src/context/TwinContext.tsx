@@ -13,6 +13,7 @@ import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
 import { createDecision } from '../services/DecisionService';
+import { calculateMaturityScore } from '../services/DynamicValueCalculator';
 import {
   fetchUserTwin,
   createTwinInDatabase,
@@ -123,13 +124,16 @@ export function TwinProvider({ children }: { children: ReactNode }) {
         }
 
         // Map Supabase snake_case to TypeScript camelCase
+        // Phase A.1: Dynamic maturityScore calculation instead of hardcoded 30
         const newTwin: TwinProfile = {
           id: savedTwin.id,
           userId: profile.userId,
           name: savedTwin.name,
           primaryArchetype: (savedTwin as any).primary_archetype as any,
           secondaryArchetype: (savedTwin as any).secondary_archetype as any,
-          maturityScore: Math.max(0, Math.min(100, (savedTwin as any).maturity_score || 30)),
+          maturityScore: calculateMaturityScore({
+            userUnderstanding: (savedTwin as any).maturity_score,
+          }),
           createdAt: new Date((savedTwin as any).awakened_at).getTime(),
           updatedAt: Date.now(),
         };
