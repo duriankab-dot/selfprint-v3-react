@@ -76,14 +76,18 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
 
       // Upsert lifecycle status in database
       // If row exists → update; if not → insert with default values
+      // FIX: must pass onConflict so PostgREST resolves on the UNIQUE(user_id) constraint
+      // Do NOT chain .eq() after .upsert() — it is not valid and breaks conflict resolution
       const { error } = await supabase
         .from('user_lifecycle')
-        .upsert({
-          user_id: userId,
-          status: newStatus,
-          last_activity_at: new Date().toISOString(),
-        })
-        .eq('user_id', userId);
+        .upsert(
+          {
+            user_id: userId,
+            status: newStatus,
+            last_activity_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (error) {
         throw new Error(`Failed to transition lifecycle: ${error.message}`);
@@ -115,16 +119,19 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       const now = new Date();
 
       // Upsert database (create if missing, update if exists)
+      // FIX: must pass onConflict + remove invalid .eq() chaining
       const { error } = await supabase
         .from('user_lifecycle')
-        .upsert({
-          user_id: userId,
-          twin_id: twinId,
-          twin_created_at: now.toISOString(),
-          status: 'TWIN_ALIVE',
-          last_activity_at: now.toISOString(),
-        })
-        .eq('user_id', userId);
+        .upsert(
+          {
+            user_id: userId,
+            twin_id: twinId,
+            twin_created_at: now.toISOString(),
+            status: 'TWIN_ALIVE',
+            last_activity_at: now.toISOString(),
+          },
+          { onConflict: 'user_id' }
+        );
 
       if (error) {
         throw new Error(`Failed to update Twin creation: ${error.message}`);
@@ -227,15 +234,22 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       }
 
       // NEW: If no existing record, auto-initialize new user as ONBOARDING
+      // FIX: Use upsert + ignoreDuplicates to handle race condition where
+      // loadLifecycle() is called twice concurrently (getSession + onAuthStateChange)
+      // — both see no row, both try to insert, second one gets 409 → ignoreDuplicates
+      // silently skips the duplicate and we continue normally.
       console.log(`[Lifecycle] New user ${userId}, auto-initializing as ONBOARDING`);
 
       const { error: insertError } = await supabase
         .from('user_lifecycle')
-        .insert({
-          user_id: userId,
-          status: 'ONBOARDING',
-          last_activity_at: new Date().toISOString(),
-        });
+        .upsert(
+          {
+            user_id: userId,
+            status: 'ONBOARDING',
+            last_activity_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id', ignoreDuplicates: true }
+        );
 
       if (insertError) {
         console.error('Failed to auto-initialize lifecycle:', insertError);
