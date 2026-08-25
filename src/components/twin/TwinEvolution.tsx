@@ -74,11 +74,10 @@ async function savePrevState(state: TwinState): Promise<void> {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export interface TwinEvolutionProps {
-  /** Called after overlay dismisses — receives badge name or null */
-  onEvolved?: (badgeName: string | null) => void;
+  // No props required — component self-manages evolution detection
 }
 
-export function TwinEvolution({ onEvolved }: TwinEvolutionProps) {
+export function TwinEvolution({}: TwinEvolutionProps) {
   const { session } = useAuth();
   const userId = session?.user?.id;
 
@@ -113,28 +112,34 @@ export function TwinEvolution({ onEvolved }: TwinEvolutionProps) {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const dismiss = useCallback(
-    (badge: string | null) => {
+    () => {
       setRingFading(true);
       setTimeout(() => {
         setVisible(false);
         setRingFading(false);
-        onEvolved?.(badge);
+        // No external callback — self-contained evolution display
       }, 600);
     },
-    [onEvolved]
+    []  // Empty dependency — dismiss is now stable
   );
 
   const triggerEvolution = useCallback(
     async (newState: TwinState) => {
-      const badge = STATE_BADGE[newState] ?? null;
+      const badgeName = STATE_BADGE[newState] ?? null;
       setEvolvedTo(newState);
-      setBadgeName(badge);
+      setBadgeName(badgeName);
       setVisible(true);
 
-      // Auto-dismiss after 4 s
-      setTimeout(() => dismiss(badge), 4000);
+      // Auto-dismiss after 4s
+      setTimeout(() => {
+        setRingFading(true);
+        setTimeout(() => {
+          setVisible(false);
+          setRingFading(false);
+        }, 600);
+      }, 4000);
     },
-    [dismiss]
+    []  // No dependencies — dismiss logic inlined
   );
 
   // Check for evolution once PersonalContext is available
@@ -167,7 +172,7 @@ export function TwinEvolution({ onEvolved }: TwinEvolutionProps) {
       role="dialog"
       aria-live="polite"
       aria-label={`Twin พัฒนาสู่ระดับ ${labels.en}`}
-      onClick={() => dismiss(badgeName)}
+      onClick={() => dismiss()}
       style={{
         position: 'fixed',
         inset: 0,

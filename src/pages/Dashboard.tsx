@@ -196,9 +196,7 @@ const Dashboard: React.FC = () => {
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <NavBar />
         {userId && (
-          <TwinEvolution onEvolved={() => {
-            // Twin evolved
-          }} />
+          <TwinEvolution />
         )}
       <div className="dashboard" style={{ flex: 1 }}>
 

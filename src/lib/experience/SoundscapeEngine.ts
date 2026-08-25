@@ -316,13 +316,30 @@ const SOUNDSCAPE_LIBRARY: SoundscapeConfig[] = [
   },
 ];
 
+// ─── World-to-Soundscape Mapping ──────────────────────────────────────────────
+// Each of the 12 Intelligence Worlds has a default soundscape fallback
+const WORLD_DEFAULT_SOUNDSCAPE: Record<WorldId, string> = {
+  'self': 'night-identity',           // Self-discovery & identity exploration
+  'mind': 'deep-work',                // Mental clarity & focus
+  'relationship': 'relationship-evening', // Connection & intimacy
+  'love': 'relationship-evening',     // Love & affection (shared with relationship)
+  'career': 'deep-work',              // Professional growth & achievement
+  'wealth': 'money-clarity',          // Financial clarity & planning
+  'life': 'discovery-mode',           // Life exploration & meaning
+  'growth': 'afternoon-creative',     // Personal growth & creativity
+  'decision': 'deep-work',            // Decision-making & clarity
+  'purpose': 'spiritual-evening',     // Purpose & existential meaning
+  'wellbeing': 'health-nature',       // Physical & mental wellbeing
+  'future': 'discovery-mode',         // Future vision & possibilities
+};
+
 // ─── SoundscapeEngine ─────────────────────────────────────────────────────────
 
 export class SoundscapeEngine {
 
   /**
    * หา SoundscapeConfig ที่ match ที่สุด
-   * Priority: exact(world+mood+period) > (world+mood) > (mood+period) > (mood only) > fallback
+   * Priority: exact(world+mood+period) > (world+mood) > (mood+period) > (mood only) > world-default > universal fallback
    */
   recommend(worldId: WorldId, mood: Mood, period: TimePeriod): SoundscapeConfig {
     // Pass 1: world + mood + period ตรงทั้งหมด
@@ -357,7 +374,14 @@ export class SoundscapeEngine {
     );
     if (moodMatch) return moodMatch;
 
-    // Pass 5: ultimate fallback
+    // Pass 5: world-specific default soundscape
+    const worldDefaultId = WORLD_DEFAULT_SOUNDSCAPE[worldId];
+    if (worldDefaultId) {
+      const worldDefault = SOUNDSCAPE_LIBRARY.find((s) => s.id === worldDefaultId);
+      if (worldDefault) return worldDefault;
+    }
+
+    // Pass 6: ultimate universal fallback
     return SOUNDSCAPE_LIBRARY.find((s) => s.id === 'ambient-minimal')!;
   }
 
