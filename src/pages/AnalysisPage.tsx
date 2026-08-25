@@ -124,8 +124,8 @@ const AnalysisPage: React.FC = () => {
     if (analysis && userId) {
       // Save analysis to store for CoreAwakening to use
       setAnalysis(analysis);
-      // NEW: Transition lifecycle to ANALYSIS
-      await transitionTo(userId, 'ANALYSIS');
+      // P0 FIX: Advance lifecycle ANALYSIS → AWAKENING (Twin birth ceremony)
+      await transitionTo(userId, 'AWAKENING');
       // Navigate to Twin birth ceremony
       navigate('/core-awakening');
     }
