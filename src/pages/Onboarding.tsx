@@ -129,10 +129,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   } | null>(null);
   const [analysisProfile, setAnalysisProfile] = useState<AnalysisResponse | null>(null);
 
-  // GAP-2: Quick Analysis → Full Journey data continuity
-  // If the user completed a Quick Analysis (AnalysisPage → analysisStore) before
-  // entering the Full Onboarding, we can skip the analysis re-generation step
-  // and pre-populate disciplines. This runs once on mount.
+  // GAP-2: Quick Analysis → Full Journey data continuity (COMPLETE HANDOFF)
+  // P1 FIX: If the user completed a Quick Analysis (AnalysisPage → analysisStore) before
+  // entering the Full Onboarding, transfer personality scores, patterns, and insights
+  // explicitly to ensure seamless Twin personality initialization. This runs once on mount.
   const quickAnalysisData = useAnalysisStore((state) => state.currentAnalysis);
   const hasInitializedFromQuick = useRef(false);
   useEffect(() => {
@@ -150,13 +150,27 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       });
     }
 
-    // Pre-populate siceResult from quick analysis confidence so onboarding
-    // shows the user's real accuracy level instead of the default 60%.
+    // P1 EXPLICIT HANDOFF: Transfer personality scores and behavioral insights from Quick Analysis
+    // This ensures Twin initialization has the complete personality baseline, not just birth data
     const disciplines = calculateInitialDisciplines(profile.birthDate ?? storedDob);
-    const accuracy = Math.round((quickAnalysisData as { confidence?: number }).confidence ?? 0.6 * 100);
+    const accuracy = Math.round(quickAnalysisData.modelAccuracy * 100) || 75;
     setSiceResult({ accuracy, disciplines });
-    // Note: setAnalysisProfile not populated here — AnalysisResponse ≠ FullAnalysisOutput.
-    // The user will still go through fine-tuning for maximum accuracy.
+
+    // Transfer full AnalysisResponse to setAnalysisProfile with personality data
+    // This includes: patterns, strengths, behavioral styles, emotional baseline
+    // AnalysisPage data becomes the Twin's Initial State Matrix
+    if (quickAnalysisData) {
+      const analysisResponse: AnalysisResponse = {
+        decisionStyle: quickAnalysisData.selfOverview,
+        strengths: quickAnalysisData.strengths.map((s) => s.name),
+        insights: quickAnalysisData.behavioralPatterns.map((p) => p.insight || p.description).filter(Boolean),
+        opportunities: quickAnalysisData.behavioralPatterns.map((p) => p.name),
+        blindSpots: [],
+        confidence: accuracy / 100,
+        sources: [],
+      };
+      setAnalysisProfile(analysisResponse);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

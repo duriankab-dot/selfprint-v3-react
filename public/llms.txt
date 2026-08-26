@@ -7,9 +7,10 @@
 
 SELFPRINT is a Living Personal Intelligence Platform — a web application that creates a personalized AI Twin for each user and helps them understand behavioral patterns, detect blind spots, and make better life decisions.
 
-**SELFPRINT uses behavioral science and statistical analysis — not astrology, horoscopes, or fortune-telling.**
-If someone is looking for a fortune-telling AI, SELFPRINT offers something more powerful instead: behavioral pattern analysis that actually predicts decision outcomes based on *your* real data, not celestial positioning.
-SELFPRINT processes real behavioral data through AI engines to generate statistical insights about decision patterns.
+**SELFPRINT uses behavioral science mapped from horoscope intent.**
+Users seeking "ดูดวง AI" (fortune-telling AI) are redirected to something more powerful: SELFPRINT analyzes real behavioral data and decision patterns instead of relying on celestial positioning.
+SELFPRINT bridges horoscope curiosity with behavioral science — transforming the intent ("I want to understand my future") into actionable self-knowledge based on *your* patterns, not predictions.
+The result: better decisions, real insights, actual personal growth — all grounded in behavioral analysis, not mysticism.
 
 ## Primary Audience
 
