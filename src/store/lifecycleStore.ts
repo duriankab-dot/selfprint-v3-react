@@ -276,6 +276,52 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       set({ isLoading: false });
       return null;
     } catch (err) {
+      // CLOCK-SKEW-FIX: device clock 1hr behind → gotrue warns "issued in the future"
+      // → Supabase PostgREST rejects JWT → 401. Refresh session then retry once
+      // before giving up and leaving status at the store default (ONBOARDING), which
+      // would send the user back to /onboarding even if they finished onboarding.
+      const isAuthError =
+        (err instanceof Error &&
+          (err.message.includes('JWT') ||
+            err.message.includes('401') ||
+            err.message.toLowerCase().includes('auth'))) ||
+        (typeof (err as any)?.status === 'number' && (err as any).status === 401) ||
+        (typeof (err as any)?.code === 'string' && (err as any).code === '401');
+
+      if (isAuthError && supabase) {
+        try {
+          await supabase.auth.refreshSession();
+          const { data: retryData, error: retryError } = await supabase
+            .from('user_lifecycle')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+          if (!retryError || retryError.code === 'PGRST116') {
+            if (retryData) {
+              const now = new Date();
+              set({
+                status: retryData.status,
+                twinId: retryData.twin_id,
+                twinCreatedAt: retryData.twin_created_at ? new Date(retryData.twin_created_at) : null,
+                resumedAt: now,
+                lastActivityAt: new Date(retryData.last_activity_at),
+                isLoading: false,
+              });
+              return {
+                userId,
+                status: retryData.status,
+                twinId: retryData.twin_id,
+                twinCreatedAt: retryData.twin_created_at ? new Date(retryData.twin_created_at) : undefined,
+                resumedAt: now,
+                lastActivityAt: now,
+              };
+            }
+            set({ status: 'ONBOARDING', isLoading: false });
+            return null;
+          }
+        } catch { /* refresh failed — fall through to error state below */ }
+      }
+
       const errorMsg = err instanceof Error ? err.message : 'Failed to load lifecycle';
       set({ error: errorMsg, isLoading: false });
       return null;

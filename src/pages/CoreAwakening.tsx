@@ -91,10 +91,10 @@ export default function CoreAwakening() {
   // Force dark body background for ceremony page — body defaults to #FFFFFF
   // (var(--color-bg-primary) in light mode from global.css) which bleeds
   // through if the Tailwind gradient div doesn't cover the full viewport.
+  // CSS class (core-awakening.css) instead of inline JS style — CSS vars rule.
   useEffect(() => {
-    const prev = document.body.style.background;
-    document.body.style.background = 'linear-gradient(to bottom, #0f172a, #1e3a5f, #0f172a)';
-    return () => { document.body.style.background = prev; };
+    document.body.classList.add('core-awakening-body-bg');
+    return () => document.body.classList.remove('core-awakening-body-bg');
   }, []);
 
   // TWINPRESENCE-005: stop any in-progress/queued greeting if the user

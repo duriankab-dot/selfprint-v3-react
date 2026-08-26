@@ -4,6 +4,14 @@
  * 5 phases: intro → processing → birth → naming → complete
  */
 
+/* Body background override for ceremony page.
+   global.css sets body { background-color: var(--color-bg-primary) } which defaults
+   to #FFFFFF in light mode — this bleeds through the Tailwind gradient div.
+   Apply this class via useEffect in CoreAwakening.tsx instead of inline JS style. */
+.core-awakening-body-bg {
+  background: linear-gradient(to bottom, #0f172a, #1e3a5f, #0f172a) !important;
+}
+
 .core-awakening-container {
   min-height: 100vh;
   display: flex;
