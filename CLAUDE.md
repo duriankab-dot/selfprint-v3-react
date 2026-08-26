@@ -63,12 +63,44 @@ npm audit             # Security check
 **Priority 1:** ✅ Data Persistence (FBS) — Complete
 **Priority 2:** ✅ Test Stabilization — testTimeout fixed, FeedbackService 11/11 passing  
 **Priority 3:** ✅ Security CVEs Assessment — 10 CVEs ACCEPTED (transitive devDeps, not exploitable in production)
-  - @vercel/node@5.10.1 required for api/unified-handler.ts
-  - All CVEs are build/dev-time only (no runtime exposure)
-  - Safe to keep; monitor for @vercel updates
-**Priority 4:** ⏸️ Linting DEFERRED — 318 warnings (unused vars), not blocking build. Tech debt revisit later.
-**Priority 5:** 🟡 E2E Tests — STARTING (Playwright critical flows)
-**Priority 6:** 🔴 Documentation — Next after P5
+**Priority 4:** ⏸️ Linting DEFERRED — 318 warnings (unused vars), not blocking build.
+**Priority 5:** ✅ E2E Tests — CI #157 green, SK-01 updated for story-mode landing
+**Priority 6:** ✅ Documentation — CLAUDE.md updated (this entry)
+
+## Session 3 Status (Phase A Completion)
+
+### Completed This Session
+- ✅ LandingPage.tsx — 3-screen story mode (NOVA reveal, fullscreen narrative)
+- ✅ NovaEyeSvg — animated CSS scanner eye
+- ✅ CI fix — GitHub Actions Node 20→22 (asamuzakjp/css-color compat)
+- ✅ .gitignore — test-results/, playwright-report/ added
+- ✅ E2E smoke SK-01 — updated CTA selectors for story-mode landing
+- ✅ CI k6 load tests — disabled on push (was consuming Edge Request quota)
+- ✅ WOW2 FullAnalysis.tsx — revelation UX ("ค้นพบตัวเอง" moment, 3-phase)
+- ✅ subscription→500 — diagnosed as Vercel cold-start 504 (infra, not code)
+- ✅ WOW3 animations — HolographicBirth + ParticleFormation already real Three.js
+
+### Architecture Locked (Phase A → B)
+```
+Landing (3 screens) → CREATE SELFPRINT → APP MODE
+→ Emotion → NOVA → Birth Data → Blueprint → FineTuning
+→ FullAnalysis (WOW2 ✅) → CoreAwakening → WOW3/TwinBirth ✅
+→ LIVING SELFPRINT → Phase B: Community
+```
+
+### Infra: Vercel → Cloudflare Migration (NEXT)
+- Vercel paused: Edge Requests 2.8M/1M (k6 CI was hammering production)
+- k6 disabled on push — only manual workflow_dispatch now
+- Migration plan: CF Pages (frontend) + CF Workers (12 APIs)
+- `@vercel/node` in unified-handler.ts needs rewrite for Workers
+- `.wrangler` + `.dev.vars` already in .gitignore (CF setup started in Astrovera)
+- CF free tier: 100K requests/day (~3M/month) vs Vercel 1M/month
+- CF Workers: no cold start → subscription 504 issue resolves automatically
+
+### Remaining Before CF Migration
+- [ ] Documentation handoff (in progress)
+- [ ] Cloudflare Pages deploy (frontend first, ~30min)
+- [ ] CF Workers: port 12 APIs from @vercel/node format
 
 ---
 Full glossary and deep context: `memory/`
