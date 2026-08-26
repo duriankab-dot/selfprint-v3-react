@@ -277,25 +277,53 @@ export default function TwinChat() {
         currentWorld ?? null,
       );
 
-      // TWIN-MEMORY-001: rich profile — Twin knows the user from Nova onboarding.
-      // Includes archetype identity, birth data, and the top behavioral insights
-      // Nova surfaced during SICE analysis. All fields null-guarded so missing
-      // data degrades gracefully without breaking the API call.
-      const twinProfile = JSON.stringify({
-        name: twin.name,
-        primaryArchetype: twin.primaryArchetype ?? null,
-        secondaryArchetype: twin.secondaryArchetype ?? null,
-        maturityScore: twin.maturityScore ?? 30,
-        // Birth data from onboarding (may be absent if user skipped)
-        birthDate: userProfile.birthDate ?? null,
-        birthTime: userProfile.birthTime ?? null,
-        birthPlace: userProfile.birthPlace ?? null,
-        // Top behavioral insights from Nova's SICE analysis
-        strengths: currentAnalysis?.strengths?.slice(0, 3).map(s => s.name) ?? [],
-        blindSpots: currentAnalysis?.blindSpots?.slice(0, 2).map(b => b.title) ?? [],
-        selfOverview: currentAnalysis?.selfOverview ?? null,
-        guidance: currentAnalysis?.guidance?.slice(0, 2) ?? [],
-      });
+      // TWIN-MEMORY-001: full behavioral profile — Twin knows the user from Nova's 12 SICE engines.
+      // Formatted as readable text (not raw JSON) so the LLM can use it confidently.
+      // All fields null-guarded so missing data degrades gracefully.
+      const a = currentAnalysis;
+      const twinProfile = [
+        `IDENTITY: ${twin.name} | Archetype: ${twin.primaryArchetype ?? 'unknown'}${twin.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin.maturityScore ?? 30}/100`,
+
+        userProfile.birthDate
+          ? `BIRTH DATA: ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
+          : null,
+
+        a?.selfOverview
+          ? `BEHAVIORAL OVERVIEW:\n${a.selfOverview}`
+          : null,
+
+        a?.strengths?.length
+          ? `STRENGTHS:\n${a.strengths.map(s => `• ${s.name}: ${s.description}`).join('\n')}`
+          : null,
+
+        a?.blindSpots?.length
+          ? `BLIND SPOTS:\n${a.blindSpots.map(b => `• ${b.title} (sensitivity: ${b.sensitivity}): ${b.description}`).join('\n')}`
+          : null,
+
+        a?.behavioralPatterns?.length
+          ? `BEHAVIORAL PATTERNS:\n${a.behavioralPatterns.slice(0, 5).map(p => `• [${p.type}] ${p.name}: ${p.insight}`).join('\n')}`
+          : null,
+
+        a?.journey
+          ? `JOURNEY STAGE: ${a.journey.currentStage}\n${a.journey.description}\nGrowing in: ${a.journey.growing.join(', ')}\nChanging: ${a.journey.changing.join(', ')}\nStill working on: ${a.journey.stillWorking.join(', ')}`
+          : null,
+
+        a?.focusAreas?.length
+          ? `FOCUS AREAS: ${a.focusAreas.join(', ')}`
+          : null,
+
+        a?.guidance?.length
+          ? `GUIDANCE FROM ANALYSIS:\n${a.guidance.map(g => `• ${g}`).join('\n')}`
+          : null,
+
+        a?.nextSteps?.length
+          ? `RECOMMENDED NEXT STEPS:\n${a.nextSteps.map(s => `• ${s}`).join('\n')}`
+          : null,
+
+        a?.modelAccuracy
+          ? `ANALYSIS CONFIDENCE: ${Math.round(a.modelAccuracy * 100)}%`
+          : null,
+      ].filter(Boolean).join('\n\n');
 
       const twinResponse = await callTwinAPI(
         apiMessages,
