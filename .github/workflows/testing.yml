@@ -95,7 +95,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: e2e-tests
-    if: always()
+    # DISABLED: k6 load tests against production consume Edge Request quota (50 VUs × 10min per push)
+    # Re-enable only for scheduled/manual runs against a staging environment
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'load'
 
     steps:
       - name: Checkout
@@ -155,7 +157,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: e2e-tests
-    if: github.event_name == 'schedule' || github.event.inputs.test_type == 'full' || github.event.inputs.test_type == 'load'
+    # DISABLED: runs only when manually triggered with test_type=full
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'full'
 
     steps:
       - name: Checkout
