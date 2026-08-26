@@ -1,17 +1,14 @@
 /**
- * FullAnalysis.tsx
+ * FullAnalysis.tsx — WOW2: "ค้นพบตัวเอง" Revelation UX
  *
- * Full AI Twin Analysis (85%+ accuracy)
- * MEMO V4: Complete blueprint with all insights
+ * Phase 1 (Scanning, 2.5s auto): NOVA scanning animation + progress
+ * Phase 2 (Reveal): Cards appear sequentially — feel of discovery not survey
+ * Phase 3 (CTA): Intelligence ready → "ตื่น Twin ของฉัน →"
  *
- * Displays:
- * - Full Decision Style
- * - 3-4 Strengths
- * - 2-3 Key Insights & Opportunities
- * - Growth Suggestions
- * - Accuracy meter (85%+, green)
- * - Home navigation
+ * Props interface unchanged — same callers work without modification.
  */
+
+import React, { useState, useEffect, useRef } from 'react';
 
 interface AnalysisData {
   decisionStyle: string;
@@ -28,468 +25,376 @@ interface FullAnalysisProps {
   onHome: () => void;
 }
 
+const SCAN_MSGS = [
+  'กำลังวิเคราะห์รูปแบบการตัดสินใจ...',
+  'ตรวจพบมิติพฤติกรรม 12 แบบ...',
+  'สังเคราะห์ SELFPRINT Intelligence...',
+  'พร้อมถอดรหัสตัวตนของคุณ ✓',
+] as const;
+
+const SCAN_DURATION_MS = 2500;
+const CARD_STAGGER_MS  = 420;
+
 export const FullAnalysis: React.FC<FullAnalysisProps> = ({
   profile,
   prototypeCore,
   accuracy = 85,
   onHome,
 }) => {
-  const getMeterColor = (value: number): string => {
-    if (value < 75) return '#FFA726'; // Amber
-    if (value < 90) return '#FFD54F'; // Yellow
-    return '#66BB6A'; // Green
+  const [phase, setPhase]         = useState<'scanning' | 'reveal'>('scanning');
+  const [scanStep, setScanStep]   = useState(0);
+  const [scanPct, setScanPct]     = useState(0);
+  const [revealN, setRevealN]     = useState(0);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = () => { timers.current.forEach(clearTimeout); timers.current = []; };
+
+  // ── Scanning phase ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'scanning') return;
+    clearTimers();
+
+    // Smooth progress bar via rAF
+    const start = Date.now();
+    let raf = 0;
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const pct = Math.min(100, (elapsed / SCAN_DURATION_MS) * 100);
+      setScanPct(pct);
+      if (pct < 100) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    // Cycle messages
+    SCAN_MSGS.forEach((_, i) => {
+      if (i === 0) return;
+      timers.current.push(setTimeout(() => setScanStep(i), i * (SCAN_DURATION_MS / SCAN_MSGS.length)));
+    });
+
+    // Advance to reveal
+    timers.current.push(setTimeout(() => setPhase('reveal'), SCAN_DURATION_MS));
+
+    return () => { clearTimers(); cancelAnimationFrame(raf); };
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Reveal phase: stagger cards ──────────────────────────────────────────────
+  useEffect(() => {
+    if (phase !== 'reveal') return;
+    clearTimers();
+
+    // 7 reveal slots: hero / decision / strengths / insights / blindSpots / opportunities / cta
+    const SLOTS = 7;
+    for (let i = 0; i <= SLOTS; i++) {
+      timers.current.push(setTimeout(() => setRevealN(i + 1), i * CARD_STAGGER_MS));
+    }
+    return clearTimers;
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const shown = (slot: number) => revealN > slot;
+
+  // ── Styles ───────────────────────────────────────────────────────────────────
+  const card: React.CSSProperties = {
+    background: 'var(--color-bg-secondary)',
+    borderRadius: 16,
+    padding: '28px',
+    border: '1px solid var(--color-border)',
+    marginBottom: 20,
+    animation: 'fa-fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both',
   };
 
+  const label: React.CSSProperties = {
+    fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
+    textTransform: 'uppercase', marginBottom: 14,
+  };
+
+  const listItem: React.CSSProperties = {
+    display: 'flex', gap: 10, alignItems: 'flex-start',
+    fontSize: 14, color: 'var(--color-text-primary)',
+    lineHeight: 1.6, marginBottom: 12,
+  };
+
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: `linear-gradient(135deg, var(--accent-light, var(--color-bg-secondary)) 0%, var(--color-bg-primary) 100%)`,
-        padding: '48px 24px 80px',
-      }}
-    >
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {/* Hero */}
-        <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-          <h1
-            style={{
-              fontSize: '36px',
-              fontWeight: 700,
-              marginBottom: '16px',
-              color: 'var(--color-text-primary)',
-            }}
-          >
-            ⚡ AI Twin ฉบับสมบูรณ์ของคุณ
-          </h1>
-          <p
-            style={{
-              fontSize: '16px',
-              color: 'var(--color-text-secondary)',
-              marginBottom: '12px',
-            }}
-          >
-            ระดับความชัดเจน {Math.round(accuracy)}%
+    <>
+      <style>{`
+        @keyframes fa-fade-up {
+          from { opacity:0; transform:translateY(22px); }
+          to   { opacity:1; transform:translateY(0);    }
+        }
+        @keyframes fa-scan-ring {
+          0%   { transform:scale(0.85); opacity:0.8; }
+          100% { transform:scale(1.65); opacity:0;   }
+        }
+        @keyframes fa-pulse-dot {
+          0%,100% { opacity:0.5; transform:scale(1);    }
+          50%     { opacity:1;   transform:scale(1.12); }
+        }
+        .fa-cta-btn { transition: transform 0.25s, box-shadow 0.25s; }
+        .fa-cta-btn:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 32px var(--accent-glow, rgba(99,102,241,0.35));
+        }
+        @media (max-width:620px) {
+          .fa-two-col { grid-template-columns:1fr !important; }
+          .fa-bs-grid  { grid-template-columns:1fr !important; }
+        }
+      `}</style>
+
+      {/* ══ PHASE: SCANNING ══════════════════════════════════════════════════════ */}
+      {phase === 'scanning' && (
+        <div style={{
+          minHeight: '100vh', display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          background: 'var(--color-bg-primary)', padding: 24, textAlign: 'center',
+        }}>
+
+          {/* NOVA eye */}
+          <div style={{ position: 'relative', width: 120, height: 120, marginBottom: 40 }}>
+            {[0, 0.7].map((delay) => (
+              <div key={delay} style={{
+                position: 'absolute', inset: delay === 0 ? 0 : 14,
+                borderRadius: '50%',
+                border: '2px solid var(--accent-primary)',
+                opacity: delay === 0 ? 0.9 : 0.5,
+                animation: `fa-scan-ring 1.4s ease-out ${delay}s infinite`,
+              }} />
+            ))}
+            <div style={{
+              position: 'absolute', inset: 28, borderRadius: '50%',
+              background: 'var(--accent-light)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: 'fa-pulse-dot 2s ease-in-out infinite',
+            }}>
+              <span style={{ fontSize: 26, lineHeight: 1 }}>◉</span>
+            </div>
+          </div>
+
+          <p style={{ ...label, color: 'var(--accent-primary)', marginBottom: 16 }}>
+            NOVA · SELFPRINT INTELLIGENCE
           </p>
-          {prototypeCore && (
-            <span
-              style={{
-                display: 'inline-block',
-                marginTop: '4px',
-                padding: '6px 16px',
-                borderRadius: '999px',
-                background: 'var(--accent-light)',
-                color: 'var(--accent-primary)',
-                fontSize: '13px',
-                fontWeight: 700,
-              }}
-            >
-              Prototype Core: {prototypeCore}
-            </span>
-          )}
+          <p style={{
+            fontSize: 18, color: 'var(--color-text-primary)', fontWeight: 500,
+            minHeight: 28, marginBottom: 40,
+          }}>
+            {SCAN_MSGS[scanStep]}
+          </p>
 
-          {/* Accuracy Meter */}
-          <div style={{ marginTop: '32px', maxWidth: '400px', margin: '0 auto' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '8px',
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  color: 'var(--color-text-secondary)',
-                  textTransform: 'uppercase',
-                }}
-              >
-                ระดับความชัดเจน
-              </span>
-              <span
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 700,
-                  color: getMeterColor(accuracy),
-                }}
-              >
-                {Math.round(accuracy)}%
-              </span>
-            </div>
-            <div
-              style={{
-                width: '100%',
-                height: '12px',
-                background: 'var(--color-bg-tertiary)',
-                borderRadius: '6px',
-                overflow: 'hidden',
-              }}
-            >
-              <div
-                style={{
-                  width: `${Math.min(100, accuracy)}%`,
-                  height: '100%',
-                  background: getMeterColor(accuracy),
-                  transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
-                  borderRadius: '6px',
-                }}
-              />
-            </div>
+          {/* Progress bar */}
+          <div style={{
+            width: '100%', maxWidth: 300, height: 3,
+            background: 'var(--color-bg-tertiary)', borderRadius: 2, overflow: 'hidden',
+          }}>
+            <div style={{
+              width: `${scanPct}%`, height: '100%',
+              background: 'var(--accent-primary)', borderRadius: 2,
+              transition: 'width 0.1s linear',
+            }} />
           </div>
         </div>
+      )}
 
-        {/* Main Content Grid */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '24px',
-            marginBottom: '48px',
-          }}
-        >
-          {/* Left Column: Decision Style & Strengths */}
-          <div>
-            {/* Decision Style Card */}
-            <div
-              style={{
-                background: 'var(--color-bg-secondary)',
-                borderRadius: '12px',
-                padding: '28px',
-                border: '2px solid var(--accent-light)',
-                marginBottom: '24px',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '12px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                🎯 รูปแบบการตัดสินใจหลัก
-              </h3>
-              <p
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 700,
-                  color: 'var(--accent-primary)',
-                  margin: '0',
-                  lineHeight: 1.3,
-                }}
-              >
-                {profile.decisionStyle}
-              </p>
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: 'var(--color-text-secondary)',
-                  margin: '12px 0 0 0',
-                  lineHeight: 1.5,
-                }}
-              >
-                นี่คือแนวทางหลักของคุณในการเลือกและแก้ปัญหา
-              </p>
+      {/* ══ PHASE: REVEAL ════════════════════════════════════════════════════════ */}
+      {phase === 'reveal' && (
+        <div style={{
+          minHeight: '100vh', background: 'var(--color-bg-primary)',
+          padding: '52px 24px 80px',
+        }}>
+          <div style={{ maxWidth: 760, margin: '0 auto' }}>
+
+            {/* Slot 0 — Hero headline */}
+            {shown(0) && (
+              <div style={{ textAlign: 'center', marginBottom: 44, animation: 'fa-fade-up 0.5s both' }}>
+                <p style={{ ...label, color: 'var(--accent-primary)', marginBottom: 10 }}>
+                  NOVA อ่านคุณออกแล้ว
+                </p>
+                <h1 style={{
+                  fontSize: 'clamp(26px, 5vw, 38px)', fontWeight: 700,
+                  color: 'var(--color-text-primary)', lineHeight: 1.25, marginBottom: 14,
+                }}>
+                  เราค้นพบสิ่งสำคัญ<br />เกี่ยวกับคุณ
+                </h1>
+                {prototypeCore && (
+                  <span style={{
+                    display: 'inline-block', padding: '6px 18px',
+                    borderRadius: 999, background: 'var(--accent-light)',
+                    color: 'var(--accent-primary)', fontSize: 13, fontWeight: 700,
+                  }}>
+                    {prototypeCore}
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* Slot 1 — Decision Style */}
+            {shown(1) && (
+              <div style={{
+                ...card,
+                border: '1px solid var(--accent-primary)',
+                boxShadow: '0 0 32px var(--accent-glow, rgba(99,102,241,0.1))',
+              }}>
+                <p style={{ ...label, color: 'var(--accent-primary)' }}>
+                  🎯 รูปแบบการตัดสินใจของคุณ
+                </p>
+                <p style={{
+                  fontSize: 'clamp(18px, 3vw, 26px)', fontWeight: 700,
+                  color: 'var(--color-text-primary)', lineHeight: 1.3, margin: '0 0 8px',
+                }}>
+                  {profile.decisionStyle}
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.6 }}>
+                  นี่คือแนวทางหลักของคุณในการเลือกและแก้ปัญหา — มันส่งผลต่อทุกการตัดสินใจในชีวิต
+                </p>
+              </div>
+            )}
+
+            {/* Slots 2+3 — Strengths & Insights (2-col grid) */}
+            <div className="fa-two-col" style={{
+              display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 20,
+            }}>
+              {shown(2) && (
+                <div style={{ ...card, marginBottom: 0, gridColumn: '1' }}>
+                  <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
+                    💪 จุดแข็งของคุณ
+                  </p>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                    {profile.strengths.map((s, i) => (
+                      <li key={i} style={{ ...listItem, marginBottom: i < profile.strengths.length - 1 ? 12 : 0 }}>
+                        <span style={{ color: 'var(--accent-primary)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {shown(3) && (
+                <div style={{ ...card, marginBottom: 0, gridColumn: '2' }}>
+                  <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
+                    🔍 ข้อมูลเชิงลึก
+                  </p>
+                  <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                    {profile.insights.map((s, i) => (
+                      <li key={i} style={{ ...listItem, marginBottom: i < profile.insights.length - 1 ? 12 : 0 }}>
+                        <span style={{ color: 'var(--accent-secondary, var(--accent-primary))', flexShrink: 0 }}>•</span>
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
-            {/* Strengths Card */}
-            <div
-              style={{
-                background: 'var(--color-bg-secondary)',
-                borderRadius: '12px',
-                padding: '28px',
-                border: '2px solid var(--accent-light)',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '16px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                💪 จุดแข็งของคุณ
-              </h3>
-              <ul
-                style={{
-                  margin: '0',
-                  paddingLeft: '20px',
-                  listStyleType: 'none',
-                }}
-              >
-                {profile.strengths.map((strength, idx) => (
-                  <li
-                    key={idx}
-                    style={{
-                      fontSize: '14px',
-                      color: 'var(--color-text-primary)',
-                      marginBottom: idx < profile.strengths.length - 1 ? '12px' : 0,
-                      paddingLeft: '20px',
-                      position: 'relative',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        color: 'var(--accent-primary)',
-                        fontWeight: 700,
-                      }}
-                    >
-                      ✓
+            {/* Slot 4 — Blind Spots (conditional) */}
+            {profile.blindSpots && profile.blindSpots.length > 0 && shown(4) && (
+              <div style={card}>
+                <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
+                  ⚠️ Blind Spots ที่ควรระวัง
+                </p>
+                <div className="fa-bs-grid" style={{
+                  display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px',
+                }}>
+                  {profile.blindSpots.map((s, i) => (
+                    <div key={i} style={{ ...listItem }}>
+                      <span style={{ color: 'var(--color-warning, #FFA726)', fontWeight: 700, flexShrink: 0 }}>!</span>
+                      {s}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Slot 5 — Opportunities */}
+            {shown(5) && (
+              <div style={card}>
+                <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
+                  🚀 โอกาสในการเติบโต
+                </p>
+                <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+                  {profile.opportunities.map((s, i) => (
+                    <li key={i} style={{ ...listItem, marginBottom: i < profile.opportunities.length - 1 ? 12 : 0 }}>
+                      <span style={{ color: 'var(--accent-primary)', flexShrink: 0 }}>→</span>
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Slot 6 — Intelligence Ready + CTA */}
+            {shown(6) && (
+              <div style={{ animation: 'fa-fade-up 0.5s both', textAlign: 'center', marginTop: 16 }}>
+
+                {/* Accuracy badge */}
+                <div style={{
+                  display: 'inline-flex', flexDirection: 'column', alignItems: 'center',
+                  padding: '28px 40px', borderRadius: 20,
+                  background: 'var(--accent-light)', border: '1px solid var(--accent-primary)',
+                  marginBottom: 28,
+                }}>
+                  <div style={{
+                    width: 80, height: 80, borderRadius: '50%',
+                    border: '4px solid var(--accent-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'var(--color-bg-primary)',
+                    boxShadow: '0 0 28px var(--accent-glow, rgba(99,102,241,0.28))',
+                    marginBottom: 14,
+                  }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--accent-primary)' }}>
+                      {Math.round(accuracy)}%
                     </span>
-                    {strength}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                  </div>
+                  <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
+                    SELFPRINT Intelligence พร้อมแล้ว
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
+                    ความแม่นยำ {Math.round(accuracy)}% จาก 12 SICE Engines
+                  </p>
+                </div>
 
-          {/* Right Column: Insights & Opportunities */}
-          <div>
-            {/* Insights Card */}
-            <div
-              style={{
-                background: 'var(--color-bg-secondary)',
-                borderRadius: '12px',
-                padding: '28px',
-                border: '2px solid var(--accent-light)',
-                marginBottom: '24px',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '16px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                🔍 ข้อมูลเชิงลึกสำคัญ
-              </h3>
-              <ul
-                style={{
-                  margin: '0',
-                  paddingLeft: '20px',
-                  listStyleType: 'none',
-                }}
-              >
-                {profile.insights.map((insight, idx) => (
-                  <li
-                    key={idx}
-                    style={{
-                      fontSize: '14px',
-                      color: 'var(--color-text-primary)',
-                      marginBottom: idx < profile.insights.length - 1 ? '12px' : 0,
-                      paddingLeft: '20px',
-                      position: 'relative',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        color: 'var(--accent-secondary)',
-                      }}
-                    >
-                      •
-                    </span>
-                    {insight}
-                  </li>
-                ))}
-              </ul>
-            </div>
+                {/* Nova closing message */}
+                <div style={{
+                  background: 'var(--color-bg-secondary)',
+                  borderLeft: '3px solid var(--accent-primary)',
+                  borderRadius: 12, padding: '18px 22px',
+                  marginBottom: 28, textAlign: 'left',
+                }}>
+                  <p style={{
+                    fontSize: 14, color: 'var(--color-text-primary)',
+                    margin: 0, lineHeight: 1.75, fontStyle: 'italic',
+                  }}>
+                    <strong style={{ fontStyle: 'normal' }}>Nova: </strong>
+                    ฉันรู้จักคุณแล้ว — ในระดับที่คนรอบข้างคุณอาจไม่เคยรู้
+                    Intelligence ของคุณพร้อมที่จะมีชีวิต พร้อมเรียนรู้จากคุณ
+                    และเติบโตไปกับคุณ ถึงเวลาแล้วที่จะตื่น
+                  </p>
+                </div>
 
-            {/* Opportunities Card */}
-            <div
-              style={{
-                background: 'var(--color-bg-secondary)',
-                borderRadius: '12px',
-                padding: '28px',
-                border: '2px solid var(--accent-light)',
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: '12px',
-                  fontWeight: 700,
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: '16px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                🚀 โอกาสในการเติบโต
-              </h3>
-              <ul
-                style={{
-                  margin: '0',
-                  paddingLeft: '20px',
-                  listStyleType: 'none',
-                }}
-              >
-                {profile.opportunities.map((opportunity, idx) => (
-                  <li
-                    key={idx}
-                    style={{
-                      fontSize: '14px',
-                      color: 'var(--color-text-primary)',
-                      marginBottom: idx < profile.opportunities.length - 1 ? '12px' : 0,
-                      paddingLeft: '20px',
-                      position: 'relative',
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: 'absolute',
-                        left: 0,
-                        color: '#FFD54F',
-                        fontWeight: 700,
-                      }}
-                    >
-                      →
-                    </span>
-                    {opportunity}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        {/* Blind Spots Card — full width, only when the API/analysis actually returned some */}
-        {profile.blindSpots && profile.blindSpots.length > 0 && (
-          <div
-            style={{
-              background: 'var(--color-bg-secondary)',
-              borderRadius: '12px',
-              padding: '28px',
-              border: '2px solid var(--accent-light)',
-              marginBottom: '48px',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '12px',
-                fontWeight: 700,
-                color: 'var(--color-text-secondary)',
-                marginBottom: '16px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-              }}
-            >
-              ⚠️ จุดที่ควรระวัง
-            </h3>
-            <ul
-              style={{
-                margin: '0',
-                paddingLeft: '20px',
-                listStyleType: 'none',
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '4px 24px',
-              }}
-            >
-              {profile.blindSpots.map((blindSpot, idx) => (
-                <li
-                  key={idx}
+                {/* CTA */}
+                <button
+                  onClick={onHome}
+                  className="fa-cta-btn"
                   style={{
-                    fontSize: '14px',
-                    color: 'var(--color-text-primary)',
-                    marginBottom: '12px',
-                    paddingLeft: '20px',
-                    position: 'relative',
-                    lineHeight: 1.5,
+                    width: '100%', maxWidth: 400,
+                    padding: '18px 32px', borderRadius: 12, border: 'none',
+                    background: 'var(--accent-primary)', color: 'white',
+                    fontWeight: 700, fontSize: 17, cursor: 'pointer',
+                    letterSpacing: '0.02em', display: 'block', margin: '0 auto',
                   }}
                 >
-                  <span
-                    style={{
-                      position: 'absolute',
-                      left: 0,
-                      color: '#FFA726',
-                      fontWeight: 700,
-                    }}
-                  >
-                    !
-                  </span>
-                  {blindSpot}
-                </li>
-              ))}
-            </ul>
+                  ตื่น Twin ของฉัน →
+                </button>
+                <p style={{
+                  marginTop: 10, fontSize: 12,
+                  color: 'var(--color-text-secondary)',
+                }}>
+                  ประสบการณ์ใช้เวลาประมาณ 30 วินาที
+                </p>
+              </div>
+            )}
+
           </div>
-        )}
-
-        {/* Nova Closing Message */}
-        <div
-          style={{
-            background: 'var(--accent-light)',
-            borderLeft: `4px solid var(--accent-primary)`,
-            borderRadius: '12px',
-            padding: '24px',
-            marginBottom: '48px',
-          }}
-        >
-          <p
-            style={{
-              fontSize: '14px',
-              color: 'var(--color-text-primary)',
-              margin: '0',
-              lineHeight: 1.6,
-              fontStyle: 'italic',
-            }}
-          >
-            <span style={{ fontWeight: 600 }}>Nova:</span> ตอนนี้คุณมีความชัดเจนถึง 85% แล้ว! บลูปรินต์นี้จะพัฒนาต่อไปเรื่อยๆ ตามที่คุณเติบโต แวะกลับมาดูเป็นระยะว่า twin ของคุณเรียนรู้และปรับตัวไปกับเส้นทางของคุณอย่างไร พร้อมสำรวจศักยภาพเต็มที่ของคุณหรือยัง?
-          </p>
         </div>
-
-        {/* Action Buttons */}
-        {/* WOW-CONNECT-001 FIX: this used to render two buttons that both
-            called the same onHome() (one mislabeled "กลับหน้าแรก" / back to
-            home, but it didn't — it did the exact same thing as the first
-            button). onHome() now leads into Core Awakening (Twin birth),
-            not the dashboard, so this is the wow2 invite moment — one
-            clear CTA instead of a confusing duplicate. */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '12px',
-            flexDirection: 'column',
-          }}
-        >
-          <button
-            onClick={onHome}
-            style={{
-              width: '100%',
-              padding: '16px 24px',
-              borderRadius: '8px',
-              border: 'none',
-              background: 'var(--accent-primary)',
-              color: 'white',
-              fontWeight: 600,
-              fontSize: '16px',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
-          >
-            สร้าง AI Twin ของคุณ →
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
-
-export default FullAnalysis;
