@@ -337,7 +337,7 @@ describe('CRITICAL PATH E2E: Production Flow Verification', () => {
         conversationId: 'conv-001',
         twinId: scenario.twin.id,
         status: 'active',
-        firstMessage: 'Hello! I\'m Nova, your personal intelligence companion. How can I help you today?",
+        firstMessage: "Hello! I'm Nova, your personal intelligence companion. How can I help you today?",
       });
 
       const result = await mockChatInit(scenario.twin.id, 'user-123');

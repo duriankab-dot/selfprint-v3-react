@@ -4,8 +4,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useChat } from '../features/chat/hooks/useChat';
 import { selfprintChat } from '../lib/api/selfprintChat';
 import type { SelfprintChatRequest, SelfprintChatResponse } from '../lib/api/selfprintChat';
 
@@ -146,22 +144,18 @@ describe('Phase 2 Integration Tests - Nova AI Twin System', () => {
 
       let successCount = 0;
       for (const combo of testCombinations) {
-        try {
-          const response = await selfprintChat({
-            userId: 'user1',
-            sessionId: 'sess1',
-            hub: combo.hub as any,
-            mood: combo.mood as any,
-            archetype: combo.archetype,
-            question: 'Test question?',
-          });
+        const response = await selfprintChat({
+          userId: 'user1',
+          sessionId: 'sess1',
+          hub: combo.hub as any,
+          mood: combo.mood as any,
+          archetype: combo.archetype,
+          question: 'Test question?',
+        });
 
-          expect(response).toBeDefined();
-          expect(response.response.text).toBeDefined();
-          successCount++;
-        } catch (error) {
-          throw error;
-        }
+        expect(response).toBeDefined();
+        expect(response.response.text).toBeDefined();
+        successCount++;
       }
 
       expect(successCount).toBe(testCombinations.length);

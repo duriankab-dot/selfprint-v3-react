@@ -171,7 +171,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (error) {
+      } catch (_error) {
         // Failed to load subscription from cache
       }
     }
@@ -205,7 +205,7 @@ export const SubscriptionProvider: React.FC<{ children: React.ReactNode }> = ({ 
           stripeSubscriptionId: data.stripeSubscriptionId,
         };
         setSubscription(newSubscription);
-      } catch (error) {
+      } catch (_error) {
         // Keep cached subscription on error
       }
     })();

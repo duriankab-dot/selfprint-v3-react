@@ -10,8 +10,6 @@ const TEST_PASSWORD = __ENV.TEST_PASSWORD || 'LoadTest123!';
 const apiResponseTime = new Trend('api_response_time');
 const chatResponseTime = new Trend('chat_response_time');
 const uploadTime = new Trend('upload_time');
-const loginErrors = new Counter('login_errors');
-const chatErrors = new Counter('chat_errors');
 const apiErrors = new Rate('api_errors');
 
 export const options = {
@@ -127,7 +125,7 @@ export default function (data) {
   sleep(__ENV.THINK_TIME ? parseInt(__ENV.THINK_TIME) : 2);
 }
 
-function testHomePageLoad(headers) {
+function testHomePageLoad(_headers) {
   const url = `${BASE_URL}/home`;
 
   const startTime = new Date().getTime();
@@ -135,8 +133,8 @@ function testHomePageLoad(headers) {
   const duration = new Date().getTime() - startTime;
 
   check(res, {
-    'home page status 200': (r) => r.status === 200,
-    'home page load < 1.5s': (r) => duration < 1500,
+    'home page status 200': (_r) => _r.status === 200,
+    'home page load < 1.5s': (_r) => duration < 1500,
   });
 
   if (res.status !== 200) {

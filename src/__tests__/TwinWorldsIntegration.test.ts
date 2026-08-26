@@ -9,7 +9,7 @@
  * 4. All 12 worlds work without errors
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { buildTwinSystemPrompt } from '../config/twin-prompts';
 import { WORLDS, WorldId, getAllWorlds } from '../constants/worlds';
 import { getTwinWorldPrompt } from '../config/twin-prompts';

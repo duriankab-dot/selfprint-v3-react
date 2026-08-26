@@ -4,8 +4,6 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import * as DecisionService from '../services/DecisionService';
-import * as DecisionLearningService from '../services/DecisionLearningService';
 import type { Decision } from '../types/decision';
 
 // Mock data generator

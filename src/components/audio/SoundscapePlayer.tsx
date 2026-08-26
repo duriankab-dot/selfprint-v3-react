@@ -285,7 +285,7 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
       if (bufferToPlay) {
         play(bufferToPlay);
       }
-    } catch (error) {
+    } catch (_error) {
       // Failed to play audio
     }
 

@@ -176,7 +176,6 @@ describe('TwinChat World Routing E2E', () => {
 
     it('should update expertise based on decision outcomes', () => {
       // Simulate: decision in world → outcome recorded → expertise updated
-      const worldId: WorldId = 'wealth';
       let expertise = 50;
 
       // Positive outcome increases expertise

@@ -71,7 +71,7 @@ describe('World Routing', () => {
       const worldIds = Object.keys(WORLDS) as WorldId[];
 
       // This tests the contract that worlds can be tracked with expertise
-      for (const worldId of worldIds) {
+      for (const _worldId of worldIds) {
         const expertiseScore = Math.random() * 100;
         expect(expertiseScore).toBeGreaterThanOrEqual(0);
         expect(expertiseScore).toBeLessThanOrEqual(100);
@@ -112,7 +112,7 @@ describe('World Routing', () => {
       const outcomes = ['positive', 'neutral', 'negative'] as const;
 
       // Verify outcomes can be tagged per world
-      for (const worldId of worldIds) {
+      for (const _worldId of worldIds) {
         for (const outcome of outcomes) {
           expect(outcome).toBeTruthy();
         }
@@ -123,7 +123,7 @@ describe('World Routing', () => {
       const worldIds = Object.keys(WORLDS) as WorldId[];
 
       // Verify patterns can be stored per world with success rate
-      for (const worldId of worldIds) {
+      for (const _worldId of worldIds) {
         const successRate = Math.random() * 100;
         expect(successRate).toBeGreaterThanOrEqual(0);
         expect(successRate).toBeLessThanOrEqual(100);

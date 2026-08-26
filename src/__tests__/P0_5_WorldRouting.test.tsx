@@ -4,7 +4,7 @@
  * Tests world-specific routing, expertise display, and decision tracking
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('P0 #5: World Routing Integration', () => {
 
@@ -64,7 +64,6 @@ describe('P0 #5: World Routing Integration', () => {
 
   describe('Dashboard World Views', () => {
     it('should display world-specific insights', () => {
-      const world = 'career';
       const insights = {
         totalDecisions: 10,
         successRate: 70,
