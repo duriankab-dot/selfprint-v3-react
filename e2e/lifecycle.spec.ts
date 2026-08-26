@@ -267,7 +267,9 @@ test.describe('Lifecycle — Mobile Viewport (375px)', () => {
   test('LIFE-12 landing page has interactive elements on mobile', async ({ page }) => {
     // At 375px, landing CTA layout may differ from desktop (responsive CSS).
     // We verify the page is functional, not a specific button text.
+    // React SPA: wait for h1 so JS has rendered before counting buttons
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
+    await page.locator('h1').first().waitFor({ timeout: 10000 }).catch(() => {});
 
     // Must have at least 1 button (nav, CTA, hamburger menu — any is fine)
     const buttons = await page.locator('button').count();
@@ -323,7 +325,8 @@ test.describe('Lifecycle — API Health', () => {
     // Vercel Edge Function: cold start can take up to 40s on Hobby plan
     test.slow(); // triples the timeout (playwright.config.ts expects 180s → 540s cap)
 
-    const response = await page.request.get('/api/og', { timeout: 45000 });
+    // Endpoint requires lang + segment params (SK-05 uses same params)
+    const response = await page.request.get('/api/og?lang=en&segment=default', { timeout: 45000 });
     expect(response.status()).toBe(200);
     const ct = response.headers()['content-type'] ?? '';
     expect(ct).toContain('image/');
