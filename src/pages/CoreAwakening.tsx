@@ -88,6 +88,15 @@ export default function CoreAwakening() {
     }
   }, [session, navigate]);
 
+  // Force dark body background for ceremony page — body defaults to #FFFFFF
+  // (var(--color-bg-primary) in light mode from global.css) which bleeds
+  // through if the Tailwind gradient div doesn't cover the full viewport.
+  useEffect(() => {
+    const prev = document.body.style.background;
+    document.body.style.background = 'linear-gradient(to bottom, #0f172a, #1e3a5f, #0f172a)';
+    return () => { document.body.style.background = prev; };
+  }, []);
+
   // TWINPRESENCE-005: stop any in-progress/queued greeting if the user
   // navigates away mid-speech — it must not keep talking on the next page.
   useEffect(() => stopTwinVoice, []);
