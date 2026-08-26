@@ -26,6 +26,11 @@ dist-ssr
 .vercel
 .env*
 
+# E2E / Playwright artifacts
+test-results/
+playwright-report/
+blob-report/
+
 # Stray temp file — sandbox couldn't delete it (fuse-mount unlink bug),
 # safe to delete by hand on Windows whenever convenient
 tsconfig.api-check.tmp.json

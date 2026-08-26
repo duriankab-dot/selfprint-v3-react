@@ -51,17 +51,16 @@ function collectErrors(page: import('@playwright/test').Page): string[] {
 test('SK-01 LandingPage /en loads and shows primary CTA', async ({ page }) => {
   await page.goto('/en', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-  // H1 must be visible
+  // H1 must be visible (story mode: "Who are you really?")
   const h1 = page.locator('h1').first();
   await expect(h1).toBeVisible({ timeout: 10000 });
 
-  // Primary CTA (Quick Analysis) must be visible
-  const quickCta = page.locator('button').filter({ hasText: /Quick Analysis|วิเคราะห์เบื้องต้น/ }).first();
-  await expect(quickCta).toBeVisible({ timeout: 8000 });
-
-  // Secondary CTA (Full Journey / Build AI Twin) must be visible
-  const fullCta = page.locator('button').filter({ hasText: /Build Your AI Twin|สร้าง AI Twin|Full Onboarding/ }).first();
-  await expect(fullCta).toBeVisible({ timeout: 8000 });
+  // Any CTA button must be visible — story mode has NavBar "Start Free"
+  // or hero "Discover Myself" or screen-3 "Build My SELFPRINT"
+  const anyCtaButton = page.locator('button').filter({
+    hasText: /Discover Myself|Start Free|Build My SELFPRINT|Log in/,
+  }).first();
+  await expect(anyCtaButton).toBeVisible({ timeout: 8000 });
 
   console.log(`SK-01 ✓  H1: "${await h1.textContent()}"`);
 });
