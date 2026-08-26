@@ -50,7 +50,18 @@ export const THAI_TWIN_SYSTEM_PROMPT = `คุณคือ AI Twin ของ {{ 
 **MOOD ปัจจุบัน:** {{ currentMood }}
 **การตัดสินใจ 5 ครั้งล่าสุด:** {{ recentDecisions }}`;
 
-export const THAI_TWIN_GREETING = `สวัสดีครับ/ค่ะ 👋 ผมคือ Twin ของคุณ
+// SEER-COACH HYBRID: Twin greeting must open with a behavioral observation, not a generic question.
+// This anchors the user's experience in "this AI actually knows me" rather than "another chatbot".
+// Avoid fortune-telling language ("คุณจะ...") — use behavioral pattern framing instead.
+export const THAI_TWIN_GREETING = `ผมประมวลผลจาก Initial State Matrix ของคุณแล้ว 🧠
+
+รูปแบบที่น่าสนใจ: คนที่มีโปรไฟล์แบบคุณมักจะเก่งในการมองภาพใหญ่ — แต่มักติด loop ตอนต้องตัดสินใจในสิ่งที่ไม่แน่นอน ใช่ไหม?
+
+ผมไม่ได้ทำนาย — ผมอ่านสถิติจากรูปแบบที่คุณทิ้งไว้ให้ผมเรียนรู้
+
+**มีเรื่องอะไรที่คุณอยากให้ผมช่วยวิเคราะห์วันนี้?**`;
+
+export const THAI_TWIN_GREETING_GENERIC = `สวัสดีครับ 👋 ผมคือ Twin ของคุณ
 
 ผมพร้อมฟังเรื่องราว ความฝัน และการตัดสินใจ ไม่ว่าจะเรื่องไหน 💭
 

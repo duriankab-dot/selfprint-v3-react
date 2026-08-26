@@ -32,32 +32,36 @@ interface Message {
 
 // TROJAN-BRIDGE: Explicit messaging that DOB = behavioral analysis, not divination
 // Available in Thai and English for all markets
+// TROJAN-BRIDGE: Nova messaging bridges horoscope/fortune-telling intent → behavioral science.
+// Lead with language familiar to astrology users, then anchor in data — never cold-open with
+// scientific jargon. The DOB ask in particular must feel like a natural extension of "knowing
+// you" rather than an impersonal form field.
 const NOVA_MESSAGES_TH = {
   greeting:
-    'ขอถามข้อมูลสำคัญเพื่อให้ Twin ของคุณเรียนรู้ behavioral pattern ที่ทำให้การตัดสินใจของคุณเป็นแบบที่เป็นอยู่ — ไม่ใช่ดูดวง แต่เป็นการวิเคราะห์จริงจากสถิติพฤติกรรม',
-  dob: 'คุณเกิดวันไหน? (ไม่ใช่เพื่อดูดวง — Birth data ช่วยคำนวณ baseline พฤติกรรม เช่น chronotype และแนวโน้มวงจรการตัดสินใจ) เช่น 1990-01-15',
-  time: 'เกิดเวลาไหน? (ไม่บังคับ — ถ้ารู้จะช่วย calibrate behavioral rhythm ได้ละเอียดขึ้น รูปแบบ HH:MM เช่น 14:30)',
-  place: 'แล้วเกิดที่ไหน? (ไม่บังคับ — ใช้สำหรับ environmental baseline ของ behavioral pattern เช่น กรุงเทพฯ)',
+    'สวัสดีครับ 👁️ ผมคือ Nova — คุณมาที่นี่เพราะอยากเข้าใจตัวเอง หรืออยากรู้ว่าอนาคตควรเดินทางไหน ผมจะไม่ทำนายดวง — แต่ผมจะให้สิ่งที่แม่นกว่า: ถอดรหัสรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ ข้อมูลบอกได้มากกว่าดาว',
+  dob: 'ขอนำวันเดือนปีเกิดของคุณไปคำนวณหน่อยนะ (ไม่ใช่การดูดวงตามดวงดาว — แต่ระบบจะใช้ข้อมูลช่วงเวลาเพื่อถอดรหัส Initial State Matrix สภาวะเริ่มต้น เพื่อดูแนวโน้มพฤติกรรมที่ซ่อนอยู่ของคุณ — เช่น วงจรการตัดสินใจ และ chronotype ที่ทำให้คุณเป็นแบบที่เป็น) เช่น 1990-01-15',
+  time: 'เกิดเวลาไหน? (ไม่บังคับ — ยิ่งละเอียดยิ่ง calibrate behavioral rhythm ได้แม่นขึ้น รูปแบบ HH:MM เช่น 14:30)',
+  place: 'แล้วเกิดที่ไหน? (ไม่บังคับ — ใช้ตั้ง environmental baseline เช่น กรุงเทพฯ)',
   confirm: (dob: string, time?: string, place?: string) => {
-    let msg = `รับทราบ! ${dob}`;
-    if (time) msg += ` เกิดเวลา ${time}`;
+    let msg = `รับทราบ ✓ ${dob}`;
+    if (time) msg += ` เวลา ${time}`;
     if (place) msg += ` ที่ ${place}`;
-    msg += ' — ข้อมูลเหล่านี้จะสร้าง Initial State Matrix ของคุณ ไม่ใช่ดวงชะตา แต่เป็น baseline ที่ Twin จะเรียนรู้จากคุณต่อไป พร้อมเจอ AI Twin หรือยัง?';
+    msg += ' — ข้อมูลเหล่านี้ไม่ใช่ดวงชะตา แต่เป็น Initial State Matrix — baseline ที่ Twin ของคุณจะเรียนรู้และพัฒนาต่อไปตามตัวคุณจริงๆ พร้อมเจอ AI Twin ของตัวเองหรือยัง?';
     return msg;
   },
 };
 
 const NOVA_MESSAGES_EN = {
   greeting:
-    'I need some important information so your Twin can learn the behavioral patterns that shape how you make decisions — not divination, but real analysis based on behavioral statistics.',
-  dob: 'When were you born? (Not for fortune-telling — birth data helps calculate your behavioral baseline, like your chronotype and decision-cycle patterns.) For example: 1990-01-15',
-  time: 'What time were you born? (Optional — knowing this helps calibrate your behavioral rhythm more precisely. Format: HH:MM, like 14:30)',
-  place: 'Where were you born? (Optional — helps establish your environmental baseline in behavioral patterns. For example: Bangkok)',
+    "Hello 👁️ I'm Nova. Whether you came here curious about your future or wanting to understand yourself better — I won't tell your fortune. Instead, I'll give you something more accurate: a behavioral pattern analysis built from your actual data. Statistics reveal more than stars ever could.",
+  dob: 'Let me take your birth date to start building your profile. (This isn\'t fortune-telling — the system uses temporal data to decode your Initial State Matrix: the behavioral tendencies and decision-cycle patterns that make you who you are.) For example: 1990-01-15',
+  time: 'What time were you born? (Optional — the more precise, the better we can calibrate your behavioral rhythm. Format: HH:MM, like 14:30)',
+  place: 'Where were you born? (Optional — used for environmental baseline calibration. For example: Bangkok)',
   confirm: (dob: string, time?: string, place?: string) => {
-    let msg = `Got it! ${dob}`;
+    let msg = `Got it ✓ ${dob}`;
     if (time) msg += ` at ${time}`;
     if (place) msg += ` in ${place}`;
-    msg += ' — this data will create your Initial State Matrix — not your destiny, but a baseline your Twin will learn from as you interact. Ready to meet your AI Twin?';
+    msg += " — this isn't your destiny. It's your Initial State Matrix — a behavioral baseline your Twin will learn from and refine as you grow. Ready to meet your AI Twin?";
     return msg;
   },
 };
