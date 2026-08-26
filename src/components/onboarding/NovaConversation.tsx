@@ -7,6 +7,7 @@
  */
 
 import { useState, useRef, useEffect } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import type { Mood } from '@/context/EmotionContext';
 
 interface BirthData {
@@ -29,9 +30,9 @@ interface Message {
   timestamp: number;
 }
 
-const NOVA_MESSAGES = {
-  // TROJAN-BRIDGE-001: ระบุชัดว่านี่คือ behavioral science ไม่ใช่ดูดวง
-  // ทำให้ผู้ใช้ที่มาจาก "ดูดวง AI" hook เข้าใจว่ากำลังทำอะไรอยู่จริงๆ
+// TROJAN-BRIDGE: Explicit messaging that DOB = behavioral analysis, not divination
+// Available in Thai and English for all markets
+const NOVA_MESSAGES_TH = {
   greeting:
     'ขอถามข้อมูลสำคัญเพื่อให้ Twin ของคุณเรียนรู้ behavioral pattern ที่ทำให้การตัดสินใจของคุณเป็นแบบที่เป็นอยู่ — ไม่ใช่ดูดวง แต่เป็นการวิเคราะห์จริงจากสถิติพฤติกรรม',
   dob: 'คุณเกิดวันไหน? (ไม่ใช่เพื่อดูดวง — Birth data ช่วยคำนวณ baseline พฤติกรรม เช่น chronotype และแนวโน้มวงจรการตัดสินใจ) เช่น 1990-01-15',
@@ -46,9 +47,27 @@ const NOVA_MESSAGES = {
   },
 };
 
+const NOVA_MESSAGES_EN = {
+  greeting:
+    'I need some important information so your Twin can learn the behavioral patterns that shape how you make decisions — not divination, but real analysis based on behavioral statistics.',
+  dob: 'When were you born? (Not for fortune-telling — birth data helps calculate your behavioral baseline, like your chronotype and decision-cycle patterns.) For example: 1990-01-15',
+  time: 'What time were you born? (Optional — knowing this helps calibrate your behavioral rhythm more precisely. Format: HH:MM, like 14:30)',
+  place: 'Where were you born? (Optional — helps establish your environmental baseline in behavioral patterns. For example: Bangkok)',
+  confirm: (dob: string, time?: string, place?: string) => {
+    let msg = `Got it! ${dob}`;
+    if (time) msg += ` at ${time}`;
+    if (place) msg += ` in ${place}`;
+    msg += ' — this data will create your Initial State Matrix — not your destiny, but a baseline your Twin will learn from as you interact. Ready to meet your AI Twin?';
+    return msg;
+  },
+};
+
 export const NovaConversation: React.FC<NovaConversationProps> = ({
   onComplete,
 }) => {
+  const { language } = useLanguage();
+  const NOVA_MESSAGES = language === 'th' ? NOVA_MESSAGES_TH : NOVA_MESSAGES_EN;
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
