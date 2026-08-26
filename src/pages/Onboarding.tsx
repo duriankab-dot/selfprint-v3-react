@@ -91,7 +91,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const navigate = useNavigate();
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
-  const { session } = useAuth();
+  const { session, loading: authLoading } = useAuth();
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
 
   // Guard against re-entry — if user already passed ONBOARDING, redirect.
@@ -109,12 +109,25 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const isLifecycleLoading = useLifecycleStore((state) => state.isLoading);
   const hasCheckedReentry = useRef(false);
   useEffect(() => {
-    if (isLifecycleLoading || hasCheckedReentry.current) return;
+    if (isLifecycleLoading || authLoading || hasCheckedReentry.current) return;
     hasCheckedReentry.current = true;
     if (status && status !== 'ONBOARDING') {
       navigate('/analysis', { replace: true });
+      return;
     }
-  }, [status, isLifecycleLoading, navigate]);
+    // MAGIC-LINK-RETURN-FIX: user authenticated (magic link clicked) but lifecycle
+    // is still ONBOARDING — means they completed onboarding earlier but the status
+    // write timed out. They have a saved resume key. Skip the entire question flow
+    // and go straight to claim-account, which detects the session immediately and
+    // calls onDone() → transitionTo('ANALYSIS') → navigate to /core-awakening.
+    if (session?.user?.id && status === 'ONBOARDING') {
+      const saved = localStorage.getItem('selfprint_onboarding_resume');
+      if (saved) {
+        hasRestoredStep.current = true; // block resume effect from overriding below
+        setStep('claim-account');
+      }
+    }
+  }, [status, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
   const [siceResult, setSiceResult] = useState<{

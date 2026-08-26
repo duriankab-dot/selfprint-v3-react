@@ -111,7 +111,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
   routes.push(
     <Route key="en-home" path="/en/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/en/onboarding'} />} />,
     <Route key="th-home" path="/th/" element={<HomeRoute onStartOnboarding={() => window.location.href = '/th/onboarding'} />} />,
-    <Route key="home-redirect" path="/" element={<Navigate to="/en/" replace />} />
+    <Route key="home-redirect" path="/" element={<Navigate to="/th/" replace />} />
   );
 
   // Public pages (support both /en and /th)
@@ -221,8 +221,8 @@ function App() {
                               <Suspense fallback={null}>
                                 <Routes>
                                   {getLanguagePrefixedRoutes()}
-                                  {/* Catch-all fallback redirects to /en/ */}
-                                  <Route path="*" element={<Navigate to="/en/" replace />} />
+                                  {/* Catch-all fallback redirects to /th/ (Thai market first) */}
+                                  <Route path="*" element={<Navigate to="/th/" replace />} />
                                 </Routes>
                               </Suspense>
                                 </LanguageProvider>
