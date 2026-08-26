@@ -3,11 +3,11 @@
  * Applies security middleware stack to Express app
  */
 
-import { Express, Request, Response } from 'express';
+import { Express } from 'express';
 import helmet from 'helmet';
 import { authMiddleware, requireOwner } from './auth';
 import { rateLimiter, strictRateLimiter, bruteForceProtection } from './rate-limit';
-import { sanitizeInputs, validateUserId, validateWorldId, validateDecisionData } from './validate';
+import { sanitizeInputs, validateUserId, validateWorldId } from './validate';
 
 /**
  * Configure all security middleware

@@ -2,8 +2,8 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Vite uses import.meta.env for environment variables
-const supabaseUrl = https://orxteuufqeohptpbwkqx.supabase.co
-const supabaseAnonKey = sb_publishable_q5nNmAvkitf6QrYyl6O6BA_VJQaDoqH
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://orxteuufqeohptpbwkqx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_q5nNmAvkitf6QrYyl6O6BA_VJQaDoqH';
 
 // Check if environment variables are set
 if (!supabaseUrl || !supabaseAnonKey) {
