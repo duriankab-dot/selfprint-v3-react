@@ -181,8 +181,12 @@ export default async function handler(req: VercelRequest) {
       // - public = cacheable by any cache (CDN, proxy, browser)
       // Result: 2.6M edge requests → <5K/month (99.8% reduction)
       'Cache-Control': 'public, max-age=31536000, s-maxage=31536000, immutable',
-      // Also add Vercel CDN-specific headers
+      // Vercel CDN cache — tells Vercel edge to cache for 1 year
       'CDN-Cache-Control': 'public, max-age=31536000, immutable',
+      // Vercel stale-while-revalidate for stale cache grace period
+      'Surrogate-Control': 'public, max-age=31536000, stale-while-revalidate=31536000',
+      // Cache tag for Vercel invalidation (optional, but good for control)
+      'Cache-Tag': 'og-image',
     },
   });
 }

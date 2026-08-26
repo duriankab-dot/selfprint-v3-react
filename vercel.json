@@ -4,6 +4,11 @@
   "installCommand": "npm install --legacy-peer-deps",
   "framework": "vite",
   "functions": {
+    "api/og.ts": {
+      "runtime": "nodejs18.x",
+      "maxDuration": 30,
+      "memory": 3008
+    },
     "api/unified-handler.ts": {
       "maxDuration": 10,
       "regions": ["hnd1"]
