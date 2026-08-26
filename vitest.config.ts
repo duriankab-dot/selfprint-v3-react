@@ -24,6 +24,7 @@ export default defineConfig({
       '**/lib/prompts/__tests__/promptBuilder.test.ts', // P0-F
       '**/lib/worlds/__tests__/worldsVerification.test.ts', // P0-G
       '**/lib/memory/__tests__/memoryLoop.test.ts',         // P0-I
+      '**/lib/entry/__tests__/entryResolver.test.ts',       // Smart Entry (P0-SMART)
     ],
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
