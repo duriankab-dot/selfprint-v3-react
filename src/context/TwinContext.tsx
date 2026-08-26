@@ -8,11 +8,12 @@
  * - Twin: Personal expert (persistent, Acts 2-3+)
  */
 
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
 import { createDecision } from '../services/DecisionService';
+import { AuthContext } from './AuthContext';
 import { calculateMaturityScore } from '../services/DynamicValueCalculator';
 import {
   fetchUserTwin,
@@ -264,18 +265,17 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     }
   }, [twin?.id, twin?.userId]);
 
-  // Load Twin from Supabase on mount
-  React.useEffect(() => {
-    const loadTwin = async () => {
-      // Get current user ID from auth context (if available)
-      // GUARD: Must be called after auth is ready
-      try {
-        // Note: This assumes AuthContext provides user ID
-        // In real implementation, extract from useAuth()
-        const stored = localStorage.getItem('selfprint_user_id');
-        if (!stored) return;
+  // Load Twin from Supabase when auth session is ready
+  // RULE: userId must come from auth session, never from localStorage (CLAUDE.md)
+  const authCtx = useContext(AuthContext);
+  const authUserId = authCtx?.session?.user?.id ?? null;
 
-        const fetchedTwin = await fetchUserTwin(stored);
+  React.useEffect(() => {
+    if (!authUserId) return; // not authenticated — nothing to load
+
+    const loadTwin = async () => {
+      try {
+        const fetchedTwin = await fetchUserTwin(authUserId);
         if (fetchedTwin) {
           setTwin({
             ...fetchedTwin,
@@ -289,7 +289,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     };
 
     loadTwin();
-  }, []);
+  }, [authUserId]); // re-run when auth state changes (login/logout)
 
   const value: TwinContextType = {
     twin,
