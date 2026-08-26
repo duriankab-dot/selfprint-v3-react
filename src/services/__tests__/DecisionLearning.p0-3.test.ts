@@ -9,9 +9,7 @@
  * 4. Twin learns from outcomes
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import * as DecisionLearning from '../DecisionLearningService';
-import * as DecisionService from '../DecisionService';
+import { describe, it, expect } from 'vitest';
 import type { DecisionPattern } from '../../types/decision';
 
 describe('P0 #3: Decision Learning Loop', () => {

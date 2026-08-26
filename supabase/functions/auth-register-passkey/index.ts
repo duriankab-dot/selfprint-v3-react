@@ -47,11 +47,6 @@ function uint8ArrayToBase64Url(arr: Uint8Array): string {
     .replace(/=+$/, '');
 }
 
-async function hashSHA256(data: Uint8Array): Promise<Uint8Array> {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  return new Uint8Array(hashBuffer);
-}
-
 function parseClientDataJSON(clientDataJSON: string): {
   type: string;
   challenge: string;
@@ -152,7 +147,6 @@ serve(async (req) => {
 
     // ─── Verify Challenge ──────────────────────────────────────
 
-    const clientDataJSON = base64UrlToUint8Array(credential.response.clientDataJSON);
     const clientData = parseClientDataJSON(credential.response.clientDataJSON);
 
     // Verify type
@@ -179,7 +173,6 @@ serve(async (req) => {
     }
 
     // Verify origin (basic check — in production, compare against config)
-    const reqOrigin = new URL(req.url).origin;
     if (!clientData.origin.includes('localhost') && !clientData.origin.includes('selfprint.one')) {
       // Allow localhost for testing, selfprint.one for production
       console.warn(`Unusual origin: ${clientData.origin}`);
@@ -190,7 +183,7 @@ serve(async (req) => {
     const attestationObjectBytes = base64UrlToUint8Array(credential.response.attestationObject);
     const attestationObject = decodeCBOR(attestationObjectBytes);
 
-    const { fmt, attStmt, authData: authDataRaw } = attestationObject;
+    const { fmt, authData: authDataRaw } = attestationObject;
 
     // For MVP: only support 'none' attestation
     if (fmt !== 'none') {
@@ -208,7 +201,7 @@ serve(async (req) => {
 
     // ─── Store in Database ────────────────────────────────────
 
-    const { data: insertedCred, error: dbError } = await supabase
+    const { data: _insertedCred, error: dbError } = await supabase
       .from('user_credentials')
       .insert({
         user_id: email,

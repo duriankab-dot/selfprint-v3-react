@@ -63,7 +63,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (stored) {
       try {
         return new Set(JSON.parse(stored));
-      } catch (error) {
+      } catch (_error) {
         // Failed to load shown popups from storage
       }
     }

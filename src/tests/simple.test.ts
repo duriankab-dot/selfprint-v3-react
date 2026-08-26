@@ -1,7 +1,7 @@
 /**
  * Simple smoke test to verify mock setup works
  */
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 describe('Supabase Mock', () => {
   it('should have Supabase client mocked', async () => {

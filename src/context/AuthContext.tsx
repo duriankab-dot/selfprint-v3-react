@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const biometric = await passkeyProvider.isBiometricAvailable();
         setIsPasskeyAvailable(available);
         setHasBiometric(biometric);
-      } catch (error) {
+      } catch (_error) {
         // Passkey not available
       }
     })();

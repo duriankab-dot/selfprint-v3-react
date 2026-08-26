@@ -86,7 +86,7 @@ export const useDecisionStore = create<DecisionStore>((set, get) => ({
       }
 
       set({ decisions, isLoading: false, overallSuccessRate, pendingFollowUpsCount });
-    } catch (error) {
+    } catch (_error) {
       // Error handled silently - logged upstream by service
       set({ decisions: [], isLoading: false });
     }

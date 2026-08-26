@@ -198,7 +198,7 @@ export function reconstructClientData(clientDataJSON: string): ClientData {
       origin: decoded.origin,
       crossOrigin: decoded.crossOrigin,
     };
-  } catch (error) {
+  } catch (_error) {
     throw new Error('Invalid client data JSON');
   }
 }

@@ -69,7 +69,6 @@ describe('P0-C: Observability Verification', () => {
 
       const p50 = times[Math.floor(times.length * 0.5)];
       const p95 = times[Math.floor(times.length * 0.95)];
-      const p99 = times[Math.floor(times.length * 0.99)];
 
       expect(p50).toBe(300);
       expect(p95).toBeGreaterThan(400);
@@ -277,8 +276,8 @@ describe('P0-C: Observability Verification', () => {
         alertRulesConfigured: 7, // 7 alert rules
         slackNotificationsWorking: true,
         emailAlertsWorking: true,
-        errorRateUnder01Percent: 0.08 < 0.1,
-        apiResponseTimeGood: 245 < 1000,
+        errorRateUnder01Percent: true, // 0.08 < 0.1
+        apiResponseTimeGood: true, // 245 < 1000
         noUnhandledExceptions: true,
         incidentDrillCompleted: true,
       };

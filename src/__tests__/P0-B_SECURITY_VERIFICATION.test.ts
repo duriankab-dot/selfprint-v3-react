@@ -95,7 +95,6 @@ describe('P0-B: Security Middleware Verification', () => {
     });
 
     it('should return 429 when rate limit exceeded', () => {
-      const clientIp = '192.168.1.1';
       const maxRequests = 5;
       let requestCount = 0;
 

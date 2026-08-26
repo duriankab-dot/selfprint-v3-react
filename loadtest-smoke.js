@@ -1,6 +1,6 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
-import { Trend, Counter, Rate } from 'k6/metrics';
+import { Trend, Rate } from 'k6/metrics';
 
 const BASE_URL = __ENV.BASE_URL || 'https://www.selfprint.one';
 

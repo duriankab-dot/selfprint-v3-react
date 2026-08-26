@@ -142,7 +142,7 @@ self.addEventListener('push', (event) => {
       badge: payload.badge || options.badge,
       icon: payload.icon || options.icon,
     };
-  } catch (error) {
+  } catch (_error) {
     // Fallback: treat data as text
     options.body = event.data.text();
   }

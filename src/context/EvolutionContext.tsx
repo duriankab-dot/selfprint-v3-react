@@ -44,7 +44,7 @@ export const EvolutionProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (stored) {
       try {
         return JSON.parse(stored);
-      } catch (error) {
+      } catch (_error) {
         // Failed to load evolution state from storage, use default
       }
     }

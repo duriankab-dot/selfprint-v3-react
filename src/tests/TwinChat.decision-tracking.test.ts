@@ -173,12 +173,6 @@ describe('TwinChat Decision Tracking (P0 #5)', () => {
         selectedChoice?: string;
       }
 
-      const message: Message = {
-        role: 'twin',
-        content: 'Consider this carefully.',
-        // No options extracted
-      };
-
       // Default options used
       const defaultOptions = ['Accepted', 'Deferred', 'Rejected'];
       const canSave = true; // No extracted options = use defaults
@@ -328,12 +322,7 @@ describe('TwinChat Decision Tracking (P0 #5)', () => {
       const worldId = 'wealth';
       const userMessage = 'Should I invest in the stock market?';
 
-      // 1. Twin responds with options
-      const twinResponse = `Consider these approaches:
-1. Start with index funds for diversification
-2. Focus on individual stock research
-3. Consult a financial advisor first`;
-
+      // 1. Twin responds with options (comment for clarity)
       // 2. Extract options
       const options = [
         'Start with index funds for diversification',

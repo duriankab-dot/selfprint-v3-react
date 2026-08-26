@@ -11,7 +11,7 @@
  * - Edge cases + error handling
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import * as DecisionService from '../services/DecisionService';
 import type { Decision } from '../types/decision';
 

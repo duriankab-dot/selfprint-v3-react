@@ -159,7 +159,7 @@ serve(async (req) => {
 
   try {
     const body = (await req.json()) as RequestBody;
-    const { email, assertion } = body;
+    const { assertion } = body;
 
     if (!assertion) {
       return new Response(JSON.stringify({ error: 'Assertion required' }), {
