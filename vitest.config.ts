@@ -25,6 +25,7 @@ export default defineConfig({
       '**/lib/worlds/__tests__/worldsVerification.test.ts', // P0-G
       '**/lib/memory/__tests__/memoryLoop.test.ts',         // P0-I
       '**/lib/entry/__tests__/entryResolver.test.ts',       // Smart Entry (P0-SMART)
+      '**/lib/visual/__tests__/VisualStateEngine.test.ts',  // Visual State Engine (P2-8)
     ],
     env: {
       // Dummy credentials — prevents client.ts from throwing in test env
