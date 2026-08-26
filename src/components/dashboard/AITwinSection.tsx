@@ -1,80 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { ShareButton } from '@/components/viral/ShareButton';
 import './AITwinSection.css';
-
-interface Profile {
-  date_of_birth: string | null;
-  time_of_birth: string | null;
-  place_of_birth: string | null;
-  initial_mood: string | null;
-}
-
-interface Blueprint {
-  accuracy_level: number;
-  decision_style: string | null;
-  strengths: string[];
-  insights: string[];
-  opportunities: string[];
-  blind_spots: string[];
-  prototype_core: string | null;
-  source: string;
-  created_at: string;
-}
 
 type LoadState = 'loading' | 'no-session' | 'empty' | 'error' | 'ready';
 
 const AITwinSection: React.FC = () => {
   const { session, loading: authLoading } = useAuth();
-  const [state, setState] = useState<LoadState>('loading');
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [blueprint, setBlueprint] = useState<Blueprint | null>(null);
+  const userId = session?.user?.id ?? '';
 
-  useEffect(() => {
-    if (authLoading) return;
+  // P2-HOTFIX: Use React Query for automatic deduplication & caching
+  // Prevents duplicate fetch calls when component remounts
+  const { data: profileData, isLoading: profileLoading } = useQuery({
+    queryKey: ['userProfile', userId],
+    queryFn: async () => {
+      if (!session?.access_token) return null;
+      const res = await fetch('/api/profile', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch profile');
+      return res.json().then((d) => d.profile);
+    },
+    enabled: !!session?.access_token && !!userId,
+    staleTime: 5 * 60 * 1000, // 5 min cache
+  });
 
-    if (!session?.access_token) {
-      setState('no-session');
-      return;
-    }
+  const { data: blueprintData, isLoading: blueprintLoading } = useQuery({
+    queryKey: ['userBlueprint', userId],
+    queryFn: async () => {
+      if (!session?.access_token) return null;
+      const res = await fetch('/api/blueprint', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      if (!res.ok) throw new Error('Failed to fetch blueprint');
+      return res.json().then((d) => d.blueprint);
+    },
+    enabled: !!session?.access_token && !!userId,
+    staleTime: 5 * 60 * 1000, // 5 min cache
+  });
 
-    let cancelled = false;
+  // Determine state based on query status
+  const getState = (): LoadState => {
+    if (authLoading || profileLoading || blueprintLoading) return 'loading';
+    if (!session?.access_token) return 'no-session';
+    if (!blueprintData) return 'empty';
+    return 'ready';
+  };
 
-    (async () => {
-      try {
-        const headers = { Authorization: `Bearer ${session.access_token}` };
-        const [profileRes, blueprintRes] = await Promise.all([
-          fetch('/api/profile', { headers }),
-          fetch('/api/blueprint', { headers }),
-        ]);
-
-        if (!profileRes.ok || !blueprintRes.ok) {
-          if (!cancelled) setState('error');
-          return;
-        }
-
-        const profileJson = await profileRes.json();
-        const blueprintJson = await blueprintRes.json();
-
-        if (cancelled) return;
-
-        if (!blueprintJson.blueprint) {
-          setState('empty');
-          return;
-        }
-
-        setProfile(profileJson.profile);
-        setBlueprint(blueprintJson.blueprint);
-        setState('ready');
-      } catch {
-        if (!cancelled) setState('error');
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [session, authLoading]);
+  const state = getState();
+  const profile = profileData;
+  const blueprint = blueprintData;
 
   if (state === 'loading') {
     return (
@@ -143,16 +119,16 @@ const AITwinSection: React.FC = () => {
     }
 
     if (blueprint.strengths?.length > 0) {
-      lines.push('จุดแข็ง:', ...blueprint.strengths.map((s) => `- ${s}`), '');
+      lines.push('จุดแข็ง:', ...blueprint.strengths.map((s: string) => `- ${s}`), '');
     }
     if (blueprint.insights?.length > 0) {
-      lines.push('ข้อมูลเชิงลึก:', ...blueprint.insights.map((s) => `- ${s}`), '');
+      lines.push('ข้อมูลเชิงลึก:', ...blueprint.insights.map((s: string) => `- ${s}`), '');
     }
     if (blueprint.opportunities?.length > 0) {
-      lines.push('โอกาส:', ...blueprint.opportunities.map((s) => `- ${s}`), '');
+      lines.push('โอกาส:', ...blueprint.opportunities.map((s: string) => `- ${s}`), '');
     }
     if (blueprint.blind_spots?.length > 0) {
-      lines.push('จุดบอด:', ...blueprint.blind_spots.map((s) => `- ${s}`), '');
+      lines.push('จุดบอด:', ...blueprint.blind_spots.map((s: string) => `- ${s}`), '');
     }
 
     const content = lines.join('\n');
@@ -197,7 +173,7 @@ const AITwinSection: React.FC = () => {
           <div className="twin-block">
             <h3>จุดแข็ง</h3>
             <ul>
-              {blueprint.strengths.map((s, i) => (
+              {blueprint.strengths.map((s: string, i: number) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>
@@ -208,7 +184,7 @@ const AITwinSection: React.FC = () => {
           <div className="twin-block">
             <h3>ข้อมูลเชิงลึก</h3>
             <ul>
-              {blueprint.insights.map((s, i) => (
+              {blueprint.insights.map((s: string, i: number) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>
@@ -219,7 +195,7 @@ const AITwinSection: React.FC = () => {
           <div className="twin-block">
             <h3>โอกาส</h3>
             <ul>
-              {blueprint.opportunities.map((s, i) => (
+              {blueprint.opportunities.map((s: string, i: number) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>
@@ -230,7 +206,7 @@ const AITwinSection: React.FC = () => {
           <div className="twin-block">
             <h3>จุดบอด</h3>
             <ul>
-              {blueprint.blind_spots.map((s, i) => (
+              {blueprint.blind_spots.map((s: string, i: number) => (
                 <li key={i}>{s}</li>
               ))}
             </ul>

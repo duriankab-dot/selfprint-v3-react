@@ -55,27 +55,56 @@ export async function handler(request: Request): Promise<Response> {
       );
     }
 
+    // Build response headers with caching for edge function optimization (P2-HOTFIX)
+    const getCacheHeaders = (maxAge: number = 300) => ({
+      'Cache-Control': `public, max-age=${maxAge}, stale-while-revalidate=3600`,
+      'CDN-Cache-Control': `public, max-age=${maxAge}`,
+    });
+
+    let response: Response;
+
     switch (module) {
       case 'notifications':
-        return handleNotifications(request, action, url);
+        response = await handleNotifications(request, action, url);
+        break;
       case 'twin-evolution':
-        return handleTwinEvolution(request, action, url);
+        response = await handleTwinEvolution(request, action, url);
+        break;
       case 'sice':
-        return handleSICE(request, action, url);
+        response = await handleSICE(request, action, url);
+        break;
       case 'stripe':
-        return handleStripe(request, action, user);
+        response = await handleStripe(request, action, user);
+        break;
       case 'share':
-        return handleShare(request, url);
+        response = await handleShare(request, url);
+        break;
       case 'profile':
-        return handleProfile(request, action, user);
+        response = await handleProfile(request, action, user);
+        // Cache profile for 5 min to reduce edge requests
+        if (response.ok) {
+          Object.entries(getCacheHeaders(300)).forEach(([key, value]) => {
+            response.headers.set(key, value);
+          });
+        }
+        break;
       case 'blueprint':
-        return handleBlueprint(request, action, user);
+        response = await handleBlueprint(request, action, user);
+        // Cache blueprint for 5 min to reduce edge requests
+        if (response.ok) {
+          Object.entries(getCacheHeaders(300)).forEach(([key, value]) => {
+            response.headers.set(key, value);
+          });
+        }
+        break;
       default:
-        return Response.json(
+        response = Response.json(
           { success: false, error: `Unknown module: ${module}` } as ApiResponse,
           { status: 400 }
         );
     }
+
+    return response;
   } catch (error) {
     console.error('Error in unified handler:', error);
     return Response.json(
