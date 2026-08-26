@@ -7,7 +7,7 @@
     "api/og.ts": {
       "runtime": "nodejs18.x",
       "maxDuration": 30,
-      "memory": 3008
+      "memory": 1024
     },
     "api/unified-handler.ts": {
       "maxDuration": 10,
