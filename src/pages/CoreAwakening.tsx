@@ -223,10 +223,12 @@ export default function CoreAwakening() {
         lang: language === 'th' ? 'th-TH' : 'en-US',
       });
 
-      // Redirect to Twin chat
+      // P0-A FIX: Redirect to World Selector (not /chat/twin)
+      // V5 Section 10: Twin Birth → World Routing, not direct to Twin chat
+      // User enters Twin through a world context, not standalone
       setTimeout(() => {
         setPhase('complete');
-        navigate('/chat/twin', { replace: true });
+        navigate('/worlds', { replace: true });
       }, 4000);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to awaken Twin';
