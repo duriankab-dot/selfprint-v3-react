@@ -171,6 +171,30 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       };
       setAnalysisProfile(analysisResponse);
     }
+
+    // ONBOARDING-RESUME-001: GAP-2 sets siceResult/analysisProfile but leaves step='emotion'.
+    // User sees emotion selector instead of their Quick Analysis results.
+    // Advance to sice-result, but honor a later resume step if the user already progressed.
+    const STEP_ORDER: OnboardingStep[] = [
+      'emotion', 'nova-conversation', 'ai-creation', 'birthdate',
+      'sice-result', 'fine-tune', 'complete', 'claim-account',
+    ];
+    let targetStep: OnboardingStep = 'sice-result';
+    try {
+      const saved = localStorage.getItem('selfprint_onboarding_resume');
+      if (saved) {
+        const resumeData = JSON.parse(saved) as { step: OnboardingStep };
+        const resumeIdx = STEP_ORDER.indexOf(resumeData.step);
+        const siceIdx = STEP_ORDER.indexOf('sice-result');
+        const claimIdx = STEP_ORDER.indexOf('claim-account');
+        // Honor resume if it's a later step than sice-result but not claim-account
+        // (claim-account requires an active session context that may not be present)
+        if (resumeIdx > siceIdx && resumeIdx < claimIdx) {
+          targetStep = resumeData.step;
+        }
+      }
+    } catch { /* use sice-result fallback */ }
+    setStep(targetStep);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -211,6 +235,12 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       if (!dob) return;
       if (!birthData) setBirthData({ dob, time: data.time, place: data.place });
       if (!siceResult) setSiceResult({ accuracy: data.accuracy ?? 65, disciplines: calculateInitialDisciplines(dob) });
+      // ONBOARDING-RESUME-002: analysisProfile is not persisted in localStorage (too large).
+      // Without it, step='complete' renders nothing (JSX guard: siceResult && analysisProfile).
+      // Generate fallback so FullAnalysis actually renders when restoring to 'complete'.
+      if (data.step === 'complete') {
+        setAnalysisProfile(buildFallbackResponse({ mood, birthDate: dob, finetuneAnswers: {} }));
+      }
       setStep(data.step);
     } catch { /* corrupted data — start fresh */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -39,12 +39,17 @@ export function useRecoveryRoute() {
   const { session, loading: authLoading } = useAuth();
   const status = useLifecycleStore((state) => state.status);
   const isLoading = useLifecycleStore((state) => state.isLoading);
+  const lifecycleError = useLifecycleStore((state) => state.error);
   const setEntryPath = useLifecycleStore((state) => state.setEntryPath);
   const recoveredForUserId = useRef<string | null>(null);
 
   useEffect(() => {
     // Wait for auth and lifecycle to load
     if (authLoading || isLoading) return;
+    // CLOCK-SKEW-FIX: if lifecycle load failed (401/JWT), status stays at store default
+    // ('ONBOARDING') — routing based on that default sends the user to /onboarding even
+    // if they finished onboarding. Block routing when the real status is unknown.
+    if (lifecycleError) return;
     if (!session?.user?.id) {
       recoveredForUserId.current = null; // logged out — re-arm
       return;
@@ -83,7 +88,7 @@ export function useRecoveryRoute() {
     if (!currentPath.includes(targetRoute)) {
       navigate(prefixedTarget, { replace: true });
     }
-  }, [session, authLoading, status, isLoading, navigate, setEntryPath]);
+  }, [session, authLoading, status, isLoading, lifecycleError, navigate, setEntryPath]);
 }
 
 /**
