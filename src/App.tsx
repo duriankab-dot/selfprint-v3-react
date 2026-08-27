@@ -75,6 +75,10 @@ const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
+// Blog pages
+const BlogIndex = lazy(() => import('./pages/BlogIndex'));
+const BlogArticle = lazy(() => import('./pages/BlogArticle'));
+const BlogListPage = BlogIndex; // Alias for route compatibility
 // Phase B: new activity pages
 const TarotPage = lazy(() => import('./pages/TarotPage'));
 const PalmistryPage = lazy(() => import('./pages/PalmistryPage'));
@@ -167,7 +171,8 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/science', element: <SciencePage /> },
     { path: '/contact', element: <ContactPage /> },
     { path: '/terms', element: <TermsPage /> },
-    { path: '/blog', element: <BlogListPage /> },
+    { path: '/blog', element: <BlogIndex /> },
+    { path: '/blog/:world/:category/:slug', element: <BlogArticle /> },
   ];
 
   // Add all public routes for both languages
@@ -177,6 +182,11 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
       <Route key={`th-${idx}`} path={`/th${page.path}`} element={page.element} />
     );
   });
+
+  // Add blog article route (no language prefix for blog)
+  routes.push(
+    <Route key="blog-article" path="/blog/:world/:category/:slug" element={<BlogArticle />} />
+  );
 
   // Protected routes (support both /en and /th)
   routes.push(
