@@ -69,6 +69,15 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
   // the first call, which would fire a redundant concurrent write.
   const hasCalledOnDone = useRef(false);
 
+  // HOOKS-RULE: useEffect must be declared before any early return so React
+  // always calls Hooks in the same order. Previously this was declared after
+  // `if (session) { return null }` — a rules-of-hooks violation.
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCountdown]);
+
   // ถ้า login อยู่แล้ว (กลับมาทำ onboarding ซ้ำ) ไม่ต้องถามอีเมลอีก
   if (session) {
     if (!hasCalledOnDone.current) {
@@ -130,13 +139,6 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
 
     setResendCountdown(60);
   };
-
-  // Countdown timer effect
-  useEffect(() => {
-    if (resendCountdown <= 0) return;
-    const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCountdown]);
 
   return (
     <div
