@@ -259,12 +259,12 @@ export default function CoreAwakening() {
         lang: language === 'th' ? 'th-TH' : 'en-US',
       });
 
-      // P0-A FIX: Redirect to World Selector (not /chat/twin)
-      // V5 Section 10: Twin Birth → World Routing, not direct to Twin chat
-      // User enters Twin through a world context, not standalone
+      // PHASE-B: Redirect to Identity World (self) first — user enters their
+      // world immediately after birth, not the selector grid. From /worlds/self
+      // they can exit to /worlds hub or /dashboard at any time.
       setTimeout(() => {
         setPhase('complete');
-        navigate('/worlds', { replace: true });
+        navigate('/worlds/self', { replace: true });
       }, 4000);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to awaken Twin';
