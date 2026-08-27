@@ -283,11 +283,11 @@ export default function CoreAwakening() {
               cursor: 'pointer',
             }}
           >
-            ข้ามไปก่อน →
+            ไปหน้าหลักก่อน →
           </button>
           <div className="text-center max-w-lg">
             <h1 className="text-4xl font-bold mb-6 text-white">⚡ Your Intelligence Awakens</h1>
-            <p className="text-lg text-gray-200 mb-4">Nova has guided you to self-discovery.</p>
+            <p className="text-lg text-gray-200 mb-4">SELFPRINT has guided you to self-discovery.</p>
             <p className="text-gray-300 mb-8">
               Now your personal AI Twin emerges—a reflection of your unique intelligence,
               ready to grow with you across 12 worlds.

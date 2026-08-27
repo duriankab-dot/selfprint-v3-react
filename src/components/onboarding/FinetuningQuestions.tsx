@@ -60,7 +60,7 @@ export const QUESTIONS: Question[] = [
     // จาก mood (ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md)
     id: 'q5',
     text: 'ในช่วงชีวิตตอนนี้ คุณรู้สึกอย่างไร?',
-    novaContext: 'ข้อสุดท้าย — คำถามนี้ช่วยให้ Nova เข้าใจจังหวะชีวิตตอนนี้ของคุณ',
+    novaContext: 'ข้อสุดท้าย — คำถามนี้ช่วยให้ SELFPRINT เข้าใจจังหวะชีวิตตอนนี้ของคุณ',
     options: [
       'กำลังสร้างและเริ่มต้นสิ่งใหม่',
       'ขยายและพัฒนาสิ่งที่มีอยู่',
@@ -258,7 +258,7 @@ export function FinetuningQuestions({
                 lineHeight: 1.4,
               }}
             >
-              <span style={{ fontWeight: 600 }}>Nova:</span> {currentQuestion.novaContext}
+              <span style={{ fontWeight: 600 }}>SELFPRINT:</span> {currentQuestion.novaContext}
             </p>
           </div>
 

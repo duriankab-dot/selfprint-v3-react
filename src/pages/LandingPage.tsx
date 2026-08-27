@@ -36,9 +36,9 @@ const STORY = {
       scroll: 'เลื่อนลงเพื่อพบ NOVA',
     },
     s2: {
-      eyeLabel: 'NOVA',
-      h1: 'NOVA อ่านคุณออก\nก่อนที่คุณจะรู้จักตัวเอง',
-      sub: 'Nova ประมวลผล Initial State Matrix วิเคราะห์รูปแบบพฤติกรรมของคุณผ่าน 12 มิติ — ก่อนที่คุณจะตอบคำถามแม้แต่ข้อเดียว',
+      eyeLabel: 'SELFPRINT',
+      h1: 'SELFPRINT อ่านคุณออก\nก่อนที่คุณจะรู้จักตัวเอง',
+      sub: 'SELFPRINT ประมวลผล Initial State Matrix วิเคราะห์รูปแบบพฤติกรรมของคุณผ่าน 12 มิติ — ก่อนที่คุณจะตอบคำถามแม้แต่ข้อเดียว',
       reading: [
         'กำลังสแกน Initial State Matrix...',
         'ตรวจพบรูปแบบพฤติกรรม 12 มิติ',
@@ -71,9 +71,9 @@ const STORY = {
       scroll: 'Scroll to meet NOVA',
     },
     s2: {
-      eyeLabel: 'NOVA',
-      h1: 'NOVA reads you\nbefore you know yourself',
-      sub: 'Nova processes your Initial State Matrix across 12 behavioral dimensions — before you answer a single question.',
+      eyeLabel: 'SELFPRINT',
+      h1: 'SELFPRINT reads you\nbefore you know yourself',
+      sub: 'SELFPRINT processes your Initial State Matrix across 12 behavioral dimensions — before you answer a single question.',
       reading: [
         'Scanning Initial State Matrix...',
         'Detecting 12-dimensional patterns',
