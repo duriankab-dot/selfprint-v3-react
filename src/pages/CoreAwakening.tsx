@@ -17,6 +17,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
+import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
 import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
@@ -57,6 +58,7 @@ export default function CoreAwakening() {
   // P0 FIX: Removed useNova() — CoreAwakening creates Twin, not Nova
   const { language } = useLanguage();
   const birthDate = useUserStore((state) => state.profile.birthDate);
+  const updateProfile = useUserStore((state) => state.updateProfile);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
 
@@ -100,6 +102,31 @@ export default function CoreAwakening() {
   // TWINPRESENCE-005: stop any in-progress/queued greeting if the user
   // navigates away mid-speech — it must not keep talking on the next page.
   useEffect(() => stopTwinVoice, []);
+
+  // G5-PROFILE-RECOVERY: userStore no longer persists profile to localStorage
+  // (G1-LOCALSTORAGE-POLICY in userStore.ts). birthDate survives the onboarding
+  // session in Zustand memory, but a page refresh at CoreAwakening after auth
+  // would clear it. PendingOnboardingSaver already wrote birthDate to
+  // selfprint.users_profiles via /api/profile when auth completed, so we can
+  // recover it here for initializeTwin() which needs the value.
+  useEffect(() => {
+    if (birthDate || !session?.user?.id || !supabase) return;
+    (async () => {
+      const { data } = await supabase
+        .schema('selfprint')
+        .from('users_profiles')
+        .select('date_of_birth, time_of_birth, place_of_birth')
+        .eq('user_id', session.user.id)
+        .single();
+      if (data?.date_of_birth) {
+        updateProfile({
+          birthDate: String(data.date_of_birth),
+          birthTime: data.time_of_birth ? String(data.time_of_birth) : undefined,
+          birthPlace: data.place_of_birth ? String(data.place_of_birth) : undefined,
+        });
+      }
+    })();
+  }, [session?.user?.id, birthDate, updateProfile]);
 
   // LIFE-001 FIX: Entering the Core Awakening ceremony = lifecycle enters AWAKENING.
   // This must happen on arrival, not after the Twin already exists — the previous

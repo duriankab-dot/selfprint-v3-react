@@ -24,6 +24,7 @@ import { useUserStore } from '@/store/userStore';
 import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology';
 import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
+import { supabase } from '@/services/supabase-service';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 // GAP-2: Quick Analysis → Full Journey data continuity
 import { useAnalysisStore } from '@/store/analysisStore';
@@ -445,6 +446,33 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           useLifecycleStore.getState().error || 'ไม่สามารถบันทึกความคืบหน้าได้ กรุณาลองอีกครั้ง'
         );
         return;
+      }
+
+      // G2-CHECKPOINT: Record completion in onboarding_checkpoints so
+      // server-side resume can confirm the user truly finished onboarding
+      // (complements lifecycleStore status + resumedAt checks). Fire-and-
+      // forget — a checkpoint write failure must never block navigation.
+      if (supabase) {
+        supabase
+          .from('onboarding_checkpoints')
+          .upsert(
+            {
+              user_id: session.user.id,
+              current_step: 'complete',
+              data: {
+                completedAt: new Date().toISOString(),
+                accuracy: pendingOnboardingData.blueprint.accuracyLevel,
+                prototypeCore: pendingOnboardingData.blueprint.prototypeCore,
+              },
+              saved_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id' }
+          )
+          .then(({ error }) => {
+            if (error) {
+              console.warn('onboarding_checkpoints upsert failed (non-blocking):', error.message);
+            }
+          });
       }
     }
 
