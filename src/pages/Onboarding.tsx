@@ -111,6 +111,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // resumedAt === null means the row was just auto-initialized (brand-new user).
   // This lets us distinguish returning users from new users without touching localStorage.
   const resumedAt = useLifecycleStore((state) => state.resumedAt);
+  // FLASH-FIX: render nothing until the reentry check has run — prevents the
+  // emotion step from briefly painting before the redirect fires for returning users.
+  const [reentryChecked, setReentryChecked] = useState(false);
   const hasCheckedReentry = useRef(false);
   useEffect(() => {
     if (isLifecycleLoading || authLoading || hasCheckedReentry.current) return;
@@ -128,6 +131,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       if (resumedAt !== null) {
         hasRestoredStep.current = true;
         setStep('claim-account');
+        setReentryChecked(true);
         return;
       }
       // MAGIC-LINK-RETURN-FIX (legacy fallback): localStorage key present → resume.
@@ -137,6 +141,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         setStep('claim-account');
       }
     }
+    setReentryChecked(true);
   }, [status, resumedAt, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
@@ -452,6 +457,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
   // ONBOARDING-LOOP-001: shown instead of the claim-account step when the
   // lifecycle write fails even after retries — visible + retryable, not a
+  // FLASH-FIX: don't paint any step content until the reentry check is done.
+  // Returning users see nothing for ~200ms instead of a flash of the emotion screen.
+  if (!reentryChecked) return null;
+
   // silent forward-navigation into a state the database doesn't reflect.
   if (lifecycleError) {
     return (
