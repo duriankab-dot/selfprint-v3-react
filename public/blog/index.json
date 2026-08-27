@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "totalArticles": 64,
+    "totalArticles": 69,
     "lastUpdated": "2026-08-27",
-    "version": "1.1"
+    "version": "1.2"
   },
   "articles": [
     {
@@ -48,6 +48,61 @@
       "publishedAt": "2026-08-27",
       "featured": true,
       "keywords": ["รู้จักตัวเอง", "Self-Discovery", "Blind Spots", "การเปลี่ยนแปลง", "SELFPRINT", "Self-Awareness"]
+    },
+    {
+      "id": "selfprint-education-1",
+      "title": "AI Twin คืออะไร? ทำไมการมี 'ฝาแฝดดิจิทัล' จะกลายเป็นสิ่งจำเป็นของคนยุค 2026",
+      "slug": "ai-twin-what-is-it",
+      "excerpt": "Digital Twin สำหรับบุคคล: AI ลิขิตแลเพื่อเข้าใจพฤติกรรมของคุณ ช่วยทดลอง ตัดสินใจ และพัฒนาตัวเอง",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["AI Twin", "Digital Twin", "Virtual Self", "AI Personality", "Behavioral Clone", "Predictive Self"]
+    },
+    {
+      "id": "selfprint-education-2",
+      "title": "ก่อนจะตอบคำถามข้อแรก: แพลตฟอร์ม AI รู้จักพฤติกรรมของคุณลึก 12 มิติได้อย่างไร?",
+      "slug": "12-dimensions-explained",
+      "excerpt": "12 มิติพฤติกรรม: ทำไม 12 ไม่ใช่ 4, 5, หรือ 16? เข้าใจแบบ Layman's term ไม่ต้อง Heavy Math",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["12 มิติ", "Behavioral Dimensions", "Personality Model", "SELFPRINT", "Big Five Alternative"]
+    },
+    {
+      "id": "selfprint-education-3",
+      "title": "รู้จัก Initial State Matrix: พิมพ์เขียวแรกเริ่มที่กำหนดว่าคุณจะเป็น 'นักล่า' หรือ 'นักวางแผน'",
+      "slug": "initial-state-matrix",
+      "excerpt": "Behavioral Blueprint จากวัยเด็ก: ทำไม 'นักล่า' บ่อยสำเร็จเร็วแต่พัง vs 'นักวางแผน' ช้าแต่ยั่งยืน",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["Initial State Matrix", "Behavioral Blueprint", "Core Type", "Hunter vs Planner"]
+    },
+    {
+      "id": "selfprint-education-4",
+      "title": "จะดีไหมถ้ามี 'ร่างโคลนสมอง' ของตัวเอง? วิธีใช้ AI Twin ทดลองตัดสินใจเรื่องใหญ่ๆ",
+      "slug": "ai-twin-decision-simulation",
+      "excerpt": "Decision Simulation: ลองเปลี่ยนงาน / ตัดขาด / ลงทุน กับ AI Twin ตัวก่อนทำจริง เห็นผลลัพธ์",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["Decision Simulation", "What-if Analysis", "AI Twin", "Virtual Decision Testing"]
+    },
+    {
+      "id": "selfprint-education-5",
+      "title": "เบื้องหลังพลัง 12 SICE Engines: อัลกอริทึมที่เปลี่ยนคำถามทายใจขำๆ ให้กลายเป็นแผนผังชีวิต",
+      "slug": "12-sice-engines",
+      "excerpt": "12 SICE Engines: ระบบประมาณวิทยาศาสตร์ที่พลิกข้อมูล 50 Q เป็น 12D profile + Blind Spots + Life Plan",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["12 SICE Engines", "AI Engines", "Behavioral Algorithm", "Prediction Engine"]
     },
   ]
     {
