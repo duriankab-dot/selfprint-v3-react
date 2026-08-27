@@ -12,10 +12,13 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
 
-    // CHUNK-SPLIT-001: warn when any single chunk exceeds 300 KB (unminified).
+    // CHUNK-SPLIT-001: warn when any single chunk exceeds 500 KB (unminified).
     // Pages are already lazy-loaded via React.lazy() in App.tsx.
-    // manualChunks below splits vendor libraries into isolated cacheable chunks.
-    chunkSizeWarningLimit: 300,
+    // vendor-three (Three.js ~350 KB) is the known large chunk — it is
+    // acceptable because it is isolated and only loads on WOW3/CoreAwakening
+    // pages (lazy). 300 KB would produce a noisy warning on every build for
+    // an unavoidable dep; 500 KB flags genuinely oversized chunks instead.
+    chunkSizeWarningLimit: 500,
 
     rollupOptions: {
       output: {
@@ -69,13 +72,11 @@ export default defineConfig({
           // APP FEATURE CHUNKS — heavy src modules shared across lazy routes.
           // ────────────────────────────────────────────────────────────────────
 
-          // Astrology + numerology computation (used in onboarding + CoreAwakening)
-          if (id.includes('/src/lib/astrology')) return 'chunk-astrology';
-
-          // SICE orchestrator (used in onboarding + CoreAwakening — never in shell)
-          if (id.includes('/src/services/sice')) return 'chunk-sice';
-
           // Personality intelligence engine (dashboard widgets)
+          // NOTE: chunk-astrology and chunk-sice were removed — supabase-service.ts
+          // is statically imported by AIContext (a core provider in App.tsx), so
+          // any module that imports supabase-service cannot be moved to a separate
+          // chunk; Rollup would inline it into the main bundle anyway.
           if (id.includes('/src/lib/intelligence')) return 'chunk-intelligence';
 
           // Decision feature components (used only in /decisions route)

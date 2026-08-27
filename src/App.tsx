@@ -23,7 +23,10 @@ import { EnvironmentProvider } from './context/EnvironmentContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
-import TwinEvolutionSceneWrapper from './components/TwinEvolutionSceneWrapper';
+// CHUNK-SPLIT: TwinEvolutionSceneWrapper is a celebration overlay that fires
+// only at the milestone-30 Twin Evolution event — no reason to ship it in the
+// main bundle. Lazy-loading shaves it from the initial JS payload.
+const TwinEvolutionSceneWrapper = lazy(() => import('./components/TwinEvolutionSceneWrapper'));
 import './styles/global.css';
 import './styles/nova-twin.css';
 import './styles/core-awakening.css';
