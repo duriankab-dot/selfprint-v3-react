@@ -23,6 +23,7 @@ import { useEmotion } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
 import { useAuth } from '@/context/AuthContext';
 import { useTwin } from '@/context/TwinContext';
+import { Link } from 'react-router-dom';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -332,97 +333,141 @@ const TwinBornSvg = () => (
   </svg>
 );
 
-// ─── NOVA Eye SVG ─────────────────────────────────────────────────────────────
+// ─── SELFPRINT Engine Eye SVG ─────────────────────────────────────────────────
+// Section 2 visual: eye with SELFPRINT logo center + 12 Thai orbit nodes
 
-const NovaEyeSvg = () => (
-  <svg
-    viewBox="0 0 280 280"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ width: '100%', maxWidth: 280, height: 'auto' }}
-    aria-hidden="true"
-  >
-    <style>{`
-      @keyframes nova-pulse{0%,100%{opacity:.06;r:118}50%{opacity:.12;r:122}}
-      @keyframes nova-scan{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-      @keyframes nova-blink{0%,85%,100%{opacity:1}92%{opacity:.1}}
-      @keyframes nova-dash{0%{stroke-dashoffset:0}100%{stroke-dashoffset:60}}
-      .nova-ring{animation:nova-pulse 3.5s ease-in-out infinite}
-      .nova-scanner{animation:nova-scan 10s linear infinite;transform-origin:140px 140px}
-      .nova-pupil{animation:nova-blink 5s ease-in-out infinite}
-      .nova-dash{animation:nova-dash 4s linear infinite}
-    `}</style>
+const SICE_TH_LABELS = [
+  'ตัวตน','จิตใจ','ความสัมพันธ์','ความรัก',
+  'อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต',
+  'การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต',
+];
 
-    {/* Outer glow ring */}
-    <circle className="nova-ring" cx="140" cy="140" r="118" stroke="var(--color-accent-primary)" strokeWidth="1" fill="none" opacity="0.06"/>
+const NovaEyeSvg = () => {
+  const CX = 190, CY = 190;
+  const NODE_R = 118;   // node dot orbit radius
+  const LABEL_R = 142;  // label text orbit radius
 
-    {/* Dashed orbit ring */}
-    <circle className="nova-dash" cx="140" cy="140" r="100" stroke="var(--color-accent-primary)" strokeWidth="0.75" fill="none" opacity="0.2" strokeDasharray="8 7"/>
+  return (
+    <svg
+      viewBox="0 0 380 380"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      style={{ width: '100%', maxWidth: 340, height: 'auto', willChange: 'transform' }}
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="eye-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="var(--color-accent-primary)" stopOpacity="0.18"/>
+          <stop offset="100%" stopColor="var(--color-accent-primary)" stopOpacity="0"/>
+        </radialGradient>
+        <filter id="nova-blur"><feGaussianBlur stdDeviation="3"/></filter>
+      </defs>
+      <style>{`
+        @keyframes nova-scan{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+        @keyframes nova-dash{0%{stroke-dashoffset:0}100%{stroke-dashoffset:80}}
+        @keyframes nova-node{0%,100%{opacity:.4;r:3.5}50%{opacity:.9;r:4.5}}
+        @keyframes nova-glow{0%,100%{opacity:.07}50%{opacity:.14}}
+        .nova-scanner{animation:nova-scan 12s linear infinite;transform-origin:${CX}px ${CY}px;will-change:transform}
+        .nova-dash{animation:nova-dash 5s linear infinite}
+        .nova-glow{animation:nova-glow 4s ease-in-out infinite}
+      `}</style>
 
-    {/* Middle ring */}
-    <circle cx="140" cy="140" r="72" stroke="var(--color-accent-primary)" strokeWidth="1" fill="none" opacity="0.25"/>
+      {/* Background glow */}
+      <circle className="nova-glow" cx={CX} cy={CY} r="150" fill="url(#eye-glow)"/>
 
-    {/* Inner iris ring */}
-    <circle cx="140" cy="140" r="44" stroke="var(--color-accent-primary)" strokeWidth="1.5" fill="none" opacity="0.5"/>
+      {/* Eye lens shape */}
+      <path
+        d={`M30 ${CY} Q${CX} 60 350 ${CY} Q${CX} 320 30 ${CY}Z`}
+        fill="var(--color-accent-primary)" fillOpacity="0.04"
+        stroke="var(--color-accent-primary)" strokeWidth="1" strokeOpacity="0.35"
+      />
 
-    {/* Eye lens shape */}
-    <path
-      d="M28 140 Q140 42 252 140 Q140 238 28 140Z"
-      fill="var(--color-accent-primary)" fillOpacity="0.04"
-      stroke="var(--color-accent-primary)" strokeWidth="1.2" strokeOpacity="0.4"
-    />
+      {/* Outer dashed orbit (node track) */}
+      <circle className="nova-dash" cx={CX} cy={CY} r={NODE_R}
+        stroke="var(--color-accent-primary)" strokeWidth="0.6" fill="none"
+        opacity="0.2" strokeDasharray="6 6"/>
 
-    {/* Iris fill */}
-    <circle cx="140" cy="140" r="34" fill="var(--color-accent-primary)" opacity="0.08"/>
+      {/* Inner rings */}
+      <circle cx={CX} cy={CY} r="80" stroke="var(--color-accent-primary)" strokeWidth="0.8" fill="none" opacity="0.2"/>
+      <circle cx={CX} cy={CY} r="52" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.35"/>
+      <circle cx={CX} cy={CY} r="32" fill="var(--color-accent-primary)" opacity="0.06"/>
 
-    {/* Iris detail lines */}
-    {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg, i) => {
-      const rad = (deg * Math.PI) / 180;
-      return (
-        <line
-          key={i}
-          x1={140 + 18 * Math.cos(rad)}
-          y1={140 + 18 * Math.sin(rad)}
-          x2={140 + 34 * Math.cos(rad)}
-          y2={140 + 34 * Math.sin(rad)}
-          stroke="var(--color-accent-primary)"
-          strokeWidth="0.75"
-          opacity="0.35"
-        />
-      );
-    })}
+      {/* Iris detail lines (12 radii) */}
+      {SICE_TH_LABELS.map((_, i) => {
+        const rad = (i * 30 * Math.PI) / 180;
+        return (
+          <line key={i}
+            x1={CX + 20 * Math.cos(rad)} y1={CY + 20 * Math.sin(rad)}
+            x2={CX + 50 * Math.cos(rad)} y2={CY + 50 * Math.sin(rad)}
+            stroke="var(--color-accent-primary)" strokeWidth="0.6" opacity="0.25"
+          />
+        );
+      })}
 
-    {/* Pupil */}
-    <circle className="nova-pupil" cx="140" cy="140" r="14" fill="var(--color-accent-primary)"/>
-    <circle cx="134" cy="135" r="4" fill="white" opacity="0.15"/>
-    <circle cx="140" cy="140" r="5" fill="var(--color-accent-primary)" opacity="0.3"/>
+      {/* SELFPRINT logo center */}
+      <image
+        href="/favicon.svg"
+        x={CX - 22} y={CY - 22}
+        width="44" height="44"
+        opacity="0.9"
+      />
+      {/* ENGINE label under logo */}
+      <text x={CX} y={CY + 34} textAnchor="middle"
+        fontSize="7" fontWeight="700" fill="var(--color-accent-primary)"
+        opacity="0.6" letterSpacing="2.5">
+        ENGINE
+      </text>
 
-    {/* Scanner arm */}
-    <g className="nova-scanner">
-      <line x1="140" y1="140" x2="140" y2="42" stroke="var(--color-accent-primary)" strokeWidth="1.5" opacity="0.5" strokeLinecap="round"/>
-      <circle cx="140" cy="45" r="3.5" fill="var(--color-accent-primary)" opacity="0.7"/>
-    </g>
+      {/* Scanner arm */}
+      <g className="nova-scanner">
+        <line x1={CX} y1={CY} x2={CX} y2={CY - NODE_R + 4}
+          stroke="var(--color-accent-primary)" strokeWidth="1.2" opacity="0.45" strokeLinecap="round"/>
+        <circle cx={CX} cy={CY - NODE_R + 6} r="3" fill="var(--color-accent-primary)" opacity="0.7"/>
+      </g>
 
-    {/* Cardinal data nodes */}
-    {[
-      { deg: 0, r: 100 }, { deg: 45, r: 95 }, { deg: 90, r: 100 },
-      { deg: 135, r: 95 }, { deg: 180, r: 100 }, { deg: 225, r: 95 },
-      { deg: 270, r: 100 }, { deg: 315, r: 95 },
-    ].map(({ deg, r }, i) => {
-      const rad = (deg * Math.PI) / 180;
-      const x = 140 + r * Math.cos(rad);
-      const y = 140 + r * Math.sin(rad);
-      return (
-        <g key={i}>
-          <circle cx={x} cy={y} r={i % 2 === 0 ? 3.5 : 2.5} fill="var(--color-accent-primary)" opacity={i % 2 === 0 ? 0.55 : 0.3}/>
-        </g>
-      );
-    })}
+      {/* 12 SICE orbit nodes with Thai labels */}
+      {SICE_TH_LABELS.map((label, i) => {
+        // start from top (-90°), go clockwise
+        const angleDeg = i * 30 - 90;
+        const rad = (angleDeg * Math.PI) / 180;
+        const nx = CX + NODE_R * Math.cos(rad);
+        const ny = CY + NODE_R * Math.sin(rad);
+        const lx = CX + LABEL_R * Math.cos(rad);
+        const ly = CY + LABEL_R * Math.sin(rad);
 
-    {/* NOVA label */}
-    <text x="140" y="218" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--color-accent-primary)" opacity="0.55" letterSpacing="5">NOVA</text>
-  </svg>
-);
+        // text-anchor: right half → start, left half → end, top/bottom → middle
+        const normAngle = ((angleDeg % 360) + 360) % 360;
+        const anchor = normAngle > 15 && normAngle < 165 ? 'start'
+          : normAngle > 195 && normAngle < 345 ? 'end'
+          : 'middle';
+        // baseline: above center → auto, below → hanging
+        const baseline = (normAngle > 195 && normAngle < 345) || normAngle < 15 || normAngle > 345
+          ? 'middle' : 'middle';
+
+        return (
+          <g key={label}>
+            {/* connector line node→label */}
+            <line
+              x1={nx} y1={ny} x2={lx} y2={ly}
+              stroke="var(--color-accent-primary)" strokeWidth="0.5" opacity="0.2"
+            />
+            {/* node dot (pulse staggered) */}
+            <circle cx={nx} cy={ny} r="4"
+              fill="var(--color-accent-primary)" opacity="0.6"
+              style={{ animation: `nova-node 3s ${(i * 0.25).toFixed(2)}s ease-in-out infinite`, willChange: 'opacity' }}
+            />
+            {/* Thai label */}
+            <text x={lx} y={ly} textAnchor={anchor} dominantBaseline={baseline}
+              fontSize="9" fontWeight="600" fill="var(--color-accent-primary)"
+              opacity="0.75" fontFamily="'Noto Sans Thai',sans-serif">
+              {label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
 
 // ─── Smart Entry Hook ─────────────────────────────────────────────────────────
 
@@ -809,12 +854,12 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                   {(story.s1 as { microcopy: string }).microcopy}
                 </span>
               )}
-              <span
-                onClick={() => navigate('/login')}
-                style={{ fontSize: '14px', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--color-border)' }}
+              <Link
+                to={`/${lang}/login`}
+                style={{ fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'underline', textDecorationColor: 'var(--color-border)' }}
               >
                 {story.s3.login}
-              </span>
+              </Link>
             </div>
           </div>
 
@@ -1144,12 +1189,12 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             </p>
 
             {/* Login link */}
-            <span
-              onClick={() => navigate('/login')}
-              style={{ fontSize: '14px', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--color-border)' }}
+            <Link
+              to={`/${lang}/login`}
+              style={{ fontSize: '14px', color: 'var(--color-text-secondary)', textDecoration: 'underline', textDecorationColor: 'var(--color-border)' }}
             >
               {story.s3.login}
-            </span>
+            </Link>
           </div>
         </section>
 
