@@ -111,9 +111,26 @@ export default function WorldDetail() {
       >
         <div className="wd-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
-              ← All Worlds
-            </button>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
+                ← โลกทั้งหมด
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                aria-label="Go to dashboard"
+                style={{
+                  background: 'none',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: 8,
+                  color: 'rgba(255,255,255,0.65)',
+                  fontSize: 13,
+                  padding: '4px 10px',
+                  cursor: 'pointer',
+                }}
+              >
+                🏠 หน้าหลัก
+              </button>
+            </div>
             <button
               onClick={ambientTone.toggle}
               title={

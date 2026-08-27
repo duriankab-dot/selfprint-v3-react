@@ -74,6 +74,10 @@ const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
+// Phase B: new activity pages
+const TarotPage = lazy(() => import('./pages/TarotPage'));
+const PalmistryPage = lazy(() => import('./pages/PalmistryPage'));
+const CommunityPage = lazy(() => import('./pages/CommunityPage'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
@@ -147,6 +151,10 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/vs-astrology', element: <VsAstrologyPage /> },
     { path: '/menu', element: <FeatureMenu /> },
     { path: '/components', element: <ComponentShowcase /> },
+    // Phase B: new activity + community pages
+    { path: '/tarot', element: <TarotPage /> },
+    { path: '/palmistry', element: <PalmistryPage /> },
+    { path: '/community', element: <CommunityPage /> },
   ];
 
   // Add all public routes for both languages

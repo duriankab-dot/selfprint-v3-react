@@ -83,6 +83,22 @@ const CATEGORIES: ActivityCategory[] = [
     color: '#8B5CF6',
     activities: [
       {
+        id: 'tarot',
+        emoji: '🃏',
+        title: 'การอ่านสัญลักษณ์',
+        description: 'วาดไพ่ 3 ใบและสะท้อนความคิดผ่านสัญลักษณ์ทางจิตวิทยา',
+        duration: '5 นาที',
+        route: '/tarot',
+      },
+      {
+        id: 'palmistry',
+        emoji: '🖐️',
+        title: 'อ่านลักษณะมือ',
+        description: 'วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพและจุดแข็ง',
+        duration: '7 นาที',
+        route: '/palmistry',
+      },
+      {
         id: 'hexagram',
         emoji: '☯',
         title: 'เปิดเซียมซีวันนี้',
@@ -150,6 +166,14 @@ const CATEGORIES: ActivityCategory[] = [
     label: 'เชื่อมต่อ',
     color: '#10B981',
     activities: [
+      {
+        id: 'community',
+        emoji: '🤝',
+        title: 'ชุมชน SELFPRINT',
+        description: 'แบ่งปัน insight และเชื่อมต่อกับผู้ใช้คนอื่น',
+        duration: '5 นาที',
+        route: '/community',
+      },
       {
         id: 'voice-chat',
         emoji: '🎤',
