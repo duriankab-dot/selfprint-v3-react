@@ -134,6 +134,13 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   // Glow intensity multiplier per stage — same as TwinPresence
   const glowMult = useMemo(() => [0, 0.7, 0.9, 1.15, 1.45][evolutionStage], [evolutionStage]);
 
+  // HOOKS-RULE: glowOpacity must be declared before any early returns so React
+  // always calls Hooks in the same order. Previously this was after `if (isLoading)`.
+  const glowOpacity = useMemo(
+    () => 0.35 + (glowMult - 0.7) * 0.2,
+    [glowMult]
+  );
+
   // Auth guard
   if (!userId) {
     return (
@@ -181,12 +188,6 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
     glowColor,
     particleIntensity,
   } = twinResult;
-
-  // Calculate CSS variables for glow scaling based on evolution stage
-  const glowOpacity = useMemo(
-    () => 0.35 + (glowMult - 0.7) * 0.2, // Scale opacity based on stage
-    [glowMult]
-  );
 
   return (
     <div
