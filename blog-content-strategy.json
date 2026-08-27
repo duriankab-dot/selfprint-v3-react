@@ -1,0 +1,364 @@
+{
+  "projectName": "SELFPRINT Blog Content Repository",
+  "version": "1.0",
+  "lastUpdated": "2026-08-27",
+  "objective": "ครอบคลุม SEO/AEO/GEO สำหรับคำค้นหา 3 หมวดทั่วไป: (1) ชนสายมู (2) ฟีเจอร์ AI Twin & 12 SICE (3) แก้ปัญหาชีวิตจริง",
+  "seoStrategy": {
+    "tier1_brand_keywords": ["SELFPRINT", "12 SICE", "AI Twin", "พฤติกรรม AI", "สแกนสมอง"],
+    "tier2_problem_keywords": ["ทายใจ", "พัฒนาตัวเอง", "การตัดสินใจ", "ความรัก", "อาชีพ"],
+    "tier3_seasonal": ["ทำนายดวง 2025", "จิตวิทยาสีเสื้อ", "Blind Spots พฤติกรรม", "Decision Fatigue", "Attachment Style"]
+  },
+
+  "categories": [
+    {
+      "categoryId": "cat-1",
+      "categoryName": "ชนสายมูโดยตรง (ลอ เรื่องดวง ท้าพิสูจน์ด้วยวิทยาศาสตร์)",
+      "description": "บทความที่จับกลุ่มผู้ที่ชอบอ่านทำนายนิสัย แต่ยังสงสัยว่าเป็นวิทยาศาสตร์หรือเรื่องไตรมาส ลองยั่วดังให้ค่อยๆ เข้าเรื่อง SELFPRINT",
+      "contentTone": "ขั้นแรก: โปรโตคอล ว่าไว้ มีสไตล์ดวง ต่อมา: พิสูจน์ด้วยข้อมูล วิธี AI ทำงาน นำเสนอข้อมูลว่าเหนือกว่า",
+      "articles": [
+        {
+          "articleId": "article-1-1",
+          "title": "ปีชงหรือพฤติกรรมชง? ถอดรหัส 'ปมขัดขวางชีวิต' ที่แก้ได้ด้วยดาต้าพฤติกรรม",
+          "primaryKeywords": ["ปีชง", "พฤติกรรม", "ปมขัดขวาง", "ดาต้าพฤติกรรม"],
+          "secondaryKeywords": ["ทำนายดวง", "วิทยาศาสตร์", "สแกนสมอง", "ลัทธิวิทยา"],
+          "searchIntent": "ผู้ค้นหากำลังสงสัยว่า 'ปีเกิด' มีอิทธิพลเหนือ 'พฤติกรรม' จริงหรือไม่",
+          "targetAudience": ["ผู้ที่ชอบอ่านทำนาย", "คนสงสัยความจริง", "คนฉลาดแต่ต้องการเปิดใจ"],
+          "outline": [
+            "Headline Hook: 'ปีเกิด' ไม่ได้ตัดสินใจคุณ 'ลูกน้อย' ของมันถึงทำ",
+            "Section 1: ปีชงโปรโตคอล + Barnum Effect (ทำไมเราชอบอ่านคำทำนาย)",
+            "Section 2: พฤติกรรมจริงคืออะไร + แบบจำลอง 12 มิติ",
+            "Section 3: ข้อมูลพิสูจน์: คน ชนิดเดียวกัน สามารถมีพฤติกรรมต่างกันได้ 80% ขึ้นอยู่กับปัจจัยอื่น",
+            "Section 4: SELFPRINT ทำอะไร - สแกน Blind Spots ของคุณด้วย Data ไม่ใช่ลูกศร",
+            "CTA: ลองสแกนพฤติกรรมตัวจริง (ลิงก์ ไปหน้า Quiz / AI Scan)"
+          ],
+          "aiPrompt": "เขียนบทความอ่านสนุก ไม่น้อยกว่า 1200 คำ เรื่องความแตกต่างระหว่าง 'ปีชง' กับ 'พฤติกรรมจริง' สไตล์: เรียนรู้ + ยั่ว + ท้าทาย โครงสร้าง: Hook ด้วยคำถาม → ศาสตร์เบื้องหลัง → ข้อมูลแทงหลังศรัทธา → เสนออีกวิธี (SELFPRINT) → CTA",
+          "seoNotes": "ลงโปรเจคเหล่านี้: pagespeed insights หัวข้อนี่ + SEO: ตรวจ LSI keywords ที่เกี่ยวข้อง + Internal link ไปยัง '12 SICE explain'"
+        },
+        {
+          "articleId": "article-1-2",
+          "title": "ลืมตารางสีเสื้อมงคลไปก่อน: วิธีใช้จิตวิทยา 'จิตวิทยา 12 มิติ' เลือกเฉดสีที่กระตุ้นสมองของคุณให้ทำงานดีที่สุด",
+          "primaryKeywords": ["สีเสื้อมงคล", "จิตวิทยาสี", "พฤติกรรมสี", "12 มิติ"],
+          "secondaryKeywords": ["ปรุงสีชีวิต", "วิทยาศาสตร์สี", "Color Psychology", "Neuromarketing"],
+          "searchIntent": "ผู้ค้นหา 'สีเสื้อมงคล' แต่อยากรู้ว่ามีเหตุผลทางวิทยาศาสตร์หรือไม่",
+          "targetAudience": ["ผู้หญิง + ผู้ชายที่เชื่อสีมงคล", "ผู้สนใจจิตวิทยาสี", "ผู้หลงไหลในเสริมดวง"],
+          "outline": [
+            "Hook: 'สีเสื้อมงคล' เป็นเรื่องจริง (มีวิทยาศาสตร์) แต่ 'สีของ YOU' ต่างกว่า",
+            "Section 1: วิทยาศาสตร์สี: Color Psychology + Neuroscience ของสี",
+            "Section 2: 12 มิติพฤติกรรม = 12 'สี' ของสมอง (metaphor)",
+            "Section 3: คนแต่ละ Type ควรใช้สีอะไรให้สมองทำงานดีสุด",
+            "Section 4: Case Study: ทำไม CEO ธุรกิจหนึ่งเปลี่ยนสี เพิ่มผลผลิต 30%",
+            "Section 5: SELFPRINT scan → รู้ Type → recommend สี ที่เหมาะกับคุณ",
+            "CTA: ค้นหา 'สี Neuro-Optimal' ของคุณ (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เชื่อมสีเสื้อมงคล กับ Color Psychology + 12 มิติพฤติกรรม สไตล์ลื่น ไม่ให้ดูเหมือน 'ลบล้าง ความเชื่อมงคล' แต่พยายาม 'ยกระดับ' เป็นวิทยาศาสตร์ โครงสร้าง: ยอมรับปรัชญา → ขยายไปวิทยาศาสตร์ → ข้อมูล → เสนออีกมิติ → CTA",
+          "seoNotes": "Internal link ไปยัง '12 มิติ explained' + 'Neuro-optimal color quiz' + External link ไปข้อมูล Color Psychology"
+        },
+        {
+          "articleId": "article-1-3",
+          "title": "เบื่อไหมกับการทักเรื่อง 'ราหูเล็ง'? มาสแกน Blind Spots จุดบอดพฤติกรรมที่บดบังทางรวยของคุณจริงๆ",
+          "primaryKeywords": ["ราหูเล็ง", "Blind Spots", "จุดบอด", "พฤติกรรมซ่อน"],
+          "secondaryKeywords": ["Johari Window", "Shadow Self", "Unconscious Bias", "Behavior Pattern"],
+          "searchIntent": "ผู้ค้นหา 'ราหู' แต่อยากรู้ว่ามีจุดบอดที่ซ่อนตัวเหมือนจริงหรือไม่",
+          "targetAudience": ["ผู้สนใจ Johari Window", "ผู้ต้องการ Self-awareness", "ผู้เชื่อ Astrology แต่ต้องการข้อมูล"],
+          "outline": [
+            "Hook: ราหูเล็ง ≠ Blind Spots ทายใจ ≠ Johari Window หารู้ไหมว่าความแตกต่างอยู่ตรงไหน",
+            "Section 1: Johari Window + Blind Spots Psychology",
+            "Section 2: 'จุดบอด' ที่แท้จริง คืออะไร (Unconscious Bias + Shadow Self)",
+            "Section 3: ว่ิธีค้นหา Blind Spots ของคุณ โดยไม่ต้องถาม 'ราหู'",
+            "Section 4: Case Study: ผู้ประกอบการที่พบ Blind Spot ดำเนินการเปลี่ยน บริษัทกำไรเพิ่ม",
+            "Section 5: SELFPRINT AI Scan → สำรวจ Blind Spots อัตโนมัติ",
+            "CTA: สแกนจุดบอดตัวเอง (ลิงก์)"
+          ],
+          "aiPrompt": "เขียน 1300+ คำ เพื่อเชื่อมโยง 'ราหูเล็ง' เข้ากับ Johari Window + Blind Spots psychology สไตล์: ยอมรับ + โยง + ขยาย + ยั่ว + ข้อเสนอทางเลือก โครงสร้าง: Hook = ความสังหรณ์ → วิทยาศาสตร์ → ข้อมูล → วิธีปฏิบัติ → SELFPRINT → CTA",
+          "seoNotes": "LSI keywords: 'Unconscious Bias', 'Shadow Self', 'Blind Spots Psychology' + Internal link ไปยัง '12 SICE Engines' + FAQ schema สำหรับ 'Blind Spots vs Astrology'"
+        }
+      ]
+    },
+
+    {
+      "categoryId": "cat-2",
+      "categoryName": "เจาะลึกฟีเจอร์ความล้ำ (AI Twin & 12 SICE)",
+      "description": "บทความ Technical + Value Prop ที่อธิบายว่า SELFPRINT ทำอะไร เหนือกว่าอะไร ให้ผู้ที่สนใจเทคโนโลยีเข้าใจได้",
+      "contentTone": "ศาสตร์ + Innovation + Excitement ไม่ควร Marketing-heavy แต่ต้อง Credible",
+      "articles": [
+        {
+          "articleId": "article-2-1",
+          "title": "AI Twin คืออะไร? ทำไมการมี 'ฝาแฝดดิจิทัล' จะกลายเป็นสิ่งจำเป็นของคนยุค 2026",
+          "primaryKeywords": ["AI Twin", "Digital Twin", "Virtual Self", "AI Personality", "Behavioral Clone"],
+          "secondaryKeywords": ["Digital Avatar", "AI Simulation", "Predictive Self", "Behavioral Modeling", "Self-Coaching AI"],
+          "searchIntent": "ผู้ค้นหาต้องการเข้าใจว่า 'AI Twin' คืออะไร ทำไมถึงจำเป็น มีประโยชน์อย่างไร",
+          "targetAudience": ["Tech-savvy audience", "ผู้สนใจ AI", "ผู้บริหาร", "Lifehacker"],
+          "outline": [
+            "Hook: จำนวน Digital Twin กำลังเพิ่มเป็น 2 เท่าทุกปี คุณมี Digital Twin ของตัวเองหรือยัง",
+            "Section 1: Digital Twin คืออะไร (Definition + Concept ในอุตสาหกรรม)",
+            "Section 2: จาก Industry Digital Twin สู่ Personal Digital Twin",
+            "Section 3: ทำไมคนต้องมี AI Twin (4 Benefits: Simulation, Decision-Making, Self-Coaching, Insight)",
+            "Section 4: AI Twin vs Digital Avatar vs Chatbot (ความแตกต่าง)",
+            "Section 5: SELFPRINT AI Twin เก็บเกี่ยว Behavioral Data ทำอะไรได้บ้าง",
+            "Section 6: Case Study: ผู้บริหาร + Sales ที่ใช้ AI Twin",
+            "CTA: สร้าง AI Twin ตัวเองมา (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1500+ คำ เรื่อง Digital Twin สำหรับผู้คน ไม่ใช่แค่โรงงาน เน้นที่: (1) Digital Twin คืออะไร (2) ทำไมจำเป็น (3) ทำอะไรได้ (4) ตัวอย่างจริง (5) SELFPRINT AI Twin โครงสร้าง: Industry context → Personal Application → Science → Value → Examples → SELFPRINT → CTA",
+          "seoNotes": "Target: 'AI Twin', 'Digital Twin personal', 'behavioral simulation' + Internal link ไปยัง '12 SICE Engines explainer' + Code-behind: FAQ schema สำหรับ 'What is AI Twin'"
+        },
+        {
+          "articleId": "article-2-2",
+          "title": "ก่อนจะตอบคำถามข้อแรก: แพลตฟอร์ม AI รู้จักพฤติกรรมของคุณลึก 12 มิติได้อย่างไร?",
+          "primaryKeywords": ["12 มิติ", "12 Dimensions", "Behavioral Analysis", "AI Scoring", "Personality Dimensions"],
+          "secondaryKeywords": ["Big Five", "MBTI Alternative", "Behavioral Model", "Psychological Profiling", "AI Assessment"],
+          "searchIntent": "ผู้ค้นหาต้องการเข้าใจว่า AI สแกนพฤติกรรมด้วยเกณฑ์ 12 มิติ คืออะไร",
+          "targetAudience": ["Data-driven people", "ผู้รักการพัฒนาตัวเอง", "Psychologists + HR", "Tech enthusiasts"],
+          "outline": [
+            "Hook: เรื่องสั้น: AI ของ SELFPRINT ถามคุณ 50 คำถาม จากนั้นรู้จักคุณลึก 12 มิติ ทำได้อย่างไร",
+            "Section 1: 12 มิติ คืออะไร (List ทั้ง 12 + Simple Description)",
+            "Section 2: แต่ละมิติ = อะไร (Deep Dive: ทำไมเลือก 12 นี้ ไม่ใช่ 5 หรือ 16)",
+            "Section 3: AI Algorithm ที่อยู่เบื้องหลัง (เรียบง่าย ไม่ต้องสูตรคณิตศาสตร์)",
+            "Section 4: ความแม่นยำ vs Alternative Assessment Tools",
+            "Section 5: ทำไม 12 มิติ ดีกว่า MBTI หรือ Big Five",
+            "Section 6: ตัวอย่าง: คนสองคนที่ดูคล้ายกัน แต่ 12 มิติ เผยว่าต่างกัน",
+            "CTA: ค้นหามิติตัวเองที่แท้จริง (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1600+ คำ เพื่ออธิบาย '12 มิติพฤติกรรม' ของ SELFPRINT แบบ Layman's term ไม่ควร Heavy Math สไตล์ Educating + Convincing โครงสร้าง: Story Hook → Definition → Deep Dive แต่ละมิติ → How AI Works → Comparison ทีมมี tools → Examples → CTA",
+          "seoNotes": "High-intent keywords: '12 dimensions behavior', 'MBTI alternative', 'behavioral profiling AI' + Internal link ไปยัง 'Initial State Matrix' + Table of contents schema"
+        },
+        {
+          "articleId": "article-2-3",
+          "title": "รู้จัก Initial State Matrix: พิมพ์เขียวแรกเริ่มที่กำหนดว่าคุณจะเป็น 'นักล่า' หรือ 'นักวางแผน' ในสังคม",
+          "primaryKeywords": ["Initial State Matrix", "Behavioral Blueprint", "Core Type", "Personality Matrix", "Hunter vs Planner"],
+          "secondaryKeywords": ["Archetype", "Behavioral Tendency", "Personality Core", "Natural Inclination", "Life Strategy"],
+          "searchIntent": "ผู้ค้นหา 'นักล่า' vs 'นักวางแผน' + ต้องการรู้ว่าตัวเองเป็นแบบไหน",
+          "targetAudience": ["Self-discovery enthusiasts", "Career changers", "Entrepreneurs", "Introspective people"],
+          "outline": [
+            "Hook: ตัวอย่างสั้น: Hunter (มักตัดสินใจเร็ว ทำแล้วคิด) vs Planner (วางแผนไว้ยาว)",
+            "Section 1: Initial State Matrix คืออะไร (ออกแบบพิมพ์เขียวพฤติกรรมแรกเริ่ม)",
+            "Section 2: ประเภท 4 (Hunter + Planner + Hybrid ช่วงไหนที่มี)",
+            "Section 3: แต่ละประเภท มีจุดแข็ง + จุดอ่อน",
+            "Section 4: ทำไมการรู้ Matrix ช่วยการตัดสินใจใหญ่ (Career, Relationship, Investment)",
+            "Section 5: Case Study: Hunter สำนักที่เป็น CEO ของ Startup vs Planner ที่สำเร็จใน Corp",
+            "Section 6: SELFPRINT ค้นหา Matrix ของคุณ + แนะแผนที่เหมาะสม",
+            "CTA: ค้นหา Matrix ตัวจริง (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Initial State Matrix: Blueprint ของพฤติกรรมคุณตั้งแต่เด็ก สไตล์: Introspective + Practical + Empowering โครงสร้าง: Story → Definition → Types → Strengths/Weakness → Real-life Impact → SELFPRINT → CTA",
+          "seoNotes": "Keywords: 'Behavioral Blueprint', 'Personality Matrix', 'Hunter Planner' + Internal link ไปยัง 'AI Twin uses Initial State' + FAQs about Matrix"
+        },
+        {
+          "articleId": "article-2-4",
+          "title": "จะดีไหมถ้ามี 'ร่างโคลนสมอง' ของตัวเอง? วิธีใช้ AI Twin ช่วยทดลองตัดสินใจเรื่องใหญ่ๆ ในชีวิตโดยไม่ต้องเสี่ยงเจ็บจริง",
+          "primaryKeywords": ["Decision Simulation", "AI Twin Decision", "Virtual Decision Testing", "Life Simulation", "Predictive Outcome"],
+          "secondaryKeywords": ["What-if Analysis", "Scenario Planning", "Decision Support", "AI Coaching", "Risk Mitigation"],
+          "searchIntent": "ผู้ค้นหา 'ทดลองตัดสินใจ' ที่ปลอดภัย ก่อนเสี่ยงจริง",
+          "targetAudience": ["Career-changing people", "ผู้ที่กำลังลำบาก", "Students", "Risk-averse people"],
+          "outline": [
+            "Hook: ตัวอย่าง: 'ถ้าฉันเปลี่ยนงาน จะเกิดอะไร' ทดลองกับ AI Twin ก่อนทำจริง",
+            "Section 1: Virtual Decision Testing (Concept ที่ AI ทำให้เป็นจริง)",
+            "Section 2: SELFPRINT AI Twin ช่วยสิ่งไหน (Career, Relationship, Investment, Skill)",
+            "Section 3: Process ของการใช้ AI Twin ทดลอง (Chat → Analysis → Prediction → Insight)",
+            "Section 4: ตัวอย่าง Scenario: สำหรับแต่ละ Type ของ Matrix",
+            "Section 5: เปรียบเทียบ AI Twin Simulation vs Real-world Outcome (พิสูจน์ได้ไหม)",
+            "Section 6: Limitation: AI Twin ทำนายได้ดี แต่ไม่ใช่ Crystal Ball",
+            "CTA: ทดลองสถานการณ์ตัวเองกับ AI Twin (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1500+ คำ เรื่อง Decision Simulation ใช้ AI Twin ทดลองตัดสินใจเรื่องใหญ่ สไตล์: Encouraging + Realistic + Practical โครงสร้าง: Hook with story → Concept → How SELFPRINT Does It → Process → Examples → Limitations (เพื่อให้ credible) → CTA",
+          "seoNotes": "Keywords: 'Decision simulation', 'What-if analysis', 'AI decision support' + Internal link ไปยัง 'AI Twin explanation' + How-to schema"
+        },
+        {
+          "articleId": "article-2-5",
+          "title": "เบื้องหลังพลัง 12 SICE Engines: อัลกอริทึมที่เปลี่ยนคำถามทายใจขำๆ ให้กลายเป็นแผนผังชีวิตระดับสากล",
+          "primaryKeywords": ["12 SICE Engines", "AI Engines", "Behavioral Engines", "Algorithm", "Life Planning AI"],
+          "secondaryKeywords": ["Machine Learning", "Behavioral Modeling", "Prediction Engine", "AI Logic", "Personality Algorithm"],
+          "searchIntent": "ผู้ค้นหาต้องการรู้ว่า SICE Engines ทำอะไร เหนือกว่า Personality Quiz ธรรมดา",
+          "targetAudience": ["Tech enthusiasts", "ผู้รักการพัฒนาตัวเอง", "Data people", "AI-curious"],
+          "outline": [
+            "Hook: 50 คำถาม → 12 SICE Engines กำลังวิเคราะห์ → แผนผังชีวิตส่วนบุคคล",
+            "Section 1: 12 SICE Engines คืออะไร (Overview: ผู้บวก AI ลิขิต โครงการนั้นแหละ)",
+            "Section 2: โครงสร้าง SICE: ทำไมเลือก 12 Engine ไม่ใช่ 5 หรือ 100",
+            "Section 3: Engines ที่มี (Description เบา ๆ ทั้ง 12)",
+            "Section 4: How Engines Interact (แต่ละ Engine ทำงานอย่างไรเข้าด้วยกัน)",
+            "Section 5: Output ของ SICE: ไม่ใช่ 'คำทำนาย' แต่เป็น 'แผนผังปฏิบัติ'",
+            "Section 6: ตัวอย่าง: ผู้ชายคนเดียว ลองกับ 2 SICE Engine ต่างกัน ผลต่างกันเหมือนไหน",
+            "CTA: ทดลองเสบียง SICE Engines (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1600+ คำ เรื่อง '12 SICE Engines': อัลกอริทึมของ SELFPRINT แบบ Tech-friendly แต่ยังเข้าใจหลักการ ไม่ต้องสูตรคณิตศาสตร์ สไตล์: Educational + Impressive + Demystifying โครงสร้าง: Hook ด้วยตัวเลข → Concept → Architecture → How It Works → Output = Life Plan → Example → CTA",
+          "seoNotes": "Keywords: 'AI personality engines', 'Behavioral algorithm', 'Machine learning personality' + Internal link ไปยัง '12 Dimensions explained' + '12 SICE Applications' + Schema markup สำหรับ article-type + technology"
+        }
+      ]
+    },
+
+    {
+      "categoryId": "cat-3",
+      "categoryName": "แก้ปัญหาชีวิตจริง (การงาน ความรัก การตัดสินใจ)",
+      "description": "บทความที่มี Problem-Solving angle ตรงต่อความเจ็บปวด ความท้อแท้ ของผู้ใช้ แล้วเสนอวิธี SELFPRINT ช่วยได้",
+      "contentTone": "Empathetic + Practical + Actionable ต้องให้รู้สึกว่า 'คุณจึงเข้าใจฉัน'",
+      "articles": [
+        {
+          "articleId": "article-3-1",
+          "title": "ทำไมยิ่งพยายามเลือก ยิ่งเลือกผิด? ถอดรหัสภาวะ 'สมองล้าจากการตัดสินใจ' (Decision Fatigue) พร้อมวิธีแก้",
+          "primaryKeywords": ["Decision Fatigue", "Choice Overload", "Decision Paralysis", "Choice Fatigue"],
+          "secondaryKeywords": ["Mental Exhaustion", "Willpower Depletion", "Decision-Making Burnout", "Overthinking", "Choice Analysis Paralysis"],
+          "searchIntent": "ผู้ค้นหา 'ทำไมตัดสินใจยาก' หรือ 'สมองเมื่อยหลังตัดสินใจ'",
+          "targetAudience": ["Overthinkers", "Decision-makers", "Busy professionals", "ผู้ที่ตัดสินใจผิดบ่อย"],
+          "outline": [
+            "Hook: เชื่อหรือไม่ Steve Jobs, Mark Zuckerberg เลือกเสื้อผ้าแบบเดียวก่อนตัดสินใจใหญ่",
+            "Section 1: Decision Fatigue คืออะไร + วิทยาศาสตร์เบื้องหลัง (Glucose + Willpower)",
+            "Section 2: ตัวอย่างจริง: Decision Fatigue ในการงาน, ความรัก, การเงิน",
+            "Section 3: Decision Fatigue อาจเป็นเหตุให้คุณเลือกผิด",
+            "Section 4: วิธีแก้ Conventional: Checklist, Prioritize, Reduce Choice",
+            "Section 5: SELFPRINT วิธี: AI Twin ช่วยให้ตัดสินใจเร็ว + ตั้งใจแบบเต็มไปหมด",
+            "Section 6: ตัวอย่าง: ผู้บริหาร ใช้ AI Twin ลด Decision Fatigue",
+            "CTA: ลอง AI Twin ช่วยตัดสินใจ (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1300+ คำ เรื่อง Decision Fatigue: ทำไมการตัดสินใจหลายครั้งทำให้เลือกผิด สไตล์: Relatable + Educational + Solution-focused โครงสร้าง: Hook ด้วย CEO ที่เลือกเสื้อแบบเดียว → Science → Symptoms → Examples → Traditional Solutions → SELFPRINT Solution → Story → CTA",
+          "seoNotes": "Keywords: 'Decision Fatigue', 'Choice overload', 'Decision paralysis' + Internal link ไปยัง 'AI Twin helps decide' + Tips schema สำหรับวิธีแก้"
+        },
+        {
+          "articleId": "article-3-2",
+          "title": "ค้นหาไอเดียอาชีพจากพฤติกรรม 12 มิติ: คุณเหมาะกับการเป็นหัวหน้าแถวหน้า หรือกุนซือเบื้องหลัง?",
+          "primaryKeywords": ["Career Fit", "Job Matching", "Leadership Style", "Career Path", "Personality-Career Match"],
+          "secondaryKeywords": ["Introvert vs Extrovert Job", "Entrepreneurship Fit", "Management Style", "Career Transition", "Job Satisfaction"],
+          "searchIntent": "ผู้ค้นหา 'อาชีพไหนเหมาะกับฉัน' หรือ 'ทำไมตำแหน่งนี้ไม่สำคัญใจ'",
+          "targetAudience": ["Career-changing people", "Graduates", "Frustrated employees", "Entrepreneurs"],
+          "outline": [
+            "Hook: ตัวอย่าง: ผู้บริหาร CEO ที่เป็น Introvert และประสบความสำเร็จ",
+            "Section 1: Myth บบ 'Leader ต้องเป็น Extrovert'",
+            "Section 2: 12 มิติพฤติกรรม ⟶ Ideal Job Type",
+            "Section 3: ประเภท 4 ของ Leaders (Visionary, Executor, Support, Strategist)",
+            "Section 4: ทำไมคุณอาจ 'ไม่ชอบงาน' แม้เงินเดือนดี (Fit, not just Skill)",
+            "Section 5: Case Study: ผู้ที่หา Fit ของตัวและเปลี่ยนอาชีพสำเร็จ",
+            "Section 6: SELFPRINT Career Recommendation จากพฤติกรรม",
+            "Section 7: ทำไมทดลอง 'ตำแหน่งใหม่' ผ่าน AI Twin ช่วยได้",
+            "CTA: ค้นหาตำแหน่งที่เหมาะกับ Type ของคุณ (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Career Fit ผ่านการวิเคราะห์พฤติกรรม 12 มิติ ลบ Myth ว่า 'Leader ต้องเป็นพวกนี้' สไตล์: Empowering + Practical + Inclusive โครงสร้าง: Hook ด้วยตัวอย่าง Introvert CEO → Myth-Busting → 12 Dimensions → Career Types → Why Fit Matters → Examples → SELFPRINT → CTA",
+          "seoNotes": "Keywords: 'Career fit', 'Job matching personality', 'Leadership style' + Internal link ไปยัง '12 Dimensions' + 'Career change using AI Twin' + Job schema สำหรับตำแหน่งที่ recommend"
+        },
+        {
+          "articleId": "article-3-3",
+          "title": "รู้จัก 'จุดบอดเร้นลับ' (Blind Spots) ของตัวเอง: สาเหตุที่ทำให้คุณพลาดโอกาสสำคัญในชีวิตซ้ำๆ",
+          "primaryKeywords": ["Blind Spots", "Unconscious Patterns", "Self-Sabotage", "Behavioral Patterns", "Limiting Beliefs"],
+          "secondaryKeywords": ["Johari Window", "Self-Awareness", "Unconscious Bias", "Shadow Self", "Repeating Pattern"],
+          "searchIntent": "ผู้ค้นหา 'ทำไมปัญหาเดิมเกิดซ้ำ' หรือ 'มีเรื่องซ่อนตัวที่ไม่รู้'",
+          "targetAudience": ["People stuck in patterns", "Self-aware people", "Therapy-seeking", "Growth-minded"],
+          "outline": [
+            "Hook: เชื่อหรือไม่ คุณทำผิดอย่างเดียวกันซ้ำซ้อน 5 ครั้ง",
+            "Section 1: Blind Spots Psychology (Johari Window, Unconscious Patterns)",
+            "Section 2: ตัวอย่าง Blind Spots ในการงาน ความรัก การเงิน",
+            "Section 3: ทำไมเราไม่รู้ Blind Spots ของตัวเอง (Defense Mechanism)",
+            "Section 4: วิธีค้นหา Blind Spots (Feedback, Pattern Analysis, AI Scan)",
+            "Section 5: SELFPRINT AI Twin สแกน Blind Spots ของคุณ",
+            "Section 6: Case Study: ผู้ที่พบและแก้ Blind Spot ประสบความสำเร็จ",
+            "CTA: ค้นหา Blind Spot ตัวจริง (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Blind Spots: ลักษณะพฤติกรรมซ่อนที่บดบังความสำเร็จ สไตล์: Compassionate + Insightful + Solution-Focused โครงสร้าง: Hook ด้วยตัวอย่าง repeat pattern → Science ของ Blind Spots → Examples → Why We Have Them → Detection Methods → SELFPRINT → Story → CTA",
+          "seoNotes": "Keywords: 'Blind spots psychology', 'Unconscious patterns', 'Self-sabotage' + Internal link ไปยัง 'Johari Window explained' + 'AI Twin uncovers blind spots' + FAQ schema"
+        },
+        {
+          "articleId": "article-3-4",
+          "title": "วิธีอ่านพิมพ์เขียวพฤติกรรมคนรัก: ลดการทะเลาะด้วยการเข้าใจ 'Matrix ความสัมพันธ์' ของกันและกัน",
+          "primaryKeywords": ["Relationship Compatibility", "Partner Understanding", "Behavioral Compatibility", "Communication Style", "Relationship Matrix"],
+          "secondaryKeywords": ["Couples Therapy", "Love Language", "Attachment Style", "Conflict Resolution", "Relationship Patterns"],
+          "searchIntent": "ผู้ค้นหา 'ทำไมเราทะเลาะ' หรือ 'เข้าใจคู่รักไม่ได้'",
+          "targetAudience": ["Couples", "Singles looking for compatibility", "Relationship-concerned", "People in conflict"],
+          "outline": [
+            "Hook: ตัวอย่าง: คู่รักที่ทะเลาะเรื่องเล็กน้อย แต่จริงๆ คนละ Type ของการสื่อสาร",
+            "Section 1: Behavioral Compatibility คืออะไร (ไม่ใช่ 'รักกันเพียงพอ')",
+            "Section 2: 12 มิติของผู้ชาย vs ผู้หญิง → เข้าใจ Matrix ความสัมพันธ์",
+            "Section 3: Attachment Style + Communication Style = Conflict Pattern",
+            "Section 4: ตัวอย่าง: คู่รักที่ Type ต่างกัน ทำไมทะเลาะ + วิธีแก้",
+            "Section 5: SELFPRINT Relationship Scanner: รู้ Matrix ของคู่ + Prediction",
+            "Section 6: วิธีใช้ AI Twin เพื่อสื่อสารกับคู่รักได้ดีขึ้น",
+            "CTA: ส่องความสัมพันธ์ของคุณผ่าน SELFPRINT (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Relationship Compatibility ผ่าน Behavioral Analysis ไม่ใช่ 'Zodiac' แต่เป็น 'Personality Fit' สไตล์: Insightful + Compassionate + Practical โครงสร้าง: Hook ด้วยความเข้าใจผิด → Behavioral Compatibility Concept → Matrix Model → Examples → Conflict patterns → SELFPRINT Relationship Tools → CTA",
+          "seoNotes": "Keywords: 'Relationship compatibility', 'Partner personality', 'Behavioral matching' + Internal link ไปยัง 'Attachment Style quiz' + 'Communication style' + FAQ schema สำหรับ Couples questions"
+        },
+        {
+          "articleId": "article-3-5",
+          "title": "พัฒนาตัวเองแบบถูกจุด: เลิกเลียนแบบคนสำเร็จ แล้วหันมาปลดล็อกศักยภาพตามแบบฉบับ SELFPRINT ของคุณ",
+          "primaryKeywords": ["Personal Development", "Self-Improvement", "Authentic Growth", "Strength-Based", "Personality-Aligned Growth"],
+          "secondaryKeywords": ["Self-Actualization", "Strengths Finder", "Growth Mindset", "Ikigai", "Personal Brand"],
+          "searchIntent": "ผู้ค้นหา 'พัฒนาตัวเอง' แต่ลืมว่าวิธี CEO ทำงานอาจไม่เหมาะกับตัวเอง",
+          "targetAudience": ["Self-improvement seekers", "Overwhelmed people", "People comparing themselves", "Authentic growth-seeking"],
+          "outline": [
+            "Hook: คุณลองอ่านหนังสือพัฒนาตัวเอง 10 เล่ม แต่ยังไม่เปลี่ยน เพราะคุณกำลังเลียนแบบ CEO ที่คนละ Type",
+            "Section 1: ปัญหา: การพัฒนาตัวเอง 'One-Size-Fits-All' ไม่ใช่วิธีที่ดี",
+            "Section 2: Strength-Based Growth vs Weakness-Fixing",
+            "Section 3: 12 มิติ = 12 วิธีการเติบโต (ไม่ใช่ 1 วิธีสำหรับทุกคน)",
+            "Section 4: ตัวอย่าง: 2 คน ที่ Type ต่างกัน พัฒนาตัวเองวิธีต่างกัน",
+            "Section 5: SELFPRINT Growth Plan: Personalized ตามแบบฉบับของคุณ",
+            "Section 6: วิธีใช้ AI Twin ทดลองกลยุทธ์พัฒนาตัวเอง",
+            "CTA: สร้าง Personal Development Plan ตามลักษณะตัวจริง (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Authentic Self-Improvement: พัฒนาตัวเองตามแบบฉบับ ไม่ใช่ตาม Template โลก สไตล์: Encouraging + Practical + Liberating โครงสร้าง: Hook ด้วย frustration จาก Generic advice → Why One-Size Doesn't Fit → Strength-Based Growth Concept → 12 Types = 12 Paths → Examples → SELFPRINT Personal Plan → CTA",
+          "seoNotes": "Keywords: 'Personal development personality', 'Authentic growth', 'Strength-based development' + Internal link ไปยัง '12 Dimensions' + 'Personalized Growth Plans' + FAQs สำหรับ Development questions"
+        },
+        {
+          "articleId": "article-3-6",
+          "title": "ทักษะการตัดสินใจในวิกฤต: เช็กระดับพฤติกรรมการรับมือความเครียดของคุณผ่านระบบสแกน AI",
+          "primaryKeywords": ["Crisis Decision", "Stress Response", "Decision Under Pressure", "Behavioral Pattern", "Coping Mechanism"],
+          "secondaryKeywords": ["Stress Management", "Anxiety Response", "Fight or Flight", "Crisis Management", "Emotional Resilience"],
+          "searchIntent": "ผู้ค้นหา 'ทำไมตัดสินใจผิดตอนตึงเครียด' หรือ 'ปฏิกิริยาความเครียด'",
+          "targetAudience": ["Crisis-prone jobs", "Anxious people", "Leaders", "People wanting resilience"],
+          "outline": [
+            "Hook: ตัวอย่าง: Pilot ทำตัดสินใจดีตอน Normal แต่ตอนวิกฤต ปฏิกิริยาเปลี่ยน",
+            "Section 1: Stress Response Pattern ของแต่ละ Type",
+            "Section 2: 'Coping Mechanism' เมื่อตึงเครียด (ต่างกันจากการตัดสินใจปกติ)",
+            "Section 3: ตัวอย่าง: Type ที่ 'Freeze' vs 'Fight' ตอนวิกฤต",
+            "Section 4: วิธีฝึก Decision-Making Under Pressure",
+            "Section 5: SELFPRINT Crisis Simulation: ทดลองตัดสินใจตอนเครียดกับ AI Twin",
+            "Section 6: Case Study: ผู้บริหาร / ทีม ฝึกตัดสินใจวิกฤต",
+            "CTA: เช็คระดับ Resilience + Crisis Decision ของคุณ (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Decision-Making in Crisis: ทำไมพฤติกรรมเปลี่ยนตอนเครียด + วิธีฝึก สไตล์: Practical + Grounded + Empowering โครงสร้าง: Hook ด้วยตัวอย่าง Crisis → Stress Response Science → Pattern Types → How It Differs → Training Methods → SELFPRINT Simulation → CTA",
+          "seoNotes": "Keywords: 'Crisis decision making', 'Stress response pattern', 'Decision under pressure' + Internal link ไปยัง 'Behavioral Patterns' + 'AI Twin Simulation' + Guide schema สำหรับ Crisis tips"
+        },
+        {
+          "articleId": "article-3-7",
+          "title": "ทำไมอ่านหนังสือพัฒนาตัวเองกี่เล่มก็ไม่เปลี่ยน? เพราะคุณยังไม่เจอ 'จุดบกพร่องถาวร' ในระบบความคิดจากคนชอบคิดมาก",
+          "primaryKeywords": ["Thought Patterns", "Mental Model", "Fixed Mindset", "Core Belief", "Limiting Belief"],
+          "secondaryKeywords": ["Overthinking", "Analysis Paralysis", "Cognitive Distortion", "Self-Sabotage", "Subconscious Pattern"],
+          "searchIntent": "ผู้ค้นหา 'ทำไมไม่เปลี่ยน' หรือ 'ปัญหาเดิมซ้ำ'",
+          "targetAudience": ["Overthinkers", "Self-help junkie", "Frustrated people", "Introspective type"],
+          "outline": [
+            "Hook: เชื่อหรือไม่ 'คิด' มากสุดบ่อยไม่ได้ = 'แก้' มากสุด",
+            "Section 1: ความแตกต่างระหว่าง 'Thinking Pattern' vs 'Action Pattern'",
+            "Section 2: Overthinker ไม่เปลี่ยนเพราะ? (Endless Loop ของการคิด)",
+            "Section 3: 'จุดบกพร่องถาวร' ในระบบความคิด (Core Limiting Belief)",
+            "Section 4: ตัวอย่าง: Overthinker ที่เจอ Core Issue และเปลี่ยนได้",
+            "Section 5: SELFPRINT Brain Scan: ค้นหา Mental Pattern ที่ซ่อน",
+            "Section 6: วิธี 'ตัด Loop' ของการคิด โดยใช้ AI Twin",
+            "CTA: ค้นหา Core Belief ที่ยับยั้งคุณ (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1400+ คำ เรื่อง Thinking vs Doing: ทำไมคนชอบคิดไม่เปลี่ยน + วิธีหาจุดบกพร่องในระบบความคิด สไตล์: Compassionate + Actionable + Deep-Diving โครงสร้าง: Hook ด้วยปัญหา Overthinker → Cognitive Pattern Science → Examples → The Core Issue → Detection Method → SELFPRINT Brain Scan → CTA",
+          "seoNotes": "Keywords: 'Overthinking', 'Mental pattern', 'Limiting belief', 'Core belief' + Internal link ไปยัง 'AI Twin analysis' + 'Blind spots' + FAQ schema สำหรับ Thinking pattern questions"
+        },
+        {
+          "articleId": "article-3-8",
+          "title": "จากคนชอบคิดมาก สู่คนคิดอย่างเป็นระบบ: เปลี่ยน Overthinking ให้กลายเป็นข้อมูลขับเคลื่อนอนาคตด้วย AI",
+          "primaryKeywords": ["Systems Thinking", "Strategic Thinking", "Data-Driven Thinking", "Structured Thinking", "Analytical Mindset"],
+          "secondaryKeywords": ["Decision Framework", "Thinking Model", "Cognitive Framework", "Structured Problem-Solving", "Systems Analysis"],
+          "searchIntent": "ผู้ค้นหา 'คิดแล้วได้ผล' หรือ 'ใช้ความคิดให้เป็นประโยชน์'",
+          "targetAudience": ["Overthinkers who want to level up", "Analytical people", "Decision-makers", "Strategic thinkers"],
+          "outline": [
+            "Hook: ตัวอย่าง: CEO ที่เคยเป็น Overthinker แต่เปลี่ยนเป็น 'Structured Thinker'",
+            "Section 1: Overthinking vs Systems Thinking (ความแตกต่าง)",
+            "Section 2: Data-Driven Thinking ช่วยอะไร (Transform Thinking เป็น Action)",
+            "Section 3: Thinking Framework 4 ขั้น (เปลี่ยน Random Think เป็น Structured)",
+            "Section 4: SELFPRINT ใช้ AI Twin เป็น 'Thinking Partner' ช่วยระบบ",
+            "Section 5: Case Study: Overthinker ที่เป็น Strategic Thinker",
+            "Section 6: วิธีฝึก Systems Thinking ผ่าน AI Twin",
+            "CTA: ก้าวไปยัง Structured Thinking (ลิงก์)"
+          ],
+          "aiPrompt": "เขียนบทความ 1500+ คำ เรื่อง Transform Overthinking to Systems Thinking: ยกระดับความคิดจาก Chaos เป็น Strategy สไตล์: Inspirational + Practical + Framework-Based โครงสร้าง: Hook ด้วย transformation story → Overthinking Problem → Systems Thinking Solution → Framework (4 steps) → SELFPRINT AI as Thinking Partner → Practice Methods → CTA",
+          "seoNotes": "Keywords: 'Systems thinking', 'Strategic thinking', 'Data-driven decision', 'Structured thinking' + Internal link ไปยัง '12 SICE Engines' + 'AI Twin decision support' + How-to schema"
+        }
+      ]
+    }
+  ],
+
+  "generalNotes": {
+    "seoStrategy": "ทุกบทความต้อง: (1) LSI keywords + Long-tail keywords (2) Internal linking ไป SELFPRINT features (3) FAQ/Schema markup (4) Word count 1200-1600 คำ (5) CTA ชัด → Quiz/Scan/Trial",
+    "writingGuidelines": "ไม่ใช่การ 'โฆษณา' SELFPRINT โดยตรง แต่เป็นการ 'Educate + Seduce' ให้เข้าใจปัญหา จากนั้นค่อยเสนอว่า SELFPRINT ช่วยได้",
+    "aiGenerationWorkflow": "1. Copy article JSON → 2. Feed into LLM + aiPrompt 3. LLM เขียนบทความเสร็จสิ้น 4. Human edit + fact-check + SEO optimize 5. Publish",
+    "publishingPlans": "ลำดับการโพสต์: Cat-1 (Hook audience) → Cat-2 (Educate audience) → Cat-3 (Solve problems + Convert) ทำให้ Funnel ชัด"
+  }
+}

@@ -78,11 +78,13 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return null;
 
       const { data: prefs } = await supabase
+        .schema('selfprint')
         .from('world_preferences')
         .select('*')
         .eq('user_id', session.user.id);
 
       const { data: stats } = await supabase
+        .schema('selfprint')
         .from('world_stats')
         .select('*')
         .eq('user_id', session.user.id);
@@ -150,6 +152,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
       const isFavorite = favoriteWorlds.includes(world);
       const { error: err } = await supabase
+        .schema('selfprint')
         .from('world_preferences')
         .upsert(
           {
@@ -184,6 +187,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
       // Update world_preferences.last_accessed
       const { error: err } = await supabase
+        .schema('selfprint')
         .from('world_preferences')
         .upsert(
           {
@@ -201,6 +205,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       // Update visits_count in world_stats — used by TwinStateEngine for maturity scoring
       const currentVisits = worldStats[world]?.visitsCount || 0;
       const { error: statsErr } = await supabase
+        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -227,6 +232,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
+        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -253,6 +259,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
+        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -279,6 +286,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
+        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {

@@ -4,9 +4,14 @@
  * Ensures 100% implementation completeness + integration
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import type { SICEInput, SICEOutput } from '../../../types/sice';
 import { SICEOrchestrator } from '../SICEOrchestrator';
+
+// Mock Supabase for test environment (no real network calls)
+vi.mock('../../supabase-service', () => ({
+  supabase: null, // Mock: Supabase unavailable in test env
+}));
 
 // Engine imports for direct testing
 import { PersonalContextBuilder } from '../engines/PersonalContextBuilder';

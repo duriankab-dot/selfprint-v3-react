@@ -22,13 +22,9 @@ export async function fetchUserTwin(userId: string): Promise<Twin | null> {
       .from('twins')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        // Not found — no Twin yet
-        return null;
-      }
       throw error;
     }
 
