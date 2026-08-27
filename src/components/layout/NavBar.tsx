@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTheme } from '@/context/ThemeContext';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 
 interface NavBarProps {
@@ -45,6 +46,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   /**
@@ -117,6 +119,8 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         .sp-nav-link:hover { background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent) !important; }
         .sp-nav-signout:hover { border-color: var(--color-accent-primary) !important; background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent) !important; }
         .sp-nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-primary) 45%, transparent); }
+        .sp-theme-toggle { background: none; border: 1px solid var(--color-border); border-radius: 8px; width: 36px; height: 36px; cursor: pointer; font-size: 17px; display: flex; align-items: center; justify-content: center; transition: border-color 0.2s, background 0.2s; color: var(--color-text-primary); }
+        .sp-theme-toggle:hover { border-color: var(--color-accent-primary); background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent); }
         @media (max-width: 760px) {
           .sp-navbar-links { display: none !important; }
           .sp-navbar-hamburger { display: flex !important; }
@@ -195,6 +199,14 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         </div>
 
         <div className="sp-navbar-desktop-action" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className="sp-theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
+          >
+            {theme === 'dark' ? '☀️' : '🌙'}
+          </button>
           <LanguageSwitcher />
           {rightSlot || authAction}
         </div>
@@ -263,6 +275,28 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             </Link>
           ))}
           <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
+              style={{
+                background: 'none',
+                border: '1px solid var(--color-border)',
+                borderRadius: 8,
+                padding: '12px 14px',
+                fontSize: 15,
+                fontWeight: 600,
+                color: 'var(--color-text-primary)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                textAlign: 'left',
+              }}
+            >
+              <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
+              <span>{theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'}</span>
+            </button>
             <LanguageSwitcher />
             {rightSlot || authAction}
           </div>
