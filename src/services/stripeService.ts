@@ -202,10 +202,18 @@ export async function getSubscriptionStatus(accessToken: string) {
       throw new Error(`Failed to fetch subscription: ${response.statusText}`);
     }
 
+    // CF Pages returns index.html (SPA fallback) when the Worker is not deployed.
+    // Detect non-JSON response to avoid SyntaxError bubbling to console.
+    const contentType = response.headers.get('content-type') ?? '';
+    if (!contentType.includes('application/json')) {
+      // API not yet deployed — treat as free tier, no error
+      return { tier: 'free', status: 'active' };
+    }
+
     return await response.json();
   } catch (error) {
-    console.error('[Stripe] Subscription fetch failed:', error);
-    throw error;
+    // Silent fallback — free tier is the safe default
+    return { tier: 'free', status: 'active' };
   }
 }
 

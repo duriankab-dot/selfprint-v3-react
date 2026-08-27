@@ -117,7 +117,7 @@ export default function CoreAwakening() {
         .from('users_profiles')
         .select('date_of_birth, time_of_birth, place_of_birth')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
       if (data?.date_of_birth) {
         updateProfile({
           birthDate: String(data.date_of_birth),
