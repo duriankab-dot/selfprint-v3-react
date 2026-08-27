@@ -7,7 +7,6 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { marked } from 'marked';
 
 interface ArticleMetadata {
   title: string;
@@ -78,8 +77,17 @@ export default function BlogArticle() {
           }
         });
 
-        // Render markdown to HTML
-        const htmlContent = await marked(content);
+        // Simple markdown to HTML (basic conversion)
+        const htmlContent = content
+          .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
+          .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
+          .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/\n\n/g, '</p><p>')
+          .split('\n')
+          .map(line => line.trim() ? `<p>${line}</p>` : '')
+          .join('');
 
         setArticle({
           ...metadata,
