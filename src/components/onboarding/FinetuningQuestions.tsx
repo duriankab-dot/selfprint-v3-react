@@ -367,14 +367,14 @@ export function FinetuningQuestions({
         </div>
 
         {/* Action Buttons */}
-        {allAnswered ? (
-          <div
-            style={{
-              display: 'flex',
-              gap: '12px',
-              flexDirection: 'column',
-            }}
-          >
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            flexDirection: 'column',
+          }}
+        >
+          {allAnswered && (
             <button
               onClick={handleComplete}
               disabled={isCompleting}
@@ -402,27 +402,34 @@ export function FinetuningQuestions({
             >
               {isCompleting ? '✓ กำลังอัปเดต...' : '✓ เสร็จสิ้น (ความแม่นยำ 85%)'}
             </button>
-            <button
-              onClick={onSkip}
-              disabled={isCompleting}
-              style={{
-                width: '100%',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                border: '2px solid var(--color-border)',
-                background: 'transparent',
-                color: 'var(--color-text-primary)',
-                fontWeight: 600,
-                fontSize: '16px',
-                cursor: isCompleting ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s',
-                opacity: isCompleting ? 0.7 : 1,
-              }}
-            >
-              ข้ามไปหน้าแรก
-            </button>
-          </div>
-        ) : null}
+          )}
+          {/* Skip is always visible — users should never be forced through questions */}
+          <button
+            onClick={onSkip}
+            disabled={isCompleting}
+            style={{
+              width: '100%',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              border: '2px solid var(--color-border)',
+              background: 'transparent',
+              color: 'var(--color-text-secondary)',
+              fontWeight: 500,
+              fontSize: '14px',
+              cursor: isCompleting ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s',
+              opacity: isCompleting ? 0.5 : 0.7,
+            }}
+            onMouseEnter={(e) => {
+              if (!isCompleting) (e.currentTarget as HTMLButtonElement).style.opacity = '1';
+            }}
+            onMouseLeave={(e) => {
+              if (!isCompleting) (e.currentTarget as HTMLButtonElement).style.opacity = '0.7';
+            }}
+          >
+            ข้ามไปก่อน (ความแม่นยำ {Math.round(accuracy)}%)
+          </button>
+        </div>
       </div>
     </div>
   );
