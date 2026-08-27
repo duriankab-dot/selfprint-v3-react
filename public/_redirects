@@ -1,1 +1,7 @@
-/* /index.html 200
+# Cloudflare Pages redirects
+# Blog static files - serve directly
+/blog/index.json  /blog/index.json  200
+/blog/*           /blog/*           200
+
+# React Router - SPA fallback
+/*                /index.html       200
