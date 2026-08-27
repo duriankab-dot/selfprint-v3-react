@@ -21,6 +21,7 @@ import { EvolutionProvider } from './context/EvolutionContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { EnvironmentProvider } from './context/EnvironmentContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
 // CHUNK-SPLIT: TwinEvolutionSceneWrapper is a celebration overlay that fires
@@ -228,6 +229,7 @@ function App() {
                               <TwinEvolution />
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />
+                              <PWAInstallPrompt />
                               <LanguageProvider>
                               <Suspense fallback={null}>
                                 <Routes>
