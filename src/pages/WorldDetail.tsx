@@ -133,6 +133,11 @@ export default function WorldDetail() {
             </div>
             <button
               onClick={ambientTone.toggle}
+              aria-label={
+                environment
+                  ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
+                  : ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'
+              }
               title={
                 environment
                   ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
