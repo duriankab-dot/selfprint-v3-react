@@ -76,7 +76,6 @@ const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
 // Blog pages
-const BlogIndex = lazy(() => import('./pages/BlogIndex'));
 const BlogArticle = lazy(() => import('./pages/BlogArticle'));
 // Phase B: new activity pages
 const TarotPage = lazy(() => import('./pages/TarotPage'));
@@ -170,7 +169,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/science', element: <SciencePage /> },
     { path: '/contact', element: <ContactPage /> },
     { path: '/terms', element: <TermsPage /> },
-    { path: '/blog', element: <BlogIndex /> },
+    { path: '/blog', element: <BlogListPage /> },
   ];
 
   // Add all public routes for both languages
