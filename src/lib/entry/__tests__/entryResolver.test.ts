@@ -1,4 +1,5 @@
 /**
+ * @vitest-environment jsdom
  * entryResolver.test.ts
  * Unit tests for Smart Entry: classification + route resolution
  *
@@ -9,7 +10,7 @@
  *  - Edge cases: unknown status, fallback behavior
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   classifyEntryPath,
   resolveEntryRoute,
@@ -19,10 +20,26 @@ import {
   LIFECYCLE_ROUTE_MAP,
   type EntryPath,
   type EntryContext,
-} from './entryResolver';
+} from '../entryResolver';
 import type { LifecycleStatus } from '@/store/lifecycleStore';
 
 describe('entryResolver', () => {
+  beforeEach(() => {
+    // Setup matchMedia mock for all tests
+    if (!window.matchMedia) {
+      window.matchMedia = vi.fn().mockImplementation(query => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }));
+    }
+  });
+
   describe('detectPwa', () => {
     it('should detect PWA via navigator.standalone (iOS)', () => {
       // Mock navigator.standalone
