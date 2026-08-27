@@ -78,7 +78,6 @@ const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
 // Blog pages
 const BlogIndex = lazy(() => import('./pages/BlogIndex'));
 const BlogArticle = lazy(() => import('./pages/BlogArticle'));
-const BlogListPage = BlogIndex; // Alias for route compatibility
 // Phase B: new activity pages
 const TarotPage = lazy(() => import('./pages/TarotPage'));
 const PalmistryPage = lazy(() => import('./pages/PalmistryPage'));
@@ -172,7 +171,6 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/contact', element: <ContactPage /> },
     { path: '/terms', element: <TermsPage /> },
     { path: '/blog', element: <BlogIndex /> },
-    { path: '/blog/:world/:category/:slug', element: <BlogArticle /> },
   ];
 
   // Add all public routes for both languages
