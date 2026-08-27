@@ -24,6 +24,7 @@ import { useUserStore } from '@/store/userStore';
 import { useAuth } from '@/context/AuthContext';
 import { useTwin } from '@/context/TwinContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
+import { useTheme } from '@/context/ThemeContext';
 
 // ─── Story copy (display) ─────────────────────────────────────────────────────
 
@@ -537,6 +538,15 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const { mood } = useEmotion();
   const { setLandingContext } = useUserStore();
   const { segment } = useSmartEntry();
+  const { theme } = useTheme();
+
+  // Landing always starts in dark navy — restore user theme on leave
+  useEffect(() => {
+    document.documentElement.setAttribute('data-mode', 'dark');
+    return () => {
+      document.documentElement.setAttribute('data-mode', theme);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { session } = useAuth();
   const { twin } = useTwin();

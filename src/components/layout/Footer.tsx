@@ -1,153 +1,117 @@
 /**
- * Footer.tsx
- *
- * เมนูด้านล่างที่ใช้ร่วมกันทุกหน้า (ยกเว้น Onboarding เหตุผลเดียวกับ NavBar)
+ * Footer.tsx — SELFPRINT
+ * 4-column layout: เกี่ยวกับเรา | แหล่งความรู้ | ความปลอดภัย | ติดตามเรา
+ * SEO: ให้ Search Engine Bot วิ่งเก็บข้อมูล + E-E-A-T signal
  */
 
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 
-const FOOTER_LINKS = [
-  { to: '/', label: 'หน้าแรก' },
-  { to: '/dashboard', label: 'แดชบอร์ด' },
-  // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin guide),
-  // wrong assistant for a user who already has a Twin.
-  { to: '/chat/twin', label: 'แชท' },
-  { to: '/menu', label: 'เมนูฟีเจอร์' },
-  { to: '/onboarding', label: 'เริ่มต้นใช้งาน' },
-];
+interface FooterLinkGroup {
+  heading: string;
+  links: { label: string; to: string; external?: boolean }[];
+}
 
 export function Footer() {
   const year = new Date().getFullYear();
   const { language } = useLanguage();
-  // ROUTELOOP-002 FIX: these were bare paths with no /en or /th prefix,
-  // which hit the app's catch-all route instead of the intended page.
-  // "/" is left alone — it has its own dedicated redirect rule in App.tsx.
-  const prefixedTo = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
+  const p = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
+
+  const GROUPS: FooterLinkGroup[] = [
+    {
+      heading: 'เกี่ยวกับเรา',
+      links: [
+        { label: 'About SELFPRINT', to: '/about' },
+        { label: 'วิทยาศาสตร์ & วิธีการ', to: '/science' },
+        { label: 'Pricing & Plans', to: '/pricing' },
+        { label: 'ติดต่อเรา', to: '/contact' },
+      ],
+    },
+    {
+      heading: 'แหล่งความรู้',
+      links: [
+        { label: 'คลังบทความ (Blog)', to: '/blog' },
+        { label: 'คำถามที่พบบ่อย (FAQ)', to: '/faq' },
+        { label: 'AI คืออะไร? vs ดูดวง', to: '/vs-astrology' },
+        { label: '12 Hub Worlds', to: '/worlds' },
+      ],
+    },
+    {
+      heading: 'ความปลอดภัย',
+      links: [
+        { label: 'Privacy Center', to: '/privacy' },
+        { label: 'นโยบายความเป็นส่วนตัว', to: '/privacy' },
+        { label: 'ข้อตกลงการใช้งาน', to: '/terms' },
+      ],
+    },
+    {
+      heading: 'ติดตามเรา',
+      links: [
+        { label: 'Facebook', to: 'https://facebook.com/selfprintone', external: true },
+        { label: 'Line Official @selfprint', to: 'https://lin.ee/selfprint', external: true },
+        { label: 'Email Support', to: 'mailto:support@selfprint.one', external: true },
+      ],
+    },
+  ];
 
   return (
-    <footer
-      style={{
-        position: 'relative',
-        borderTop: '1px solid var(--color-border)',
-        background: 'var(--color-bg-secondary)',
-        padding: '56px 32px 28px',
-        marginTop: 'auto',
-        overflow: 'hidden',
-      }}
-    >
+    <footer style={{ position: 'relative', borderTop: '1px solid var(--color-border)', background: 'var(--color-bg-secondary)', padding: '56px 24px 28px', marginTop: 'auto', overflow: 'hidden' }}>
       <style>{`
-        .sp-footer-link { position: relative; transition: color 0.2s; }
+        .sp-footer-link { transition: color 0.2s; }
         .sp-footer-link:hover { color: var(--color-accent-primary) !important; }
-        @media (max-width: 640px) {
-          .sp-footer-inner { flex-direction: column; gap: 28px !important; }
-        }
+        .sp-footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3,1fr); gap: 32px; max-width: 1100px; margin: 0 auto 40px; }
+        @media (max-width: 860px) { .sp-footer-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) { .sp-footer-grid { grid-template-columns: 1fr; } }
+        .sp-footer-col-heading { font-size: 11.5px; font-weight: 700; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+        .sp-footer-col a, .sp-footer-col span { display: block; font-size: 13.5px; font-weight: 500; color: var(--color-text-secondary); text-decoration: none; margin-bottom: 10px; }
       `}</style>
 
-      {/* subtle accent glow */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          top: '-60px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '360px',
-          height: '160px',
-          background: 'var(--color-accent-primary)',
-          opacity: 0.06,
-          filter: 'blur(60px)',
-          pointerEvents: 'none',
-        }}
-      />
+      {/* subtle glow */}
+      <div aria-hidden style={{ position: 'absolute', top: '-60px', left: '50%', transform: 'translateX(-50%)', width: '360px', height: '160px', background: 'var(--color-accent-primary)', opacity: 0.05, filter: 'blur(60px)', pointerEvents: 'none' }} />
 
-      <div
-        className="sp-footer-inner"
-        style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          display: 'flex',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '32px',
-          marginBottom: '36px',
-          position: 'relative',
-        }}
-      >
-        <div style={{ maxWidth: '340px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '9px',
-              fontWeight: 800,
-              fontSize: '19px',
-              letterSpacing: '-0.01em',
-              color: 'var(--color-text-primary)',
-              marginBottom: '10px',
-            }}
-          >
-            <img
-              src="/favicon.svg"
-              alt="SelfPrint"
-              width={28}
-              height={28}
-              style={{ display: 'block' }}
-            />
-            SelfPrint
+      <div className="sp-footer-grid">
+        {/* Brand column */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '9px', fontWeight: 800, fontSize: '19px', letterSpacing: '-0.01em', color: 'var(--color-text-primary)', marginBottom: '12px' }}>
+            <img src="/favicon.svg" alt="SELFPRINT" width={26} height={26} />
+            SELFPRINT
           </div>
-          <p style={{ fontSize: '13.5px', color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.7 }}>
-            AI Twin ที่เข้าใจรูปแบบการตัดสินใจของคุณ ช่วยให้คุณรู้จักตัวเองได้ลึกขึ้นในทุกวัน
+          <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 16px', lineHeight: 1.75, maxWidth: '240px' }}>
+            แพลตฟอร์ม AI วิเคราะห์พฤติกรรม 12 มิติ สร้าง AI Twin เฉพาะบุคคล ไม่ใช่ดวงชะตา
+          </p>
+          <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', margin: 0, lineHeight: 1.6 }}>
+            🔬 อ้างอิงจาก Behavioral Science<br />
+            🔒 ข้อมูลเข้ารหัส RLS<br />
+            ⚡ ฟรี ไม่ต้องผูกบัตร
           </p>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <span
-            style={{
-              fontSize: '11.5px',
-              fontWeight: 700,
-              color: 'var(--color-text-tertiary)',
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-            }}
-          >
-            ลิงก์ด่วน
-          </span>
-          {FOOTER_LINKS.map((link) => (
-            <Link
-              key={link.to}
-              to={prefixedTo(link.to)}
-              className="sp-footer-link"
-              style={{
-                fontSize: '14px',
-                fontWeight: 500,
-                color: 'var(--color-text-secondary)',
-                textDecoration: 'none',
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </div>
+        {/* Link groups */}
+        {GROUPS.map((group) => (
+          <div key={group.heading} className="sp-footer-col">
+            <div className="sp-footer-col-heading">{group.heading}</div>
+            {group.links.map((link) =>
+              link.external ? (
+                <a key={link.label} href={link.to} target="_blank" rel="noreferrer" className="sp-footer-link">
+                  {link.label}
+                </a>
+              ) : (
+                <Link key={link.label} to={p(link.to)} className="sp-footer-link">
+                  {link.label}
+                </Link>
+              )
+            )}
+          </div>
+        ))}
       </div>
 
-      <div
-        style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          paddingTop: '22px',
-          borderTop: '1px solid var(--color-border)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '8px',
-          fontSize: '12.5px',
-          color: 'var(--color-text-tertiary)',
-        }}
-      >
-        <span>© {year} SelfPrint สงวนลิขสิทธิ์</span>
-        <span style={{ opacity: 0.7 }}>สร้างด้วย AI Twin Engine</span>
+      {/* Bottom bar */}
+      <div style={{ maxWidth: '1100px', margin: '0 auto', paddingTop: '20px', borderTop: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
+        <span>© {year} SELFPRINT · สงวนลิขสิทธิ์ · ขับเคลื่อนด้วย AI Behavioral Science</span>
+        <div style={{ display: 'flex', gap: '16px' }}>
+          <Link to={p('/privacy')} className="sp-footer-link" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px', textDecoration: 'none' }}>Privacy</Link>
+          <Link to={p('/terms')} className="sp-footer-link" style={{ color: 'var(--color-text-tertiary)', fontSize: '12px', textDecoration: 'none' }}>Terms</Link>
+        </div>
       </div>
     </footer>
   );
