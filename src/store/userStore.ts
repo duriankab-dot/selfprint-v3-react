@@ -80,6 +80,18 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'selfprint-user-storage',
+      // G1-LOCALSTORAGE-POLICY: Only persist the user's theme preference.
+      // Sensitive data (birthDate, birthTime, birthPlace) and derived data
+      // (SICE scores, landingContext) must NOT persist to localStorage:
+      //   - birthDate: written to selfprint.users_profiles via /api/profile after auth
+      //   - SICE scores: recomputed from birthDate on each session
+      //   - landingContext: session-level only, clears naturally on next visit
+      //   - profile: source-of-truth is Supabase; localStorage copy causes
+      //     stale-data confusion when user updates profile on another device
+      //
+      // Pre-auth onboarding data survives page refresh via
+      // 'selfprint_onboarding_resume' (step + dob) — not userStore.
+      partialize: (state) => ({ theme: state.theme }),
     }
   )
 );
