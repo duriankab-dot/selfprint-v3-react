@@ -20,7 +20,7 @@ import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import { generatePricingSchema, type PricingPlan } from '@/lib/structuredData';
-import { formatCurrency, convertUSDToLocal } from '@/config/currencyConfig';
+import { formatCurrency } from '@/config/currencyConfig';
 import type { CurrencyCode } from '@/config/currencyConfig';
 import '../styles/pricing.css';
 
@@ -180,6 +180,13 @@ export default function PricingPage() {
   const getCurrency = (): CurrencyCode => (language === 'th' ? 'THB' : 'USD');
   const currency = getCurrency();
 
+  // USD prices for English locale (separately defined — THB and USD are not direct conversions)
+  const USD_PRICES: Record<string, { monthly: number; annual: number; annualMonthly: number; lifetime: number }> = {
+    plus:     { monthly: 9.99,  annual: 79,  annualMonthly: 6.58,  lifetime: 0 },
+    pro:      { monthly: 18.99, annual: 149, annualMonthly: 12.42, lifetime: 0 },
+    lifetime: { monthly: 0,     annual: 0,   annualMonthly: 0,     lifetime: 199 },
+  };
+
   const formatPrice = (plan: typeof PLANS[number]): { main: string; sub: string } => {
     const isThai = language === 'th';
     const freeText = isThai ? 'ฟรี' : 'Free';
@@ -190,22 +197,28 @@ export default function PricingPage() {
 
     if (plan.tier === 'free') return { main: freeText, sub: foreverText };
 
-    const lifetimeUSD = 199;
-    const lifetimeLocal = isThai ? convertUSDToLocal(lifetimeUSD, 'THB') : lifetimeUSD;
-    if (plan.tier === 'lifetime') return { main: formatCurrency(lifetimeLocal, currency), sub: lifetimeText };
+    if (plan.tier === 'lifetime') {
+      // THB: ฿4,990 (from stripeService) | USD: $199
+      const price = isThai ? 4990 : USD_PRICES.lifetime.lifetime;
+      return { main: formatCurrency(price, currency), sub: lifetimeText };
+    }
+
+    const usd = USD_PRICES[plan.tier];
 
     if (billing === 'annual' && plan.annualMonthly !== null) {
-      const monthlyLocal = isThai ? convertUSDToLocal(plan.annualMonthly, 'THB') : plan.annualMonthly;
-      const totalLocal = isThai ? convertUSDToLocal(plan.annualTotal || 0, 'THB') : (plan.annualTotal || 0);
+      // THB prices already in THB; USD uses USD_PRICES
+      const monthlyDisplay = isThai ? (plan.annualMonthly ?? 0) : (usd?.annualMonthly ?? 0);
+      const totalDisplay   = isThai ? (plan.annualTotal   ?? 0) : (usd?.annual       ?? 0);
       return {
-        main: formatCurrency(monthlyLocal, currency),
-        sub: `${formatCurrency(totalLocal, currency)}${perYearText}`,
+        main: formatCurrency(monthlyDisplay, currency),
+        sub: `${formatCurrency(totalDisplay, currency)}${perYearText}`,
       };
     }
 
-    const monthlyLocal = isThai ? convertUSDToLocal(plan.monthlyPrice || 0, 'THB') : (plan.monthlyPrice || 0);
+    // Monthly: THB from PLANS, USD from USD_PRICES
+    const monthlyDisplay = isThai ? (plan.monthlyPrice ?? 0) : (usd?.monthly ?? 0);
     return {
-      main: formatCurrency(monthlyLocal, currency),
+      main: formatCurrency(monthlyDisplay, currency),
       sub: perMonthText,
     };
   };
