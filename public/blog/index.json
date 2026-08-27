@@ -1,10 +1,55 @@
 {
   "metadata": {
-    "totalArticles": 60,
-    "lastUpdated": "2026-08-16",
-    "version": "1.0"
+    "totalArticles": 64,
+    "lastUpdated": "2026-08-27",
+    "version": "1.1"
   },
   "articles": [
+    {
+      "id": "selfprint-awareness-1",
+      "title": "ปีชงหรือพฤติกรรมชง? ถอดรหัส 'ปมขัดขวางชีวิต' ที่แก้ได้ด้วยดาต้าพฤติกรรม",
+      "slug": "birth-chart-vs-behavior",
+      "excerpt": "ปีเกิดไม่ได้ตัดสินใจคุณ — พฤติกรรมถึงทำ เรียนรู้ความแตกต่างระหว่างปีชงกับพฤติกรรมจริง",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["ปีชง", "พฤติกรรม", "ปมขัดขวาง", "ข้อมูลพฤติกรรม", "SELFPRINT", "12 มิติ"]
+    },
+    {
+      "id": "selfprint-awareness-2",
+      "title": "ลืมตารางสีเสื้อมงคลไปก่อน: จิตวิทยาสี × 12 มิติพฤติกรรม",
+      "slug": "color-psychology-12-dimensions",
+      "excerpt": "สีมงคลไม่ใช่เรื่องลึกลับ แต่เรื่องวิทยาศาสตร์ Color Psychology สมองของคุณตอบสนองต่อสีแตกต่างกัน",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["สีเสื้อมงคล", "Color Psychology", "จิตวิทยาสี", "พฤติกรรมสี", "12 มิติ", "Neuro-Optimal"]
+    },
+    {
+      "id": "selfprint-awareness-3",
+      "title": "เบื่อไหมกับ 'ราหูเล็ง'? สแกน Blind Spots จุดบอดพฤติกรรมที่บดบังทางรวยของคุณจริงๆ",
+      "slug": "blind-spots-vs-astrology",
+      "excerpt": "ราหูเล็ง vs Blind Spots: ทำไมการค้นหา 'จุดบอด' เป็นคีย์ของการเปลี่ยนชีวิตจริง",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["Blind Spots", "จุดบอด", "ราหูเล็ง", "Johari Window", "Unconscious Bias", "Shadow Self"]
+    },
+    {
+      "id": "selfprint-awareness-4",
+      "title": "จากรอ 'ราหูจากไป' มาเป็น 'รู้จักตัวเอง': วิธีหลีกเลี่ยงการเลือกผิด ซ้ำๆ",
+      "slug": "opening-eyes-to-self-discovery",
+      "excerpt": "หยุดรอ ต้องรู้จักตัวเอง ก่อน สำรวจทำไมการค้นหา Blind Spots เป็นจุดเริ่มต้นของการพลิกชีวิต",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": ["รู้จักตัวเอง", "Self-Discovery", "Blind Spots", "การเปลี่ยนแปลง", "SELFPRINT", "Self-Awareness"]
+    },
+  ]
     {
       "id": "career-1",
       "title": "Decision-Making in Career Transitions: Your Twin's Framework",
