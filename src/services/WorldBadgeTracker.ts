@@ -26,6 +26,7 @@ export class WorldBadgeTracker {
     try {
       // Query unlocked_badges table from Supabase
       const { data: unlockedData, error } = await supabase
+        .schema('selfprint')
         .from('unlocked_badges')
         .select('badge_id')
         .eq('user_id', userId)
@@ -64,12 +65,13 @@ export class WorldBadgeTracker {
     try {
       // Check if badge is already unlocked
       const { data: existing } = await supabase
+        .schema('selfprint')
         .from('unlocked_badges')
         .select('id')
         .eq('user_id', userId)
         .eq('badge_id', badgeId)
         .eq('world_id', worldId)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Already unlocked
@@ -78,6 +80,7 @@ export class WorldBadgeTracker {
 
       // Insert into unlocked_badges table with timestamp
       const { error } = await supabase
+        .schema('selfprint')
         .from('unlocked_badges')
         .insert({
           user_id: userId,
