@@ -87,6 +87,7 @@ const AboutPage = lazy(() => import('./pages/AboutPage'));
 const SciencePage = lazy(() => import('./pages/SciencePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 
 /**
  * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
