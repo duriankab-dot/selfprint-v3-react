@@ -107,6 +107,10 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // only checks once, right when the page first has a real status.
   const status = useLifecycleStore((state) => state.status);
   const isLifecycleLoading = useLifecycleStore((state) => state.isLoading);
+  // resumedAt is set (non-null) only when loadLifecycle() found an EXISTING DB row.
+  // resumedAt === null means the row was just auto-initialized (brand-new user).
+  // This lets us distinguish returning users from new users without touching localStorage.
+  const resumedAt = useLifecycleStore((state) => state.resumedAt);
   const hasCheckedReentry = useRef(false);
   useEffect(() => {
     if (isLifecycleLoading || authLoading || hasCheckedReentry.current) return;
@@ -115,19 +119,25 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       navigate('/analysis', { replace: true });
       return;
     }
-    // MAGIC-LINK-RETURN-FIX: user authenticated (magic link clicked) but lifecycle
-    // is still ONBOARDING — means they completed onboarding earlier but the status
-    // write timed out. They have a saved resume key. Skip the entire question flow
-    // and go straight to claim-account, which detects the session immediately and
-    // calls onDone() → transitionTo('ANALYSIS') → navigate to /core-awakening.
     if (session?.user?.id && status === 'ONBOARDING') {
+      // RETURNING-USER-FIX: resumedAt !== null means an existing user_lifecycle row
+      // was found in the DB. The user has been through onboarding before but the
+      // lifecycle status write timed out (Vercel cold-start 504, race condition, etc).
+      // Skip the entire question flow regardless of localStorage state — works across
+      // incognito, different devices, and cleared caches.
+      if (resumedAt !== null) {
+        hasRestoredStep.current = true;
+        setStep('claim-account');
+        return;
+      }
+      // MAGIC-LINK-RETURN-FIX (legacy fallback): localStorage key present → resume.
       const saved = localStorage.getItem('selfprint_onboarding_resume');
       if (saved) {
-        hasRestoredStep.current = true; // block resume effect from overriding below
+        hasRestoredStep.current = true;
         setStep('claim-account');
       }
     }
-  }, [status, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status, resumedAt, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
   const [siceResult, setSiceResult] = useState<{
