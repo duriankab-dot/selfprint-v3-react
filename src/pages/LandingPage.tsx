@@ -30,15 +30,17 @@ import { useLifecycleStore } from '@/store/lifecycleStore';
 const STORY = {
   th: {
     s1: {
-      badge: '12 SICE Engines · AI · พฤติกรรม',
-      h1: 'คุณคือใคร\nจริงๆ?',
-      sub: 'ไม่ใช่ดวงชะตา ไม่ใช่ความเชื่อ\nแต่เป็นรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณมาตลอด',
-      scroll: 'เลื่อนลงเพื่อพบ NOVA',
+      badge: '12 SICE Engines · AI พฤติกรรม · ฟรี 2 นาที',
+      h1: 'ถอดรหัสลับตัวตน!\nปลดล็อก "ฝาแฝดดิจิทัล"\nที่รู้จักคุณดีที่สุด',
+      sub: 'เปลี่ยนทุกการวิเคราะห์ เรียนรู้ และตัดสินใจให้กลายเป็น AI Twin — ร่างจำลองที่จะเตือนสติ ชี้จุดบอด (Blind Spots) และนำทางชีวิตทั้งเรื่องงาน ความรัก และอนาคต',
+      microcopy: '⚡ ปลดล็อกพิมพ์เขียวพฤติกรรม 12 มิติฟรี ใน 2 นาที',
+      cta: 'ให้กำเนิด AI Twin ของฉัน →',
+      scroll: 'เลื่อนดูวิธีที่ SELFPRINT อ่านคุณออก',
     },
     s2: {
-      eyeLabel: 'SELFPRINT',
+      eyeLabel: 'SELFPRINT ENGINE',
       h1: 'SELFPRINT อ่านคุณออก\nก่อนที่คุณจะรู้จักตัวเอง',
-      sub: 'SELFPRINT ประมวลผล Initial State Matrix วิเคราะห์รูปแบบพฤติกรรมของคุณผ่าน 12 มิติ — ก่อนที่คุณจะตอบคำถามแม้แต่ข้อเดียว',
+      sub: 'ระบบ Initial State Matrix วิเคราะห์รูปแบบพฤติกรรมของคุณผ่าน 12 มิติ — ก่อนที่คุณจะตอบคำถามแม้แต่ข้อเดียว ไม่ใช่แบบทดสอบ แต่คือวิทยาศาสตร์พฤติกรรมจริง',
       reading: [
         'กำลังสแกน Initial State Matrix...',
         'ตรวจพบรูปแบบพฤติกรรม 12 มิติ',
@@ -52,23 +54,25 @@ const STORY = {
       ],
     },
     s3: {
-      h1: 'พร้อมเจอตัวตน\nที่แท้จริงแล้วหรือยัง?',
+      h1: 'พร้อมพบกับ\nฝาแฝดดิจิทัลของคุณแล้วหรือยัง?',
       bullets: [
-        'รูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ',
-        'Blind Spots ที่ขัดขวางการตัดสินใจ',
-        'AI Twin ที่รู้จักคุณดีกว่าตัวเอง',
+        'พิมพ์เขียวพฤติกรรม 12 มิติที่ซ่อนอยู่ในตัวคุณ',
+        'Blind Spots ที่ขัดขวางการตัดสินใจของคุณ',
+        'AI Twin ที่รู้จักคุณดีกว่าตัวเอง — และเติบโตไปพร้อมคุณ',
       ],
-      cta: 'สร้าง SELFPRINT ของฉัน →',
+      cta: 'ให้กำเนิด AI Twin ของฉัน →',
       trust: 'ฟรี · ไม่ต้องใส่บัตรเครดิต · ใช้เวลาไม่ถึง 2 นาที',
       login: 'มีบัญชีแล้ว? เข้าสู่ระบบ',
     },
   },
   en: {
     s1: {
-      badge: '12 SICE Engines · Behavioral AI',
-      h1: 'Who are you\nreally?',
-      sub: 'Not destiny, not beliefs —\nbut behavioral patterns hiding inside you all along.',
-      scroll: 'Scroll to meet NOVA',
+      badge: '12 SICE Engines · Behavioral AI · Free 2 min',
+      h1: 'Unlock Your\nDigital Twin —\nthe AI that knows you best',
+      sub: 'Not destiny, not beliefs — but behavioral science. Create an AI Twin that warns you, reveals blind spots, and guides your decisions in work, love and life.',
+      microcopy: '⚡ Unlock your 12-dimension behavioral blueprint free in 2 minutes',
+      cta: 'Give Birth to My AI Twin →',
+      scroll: 'See how SELFPRINT reads you',
     },
     s2: {
       eyeLabel: 'SELFPRINT',
@@ -128,8 +132,8 @@ const SEO_COPY: Record<'th' | 'en', Record<Segment, SeoCopy>> = {
       seoDesc: 'ต้องการเข้าใจตัวเอง? SELFPRINT วิเคราะห์พฤติกรรมจริง ไม่ใช่โชคชะตา — แม่นกว่าเพราะเรียนรู้จากคุณ',
     },
     default: {
-      seoTitle: 'SELFPRINT | สร้าง AI Twin ภาษาไทย - ช่วยตัดสินใจชีวิต',
-      seoDesc: 'SELFPRINT วิเคราะห์ 12 มิติชีวิตด้วย AI Twin ที่เรียนรู้จากคุณจริงๆ ฟรี',
+      seoTitle: 'SELFPRINT - แม่นกว่าดวงชะตา ถอดรหัสลับตัวตนของคุณด้วย AI',
+      seoDesc: 'เปลี่ยนข้อมูลพฤติกรรมให้กลายเป็น AI Twin ฝาแฝดดิจิทัล ปลดล็อกพิมพ์เขียวพฤติกรรม 12 มิติ ชี้ชัดทุก Blind Spot เพื่อนำทางชีวิต การงาน และความรัก แม่นยำกว่าการดูดวงทั่วไป',
     },
   },
   en: {
@@ -156,59 +160,174 @@ const SEO_COPY: Record<'th' | 'en', Record<Segment, SeoCopy>> = {
   },
 };
 
-// ─── Hero Neural Network SVG ──────────────────────────────────────────────────
+// ─── TwinBorn SVG ─────────────────────────────────────────────────────────────
+// Spec §4.1: Two human silhouettes connected by particle data stream.
+// Left = Real Human (illuminates on load). Right = AI Twin (materializes).
+// Pure CSS animations — no Three.js, GPU-accelerated via will-change.
 
-const HeroNetworkSvg = () => (
+const SICE_LABELS_TH = ['ตัวตน','จิตใจ','ความสัมพันธ์','ความรัก','อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต','การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต'];
+
+const TwinBornSvg = () => (
   <svg
-    viewBox="0 0 320 320"
+    viewBox="0 0 400 340"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
-    style={{ width: '100%', maxWidth: 300, height: 'auto' }}
+    style={{ width: '100%', maxWidth: 380, height: 'auto', willChange: 'transform' }}
     aria-hidden="true"
   >
+    <defs>
+      <radialGradient id="human-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="var(--color-accent-primary)" stopOpacity="0.3"/>
+        <stop offset="100%" stopColor="var(--color-accent-primary)" stopOpacity="0"/>
+      </radialGradient>
+      <radialGradient id="twin-glow" cx="50%" cy="50%" r="50%">
+        <stop offset="0%" stopColor="#00f2fe" stopOpacity="0.35"/>
+        <stop offset="100%" stopColor="#00f2fe" stopOpacity="0"/>
+      </radialGradient>
+      <filter id="glow-blur">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
     <style>{`
-      @keyframes pulse-node{0%,100%{opacity:.7}50%{opacity:1}}
-      @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(0,-8px)}}
-      .n1{animation:pulse-node 2.4s ease-in-out infinite}
-      .n2{animation:pulse-node 2.4s .4s ease-in-out infinite}
-      .n3{animation:pulse-node 2.4s .8s ease-in-out infinite}
-      .n4{animation:pulse-node 2.4s 1.2s ease-in-out infinite}
-      .n5{animation:pulse-node 2.4s 1.6s ease-in-out infinite}
-      .hero-group{animation:drift 6s ease-in-out infinite}
+      @keyframes tb-human-pulse{0%,100%{opacity:.55}50%{opacity:.9}}
+      @keyframes tb-twin-materialize{0%{opacity:.1;filter:url(#glow-blur)}30%{opacity:.45}70%{opacity:.75}100%{opacity:.9;filter:url(#glow-blur)}}
+      @keyframes tb-twin-pulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.015)}}
+      @keyframes tb-particle1{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,-8px);opacity:0}}
+      @keyframes tb-particle2{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,5px);opacity:0}}
+      @keyframes tb-particle3{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,-18px);opacity:0}}
+      @keyframes tb-particle4{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,14px);opacity:0}}
+      @keyframes tb-stream-dash{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
+      @keyframes tb-node-orbit{0%{transform:rotate(0deg) translateX(110px) rotate(0deg)}100%{transform:rotate(360deg) translateX(110px) rotate(-360deg)}}
+      @keyframes tb-node-pulse{0%,100%{opacity:.45;r:3}50%{opacity:.9;r:4}}
+      @keyframes tb-label-float{0%,100%{opacity:.5}50%{opacity:.85}}
+      .tb-human{animation:tb-human-pulse 3s ease-in-out infinite}
+      .tb-twin{animation:tb-twin-pulse 3.5s 1.5s ease-in-out infinite both;transform-origin:310px 155px}
+      .tb-p1{animation:tb-particle1 2.2s .0s ease-in-out infinite;will-change:transform,opacity}
+      .tb-p2{animation:tb-particle2 2.2s .55s ease-in-out infinite;will-change:transform,opacity}
+      .tb-p3{animation:tb-particle3 2.2s 1.1s ease-in-out infinite;will-change:transform,opacity}
+      .tb-p4{animation:tb-particle4 2.2s 1.65s ease-in-out infinite;will-change:transform,opacity}
+      .tb-stream{animation:tb-stream-dash 1.8s linear infinite}
+      .tb-node{animation:tb-node-pulse 2.8s ease-in-out infinite}
+      .tb-label{animation:tb-label-float 3s ease-in-out infinite;font-size:7.5px;fill:var(--color-accent-primary)}
     `}</style>
-    <g className="hero-group">
-      <rect x="116" y="116" width="88" height="88" rx="18" fill="var(--color-accent-primary)" opacity="0.08" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
-      <rect x="132" y="132" width="56" height="56" rx="10" fill="var(--color-accent-primary)" opacity="0.15"/>
-      <text x="160" y="166" textAnchor="middle" fontSize="11" fontWeight="700" fill="var(--color-accent-primary)" letterSpacing="0.5">SELFPRINT</text>
-      <text x="160" y="178" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)" opacity="0.7">SICE × 12</text>
-      {[134, 148, 162, 176].map((x, i) => (
-        <g key={i}>
-          <line x1={x} y1="116" x2={x} y2="100" stroke="var(--color-accent-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-          <line x1={x} y1="204" x2={x} y2="220" stroke="var(--color-accent-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-        </g>
-      ))}
-      {[134, 148, 162, 176].map((y, i) => (
-        <g key={i}>
-          <line x1="116" y1={y} x2="100" y2={y} stroke="var(--color-accent-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-          <line x1="204" y1={y} x2="220" y2={y} stroke="var(--color-accent-primary)" strokeWidth="1.5" strokeLinecap="round" opacity="0.5"/>
-        </g>
-      ))}
-      <circle className="n1" cx="160" cy="50" r="14" fill="var(--color-accent-primary)" opacity="0.12" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
-      <text x="160" y="54" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)">SELF</text>
-      <circle className="n2" cx="270" cy="160" r="14" fill="var(--color-accent-primary)" opacity="0.12" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
-      <text x="270" y="164" textAnchor="middle" fontSize="7" fill="var(--color-accent-primary)">CAREER</text>
-      <circle className="n3" cx="160" cy="270" r="14" fill="var(--color-accent-primary)" opacity="0.12" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
-      <text x="160" y="274" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)">MIND</text>
-      <circle className="n4" cx="50" cy="160" r="14" fill="var(--color-accent-primary)" opacity="0.12" stroke="var(--color-accent-primary)" strokeWidth="1.5"/>
-      <text x="50" y="164" textAnchor="middle" fontSize="7" fill="var(--color-accent-primary)">GROWTH</text>
-      <circle className="n5" cx="252" cy="68" r="10" fill="var(--color-accent-primary)" opacity="0.1" stroke="var(--color-accent-primary)" strokeWidth="1"/>
-      <text x="252" y="72" textAnchor="middle" fontSize="6" fill="var(--color-accent-primary)">FUTURE</text>
-      <line x1="160" y1="64" x2="160" y2="116" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
-      <line x1="256" y1="160" x2="204" y2="160" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
-      <line x1="160" y1="256" x2="160" y2="204" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
-      <line x1="64" y1="160" x2="116" y2="160" stroke="var(--color-accent-primary)" strokeWidth="1" strokeDasharray="5 4" opacity="0.35"/>
-      <line x1="245" y1="74" x2="204" y2="116" stroke="var(--color-accent-primary)" strokeWidth="0.75" strokeDasharray="4 5" opacity="0.25"/>
+
+    {/* ── 12 SICE orbit nodes (§4.2) ── */}
+    <g style={{ transformOrigin: '200px 170px' }}>
+      {SICE_LABELS_TH.map((label, i) => {
+        const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
+        const r = 155;
+        const cx = 200 + r * Math.cos(angle);
+        const cy = 170 + r * Math.sin(angle);
+        return (
+          <g key={i}>
+            <circle
+              className="tb-node"
+              cx={cx} cy={cy} r={3}
+              fill="var(--color-accent-primary)"
+              opacity="0.5"
+              style={{ animationDelay: `${i * 0.23}s`, willChange: 'opacity' }}
+            />
+            <line
+              x1={200} y1={170} x2={cx} y2={cy}
+              stroke="var(--color-accent-primary)"
+              strokeWidth="0.5"
+              opacity="0.08"
+            />
+            <text
+              x={cx + (cx > 200 ? 5 : -5)}
+              y={cy + (cy > 170 ? 5 : -2)}
+              className="tb-label"
+              textAnchor={cx > 200 ? 'start' : 'end'}
+              style={{ animationDelay: `${i * 0.2}s` }}
+            >
+              {label}
+            </text>
+          </g>
+        );
+      })}
     </g>
+
+    {/* ── Connecting data streams (L → R) ── */}
+    {[145, 155, 165, 175, 185].map((y, i) => (
+      <line
+        key={i}
+        className="tb-stream"
+        x1={140} y1={y} x2={265} y2={y}
+        stroke="var(--color-accent-primary)"
+        strokeWidth={i === 2 ? 1.2 : 0.7}
+        opacity={i === 2 ? 0.5 : 0.25}
+        strokeDasharray="12 8"
+        style={{ animationDelay: `${i * 0.35}s` }}
+      />
+    ))}
+
+    {/* ── Particles flying L → R ── */}
+    <circle className="tb-p1" cx={148} cy={158} r="2.5" fill="var(--color-accent-primary)" opacity="0.9"/>
+    <circle className="tb-p2" cx={148} cy={172} r="2"   fill="#00f2fe" opacity="0.85"/>
+    <circle className="tb-p3" cx={148} cy={148} r="1.8" fill="var(--color-accent-primary)" opacity="0.75"/>
+    <circle className="tb-p4" cx={148} cy={182} r="1.5" fill="#818cf8" opacity="0.8"/>
+
+    {/* ── Left: Human silhouette (mesh/wireframe style) ── */}
+    <g className="tb-human" filter="url(#glow-blur)">
+      {/* Head */}
+      <circle cx="100" cy="95" r="18" stroke="var(--color-accent-primary)" strokeWidth="1.5" fill="none" opacity="0.7"/>
+      <circle cx="100" cy="95" r="10" stroke="var(--color-accent-primary)" strokeWidth="0.75" fill="none" opacity="0.4"/>
+      {/* Neck */}
+      <line x1="100" y1="113" x2="100" y2="128" stroke="var(--color-accent-primary)" strokeWidth="1.5" opacity="0.6"/>
+      {/* Shoulders */}
+      <path d="M68 128 Q100 122 132 128" stroke="var(--color-accent-primary)" strokeWidth="1.5" fill="none" opacity="0.7"/>
+      {/* Torso */}
+      <path d="M72 128 L76 200 L100 210 L124 200 L128 128" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      {/* Center spine line */}
+      <line x1="100" y1="128" x2="100" y2="210" stroke="var(--color-accent-primary)" strokeWidth="0.75" opacity="0.3" strokeDasharray="4 4"/>
+      {/* Arms */}
+      <path d="M68 132 L55 180 L60 200" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      <path d="M132 132 L145 180 L140 200" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      {/* Legs */}
+      <path d="M80 210 L74 270 L82 280" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      <path d="M120 210 L126 270 L118 280" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      {/* Body grid lines */}
+      {[145, 162, 179, 196].map((y, i) => (
+        <line key={i} x1="76" y1={y} x2="124" y2={y} stroke="var(--color-accent-primary)" strokeWidth="0.5" opacity="0.2"/>
+      ))}
+      {/* Glow halo */}
+      <ellipse cx="100" cy="185" rx="40" ry="60" fill="url(#human-glow)" opacity="0.4"/>
+      {/* Label */}
+      <text x="100" y="295" textAnchor="middle" fontSize="9" fontWeight="600" fill="var(--color-accent-primary)" opacity="0.7" letterSpacing="1.5">HUMAN</text>
+    </g>
+
+    {/* ── Right: AI Twin silhouette (cyan, pulsates) ── */}
+    <g className="tb-twin">
+      {/* Head */}
+      <circle cx="310" cy="95" r="18" stroke="#00f2fe" strokeWidth="1.5" fill="none" opacity="0.75"/>
+      <circle cx="310" cy="95" r="10" stroke="#818cf8" strokeWidth="0.75" fill="none" opacity="0.45"/>
+      {/* Neck */}
+      <line x1="310" y1="113" x2="310" y2="128" stroke="#00f2fe" strokeWidth="1.5" opacity="0.6"/>
+      {/* Shoulders */}
+      <path d="M278 128 Q310 122 342 128" stroke="#00f2fe" strokeWidth="1.5" fill="none" opacity="0.7"/>
+      {/* Torso */}
+      <path d="M282 128 L286 200 L310 210 L334 200 L338 128" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.6"/>
+      <line x1="310" y1="128" x2="310" y2="210" stroke="#00f2fe" strokeWidth="0.75" opacity="0.3" strokeDasharray="4 4"/>
+      {/* Arms */}
+      <path d="M278 132 L265 180 L270 200" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      <path d="M342 132 L355 180 L350 200" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      {/* Legs */}
+      <path d="M290 210 L284 270 L292 280" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      <path d="M330 210 L336 270 L328 280" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
+      {/* Body grid lines */}
+      {[145, 162, 179, 196].map((y, i) => (
+        <line key={i} x1="286" y1={y} x2="334" y2={y} stroke="#00f2fe" strokeWidth="0.5" opacity="0.22"/>
+      ))}
+      {/* Twin glow halo */}
+      <ellipse cx="310" cy="185" rx="40" ry="60" fill="url(#twin-glow)" opacity="0.5"/>
+      {/* Label */}
+      <text x="310" y="295" textAnchor="middle" fontSize="9" fontWeight="600" fill="#00f2fe" opacity="0.8" letterSpacing="1.5">AI TWIN</text>
+    </g>
+
+    {/* ── Center label ── */}
+    <text x="200" y="320" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)" opacity="0.4" letterSpacing="3">SELFPRINT ENGINE</text>
   </svg>
 );
 
@@ -507,8 +626,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         title={seo.seoTitle}
         description={seo.seoDesc}
         keywords={lang === 'th'
-          ? 'AI Twin ไทย, ตัดสินใจชีวิต, วิเคราะห์พฤติกรรม, 12 มิติชีวิต, SELFPRINT'
-          : 'AI twin, personal intelligence, decision making AI, behavioral pattern, SELFPRINT'}
+          ? 'แบบทดสอบจิตวิทยา, วิเคราะห์พฤติกรรม, ดูดวงพฤติกรรม, AI Twin, ฝาแฝดดิจิทัล, SELFPRINT, 12 มิติ, ทำนายนิสัย, AI ดูดวง, Blind Spots'
+          : 'AI twin, digital twin, behavioral analysis, SELFPRINT, 12 dimensions, blind spots, personal intelligence, decision AI'}
         ogImage={ogUrl}
         ogType="website"
         canonicalUrl={`/${lang}`}
@@ -516,13 +635,14 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           '@context': 'https://schema.org',
           '@type': 'SoftwareApplication',
           name: 'SELFPRINT',
-          applicationCategory: lang === 'th' ? 'LifestyleApplication' : 'BusinessApplication',
+          operatingSystem: 'All',
+          applicationCategory: 'Psychology & AI Application',
           inLanguage: lang,
-          description: seo.seoDesc,
-          offers: { '@type': 'Offer', price: '0', priceCurrency: lang === 'th' ? 'THB' : 'USD' },
+          description: 'An AI-powered behavioral analysis platform that creates a digital twin based on a 12-dimensional psychological matrix, outperforming traditional astrology and personality quizzes.',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'THB' },
           featureList: lang === 'th'
-            ? ['AI Digital Twin สร้างใน 2 นาที', '12 Hub Worlds วิเคราะห์ชีวิต', 'Behavioral Pattern Recognition', 'Decision simulation', 'Real-time learning Twin']
-            : ['AI Digital Twin creation', '12 Intelligence Hub Worlds', 'Real-time behavioral learning', 'Future decision simulation', 'Memory-enabled Twin evolution'],
+            ? ['AI Digital Twin ฝาแฝดดิจิทัล สร้างใน 2 นาที', 'วิเคราะห์พฤติกรรม 12 มิติ (SICE)', 'ตรวจจับ Blind Spots', 'จำลองการตัดสินใจอัจฉริยะ', 'Twin เรียนรู้และพัฒนาแบบ Real-time']
+            : ['AI Digital Twin creation in 2 minutes', '12-dimension behavioral analysis (SICE)', 'Blind spot detection', 'Decision simulation', 'Real-time learning Twin'],
         }}
       />
 
@@ -539,8 +659,10 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         .hero-scroll{animation:sp-bounce 2.2s ease-in-out infinite}
         .sp-s2-enter{transition:opacity .6s ease,transform .6s ease}
         .sp-s3-enter{transition:opacity .7s ease,transform .7s ease}
-        .sp-cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px color-mix(in srgb,var(--color-accent-primary) 45%,transparent)!important}
-        .sp-cta-btn{transition:transform .2s,box-shadow .2s}
+        .sp-cta-btn{transition:transform .2s,box-shadow .2s;box-shadow:0 0 14px rgba(91,92,235,0.35),0 4px 20px rgba(91,92,235,0.25);will-change:transform,box-shadow}
+        .sp-cta-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 32px rgba(91,92,235,0.75),0 8px 32px rgba(91,92,235,0.5)!important}
+        .sp-cta-btn:hover .sp-cta-arrow{transform:translateX(5px)}
+        .sp-cta-arrow{display:inline-block;transition:transform .3s ease}
         @media(max-width:700px){
           .sp-s2-grid{grid-template-columns:1fr!important}
           .sp-nova-wrap{max-width:220px!important;margin:0 auto 32px!important}
@@ -548,7 +670,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         }
       `}</style>
 
-      <div style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
+      <main style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
 
         {/* ── NAV ── */}
         <NavBar
@@ -654,29 +776,34 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               {story.s1.sub}
             </p>
 
-            <div className="hero-cta" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <div className="hero-cta" style={{ display: 'flex', flexDirection: 'column', gap: '12px', alignItems: 'flex-start' }}>
               <button
                 onClick={goFull}
                 className="sp-cta-btn"
                 style={{
-                  padding: '15px 32px',
+                  padding: '16px 36px',
                   borderRadius: '12px',
-                  fontWeight: 700,
-                  fontSize: '16px',
+                  fontWeight: 800,
+                  fontSize: '17px',
                   cursor: 'pointer',
                   background: 'var(--color-accent-primary)',
                   color: 'white',
                   border: 'none',
-                  boxShadow: '0 4px 20px color-mix(in srgb, var(--color-accent-primary) 35%, transparent)',
+                  letterSpacing: '-0.01em',
                 }}
               >
-                {lang === 'th' ? 'ค้นพบตัวเอง →' : 'Discover Myself →'}
+                {story.s1.cta}
               </button>
+              {'microcopy' in story.s1 && (
+                <span style={{ fontSize: '13px', color: 'var(--color-accent-primary)', fontWeight: 600, opacity: 0.9 }}>
+                  {(story.s1 as { microcopy: string }).microcopy}
+                </span>
+              )}
               <span
                 onClick={() => navigate('/login')}
                 style={{ fontSize: '14px', color: 'var(--color-text-secondary)', cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'var(--color-border)' }}
               >
-                {lang === 'th' ? 'มีบัญชีแล้ว? เข้าสู่ระบบ' : 'Have an account? Log in'}
+                {story.s3.login}
               </span>
             </div>
           </div>
@@ -696,7 +823,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               zIndex: 1,
             }}
           >
-            <HeroNetworkSvg />
+            <TwinBornSvg />
           </div>
 
           {/* Scroll indicator */}
@@ -1018,7 +1145,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
 
         <Footer />
         <BottomNav />
-      </div>
+      </main>
     </>
   );
 }
