@@ -266,7 +266,25 @@ export default function CoreAwakening() {
 
       {/* INTRO PHASE */}
       {phase === 'intro' && (
-        <div className="flex-1 flex flex-col items-center justify-center px-6">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 relative">
+          {/* Exit — subtle, top-right */}
+          <button
+            onClick={() => navigate('/dashboard', { replace: true })}
+            style={{
+              position: 'absolute',
+              top: '20px',
+              right: '20px',
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: '8px',
+              color: 'rgba(255,255,255,0.5)',
+              fontSize: '13px',
+              padding: '6px 14px',
+              cursor: 'pointer',
+            }}
+          >
+            ข้ามไปก่อน →
+          </button>
           <div className="text-center max-w-lg">
             <h1 className="text-4xl font-bold mb-6 text-white">⚡ Your Intelligence Awakens</h1>
             <p className="text-lg text-gray-200 mb-4">Nova has guided you to self-discovery.</p>
