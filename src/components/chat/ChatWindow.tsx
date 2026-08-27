@@ -26,7 +26,7 @@ export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
     setInput('');
   };
 
-  const charName = character === 'nova' ? 'Nova' : 'Elite';
+  const charName = character === 'nova' ? 'SELFPRINT' : 'Elite';
   const charEmoji = character === 'nova' ? '✨' : '👑';
 
   return (

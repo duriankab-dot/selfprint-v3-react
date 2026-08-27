@@ -18,7 +18,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ show }) => {
         <span className="typing-dot"></span>
         <span className="typing-dot"></span>
       </div>
-      <span className="typing-text">⏳ Nova กำลังคิด...</span>
+      <span className="typing-text">⏳ SELFPRINT กำลังคิด...</span>
     </div>
   );
 };

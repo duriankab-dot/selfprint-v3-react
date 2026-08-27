@@ -38,7 +38,7 @@ interface Message {
 // you" rather than an impersonal form field.
 const NOVA_MESSAGES_TH = {
   greeting:
-    'สวัสดีครับ 👁️ ผมคือ Nova — คุณมาที่นี่เพราะอยากเข้าใจตัวเอง หรืออยากรู้ว่าอนาคตควรเดินทางไหน ผมจะไม่ทำนายดวง — แต่ผมจะให้สิ่งที่แม่นกว่า: ถอดรหัสรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ ข้อมูลบอกได้มากกว่าดาว',
+    'สวัสดีครับ 👁️ ผมคือ SELFPRINT — คุณมาที่นี่เพราะอยากเข้าใจตัวเอง หรืออยากรู้ว่าอนาคตควรเดินทางไหน ผมจะไม่ทำนายดวง — แต่ผมจะให้สิ่งที่แม่นกว่า: ถอดรหัสรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ ข้อมูลบอกได้มากกว่าดาว',
   dob: 'ขอนำวันเดือนปีเกิดของคุณไปคำนวณหน่อยนะ (ไม่ใช่การดูดวงตามดวงดาว — แต่ระบบจะใช้ข้อมูลช่วงเวลาเพื่อถอดรหัส Initial State Matrix สภาวะเริ่มต้น เพื่อดูแนวโน้มพฤติกรรมที่ซ่อนอยู่ของคุณ — เช่น วงจรการตัดสินใจ และ chronotype ที่ทำให้คุณเป็นแบบที่เป็น) เช่น 1990-01-15',
   time: 'เกิดเวลาไหน? (ไม่บังคับ — ยิ่งละเอียดยิ่ง calibrate behavioral rhythm ได้แม่นขึ้น รูปแบบ HH:MM เช่น 14:30)',
   place: 'แล้วเกิดที่ไหน? (ไม่บังคับ — ใช้ตั้ง environmental baseline เช่น กรุงเทพฯ)',
@@ -53,7 +53,7 @@ const NOVA_MESSAGES_TH = {
 
 const NOVA_MESSAGES_EN = {
   greeting:
-    "Hello 👁️ I'm Nova. Whether you came here curious about your future or wanting to understand yourself better — I won't tell your fortune. Instead, I'll give you something more accurate: a behavioral pattern analysis built from your actual data. Statistics reveal more than stars ever could.",
+    "Hello 👁️ I'm SELFPRINT. Whether you came here curious about your future or wanting to understand yourself better — I won't tell your fortune. Instead, I'll give you something more accurate: a behavioral pattern analysis built from your actual data. Statistics reveal more than stars ever could.",
   dob: 'Let me take your birth date to start building your profile. (This isn\'t fortune-telling — the system uses temporal data to decode your Initial State Matrix: the behavioral tendencies and decision-cycle patterns that make you who you are.) For example: 1990-01-15',
   time: 'What time were you born? (Optional — the more precise, the better we can calibrate your behavioral rhythm. Format: HH:MM, like 14:30)',
   place: 'Where were you born? (Optional — used for environmental baseline calibration. For example: Bangkok)',
@@ -262,7 +262,7 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
             gap: '8px',
           }}
         >
-          <span>🤖</span> Nova
+          <span>🤖</span> SELFPRINT
         </h2>
         <p
           style={{

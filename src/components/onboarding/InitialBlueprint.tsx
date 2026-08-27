@@ -287,7 +287,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
             fontStyle: 'italic',
           }}
         >
-          <span style={{ fontWeight: 600 }}>Nova:</span> {getNovaMessage(ctaSource)}
+          <span style={{ fontWeight: 600 }}>SELFPRINT:</span> {getNovaMessage(ctaSource)}
         </p>
       </div>
 

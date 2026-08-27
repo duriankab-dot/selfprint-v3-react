@@ -362,7 +362,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                     fontSize: 14, color: 'var(--color-text-primary)',
                     margin: 0, lineHeight: 1.75, fontStyle: 'italic',
                   }}>
-                    <strong style={{ fontStyle: 'normal' }}>Nova: </strong>
+                    <strong style={{ fontStyle: 'normal' }}>SELFPRINT: </strong>
                     ฉันรู้จักคุณแล้ว — ในระดับที่คนรอบข้างคุณอาจไม่เคยรู้
                     Intelligence ของคุณพร้อมที่จะมีชีวิต พร้อมเรียนรู้จากคุณ
                     และเติบโตไปกับคุณ ถึงเวลาแล้วที่จะตื่น
