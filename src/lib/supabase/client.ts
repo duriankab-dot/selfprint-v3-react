@@ -4,33 +4,56 @@
  * @module supabase/client
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Initialize Supabase client with project URL and anon key
  * Uses environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
  * Vite provides env via import.meta.env; process.env used in Node.js environments
  */
-const supabaseUrl = (
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_URL) ||
-  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL)
-);
-const supabaseAnonKey = (
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_SUPABASE_ANON_KEY) ||
-  (typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY)
-);
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables'
+function readEnv(name: string): string | undefined {
+  return (
+    (typeof import.meta !== 'undefined' && (import.meta as any).env?.[name]) ||
+    (typeof process !== 'undefined' && process.env?.[name])
   );
+}
+
+// CF-PAGES-MIGRATION-001: this used to construct the client (and throw if
+// env vars were missing) at module load time. That's fine in the browser/
+// Vite build, where import.meta.env is always populated -- but this module
+// is also imported (transitively, via api/unified-handler.ts) into the
+// Cloudflare Pages Functions worker, whose build/publish step evaluates
+// every module's top level with no env bindings attached yet. A
+// module-scope throw there crashes the entire Functions worker before a
+// single request is ever handled. Deferring both the env read and the
+// throw to first actual use (via this Proxy) keeps every existing call
+// site (`supabase.from(...)`, `supabase.auth.getUser()`, etc.) working
+// exactly as before -- the client is just built lazily instead of eagerly.
+let _client: SupabaseClient | null = null;
+function getClient(): SupabaseClient {
+  if (_client) return _client;
+  const supabaseUrl = readEnv('VITE_SUPABASE_URL');
+  const supabaseAnonKey = readEnv('VITE_SUPABASE_ANON_KEY');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error(
+      'Missing Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables'
+    );
+  }
+  _client = createClient(supabaseUrl, supabaseAnonKey);
+  return _client;
 }
 
 /**
  * Supabase client instance
  * Use this to query all tables
  */
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
+  get(_target, prop, _receiver) {
+    const client = getClient();
+    const value = (client as any)[prop];
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
 
 /**
  * Get current authenticated user
