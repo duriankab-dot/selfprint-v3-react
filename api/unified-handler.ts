@@ -14,7 +14,7 @@ import {
   trackDecisionOutcome,
 } from '../src/services/NotificationAnalytics.js';
 import Stripe from 'stripe';
-import { verifyUser, supabaseAdmin, type VerifiedUser } from './_utils/verify-user.js';
+import { verifyUser, getSupabaseAdmin, type VerifiedUser } from './_utils/verify-user.js';
 import { rateLimitMiddleware, tooManyRequestsResponse } from './_utils/rate-limit.js';
 
 interface ApiResponse<T = any> {
@@ -400,6 +400,7 @@ function getPriceId(tier: string, billingPeriod: string): string {
 }
 
 async function getStripeCustomerId(userId: string): Promise<string | null> {
+  const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) return null;
   const { data } = await supabaseAdmin
     .from('subscriptions')
@@ -412,6 +413,7 @@ async function getStripeCustomerId(userId: string): Promise<string | null> {
 // ── Stripe webhook handlers ───────────────────────────────────────────────────
 
 async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) return;
   const userId = session.metadata?.user_id || session.client_reference_id;
   const tier = session.metadata?.tier;
@@ -433,6 +435,7 @@ async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<voi
 }
 
 async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) return;
   const userId = sub.metadata?.user_id;
   if (!userId) return;
@@ -456,6 +459,7 @@ async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
 }
 
 async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) return;
   const customerId = typeof invoice.customer === 'string'
     ? invoice.customer
@@ -544,6 +548,7 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
+        const supabaseAdmin = getSupabaseAdmin();
         if (!supabaseAdmin) {
           return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
         }
@@ -633,6 +638,7 @@ function generateShareCode(): string {
 }
 
 async function handleShare(request: Request, url: URL): Promise<Response> {
+  const supabaseAdmin = getSupabaseAdmin();
   if (!supabaseAdmin) {
     return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
   }
@@ -717,6 +723,7 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
 
 async function handleProfile(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
@@ -791,6 +798,7 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
 
 async function handleBlueprint(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
