@@ -836,8 +836,16 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
         .select()
         .single();
       if (upsertError) {
+        // TEMP-DEBUG-PROFILE-001: production QA (2026-08-28) found POST
+        // /api/profile 500ing repeatedly during real onboarding, blocking
+        // users from ever reaching Core Awakening. Surfacing the real
+        // Postgrest error to diagnose without CF dashboard log access —
+        // revert once root-caused (see TEMP-DEBUG-SHARE-001 for precedent).
         console.error('[profile] upsert error:', upsertError);
-        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+        return Response.json(
+          { success: false, error: 'DB error', debug: { message: (upsertError as any).message, code: (upsertError as any).code, details: (upsertError as any).details, hint: (upsertError as any).hint } } as ApiResponse,
+          { status: 500 }
+        );
       }
       return Response.json({ success: true, profileId: (data as any)?.id, message: 'Profile saved' } as ApiResponse);
     }
@@ -932,8 +940,13 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
         .select()
         .single();
       if (insertError) {
+        // TEMP-DEBUG-PROFILE-001 (see handleProfile) — same live 500 pattern
+        // hit /api/blueprint too, blocking onboarding completion.
         console.error('[blueprint] insert error:', insertError);
-        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
+        return Response.json(
+          { success: false, error: 'DB error', debug: { message: (insertError as any).message, code: (insertError as any).code, details: (insertError as any).details, hint: (insertError as any).hint } } as ApiResponse,
+          { status: 500 }
+        );
       }
       return Response.json({ success: true, blueprintId: (data as any)?.id, message: 'Blueprint saved' } as ApiResponse);
     }
