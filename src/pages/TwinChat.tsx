@@ -39,6 +39,7 @@ export default function TwinChat() {
   // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
   // "intelligent from birth" — knows the user before the first message.
   const userProfile = useUserStore(s => s.profile);
+  const updateProfile = useUserStore(s => s.updateProfile);
   const currentAnalysis = useAnalysisStore(s => s.currentAnalysis);
   const setCurrentAnalysis = useAnalysisStore(s => s.setCurrentAnalysis);
   const [searchParams] = useSearchParams();
@@ -103,58 +104,104 @@ export default function TwinChat() {
   // ANALYSIS-PERSIST-001 FIX: fetch analysis from database when store is empty.
   // Without this, Twin is only smart in the first session — on reload,
   // currentAnalysis becomes null and Twin loses all strengths/blindSpots context.
+  // NOTE: data lives in awakening_essence.personal_intelligence (NOT profiles_blueprints.final_analysis)
   useEffect(() => {
     if (currentAnalysis || !session?.user?.id || !supabase) return;
 
     const fetchAnalysisFromDB = async () => {
       try {
-        // Fetch latest blueprint with analysis for this user
+        // Fetch latest awakening essence (real analysis source)
         const { data, error } = await supabase
-          .from('profiles_blueprints')
-          .select('final_analysis, sice_results')
+          .from('awakening_essence')
+          .select('personal_intelligence, sice_results, synthesis')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();  // maybeSingle → null on 0 rows, no PGRST116
 
         if (error) {
-          console.warn('Failed to fetch analysis from DB:', error.message);
+          console.warn('Failed to fetch essence from DB:', error.message);
           return;
         }
 
-        if (data?.final_analysis) {
-          // final_analysis should already be a FullAnalysisOutput object
-          // but ensure dates are properly parsed
-          const analysis = typeof data.final_analysis === 'string'
-            ? JSON.parse(data.final_analysis)
-            : data.final_analysis;
+        if (data?.personal_intelligence) {
+          const pi = data.personal_intelligence as {
+            userUnderstanding?: number;
+            recommendedAction?: string;
+            confidence?: number;
+            insights?: string[];
+            nextStepsSuggested?: string[];
+            warningsOrCautions?: string[];
+          };
+          const synth = (data.synthesis ?? {}) as {
+            themes?: string[];
+            agreements?: string[];
+            confidenceScore?: number;
+          };
+          const siceArr = Array.isArray(data.sice_results) ? data.sice_results : [];
 
-          // Ensure date fields are Date objects
-          if (analysis && typeof analysis === 'object') {
-            if (analysis.generatedAt && typeof analysis.generatedAt === 'string') {
-              analysis.generatedAt = new Date(analysis.generatedAt);
-            }
-            analysis.behavioralPatterns?.forEach((p: any) => {
-              if (p.lastDetected && typeof p.lastDetected === 'string') {
-                p.lastDetected = new Date(p.lastDetected);
-              }
-            });
-            analysis.trends?.forEach((t: any) => {
-              if (t.since && typeof t.since === 'string') {
-                t.since = new Date(t.since);
-              }
-            });
-          }
-
-          setCurrentAnalysis(analysis);
+          // Map PersonalIntelligence + synthesis → FullAnalysisOutput shape
+          setCurrentAnalysis({
+            selfOverview: [pi.recommendedAction, ...(pi.insights ?? []).slice(0, 2)].filter(Boolean).join(' '),
+            behavioralPatterns: [],
+            strengths: (synth.themes ?? []).slice(0, 4).map((t, i) => ({
+              name: t,
+              description: (pi.insights ?? [])[i] ?? t,
+              confidence: (pi.confidence ?? 70) / 100,
+              evidence: [],
+            })),
+            blindSpots: (pi.warningsOrCautions ?? []).map(w => ({
+              title: w,
+              description: w,
+              sensitivity: 'medium',
+              confidence: 0.65,
+            })),
+            trends: [],
+            journey: {
+              currentStage: 'awakening',
+              description: pi.recommendedAction ?? '',
+              growing: (synth.agreements ?? []).slice(0, 2),
+              changing: [],
+              stillWorking: [],
+            },
+            focusAreas: (pi.insights ?? []).slice(0, 3),
+            guidance: pi.insights ?? [],
+            nextSteps: pi.nextStepsSuggested ?? [],
+            generatedAt: new Date(),
+            modelAccuracy: (pi.confidence ?? 70) / 100,
+            sourceCount: siceArr.length > 0 ? siceArr.length : 12,
+          });
         }
       } catch (err) {
-        console.error('Error fetching analysis from DB:', err);
+        console.error('Error fetching essence from DB:', err);
       }
     };
 
     fetchAnalysisFromDB();
     // Run once on mount; dependencies are controlled by the early return
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user?.id]);
+
+  // BIRTHDATE-RECOVER-001: userStore no longer persists birthDate to localStorage
+  // (G1-LOCALSTORAGE-POLICY). Recover it from selfprint.users_profiles so twinProfile
+  // always includes birth data context.
+  useEffect(() => {
+    if (userProfile.birthDate || !session?.user?.id || !supabase) return;
+    supabase
+      .schema('selfprint')
+      .from('users_profiles')
+      .select('date_of_birth, time_of_birth, place_of_birth')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data?.date_of_birth) {
+          updateProfile({
+            birthDate: String(data.date_of_birth),
+            birthTime: data.time_of_birth ? String(data.time_of_birth) : undefined,
+            birthPlace: data.place_of_birth ? String(data.place_of_birth) : undefined,
+          });
+        }
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
 
