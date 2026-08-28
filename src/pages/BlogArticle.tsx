@@ -104,14 +104,29 @@ export default function BlogArticle() {
         setLoading(true);
         let markdown = '';
 
+        // Production QA (2026-08-28): article files are named by a numbered
+        // convention (e.g. "02-career-fit.md") that does NOT match the
+        // article's URL slug (e.g. "career-fit-12-dimensions") — index.json
+        // is the only reliable slug→filePath mapping. Step 1's direct-path
+        // guess below therefore 404s for every such article; CF Pages
+        // serves its SPA fallback (index.html) for the 404, and relying on
+        // the Content-Type header to detect that (as this used to) is
+        // unreliable — when the header comes back empty, the fallback's
+        // raw HTML was silently accepted as "markdown" and rendered
+        // verbatim (confirmed live on /th/blog/selfprint/conversion/
+        // career-fit-12-dimensions). Validating the fetched text actually
+        // *looks like* frontmatter markdown (starts with `---`) is a much
+        // more reliable check than trusting Content-Type from a static
+        // host's fallback response.
+        const looksLikeMarkdown = (text: string) => text.trimStart().startsWith('---');
+
         // Step 1: Try direct path from route params
         const directPath = `/blog/${world}/${category}/${slug}.md`;
         const directRes = await fetch(directPath);
         if (directRes.ok) {
-          const ct = directRes.headers.get('content-type') ?? '';
-          // CF Pages returns 200 HTML for missing files — check for actual markdown
-          if (ct.includes('text/markdown') || ct.includes('text/plain') || !ct.includes('text/html')) {
-            markdown = await directRes.text();
+          const directText = await directRes.text();
+          if (looksLikeMarkdown(directText)) {
+            markdown = directText;
           }
         }
 
@@ -127,7 +142,10 @@ export default function BlogArticle() {
               const resolvedPath = `/blog/${entry.world}/${entry.filePath}.md`;
               const resolvedRes = await fetch(resolvedPath);
               if (resolvedRes.ok) {
-                markdown = await resolvedRes.text();
+                const resolvedText = await resolvedRes.text();
+                if (looksLikeMarkdown(resolvedText)) {
+                  markdown = resolvedText;
+                }
               }
             }
           }
