@@ -135,8 +135,10 @@ export default function BlogArticle() {
 
         if (!markdown) throw new Error(`Article not found: ${slug}`);
 
+        // Normalize CRLF → LF (Windows markdown files)
+        const normalized = markdown.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         // Parse frontmatter
-        const frontmatterMatch = markdown.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+        const frontmatterMatch = normalized.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
         if (!frontmatterMatch) throw new Error('Invalid article format');
 
         const [, frontmatterStr, rawContent] = frontmatterMatch;
