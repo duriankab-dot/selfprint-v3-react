@@ -24,9 +24,8 @@ export class WorldBadgeTracker {
     worldId: WorldId
   ): Promise<WorldBadgeProgress> {
     try {
-      // Query unlocked_badges table from Supabase
+      // Query unlocked_badges table from Supabase (public schema)
       const { data: unlockedData, error } = await supabase
-        .schema('selfprint')
         .from('unlocked_badges')
         .select('badge_id')
         .eq('user_id', userId)
@@ -63,9 +62,8 @@ export class WorldBadgeTracker {
    */
   static async unlockBadge(userId: string, badgeId: string, worldId: WorldId): Promise<boolean> {
     try {
-      // Check if badge is already unlocked
+      // Check if badge is already unlocked (public schema)
       const { data: existing } = await supabase
-        .schema('selfprint')
         .from('unlocked_badges')
         .select('id')
         .eq('user_id', userId)
@@ -78,9 +76,8 @@ export class WorldBadgeTracker {
         return true;
       }
 
-      // Insert into unlocked_badges table with timestamp
+      // Insert into unlocked_badges table with timestamp (public schema)
       const { error } = await supabase
-        .schema('selfprint')
         .from('unlocked_badges')
         .insert({
           user_id: userId,
