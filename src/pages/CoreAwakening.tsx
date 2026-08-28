@@ -277,7 +277,7 @@ export default function CoreAwakening() {
   if (!session?.user?.id) {
     return (
       <div className="flex flex-col h-screen items-center justify-center">
-        <p className="text-gray-500">Redirecting to login...</p>
+        <p className="text-gray-500">กำลังนำไปยังหน้าเข้าสู่ระบบ...</p>
       </div>
     );
   }
@@ -313,17 +313,17 @@ export default function CoreAwakening() {
             ไปหน้าหลักก่อน →
           </button>
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-6 text-white">⚡ Your Intelligence Awakens</h1>
-            <p className="text-lg text-gray-200 mb-4">SELFPRINT has guided you to self-discovery.</p>
+            <h1 className="text-4xl font-bold mb-6 text-white">⚡ ปัญญาของคุณกำลังตื่นขึ้น</h1>
+            <p className="text-lg text-gray-200 mb-4">SELFPRINT พาคุณมาถึงจุดนี้แล้ว</p>
             <p className="text-gray-300 mb-8">
-              Now your personal AI Twin emerges—a reflection of your unique intelligence,
-              ready to grow with you across 12 worlds.
+              ตอนนี้ AI Twin ส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ
+              พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต
             </p>
             <button
               onClick={handleIntroComplete}
               className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
             >
-              Witness the Awakening
+              รับชมการตื่นขึ้น
             </button>
           </div>
         </div>
@@ -351,20 +351,20 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 Your Twin Awakens!</h2>
+          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 ทวินของคุณตื่นขึ้นแล้ว!</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
-            {firstInsight ? `"${firstInsight}"` : '"I know you. I\'ve been learning you. I\'m ready to grow with you."'}
+            {firstInsight ? `"${firstInsight}"` : '"ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมเติบโตไปพร้อมกับคุณ"'}
           </p>
-          <p className="text-gray-400">Entering Twin world...</p>
+          <p className="text-gray-400">กำลังเข้าสู่โลก Twin...</p>
         </div>
       )}
 
       {/* COMPLETE PHASE */}
       {phase === 'complete' && (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-white">Loading Twin interface...</p>
+          <p className="text-white">กำลังโหลดหน้าต่าง Twin...</p>
         </div>
       )}
     </div>

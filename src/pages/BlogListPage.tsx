@@ -4,7 +4,7 @@
  * SEO/GEO/AEO: JSON-LD Article + FAQ schema + speakable + hreflang
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 
@@ -98,6 +98,17 @@ const STATIC_ARTICLES: Article[] = [
   },
 ];
 
+/** Render inline markdown: **bold** → <strong>, strip remaining * */
+function renderInline(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  if (parts.length === 1) return text.replace(/\*/g, '');
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**'))
+      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    return part.replace(/\*/g, '');
+  });
+}
+
 /** FAQ schema สำหรับ AEO (Answer Engine Optimization) */
 function buildFaqSchema(articles: Article[]) {
   const faqs = [
@@ -152,6 +163,7 @@ export default function BlogListPage() {
   const [activeContent, setActiveContent] = useState<string>('');
   const [dynamicArticles, setDynamicArticles] = useState<DynamicArticle[]>([]);
   const [loadingContent, setLoadingContent] = useState(false);
+  const savedScrollY = React.useRef<number>(0);
 
   useEffect(() => {
     const loadArticles = async () => {
@@ -180,10 +192,12 @@ export default function BlogListPage() {
         console.warn(`Blog article not found: ${path}`);
         return;
       }
-      const markdown = await response.text();
-      // Strip frontmatter
+      const rawText = await response.text();
+      // Normalize Windows CRLF → LF (แก้ปัญหา regex ล้มเหลวบน Windows markdown files)
+      const markdown = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      // Strip YAML frontmatter
       const match = markdown.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-      setActiveContent(match ? match[1] : markdown);
+      setActiveContent(match ? match[1].trim() : markdown.trim());
     } catch (err) {
       console.error('Error loading content:', err);
     } finally {
@@ -208,6 +222,10 @@ export default function BlogListPage() {
   ];
 
   const handleArticleClick = async (a: Article) => {
+    // บันทึก scroll position ปัจจุบัน (ใช้ตอนกดกลับ)
+    savedScrollY.current = window.scrollY;
+    // Scroll ไปบนสุดก่อนแสดงบทความ
+    window.scrollTo({ top: 0, behavior: 'instant' });
     setActive(a);
     setActiveContent('');
     if (a.content) return; // static — built-in content
@@ -215,6 +233,14 @@ export default function BlogListPage() {
     if (a.world && a.filePath) {
       await loadMarkdownContent(a.world, a.filePath);
     }
+  };
+
+  const handleBackToList = () => {
+    setActive(null);
+    // Restore scroll ไปตำแหน่งหัวข้อบทความเดิม
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
+    });
   };
 
   // ───── Article detail view ─────
@@ -242,7 +268,7 @@ export default function BlogListPage() {
         >
           <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px 0' }}>
             <button
-              onClick={() => setActive(null)}
+              onClick={handleBackToList}
               style={{
                 background: 'none',
                 border: 'none',
@@ -319,39 +345,51 @@ export default function BlogListPage() {
                       .split('\n\n')
                       .filter(p => p.trim())
                       .map((para, i) => {
+                        const trimmed = para.trim();
                         // Render headings
-                        if (para.startsWith('## '))
+                        if (trimmed.startsWith('# '))
+                          return (
+                            <h1
+                              key={i}
+                              style={{ fontSize: '28px', fontWeight: 900, marginTop: '40px', marginBottom: '16px' }}
+                            >
+                              {trimmed.replace(/^# /, '')}
+                            </h1>
+                          );
+                        if (trimmed.startsWith('## '))
                           return (
                             <h2
                               key={i}
                               style={{ fontSize: '22px', fontWeight: 800, marginTop: '36px', marginBottom: '12px' }}
                             >
-                              {para.replace('## ', '')}
+                              {trimmed.replace(/^## /, '')}
                             </h2>
                           );
-                        if (para.startsWith('### '))
+                        if (trimmed.startsWith('### '))
                           return (
                             <h3
                               key={i}
                               style={{ fontSize: '18px', fontWeight: 700, marginTop: '24px', marginBottom: '8px' }}
                             >
-                              {para.replace('### ', '')}
+                              {trimmed.replace(/^### /, '')}
                             </h3>
                           );
-                        // Render bullet list
-                        if (para.includes('\n- '))
+                        // Render bullet list (lines starting with - or *)
+                        const lines = trimmed.split('\n');
+                        const isList = lines.every(l => !l.trim() || /^[-*]\s/.test(l.trim()));
+                        if (isList && lines.some(l => /^[-*]\s/.test(l.trim())))
                           return (
                             <ul key={i} style={{ marginBottom: '20px', paddingLeft: '24px' }}>
-                              {para.split('\n').filter(l => l.trim()).map((line, j) => (
+                              {lines.filter(l => l.trim()).map((line, j) => (
                                 <li key={j} style={{ marginBottom: '8px' }}>
-                                  {line.replace(/^[-*]\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1')}
+                                  {renderInline(line.replace(/^[-*]\s*/, ''))}
                                 </li>
                               ))}
                             </ul>
                           );
                         return (
                           <p key={i} style={{ marginBottom: '20px' }}>
-                            {para.replace(/\*\*(.*?)\*\*/g, '$1')}
+                            {renderInline(trimmed)}
                           </p>
                         );
                       })}
