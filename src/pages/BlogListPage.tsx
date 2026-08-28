@@ -502,6 +502,25 @@ export default function BlogListPage() {
             borderBottom: '1px solid var(--color-border)',
           }}
         >
+          {/* Production QA (2026-08-28): คลังบทความไม่มีทางออกกลับหน้าหลักเลย
+              ผู้ใช้ติดอยู่ในหน้านี้ ต้องกด back ของเบราว์เซอร์เท่านั้น */}
+          <div style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto 24px' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-accent-primary)',
+                fontSize: '14px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: 0,
+              }}
+            >
+              ← กลับหน้าหลัก
+            </button>
+          </div>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
           <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 900, margin: '0 0 16px' }}>
             คลังบทความ SELFPRINT
