@@ -1,15 +1,19 @@
 name = "selfprint-v3-react"
 compatibility_date = "2024-12-01"
 
-# CF-PAGES-MIGRATION-001: this file previously targeted the CF Workers
-# format (main = "src/index.ts", which doesn't exist; [[routes]]/zone_id,
-# [build.upload] format = "service-worker" — all Workers Sites concepts,
-# inert for a Pages project). Replaced with the actual Cloudflare Pages
-# Functions config:
-#   - pages_build_output_dir: where `npm run build` (vite build) writes
-#   - compatibility_flags nodejs_compat: required for functions/api/[[route]].ts
-#     -> api/unified-handler.ts, which reads process.env.* (Supabase,
-#     Stripe keys) and uses Buffer — neither exists in the raw Workers
-#     runtime without this flag.
-pages_build_output_dir = "dist"
-compatibility_flags = ["nodejs_compat"]
+# CF-PAGES-MIGRATION-001: pages_build_output_dir was added here briefly,
+# but that key is exactly what switches a CF Pages project onto the
+# "Wrangler configuration file (BETA)" deploy path — and in that mode this
+# project's Dashboard-configured Environment Variables were NOT being
+# passed to the Functions worker at all (build log kept showing
+# "Build environment variables: (none found)" even after they were set,
+# and the Functions worker crashed at init on missing Supabase env vars).
+# Reverted to the config that already deployed successfully 35+ times:
+# CF Pages reads build output dir / build command from the Dashboard
+# (Settings -> Builds & deployments), not from this file.
+#
+# nodejs_compat (needed by functions/api/[[route]].ts -> unified-handler.ts,
+# which reads process.env.* and uses Buffer) must be set via Dashboard ->
+# Settings -> Functions -> Compatibility flags, for both Production and
+# Preview -- it is not reliably picked up from this file on the classic
+# (non-Wrangler-config) Pages deploy path.
