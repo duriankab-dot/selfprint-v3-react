@@ -1,31 +1,15 @@
 name = "selfprint-v3-react"
-main = "src/index.ts"
 compatibility_date = "2024-12-01"
 
-[env.production]
-name = "selfprint-v3-react-production"
-
-# Cloudflare Pages specific config
-[build]
-command = "npm run build"
-cwd = "."
-watch_paths = ["src/**/*.ts", "src/**/*.tsx", "public/**/*"]
-
-[build.upload]
-format = "service-worker"
-
-# Serve dist/ as root
-[[routes]]
-pattern = "/*"
-zone_id = ""
-
-# Static assets (include public/blog/)
-[[routes]]
-pattern = "/blog/*"
-zone_id = ""
-
-# Cache blog articles (public/blog/)
-[[routes]]
-pattern = "/blog/index.json"
-zone_id = ""
-custom_domain = false
+# CF-PAGES-MIGRATION-001: this file previously targeted the CF Workers
+# format (main = "src/index.ts", which doesn't exist; [[routes]]/zone_id,
+# [build.upload] format = "service-worker" — all Workers Sites concepts,
+# inert for a Pages project). Replaced with the actual Cloudflare Pages
+# Functions config:
+#   - pages_build_output_dir: where `npm run build` (vite build) writes
+#   - compatibility_flags nodejs_compat: required for functions/api/[[route]].ts
+#     -> api/unified-handler.ts, which reads process.env.* (Supabase,
+#     Stripe keys) and uses Buffer — neither exists in the raw Workers
+#     runtime without this flag.
+pages_build_output_dir = "dist"
+compatibility_flags = ["nodejs_compat"]
