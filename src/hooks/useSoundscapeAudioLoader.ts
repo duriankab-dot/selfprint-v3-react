@@ -60,6 +60,36 @@ const SOUNDSCAPE_SOURCES: Record<string, { primary: string }> = {
   'purpose': { primary: 'purpose-world.mp3' },
   'wellbeing': { primary: 'wellbeing-world.mp3' },
   'future': { primary: 'future-world.mp3' },
+
+  // CF-PAGES-MIGRATION-001 follow-up (production QA, 2026-08-28): the 21
+  // mood-based soundscape ids defined in SoundscapeEngine.ts's
+  // SOUNDSCAPE_LIBRARY (morning-focus, deep-work, spiritual-evening,
+  // celebration, etc.) never had an entry here. Without one, this file
+  // falls back to guessing `${id}.mp3` (see below), which doesn't exist
+  // on Cloudinary -- confirmed live: every one of these 404'd, e.g.
+  // GET .../soundscapes/spiritual-evening.mp3 404. Until the real,
+  // dedicated files are uploaded, point each missing id at whichever of
+  // the 3 confirmed-working generic tracks best matches its
+  // matchPeriods/audioCharacter, so at least *something* plays instead
+  // of silence. Swap these for real per-mood files as they're uploaded.
+  'morning-focus': { primary: 'morning-forest.mp3' },
+  'morning-gentle': { primary: 'morning-forest.mp3' },
+  'deep-work': { primary: 'afternoon-calm.mp3' },
+  'afternoon-creative': { primary: 'afternoon-calm.mp3' },
+  'discovery-mode': { primary: 'afternoon-calm.mp3' },
+  'evening-reflection': { primary: 'night-ambient.mp3' },
+  'relationship-evening': { primary: 'night-ambient.mp3' },
+  'evening-release': { primary: 'night-ambient.mp3' },
+  'spiritual-evening': { primary: 'night-ambient.mp3' },
+  'night-focus': { primary: 'night-ambient.mp3' },
+  'night-identity': { primary: 'night-ambient.mp3' },
+  'night-wind-down': { primary: 'night-ambient.mp3' },
+  'celebration': { primary: 'afternoon-calm.mp3' },
+  'health-nature': { primary: 'morning-forest.mp3' },
+  'money-clarity': { primary: 'afternoon-calm.mp3' },
+  'creativity-flow': { primary: 'afternoon-calm.mp3' },
+  'ambient-minimal': { primary: 'morning-forest.mp3' },
+  'deep-reflection-universal': { primary: 'night-ambient.mp3' },
 };
 
 // ─── IndexedDB Initialization ──────────────────────────────────────────────────
