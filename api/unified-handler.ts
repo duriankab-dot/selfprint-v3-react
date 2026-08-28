@@ -376,7 +376,12 @@ async function handleSICE(_request: Request, _action: string, url: URL): Promise
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY is not configured');
-  return new Stripe(key, { apiVersion: '2024-06-20' });
+  // CF-PAGES-MIGRATION-001: stripe-node defaults to Node's `http` module,
+  // which doesn't exist in the Cloudflare Workers/Pages Functions runtime.
+  // The fetch-based client is what Stripe ships specifically for edge
+  // runtimes (Workers, Vercel Edge, Deno) — request/response logic is
+  // otherwise identical. No-op on Vercel's Node runtime.
+  return new Stripe(key, { apiVersion: '2024-06-20', httpClient: Stripe.createFetchHttpClient() });
 }
 
 function getPriceId(tier: string, billingPeriod: string): string {
