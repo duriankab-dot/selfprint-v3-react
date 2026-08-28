@@ -693,7 +693,16 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       .eq('code', code)
       .maybeSingle();
     if (linkErr) {
-      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+      // TEMP-DEBUG-SHARE-001: /api/share kept 500ing "Database error" in
+      // production even after confirming selfprint.share_links exists and
+      // is exposed. Surfacing the real Postgrest error message/code here
+      // (harmless — no user data, just a query-level error) to diagnose
+      // without needing CF dashboard log access. Revert once root-caused.
+      console.error('[share] linkErr:', linkErr);
+      return Response.json(
+        { success: false, error: 'Database error', debug: { message: linkErr.message, code: (linkErr as any).code, details: (linkErr as any).details, hint: (linkErr as any).hint } } as ApiResponse,
+        { status: 500 }
+      );
     }
     if (!link) {
       return Response.json({ success: false, error: 'Share link not found' } as ApiResponse, { status: 404 });
@@ -706,7 +715,11 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       .eq('is_latest', true)
       .maybeSingle();
     if (bpErr) {
-      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
+      console.error('[share] bpErr:', bpErr);
+      return Response.json(
+        { success: false, error: 'Database error', debug: { message: bpErr.message, code: (bpErr as any).code, details: (bpErr as any).details, hint: (bpErr as any).hint } } as ApiResponse,
+        { status: 500 }
+      );
     }
     if (!blueprint) {
       return Response.json({ success: false, error: 'Owner has no AI Twin yet' } as ApiResponse, { status: 404 });
