@@ -27,6 +27,7 @@ import { handler } from '../../api/unified-handler.js';
 interface PagesContext {
   request: Request;
   params: { route?: string[] };
+  env: Record<string, string | undefined>;
 }
 
 const KNOWN_MODULES = new Set([
@@ -64,7 +65,7 @@ function toModuleAction(segments: string[]): { module: string; action: string } 
 }
 
 export async function onRequest(context: PagesContext): Promise<Response> {
-  const { request, params } = context;
+  const { request, params, env } = context;
   const segments = params.route ?? [];
   const mapped = toModuleAction(segments);
 
@@ -77,7 +78,12 @@ export async function onRequest(context: PagesContext): Promise<Response> {
 
   const url = new URL(request.url);
   url.pathname = '/api/unified-handler';
-  url.search = '';
+  // Preserve the original query string (e.g. /api/share?code=... ,
+  // /api/notifications/list?userId=...) and only add module/action on top
+  // -- matches Vercel's rewrite behavior, which merges the destination's
+  // query params with the original request's rather than replacing them.
+  // (Caught this by simulating a real request against the bundled worker:
+  // /api/share?code=abcd1234 was reaching handleShare with `code` missing.)
   url.searchParams.set('module', mapped.module);
   if (mapped.action) url.searchParams.set('action', mapped.action);
 
@@ -95,5 +101,5 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     body,
   });
 
-  return handler(forwarded);
+  return handler(forwarded, env);
 }

@@ -7,24 +7,30 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Database } from './database.types.js';  // import type
 
-declare const process: { env: Record<string, string | undefined> };
+export type Env = Record<string, string | undefined>;
 
-// CF-PAGES-MIGRATION-001: this used to read process.env and construct the
-// client at MODULE LOAD time. On Cloudflare Pages Functions, env bindings
-// aren't reliably present yet when the module first evaluates (same class
-// of issue fixed in src/lib/supabase/client.ts — confirmed live: every
-// unified-handler route needing supabaseAdmin returned "Supabase
-// unavailable"/"Supabase admin not configured" even with SUPABASE_URL and
-// SUPABASE_SERVICE_ROLE_KEY set in the CF Pages dashboard). Building it
-// lazily on first call, memoized, fixes that with no change to the
-// already-nullable contract every call site expects.
+// CF-PAGES-MIGRATION-001: this used to read `process.env` directly. Two
+// separate bugs, found live in production, in order:
+//   1. Module-load-time construction crashed the whole Functions worker at
+//      publish time (fixed first — moved to a lazy, memoized getter).
+//   2. Even lazily, `process.env.SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY`
+//      still came back empty on every real request — confirmed live:
+//      GET /api/share -> "Supabase admin not configured" and
+//      GET /api/profile / /api/blueprint -> "Supabase unavailable", with
+//      those exact vars correctly set (as Secrets) in the CF Pages
+//      dashboard. `functions/api/twin.ts` and `functions/api/nova.ts`,
+//      which read ANTHROPIC_API_KEY via the Pages Functions `context.env`
+//      parameter directly instead of `process.env`, worked immediately —
+//      isolating the fix to "stop using process.env, thread the real env
+//      object through instead," which is what this file and
+//      api/unified-handler.ts now do.
 let _supabaseAdmin: SupabaseClient<Database> | null | undefined;
 
 // สร้าง client พร้อม Database type
-export function getSupabaseAdmin(): SupabaseClient<Database> | null {
+export function getSupabaseAdmin(env: Env): SupabaseClient<Database> | null {
   if (_supabaseAdmin !== undefined) return _supabaseAdmin;
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const supabaseUrl = env.SUPABASE_URL;
+  const supabaseServiceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
   _supabaseAdmin =
     supabaseUrl && supabaseServiceRoleKey
       ? createClient<Database>(supabaseUrl, supabaseServiceRoleKey)
@@ -38,12 +44,13 @@ export interface VerifiedUser {
 }
 
 export async function verifyUser(
-  authHeader: string | undefined
+  authHeader: string | undefined,
+  env: Env
 ): Promise<VerifiedUser | null> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return null;
   }
-  const supabaseAdmin = getSupabaseAdmin();
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) return null;
 
   const token = authHeader.slice('Bearer '.length).trim();

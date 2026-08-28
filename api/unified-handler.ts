@@ -5,7 +5,7 @@
  * @ts-nocheck Supabase types don't match schema—runtime works correctly
  */
 
-import { supabase } from '../src/lib/supabase/client.js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { scheduleNotification } from '../src/services/PushScheduler.js';
 import { scheduleDecisionFollowUps } from '../src/services/DecisionFollowUpNotifier.js';
 import {
@@ -14,7 +14,7 @@ import {
   trackDecisionOutcome,
 } from '../src/services/NotificationAnalytics.js';
 import Stripe from 'stripe';
-import { verifyUser, getSupabaseAdmin, type VerifiedUser } from './_utils/verify-user.js';
+import { verifyUser, getSupabaseAdmin, type VerifiedUser, type Env } from './_utils/verify-user.js';
 import { rateLimitMiddleware, tooManyRequestsResponse } from './_utils/rate-limit.js';
 
 interface ApiResponse<T = any> {
@@ -24,11 +24,27 @@ interface ApiResponse<T = any> {
   message?: string;
 }
 
-export async function handler(request: Request): Promise<Response> {
+// CF-PAGES-MIGRATION-001: anon-key client, used only by handleNotifications/
+// handleTwinEvolution/handleSICE below. Previously imported from
+// ../src/lib/supabase/client.ts (the shared frontend client, which reads
+// import.meta.env / process.env — neither populated in the CF Functions
+// runtime; see that file's own fix). Built locally here instead, from the
+// real `env` object threaded through from functions/api/[[route]].ts, same
+// pattern as getSupabaseAdmin in _utils/verify-user.ts.
+let _supabaseAnon: SupabaseClient | null | undefined;
+function getAnonSupabase(env: Env): SupabaseClient | null {
+  if (_supabaseAnon !== undefined) return _supabaseAnon;
+  const url = env.VITE_SUPABASE_URL;
+  const key = env.VITE_SUPABASE_ANON_KEY;
+  _supabaseAnon = url && key ? createClient(url, key) : null;
+  return _supabaseAnon;
+}
+
+export async function handler(request: Request, env: Env): Promise<Response> {
   try {
     // Rate limiting — apply before any business logic
     const authHeader = request.headers.get('authorization');
-    const user = authHeader ? await verifyUser(authHeader) : null;
+    const user = authHeader ? await verifyUser(authHeader, env) : null;
     const rateLimitResult = rateLimitMiddleware(request, user?.id);
     if (!rateLimitResult.ok) {
       return tooManyRequestsResponse(rateLimitResult);
@@ -65,22 +81,22 @@ export async function handler(request: Request): Promise<Response> {
 
     switch (module) {
       case 'notifications':
-        response = await handleNotifications(request, action, url);
+        response = await handleNotifications(request, action, url, env);
         break;
       case 'twin-evolution':
-        response = await handleTwinEvolution(request, action, url);
+        response = await handleTwinEvolution(request, action, url, env);
         break;
       case 'sice':
-        response = await handleSICE(request, action, url);
+        response = await handleSICE(request, action, url, env);
         break;
       case 'stripe':
-        response = await handleStripe(request, action, user);
+        response = await handleStripe(request, action, user, env);
         break;
       case 'share':
-        response = await handleShare(request, url);
+        response = await handleShare(request, url, env);
         break;
       case 'profile':
-        response = await handleProfile(request, action, user);
+        response = await handleProfile(request, action, user, env);
         // Cache profile for 5 min to reduce edge requests
         if (response.ok) {
           Object.entries(getCacheHeaders(300)).forEach(([key, value]) => {
@@ -89,7 +105,7 @@ export async function handler(request: Request): Promise<Response> {
         }
         break;
       case 'blueprint':
-        response = await handleBlueprint(request, action, user);
+        response = await handleBlueprint(request, action, user, env);
         // Cache blueprint for 5 min to reduce edge requests
         if (response.ok) {
           Object.entries(getCacheHeaders(300)).forEach(([key, value]) => {
@@ -114,7 +130,8 @@ export async function handler(request: Request): Promise<Response> {
   }
 }
 
-async function handleNotifications(request: Request, action: string, url: URL): Promise<Response> {
+async function handleNotifications(request: Request, action: string, url: URL, env: Env): Promise<Response> {
+  const supabase = getAnonSupabase(env);
   if (request.method === 'GET') {
     if (action === 'list') {
       const userId = url.searchParams.get('userId');
@@ -297,7 +314,8 @@ async function handleNotifications(request: Request, action: string, url: URL): 
   );
 }
 
-async function handleTwinEvolution(_request: Request, _action: string, url: URL): Promise<Response> {
+async function handleTwinEvolution(_request: Request, _action: string, url: URL, env: Env): Promise<Response> {
+  const supabase = getAnonSupabase(env);
   if (!supabase) {
     return Response.json(
       { success: false, error: 'Database not initialized' } as ApiResponse,
@@ -334,7 +352,8 @@ async function handleTwinEvolution(_request: Request, _action: string, url: URL)
   );
 }
 
-async function handleSICE(_request: Request, _action: string, url: URL): Promise<Response> {
+async function handleSICE(_request: Request, _action: string, url: URL, env: Env): Promise<Response> {
+  const supabase = getAnonSupabase(env);
   if (!supabase) {
     return Response.json(
       { success: false, error: 'Database not initialized' } as ApiResponse,
@@ -373,8 +392,8 @@ async function handleSICE(_request: Request, _action: string, url: URL): Promise
 
 // ── Stripe helpers ────────────────────────────────────────────────────────────
 
-function getStripe(): Stripe {
-  const key = process.env.STRIPE_SECRET_KEY;
+function getStripe(env: Env): Stripe {
+  const key = env.STRIPE_SECRET_KEY;
   if (!key) throw new Error('STRIPE_SECRET_KEY is not configured');
   // CF-PAGES-MIGRATION-001: stripe-node defaults to Node's `http` module,
   // which doesn't exist in the Cloudflare Workers/Pages Functions runtime.
@@ -384,7 +403,7 @@ function getStripe(): Stripe {
   return new Stripe(key, { apiVersion: '2024-06-20', httpClient: Stripe.createFetchHttpClient() });
 }
 
-function getPriceId(tier: string, billingPeriod: string): string {
+function getPriceId(tier: string, billingPeriod: string, env: Env): string {
   const envKey = (() => {
     if (tier === 'plus' && billingPeriod === 'monthly') return 'STRIPE_PRICE_PLUS_MONTHLY';
     if (tier === 'plus' && billingPeriod === 'annual')  return 'STRIPE_PRICE_PLUS_ANNUAL';
@@ -394,13 +413,13 @@ function getPriceId(tier: string, billingPeriod: string): string {
     return null;
   })();
   if (!envKey) throw new Error(`Unknown tier/billingPeriod: ${tier}/${billingPeriod}`);
-  const priceId = process.env[envKey];
+  const priceId = env[envKey];
   if (!priceId) throw new Error(`Env var ${envKey} is not set`);
   return priceId;
 }
 
-async function getStripeCustomerId(userId: string): Promise<string | null> {
-  const supabaseAdmin = getSupabaseAdmin();
+async function getStripeCustomerId(userId: string, env: Env): Promise<string | null> {
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) return null;
   const { data } = await supabaseAdmin
     .from('subscriptions')
@@ -412,8 +431,8 @@ async function getStripeCustomerId(userId: string): Promise<string | null> {
 
 // ── Stripe webhook handlers ───────────────────────────────────────────────────
 
-async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<void> {
-  const supabaseAdmin = getSupabaseAdmin();
+async function onCheckoutComplete(session: Stripe.Checkout.Session, env: Env): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) return;
   const userId = session.metadata?.user_id || session.client_reference_id;
   const tier = session.metadata?.tier;
@@ -434,8 +453,8 @@ async function onCheckoutComplete(session: Stripe.Checkout.Session): Promise<voi
   console.log(`[stripe] Upserted subscription: user=${userId} tier=${tier}`);
 }
 
-async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
-  const supabaseAdmin = getSupabaseAdmin();
+async function onSubscriptionChange(sub: Stripe.Subscription, env: Env): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) return;
   const userId = sub.metadata?.user_id;
   if (!userId) return;
@@ -458,8 +477,8 @@ async function onSubscriptionChange(sub: Stripe.Subscription): Promise<void> {
   console.log(`[stripe] Subscription ${sub.status}: user=${userId} tier=${tier}`);
 }
 
-async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-  const supabaseAdmin = getSupabaseAdmin();
+async function onPaymentFailed(invoice: Stripe.Invoice, env: Env): Promise<void> {
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) return;
   const customerId = typeof invoice.customer === 'string'
     ? invoice.customer
@@ -481,7 +500,7 @@ async function onPaymentFailed(invoice: Stripe.Invoice): Promise<void> {
 
 // ── handleStripe ─────────────────────────────────────────────────────────────
 
-async function handleStripe(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
+async function handleStripe(request: Request, action: string, user: VerifiedUser | null, env: Env): Promise<Response> {
   try {
     switch (action) {
       case 'create-checkout': {
@@ -496,11 +515,11 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         if (!tier) {
           return Response.json({ success: false, error: 'tier is required' } as ApiResponse, { status: 400 });
         }
-        const stripe = getStripe();
-        const priceId = getPriceId(tier, billingPeriod);
+        const stripe = getStripe(env);
+        const priceId = getPriceId(tier, billingPeriod, env);
         const origin = returnUrl
           ? new URL(returnUrl).origin
-          : (process.env.FRONTEND_URL || 'https://selfprint.app');
+          : (env.FRONTEND_URL || 'https://selfprint.app');
         const mode: Stripe.Checkout.SessionCreateParams['mode'] =
           tier === 'lifetime' ? 'payment' : 'subscription';
         const session = await stripe.checkout.sessions.create({
@@ -525,9 +544,9 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
-        const stripe = getStripe();
-        const origin = process.env.FRONTEND_URL || 'https://selfprint.app';
-        const customerId = await getStripeCustomerId(user.id);
+        const stripe = getStripe(env);
+        const origin = env.FRONTEND_URL || 'https://selfprint.app';
+        const customerId = await getStripeCustomerId(user.id, env);
         if (!customerId) {
           return Response.json(
             { success: false, error: 'No Stripe customer found for this user' } as ApiResponse,
@@ -548,7 +567,7 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         if (!user) {
           return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
         }
-        const supabaseAdmin = getSupabaseAdmin();
+        const supabaseAdmin = getSupabaseAdmin(env);
         if (!supabaseAdmin) {
           return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
         }
@@ -585,12 +604,12 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         if (request.method !== 'POST') {
           return Response.json({ success: false, error: 'POST only' } as ApiResponse, { status: 405 });
         }
-        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+        const webhookSecret = env.STRIPE_WEBHOOK_SECRET;
         if (!webhookSecret) {
           console.error('[stripe] STRIPE_WEBHOOK_SECRET not set');
           return Response.json({ success: false, error: 'Webhook secret not configured' } as ApiResponse, { status: 500 });
         }
-        const stripe = getStripe();
+        const stripe = getStripe(env);
         const sig = request.headers.get('stripe-signature') ?? '';
         const rawBody = await request.text();
         let event: Stripe.Event;
@@ -604,14 +623,14 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         console.log(`[stripe] Webhook received: ${event.type}`);
         switch (event.type) {
           case 'checkout.session.completed':
-            await onCheckoutComplete(event.data.object as Stripe.Checkout.Session);
+            await onCheckoutComplete(event.data.object as Stripe.Checkout.Session, env);
             break;
           case 'customer.subscription.updated':
           case 'customer.subscription.deleted':
-            await onSubscriptionChange(event.data.object as Stripe.Subscription);
+            await onSubscriptionChange(event.data.object as Stripe.Subscription, env);
             break;
           case 'invoice.payment_failed':
-            await onPaymentFailed(event.data.object as Stripe.Invoice);
+            await onPaymentFailed(event.data.object as Stripe.Invoice, env);
             break;
           default:
             break;
@@ -637,8 +656,8 @@ function generateShareCode(): string {
   return Buffer.from(bytes).toString('base64url');
 }
 
-async function handleShare(request: Request, url: URL): Promise<Response> {
-  const supabaseAdmin = getSupabaseAdmin();
+async function handleShare(request: Request, url: URL, env: Env): Promise<Response> {
+  const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) {
     return Response.json({ success: false, error: 'Supabase admin not configured' } as ApiResponse, { status: 500 });
   }
@@ -684,7 +703,7 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
   }
 
   if (request.method === 'POST') {
-    const user = await verifyUser(request.headers.get('authorization') ?? undefined);
+    const user = await verifyUser(request.headers.get('authorization') ?? undefined, env);
     if (!user) {
       return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
     }
@@ -721,9 +740,9 @@ async function handleShare(request: Request, url: URL): Promise<Response> {
   return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
 }
 
-async function handleProfile(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
+async function handleProfile(request: Request, action: string, user: VerifiedUser | null, env: Env): Promise<Response> {
   try {
-    const supabaseAdmin = getSupabaseAdmin();
+    const supabaseAdmin = getSupabaseAdmin(env);
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
@@ -796,9 +815,9 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
   }
 }
 
-async function handleBlueprint(request: Request, action: string, user: VerifiedUser | null): Promise<Response> {
+async function handleBlueprint(request: Request, action: string, user: VerifiedUser | null, env: Env): Promise<Response> {
   try {
-    const supabaseAdmin = getSupabaseAdmin();
+    const supabaseAdmin = getSupabaseAdmin(env);
     if (!supabaseAdmin) {
       return Response.json({ success: false, error: 'Supabase unavailable' } as ApiResponse, { status: 500 });
     }
@@ -902,10 +921,18 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
 // HTTP-method function exports (`export function GET(request) {...}`),
 // not a const alias to an existing function. Only GET and POST are used
 // anywhere in this file (see the request.method checks throughout).
+// CF-PAGES-MIGRATION-001: handler() now takes an explicit `env` (see the
+// module-level comment above getAnonSupabase). functions/api/[[route]].ts
+// passes the real Cloudflare `context.env`. These two exports are only
+// reached via Vercel's own routing (never called from the CF path — the
+// Pages Function imports `handler` directly), so they fall back to
+// `process.env`, which is what Vercel's Node runtime actually populates.
+declare const process: { env: Record<string, string | undefined> } | undefined;
+
 export async function GET(request: Request): Promise<Response> {
-  return handler(request);
+  return handler(request, (typeof process !== 'undefined' && process?.env) || {});
 }
 
 export async function POST(request: Request): Promise<Response> {
-  return handler(request);
+  return handler(request, (typeof process !== 'undefined' && process?.env) || {});
 }
