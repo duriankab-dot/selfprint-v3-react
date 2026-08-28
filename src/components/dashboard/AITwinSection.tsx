@@ -19,11 +19,15 @@ const AITwinSection: React.FC = () => {
       const res = await fetch('/api/profile', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch profile');
-      return res.json().then((d) => d.profile);
+      if (!res.ok) return null;
+      // CF Pages SPA fallback returns HTML with 200 — detect and skip
+      const ct = res.headers.get('content-type') ?? '';
+      if (!ct.includes('application/json')) return null;
+      return res.json().then((d: any) => d.profile ?? null).catch(() => null);
     },
     enabled: !!session?.access_token && !!userId,
-    staleTime: 5 * 60 * 1000, // 5 min cache
+    staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 
   const { data: blueprintData, isLoading: blueprintLoading } = useQuery({
@@ -33,11 +37,14 @@ const AITwinSection: React.FC = () => {
       const res = await fetch('/api/blueprint', {
         headers: { Authorization: `Bearer ${session.access_token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch blueprint');
-      return res.json().then((d) => d.blueprint);
+      if (!res.ok) return null;
+      const ct = res.headers.get('content-type') ?? '';
+      if (!ct.includes('application/json')) return null;
+      return res.json().then((d: any) => d.blueprint ?? null).catch(() => null);
     },
     enabled: !!session?.access_token && !!userId,
-    staleTime: 5 * 60 * 1000, // 5 min cache
+    staleTime: 5 * 60 * 1000,
+    retry: false,
   });
 
   // Determine state based on query status

@@ -64,8 +64,11 @@ export default function ExplorePage() {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (res.ok) {
-          const json = await res.json();
-          dob = json.blueprint?.dob || json.blueprint?.content?.dob || '';
+          const ct = res.headers.get('content-type') ?? '';
+          if (ct.includes('application/json')) {
+            const json = await res.json();
+            dob = json.blueprint?.dob || json.blueprint?.content?.dob || '';
+          }
         }
       }
 

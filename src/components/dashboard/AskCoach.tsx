@@ -47,6 +47,8 @@ const AskCoach: React.FC = () => {
           headers: { Authorization: `Bearer ${session.access_token}` },
         });
         if (!res.ok) return;
+        const ct = res.headers.get('content-type') ?? '';
+        if (!ct.includes('application/json')) return;
         const json = await res.json();
         if (!cancelled) setBirthDate(json.profile?.date_of_birth ?? null);
       } catch {
