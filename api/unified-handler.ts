@@ -656,6 +656,21 @@ function generateShareCode(): string {
   return Buffer.from(bytes).toString('base64url');
 }
 
+// CF-PAGES-MIGRATION-001: pre-existing bug found live during production
+// verification (not introduced by this migration, but surfaced by it —
+// /api/share returned 500 "Database error" for a well-formed code).
+// Migration 002_profiles_blueprints.sql explicitly created
+// selfprint.users_profiles / selfprint.blueprints (and 004_share_links.sql
+// created selfprint.share_links) in a *dedicated* `selfprint` Postgres
+// schema, specifically because this Supabase project already has
+// unrelated tables named blueprints/users_profiles in `public` belonging
+// to a different product. The frontend already does this correctly
+// (supabase.schema('selfprint').from(...), see src/pages/TwinChat.tsx /
+// CoreAwakening.tsx / WorldContext.tsx) but handleShare / handleProfile /
+// handleBlueprint below never did — every query here was silently hitting
+// `public.*` instead. Fixed by adding .schema('selfprint') to every
+// share_links / users_profiles / blueprints call in this file (9 call
+// sites) to match the schema the tables actually live in.
 async function handleShare(request: Request, url: URL, env: Env): Promise<Response> {
   const supabaseAdmin = getSupabaseAdmin(env);
   if (!supabaseAdmin) {
@@ -672,6 +687,7 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       return Response.json({ success: false, error: 'Invalid share code format' } as ApiResponse, { status: 400 });
     }
     const { data: link, error: linkErr } = await supabaseAdmin
+      .schema('selfprint')
       .from('share_links')
       .select('user_id')
       .eq('code', code)
@@ -683,6 +699,7 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       return Response.json({ success: false, error: 'Share link not found' } as ApiResponse, { status: 404 });
     }
     const { data: blueprint, error: bpErr } = await supabaseAdmin
+      .schema('selfprint')
       .from('blueprints')
       .select('accuracy_level, decision_style')
       .eq('user_id', link.user_id)
@@ -709,6 +726,7 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
     }
     // Return existing code if already has one
     const { data: existing, error: existingErr } = await supabaseAdmin
+      .schema('selfprint')
       .from('share_links')
       .select('code')
       .eq('user_id', user.id)
@@ -723,6 +741,7 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
     for (let attempt = 0; attempt < 5; attempt++) {
       const code = generateShareCode();
       const { error: insertErr } = await supabaseAdmin
+        .schema('selfprint')
         .from('share_links')
         .insert({ user_id: user.id, code } as any);
       if (!insertErr) {
@@ -752,6 +771,7 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
 
     if (request.method === 'GET') {
       const { data, error: selectError } = await supabaseAdmin
+        .schema('selfprint')
         .from('users_profiles')
         .select()
         .eq('user_id', user.id)
@@ -787,6 +807,7 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
       // ─────────────────────────────────────────────────────
 
       const { data, error: upsertError } = await supabaseAdmin
+        .schema('selfprint')
         .from('users_profiles')
         .upsert(
           {
@@ -827,6 +848,7 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
 
     if (request.method === 'GET') {
       const { data, error: selectError } = (await supabaseAdmin
+        .schema('selfprint')
         .from('blueprints')
         .select()
         .eq('user_id', user.id)
@@ -873,11 +895,13 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
       }
       // Mark previous blueprints as non-latest
       await supabaseAdmin
+        .schema('selfprint')
         .from('blueprints')
         .update({ is_latest: false })
         .eq('user_id', user.id)
         .eq('is_latest', true);
       const { data, error: insertError } = await supabaseAdmin
+        .schema('selfprint')
         .from('blueprints')
         .insert({
           user_id: user.id,
