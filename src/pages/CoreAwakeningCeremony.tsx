@@ -169,8 +169,11 @@ export const CoreAwakeningCeremony: React.FC<CoreAwakeningProps> = ({
           setIsComplete(true);
 
           // Auto-redirect to chat after brief display
+          // CEREMONY-REDIRECT-001 FIX: /twin/${id}/chat is not a valid route.
+          // Correct route is /${lang}/chat/twin.
           setTimeout(() => {
-            window.location.href = `/twin/${twinId}/chat`;
+            const lang = window.location.pathname.startsWith('/en') ? 'en' : 'th';
+            window.location.href = `/${lang}/chat/twin`;
           }, 2000);
         } catch (err) {
           setError(

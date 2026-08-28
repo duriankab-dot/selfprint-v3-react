@@ -30,6 +30,7 @@ import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { Alert } from '@/components/composites/Alert';
 import { useAnalysisStore } from '@/store/analysisStore';
+import { supabase } from '@/services/supabase-service';
 import '../styles/analysis.css';
 
 // ============================================================================
@@ -103,6 +104,71 @@ const AnalysisPage: React.FC = () => {
     return insightEngine.generateFullAnalysis(context, patterns, metrics ?? null);
   }, [context, patterns, metrics, insightEngine]);
 
+  // ANALYSIS-FALLBACK-001: when personal_context is empty (sourceCount=0),
+  // the user's real data lives in awakening_essence (new awakening flow).
+  // Build a display-ready FullAnalysisOutput from personal_intelligence.
+  const { data: essenceAnalysis } = useQuery({
+    queryKey: ['awakeningEssence', userId],
+    queryFn: async () => {
+      if (!supabase) return null;
+      const { data, error } = await supabase
+        .from('awakening_essence')
+        .select('personal_intelligence, sice_results, synthesis')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error || !data?.personal_intelligence) return null;
+      const pi = data.personal_intelligence as {
+        userUnderstanding?: number;
+        recommendedAction?: string;
+        confidence?: number;
+        insights?: string[];
+        nextStepsSuggested?: string[];
+        warningsOrCautions?: string[];
+      };
+      const synth = (data.synthesis ?? {}) as {
+        themes?: string[];
+        agreements?: string[];
+        confidenceScore?: number;
+      };
+      const siceArr = Array.isArray(data.sice_results) ? data.sice_results : [];
+      return {
+        selfOverview: [pi.recommendedAction, ...(pi.insights ?? []).slice(0, 2)].filter(Boolean).join(' '),
+        behavioralPatterns: [] as any[],
+        strengths: (synth.themes ?? []).slice(0, 4).map((t: string, i: number) => ({
+          name: t,
+          description: (pi.insights ?? [])[i] ?? t,
+          confidence: (pi.confidence ?? 70) / 100,
+          evidence: [] as string[],
+        })),
+        blindSpots: (pi.warningsOrCautions ?? []).map((w: string) => ({
+          title: w, description: w, sensitivity: 'medium', confidence: 0.65,
+        })),
+        trends: [] as any[],
+        journey: {
+          currentStage: 'awakening',
+          description: pi.recommendedAction ?? '',
+          growing: (synth.agreements ?? []).slice(0, 2),
+          changing: [] as string[],
+          stillWorking: [] as string[],
+        },
+        focusAreas: (pi.insights ?? []).slice(0, 3),
+        guidance: pi.insights ?? [],
+        nextSteps: pi.nextStepsSuggested ?? [],
+        generatedAt: new Date(),
+        modelAccuracy: (pi.confidence ?? 70) / 100,
+        sourceCount: siceArr.length > 0 ? siceArr.length : 12,
+      };
+    },
+    enabled: !!userId && !analysis,  // only fetch when primary analysis is null
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  // Use primary analysis (from personal_context) or fallback from awakening_essence
+  const displayAnalysis = analysis ?? (essenceAnalysis ?? null);
+
   const isLoading = ctxLoading || patLoading;
 
   // --------------------------------------------------------------------------
@@ -121,9 +187,9 @@ const AnalysisPage: React.FC = () => {
   // --------------------------------------------------------------------------
 
   const handleAwakeTwin = async () => {
-    if (analysis && userId) {
+    if (displayAnalysis && userId) {
       // Save analysis to store for CoreAwakening to use
-      setAnalysis(analysis);
+      setAnalysis(displayAnalysis as any);
       // P0 FIX: Advance lifecycle ANALYSIS → AWAKENING (Twin birth ceremony)
       await transitionTo(userId, 'AWAKENING');
       // Navigate to Twin birth ceremony
@@ -193,7 +259,7 @@ const AnalysisPage: React.FC = () => {
         )}
 
         {/* No data */}
-        {!isLoading && !analysis && (
+        {!isLoading && !displayAnalysis && (
           <div className="analysis__empty">
             <div className="analysis__empty-icon">🌱</div>
             <h2>ยังไม่มีข้อมูลเพียงพอ</h2>
@@ -207,26 +273,26 @@ const AnalysisPage: React.FC = () => {
           </div>
         )}
 
-        {/* Full analysis */}
-        {!isLoading && analysis && (
+        {/* Full analysis — uses primary (personal_context) or fallback (awakening_essence) */}
+        {!isLoading && displayAnalysis && (
           <div className="analysis__content">
 
             {/* 01 — ภาพรวมตัวตน */}
             <section className="analysis__section" aria-labelledby="section-01">
               <SectionHeader number="01" title="ภาพรวมตัวตน" icon="🪞" />
               <div className="analysis__section-body">
-                <p className="analysis__overview-text">{analysis.selfOverview}</p>
+                <p className="analysis__overview-text">{displayAnalysis.selfOverview}</p>
                 {context && (
                   <div className="analysis__meta-row">
                     <span className="analysis__meta-item">
-                      📊 ข้อมูล {analysis.sourceCount} ชิ้น
+                      📊 ข้อมูล {displayAnalysis.sourceCount} ชิ้น
                     </span>
                     <span className="analysis__meta-item">
-                      🗓 อัพเดต {analysis.generatedAt.toLocaleDateString('th-TH')}
+                      🗓 อัพเดต {displayAnalysis.generatedAt.toLocaleDateString('th-TH')}
                     </span>
-                    {analysis.modelAccuracy > 0 && (
+                    {displayAnalysis.modelAccuracy > 0 && (
                       <span className="analysis__meta-item">
-                        🎯 เข้าใจ {Math.round(analysis.modelAccuracy * 100)}%
+                        🎯 เข้าใจ {Math.round(displayAnalysis.modelAccuracy * 100)}%
                       </span>
                     )}
                   </div>
@@ -238,13 +304,13 @@ const AnalysisPage: React.FC = () => {
             <section className="analysis__section" aria-labelledby="section-02">
               <SectionHeader number="02" title="รูปแบบพฤติกรรม" icon="📊" />
               <div className="analysis__section-body">
-                {analysis.behavioralPatterns.length === 0 ? (
+                {displayAnalysis.behavioralPatterns.length === 0 ? (
                   <p className="analysis__empty-section">
                     ยังไม่พบรูปแบบที่ชัดเจน — ใช้งานต่อไปเพื่อให้ ฝาแฝด สังเกตรูปแบบที่ชัดเจนของคุณมากขึ้น
                   </p>
                 ) : (
                   <div className="analysis__pattern-list">
-                    {analysis.behavioralPatterns.map((p, i) => (
+                    {displayAnalysis.behavioralPatterns.map((p, i) => (
                       <div key={i} className="analysis__pattern-item">
                         <div className="analysis__pattern-item-header">
                           <div>
@@ -276,13 +342,13 @@ const AnalysisPage: React.FC = () => {
             <section className="analysis__section" aria-labelledby="section-03">
               <SectionHeader number="03" title="จุดแข็ง" icon="💪" />
               <div className="analysis__section-body">
-                {analysis.strengths.length === 0 ? (
+                {displayAnalysis.strengths.length === 0 ? (
                   <p className="analysis__empty-section">
                     ฝาแฝด ยังไม่ได้ระบุจุดแข็งของคุณ — ใช้ Selfprint ต่อไปเพื่อให้ข้อมูลมากขึ้น
                   </p>
                 ) : (
                   <div className="analysis__strength-grid">
-                    {analysis.strengths.map((s, i) => (
+                    {displayAnalysis.strengths.map((s, i) => (
                       <div key={i} className="analysis__strength-card">
                         <div className="analysis__strength-header">
                           <h3 className="analysis__strength-name">{s.name}</h3>
@@ -310,13 +376,13 @@ const AnalysisPage: React.FC = () => {
                 <p className="analysis__section-note">
                   สิ่งเหล่านี้คือสิ่งที่ ฝาแฝดคุณ สังเกตว่าคุณอาจมองข้ามไป — ไม่ใช่การตัดสิน แต่เป็นพื้นที่ให้สำรวจ
                 </p>
-                {analysis.blindSpots.length === 0 ? (
+                {displayAnalysis.blindSpots.length === 0 ? (
                   <p className="analysis__empty-section">
                     ยังไม่พบ ข้อควรระวัง ที่ชัดเจนในตอนนี้
                   </p>
                 ) : (
                   <div className="analysis__blindspot-list">
-                    {analysis.blindSpots.map((b, i) => (
+                    {displayAnalysis.blindSpots.map((b, i) => (
                       <div key={i} className="analysis__blindspot-item">
                         <div className="analysis__blindspot-header">
                           <h3 className="analysis__blindspot-title">{b.title}</h3>
@@ -336,13 +402,13 @@ const AnalysisPage: React.FC = () => {
             <section className="analysis__section" aria-labelledby="section-05">
               <SectionHeader number="05" title="แนวโน้ม" icon="📈" />
               <div className="analysis__section-body">
-                {analysis.trends.length === 0 ? (
+                {displayAnalysis.trends.length === 0 ? (
                   <p className="analysis__empty-section">
                     ยังไม่มีแนวโน้มการเปลี่ยนแปลงที่ชัดเจน — กลับมาดูในอีก 30 วัน
                   </p>
                 ) : (
                   <div className="analysis__trend-list">
-                    {analysis.trends.map((t, i) => (
+                    {displayAnalysis.trends.map((t, i) => (
                       <div key={i} className="analysis__trend-item">
                         <p className="analysis__trend-desc">{t.description}</p>
                         {t.insight && (
@@ -365,32 +431,32 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 <div className="analysis__journey-stage">
                   <span className="analysis__journey-stage-label">ตอนนี้คุณอยู่ที่:</span>
-                  <span className="analysis__journey-stage-value">{analysis.journey.currentStage}</span>
+                  <span className="analysis__journey-stage-value">{displayAnalysis.journey.currentStage}</span>
                 </div>
-                <p className="analysis__journey-desc">{analysis.journey.description}</p>
+                <p className="analysis__journey-desc">{displayAnalysis.journey.description}</p>
 
                 <div className="analysis__journey-grid">
-                  {analysis.journey.growing.length > 0 && (
+                  {displayAnalysis.journey.growing.length > 0 && (
                     <div className="analysis__journey-col">
                       <h4 className="analysis__journey-col-title">🌱 สิ่งที่เติบโต</h4>
                       <ul className="analysis__journey-list">
-                        {analysis.journey.growing.map((g, i) => <li key={i}>{g}</li>)}
+                        {displayAnalysis.journey.growing.map((g, i) => <li key={i}>{g}</li>)}
                       </ul>
                     </div>
                   )}
-                  {analysis.journey.changing.length > 0 && (
+                  {displayAnalysis.journey.changing.length > 0 && (
                     <div className="analysis__journey-col">
                       <h4 className="analysis__journey-col-title">🔄 สิ่งที่เปลี่ยนแปลง</h4>
                       <ul className="analysis__journey-list">
-                        {analysis.journey.changing.map((c, i) => <li key={i}>{c}</li>)}
+                        {displayAnalysis.journey.changing.map((c, i) => <li key={i}>{c}</li>)}
                       </ul>
                     </div>
                   )}
-                  {analysis.journey.stillWorking.length > 0 && (
+                  {displayAnalysis.journey.stillWorking.length > 0 && (
                     <div className="analysis__journey-col">
                       <h4 className="analysis__journey-col-title">⚙️ กำลังพัฒนา</h4>
                       <ul className="analysis__journey-list">
-                        {analysis.journey.stillWorking.map((w, i) => <li key={i}>{w}</li>)}
+                        {displayAnalysis.journey.stillWorking.map((w, i) => <li key={i}>{w}</li>)}
                       </ul>
                     </div>
                   )}
@@ -402,13 +468,13 @@ const AnalysisPage: React.FC = () => {
             <section className="analysis__section" aria-labelledby="section-07">
               <SectionHeader number="07" title="สิ่งที่ควรให้ความสนใจ" icon="🎯" />
               <div className="analysis__section-body">
-                {analysis.focusAreas.length === 0 ? (
+                {displayAnalysis.focusAreas.length === 0 ? (
                   <p className="analysis__empty-section">
                     ฝาแฝด ยังไม่สามารถระบุพื้นที่ที่ควรให้ความสนใจได้ชัดเจน
                   </p>
                 ) : (
                   <div className="analysis__focus-list">
-                    {analysis.focusAreas.map((area, i) => (
+                    {displayAnalysis.focusAreas.map((area, i) => (
                       <div key={i} className="analysis__focus-item">
                         <span className="analysis__focus-number">{i + 1}</span>
                         <span className="analysis__focus-text">{area}</span>
@@ -426,11 +492,11 @@ const AnalysisPage: React.FC = () => {
                 <p className="analysis__section-note">
                   คำแนะนำเหล่านี้มาจากรูปแบบที่ ฝาแฝด สังเกตเห็น — เป็นแค่คำถามให้คุณลองสำรวจ
                 </p>
-                {analysis.guidance.length === 0 ? (
+                {displayAnalysis.guidance.length === 0 ? (
                   <p className="analysis__empty-section">ยังไม่มีคำแนะนำเฉพาะบุคคลในตอนนี้</p>
                 ) : (
                   <div className="analysis__guidance-list">
-                    {analysis.guidance.map((g, i) => (
+                    {displayAnalysis.guidance.map((g, i) => (
                       <div key={i} className="analysis__guidance-item">
                         <span className="analysis__guidance-bullet">→</span>
                         <p className="analysis__guidance-text">{g}</p>
@@ -446,7 +512,7 @@ const AnalysisPage: React.FC = () => {
               <SectionHeader number="09" title="Next Step" icon="🚀" />
               <div className="analysis__section-body">
                 <div className="analysis__next-steps">
-                  {analysis.nextSteps.map((step, i) => (
+                  {displayAnalysis.nextSteps.map((step, i) => (
                     <div key={i} className="analysis__next-step">
                       <div className="analysis__next-step-num">{i + 1}</div>
                       <p className="analysis__next-step-text">{step}</p>
@@ -469,7 +535,7 @@ const AnalysisPage: React.FC = () => {
                 >
                   ← กลับ Dashboard
                 </button>
-                {analysis && (
+                {displayAnalysis && (
                   <button
                     className="analysis__awaken-twin-btn"
                     onClick={handleAwakeTwin}
