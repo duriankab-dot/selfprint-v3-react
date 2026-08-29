@@ -1,6 +1,6 @@
 /**
  * BlogIndex.tsx
- * Blog listing page - displays all articles
+ * Blog listing page - displays all articles with categories
  */
 
 import { useEffect, useState } from 'react';
@@ -15,18 +15,20 @@ interface ArticleListItem {
   world: string;
   publishedAt: string;
   featured: boolean;
+  keywords: string[];
 }
 
 export default function BlogIndex() {
   const [articles, setArticles] = useState<ArticleListItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
     const loadArticles = async () => {
       try {
         const response = await fetch('/blog/index.json');
         if (!response.ok) throw new Error('Failed to load blog index');
-
         const data = await response.json();
         setArticles(data.articles || []);
       } catch (err) {
@@ -40,91 +42,154 @@ export default function BlogIndex() {
     loadArticles();
   }, []);
 
+  // Get unique categories for filter
+  const categories = ['all', ...new Set(articles.map(a => a.category))];
+
+  const filteredArticles = articles.filter(article => {
+    const matchesCategory = selectedCategory === 'all' || article.category === selectedCategory;
+    const matchesSearch =
+      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      article.keywords.some(k => k.toLowerCase().includes(searchTerm.toLowerCase()));
+    return matchesCategory && matchesSearch;
+  });
+
+  const featuredArticles = filteredArticles.filter(a => a.featured);
+  const regularArticles = filteredArticles.filter(a => !a.featured);
+
   if (loading) {
     return (
-      <main style={{ padding: '40px 20px', textAlign: 'center' }}>
-        <p>Loading articles...</p>
-      </main>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">กำลังโหลดบทความ...</p>
+        </div>
+      </div>
     );
   }
 
-  // Group by category
-  const grouped = articles.reduce((acc, article) => {
-    const key = article.category;
-    if (!acc[key]) acc[key] = [];
-    acc[key].push(article);
-    return acc;
-  }, {} as Record<string, ArticleListItem[]>);
-
-  const categoryOrder = ['Self-Discovery', 'Features', 'Problem-Solving', 'Advanced'];
-
   return (
-    <main style={{ padding: '40px 20px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '40px', marginBottom: '12px' }}>SELFPRINT Blog</h1>
-      <p style={{ fontSize: '18px', color: '#666', marginBottom: '40px' }}>
-        Discover behavioral science, AI Twin insights, and personal growth strategies
-      </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 pt-24 pb-16">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-12 text-center sm:text-left">
+          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4">
+            The Selfprint Blog
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto sm:mx-0">
+            Guided decision-making for career, relationships, and wellness.
+            Your Twin helps you think clearly about what matters.
+          </p>
+        </div>
 
-      {categoryOrder.map(category => {
-        const categoryArticles = grouped[category] || [];
-        if (categoryArticles.length === 0) return null;
+        {/* Search and filters */}
+        <div className="mb-10 space-y-4">
+          {/* Search */}
+          <div className="relative max-w-md">
+            <input
+              type="text"
+              placeholder="ค้นหาบทความ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 pl-11 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
+            />
+            <span className="absolute left-4 top-3.5 text-slate-400">🔍</span>
+          </div>
 
-        return (
-          <section key={category} style={{ marginBottom: '60px' }}>
-            <h2 style={{ fontSize: '24px', borderBottom: '2px solid #eee', paddingBottom: '12px', marginBottom: '20px' }}>
-              {category}
+          {/* Category filters */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+                  selectedCategory === cat
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
+                }`}
+              >
+                {cat === 'all' ? 'ทั้งหมด' : cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured articles */}
+        {featuredArticles.length > 0 && (
+          <div className="mb-16">
+            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+              <span>⭐</span> บทความแนะนำ
             </h2>
-
-            <div style={{ display: 'grid', gap: '20px' }}>
-              {categoryArticles.map(article => (
-                <article
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredArticles.map((article) => (
+                <Link
                   key={article.id}
-                  style={{
-                    padding: '20px',
-                    border: '1px solid #eee',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseEnter={e => {
-                    if (e.currentTarget instanceof HTMLElement) {
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                      e.currentTarget.style.borderColor = '#ddd';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (e.currentTarget instanceof HTMLElement) {
-                      e.currentTarget.style.boxShadow = 'none';
-                      e.currentTarget.style.borderColor = '#eee';
-                    }
-                  }}
+                  to={`/blog/${article.slug}`}
+                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100"
                 >
-                  <Link
-                    to={`/blog/${article.world}/${article.category.toLowerCase().replace('-', '-')}/${article.slug}`}
-                    style={{ textDecoration: 'none', color: 'inherit' }}
-                  >
-                    <h3 style={{ fontSize: '20px', margin: '0 0 8px 0' }}>
+                  <div className="p-6">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="inline-block px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs font-medium">
+                        {article.category}
+                      </span>
+                      <span className="text-yellow-500">★</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
                       {article.title}
                     </h3>
-                    <p style={{ fontSize: '14px', color: '#666', margin: '8px 0' }}>
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
                       {article.excerpt}
                     </p>
-                    <div style={{ fontSize: '12px', color: '#999' }}>
-                      {new Date(article.publishedAt).toLocaleDateString()} • {article.category}
+                    <div className="flex items-center gap-2 text-indigo-600 text-sm font-medium">
+                      อ่านบทความ →
                     </div>
-                  </Link>
-                </article>
+                  </div>
+                </Link>
               ))}
             </div>
-          </section>
-        );
-      })}
+          </div>
+        )}
 
-      {articles.length === 0 && (
-        <p style={{ textAlign: 'center', color: '#999', marginTop: '60px' }}>
-          No articles found. Check back soon!
-        </p>
-      )}
-    </main>
+        {/* All articles */}
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">
+            บทความทั้งหมด {searchTerm && `(${filteredArticles.length})`}
+          </h2>
+
+          {regularArticles.length === 0 && filteredArticles.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+              <p className="text-slate-500">ไม่พบบทความที่ตรงกับคำค้นหา</p>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {regularArticles.map((article) => (
+                <Link
+                  key={article.id}
+                  to={`/blog/${article.slug}`}
+                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-100"
+                >
+                  <div className="p-6">
+                    <div className="mb-3">
+                      <span className="inline-block px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-full text-xs font-medium">
+                        {article.category}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                      {article.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">
+                      {article.excerpt}
+                    </p>
+                    <div className="flex items-center gap-2 text-indigo-600 text-sm font-medium">
+                      อ่าน →
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

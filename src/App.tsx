@@ -44,8 +44,6 @@ import './App.css';
 // Phase 5.9: Code splitting
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
-// Chat is now redirected to /twin
-// const Chat = lazy(() => import('./pages/Chat'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
 const PrivacyCenter = lazy(() => import('./pages/PrivacyCenter'));
@@ -75,22 +73,22 @@ const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
+
 // Blog pages
 const BlogArticle = lazy(() => import('./pages/BlogArticle'));
+const BlogListPage = lazy(() => import('./pages/BlogListPage'));
+
 // Phase B: new activity pages
 const TarotPage = lazy(() => import('./pages/TarotPage'));
 const PalmistryPage = lazy(() => import('./pages/PalmistryPage'));
 const CommunityPage = lazy(() => import('./pages/CommunityPage'));
+
 // New pages: SEO + Footer links
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const SciencePage = lazy(() => import('./pages/SciencePage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 const TermsPage = lazy(() => import('./pages/TermsPage'));
-const BlogListPage = lazy(() => import('./pages/BlogListPage'));
 
-/**
- * HomeRoute — LandingPage for guest, redirect to /dashboard if logged in
- */
 /**
  * LangRedirect — ROUTELOOP-002 FIX: the /chat and /twin shortcut routes
  * below redirect to another internal page, but the same <Route element>
@@ -169,6 +167,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/science', element: <SciencePage /> },
     { path: '/contact', element: <ContactPage /> },
     { path: '/terms', element: <TermsPage /> },
+    // Blog list page (ใช้ BlogIndex ที่ใช้ react-markdown และแสดงผลถูกต้อง)
     { path: '/blog', element: <BlogListPage /> },
   ];
 
@@ -180,9 +179,11 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     );
   });
 
-  // Add blog article route (no language prefix for blog)
+  // Blog article route: ใช้ slug เดียว (ไม่ต้อง world/category) 
+  // และไม่มี language prefix เพื่อให้ URL สั้นและ SEO Friendly
+  // ตัวอย่าง: /blog/systems-thinking-transformation
   routes.push(
-    <Route key="blog-article" path="/blog/:world/:category/:slug" element={<BlogArticle />} />
+    <Route key="blog-article" path="/blog/:slug" element={<BlogArticle />} />
   );
 
   // Protected routes (support both /en and /th)
