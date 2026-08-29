@@ -1,15 +1,19 @@
 /**
  * BlogArticle.tsx
  * Dynamic blog article renderer
- * - Resolves filePath via /blog/index.json (slug → actual folder/filename)
- * - Falls back to route params: /blog/:world/:category/:slug
- * - JSON-LD Article schema for SEO/GEO/AEO
+ * - Uses index.json as the single source of truth for slug → filePath resolution
+ * - Renders Markdown content with react-markdown
+ * - Supports articles WITH or WITHOUT frontmatter
+ * - Includes JSON-LD Article schema for SEO/GEO/AEO
+ * - Dark sci-fi theme with glassmorphism
  */
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 interface ArticleMetadata {
+  id: string;
   title: string;
   slug: string;
   excerpt: string;
@@ -18,7 +22,8 @@ interface ArticleMetadata {
   date: string;
   category: string;
   featured: boolean;
-  filePath?: string;
+  filePath: string;
+  world: string;
 }
 
 interface Article extends ArticleMetadata {
@@ -26,7 +31,7 @@ interface Article extends ArticleMetadata {
 }
 
 /** Build Article JSON-LD for GEO / AEO */
-function buildArticleSchema(article: Article, world: string) {
+function buildArticleSchema(article: Article) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -44,7 +49,7 @@ function buildArticleSchema(article: Article, world: string) {
     },
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': `https://selfprint.one/blog/${world}/${article.category}/${article.slug}`,
+      '@id': `https://selfprint.one/blog/${article.slug}`,
     },
     'speakable': {
       '@type': 'SpeakableSpecification',
@@ -53,146 +58,94 @@ function buildArticleSchema(article: Article, world: string) {
   };
 }
 
-/** Structured markdown renderer */
-function renderMarkdownBlock(block: string, idx: number) {
-  const trimmed = block.trim();
-  if (!trimmed) return null;
-
-  if (trimmed.startsWith('### '))
-    return (
-      <h3 key={idx} style={{ fontSize: '18px', fontWeight: 700, marginTop: '28px', marginBottom: '10px', color: 'var(--color-text-primary)' }}>
-        {trimmed.replace(/^### /, '')}
-      </h3>
-    );
-  if (trimmed.startsWith('## '))
-    return (
-      <h2 key={idx} style={{ fontSize: '22px', fontWeight: 800, marginTop: '40px', marginBottom: '12px', color: 'var(--color-text-primary)' }}>
-        {trimmed.replace(/^## /, '')}
-      </h2>
-    );
-  if (trimmed.startsWith('# '))
-    return null; // skip H1 — already shown as page heading
-
-  // Bullet list block
-  if (trimmed.match(/^[-*]\s/m))
-    return (
-      <ul key={idx} style={{ marginBottom: '20px', paddingLeft: '24px' }}>
-        {trimmed.split('\n').filter(l => l.trim()).map((line, j) => (
-          <li key={j} style={{ marginBottom: '8px', color: 'var(--color-text-secondary)', lineHeight: 1.7 }}>
-            {line.replace(/^[-*]\s*/, '').replace(/\*\*(.*?)\*\*/g, '$1')}
-          </li>
-        ))}
-      </ul>
-    );
-
-  return (
-    <p key={idx} style={{ marginBottom: '20px', lineHeight: 1.85, color: 'var(--color-text-secondary)' }}>
-      {trimmed.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1')}
-    </p>
-  );
-}
-
 export default function BlogArticle() {
-  const { world = 'selfprint', category, slug } = useParams();
+  const { slug } = useParams<{ slug: string }>();
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadArticle = async () => {
+      if (!slug) {
+        setError('No article slug provided');
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        let markdown = '';
+        setError(null);
 
-        // Production QA (2026-08-28): article files are named by a numbered
-        // convention (e.g. "02-career-fit.md") that does NOT match the
-        // article's URL slug (e.g. "career-fit-12-dimensions") — index.json
-        // is the only reliable slug→filePath mapping. Step 1's direct-path
-        // guess below therefore 404s for every such article; CF Pages
-        // serves its SPA fallback (index.html) for the 404, and relying on
-        // the Content-Type header to detect that (as this used to) is
-        // unreliable — when the header comes back empty, the fallback's
-        // raw HTML was silently accepted as "markdown" and rendered
-        // verbatim (confirmed live on /th/blog/selfprint/conversion/
-        // career-fit-12-dimensions). Validating the fetched text actually
-        // *looks like* frontmatter markdown (starts with `---`) is a much
-        // more reliable check than trusting Content-Type from a static
-        // host's fallback response.
-        const looksLikeMarkdown = (text: string) => text.trimStart().startsWith('---');
+        const indexRes = await fetch('/blog/index.json');
+        if (!indexRes.ok) {
+          throw new Error('Failed to load blog index');
+        }
+        const indexData = await indexRes.json();
+        const entry = indexData.articles.find((a: any) => a.slug === slug);
 
-        // Step 1: Try direct path from route params
-        const directPath = `/blog/${world}/${category}/${slug}.md`;
-        const directRes = await fetch(directPath);
-        if (directRes.ok) {
-          const directText = await directRes.text();
-          if (looksLikeMarkdown(directText)) {
-            markdown = directText;
-          }
+        if (!entry) {
+          throw new Error(`Article not found: ${slug}`);
         }
 
-        // Step 2: If not found, resolve via index.json (slug → filePath)
-        if (!markdown) {
-          const indexRes = await fetch('/blog/index.json');
-          if (indexRes.ok) {
-            const indexData = await indexRes.json();
-            const entry = (indexData.articles || []).find(
-              (a: any) => a.slug === slug || a.id === slug
-            );
-            if (entry?.filePath && entry?.world) {
-              const resolvedPath = `/blog/${entry.world}/${entry.filePath}.md`;
-              const resolvedRes = await fetch(resolvedPath);
-              if (resolvedRes.ok) {
-                const resolvedText = await resolvedRes.text();
-                if (looksLikeMarkdown(resolvedText)) {
-                  markdown = resolvedText;
-                }
-              }
-            }
-          }
+        const resolvedPath = `/blog/${entry.world}/${entry.filePath}.md`;
+        const mdRes = await fetch(resolvedPath);
+        if (!mdRes.ok) {
+          throw new Error(`Failed to load markdown file: ${resolvedPath}`);
         }
+        const markdown = await mdRes.text();
 
-        if (!markdown) throw new Error(`Article not found: ${slug}`);
-
-        // Normalize CRLF → LF (Windows markdown files)
         const normalized = markdown.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        // Parse frontmatter
-        const frontmatterMatch = normalized.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-        if (!frontmatterMatch) throw new Error('Invalid article format');
 
-        const [, frontmatterStr, rawContent] = frontmatterMatch;
-
-        const metadata: ArticleMetadata = {
-          title: '',
-          slug: slug || '',
-          excerpt: '',
-          keywords: [],
+        const metadata: Partial<ArticleMetadata> = {
+          id: entry.id,
+          title: entry.title || '',
+          slug: entry.slug || slug,
+          excerpt: entry.excerpt || '',
+          keywords: entry.keywords || [],
           author: 'SELFPRINT',
           date: new Date().toISOString().split('T')[0],
-          category: category || '',
-          featured: false,
+          category: entry.category || '',
+          featured: entry.featured || false,
+          filePath: entry.filePath || '',
+          world: entry.world || 'selfprint',
         };
 
-        frontmatterStr.split('\n').forEach(line => {
-          const colonIdx = line.indexOf(':');
-          if (colonIdx === -1) return;
-          const key = line.slice(0, colonIdx).trim();
-          const value = line.slice(colonIdx + 1).trim();
+        const frontmatterMatch = normalized.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+        
+        if (frontmatterMatch) {
+          const [, frontmatterStr, rawContent] = frontmatterMatch;
+          
+          frontmatterStr.split('\n').forEach(line => {
+            const colonIdx = line.indexOf(':');
+            if (colonIdx === -1) return;
+            const key = line.slice(0, colonIdx).trim();
+            const value = line.slice(colonIdx + 1).trim().replace(/^"|"$/g, '');
 
-          if (key === 'title') metadata.title = value.replace(/^"|"$/g, '');
-          if (key === 'description') metadata.excerpt = value.replace(/^"|"$/g, '');
-          if (key === 'excerpt') metadata.excerpt = value.replace(/^"|"$/g, '');
-          if (key === 'author') metadata.author = value;
-          if (key === 'date') metadata.date = value;
-          if (key === 'category') metadata.category = value;
-          if (key === 'featured') metadata.featured = value === 'true';
-          if (key === 'keywords') {
-            try { metadata.keywords = JSON.parse(value); } catch { /* skip */ }
-          }
-        });
+            if (key === 'title') metadata.title = value;
+            if (key === 'description' || key === 'excerpt') metadata.excerpt = value;
+            if (key === 'author') metadata.author = value;
+            if (key === 'date') metadata.date = value;
+            if (key === 'category') metadata.category = value;
+            if (key === 'featured') metadata.featured = value === 'true';
+            if (key === 'keywords') {
+              try { metadata.keywords = JSON.parse(value); } catch { /* ignore */ }
+            }
+          });
 
-        setArticle({ ...metadata, content: rawContent });
-        setError(null);
+          setArticle({
+            ...(metadata as ArticleMetadata),
+            content: rawContent.trim(),
+          });
+        } else {
+          console.warn(`Article ${slug} has no frontmatter — using index.json metadata`);
+          setArticle({
+            ...(metadata as ArticleMetadata),
+            content: normalized.trim(),
+          });
+        }
+
       } catch (err) {
+        console.error('Failed to load article:', err);
         setError(err instanceof Error ? err.message : 'Failed to load article');
         setArticle(null);
       } finally {
@@ -201,105 +154,159 @@ export default function BlogArticle() {
     };
 
     loadArticle();
-  }, [world, category, slug]);
+  }, [slug]);
 
   if (loading) {
     return (
-      <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--color-text-secondary)' }}>กำลังโหลดบทความ...</p>
-      </main>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
+          <p className="text-indigo-300">กำลังโหลดบทความ...</p>
+        </div>
+      </div>
     );
   }
 
   if (error || !article) {
     return (
-      <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', padding: '80px 24px', textAlign: 'center' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>😕</div>
-        <h1 style={{ color: 'var(--color-text-primary)', marginBottom: '12px' }}>ไม่พบบทความ</h1>
-        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '32px' }}>{error}</p>
-        <Link to="/th/blog" style={{ color: 'var(--color-accent-primary)', fontWeight: 700 }}>
-          ← กลับไปคลังบทความ
-        </Link>
-      </main>
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">🔬</div>
+          <h1 className="text-2xl font-bold text-white mb-2">ไม่พบบทความ</h1>
+          <p className="text-slate-400 mb-6">{error || 'ไม่พบเนื้อหาที่คุณต้องการ'}</p>
+          <Link to="/th/blog" className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors">
+            กลับไปคลังบทความ
+          </Link>
+        </div>
+      </div>
     );
   }
 
-  const articleSchema = buildArticleSchema(article, world);
-  const blocks = article.content.split('\n\n');
+  const articleSchema = buildArticleSchema(article);
 
   return (
     <>
-      {/* JSON-LD Article schema — SEO + GEO + AEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
 
-      <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 100px' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 24px 0' }}>
-
-          {/* Back */}
+      <main className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-24 pb-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
             to="/th/blog"
-            style={{ color: 'var(--color-accent-primary)', fontSize: '14px', fontWeight: 600, textDecoration: 'none', display: 'inline-block', marginBottom: '32px' }}
+            className="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-medium mb-8 transition-colors"
           >
             ← กลับไปคลังบทความ
           </Link>
 
-          {/* Category + Meta */}
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12px', background: 'color-mix(in srgb,var(--color-accent-primary) 12%,transparent)', color: 'var(--color-accent-primary)', padding: '3px 10px', borderRadius: '20px', fontWeight: 700 }}>
-              {article.category}
-            </span>
-            <span style={{ fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
-              {new Date(article.date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}
-            </span>
-          </div>
-
-          {/* Heading — AEO speakable */}
-          <h1 style={{ fontSize: 'clamp(24px,5vw,40px)', fontWeight: 900, lineHeight: 1.3, marginBottom: '12px', color: 'var(--color-text-primary)' }}>
-            {article.title}
-          </h1>
-
-          {/* Excerpt — AEO speakable */}
-          {article.excerpt && (
-            <p className="article-excerpt" style={{ fontSize: '17px', color: 'var(--color-text-secondary)', marginBottom: '32px', lineHeight: 1.7, borderLeft: '3px solid var(--color-accent-primary)', paddingLeft: '16px' }}>
-              {article.excerpt}
-            </p>
-          )}
-
-          {/* Keywords chips */}
-          {article.keywords.length > 0 && (
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '40px' }}>
-              {article.keywords.map(kw => (
-                <span key={kw} style={{ padding: '3px 10px', background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)', borderRadius: '20px', fontSize: '12px', color: 'var(--color-text-tertiary)' }}>
-                  {kw}
+          <article className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="px-6 sm:px-8 lg:px-10 py-8 sm:py-12">
+              <div className="flex flex-wrap items-center gap-3 mb-4">
+                <span className="inline-block px-3 py-1 bg-indigo-500/30 text-indigo-300 rounded-full text-sm font-medium border border-indigo-400/30">
+                  {article.category}
                 </span>
-              ))}
+                <span className="text-slate-400 text-sm">
+                  {new Date(article.date).toLocaleDateString('th-TH', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                {article.title}
+              </h1>
+
+              {article.excerpt && (
+                <p className="article-excerpt text-lg text-indigo-200 mb-6 border-l-4 border-indigo-400 pl-4 italic">
+                  {article.excerpt}
+                </p>
+              )}
+
+              {article.keywords.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {article.keywords.map((kw) => (
+                    <span
+                      key={kw}
+                      className="px-3 py-1 bg-white/5 border border-white/10 text-slate-300 rounded-full text-xs"
+                    >
+                      {kw}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <hr className="border-white/10 my-8" />
+
+              <div className="prose prose-invert prose-lg max-w-none">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-white">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-2xl font-bold mt-8 mb-3 text-indigo-200">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-xl font-semibold mt-6 mb-2 text-slate-200">{children}</h3>,
+                    p: ({ children }) => <p className="text-slate-300 leading-relaxed mb-4">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc pl-6 mb-4 space-y-1 text-slate-300">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal pl-6 mb-4 space-y-1 text-slate-300">{children}</ol>,
+                    li: ({ children }) => <li className="text-slate-300">{children}</li>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-indigo-400 pl-4 italic text-indigo-200 my-4">
+                        {children}
+                      </blockquote>
+                    ),
+                    a: ({ href, children }) => (
+                      <a href={href} className="text-indigo-400 hover:text-indigo-300 underline" target="_blank" rel="noopener noreferrer">
+                        {children}
+                      </a>
+                    ),
+                    strong: ({ children }) => <strong className="font-bold text-white">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-indigo-200">{children}</em>,
+                  }}
+                >
+                  {article.content}
+                </ReactMarkdown>
+              </div>
+
+              <div className="mt-12 pt-8 border-t border-white/10">
+                <div className="bg-indigo-500/10 backdrop-blur-sm border border-indigo-400/30 rounded-xl p-6 sm:p-8 text-center">
+                  <div className="text-3xl mb-3">🚀</div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    อยากเข้าใจตัวเองอย่างลึกซึ้ง?
+                  </h3>
+                  <p className="text-slate-300 mb-6">
+                    ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติ — ฟรี ไม่ต้องดูดวง
+                  </p>
+                  <Link
+                    to="/th/onboarding"
+                    className="inline-block px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/25"
+                  >
+                    สร้าง SELFPRINT ของฉัน →
+                  </Link>
+                </div>
+              </div>
+
+              <div className="mt-12">
+                <h4 className="text-lg font-semibold text-white mb-4">📖 อ่านต่อ</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Link
+                    to="/blog/ai-twin-what-is-it"
+                    className="block p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <p className="font-medium text-white text-sm">AI Twin คืออะไร?</p>
+                    <p className="text-xs text-slate-400">Digital Twin + Personal AI</p>
+                  </Link>
+                  <Link
+                    to="/blog/12-dimensions-explained"
+                    className="block p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <p className="font-medium text-white text-sm">12 มิติ พฤติกรรมมนุษย์</p>
+                    <p className="text-xs text-slate-400">ทำไมต้อง 12 มิติ?</p>
+                  </Link>
+                </div>
+              </div>
             </div>
-          )}
-
-          {/* Divider */}
-          <hr style={{ border: 'none', borderTop: '1px solid var(--color-border)', marginBottom: '40px' }} />
-
-          {/* Article body */}
-          <div style={{ fontSize: '16px' }}>
-            {blocks.map((block, idx) => renderMarkdownBlock(block, idx))}
-          </div>
-
-          {/* CTA */}
-          <div style={{ marginTop: '60px', padding: '32px', background: 'var(--color-bg-secondary)', border: '2px solid var(--color-accent-primary)', borderRadius: '20px', textAlign: 'center' }}>
-            <div style={{ fontSize: '28px', marginBottom: '12px' }}>🚀</div>
-            <p style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', color: 'var(--color-text-primary)' }}>
-              อยากเข้าใจตัวเองอย่างลึกซึ้ง?
-            </p>
-            <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-              ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติ — ฟรี ไม่ต้องดูดวง
-            </p>
-            <a href="/th/onboarding" style={{ display: 'inline-block', padding: '14px 32px', background: 'var(--color-accent-primary)', color: '#fff', borderRadius: '12px', fontWeight: 800, fontSize: '16px', textDecoration: 'none' }}>
-              สร้าง SELFPRINT ของฉัน →
-            </a>
-          </div>
+          </article>
         </div>
       </main>
     </>
