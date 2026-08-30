@@ -78,6 +78,7 @@ const Dashboard: React.FC = () => {
   const userId = session?.user?.id || '';
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const isTh = language === 'th';
   // P0 #5: World context for world-specific insights (reserved for future use)
   useWorld();
   // TWIN-VISUAL-001: get maturityScore for LivingTwin evolution
@@ -165,7 +166,7 @@ const Dashboard: React.FC = () => {
 
     const content = await exportDecisionLogs(userId, format);
     if (!content) {
-      alert('ไม่มีข้อมูลให้ส่งออก');
+      alert(isTh ? 'ไม่มีข้อมูลให้ส่งออก' : 'No data to export');
       return;
     }
 
@@ -204,23 +205,23 @@ const Dashboard: React.FC = () => {
           continuation point instead of repeating a completed journey */}
       {lifecycleStatus === 'TWIN_ALIVE' && (
         <div className="dashboard-resume-banner">
-          <p className="dashboard-resume-banner__text">✨ Twin ของคุณพร้อมแล้ว</p>
+          <p className="dashboard-resume-banner__text">✨ {isTh ? 'Twin ของคุณพร้อมแล้ว' : 'Your Twin is ready'}</p>
           <button
             className="dashboard-resume-banner__cta"
             onClick={() => navigate('/chat/twin')}
           >
-            เข้าสู่ Twin ของคุณ →
+            {isTh ? 'เข้าสู่ Twin ของคุณ →' : 'Go to your Twin →'}
           </button>
         </div>
       )}
       {lifecycleStatus === 'WORLD_ACTIVE' && (
         <div className="dashboard-resume-banner">
-          <p className="dashboard-resume-banner__text">🌍 ไปต่อในโลกของคุณ</p>
+          <p className="dashboard-resume-banner__text">🌍 {isTh ? 'ไปต่อในโลกของคุณ' : 'Continue in your world'}</p>
           <button
             className="dashboard-resume-banner__cta"
             onClick={() => navigate('/worlds')}
           >
-            ไปต่อยัง Worlds →
+            {isTh ? 'ไปต่อยัง Worlds →' : 'Continue to Worlds →'}
           </button>
         </div>
       )}
@@ -266,54 +267,54 @@ const Dashboard: React.FC = () => {
       {/* Insights Section */}
       {insights && (
         <div className="insights-section">
-          <h2>ข้อมูลเชิงลึกของคุณ</h2>
+          <h2>{isTh ? 'ข้อมูลเชิงลึกของคุณ' : 'Your Insights'}</h2>
           <div className="insights-grid">
             <InsightsCard
               id="total-interactions"
-              label="การโต้ตอบทั้งหมด"
+              label={isTh ? 'การโต้ตอบทั้งหมด' : 'Total Interactions'}
               value={insights.totalInteractions}
-              subtitle="ข้อความที่ติดตาม"
-              insightText={`คุณมีการโต้ตอบกับ Twin ทั้งหมด ${insights.totalInteractions} ครั้ง`}
+              subtitle={isTh ? 'ข้อความที่ติดตาม' : 'Messages tracked'}
+              insightText={isTh ? `คุณมีการโต้ตอบกับ Twin ทั้งหมด ${insights.totalInteractions} ครั้ง` : `You've interacted with your Twin ${insights.totalInteractions} times`}
               evidence="KNOW"
             />
             <InsightsCard
               id="avg-autonomy"
-              label="ความเป็นอิสระเฉลี่ย"
+              label={isTh ? 'ความเป็นอิสระเฉลี่ย' : 'Avg Autonomy'}
               value={`${insights.avgAutonomy}%`}
-              subtitle="ค่าพื้นฐานของคุณ"
-              insightText="วัดจากรูปแบบการตัดสินใจจริง ไม่ใช่การประเมินตัวเอง"
+              subtitle={isTh ? 'ค่าพื้นฐานของคุณ' : 'Your baseline'}
+              insightText={isTh ? 'วัดจากรูปแบบการตัดสินใจจริง ไม่ใช่การประเมินตัวเอง' : 'Measured from real decision patterns, not self-assessment'}
               evidence="INFER"
             />
             <InsightsCard
               id="avg-confidence"
-              label="ความมั่นใจเฉลี่ย"
+              label={isTh ? 'ความมั่นใจเฉลี่ย' : 'Avg Confidence'}
               value={insights.avgConfidence.toFixed(2)}
-              subtitle="0.0 ถึง 1.0"
-              insightText="ค่าเฉลี่ย Confidence Score จากทุก session"
+              subtitle={isTh ? '0.0 ถึง 1.0' : '0.0 to 1.0'}
+              insightText={isTh ? 'ค่าเฉลี่ย Confidence Score จากทุก session' : 'Average confidence score across all sessions'}
               evidence="KNOW"
             />
             <InsightsCard
               id="top-hub"
-              label="Hub ที่ใช้บ่อยที่สุด"
+              label={isTh ? 'Hub ที่ใช้บ่อยที่สุด' : 'Top Hub'}
               value={insights.topHub || 'N/A'}
-              subtitle="ใช้งานมากที่สุด"
-              insightText={insights.topHub ? `คุณสำรวจ ${insights.topHub} มากกว่า Hub อื่น` : 'ยังไม่มีข้อมูลเพียงพอ'}
+              subtitle={isTh ? 'ใช้งานมากที่สุด' : 'Most used'}
+              insightText={insights.topHub ? (isTh ? `คุณสำรวจ ${insights.topHub} มากกว่า Hub อื่น` : `You explore ${insights.topHub} more than other hubs`) : (isTh ? 'ยังไม่มีข้อมูลเพียงพอ' : 'Not enough data yet')}
               evidence={insights.topHub ? 'KNOW' : 'UNKNOWN'}
             />
             <InsightsCard
               id="top-mood"
-              label="Mood ที่พบบ่อยที่สุด"
+              label={isTh ? 'Mood ที่พบบ่อยที่สุด' : 'Top Mood'}
               value={insights.topMood || 'N/A'}
-              subtitle="รู้สึกบ่อยที่สุด"
-              insightText={insights.topMood ? `${insights.topMood} เป็น Mood หลักในช่วงที่ผ่านมา` : 'ยังไม่มีข้อมูลเพียงพอ'}
+              subtitle={isTh ? 'รู้สึกบ่อยที่สุด' : 'Most frequent'}
+              insightText={insights.topMood ? (isTh ? `${insights.topMood} เป็น Mood หลักในช่วงที่ผ่านมา` : `${insights.topMood} has been your dominant mood recently`) : (isTh ? 'ยังไม่มีข้อมูลเพียงพอ' : 'Not enough data yet')}
               evidence={insights.topMood ? 'INFER' : 'UNKNOWN'}
             />
             <InsightsCard
               id="avg-response-time"
-              label="เวลาตอบสนองเฉลี่ย"
+              label={isTh ? 'เวลาตอบสนองเฉลี่ย' : 'Avg Response Time'}
               value={`${insights.avgResponseTime}ms`}
-              subtitle="จาก Brain Gateway"
-              insightText="เวลาเฉลี่ยที่ Twin ใช้ประมวลผลคำถามของคุณ"
+              subtitle={isTh ? 'จาก Brain Gateway' : 'From Brain Gateway'}
+              insightText={isTh ? 'เวลาเฉลี่ยที่ Twin ใช้ประมวลผลคำถามของคุณ' : 'Average time your Twin takes to process your questions'}
               evidence="KNOW"
             />
           </div>
@@ -323,7 +324,7 @@ const Dashboard: React.FC = () => {
       {/* Trend Chart Section */}
       {trendData.length > 1 && (
         <div className="chart-section">
-          <h2>แนวโน้มความเป็นอิสระ</h2>
+          <h2>{isTh ? 'แนวโน้มความเป็นอิสระ' : 'Autonomy Trend'}</h2>
           <TrendChart data={trendData} />
         </div>
       )}
@@ -333,17 +334,17 @@ const Dashboard: React.FC = () => {
 
       {/* Filter Section */}
       <div className="filter-section">
-        <h2>กรองและค้นหา</h2>
+        <h2>{isTh ? 'กรองและค้นหา' : 'Filter & Search'}</h2>
         <FilterBar onFilterChange={handleFilterChange} />
       </div>
 
       {/* Decision Log Table */}
       <div className="table-section">
-        <h2>บันทึกการตัดสินใจ ({logs.length} รายการ)</h2>
+        <h2>{isTh ? `บันทึกการตัดสินใจ (${logs.length} รายการ)` : `Decision Log (${logs.length} entries)`}</h2>
         {loading ? (
-          <div className="loading">กำลังโหลด...</div>
+          <div className="loading">{isTh ? 'กำลังโหลด...' : 'Loading...'}</div>
         ) : logs.length === 0 ? (
-          <div className="no-data">ไม่มีข้อมูลที่ตรงกับตัวกรอง</div>
+          <div className="no-data">{isTh ? 'ไม่มีข้อมูลที่ตรงกับตัวกรอง' : 'No data matches the filter'}</div>
         ) : (
           <DecisionLogTable logs={logs} />
         )}
@@ -351,7 +352,7 @@ const Dashboard: React.FC = () => {
 
       {/* Export Section */}
       <div className="export-section">
-        <h2>ส่งออกข้อมูล</h2>
+        <h2>{isTh ? 'ส่งออกข้อมูล' : 'Export Data'}</h2>
         <div className="export-buttons">
           <ExportButton format="csv" onExport={() => handleExport('csv')} />
           <ExportButton format="json" onExport={() => handleExport('json')} />
@@ -385,7 +386,7 @@ const Dashboard: React.FC = () => {
             padding: '4px 8px',
           }}
         >
-          🔒 ความเป็นส่วนตัว / PDPA
+          🔒 {isTh ? 'ความเป็นส่วนตัว / PDPA' : 'Privacy / PDPA'}
         </button>
       </div>
       <Footer />

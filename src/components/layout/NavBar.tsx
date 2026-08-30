@@ -32,15 +32,18 @@ interface NavLink {
   requiresAuth?: boolean;
 }
 
-const BASE_NAV_LINKS: NavLink[] = [
-  { path: '/dashboard', label: 'แดชบอร์ด' },
-  // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (the pre-Twin
-  // guide) — for a user already past onboarding (who sees this nav),
-  // that's the wrong assistant. Point straight at the Twin.
-  { path: '/chat/twin', label: 'แชท' },
-  { path: '/worlds', label: '🌍 Worlds', requiresAuth: true },
-  { path: '/menu', label: 'เมนู' },
-];
+function getNavLinks(language: 'en' | 'th'): NavLink[] {
+  const isTh = language === 'th';
+  return [
+    { path: '/dashboard', label: isTh ? 'แดชบอร์ด' : 'Dashboard' },
+    // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (the pre-Twin
+    // guide) — for a user already past onboarding (who sees this nav),
+    // that's the wrong assistant. Point straight at the Twin.
+    { path: '/chat/twin', label: isTh ? 'แชท' : 'Chat' },
+    { path: '/worlds', label: '🌍 Worlds', requiresAuth: true },
+    { path: '/menu', label: isTh ? 'เมนู' : 'Menu' },
+  ];
+}
 
 export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   const { session, signOut } = useAuth();
@@ -68,7 +71,8 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   };
 
   // Filter nav links based on auth status
-  const visibleLinks = BASE_NAV_LINKS.filter(link => !link.requiresAuth || session);
+  const visibleLinks = getNavLinks(language).filter(link => !link.requiresAuth || session);
+  const isTh = language === 'th';
 
   const authAction = session ? (
     <button
@@ -87,7 +91,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         transition: 'border-color 0.2s, background 0.2s',
       }}
     >
-      ออกจากระบบ
+      {isTh ? 'ออกจากระบบ' : 'Sign out'}
     </button>
   ) : (
     <Link
@@ -108,7 +112,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         display: 'inline-block',
       }}
     >
-      เริ่มต้นใช้งาน
+      {isTh ? 'เริ่มต้นใช้งาน' : 'Get Started'}
     </Link>
   );
 
@@ -204,7 +208,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             type="button"
             className="sp-theme-toggle"
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
+            aria-label={theme === 'dark' ? (isTh ? 'เปลี่ยนเป็นโหมดสว่าง' : 'Switch to light mode') : (isTh ? 'เปลี่ยนเป็นโหมดมืด' : 'Switch to dark mode')}
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
@@ -216,7 +220,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         {/* Mobile hamburger */}
         <button
           type="button"
-          aria-label="เปิดเมนู"
+          aria-label={isTh ? 'เปิดเมนู' : 'Open menu'}
           onClick={() => setMobileOpen((v) => !v)}
           className="sp-navbar-hamburger"
           style={{
@@ -280,7 +284,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             <button
               type="button"
               onClick={toggleTheme}
-              aria-label={theme === 'dark' ? 'เปลี่ยนเป็นโหมดสว่าง' : 'เปลี่ยนเป็นโหมดมืด'}
+              aria-label={theme === 'dark' ? (isTh ? 'เปลี่ยนเป็นโหมดสว่าง' : 'Switch to light mode') : (isTh ? 'เปลี่ยนเป็นโหมดมืด' : 'Switch to dark mode')}
               style={{
                 background: 'none',
                 border: '1px solid var(--color-border)',
@@ -297,11 +301,11 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
               }}
             >
               <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
-              <span>{theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'}</span>
+              <span>{theme === 'dark' ? (isTh ? 'โหมดสว่าง' : 'Light mode') : (isTh ? 'โหมดมืด' : 'Dark mode')}</span>
             </button>
             <div style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <AudioSettingsButton />
-              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>เสียงพื้นหลัง</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>{isTh ? 'เสียงพื้นหลัง' : 'Ambient sound'}</span>
             </div>
             <LanguageSwitcher />
             {rightSlot || authAction}
