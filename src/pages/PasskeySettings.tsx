@@ -12,6 +12,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../services/supabase-service';
 import {
   isPasskeyAvailable,
@@ -42,9 +43,9 @@ function deviceIcon(type: StoredPasskey['deviceType']): string {
   return type === 'platform' ? '📱' : '🔑';
 }
 
-function formatDate(iso: string | null): string {
-  if (!iso) return 'ยังไม่ได้ใช้งาน';
-  return new Date(iso).toLocaleDateString('th-TH', {
+function formatDate(iso: string | null, isTh: boolean): string {
+  if (!iso) return isTh ? 'ยังไม่ได้ใช้งาน' : 'Never used';
+  return new Date(iso).toLocaleDateString(isTh ? 'th-TH' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -57,6 +58,8 @@ const PasskeySettings: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const [passkeys, setPasskeys] = useState<StoredPasskey[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,11 +107,11 @@ const PasskeySettings: React.FC = () => {
         }))
       );
     } catch (e) {
-      setError('โหลดข้อมูล Passkeys ไม่สำเร็จ — ลองใหม่อีกครั้ง');
+      setError(isTh ? 'โหลดข้อมูล Passkeys ไม่สำเร็จ — ลองใหม่อีกครั้ง' : 'Failed to load Passkeys — please try again');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, isTh]);
 
   useEffect(() => {
     void loadPasskeys();
@@ -146,17 +149,17 @@ const PasskeySettings: React.FC = () => {
         user_id: userId,
         credential_id: credential.id,
         public_key: credential.rawId,
-        name: `Passkey ${new Date().toLocaleDateString('th-TH')}`,
+        name: `Passkey ${new Date().toLocaleDateString(isTh ? 'th-TH' : 'en-US')}`,
         device_type: 'platform',
         counter: 0,
       });
 
       if (insertErr) throw insertErr;
 
-      setSuccessMsg('เพิ่ม Passkey ใหม่เรียบร้อยแล้ว ✅');
+      setSuccessMsg(isTh ? 'เพิ่ม Passkey ใหม่เรียบร้อยแล้ว ✅' : 'New Passkey added successfully ✅');
       void loadPasskeys();
     } catch (e) {
-      const msg = e instanceof Error ? e.message : 'เพิ่ม Passkey ไม่สำเร็จ';
+      const msg = e instanceof Error ? e.message : (isTh ? 'เพิ่ม Passkey ไม่สำเร็จ' : 'Failed to add Passkey');
       setError(msg);
     } finally {
       setAdding(false);
@@ -166,7 +169,9 @@ const PasskeySettings: React.FC = () => {
   // ── Delete Passkey ──────────────────────────────────────────────────────
   const handleDelete = async (passkeyId: string) => {
     if (passkeys.length <= 1) {
-      setError('ไม่สามารถลบ Passkey สุดท้ายได้ — ต้องมีอย่างน้อย 1 วิธีเข้าสู่ระบบ');
+      setError(isTh
+        ? 'ไม่สามารถลบ Passkey สุดท้ายได้ — ต้องมีอย่างน้อย 1 วิธีเข้าสู่ระบบ'
+        : 'Cannot delete your last Passkey — you need at least 1 way to sign in');
       return;
     }
 
@@ -184,10 +189,10 @@ const PasskeySettings: React.FC = () => {
 
       if (deleteErr) throw deleteErr;
 
-      setSuccessMsg('ลบ Passkey เรียบร้อยแล้ว');
+      setSuccessMsg(isTh ? 'ลบ Passkey เรียบร้อยแล้ว' : 'Passkey deleted');
       void loadPasskeys();
     } catch (e) {
-      setError('ลบ Passkey ไม่สำเร็จ — ลองใหม่อีกครั้ง');
+      setError(isTh ? 'ลบ Passkey ไม่สำเร็จ — ลองใหม่อีกครั้ง' : 'Failed to delete Passkey — please try again');
     } finally {
       setDeletingId(null);
     }
@@ -207,11 +212,13 @@ const PasskeySettings: React.FC = () => {
               onClick={() => navigate(-1)}
               type="button"
             >
-              ← กลับ
+              {isTh ? '← กลับ' : '← Back'}
             </button>
-            <h1 className="passkey-settings-title">🔑 จัดการ Passkeys</h1>
+            <h1 className="passkey-settings-title">🔑 {isTh ? 'จัดการ Passkeys' : 'Manage Passkeys'}</h1>
             <p className="passkey-settings-subtitle">
-              Passkey ช่วยให้คุณเข้าสู่ระบบด้วยการสแกนนิ้ว / ใบหน้า / PIN ของอุปกรณ์ได้อย่างปลอดภัย
+              {isTh
+                ? 'Passkey ช่วยให้คุณเข้าสู่ระบบด้วยการสแกนนิ้ว / ใบหน้า / PIN ของอุปกรณ์ได้อย่างปลอดภัย'
+                : "Passkeys let you sign in securely with your device's fingerprint, face, or PIN"}
             </p>
           </div>
 
@@ -223,7 +230,7 @@ const PasskeySettings: React.FC = () => {
                 className="passkey-alert-close"
                 onClick={() => setError(null)}
                 type="button"
-                aria-label="ปิด"
+                aria-label={isTh ? 'ปิด' : 'Close'}
               >×</button>
             </div>
           )}
@@ -234,7 +241,7 @@ const PasskeySettings: React.FC = () => {
                 className="passkey-alert-close"
                 onClick={() => setSuccessMsg(null)}
                 type="button"
-                aria-label="ปิด"
+                aria-label={isTh ? 'ปิด' : 'Close'}
               >×</button>
             </div>
           )}
@@ -243,7 +250,7 @@ const PasskeySettings: React.FC = () => {
           <div className="passkey-list-section">
             <div className="passkey-list-header">
               <h2 className="passkey-list-title">
-                Passkeys ที่ลงทะเบียนแล้ว
+                {isTh ? 'Passkeys ที่ลงทะเบียนแล้ว' : 'Registered Passkeys'}
                 <span className="passkey-count">{passkeys.length}</span>
               </h2>
 
@@ -254,16 +261,18 @@ const PasskeySettings: React.FC = () => {
                   disabled={adding}
                   type="button"
                 >
-                  {adding ? '⏳ กำลังเพิ่ม...' : '+ เพิ่ม Passkey ใหม่'}
+                  {adding
+                    ? (isTh ? '⏳ กำลังเพิ่ม...' : '⏳ Adding...')
+                    : (isTh ? '+ เพิ่ม Passkey ใหม่' : '+ Add new Passkey')}
                 </button>
               )}
             </div>
 
             {loading ? (
-              <div className="passkey-loading">⏳ กำลังโหลด...</div>
+              <div className="passkey-loading">{isTh ? '⏳ กำลังโหลด...' : '⏳ Loading...'}</div>
             ) : passkeys.length === 0 ? (
               <div className="passkey-empty">
-                <p>ยังไม่มี Passkey ที่ลงทะเบียน</p>
+                <p>{isTh ? 'ยังไม่มี Passkey ที่ลงทะเบียน' : 'No Passkeys registered yet'}</p>
                 {passkeySupported && (
                   <button
                     className="passkey-add-btn passkey-add-btn--large"
@@ -271,7 +280,9 @@ const PasskeySettings: React.FC = () => {
                     disabled={adding}
                     type="button"
                   >
-                    {adding ? '⏳ กำลังเพิ่ม...' : '🔑 เพิ่ม Passkey แรก'}
+                    {adding
+                      ? (isTh ? '⏳ กำลังเพิ่ม...' : '⏳ Adding...')
+                      : (isTh ? '🔑 เพิ่ม Passkey แรก' : '🔑 Add your first Passkey')}
                   </button>
                 )}
               </div>
@@ -283,8 +294,8 @@ const PasskeySettings: React.FC = () => {
                     <div className="passkey-item-info">
                       <p className="passkey-item-name">{pk.name}</p>
                       <p className="passkey-item-meta">
-                        เพิ่มเมื่อ {formatDate(pk.createdAt)}
-                        {pk.lastUsedAt && ` · ใช้ล่าสุด ${formatDate(pk.lastUsedAt)}`}
+                        {isTh ? `เพิ่มเมื่อ ${formatDate(pk.createdAt, isTh)}` : `Added ${formatDate(pk.createdAt, isTh)}`}
+                        {pk.lastUsedAt && (isTh ? ` · ใช้ล่าสุด ${formatDate(pk.lastUsedAt, isTh)}` : ` · Last used ${formatDate(pk.lastUsedAt, isTh)}`)}
                       </p>
                     </div>
                     <button
@@ -292,7 +303,7 @@ const PasskeySettings: React.FC = () => {
                       onClick={() => void handleDelete(pk.id)}
                       disabled={deletingId === pk.id}
                       type="button"
-                      aria-label={`ลบ ${pk.name}`}
+                      aria-label={isTh ? `ลบ ${pk.name}` : `Delete ${pk.name}`}
                     >
                       {deletingId === pk.id ? '⏳' : '🗑'}
                     </button>
@@ -304,18 +315,31 @@ const PasskeySettings: React.FC = () => {
 
           {/* Security Info */}
           <div className="passkey-security-info">
-            <h3 className="passkey-security-title">ℹ️ ข้อมูลความปลอดภัย</h3>
+            <h3 className="passkey-security-title">ℹ️ {isTh ? 'ข้อมูลความปลอดภัย' : 'Security info'}</h3>
             <ul className="passkey-security-list">
-              <li>Passkeys ไม่มีรหัสผ่านที่ถูกขโมยได้ — เข้าสู่ระบบด้วยชีวมิติของคุณเท่านั้น</li>
-              <li>ข้อมูล Passkey ถูกเก็บในอุปกรณ์ของคุณ ไม่ใช่บนเซิร์ฟเวอร์</li>
-              <li>ถ้าทำอุปกรณ์หาย ยังสามารถเข้าระบบด้วย Google / Apple / Magic Link</li>
-              <li>ลบ Passkey ได้ตลอดเวลา — ต้องมีอย่างน้อย 1 วิธีเข้าสู่ระบบ</li>
+              {isTh ? (
+                <>
+                  <li>Passkeys ไม่มีรหัสผ่านที่ถูกขโมยได้ — เข้าสู่ระบบด้วยชีวมิติของคุณเท่านั้น</li>
+                  <li>ข้อมูล Passkey ถูกเก็บในอุปกรณ์ของคุณ ไม่ใช่บนเซิร์ฟเวอร์</li>
+                  <li>ถ้าทำอุปกรณ์หาย ยังสามารถเข้าระบบด้วย Google / Apple / Magic Link</li>
+                  <li>ลบ Passkey ได้ตลอดเวลา — ต้องมีอย่างน้อย 1 วิธีเข้าสู่ระบบ</li>
+                </>
+              ) : (
+                <>
+                  <li>Passkeys have no password that can be stolen — you sign in with your own biometrics</li>
+                  <li>Passkey data lives on your device, not on a server</li>
+                  <li>If you lose your device, you can still sign in with Google / Apple / Magic Link</li>
+                  <li>You can delete a Passkey anytime — you just need at least 1 way to sign in</li>
+                </>
+              )}
             </ul>
           </div>
 
           {!passkeySupported && (
             <div className="passkey-unsupported">
-              ⚠️ อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับ Passkey — ลองใช้ Chrome / Safari บน iOS/Android
+              {isTh
+                ? '⚠️ อุปกรณ์หรือเบราว์เซอร์นี้ไม่รองรับ Passkey — ลองใช้ Chrome / Safari บน iOS/Android'
+                : '⚠️ This device or browser doesn\'t support Passkeys — try Chrome / Safari on iOS/Android'}
             </div>
           )}
         </div>

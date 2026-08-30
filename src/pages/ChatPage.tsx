@@ -22,6 +22,7 @@ import { useChat } from '@/features/chat/hooks/useChat';
 import { useHub } from '@/context/HubContext';
 import { useEmotion } from '@/context/EmotionContext';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useTwinStore } from '@/store/twinStore';
 import { logEvent } from '@/services/analytics';
 import { useJournalQueue } from '@/hooks/useJournalQueue';
@@ -31,6 +32,8 @@ export const ChatPage: React.FC = () => {
   const { currentHub: hub } = useHub();
   const { mood } = useEmotion();
   const { session } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const recordFeedback = useTwinStore((s) => s.recordFeedback);
 
   // Alias สำหรับให้ readable
@@ -90,7 +93,7 @@ export const ChatPage: React.FC = () => {
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
     if (!currentHub || !currentMood) {
-      alert('ต้องเลือก hub และ mood ก่อนเซนด์');
+      alert(isTh ? 'ต้องเลือก hub และ mood ก่อนเซนด์' : 'Select a hub and mood before sending');
       return;
     }
 
@@ -105,12 +108,12 @@ export const ChatPage: React.FC = () => {
       if (offlineStatus === 'offline' || (err instanceof Error && err.message.includes('Network'))) {
         try {
           await saveOffline(messageText, currentHub, currentMood);
-          setSavedOfflineMsg('💾 บันทึกไว้ในเครื่อง — จะส่งเมื่อออนไลน์');
+          setSavedOfflineMsg(isTh ? '💾 บันทึกไว้ในเครื่อง — จะส่งเมื่อออนไลน์' : '💾 Saved locally — will send when back online');
           setTimeout(() => setSavedOfflineMsg(null), 3000);
           await requestBackgroundSync();
         } catch (offlineErr) {
           // Failed to save offline
-          alert('ไม่สามารถบันทึกข้อความได้');
+          alert(isTh ? 'ไม่สามารถบันทึกข้อความได้' : 'Could not save the message');
         }
       } else {
         throw err;
@@ -166,7 +169,7 @@ export const ChatPage: React.FC = () => {
               marginBottom: '12px',
             }}
           >
-            ⚙️ ตั้งค่า
+            ⚙️ {isTh ? 'ตั้งค่า' : 'Settings'}
           </h2>
           <HubSwitcher />
         </div>
@@ -185,7 +188,7 @@ export const ChatPage: React.FC = () => {
               marginBottom: '12px',
             }}
           >
-            🎯 ระดับความเป็นอิสระ
+            🎯 {isTh ? 'ระดับความเป็นอิสระ' : 'Autonomy Level'}
           </h2>
           <div
             style={{
@@ -219,7 +222,7 @@ export const ChatPage: React.FC = () => {
                 color: 'var(--color-text-secondary)',
               }}
             >
-              <span>ต่ำ</span>
+              <span>{isTh ? 'ต่ำ' : 'Low'}</span>
               <span
                 style={{
                   padding: '4px 8px',
@@ -231,7 +234,7 @@ export const ChatPage: React.FC = () => {
               >
                 {autonomyLevel}%
               </span>
-              <span>สูง</span>
+              <span>{isTh ? 'สูง' : 'High'}</span>
             </div>
             <p
               style={{
@@ -241,11 +244,11 @@ export const ChatPage: React.FC = () => {
                 lineHeight: '1.5',
               }}
             >
-              {autonomyLevel < 30 && '🤔 พึ่งพามาก — ขอคำแนะนำทุกครั้ง'}
-              {autonomyLevel >= 30 && autonomyLevel < 50 && '📌 พึ่งพาบ้าง — ขอความเห็นก่อนตัดสินใจ'}
-              {autonomyLevel >= 50 && autonomyLevel < 70 && '⚖️ สมดุล — ทำงานร่วมกัน'}
-              {autonomyLevel >= 70 && autonomyLevel < 85 && '💪 อิสระเป็นส่วนใหญ่ — ตัดสินใจเอง'}
-              {autonomyLevel >= 85 && '🚀 อิสระเต็มที่ — ควบคุมเอง'}
+              {autonomyLevel < 30 && (isTh ? '🤔 พึ่งพามาก — ขอคำแนะนำทุกครั้ง' : "🤔 Highly reliant — asks for guidance every time")}
+              {autonomyLevel >= 30 && autonomyLevel < 50 && (isTh ? '📌 พึ่งพาบ้าง — ขอความเห็นก่อนตัดสินใจ' : '📌 Somewhat reliant — checks in before deciding')}
+              {autonomyLevel >= 50 && autonomyLevel < 70 && (isTh ? '⚖️ สมดุล — ทำงานร่วมกัน' : '⚖️ Balanced — works together with you')}
+              {autonomyLevel >= 70 && autonomyLevel < 85 && (isTh ? '💪 อิสระเป็นส่วนใหญ่ — ตัดสินใจเอง' : '💪 Mostly autonomous — decides on its own')}
+              {autonomyLevel >= 85 && (isTh ? '🚀 อิสระเต็มที่ — ควบคุมเอง' : '🚀 Fully autonomous — in full control')}
             </p>
           </div>
         </div>
@@ -262,7 +265,7 @@ export const ChatPage: React.FC = () => {
           }}
         >
           <p style={{ margin: '0 0 6px 0', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-            📊 สถานะ
+            📊 {isTh ? 'สถานะ' : 'Status'}
           </p>
           <p style={{ margin: 0 }}>
             Hub: <strong>{currentHub || '-'}</strong>
@@ -271,10 +274,10 @@ export const ChatPage: React.FC = () => {
             Mood: <strong>{currentMood || '-'}</strong>
           </p>
           <p style={{ margin: 0 }}>
-            ความเป็นอิสระ: <strong>{autonomyLevel}%</strong>
+            {isTh ? 'ความเป็นอิสระ' : 'Autonomy'}: <strong>{autonomyLevel}%</strong>
           </p>
           <p style={{ margin: 0 }}>
-            ข้อความ: <strong>{messages.length}</strong>
+            {isTh ? 'ข้อความ' : 'Messages'}: <strong>{messages.length}</strong>
           </p>
         </div>
 
@@ -299,7 +302,7 @@ export const ChatPage: React.FC = () => {
             (e.target as HTMLElement).style.background = 'var(--color-border)';
           }}
         >
-          🗑️ ล้าง Chat
+          🗑️ {isTh ? 'ล้าง Chat' : 'Clear chat'}
         </button>
 
         {/* Dashboard link */}
@@ -330,7 +333,7 @@ export const ChatPage: React.FC = () => {
             (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
           }}
         >
-          📊 แดชบอร์ด
+          📊 {isTh ? 'แดชบอร์ด' : 'Dashboard'}
         </Link>
       </aside>
 
@@ -375,9 +378,9 @@ export const ChatPage: React.FC = () => {
                   <line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/>
                 </svg>
               </p>
-              <p style={{ margin: 0 }}>AI ฝาแฝดของคุณพร้อมแล้ว</p>
+              <p style={{ margin: 0 }}>{isTh ? 'AI ฝาแฝดของคุณพร้อมแล้ว' : 'Your AI Twin is ready'}</p>
               <p style={{ fontSize: '12px', margin: '4px 0 0 0', opacity: 0.7 }}>
-                เลือก hub และ mood แล้วพิมพ์ข้อความ
+                {isTh ? 'เลือก hub และ mood แล้วพิมพ์ข้อความ' : 'Choose a hub and mood, then type a message'}
               </p>
             </div>
           )}
@@ -512,9 +515,9 @@ export const ChatPage: React.FC = () => {
               lineHeight: '1.5',
             }}
           >
-            {offlineStatus === 'offline' && '🔌 ออนไลน์ - ข้อความจะบันทึกไว้ในเครื่อง'}
-            {offlineStatus === 'syncing' && '🔄 กำลังซิงค์ข้อความที่บันทึกไว้...'}
-            {offlineStatus === 'online' && pendingCount > 0 && `✅ เชื่อมต่ออยู่ — ${pendingCount} ข้อความรอการส่ง`}
+            {offlineStatus === 'offline' && (isTh ? '🔌 ออฟไลน์ - ข้อความจะบันทึกไว้ในเครื่อง' : "🔌 Offline — your messages will be saved locally")}
+            {offlineStatus === 'syncing' && (isTh ? '🔄 กำลังซิงค์ข้อความที่บันทึกไว้...' : '🔄 Syncing saved messages...')}
+            {offlineStatus === 'online' && pendingCount > 0 && (isTh ? `✅ เชื่อมต่ออยู่ — ${pendingCount} ข้อความรอการส่ง` : `✅ Connected — ${pendingCount} message(s) pending`)}
             {savedOfflineMsg && <div>{savedOfflineMsg}</div>}
             {queueError && <div style={{ color: 'rgba(255, 100, 100, 0.8)' }}>❌ {queueError}</div>}
           </div>
@@ -531,7 +534,7 @@ export const ChatPage: React.FC = () => {
           {/* Voice Mode toggle button */}
           <button
             onClick={() => setVoiceMode((v) => !v)}
-            title={voiceMode ? 'ปิด Voice Mode' : 'เปิด Voice Mode (Talk to Twin)'}
+            title={voiceMode ? (isTh ? 'ปิด Voice Mode' : 'Turn off Voice Mode') : (isTh ? 'เปิด Voice Mode (Talk to Twin)' : 'Turn on Voice Mode (Talk to Twin)')}
             style={{
               padding: '12px',
               borderRadius: '8px',
@@ -544,7 +547,7 @@ export const ChatPage: React.FC = () => {
               transition: 'all 0.2s',
               flexShrink: 0,
             }}
-            aria-label={voiceMode ? 'ปิด Voice Mode' : 'เปิด Voice Mode'}
+            aria-label={voiceMode ? (isTh ? 'ปิด Voice Mode' : 'Turn off Voice Mode') : (isTh ? 'เปิด Voice Mode' : 'Turn on Voice Mode')}
           >
             🎤
           </button>
@@ -552,7 +555,7 @@ export const ChatPage: React.FC = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="พิมพ์ข้อความ... (Shift+Enter = ขึ้นบรรทัดใหม่)"
+            placeholder={isTh ? 'พิมพ์ข้อความ... (Shift+Enter = ขึ้นบรรทัดใหม่)' : 'Type a message... (Shift+Enter = new line)'}
             disabled={isLoading}
             style={{
               flex: 1,
@@ -596,7 +599,7 @@ export const ChatPage: React.FC = () => {
               }
             }}
           >
-            {isLoading ? '⏳' : '📤 ส่ง'}
+            {isLoading ? '⏳' : (isTh ? '📤 ส่ง' : '📤 Send')}
           </button>
         </div>
       </main>

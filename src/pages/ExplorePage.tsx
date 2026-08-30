@@ -8,6 +8,11 @@
  * - คำถามชวนคิด (Self Question — deterministic per day)
  * - วิเคราะห์ตัวตน → /analysis
  * - ลายนิ้วมือ / ลายมือ (coming soon — real UI structure)
+ *
+ * NOTE (i18n): hexagram.thaiName / .theme / .guidance / .keywords come from
+ * HexagramEngine's 64-entry Thai-only data table — genuine data-layer content,
+ * out of scope for UI-string translation (same precedent as InsightEngine).
+ * Only page chrome below is localized.
  */
 
 import { useState, useEffect } from 'react';
@@ -15,11 +20,12 @@ import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { calculateHexagram } from '../lib/intelligence/HexagramEngine';
 import type { HexagramResult } from '../lib/intelligence/HexagramEngine';
 
 // คำถามชวนคิดสำหรับ Self Exploration (deterministic per day-of-year)
-const SELF_QUESTIONS = [
+const SELF_QUESTIONS_TH = [
   'สิ่งที่ทำให้คุณรู้สึกมีชีวิตชีวาที่สุดในช่วงนี้คืออะไร?',
   'ความกลัวอะไรที่คุณยังไม่ยอมรับกับตัวเอง?',
   'ถ้าคุณรู้ว่าจะไม่ล้มเหลว คุณจะทำอะไร?',
@@ -32,9 +38,25 @@ const SELF_QUESTIONS = [
   'อะไรที่คุณยังรอ "พร้อม" ก่อนจะเริ่ม?',
 ];
 
+const SELF_QUESTIONS_EN = [
+  'What has made you feel most alive lately?',
+  "What fear haven't you admitted to yourself yet?",
+  "If you knew you couldn't fail, what would you do?",
+  "What value do you hold onto without ever questioning it?",
+  "What have you stopped doing, but deep down know you should continue?",
+  "If someone knew you best, what would they say you're afraid of?",
+  'When do you feel most like your "true self"?',
+  "What do you keep repeating, even though you know it's not leading anywhere?",
+  "If you were your own friend, what would you tell yourself?",
+  'What are you still waiting to feel "ready" for before you start?',
+];
+
 export default function ExplorePage() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const SELF_QUESTIONS = isTh ? SELF_QUESTIONS_TH : SELF_QUESTIONS_EN;
 
   const [hexagram, setHexagram] = useState<HexagramResult | null>(null);
   const [hexLoading, setHexLoading] = useState(false);
@@ -50,7 +72,7 @@ export default function ExplorePage() {
     const start = new Date(now.getFullYear(), 0, 0);
     const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
     setTodayQuestion(SELF_QUESTIONS[dayOfYear % SELF_QUESTIONS.length]);
-  }, []);
+  }, [SELF_QUESTIONS]);
 
   // โหลด Hexagram จาก birth date ใน blueprint
   const loadHexagram = async () => {
@@ -97,7 +119,9 @@ export default function ExplorePage() {
     // (pre-Twin guide) — wrong assistant once a Twin exists.
     navigate('/chat/twin', {
       state: {
-        initialMessage: `คำถามประจำวัน: "${todayQuestion}"\n\nความคิดของฉัน: ${reflectionText}`,
+        initialMessage: isTh
+          ? `คำถามประจำวัน: "${todayQuestion}"\n\nความคิดของฉัน: ${reflectionText}`
+          : `Today's question: "${todayQuestion}"\n\nMy thoughts: ${reflectionText}`,
       },
     });
   };
@@ -115,7 +139,7 @@ export default function ExplorePage() {
             color: 'var(--color-text-primary)',
             margin: 0,
           }}>
-            สำรวจตัวเอง
+            {isTh ? 'สำรวจตัวเอง' : 'Explore yourself'}
           </h1>
           <p style={{
             fontSize: 14,
@@ -123,7 +147,9 @@ export default function ExplorePage() {
             marginTop: 6,
             margin: '6px 0 0',
           }}>
-            มองตัวเองจากหลากหลายมุม เพื่อให้เข้าใจตัวเองมากยิ่งขึ้น
+            {isTh
+              ? 'มองตัวเองจากหลากหลายมุม เพื่อให้เข้าใจตัวเองมากยิ่งขึ้น'
+              : 'See yourself from different angles to understand yourself more deeply'}
           </p>
         </div>
 
@@ -154,7 +180,7 @@ export default function ExplorePage() {
                 </svg>
               </div>
               <div style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '6px 0 2px' }}>
-                รูปแบบที่ #{hexagram.number} · {hexagram.symbol}
+                {isTh ? `รูปแบบที่ #${hexagram.number} · ${hexagram.symbol}` : `Pattern #${hexagram.number} · ${hexagram.symbol}`}
               </div>
               <div style={{
                 fontSize: 22,
@@ -208,14 +234,18 @@ export default function ExplorePage() {
               margin: '16px 0 0',
               lineHeight: 1.6,
             }}>
-              นี่เป็นมุมมองหนึ่งสำหรับการสำรวจตัวเอง ลองดูว่าตรงกับสิ่งที่คุณกำลังรู้สึกอยู่ตอนนี้ไหม?
+              {isTh
+                ? 'นี่เป็นมุมมองหนึ่งสำหรับการสำรวจตัวเอง ลองดูว่าตรงกับสิ่งที่คุณกำลังรู้สึกอยู่ตอนนี้ไหม?'
+                : 'This is one lens for self-exploration — see if it resonates with how you feel right now'}
             </p>
 
             <button
               onClick={() =>
                 navigate('/chat/twin', {
                   state: {
-                    initialMessage: `รูปแบบที่ AI วิเคราะห์ได้: "${hexagram.thaiName}" (${hexagram.theme}) — ช่วยเชื่อมโยงกับสิ่งที่ฉันกำลังเผชิญในชีวิตจริงได้ไหม?`,
+                    initialMessage: isTh
+                      ? `รูปแบบที่ AI วิเคราะห์ได้: "${hexagram.thaiName}" (${hexagram.theme}) — ช่วยเชื่อมโยงกับสิ่งที่ฉันกำลังเผชิญในชีวิตจริงได้ไหม?`
+                      : `The pattern the AI found: "${hexagram.thaiName}" (${hexagram.theme}) — can you help connect this to what I'm facing in real life?`,
                   },
                 })
               }
@@ -232,7 +262,7 @@ export default function ExplorePage() {
                 cursor: 'pointer',
               }}
             >
-              💬 คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้
+              {isTh ? '💬 คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้' : '💬 Talk to your Twin about this'}
             </button>
           </div>
         )}
@@ -247,7 +277,7 @@ export default function ExplorePage() {
             marginBottom: 20,
           }}>
             <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
-              คำถามประจำวัน
+              {isTh ? 'คำถามประจำวัน' : "Today's question"}
             </div>
             <p style={{
               fontSize: 16,
@@ -264,7 +294,7 @@ export default function ExplorePage() {
                 <textarea
                   value={reflectionText}
                   onChange={e => setReflectionText(e.target.value)}
-                  placeholder="เขียนความคิดของคุณที่นี่..."
+                  placeholder={isTh ? 'เขียนความคิดของคุณที่นี่...' : 'Write your thoughts here...'}
                   rows={4}
                   style={{
                     width: '100%',
@@ -297,13 +327,13 @@ export default function ExplorePage() {
                       cursor: 'pointer',
                     }}
                   >
-                    คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้
+                    {isTh ? 'คุยกับ ฝาแฝด ของคุณเกี่ยวกับเรื่องนี้' : 'Talk to your Twin about this'}
                   </button>
                 )}
               </>
             ) : (
               <p style={{ fontSize: 14, color: 'var(--color-accent-primary)', margin: 0 }}>
-                ✅ ส่งให้  ฝาแฝดของคุณแล้ว
+                {isTh ? '✅ ส่งให้  ฝาแฝดของคุณแล้ว' : '✅ Sent to your Twin'}
               </p>
             )}
           </div>
@@ -314,8 +344,8 @@ export default function ExplorePage() {
           {/* เซียมซี */}
           <ExploreCard
             emoji="☯"
-            title="เซียมซี / I Ching"
-            subtitle={hexLoading ? 'กำลังโหลด…' : hexRevealed ? 'ดูแล้ว — แตะเพื่อดูอีกครั้ง' : 'คำแนะนำจากวิชาตะวันออกโบราณ'}
+            title={isTh ? 'เซียมซี / I Ching' : 'I Ching'}
+            subtitle={hexLoading ? (isTh ? 'กำลังโหลด…' : 'Loading…') : hexRevealed ? (isTh ? 'ดูแล้ว — แตะเพื่อดูอีกครั้ง' : 'Already viewed — tap to view again') : (isTh ? 'คำแนะนำจากวิชาตะวันออกโบราณ' : 'Guidance from ancient Eastern wisdom')}
             available={!hexLoading}
             onClick={loadHexagram}
           />
@@ -323,8 +353,8 @@ export default function ExplorePage() {
           {/* คำถามชวนคิด */}
           <ExploreCard
             emoji="💭"
-            title="คำถามชวนคิด"
-            subtitle={questionOpen ? 'เปิดอยู่ด้านบน' : 'มองตัวเองจากมุมใหม่'}
+            title={isTh ? 'คำถามชวนคิด' : 'A question to reflect on'}
+            subtitle={questionOpen ? (isTh ? 'เปิดอยู่ด้านบน' : 'Open above') : (isTh ? 'มองตัวเองจากมุมใหม่' : 'See yourself from a new angle')}
             available
             onClick={() => setQuestionOpen(true)}
           />
@@ -332,8 +362,8 @@ export default function ExplorePage() {
           {/* วิเคราะห์ตัวตน */}
           <ExploreCard
             emoji="🧬"
-            title="วิเคราะห์ตัวตน"
-            subtitle="ภาพรวมจาก ฝาแฝด ของคุณ"
+            title={isTh ? 'วิเคราะห์ตัวตน' : 'Self analysis'}
+            subtitle={isTh ? 'ภาพรวมจาก ฝาแฝด ของคุณ' : 'An overview from your Twin'}
             available
             onClick={() => navigate('/analysis')}
           />
@@ -341,20 +371,22 @@ export default function ExplorePage() {
           {/* ลายนิ้วมือ — coming soon */}
           <ExploreCard
             emoji="👆"
-            title="สำรวจลายนิ้วมือ"
+            title={isTh ? 'สำรวจลายนิ้วมือ' : 'Fingerprint exploration'}
             subtitle="Dermatoglyphics"
             available={false}
             comingSoon
+            isTh={isTh}
             onClick={() => {}}
           />
 
           {/* ลายมือ — coming soon */}
           <ExploreCard
             emoji="✋"
-            title="สำรวจลายมือ"
-            subtitle="ลายเส้นชีวิต"
+            title={isTh ? 'สำรวจลายมือ' : 'Palmistry exploration'}
+            subtitle={isTh ? 'ลายเส้นชีวิต' : 'Lines of life'}
             available={false}
             comingSoon
+            isTh={isTh}
             onClick={() => {}}
           />
         </div>
@@ -367,7 +399,9 @@ export default function ExplorePage() {
           lineHeight: 1.6,
           padding: '0 8px',
         }}>
-          ข้อมูลจากการสำรวจตัวเองเป็นสัญญาณเพื่อสำรวจตัวเอง ไม่ใช่ข้อเท็จจริงสมบูรณ์โปรดใช้วิจารณญาณ
+          {isTh
+            ? 'ข้อมูลจากการสำรวจตัวเองเป็นสัญญาณเพื่อสำรวจตัวเอง ไม่ใช่ข้อเท็จจริงสมบูรณ์โปรดใช้วิจารณญาณ'
+            : 'Self-exploration results are signals for reflection, not absolute facts — please use your own judgment'}
         </p>
       </div>
 
@@ -386,10 +420,11 @@ interface ExploreCardProps {
   subtitle: string;
   available: boolean;
   comingSoon?: boolean;
+  isTh?: boolean;
   onClick: () => void;
 }
 
-function ExploreCard({ emoji, title, subtitle, available, comingSoon, onClick }: ExploreCardProps) {
+function ExploreCard({ emoji, title, subtitle, available, comingSoon, isTh, onClick }: ExploreCardProps) {
   return (
     <button
       onClick={available ? onClick : undefined}
@@ -429,7 +464,7 @@ function ExploreCard({ emoji, title, subtitle, available, comingSoon, onClick }:
               color: 'var(--color-text-secondary)',
               fontWeight: 500,
             }}>
-              เร็วๆ นี้
+              {isTh ? 'เร็วๆ นี้' : 'Coming soon'}
             </span>
           )}
         </div>

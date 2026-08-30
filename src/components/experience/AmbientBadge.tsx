@@ -14,6 +14,13 @@
 
 import { useEnvironment } from '@/context/EnvironmentContext';
 
+// NOTE (i18n): timeOfDay.labelThai / soundscape.labelThai / .descriptionThai
+// come from TimeOfDayEngine.ts / SoundscapeEngine.ts — genuine Thai-only
+// data-layer content (same precedent as InsightEngine), shared across
+// multiple consumers (WorldDetail, SoundscapePlayer, WorldEnvironment).
+// Out of scope for a UI-string-level i18n pass; would need a data-model
+// change (labelEn/descriptionEn fields) across the shared engine.
+
 interface AmbientBadgeProps {
   /** แสดงชื่อ soundscape ด้วยหรือเปล่า (default: false — แค่ period) */
   showSoundscape?: boolean;

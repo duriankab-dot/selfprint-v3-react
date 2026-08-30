@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { generateShareLink } from '@/features/viral/api/shareService';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 export function ShareButton() {
   const { session } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [shareUrl, setShareUrl] = useState('');
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
@@ -11,7 +14,7 @@ export function ShareButton() {
 
   const handleShare = async () => {
     if (!session?.access_token) {
-      setError('ต้อง login ก่อนถึงจะแชร์ได้');
+      setError(isTh ? 'ต้อง login ก่อนถึงจะแชร์ได้' : 'You must sign in before sharing');
       return;
     }
     setLoading(true);
@@ -20,7 +23,7 @@ export function ShareButton() {
       const url = await generateShareLink(session.access_token);
       setShareUrl(url);
     } catch {
-      setError('สร้างลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง');
+      setError(isTh ? 'สร้างลิงก์ไม่สำเร็จ ลองใหม่อีกครั้ง' : 'Failed to create link, please try again');
     } finally {
       setLoading(false);
     }
@@ -52,7 +55,7 @@ export function ShareButton() {
             transition: 'opacity 0.2s',
           }}
         >
-          {loading ? 'กำลังสร้างลิงก์...' : 'แชร์ Twin'}
+          {loading ? (isTh ? 'กำลังสร้างลิงก์...' : 'Creating link...') : (isTh ? 'แชร์ Twin' : 'Share Twin')}
         </button>
         {error && (
           <p style={{ fontSize: '13px', color: '#ef5350', marginTop: '8px' }}>{error}</p>
@@ -78,7 +81,7 @@ export function ShareButton() {
           marginBottom: '8px',
         }}
       >
-        แชร์ AI Twin ของคุณ:
+        {isTh ? 'แชร์ AI Twin ของคุณ:' : 'Share your AI Twin:'}
       </p>
       <div style={{ display: 'flex', gap: '8px' }}>
         <input
@@ -110,7 +113,7 @@ export function ShareButton() {
             whiteSpace: 'nowrap',
           }}
         >
-          {copied ? 'คัดลอกแล้ว' : 'คัดลอก'}
+          {copied ? (isTh ? 'คัดลอกแล้ว' : 'Copied') : (isTh ? 'คัดลอก' : 'Copy')}
         </button>
       </div>
     </div>

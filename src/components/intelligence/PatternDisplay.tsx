@@ -22,6 +22,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import type { BehavioralPattern } from '@/lib/intelligence/types';
 import './PatternDisplay.css';
 
@@ -47,6 +48,8 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
   showConfidence = true,
   onPatternClick,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [sortBy, setSortBy] = useState<SortBy>('confidence');
 
@@ -91,7 +94,7 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
     return (
       <div className="pattern-display pattern-display--empty">
         <p className="pattern-display__empty-message">
-          ยังไม่มีรูปแบบที่ค้นหา (ทำให้พอใจก่อน 😊)
+          {isTh ? 'ยังไม่มีรูปแบบที่ค้นหา (ทำให้พอใจก่อน 😊)' : 'No patterns found yet (keep going 😊)'}
         </p>
       </div>
     );
@@ -103,13 +106,13 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
       <div className="pattern-display__header">
         <div className="pattern-display__stats">
           <span className="pattern-stats__item pattern-stats__repeating">
-            🔄 เกิดซ้ำ: {stats.repeating}
+            🔄 {isTh ? 'เกิดซ้ำ' : 'Repeating'}: {stats.repeating}
           </span>
           <span className="pattern-stats__item pattern-stats__emerging">
-            ✨ ใหม่: {stats.emerging}
+            ✨ {isTh ? 'ใหม่' : 'Emerging'}: {stats.emerging}
           </span>
           <span className="pattern-stats__item pattern-stats__changing">
-            📈 เปลี่ยน: {stats.changing}
+            📈 {isTh ? 'เปลี่ยน' : 'Changing'}: {stats.changing}
           </span>
         </div>
 
@@ -123,10 +126,10 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
                 onClick={() => setFilterType(type)}
                 aria-label={`Filter by ${type}`}
               >
-                {type === 'all' && 'ทั้งหมด'}
-                {type === 'repeating' && '🔄 เกิดซ้ำ'}
-                {type === 'emerging' && '✨ ใหม่'}
-                {type === 'changing' && '📈 เปลี่ยน'}
+                {type === 'all' && (isTh ? 'ทั้งหมด' : 'All')}
+                {type === 'repeating' && `🔄 ${isTh ? 'เกิดซ้ำ' : 'Repeating'}`}
+                {type === 'emerging' && `✨ ${isTh ? 'ใหม่' : 'Emerging'}`}
+                {type === 'changing' && `📈 ${isTh ? 'เปลี่ยน' : 'Changing'}`}
               </button>
             ))}
           </div>
@@ -138,9 +141,9 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
             onChange={(e) => setSortBy(e.target.value as SortBy)}
             aria-label="Sort patterns"
           >
-            <option value="confidence">🎯 ความเชื่อถือได้สูง</option>
-            <option value="recent">🕐 ล่าสุด</option>
-            <option value="type">📂 ประเภท</option>
+            <option value="confidence">🎯 {isTh ? 'ความเชื่อถือได้สูง' : 'Highest confidence'}</option>
+            <option value="recent">🕐 {isTh ? 'ล่าสุด' : 'Most recent'}</option>
+            <option value="type">📂 {isTh ? 'ประเภท' : 'Type'}</option>
           </select>
         </div>
       </div>
@@ -152,6 +155,7 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
             key={pattern.id}
             pattern={pattern}
             showConfidence={showConfidence}
+            isTh={isTh}
             onClick={() => onPatternClick?.(pattern)}
           />
         ))}
@@ -160,7 +164,9 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
       {/* Showing N of M */}
       <div className="pattern-display__footer">
         <p className="pattern-display__count">
-          แสดง {sortedPatterns.length} จาก {patterns.length} รูปแบบ
+          {isTh
+            ? `แสดง ${sortedPatterns.length} จาก ${patterns.length} รูปแบบ`
+            : `Showing ${sortedPatterns.length} of ${patterns.length} patterns`}
         </p>
       </div>
     </div>
@@ -174,21 +180,28 @@ export const PatternDisplay: React.FC<PatternDisplayProps> = ({
 interface PatternCardProps {
   pattern: BehavioralPattern;
   showConfidence: boolean;
+  isTh: boolean;
   onClick?: () => void;
 }
 
-const PatternCard: React.FC<PatternCardProps> = ({ pattern, showConfidence, onClick }) => {
+const PatternCard: React.FC<PatternCardProps> = ({ pattern, showConfidence, isTh, onClick }) => {
   const typeIcon = {
     repeating: '🔄',
     emerging: '✨',
     changing: '📈',
   }[pattern.patternType];
 
-  const typeLabel = {
-    repeating: 'เกิดซ้ำ',
-    emerging: 'ใหม่',
-    changing: 'เปลี่ยน',
-  }[pattern.patternType];
+  const typeLabel = isTh
+    ? {
+        repeating: 'เกิดซ้ำ',
+        emerging: 'ใหม่',
+        changing: 'เปลี่ยน',
+      }[pattern.patternType]
+    : {
+        repeating: 'Repeating',
+        emerging: 'Emerging',
+        changing: 'Changing',
+      }[pattern.patternType];
 
   const confidenceColor = getConfidenceColor(pattern.confidence);
   const confidencePercent = Math.round(pattern.confidence * 100);
@@ -209,14 +222,14 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, showConfidence, onCl
       {/* Metadata: frequency + last detected */}
       <div className="pattern-card__metadata">
         <span className="pattern-metadata__item">📊 {pattern.frequency}</span>
-        <span className="pattern-metadata__item">🕐 {formatLastDetected(pattern.lastDetected)}</span>
+        <span className="pattern-metadata__item">🕐 {formatLastDetected(pattern.lastDetected, isTh)}</span>
       </div>
 
       {/* Confidence bar */}
       {showConfidence && (
         <div className="pattern-card__confidence">
           <div className="confidence-label">
-            <span>ความเชื่อถือได้</span>
+            <span>{isTh ? 'ความเชื่อถือได้' : 'Confidence'}</span>
             <span className="confidence-percent" style={{ color: confidenceColor }}>
               {confidencePercent}%
             </span>
@@ -236,7 +249,7 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, showConfidence, onCl
       {/* AI insight */}
       {pattern.aiInsight && (
         <div className="pattern-card__insight">
-          <p className="insight-label">💡 ความเห็นของ AI</p>
+          <p className="insight-label">💡 {isTh ? 'ความเห็นของ AI' : "AI's take"}</p>
           <p className="insight-text">{pattern.aiInsight}</p>
         </div>
       )}
@@ -244,14 +257,14 @@ const PatternCard: React.FC<PatternCardProps> = ({ pattern, showConfidence, onCl
       {/* Impact (if available) */}
       {pattern.impact && (
         <div className="pattern-card__impact">
-          <p className="impact-label">⚡ ผลกระทบ</p>
+          <p className="impact-label">⚡ {isTh ? 'ผลกระทบ' : 'Impact'}</p>
           <p className="impact-text">{pattern.impact}</p>
         </div>
       )}
 
       {/* Evidence count */}
       <div className="pattern-card__evidence">
-        <span className="evidence-badge">📌 {pattern.evidencePoints.length} หลักฐาน</span>
+        <span className="evidence-badge">📌 {pattern.evidencePoints.length} {isTh ? 'หลักฐาน' : 'evidence points'}</span>
       </div>
     </div>
   );
@@ -278,17 +291,25 @@ function getConfidenceColor(confidence: number): string {
 /**
  * ✅ formatLastDetected() — แปลง date เป็น "X days ago" / "Today" / "Yesterday"
  */
-function formatLastDetected(date: Date): string {
+function formatLastDetected(date: Date, isTh: boolean): string {
   const now = new Date();
   const lastDate = new Date(date);
   const diffMs = now.getTime() - lastDate.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) return 'วันนี้';
-  if (diffDays === 1) return 'เมื่อวาน';
-  if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} สัปดาห์ที่แล้ว`;
-  return `${Math.floor(diffDays / 30)} เดือนที่แล้ว`;
+  if (isTh) {
+    if (diffDays === 0) return 'วันนี้';
+    if (diffDays === 1) return 'เมื่อวาน';
+    if (diffDays < 7) return `${diffDays} วันที่แล้ว`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} สัปดาห์ที่แล้ว`;
+    return `${Math.floor(diffDays / 30)} เดือนที่แล้ว`;
+  }
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === 1) return 'Yesterday';
+  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
+  return `${Math.floor(diffDays / 30)}mo ago`;
 }
 
 export default PatternDisplay;

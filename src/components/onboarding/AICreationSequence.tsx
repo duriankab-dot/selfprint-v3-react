@@ -17,6 +17,7 @@ import {
   validateOnboardingData,
 } from '@/lib/intelligence/PersonalContextInitializer';
 import { supabase } from '@/services/supabase-service';
+import { useLanguage } from '@/context/LanguageContext';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 import type { Mood } from '@/context/EmotionContext';
 
@@ -41,10 +42,16 @@ interface InitializationState {
   isSuccessful: boolean;
 }
 
-const STAGE_TIMINGS = {
+const STAGE_TIMINGS_TH = {
   0: { text: 'กำลังวิเคราะห์วันเกิดของคุณ...', duration: 1000 },
   1: { text: 'กำลังสร้าง AI Twin ของคุณ...', duration: 1000 },
   2: { text: 'กำลังเชื่อมต่อบุคลิกภาพ...', duration: 1000 },
+};
+
+const STAGE_TIMINGS_EN = {
+  0: { text: 'Analyzing your birth date...', duration: 1000 },
+  1: { text: 'Creating your AI Twin...', duration: 1000 },
+  2: { text: 'Connecting personality...', duration: 1000 },
 };
 
 export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
@@ -52,6 +59,9 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
   className = '',
   onboardingData,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const STAGE_TIMINGS = isTh ? STAGE_TIMINGS_TH : STAGE_TIMINGS_EN;
   const [stage, setStage] = useState<CreationStage>(0);
   const [isComplete, setIsComplete] = useState(false);
   const [initState, setInitState] = useState<InitializationState>({
@@ -329,7 +339,9 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
                 margin: 0,
               }}
             >
-              ⚡ AI Twin ของคุณถือกำเนิดแล้ว! มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...
+              {isTh
+                ? '⚡ AI Twin ของคุณถือกำเนิดแล้ว! มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...'
+                : "⚡ Your AI Twin has been born! Let's see what I understand about you so far..."}
             </p>
           </div>
         )}

@@ -13,6 +13,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useEmotion } from '@/context/EmotionContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { isInRollout } from '@/lib/rollout';
 import './AskCoach.css';
 
@@ -28,6 +29,8 @@ interface CoachAnswer {
 const AskCoach: React.FC = () => {
   const { session } = useAuth();
   const { mood } = useEmotion();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [birthDate, setBirthDate] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
   const [state, setState] = useState<AskState>('idle');
@@ -84,7 +87,7 @@ const AskCoach: React.FC = () => {
       const json = await res.json();
 
       if (!res.ok) {
-        setErrorMessage(json.message || 'ถามไม่สำเร็จ ลองใหม่อีกครั้ง');
+        setErrorMessage(json.message || (isTh ? 'ถามไม่สำเร็จ ลองใหม่อีกครั้ง' : 'Question failed. Please try again.'));
         setState('error');
         return;
       }
@@ -92,25 +95,27 @@ const AskCoach: React.FC = () => {
       setResult({ answer: json.answer, contextUsed: json.contextUsed });
       setState('answered');
     } catch {
-      setErrorMessage('เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง');
+      setErrorMessage(isTh ? 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง' : 'Connection failed. Please try again.');
       setState('error');
     }
   };
 
   return (
     <div className="coach-section">
-      <h2>ถาม Coach</h2>
+      <h2>{isTh ? 'ถาม Coach' : 'Ask Coach'}</h2>
       <div className="coach-card">
         {!session?.access_token && (
-          <p className="coach-hint">ต้อง login ก่อนเพื่อถาม Coach</p>
+          <p className="coach-hint">{isTh ? 'ต้อง login ก่อนเพื่อถาม Coach' : 'You need to log in to ask Coach'}</p>
         )}
         {session?.access_token && !birthDate && (
-          <p className="coach-hint">ต้องมีวันเกิดในโปรไฟล์ก่อน (ทำ onboarding ให้ครบ)</p>
+          <p className="coach-hint">
+            {isTh ? 'ต้องมีวันเกิดในโปรไฟล์ก่อน (ทำ onboarding ให้ครบ)' : 'A birth date is required in your profile (complete onboarding first)'}
+          </p>
         )}
 
         <textarea
           className="coach-input"
-          placeholder="พิมพ์คำถามเชิงการตัดสินใจ เช่น 'ควรเปลี่ยนงานตอนนี้ไหม'"
+          placeholder={isTh ? "พิมพ์คำถามเชิงการตัดสินใจ เช่น 'ควรเปลี่ยนงานตอนนี้ไหม'" : "Type a decision question, e.g. 'Should I change jobs now?'"}
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           disabled={state === 'loading'}
@@ -123,7 +128,7 @@ const AskCoach: React.FC = () => {
           onClick={handleAsk}
           disabled={!canAsk || state === 'loading'}
         >
-          {state === 'loading' ? 'กำลังคิด...' : 'ถาม Coach'}
+          {state === 'loading' ? (isTh ? 'กำลังคิด...' : 'Thinking...') : (isTh ? 'ถาม Coach' : 'Ask Coach')}
         </button>
 
         {state === 'error' && <p className="coach-error">⚠️ {errorMessage}</p>}
@@ -133,7 +138,9 @@ const AskCoach: React.FC = () => {
             <p className="coach-answer-text">{result.answer}</p>
             {result.contextUsed.patternsFound > 0 && (
               <p className="coach-answer-meta">
-                อ้างอิงจากรูปแบบที่พบในประวัติการใช้งานของคุณ ({result.contextUsed.patternsFound} รูปแบบ)
+                {isTh
+                  ? `อ้างอิงจากรูปแบบที่พบในประวัติการใช้งานของคุณ (${result.contextUsed.patternsFound} รูปแบบ)`
+                  : `Based on patterns found in your usage history (${result.contextUsed.patternsFound} patterns)`}
               </p>
             )}
           </div>

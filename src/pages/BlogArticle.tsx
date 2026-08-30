@@ -6,11 +6,17 @@
  * - Supports articles WITH or WITHOUT frontmatter
  * - Includes JSON-LD Article schema for SEO/GEO/AEO
  * - Dark sci-fi theme with glassmorphism
+ *
+ * NOTE (i18n): article.content itself (Markdown body) is sourced from Thai-only
+ * markdown files in /public/blog — this is long-form editorial content, out of
+ * scope for UI-string translation (same precedent as BlogListPage.tsx). Only
+ * page chrome below is localized.
  */
 
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ArticleMetadata {
   id: string;
@@ -31,7 +37,7 @@ interface Article extends ArticleMetadata {
 }
 
 /** Build Article JSON-LD for GEO / AEO */
-function buildArticleSchema(article: Article) {
+function buildArticleSchema(article: Article, isTh: boolean) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -40,7 +46,7 @@ function buildArticleSchema(article: Article) {
     'keywords': article.keywords.join(', '),
     'datePublished': article.date,
     'dateModified': article.date,
-    'inLanguage': 'th',
+    'inLanguage': isTh ? 'th' : 'en',
     'author': { '@type': 'Organization', 'name': 'SELFPRINT', 'url': 'https://selfprint.one' },
     'publisher': {
       '@type': 'Organization',
@@ -60,6 +66,9 @@ function buildArticleSchema(article: Article) {
 
 export default function BlogArticle() {
   const { slug } = useParams<{ slug: string }>();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const langPrefix = isTh ? '/th' : '/en';
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -111,10 +120,10 @@ export default function BlogArticle() {
         };
 
         const frontmatterMatch = normalized.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-        
+
         if (frontmatterMatch) {
           const [, frontmatterStr, rawContent] = frontmatterMatch;
-          
+
           frontmatterStr.split('\n').forEach(line => {
             const colonIdx = line.indexOf(':');
             if (colonIdx === -1) return;
@@ -161,7 +170,7 @@ export default function BlogArticle() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-400 mx-auto mb-4"></div>
-          <p className="text-indigo-300">กำลังโหลดบทความ...</p>
+          <p className="text-indigo-300">{isTh ? 'กำลังโหลดบทความ...' : 'Loading article...'}</p>
         </div>
       </div>
     );
@@ -172,17 +181,17 @@ export default function BlogArticle() {
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🔬</div>
-          <h1 className="text-2xl font-bold text-white mb-2">ไม่พบบทความ</h1>
-          <p className="text-slate-400 mb-6">{error || 'ไม่พบเนื้อหาที่คุณต้องการ'}</p>
-          <Link to="/th/blog" className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors">
-            กลับไปคลังบทความ
+          <h1 className="text-2xl font-bold text-white mb-2">{isTh ? 'ไม่พบบทความ' : 'Article not found'}</h1>
+          <p className="text-slate-400 mb-6">{error || (isTh ? 'ไม่พบเนื้อหาที่คุณต้องการ' : "We couldn't find the content you're looking for")}</p>
+          <Link to={`${langPrefix}/blog`} className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition-colors">
+            {isTh ? 'กลับไปคลังบทความ' : 'Back to articles'}
           </Link>
         </div>
       </div>
     );
   }
 
-  const articleSchema = buildArticleSchema(article);
+  const articleSchema = buildArticleSchema(article, isTh);
 
   return (
     <>
@@ -194,10 +203,10 @@ export default function BlogArticle() {
       <main className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <Link
-            to="/th/blog"
+            to={`${langPrefix}/blog`}
             className="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-medium mb-8 transition-colors"
           >
-            ← กลับไปคลังบทความ
+            {isTh ? '← กลับไปคลังบทความ' : '← Back to articles'}
           </Link>
 
           <article className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
@@ -207,7 +216,7 @@ export default function BlogArticle() {
                   {article.category}
                 </span>
                 <span className="text-slate-400 text-sm">
-                  {new Date(article.date).toLocaleDateString('th-TH', {
+                  {new Date(article.date).toLocaleDateString(isTh ? 'th-TH' : 'en-US', {
                     year: 'numeric',
                     month: 'long',
                     day: 'numeric',
@@ -272,36 +281,38 @@ export default function BlogArticle() {
                 <div className="bg-indigo-500/10 backdrop-blur-sm border border-indigo-400/30 rounded-xl p-6 sm:p-8 text-center">
                   <div className="text-3xl mb-3">🚀</div>
                   <h3 className="text-xl font-bold text-white mb-2">
-                    อยากเข้าใจตัวเองอย่างลึกซึ้ง?
+                    {isTh ? 'อยากเข้าใจตัวเองอย่างลึกซึ้ง?' : 'Want to understand yourself more deeply?'}
                   </h3>
                   <p className="text-slate-300 mb-6">
-                    ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติ — ฟรี ไม่ต้องดูดวง
+                    {isTh
+                      ? 'ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติ — ฟรี ไม่ต้องดูดวง'
+                      : 'Let your AI Twin analyze 12 behavioral dimensions — free, no astrology involved'}
                   </p>
                   <Link
-                    to="/th/onboarding"
+                    to={`${langPrefix}/onboarding`}
                     className="inline-block px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg transition-colors shadow-lg shadow-indigo-500/25"
                   >
-                    สร้าง SELFPRINT ของฉัน →
+                    {isTh ? 'สร้าง SELFPRINT ของฉัน →' : 'Create my SELFPRINT →'}
                   </Link>
                 </div>
               </div>
 
               <div className="mt-12">
-                <h4 className="text-lg font-semibold text-white mb-4">📖 อ่านต่อ</h4>
+                <h4 className="text-lg font-semibold text-white mb-4">{isTh ? '📖 อ่านต่อ' : '📖 Keep reading'}</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Link
                     to="/blog/ai-twin-what-is-it"
                     className="block p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-colors"
                   >
-                    <p className="font-medium text-white text-sm">AI Twin คืออะไร?</p>
+                    <p className="font-medium text-white text-sm">{isTh ? 'AI Twin คืออะไร?' : 'What is an AI Twin?'}</p>
                     <p className="text-xs text-slate-400">Digital Twin + Personal AI</p>
                   </Link>
                   <Link
                     to="/blog/12-dimensions-explained"
                     className="block p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-colors"
                   >
-                    <p className="font-medium text-white text-sm">12 มิติ พฤติกรรมมนุษย์</p>
-                    <p className="text-xs text-slate-400">ทำไมต้อง 12 มิติ?</p>
+                    <p className="font-medium text-white text-sm">{isTh ? '12 มิติ พฤติกรรมมนุษย์' : 'The 12 dimensions of human behavior'}</p>
+                    <p className="text-xs text-slate-400">{isTh ? 'ทำไมต้อง 12 มิติ?' : 'Why 12 dimensions?'}</p>
                   </Link>
                 </div>
               </div>

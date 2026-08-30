@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useChat } from '@/features/chat/hooks/useChat';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ChatWindowProps {
   siceContext?: string;
@@ -8,6 +9,8 @@ interface ChatWindowProps {
 
 export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
   const { messages, isLoading, sendMessage } = useChat();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [input, setInput] = React.useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,9 +37,11 @@ export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
       {/* Header */}
       <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
         <h2 className="text-lg font-bold">
-          {charEmoji} {charName} — AI Twin ของคุณ
+          {charEmoji} {charName} — {isTh ? 'AI Twin ของคุณ' : 'Your AI Twin'}
         </h2>
-        <p className="text-sm text-gray-600">คำแนะนำที่ปรับให้เข้ากับการตัดสินใจของคุณ</p>
+        <p className="text-sm text-gray-600">
+          {isTh ? 'คำแนะนำที่ปรับให้เข้ากับการตัดสินใจของคุณ' : 'Advice tailored to your decisions'}
+        </p>
       </div>
 
       {/* Messages */}
@@ -44,7 +49,7 @@ export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-12">
             <p className="text-2xl mb-2">{charEmoji}</p>
-            <p>ทักทายเพื่อเริ่มบทสนทนา</p>
+            <p>{isTh ? 'ทักทายเพื่อเริ่มบทสนทนา' : 'Say hello to start the conversation'}</p>
           </div>
         )}
 
@@ -88,7 +93,7 @@ export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isLoading}
-            placeholder="ถามอะไรก็ได้..."
+            placeholder={isTh ? 'ถามอะไรก็ได้...' : 'Ask anything...'}
             className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
           />
           <button
@@ -96,7 +101,7 @@ export function ChatWindow({ character = 'nova' }: ChatWindowProps) {
             disabled={isLoading || !input.trim()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 font-medium"
           >
-            ส่ง
+            {isTh ? 'ส่ง' : 'Send'}
           </button>
         </div>
       </form>

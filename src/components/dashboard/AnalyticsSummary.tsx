@@ -9,6 +9,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { getAnalyticsSummary, type AnalyticsSummary as Summary } from '@/services/analytics';
 import { HUB_OPTIONS } from '@/constants/hubs';
 import './AnalyticsSummary.css';
@@ -20,6 +21,8 @@ function hubLabel(hubId: string): string {
 
 const AnalyticsSummaryView: React.FC = () => {
   const { session } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [summary, setSummary] = useState<Summary | null>(null);
 
   useEffect(() => {
@@ -45,27 +48,27 @@ const AnalyticsSummaryView: React.FC = () => {
 
   return (
     <div className="analytics-section">
-      <h2>ภาพรวมพฤติกรรมการใช้งาน</h2>
+      <h2>{isTh ? 'ภาพรวมพฤติกรรมการใช้งาน' : 'Usage Overview'}</h2>
       <div className="analytics-grid">
         {summary.topHub && (
           <div className="analytics-card">
-            <div className="analytics-card-label">Hub ที่ใช้บ่อยที่สุด</div>
+            <div className="analytics-card-label">{isTh ? 'Hub ที่ใช้บ่อยที่สุด' : 'Most-used hub'}</div>
             <div className="analytics-card-value">{hubLabel(summary.topHub)}</div>
             <div className="analytics-card-subtitle">
-              {summary.hubVisitCounts[summary.topHub]} ครั้ง
+              {summary.hubVisitCounts[summary.topHub]} {isTh ? 'ครั้ง' : 'times'}
             </div>
           </div>
         )}
 
         <div className="analytics-card">
-          <div className="analytics-card-label">เปลี่ยน Mood</div>
+          <div className="analytics-card-label">{isTh ? 'เปลี่ยน Mood' : 'Mood changes'}</div>
           <div className="analytics-card-value">{summary.moodChangeCount}</div>
-          <div className="analytics-card-subtitle">ครั้ง</div>
+          <div className="analytics-card-subtitle">{isTh ? 'ครั้ง' : 'times'}</div>
         </div>
 
         {totalFeedback > 0 && (
           <div className="analytics-card">
-            <div className="analytics-card-label">คำตอบที่เป็นประโยชน์</div>
+            <div className="analytics-card-label">{isTh ? 'คำตอบที่เป็นประโยชน์' : 'Helpful responses'}</div>
             <div className="analytics-card-value">{helpfulPercent}%</div>
             <div className="analytics-card-subtitle">
               👍 {summary.feedback.helpful} / 👎 {summary.feedback.unhelpful}
@@ -75,7 +78,7 @@ const AnalyticsSummaryView: React.FC = () => {
 
         {summary.latestArchetypeAccuracy !== null && (
           <div className="analytics-card">
-            <div className="analytics-card-label">ความแม่นยำล่าสุด</div>
+            <div className="analytics-card-label">{isTh ? 'ความแม่นยำล่าสุด' : 'Latest accuracy'}</div>
             <div className="analytics-card-value">{summary.latestArchetypeAccuracy}%</div>
             <div className="analytics-card-subtitle">AI Twin blueprint</div>
           </div>

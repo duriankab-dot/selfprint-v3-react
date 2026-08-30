@@ -12,6 +12,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ─── Icon SVGs (inline, no deps) ─────────────────────────────────────────────
 const GoogleIcon = () => (
@@ -54,6 +55,8 @@ interface ClaimAccountProps {
 }
 
 export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const { session, signInWithMagicLink, signInWithOAuth } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
@@ -154,11 +157,20 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
         {sent ? (
           <>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '12px' }}>
-              เช็คอีเมลของคุณ 📬
+              {isTh ? 'เช็คอีเมลของคุณ 📬' : 'Check your email 📬'}
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-              เราส่งลิงก์เข้าสู่ระบบไปที่ <strong>{email}</strong> แล้ว
-              คลิกลิงก์ในอีเมลเพื่อบันทึก AI Twin ของคุณไว้ถาวร
+              {isTh ? (
+                <>
+                  เราส่งลิงก์เข้าสู่ระบบไปที่ <strong>{email}</strong> แล้ว
+                  คลิกลิงก์ในอีเมลเพื่อบันทึก AI Twin ของคุณไว้ถาวร
+                </>
+              ) : (
+                <>
+                  We sent a sign-in link to <strong>{email}</strong>.
+                  Click the link in the email to save your AI Twin permanently.
+                </>
+              )}
             </p>
             {error && (
               <p style={{ color: '#E24B4A', fontSize: '13px', marginBottom: '12px' }}>{error}</p>
@@ -179,7 +191,17 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 opacity: resendCountdown > 0 ? 0.5 : 1,
               }}
             >
-              {submitting ? 'กำลังส่ง...' : resendCountdown > 0 ? `ส่งใหม่ใน ${resendCountdown}s` : 'ส่งลิงก์ใหม่'}
+              {isTh
+                ? submitting
+                  ? 'กำลังส่ง...'
+                  : resendCountdown > 0
+                    ? `ส่งใหม่ใน ${resendCountdown}s`
+                    : 'ส่งลิงก์ใหม่'
+                : submitting
+                  ? 'Sending...'
+                  : resendCountdown > 0
+                    ? `Resend in ${resendCountdown}s`
+                    : 'Resend link'}
             </button>
             <button
               onClick={onDone}
@@ -197,13 +219,13 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 fontSize: '14px',
               }}
             >
-              ไปต่อก่อน (บันทึกอัตโนมัติเมื่อคลิกลิงก์)
+              {isTh ? 'ไปต่อก่อน (บันทึกอัตโนมัติเมื่อคลิกลิงก์)' : 'Continue for now (saves automatically once you click the link)'}
             </button>
           </>
         ) : (
           <>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '12px' }}>
-              บันทึก AI Twin ของคุณไว้ 💾
+              {isTh ? 'บันทึก AI Twin ของคุณไว้ 💾' : 'Save your AI Twin 💾'}
             </h2>
             <p
               style={{
@@ -213,8 +235,9 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 marginBottom: '24px',
               }}
             >
-              ใส่อีเมลเพื่อรับลิงก์เข้าสู่ระบบ ไม่ต้องตั้งรหัสผ่าน —
-              กลับมาใช้ AI Twin นี้ได้อีกทุกครั้งที่ต้องการ
+              {isTh
+                ? 'ใส่อีเมลเพื่อรับลิงก์เข้าสู่ระบบ ไม่ต้องตั้งรหัสผ่าน — กลับมาใช้ AI Twin นี้ได้อีกทุกครั้งที่ต้องการ'
+                : "Enter your email to get a sign-in link — no password needed. Come back to this AI Twin anytime."}
             </p>
             {/* ── OAuth Buttons ─────────────────────────────────────────── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
@@ -234,7 +257,9 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 }}
               >
                 <GoogleIcon />
-                {oauthLoading === 'google' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
+                {oauthLoading === 'google'
+                  ? (isTh ? 'กำลังเข้าสู่ระบบ...' : 'Signing in...')
+                  : (isTh ? 'เข้าสู่ระบบด้วย Google' : 'Continue with Google')}
               </button>
               <button
                 type="button"
@@ -252,7 +277,9 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 }}
               >
                 <AppleIcon />
-                {oauthLoading === 'apple' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Apple'}
+                {oauthLoading === 'apple'
+                  ? (isTh ? 'กำลังเข้าสู่ระบบ...' : 'Signing in...')
+                  : (isTh ? 'เข้าสู่ระบบด้วย Apple' : 'Continue with Apple')}
               </button>
             </div>
 
@@ -260,7 +287,7 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
               <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
               <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                หรือใช้ Magic Link
+                {isTh ? 'หรือใช้ Magic Link' : 'Or use a Magic Link'}
               </span>
               <div style={{ flex: 1, height: '1px', background: 'var(--color-border)' }} />
             </div>
@@ -302,7 +329,7 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                   opacity: submitting ? 0.7 : 1,
                 }}
               >
-                {submitting ? 'กำลังส่ง...' : 'ส่งลิงก์เข้าสู่ระบบ'}
+                {isTh ? (submitting ? 'กำลังส่ง...' : 'ส่งลิงก์เข้าสู่ระบบ') : (submitting ? 'Sending...' : 'Send sign-in link')}
               </button>
             </form>
             <button
@@ -317,7 +344,7 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 textDecoration: 'underline',
               }}
             >
-              ข้ามไปก่อน (ผลลัพธ์จะไม่ถูกบันทึก)
+              {isTh ? 'ข้ามไปก่อน (ผลลัพธ์จะไม่ถูกบันทึก)' : 'Skip for now (results won\'t be saved)'}
             </button>
           </>
         )}

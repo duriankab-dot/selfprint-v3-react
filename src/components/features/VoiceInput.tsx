@@ -20,6 +20,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
   onTranscript,
   language,
 }) => {
+  const isTh = language === 'th';
   const [transcript, setTranscript] = useState('');
   const [isBrowserSupported] = useState(
     'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
@@ -27,7 +28,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
 
   const handleStartListening = () => {
     if (!isBrowserSupported) {
-      alert('เบราว์เซอร์ของคุณไม่รองรับ Speech Recognition');
+      alert(isTh ? 'เบราว์เซอร์ของคุณไม่รองรับ Speech Recognition' : 'Your browser does not support Speech Recognition');
       return;
     }
 
@@ -35,9 +36,10 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
     setTranscript('');
 
     // Mock speech recognition
+    const mockText = isTh ? 'สวัสดี ฉันต้องการพูดคุยกับ AI Twin' : 'Hello, I want to talk with my AI Twin';
     setTimeout(() => {
-      setTranscript('สวัสดี ฉันต้องการพูดคุยกับ AI Twin');
-      onTranscript('สวัสดี ฉันต้องการพูดคุยกับ AI Twin');
+      setTranscript(mockText);
+      onTranscript(mockText);
       onStop();
     }, 3000);
   };
@@ -46,7 +48,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
     <div className="voice-input">
       <div className="voice-input__display">
         <p className="voice-input__text">
-          {transcript || 'กดปุ่มไมโครโฟนและพูดได้เลย...'}
+          {transcript || (isTh ? 'กดปุ่มไมโครโฟนและพูดได้เลย...' : 'Press the microphone button and speak...')}
         </p>
       </div>
 
@@ -55,12 +57,12 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
           className={`voice-input__btn${isListening ? ' listening' : ''}`}
           onClick={handleStartListening}
           disabled={isListening}
-          title="กดแล้วพูด"
+          title={isTh ? 'กดแล้วพูด' : 'Press and speak'}
         >
           🎙️
         </button>
         <span className="voice-input__lang">
-          {language === 'th' ? '🇹🇭 Thai' : '🇺🇸 English'}
+          {isTh ? '🇹🇭 Thai' : '🇺🇸 English'}
         </span>
       </div>
     </div>

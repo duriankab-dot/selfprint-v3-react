@@ -17,6 +17,7 @@
 import React, { useState, useCallback } from 'react';
 import { useVoiceTwin } from '@/hooks/useVoiceTwin';
 import type { VoiceMode } from '@/hooks/useVoiceTwin';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ============================================================================
 // Props
@@ -37,18 +38,32 @@ export interface VoiceTwinProps {
 // Mode label helper
 // ============================================================================
 
-const MODE_LABEL: Record<VoiceMode, string> = {
+const MODE_LABEL_TH: Record<VoiceMode, string> = {
   idle:       'กดพูดคุยกับ Twin',
   listening:  '🎤 กำลังฟัง...',
   processing: '⏳ กำลังประมวลผล...',
   speaking:   '🔊 Twin กำลังพูด...',
 };
 
-const MODE_ARIA: Record<VoiceMode, string> = {
+const MODE_LABEL_EN: Record<VoiceMode, string> = {
+  idle:       'Press to talk with Twin',
+  listening:  '🎤 Listening...',
+  processing: '⏳ Processing...',
+  speaking:   '🔊 Twin is speaking...',
+};
+
+const MODE_ARIA_TH: Record<VoiceMode, string> = {
   idle:       'เริ่มพูดคุยกับ Twin',
   listening:  'Twin กำลังฟัง — กดเพื่อหยุด',
   processing: 'กำลังประมวลผล',
   speaking:   'Twin กำลังพูด — กดเพื่อหยุด',
+};
+
+const MODE_ARIA_EN: Record<VoiceMode, string> = {
+  idle:       'Start talking with Twin',
+  listening:  'Twin is listening — press to stop',
+  processing: 'Processing',
+  speaking:   'Twin is speaking — press to stop',
 };
 
 // ============================================================================
@@ -56,6 +71,11 @@ const MODE_ARIA: Record<VoiceMode, string> = {
 // ============================================================================
 
 export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-TH' }: VoiceTwinProps) {
+  const { language: uiLanguage } = useLanguage();
+  const isTh = uiLanguage === 'th';
+  const MODE_LABEL = isTh ? MODE_LABEL_TH : MODE_LABEL_EN;
+  const MODE_ARIA = isTh ? MODE_ARIA_TH : MODE_ARIA_EN;
+
   const [consentGiven, setConsentGiven] = useState(() =>
     localStorage.getItem('sp-voice-consent') === 'true'
   );
@@ -79,7 +99,9 @@ export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-T
   const handleMainButton = useCallback(() => {
     if (!consentGiven) {
       const ok = window.confirm(
-        'เปิดโหมด Voice Twin?\n\nTwin จะฟังเสียงคุณและพูดตอบกลับ คุณสามารถปิดได้ตลอดเวลา'
+        isTh
+          ? 'เปิดโหมด Voice Twin?\n\nTwin จะฟังเสียงคุณและพูดตอบกลับ คุณสามารถปิดได้ตลอดเวลา'
+          : 'Turn on Voice Twin mode?\n\nYour Twin will listen and speak back. You can turn it off anytime.'
       );
       if (!ok) return;
       localStorage.setItem('sp-voice-consent', 'true');
@@ -99,13 +121,15 @@ export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-T
       default:
         break;
     }
-  }, [consentGiven, state.mode, startListening, stopListening, stopSpeaking]);
+  }, [consentGiven, state.mode, startListening, stopListening, stopSpeaking, isTh]);
 
   if (!state.supported) {
     return (
       <div className="voice-twin voice-twin--unsupported">
         <p className="voice-unsupported-msg">
-          เบราว์เซอร์นี้ไม่รองรับ Voice Mode — ใช้ Text Mode แทนได้เลย
+          {isTh
+            ? 'เบราว์เซอร์นี้ไม่รองรับ Voice Mode — ใช้ Text Mode แทนได้เลย'
+            : "This browser doesn't support Voice Mode — use Text Mode instead"}
         </p>
       </div>
     );
@@ -139,7 +163,7 @@ export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-T
 
       {/* Live transcript */}
       {state.transcript && (
-        <div className="voice-transcript" aria-label="ข้อความที่ Twin ได้ยิน">
+        <div className="voice-transcript" aria-label={isTh ? 'ข้อความที่ Twin ได้ยิน' : 'What Twin heard'}>
           <span className={state.isFinalTranscript ? 'voice-transcript--final' : 'voice-transcript--interim'}>
             {state.transcript}
           </span>
@@ -154,16 +178,16 @@ export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-T
             stopListening();
             stopSpeaking();
           }}
-          aria-label="หยุดทันที"
+          aria-label={isTh ? 'หยุดทันที' : 'Stop now'}
         >
-          ⏹ หยุด
+          ⏹ {isTh ? 'หยุด' : 'Stop'}
         </button>
       )}
 
       {/* Reset */}
       {isActive && (
-        <button className="voice-reset-btn" onClick={reset} aria-label="รีเซ็ต Voice Mode">
-          รีเซ็ต
+        <button className="voice-reset-btn" onClick={reset} aria-label={isTh ? 'รีเซ็ต Voice Mode' : 'Reset Voice Mode'}>
+          {isTh ? 'รีเซ็ต' : 'Reset'}
         </button>
       )}
 
@@ -177,7 +201,9 @@ export function VoiceTwin({ mood, onUserSpeech, twinSpeechText, language = 'th-T
       {/* Text fallback hint */}
       {!consentGiven && (
         <p className="voice-fallback-hint">
-          กดปุ่มด้านบนเพื่อเริ่ม Voice Mode — หรือพิมพ์ใน Text Mode ด้านล่าง
+          {isTh
+            ? 'กดปุ่มด้านบนเพื่อเริ่ม Voice Mode — หรือพิมพ์ใน Text Mode ด้านล่าง'
+            : 'Press the button above to start Voice Mode — or type in Text Mode below'}
         </p>
       )}
     </div>

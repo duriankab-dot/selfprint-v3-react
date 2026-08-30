@@ -5,16 +5,23 @@
 
 import { useState } from 'react';
 import { MetaTagManager } from '@/components/MetaTagManager';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function ContactPage() {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [sent, setSent] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', message: '' });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Mailto fallback — no server required at launch
-    const subject = encodeURIComponent(`[SELFPRINT Support] จาก ${form.name}`);
-    const body = encodeURIComponent(`ชื่อ: ${form.name}\nอีเมล: ${form.email}\n\n${form.message}`);
+    const subject = encodeURIComponent(isTh ? `[SELFPRINT Support] จาก ${form.name}` : `[SELFPRINT Support] from ${form.name}`);
+    const body = encodeURIComponent(
+      isTh
+        ? `ชื่อ: ${form.name}\nอีเมล: ${form.email}\n\n${form.message}`
+        : `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
+    );
     window.open(`mailto:support@selfprint.one?subject=${subject}&body=${body}`, '_blank');
     setSent(true);
   };
@@ -22,9 +29,11 @@ export default function ContactPage() {
   return (
     <>
       <MetaTagManager
-        title="ติดต่อ SELFPRINT — Support & Help"
-        description="ติดต่อทีม SELFPRINT สำหรับคำถาม ข้อเสนอแนะ หรือปัญหาการใช้งาน"
-        canonicalUrl="/th/contact"
+        title={isTh ? 'ติดต่อ SELFPRINT — Support & Help' : 'Contact SELFPRINT — Support & Help'}
+        description={isTh
+          ? 'ติดต่อทีม SELFPRINT สำหรับคำถาม ข้อเสนอแนะ หรือปัญหาการใช้งาน'
+          : 'Contact the SELFPRINT team with questions, feedback, or issues'}
+        canonicalUrl={isTh ? '/th/contact' : '/en/contact'}
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`
@@ -53,18 +62,22 @@ export default function ContactPage() {
 
         <div className="contact-hero">
           <div style={{ fontSize: '40px', marginBottom: '12px' }}>💬</div>
-          <h1>ติดต่อเรา</h1>
-          <p>มีคำถาม ข้อเสนอแนะ หรือปัญหาการใช้งาน? ทีมงานพร้อมช่วยเสมอ</p>
+          <h1>{isTh ? 'ติดต่อเรา' : 'Contact us'}</h1>
+          <p>{isTh ? 'มีคำถาม ข้อเสนอแนะ หรือปัญหาการใช้งาน? ทีมงานพร้อมช่วยเสมอ' : "Have a question, feedback, or an issue? Our team is happy to help."}</p>
         </div>
 
         <div className="contact-body">
           <div className="contact-info">
-            <h2>ช่องทางติดต่อ</h2>
-            {[
+            <h2>{isTh ? 'ช่องทางติดต่อ' : 'Get in touch'}</h2>
+            {(isTh ? [
               { icon: '📧', title: 'อีเมล Support', text: <a href="mailto:support@selfprint.one">support@selfprint.one</a>, sub: 'ตอบกลับภายใน 24–48 ชั่วโมง' },
               { icon: '💬', title: 'Line Official', text: <a href="https://lin.ee/selfprint" target="_blank" rel="noreferrer">@selfprint</a>, sub: 'ตอบเร็วที่สุด ในเวลาทำการ' },
               { icon: '📱', title: 'Facebook Page', text: <a href="https://facebook.com/selfprintone" target="_blank" rel="noreferrer">SELFPRINT Thailand</a>, sub: 'ข่าวสาร อัปเดต และคอมมูนิตี้' },
-            ].map((item) => (
+            ] : [
+              { icon: '📧', title: 'Support email', text: <a href="mailto:support@selfprint.one">support@selfprint.one</a>, sub: 'We reply within 24–48 hours' },
+              { icon: '💬', title: 'Line Official', text: <a href="https://lin.ee/selfprint" target="_blank" rel="noreferrer">@selfprint</a>, sub: 'Fastest response during business hours' },
+              { icon: '📱', title: 'Facebook Page', text: <a href="https://facebook.com/selfprintone" target="_blank" rel="noreferrer">SELFPRINT Thailand</a>, sub: 'News, updates, and community' },
+            ]).map((item) => (
               <div key={item.title} className="contact-item">
                 <div className="contact-item-icon">{item.icon}</div>
                 <div className="contact-item-text">
@@ -77,31 +90,35 @@ export default function ContactPage() {
           </div>
 
           <div className="contact-form">
-            <h2>ส่งข้อความ</h2>
+            <h2>{isTh ? 'ส่งข้อความ' : 'Send a message'}</h2>
             {sent ? (
               <div className="contact-success">
                 <div style={{ fontSize: '36px', marginBottom: '12px' }}>✅</div>
-                <h3>ขอบคุณ!</h3>
-                <p>ระบบเปิด email client ให้แล้ว กด Send เพื่อส่งข้อความ ทีมงานจะตอบกลับโดยเร็ว</p>
+                <h3>{isTh ? 'ขอบคุณ!' : 'Thank you!'}</h3>
+                <p>
+                  {isTh
+                    ? 'ระบบเปิด email client ให้แล้ว กด Send เพื่อส่งข้อความ ทีมงานจะตอบกลับโดยเร็ว'
+                    : "We've opened your email client — hit Send to submit your message. Our team will get back to you soon."}
+                </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
                 <div className="contact-field">
-                  <label htmlFor="contact-name">ชื่อ</label>
-                  <input id="contact-name" type="text" required placeholder="ชื่อของคุณ" value={form.name}
+                  <label htmlFor="contact-name">{isTh ? 'ชื่อ' : 'Name'}</label>
+                  <input id="contact-name" type="text" required placeholder={isTh ? 'ชื่อของคุณ' : 'Your name'} value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })} />
                 </div>
                 <div className="contact-field">
-                  <label htmlFor="contact-email">อีเมล</label>
+                  <label htmlFor="contact-email">{isTh ? 'อีเมล' : 'Email'}</label>
                   <input id="contact-email" type="email" required placeholder="email@example.com" value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })} />
                 </div>
                 <div className="contact-field">
-                  <label htmlFor="contact-msg">ข้อความ</label>
-                  <textarea id="contact-msg" rows={5} required placeholder="อธิบายสิ่งที่คุณต้องการความช่วยเหลือ..." value={form.message}
+                  <label htmlFor="contact-msg">{isTh ? 'ข้อความ' : 'Message'}</label>
+                  <textarea id="contact-msg" rows={5} required placeholder={isTh ? 'อธิบายสิ่งที่คุณต้องการความช่วยเหลือ...' : 'Tell us what you need help with...'} value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })} />
                 </div>
-                <button type="submit" className="contact-submit">ส่งข้อความ →</button>
+                <button type="submit" className="contact-submit">{isTh ? 'ส่งข้อความ →' : 'Send message →'}</button>
               </form>
             )}
           </div>

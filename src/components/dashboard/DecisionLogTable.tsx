@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './DecisionLogTable.css';
 
 interface DecisionLog {
@@ -18,8 +19,10 @@ interface DecisionLogTableProps {
 }
 
 const DecisionLogTable: React.FC<DecisionLogTableProps> = ({ logs }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('th-TH', {
+    return new Date(dateString).toLocaleString(isTh ? 'th-TH' : 'en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -33,13 +36,13 @@ const DecisionLogTable: React.FC<DecisionLogTableProps> = ({ logs }) => {
       <table className="decision-log-table">
         <thead>
           <tr>
-            <th>เวลา</th>
+            <th>{isTh ? 'เวลา' : 'Time'}</th>
             <th>Hub</th>
             <th>Mood</th>
-            <th>ความเป็นอิสระ %</th>
-            <th>ความมั่นใจ</th>
-            <th>เวลาตอบสนอง (ms)</th>
-            <th>ความยาว</th>
+            <th>{isTh ? 'ความเป็นอิสระ %' : 'Autonomy %'}</th>
+            <th>{isTh ? 'ความมั่นใจ' : 'Confidence'}</th>
+            <th>{isTh ? 'เวลาตอบสนอง (ms)' : 'Response time (ms)'}</th>
+            <th>{isTh ? 'ความยาว' : 'Length'}</th>
           </tr>
         </thead>
         <tbody>

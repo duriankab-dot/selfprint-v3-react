@@ -14,6 +14,7 @@
 
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 import type { DecisionIntelligenceReport } from '@/lib/intelligence/DecisionIntelligenceEngine';
 import { saveDecisionForm } from '@/services/supabase-service';
 import './decision-form.css';
@@ -45,6 +46,8 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   onDecisionCreated,
 }) => {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [formData, setFormData] = useState<FormData>({
     title: '',
     context: '',
@@ -97,9 +100,9 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   const validate = (): boolean => {
     const newErrors: Partial<FormData> = {};
 
-    if (!formData.title.trim()) newErrors.title = 'ต้องระบุชื่อการตัดสินใจ';
-    if (!formData.context.trim()) newErrors.context = 'ต้องระบุบริบท';
-    if (!formData.expectedOutcome.trim()) newErrors.expectedOutcome = 'ต้องระบุผลลัพธ์ที่คาดหวัง';
+    if (!formData.title.trim()) newErrors.title = isTh ? 'ต้องระบุชื่อการตัดสินใจ' : 'A decision title is required';
+    if (!formData.context.trim()) newErrors.context = isTh ? 'ต้องระบุบริบท' : 'Context is required';
+    if (!formData.expectedOutcome.trim()) newErrors.expectedOutcome = isTh ? 'ต้องระบุผลลัพธ์ที่คาดหวัง' : 'Expected outcome is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -125,13 +128,13 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
     <form className="decision-form" onSubmit={handleSubmit}>
       <div className="decision-form__group">
         <label className="decision-form__label" htmlFor="title">
-          ชื่อการตัดสินใจ <span className="required">*</span>
+          {isTh ? 'ชื่อการตัดสินใจ' : 'Decision title'} <span className="required">*</span>
         </label>
         <input
           id="title"
           type="text"
           className={`decision-form__input${errors.title ? ' error' : ''}`}
-          placeholder="เช่น: เปลี่ยนงาน, ย้ายเมือง, ลงทุนในโครงการนี้"
+          placeholder={isTh ? 'เช่น: เปลี่ยนงาน, ย้ายเมือง, ลงทุนในโครงการนี้' : 'e.g.: Change jobs, move cities, invest in this project'}
           value={formData.title}
           onChange={(e) => handleChange('title', e.target.value)}
         />
@@ -140,12 +143,12 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
       <div className="decision-form__group">
         <label className="decision-form__label" htmlFor="context">
-          บริบท: ทำไมต้องตัดสินใจตอนนี้? <span className="required">*</span>
+          {isTh ? 'บริบท: ทำไมต้องตัดสินใจตอนนี้?' : 'Context: why decide now?'} <span className="required">*</span>
         </label>
         <textarea
           id="context"
           className={`decision-form__textarea${errors.context ? ' error' : ''}`}
-          placeholder="อธิบายสถานการณ์ที่ทำให้คุณต้องตัดสินใจ..."
+          placeholder={isTh ? 'อธิบายสถานการณ์ที่ทำให้คุณต้องตัดสินใจ...' : 'Describe the situation that requires this decision...'}
           rows={3}
           value={formData.context}
           onChange={(e) => handleChange('context', e.target.value)}
@@ -155,12 +158,12 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
       <div className="decision-form__group">
         <label className="decision-form__label" htmlFor="expectedOutcome">
-          ผลลัพธ์ที่คาดหวัง <span className="required">*</span>
+          {isTh ? 'ผลลัพธ์ที่คาดหวัง' : 'Expected outcome'} <span className="required">*</span>
         </label>
         <textarea
           id="expectedOutcome"
           className={`decision-form__textarea${errors.expectedOutcome ? ' error' : ''}`}
-          placeholder="คุณหวังว่าการตัดสินใจนี้จะนำไปสู่อะไร?"
+          placeholder={isTh ? 'คุณหวังว่าการตัดสินใจนี้จะนำไปสู่อะไร?' : 'What do you hope this decision leads to?'}
           rows={3}
           value={formData.expectedOutcome}
           onChange={(e) => handleChange('expectedOutcome', e.target.value)}
@@ -170,7 +173,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
 
       <div className="decision-form__group">
         <label className="decision-form__label" htmlFor="confidence">
-          ความมั่นใจในการตัดสินใจ: {formData.confidence}%
+          {isTh ? 'ความมั่นใจในการตัดสินใจ' : 'Confidence in this decision'}: {formData.confidence}%
         </label>
         <input
           id="confidence"
@@ -183,17 +186,28 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           onChange={(e) => handleChange('confidence', parseInt(e.target.value))}
         />
         <p className="decision-form__confidence-text">
-          {formData.confidence < 30 && '❓ กำลังลังเล...'}
-          {formData.confidence >= 30 && formData.confidence < 60 && '🤔 ค่อนข้างแน่ใจ'}
-          {formData.confidence >= 60 && formData.confidence < 85 && '✅ ค่อนข้างมั่นใจ'}
-          {formData.confidence >= 85 && '💯 มั่นใจมาก'}
+          {isTh ? (
+            <>
+              {formData.confidence < 30 && '❓ กำลังลังเล...'}
+              {formData.confidence >= 30 && formData.confidence < 60 && '🤔 ค่อนข้างแน่ใจ'}
+              {formData.confidence >= 60 && formData.confidence < 85 && '✅ ค่อนข้างมั่นใจ'}
+              {formData.confidence >= 85 && '💯 มั่นใจมาก'}
+            </>
+          ) : (
+            <>
+              {formData.confidence < 30 && '❓ Still hesitant...'}
+              {formData.confidence >= 30 && formData.confidence < 60 && '🤔 Fairly sure'}
+              {formData.confidence >= 60 && formData.confidence < 85 && '✅ Fairly confident'}
+              {formData.confidence >= 85 && '💯 Very confident'}
+            </>
+          )}
         </p>
       </div>
 
       {/* Decision Analysis Recommendations */}
       {decisionAnalysis && (
         <div className="decision-form__recommendations">
-          <h4>💡 ข้อเสนอแนะแบบที่เหมาะกับสไตล์ของคุณ</h4>
+          <h4>💡 {isTh ? 'ข้อเสนอแนะแบบที่เหมาะกับสไตล์ของคุณ' : 'Recommendations matched to your style'}</h4>
           <div className="frameworks-list">
             {decisionAnalysis.recommendedFrameworks.slice(0, 3).map((fw) => (
               <div key={fw.framework} className="framework-card">
@@ -212,7 +226,9 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
           className="decision-form__btn-submit"
           disabled={createDecisionMutation.isPending}
         >
-          {createDecisionMutation.isPending ? '⏳ กำลังบันทึก...' : '💾 บันทึกการตัดสินใจ'}
+          {createDecisionMutation.isPending
+            ? (isTh ? '⏳ กำลังบันทึก...' : '⏳ Saving...')
+            : (isTh ? '💾 บันทึกการตัดสินใจ' : '💾 Save decision')}
         </button>
       </div>
     </form>

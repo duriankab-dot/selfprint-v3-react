@@ -19,38 +19,48 @@ interface Feature {
   tag?: string;
 }
 
-const FEATURES: Feature[] = [
-  {
-    icon: '🏠',
-    title: 'หน้าแรก',
-    description: 'ภาพรวมของ SelfPrint และวิธีการทำงานของ AI Twin',
-    to: '/',
-  },
-  {
-    icon: '✨',
-    title: 'สร้าง AI Twin ของคุณ',
-    description: 'เริ่มต้นสร้างโปรไฟล์ AI Twin จากวันเกิดและคำถามเจาะลึกเรื่องการตัดสินใจ',
-    to: '/onboarding',
-    tag: 'เริ่มต้นที่นี่',
-  },
-  {
-    icon: '💬',
-    title: 'คุยกับ AI ฝาแฝด',
-    description: 'สนทนากับ AI ที่เข้าใจรูปแบบการตัดสินใจของคุณ ปรับระดับความเป็นอิสระได้เอง',
-    // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin guide),
-    // wrong assistant — this card is explicitly labeled "AI ฝาแฝด" (Twin).
-    to: '/chat/twin',
-  },
-  {
-    icon: '📊',
-    title: 'แดชบอร์ด & AI Twin Blueprint',
-    description: 'ดู Prototype Core, ข้อมูลเชิงลึก แนวโน้มความเป็นอิสระ ส่งออก และแชร์ทั้งหมดในที่เดียว',
-    to: '/dashboard',
-  },
-];
+function getFeatures(isTh: boolean): Feature[] {
+  return [
+    {
+      icon: '🏠',
+      title: isTh ? 'หน้าแรก' : 'Home',
+      description: isTh ? 'ภาพรวมของ SelfPrint และวิธีการทำงานของ AI Twin' : 'An overview of SelfPrint and how your AI Twin works',
+      to: '/',
+    },
+    {
+      icon: '✨',
+      title: isTh ? 'สร้าง AI Twin ของคุณ' : 'Create your AI Twin',
+      description: isTh
+        ? 'เริ่มต้นสร้างโปรไฟล์ AI Twin จากวันเกิดและคำถามเจาะลึกเรื่องการตัดสินใจ'
+        : 'Start building your AI Twin profile from your birth details and in-depth decision-making questions',
+      to: '/onboarding',
+      tag: isTh ? 'เริ่มต้นที่นี่' : 'Start here',
+    },
+    {
+      icon: '💬',
+      title: isTh ? 'คุยกับ AI ฝาแฝด' : 'Chat with your AI Twin',
+      description: isTh
+        ? 'สนทนากับ AI ที่เข้าใจรูปแบบการตัดสินใจของคุณ ปรับระดับความเป็นอิสระได้เอง'
+        : 'Talk with an AI that understands your decision-making patterns — adjust the autonomy level yourself',
+      // BOTTOMNAV-001 FIX: '/chat' redirects to /chat/nova (pre-Twin guide),
+      // wrong assistant — this card is explicitly labeled "AI Twin".
+      to: '/chat/twin',
+    },
+    {
+      icon: '📊',
+      title: isTh ? 'แดชบอร์ด & AI Twin Blueprint' : 'Dashboard & AI Twin Blueprint',
+      description: isTh
+        ? 'ดู Prototype Core, ข้อมูลเชิงลึก แนวโน้มความเป็นอิสระ ส่งออก และแชร์ทั้งหมดในที่เดียว'
+        : 'View your Prototype Core, insights, autonomy trends, export and share — all in one place',
+      to: '/dashboard',
+    },
+  ];
+}
 
 export default function FeatureMenu() {
   const { language } = useLanguage();
+  const isTh = language === 'th';
+  const FEATURES = getFeatures(isTh);
   // ROUTELOOP-002 FIX: bare paths hit the app's catch-all route instead of
   // the intended page. "/" is left alone (own dedicated redirect rule).
   const prefixedTo = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
@@ -75,10 +85,10 @@ export default function FeatureMenu() {
                 margin: '0 0 10px 0',
               }}
             >
-              เมนูฟีเจอร์
+              {isTh ? 'เมนูฟีเจอร์' : 'Feature Menu'}
             </h1>
             <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', margin: 0 }}>
-              ทุกฟีเจอร์ของ SelfPrint ในที่เดียว เลือกได้เลยว่าอยากทำอะไรต่อ
+              {isTh ? 'ทุกฟีเจอร์ของ SelfPrint ในที่เดียว เลือกได้เลยว่าอยากทำอะไรต่อ' : 'Every SelfPrint feature in one place — pick what you want to do next'}
             </p>
           </div>
 

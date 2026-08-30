@@ -37,8 +37,10 @@ const PLANS: Array<{
   annualMonthly: number | null;
   savings: number | null;
   cta: string;
+  ctaEn: string;
   highlighted: boolean;
   features: string[];
+  featuresEn: string[];
 }> = [
   {
     tier: 'free',
@@ -49,12 +51,21 @@ const PLANS: Array<{
     annualMonthly: null,
     savings: null,
     cta: 'เริ่มต้นใช้งาน',
+    ctaEn: 'Get started',
     highlighted: false,
     features: [
       'สนทนากับ Twin ขั้นพื้นฐาน',
       'Insight & Reflection หลัก',
       'Hub access',
       'Archetype 1 แบบ',
+      'Badge system',
+      'Evolution milestones',
+    ],
+    featuresEn: [
+      'Basic conversation with your Twin',
+      'Core Insight & Reflection',
+      'Hub access',
+      '1 Archetype',
       'Badge system',
       'Evolution milestones',
     ],
@@ -68,6 +79,7 @@ const PLANS: Array<{
     annualMonthly: 166,
     savings: 509,
     cta: 'เริ่ม Plus',
+    ctaEn: 'Start Plus',
     highlighted: true,
     features: [
       'ทุกอย่างใน Free',
@@ -76,6 +88,15 @@ const PLANS: Array<{
       'Advanced analytics & insights',
       'Archetypes ครบ 18 แบบ',
       'Daily Brief ด้วยเสียง (§25)',
+      'Decision guidance',
+    ],
+    featuresEn: [
+      'Everything in Free',
+      'Memory persistence — your Twin remembers you',
+      'Pattern detection — behavioral patterns',
+      'Advanced analytics & insights',
+      'All 18 Archetypes',
+      'Voice Daily Brief (§25)',
       'Decision guidance',
     ],
   },
@@ -88,6 +109,7 @@ const PLANS: Array<{
     annualMonthly: 416,
     savings: 1078,
     cta: 'เริ่ม Pro',
+    ctaEn: 'Start Pro',
     highlighted: false,
     features: [
       'ทุกอย่างใน Plus',
@@ -96,6 +118,15 @@ const PLANS: Array<{
       'Relationship insights',
       'Career intelligence',
       'AI usage สูงกว่า',
+      'Priority email support',
+    ],
+    featuresEn: [
+      'Everything in Plus',
+      'Future Self projection',
+      'Journey roadmap',
+      'Relationship insights',
+      'Career intelligence',
+      'Higher AI usage limits',
       'Priority email support',
     ],
   },
@@ -108,9 +139,19 @@ const PLANS: Array<{
     annualMonthly: null,
     savings: null,
     cta: 'รับ Lifetime',
+    ctaEn: 'Get Lifetime',
     highlighted: false,
     features: [
       'ทุกอย่างใน Pro ไม่จำกัด',
+      'Unlimited AI usage',
+      'Export Twin data & conversations',
+      'Custom Twin training',
+      'VIP community access',
+      'Lifetime updates',
+      'Priority 24/7 support',
+    ],
+    featuresEn: [
+      'Everything in Pro, unlimited',
       'Unlimited AI usage',
       'Export Twin data & conversations',
       'Custom Twin training',
@@ -126,6 +167,7 @@ export default function PricingPage() {
   const [billing, setBilling] = useState<BillingPeriod>('monthly');
   const { tier: currentTier, startCheckout, managePlan, canUpgrade } = usePricing();
   const { language } = useLanguage();
+  const isTh = language === 'th';
   const seoData = getSeoMetadata('pricing', language);
 
   // Generate pricing schema for search engines
@@ -239,25 +281,27 @@ export default function PricingPage() {
         {/* Header */}
         <div className="pricing-header">
         <p className="pricing-eyebrow">§ 31 Monetization</p>
-        <h1 className="pricing-title">เลือกแผนที่ใช่สำหรับคุณ</h1>
+        <h1 className="pricing-title">{isTh ? 'เลือกแผนที่ใช่สำหรับคุณ' : 'Choose the plan that fits you'}</h1>
         <p className="pricing-subtitle">
-          ยิ่งเข้าใจตัวเองลึกขึ้นเท่าไร Twin ของคุณยิ่งมีคุณค่ามากขึ้นเท่านั้น
+          {isTh
+            ? 'ยิ่งเข้าใจตัวเองลึกขึ้นเท่าไร Twin ของคุณยิ่งมีคุณค่ามากขึ้นเท่านั้น'
+            : 'The deeper you understand yourself, the more valuable your Twin becomes'}
         </p>
 
         {/* Billing toggle */}
-        <div className="pricing-billing-toggle" role="group" aria-label="รูปแบบการชำระเงิน">
+        <div className="pricing-billing-toggle" role="group" aria-label={isTh ? 'รูปแบบการชำระเงิน' : 'Billing period'}>
           <button
             className={`pricing-billing-btn${billing === 'monthly' ? ' active' : ''}`}
             onClick={() => setBilling('monthly')}
           >
-            รายเดือน
+            {isTh ? 'รายเดือน' : 'Monthly'}
           </button>
           <button
             className={`pricing-billing-btn${billing === 'annual' ? ' active' : ''}`}
             onClick={() => setBilling('annual')}
           >
-            รายปี
-            <span className="pricing-billing-badge">ประหยัดถึง 28%</span>
+            {isTh ? 'รายปี' : 'Annual'}
+            <span className="pricing-billing-badge">{isTh ? 'ประหยัดถึง 28%' : 'Save up to 28%'}</span>
           </button>
         </div>
       </div>
@@ -281,11 +325,11 @@ export default function PricingPage() {
                 .join(' ')}
             >
               {plan.highlighted && (
-                <div className="pricing-card-badge">ยอดนิยม</div>
+                <div className="pricing-card-badge">{isTh ? 'ยอดนิยม' : 'Popular'}</div>
               )}
               {isCurrent && (
                 <div className="pricing-card-badge pricing-card-badge--current">
-                  แผนของคุณ
+                  {isTh ? 'แผนของคุณ' : 'Your plan'}
                 </div>
               )}
 
@@ -300,13 +344,21 @@ export default function PricingPage() {
 
                 {billing === 'annual' && plan.savings && (
                   <p className="pricing-savings">
-                    ประหยัด ฿{plan.savings.toLocaleString()}/ปี
+                    {isTh ? (
+                      `ประหยัด ฿${plan.savings.toLocaleString()}/ปี`
+                    ) : (
+                      (() => {
+                        const usd = USD_PRICES[plan.tier];
+                        const usdSavings = usd ? Math.round((usd.monthly * 12 - usd.annual) * 100) / 100 : 0;
+                        return `Save ${formatCurrency(usdSavings, currency)}/year`;
+                      })()
+                    )}
                   </p>
                 )}
               </div>
 
               <ul className="pricing-features">
-                {plan.features.map((f) => (
+                {(isTh ? plan.features : plan.featuresEn).map((f) => (
                   <li key={f} className="pricing-feature-item">
                     <span className="pricing-feature-check" aria-hidden="true">✦</span>
                     {f}
@@ -326,10 +378,10 @@ export default function PricingPage() {
                 disabled={plan.tier === 'free' && isCurrent}
               >
                 {isCurrent && plan.tier !== 'free'
-                  ? 'จัดการแผน'
+                  ? (isTh ? 'จัดการแผน' : 'Manage plan')
                   : isCurrent
-                  ? 'แผนปัจจุบัน'
-                  : plan.cta}
+                  ? (isTh ? 'แผนปัจจุบัน' : 'Current plan')
+                  : (isTh ? plan.cta : plan.ctaEn)}
               </button>
             </div>
           );
@@ -338,11 +390,11 @@ export default function PricingPage() {
 
       {/* Footer note */}
       <div className="pricing-footer">
-        <p>ไม่มีสัญญาผูกมัด — ยกเลิกได้ทุกเมื่อ</p>
+        <p>{isTh ? 'ไม่มีสัญญาผูกมัด — ยกเลิกได้ทุกเมื่อ' : 'No contract — cancel anytime'}</p>
         <p>
-          มีคำถาม?{' '}
+          {isTh ? 'มีคำถาม?' : 'Questions?'}{' '}
           <a href="mailto:hello@selfprint.app" className="pricing-footer-link">
-            ติดต่อเรา
+            {isTh ? 'ติดต่อเรา' : 'Contact us'}
           </a>
         </p>
       </div>

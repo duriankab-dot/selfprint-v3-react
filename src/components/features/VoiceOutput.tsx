@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './voice-output.css';
 
 interface VoiceOutputProps {
@@ -21,14 +22,21 @@ const VoiceOutput: React.FC<VoiceOutputProps> = ({
   message,
   settings,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+
   const handleSpeak = () => {
     if (!message) {
-      alert('ไม่มีข้อความให้อ่าน');
+      alert(isTh ? 'ไม่มีข้อความให้อ่าน' : 'No message to read');
       return;
     }
 
     // Mock text-to-speech
-    alert(`กำลังอ่าน (Tone: ${settings.tone}, Pace: ${settings.pace}, Volume: ${settings.volume}%)`);
+    alert(
+      isTh
+        ? `กำลังอ่าน (Tone: ${settings.tone}, Pace: ${settings.pace}, Volume: ${settings.volume}%)`
+        : `Speaking (Tone: ${settings.tone}, Pace: ${settings.pace}, Volume: ${settings.volume}%)`
+    );
   };
 
   return (
@@ -37,12 +45,12 @@ const VoiceOutput: React.FC<VoiceOutputProps> = ({
         className={`voice-output__btn${isSpeaking ? ' speaking' : ''}`}
         onClick={handleSpeak}
         disabled={!message}
-        title="อ่านคำตอบ"
+        title={isTh ? 'อ่านคำตอบ' : 'Read the answer'}
       >
         🔊
       </button>
       <span className="voice-output__status">
-        {isSpeaking ? 'กำลังอ่าน...' : 'พร้อมอ่าน'}
+        {isSpeaking ? (isTh ? 'กำลังอ่าน...' : 'Speaking...') : (isTh ? 'พร้อมอ่าน' : 'Ready to speak')}
       </span>
     </div>
   );

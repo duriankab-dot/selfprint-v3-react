@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './TrendChart.css';
 
 interface TrendPoint {
@@ -12,8 +13,14 @@ interface TrendChartProps {
 }
 
 const TrendChart: React.FC<TrendChartProps> = ({ data }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   if (data.length < 2) {
-    return <div className="chart-empty">ข้อมูลยังไม่พอสำหรับแสดงกราฟ</div>;
+    return (
+      <div className="chart-empty">
+        {isTh ? 'ข้อมูลยังไม่พอสำหรับแสดงกราฟ' : 'Not enough data to show a chart yet'}
+      </div>
+    );
   }
 
   // Find min/max for scaling
@@ -129,7 +136,7 @@ const TrendChart: React.FC<TrendChartProps> = ({ data }) => {
       <div className="chart-legend">
         <div className="legend-item">
           <div className="legend-color" style={{ background: 'linear-gradient(90deg, #667eea, #764ba2)' }} />
-          <span>ระดับความเป็นอิสระ (%)</span>
+          <span>{isTh ? 'ระดับความเป็นอิสระ (%)' : 'Autonomy Level (%)'}</span>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { FutureSelfEngine } from '@/lib/intelligence/FutureSelfEngine';
 import type { PersonalContext } from '@/lib/intelligence/types';
+import { useLanguage } from '@/context/LanguageContext';
 import './FutureSelfPanel.css';
 
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 }
 
 const FutureSelfPanel: React.FC<Props> = ({ context }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const engine = useMemo(() => new FutureSelfEngine(), []);
 
   const projection = useMemo(() => {
@@ -23,14 +26,16 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
   if (!projection) {
     return (
       <div className="future-self-panel future-self-panel--empty">
-        <p className="future-self-empty-text">เพิ่ม reflection เพื่อให้ AI ทำนายอนาคตของคุณ</p>
+        <p className="future-self-empty-text">
+          {isTh ? 'เพิ่ม reflection เพื่อให้ AI ทำนายอนาคตของคุณ' : 'Add a reflection so AI can project your future'}
+        </p>
       </div>
     );
   }
 
   const qualityLabel =
-    projection.dataQuality === 'rich' ? '🟢 ข้อมูลครบ' :
-    projection.dataQuality === 'moderate' ? '🟡 ข้อมูลปานกลาง' : '🔴 ข้อมูลน้อย';
+    projection.dataQuality === 'rich' ? (isTh ? '🟢 ข้อมูลครบ' : '🟢 Rich data') :
+    projection.dataQuality === 'moderate' ? (isTh ? '🟡 ข้อมูลปานกลาง' : '🟡 Moderate data') : (isTh ? '🔴 ข้อมูลน้อย' : '🔴 Limited data');
 
   return (
     <div className="future-self-panel">
@@ -50,7 +55,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
             </div>
 
             <div className="scenario-section">
-              <p className="scenario-section-title">📈 แนวโน้ม</p>
+              <p className="scenario-section-title">📈 {isTh ? 'แนวโน้ม' : 'Trajectory'}</p>
               <ul className="scenario-list">
                 {s.likelyTrajectory.map((t, i) => (
                   <li key={i}>{t}</li>
@@ -59,7 +64,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
             </div>
 
             <div className="scenario-section">
-              <p className="scenario-section-title">↑ โอกาสเติบโต</p>
+              <p className="scenario-section-title">↑ {isTh ? 'โอกาสเติบโต' : 'Growth Opportunities'}</p>
               <ul className="scenario-list">
                 {s.growthOpportunities.map((g, i) => (
                   <li key={i}>{g}</li>
@@ -69,7 +74,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
 
             {s.riskAreas.length > 0 && (
               <div className="scenario-section">
-                <p className="scenario-section-title">⚠️ ระวัง</p>
+                <p className="scenario-section-title">⚠️ {isTh ? 'ระวัง' : 'Watch out for'}</p>
                 <ul className="scenario-list scenario-list--risk">
                   {s.riskAreas.map((r, i) => (
                     <li key={i}>{r}</li>

@@ -5,20 +5,26 @@
  * Route: /pricing/success?session_id=...
  */
 
+import { useLanguage } from '@/context/LanguageContext';
+
 export default function PricingSuccessPage() {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get('session_id');
 
   return (
     <div className="pricing-success">
       <div className="pricing-success-icon" aria-hidden="true">✦</div>
-      <h1 className="pricing-success-title">ยินดีด้วย!</h1>
+      <h1 className="pricing-success-title">{isTh ? 'ยินดีด้วย!' : 'Congratulations!'}</h1>
       <p className="pricing-success-subtitle">
-        Twin ของคุณพร้อมให้รู้จักคุณในระดับที่ลึกขึ้นแล้ว
+        {isTh
+          ? 'Twin ของคุณพร้อมให้รู้จักคุณในระดับที่ลึกขึ้นแล้ว'
+          : 'Your Twin is ready to know you on a deeper level'}
       </p>
       {sessionId && (
         <p className="pricing-success-ref">
-          หมายเลขอ้างอิง: <code>{sessionId.slice(0, 20)}…</code>
+          {isTh ? 'หมายเลขอ้างอิง:' : 'Reference number:'} <code>{sessionId.slice(0, 20)}…</code>
         </p>
       )}
       <button
@@ -29,7 +35,7 @@ export default function PricingSuccessPage() {
           window.location.href = `${langPrefix}/dashboard`;
         }}
       >
-        เปิด Dashboard
+        {isTh ? 'เปิด Dashboard' : 'Open Dashboard'}
       </button>
     </div>
   );

@@ -14,6 +14,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { BadgeEngine } from '@/lib/intelligence/BadgeEngine';
 import type { BadgeDefinition, EarnedBadge, BadgeId } from '@/lib/intelligence/BadgeEngine';
 import { BADGE_DEFINITIONS } from '@/lib/intelligence/BadgeEngine';
@@ -32,10 +33,13 @@ interface BadgeCardProps {
   definition: BadgeDefinition;
   earned?: EarnedBadge;
   isNext?: boolean;
+  isTh: boolean;
 }
 
-function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
+function BadgeCard({ definition, earned, isNext, isTh }: BadgeCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const earnedLabel = isTh ? 'ได้รับแล้ว' : 'Earned';
+  const notEarnedLabel = isTh ? 'ยังไม่ได้รับ' : 'Not earned yet';
 
   return (
     <div
@@ -51,7 +55,7 @@ function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && setExpanded((v) => !v)}
       aria-expanded={expanded}
-      aria-label={`${definition.nameTh} — ${earned ? 'ได้รับแล้ว' : 'ยังไม่ได้รับ'}`}
+      aria-label={`${definition.nameTh} — ${earned ? earnedLabel : notEarnedLabel}`}
     >
       <div className="badge-card-header">
         <span className="badge-icon" aria-hidden="true">
@@ -61,12 +65,13 @@ function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
           <p className="badge-name">{definition.nameTh}</p>
           {earned ? (
             <p className="badge-earned-date">
-              ได้รับ {new Date(earned.earnedAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' })}
+              {isTh ? 'ได้รับ' : 'Earned'}{' '}
+              {new Date(earned.earnedAt).toLocaleDateString(isTh ? 'th-TH' : 'en-US', { day: 'numeric', month: 'short', year: '2-digit' })}
             </p>
           ) : isNext ? (
-            <p className="badge-next-label">🎯 ถัดไป</p>
+            <p className="badge-next-label">🎯 {isTh ? 'ถัดไป' : 'Next'}</p>
           ) : (
-            <p className="badge-locked-label">ยังไม่ได้รับ</p>
+            <p className="badge-locked-label">{notEarnedLabel}</p>
           )}
         </div>
         <span className="badge-expand" aria-hidden="true">{expanded ? '▲' : '▼'}</span>
@@ -77,11 +82,11 @@ function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
           <p className="badge-desc">{definition.descriptionTh}</p>
           {!earned && (
             <p className="badge-requirement">
-              <strong>เงื่อนไข:</strong> {definition.requirementTh}
+              <strong>{isTh ? 'เงื่อนไข:' : 'Requirement:'}</strong> {definition.requirementTh}
             </p>
           )}
           <div className="badge-unlock-info">
-            <span className="badge-unlock-label">🔓 ปลดล็อก:</span>
+            <span className="badge-unlock-label">🔓 {isTh ? 'ปลดล็อก:' : 'Unlocks:'}</span>
             <span className="badge-unlock-text">{definition.unlockTh}</span>
           </div>
         </div>
@@ -97,6 +102,8 @@ function BadgeCard({ definition, earned, isNext }: BadgeCardProps) {
 export function BadgeGallery() {
   const { session } = useAuth();
   const userId = session?.user?.id ?? null;
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const { data, isLoading } = useQuery({
     queryKey: ['badgeState', userId],
@@ -110,7 +117,7 @@ export function BadgeGallery() {
   if (isLoading) {
     return (
       <div className="badge-gallery badge-gallery--loading">
-        <p className="badge-loading-text">กำลังโหลด Badge ของคุณ...</p>
+        <p className="badge-loading-text">{isTh ? 'กำลังโหลด Badge ของคุณ...' : 'Loading your badges...'}</p>
       </div>
     );
   }
@@ -126,9 +133,9 @@ export function BadgeGallery() {
     <section className="badge-gallery" aria-label="Badge Gallery">
       {/* Progress bar */}
       <div className="badge-gallery-header">
-        <h2 className="badge-gallery-title">Badge ของคุณ</h2>
+        <h2 className="badge-gallery-title">{isTh ? 'Badge ของคุณ' : 'Your Badges'}</h2>
         <p className="badge-gallery-progress">
-          {earnedCount} / {total} ปลดล็อกแล้ว
+          {earnedCount} / {total} {isTh ? 'ปลดล็อกแล้ว' : 'unlocked'}
         </p>
       </div>
       <div
@@ -147,13 +154,14 @@ export function BadgeGallery() {
       {/* Earned */}
       {earned.length > 0 && (
         <div className="badge-section">
-          <h3 className="badge-section-title">✅ ได้รับแล้ว</h3>
+          <h3 className="badge-section-title">✅ {isTh ? 'ได้รับแล้ว' : 'Earned'}</h3>
           <div className="badge-grid">
             {earned.map((e) => (
               <BadgeCard
                 key={e.id}
                 definition={BADGE_DEFINITIONS[e.id]}
                 earned={e}
+                isTh={isTh}
               />
             ))}
           </div>
@@ -163,13 +171,14 @@ export function BadgeGallery() {
       {/* Next + Available */}
       {available.length > 0 && (
         <div className="badge-section">
-          <h3 className="badge-section-title">🔒 ยังไม่ได้รับ</h3>
+          <h3 className="badge-section-title">🔒 {isTh ? 'ยังไม่ได้รับ' : 'Not earned yet'}</h3>
           <div className="badge-grid">
             {available.map((def) => (
               <BadgeCard
                 key={def.id}
                 definition={def}
                 isNext={def.id === nextBadge?.id}
+                isTh={isTh}
               />
             ))}
           </div>
@@ -178,7 +187,7 @@ export function BadgeGallery() {
 
       {earnedCount === total && (
         <div className="badge-complete-banner">
-          🌟 คุณปลดล็อก Badge ทั้งหมดแล้ว — Selfprint ของคุณสมบูรณ์แบบ!
+          {isTh ? '🌟 คุณปลดล็อก Badge ทั้งหมดแล้ว — Selfprint ของคุณสมบูรณ์แบบ!' : '🌟 You unlocked every badge — your Selfprint is complete!'}
         </div>
       )}
     </section>

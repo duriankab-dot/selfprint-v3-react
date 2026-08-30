@@ -15,27 +15,34 @@ import { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
+import { useLanguage } from '../context/LanguageContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface HandOption {
   id: string;
-  label: string;
-  description: string;
+  labelTh: string;
+  labelEn: string;
+  descriptionTh: string;
+  descriptionEn: string;
   emoji: string;
 }
 
 interface HandSection {
   id: string;
-  title: string;
-  description: string;
+  titleTh: string;
+  titleEn: string;
+  descriptionTh: string;
+  descriptionEn: string;
   options: HandOption[];
 }
 
 interface PalmResult {
-  trait: string;
-  insight: string;
+  traitTh: string;
+  traitEn: string;
+  insightTh: string;
+  insightEn: string;
   tendency: string;
 }
 
@@ -44,118 +51,156 @@ interface PalmResult {
 const HAND_SECTIONS: HandSection[] = [
   {
     id: 'shape',
-    title: 'รูปทรงมือโดยรวม',
-    description: 'เลือกที่ใกล้เคียงมือของคุณมากที่สุด',
+    titleTh: 'รูปทรงมือโดยรวม',
+    titleEn: 'Overall hand shape',
+    descriptionTh: 'เลือกที่ใกล้เคียงมือของคุณมากที่สุด',
+    descriptionEn: 'Pick the one closest to your hand',
     options: [
       {
         id: 'square_short',
-        label: 'สี่เหลี่ยม · นิ้วสั้น',
-        description: 'ฝ่ามือกว้าง นิ้วดูเตี้ย',
+        labelTh: 'สี่เหลี่ยม · นิ้วสั้น',
+        labelEn: 'Square · short fingers',
+        descriptionTh: 'ฝ่ามือกว้าง นิ้วดูเตี้ย',
+        descriptionEn: 'Wide palm, short-looking fingers',
         emoji: '🏔️',
       },
       {
         id: 'square_long',
-        label: 'สี่เหลี่ยม · นิ้วยาว',
-        description: 'ฝ่ามือกว้าง นิ้วยาวสม่ำเสมอ',
+        labelTh: 'สี่เหลี่ยม · นิ้วยาว',
+        labelEn: 'Square · long fingers',
+        descriptionTh: 'ฝ่ามือกว้าง นิ้วยาวสม่ำเสมอ',
+        descriptionEn: 'Wide palm, evenly long fingers',
         emoji: '🌲',
       },
       {
         id: 'rectangle_short',
-        label: 'สี่เหลี่ยมผืนผ้า · นิ้วสั้น',
-        description: 'ฝ่ามือยาว นิ้วดูเตี้ย',
+        labelTh: 'สี่เหลี่ยมผืนผ้า · นิ้วสั้น',
+        labelEn: 'Rectangular · short fingers',
+        descriptionTh: 'ฝ่ามือยาว นิ้วดูเตี้ย',
+        descriptionEn: 'Long palm, short-looking fingers',
         emoji: '🌊',
       },
       {
         id: 'rectangle_long',
-        label: 'สี่เหลี่ยมผืนผ้า · นิ้วยาว',
-        description: 'ฝ่ามือยาว นิ้วเรียว',
+        labelTh: 'สี่เหลี่ยมผืนผ้า · นิ้วยาว',
+        labelEn: 'Rectangular · long fingers',
+        descriptionTh: 'ฝ่ามือยาว นิ้วเรียว',
+        descriptionEn: 'Long palm, slender fingers',
         emoji: '💨',
       },
     ],
   },
   {
     id: 'headline',
-    title: 'เส้นความคิด (Head Line)',
-    description: 'เส้นกลางฝ่ามือ — ขีดในแนวนอน',
+    titleTh: 'เส้นความคิด (Head Line)',
+    titleEn: 'Head line',
+    descriptionTh: 'เส้นกลางฝ่ามือ — ขีดในแนวนอน',
+    descriptionEn: 'The horizontal line across the middle of your palm',
     options: [
       {
         id: 'short_straight',
-        label: 'สั้น · ตรง',
-        description: 'คิดตรงไปตรงมา โฟกัสด้านปฏิบัติ',
+        labelTh: 'สั้น · ตรง',
+        labelEn: 'Short · straight',
+        descriptionTh: 'คิดตรงไปตรงมา โฟกัสด้านปฏิบัติ',
+        descriptionEn: 'Straightforward thinking, practically focused',
         emoji: '➡️',
       },
       {
         id: 'long_straight',
-        label: 'ยาว · ตรง',
-        description: 'คิดเป็นระบบ วิเคราะห์เชิงลึก',
+        labelTh: 'ยาว · ตรง',
+        labelEn: 'Long · straight',
+        descriptionTh: 'คิดเป็นระบบ วิเคราะห์เชิงลึก',
+        descriptionEn: 'Systematic thinking, deep analysis',
         emoji: '📐',
       },
       {
         id: 'curved',
-        label: 'โค้งลง',
-        description: 'คิดสร้างสรรค์ จินตนาการสูง',
+        labelTh: 'โค้งลง',
+        labelEn: 'Curving downward',
+        descriptionTh: 'คิดสร้างสรรค์ จินตนาการสูง',
+        descriptionEn: 'Creative thinking, highly imaginative',
         emoji: '🌙',
       },
       {
         id: 'broken',
-        label: 'ขาดหรือหลายแขนง',
-        description: 'คิดหลายมิติพร้อมกัน ปรับตัวได้สูง',
+        labelTh: 'ขาดหรือหลายแขนง',
+        labelEn: 'Broken or branching',
+        descriptionTh: 'คิดหลายมิติพร้อมกัน ปรับตัวได้สูง',
+        descriptionEn: 'Thinks in multiple dimensions at once, highly adaptable',
         emoji: '⚡',
       },
     ],
   },
   {
     id: 'lifeline',
-    title: 'เส้นชีวิต (Life Line)',
-    description: 'เส้นโค้งรอบนิ้วหัวแม่มือ',
+    titleTh: 'เส้นชีวิต (Life Line)',
+    titleEn: 'Life line',
+    descriptionTh: 'เส้นโค้งรอบนิ้วหัวแม่มือ',
+    descriptionEn: 'The curved line around the base of your thumb',
     options: [
       {
         id: 'wide_arc',
-        label: 'โค้งกว้าง',
-        description: 'พลังงานสูง ชอบความท้าทาย',
+        labelTh: 'โค้งกว้าง',
+        labelEn: 'Wide arc',
+        descriptionTh: 'พลังงานสูง ชอบความท้าทาย',
+        descriptionEn: 'High energy, drawn to challenges',
         emoji: '🔥',
       },
       {
         id: 'close_thumb',
-        label: 'ชิดนิ้วหัวแม่มือ',
-        description: 'รอบคอบ ประหยัดพลังงาน',
+        labelTh: 'ชิดนิ้วหัวแม่มือ',
+        labelEn: 'Close to the thumb',
+        descriptionTh: 'รอบคอบ ประหยัดพลังงาน',
+        descriptionEn: 'Careful, conserves energy',
         emoji: '🎯',
       },
       {
         id: 'forked',
-        label: 'แตกสาขา',
-        description: 'ชีวิตมีหลายเส้นทาง ชอบเปลี่ยนแปลง',
+        labelTh: 'แตกสาขา',
+        labelEn: 'Forked',
+        descriptionTh: 'ชีวิตมีหลายเส้นทาง ชอบเปลี่ยนแปลง',
+        descriptionEn: 'Life takes multiple paths, drawn to change',
         emoji: '🌿',
       },
     ],
   },
   {
     id: 'heartline',
-    title: 'เส้นหัวใจ (Heart Line)',
-    description: 'เส้นบนสุดของฝ่ามือ',
+    titleTh: 'เส้นหัวใจ (Heart Line)',
+    titleEn: 'Heart line',
+    descriptionTh: 'เส้นบนสุดของฝ่ามือ',
+    descriptionEn: 'The topmost line across your palm',
     options: [
       {
         id: 'starts_index',
-        label: 'เริ่มต้นใต้นิ้วชี้',
-        description: 'ให้ความสำคัญกับความสัมพันธ์',
+        labelTh: 'เริ่มต้นใต้นิ้วชี้',
+        labelEn: 'Starts beneath the index finger',
+        descriptionTh: 'ให้ความสำคัญกับความสัมพันธ์',
+        descriptionEn: 'Values relationships highly',
         emoji: '💕',
       },
       {
         id: 'starts_middle',
-        label: 'เริ่มต้นใต้นิ้วกลาง',
-        description: 'เชิงปฏิบัติในความรัก',
+        labelTh: 'เริ่มต้นใต้นิ้วกลาง',
+        labelEn: 'Starts beneath the middle finger',
+        descriptionTh: 'เชิงปฏิบัติในความรัก',
+        descriptionEn: 'Practical when it comes to love',
         emoji: '⚖️',
       },
       {
         id: 'straight',
-        label: 'ตรง',
-        description: 'แสดงอารมณ์ตามเหตุผล',
+        labelTh: 'ตรง',
+        labelEn: 'Straight',
+        descriptionTh: 'แสดงอารมณ์ตามเหตุผล',
+        descriptionEn: 'Expresses emotion through reason',
         emoji: '📊',
       },
       {
         id: 'deeply_curved',
-        label: 'โค้งลึก',
-        description: 'แสดงอารมณ์อย่างเต็มที่',
+        labelTh: 'โค้งลึก',
+        labelEn: 'Deeply curved',
+        descriptionTh: 'แสดงอารมณ์อย่างเต็มที่',
+        descriptionEn: 'Expresses emotion fully and openly',
         emoji: '🌊',
       },
     ],
@@ -166,31 +211,41 @@ const HAND_SECTIONS: HandSection[] = [
 const TRAIT_MAP: Record<string, PalmResult> = {
   // Fire hand (square/short)
   square_short_short_straight: {
-    trait: 'นักปฏิบัติที่มุ่งเป้า',
-    insight: 'คุณประมวลข้อมูลรวดเร็ว ตัดสินใจเด็ดขาด และชอบเห็นผลลัพธ์ที่จับต้องได้ จุดแข็งคือประสิทธิภาพ — จุดที่ควรพัฒนาคือการรับฟังมุมมองที่ต่างออกไป',
+    traitTh: 'นักปฏิบัติที่มุ่งเป้า',
+    traitEn: 'The goal-driven doer',
+    insightTh: 'คุณประมวลข้อมูลรวดเร็ว ตัดสินใจเด็ดขาด และชอบเห็นผลลัพธ์ที่จับต้องได้ จุดแข็งคือประสิทธิภาพ — จุดที่ควรพัฒนาคือการรับฟังมุมมองที่ต่างออกไป',
+    insightEn: "You process information quickly, decide firmly, and like seeing tangible results. Your strength is efficiency — the growth edge is staying open to different perspectives.",
     tendency: 'Action-oriented · Pragmatic · Results-focused',
   },
   square_short_curved: {
-    trait: 'นักสร้างสรรค์ที่มีพลังงาน',
-    insight: 'คุณผสมผสานความคิดสร้างสรรค์กับพลังงานในการลงมือทำได้ดี จุดแข็งคือไอเดียที่ได้รับการ execute — จุดที่ควรพัฒนาคือความสม่ำเสมอในระยะยาว',
+    traitTh: 'นักสร้างสรรค์ที่มีพลังงาน',
+    traitEn: 'The energetic creator',
+    insightTh: 'คุณผสมผสานความคิดสร้างสรรค์กับพลังงานในการลงมือทำได้ดี จุดแข็งคือไอเดียที่ได้รับการ execute — จุดที่ควรพัฒนาคือความสม่ำเสมอในระยะยาว',
+    insightEn: 'You combine creative thinking with the energy to act on it. Your strength is turning ideas into execution — the growth edge is staying consistent over the long run.',
     tendency: 'Creative · Energetic · Entrepreneurial',
   },
   // Air hand (square/long)
   square_long_long_straight: {
-    trait: 'นักวิเคราะห์เชิงลึก',
-    insight: 'คุณคิดเป็นระบบ วิเคราะห์ข้อมูลได้ละเอียด และชอบความแม่นยำ จุดแข็งคือการวางแผนที่รัดกุม — จุดที่ควรพัฒนาคือการลงมือทำเมื่อข้อมูลยังไม่สมบูรณ์ 100%',
+    traitTh: 'นักวิเคราะห์เชิงลึก',
+    traitEn: 'The deep analyst',
+    insightTh: 'คุณคิดเป็นระบบ วิเคราะห์ข้อมูลได้ละเอียด และชอบความแม่นยำ จุดแข็งคือการวางแผนที่รัดกุม — จุดที่ควรพัฒนาคือการลงมือทำเมื่อข้อมูลยังไม่สมบูรณ์ 100%',
+    insightEn: "You think systematically, analyze in detail, and value precision. Your strength is airtight planning — the growth edge is acting even when the data isn't 100% complete.",
     tendency: 'Analytical · Systematic · Detail-oriented',
   },
   // Water hand (rectangle/long)
   rectangle_long_curved: {
-    trait: 'ผู้รับรู้ทางอารมณ์',
-    insight: 'คุณมีความสามารถในการอ่านอารมณ์ผู้อื่นและเชื่อมต่อในระดับลึก จุดแข็งคือ empathy และความเข้าใจมนุษย์ — จุดที่ควรพัฒนาคือการรักษาขอบเขตส่วนตัว',
+    traitTh: 'ผู้รับรู้ทางอารมณ์',
+    traitEn: 'The emotionally attuned',
+    insightTh: 'คุณมีความสามารถในการอ่านอารมณ์ผู้อื่นและเชื่อมต่อในระดับลึก จุดแข็งคือ empathy และความเข้าใจมนุษย์ — จุดที่ควรพัฒนาคือการรักษาขอบเขตส่วนตัว',
+    insightEn: "You're skilled at reading others' emotions and connecting on a deep level. Your strength is empathy and understanding people — the growth edge is holding your own boundaries.",
     tendency: 'Empathetic · Intuitive · Emotionally-aware',
   },
   // Earth hand (rectangle/short)
   rectangle_short_short_straight: {
-    trait: 'ผู้มั่นคงและน่าเชื่อถือ',
-    insight: 'คุณให้ความสำคัญกับความมั่นคงและความน่าเชื่อถือ ทำสิ่งที่พูดไว้เสมอ จุดแข็งคือความไว้วางใจได้ — จุดที่ควรพัฒนาคือการยืดหยุ่นต่อการเปลี่ยนแปลง',
+    traitTh: 'ผู้มั่นคงและน่าเชื่อถือ',
+    traitEn: 'The steady and reliable',
+    insightTh: 'คุณให้ความสำคัญกับความมั่นคงและความน่าเชื่อถือ ทำสิ่งที่พูดไว้เสมอ จุดแข็งคือความไว้วางใจได้ — จุดที่ควรพัฒนาคือการยืดหยุ่นต่อการเปลี่ยนแปลง',
+    insightEn: 'You value stability and reliability, and always follow through on what you say. Your strength is being trustworthy — the growth edge is staying flexible when things change.',
     tendency: 'Reliable · Grounded · Consistent',
   },
 };
@@ -204,8 +259,10 @@ function getResult(selections: Record<string, string>): PalmResult {
   if (shapeKey) return TRAIT_MAP[shapeKey];
 
   return {
-    trait: 'บุคลิกภาพแบบผสม',
-    insight: 'ลักษณะมือของคุณบ่งบอกถึงบุคลิกภาพที่ผสมผสานหลายจุดแข็ง คุณสามารถปรับตัวกับสถานการณ์ที่หลากหลายได้ดี',
+    traitTh: 'บุคลิกภาพแบบผสม',
+    traitEn: 'The versatile blend',
+    insightTh: 'ลักษณะมือของคุณบ่งบอกถึงบุคลิกภาพที่ผสมผสานหลายจุดแข็ง คุณสามารถปรับตัวกับสถานการณ์ที่หลากหลายได้ดี',
+    insightEn: 'Your hand shows a personality that blends several strengths — you adapt well to a wide range of situations.',
     tendency: 'Versatile · Adaptive · Multi-dimensional',
   };
 }
@@ -214,6 +271,8 @@ function getResult(selections: Record<string, string>): PalmResult {
 
 export default function PalmistryPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [selections, setSelections] = useState<Record<string, string>>({});
   const [phase, setPhase] = useState<'select' | 'result'>('select');
   const [result, setResult] = useState<PalmResult | null>(null);
@@ -234,16 +293,22 @@ export default function PalmistryPage() {
 
   const handleChatWithTwin = () => {
     if (!result) return;
+    const trait = isTh ? result.traitTh : result.traitEn;
     navigate('/chat/twin', {
       state: {
-        initialMessage: `จากการวิเคราะห์ลักษณะมือของฉัน พบว่าฉันมีแนวโน้มเป็น "${result.trait}" (${result.tendency}) — ช่วยฉันเชื่อมโยงสิ่งนี้กับ SELFPRINT Blueprint ของฉันได้ไหม?`,
+        initialMessage: isTh
+          ? `จากการวิเคราะห์ลักษณะมือของฉัน พบว่าฉันมีแนวโน้มเป็น "${trait}" (${result.tendency}) — ช่วยฉันเชื่อมโยงสิ่งนี้กับ SELFPRINT Blueprint ของฉันได้ไหม?`
+          : `My palm analysis suggests I lean toward "${trait}" (${result.tendency}) — can you help me connect this to my SELFPRINT Blueprint?`,
       },
     });
   };
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
-      <MetaTagManager title="อ่านลักษณะมือ — SELFPRINT" description="วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ" />
+      <MetaTagManager
+        title={isTh ? 'อ่านลักษณะมือ — SELFPRINT' : 'Palm Reading — SELFPRINT'}
+        description={isTh ? 'วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ' : 'Explore how your hand shape relates to personality'}
+      />
       <NavBar />
 
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
@@ -260,13 +325,15 @@ export default function PalmistryPage() {
               padding: '0 0 16px',
             }}
           >
-            ← กลับ
+            {isTh ? '← กลับ' : '← Back'}
           </button>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
-            🖐️ อ่านลักษณะมือ
+            🖐️ {isTh ? 'อ่านลักษณะมือ' : 'Palm Reading'}
           </h1>
           <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '6px 0 0' }}>
-            วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ — ตามแนวทางจิตวิทยาบุคลิกภาพ
+            {isTh
+              ? 'วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ — ตามแนวทางจิตวิทยาบุคลิกภาพ'
+              : 'Explore how your hand shape relates to personality — grounded in personality psychology'}
           </p>
         </div>
 
@@ -299,7 +366,7 @@ export default function PalmistryPage() {
                 }} />
               </div>
               <span style={{ fontSize: 13, color: 'var(--color-text-secondary)', whiteSpace: 'nowrap' }}>
-                {completedSections}/{totalSections} หัวข้อ
+                {isTh ? `${completedSections}/${totalSections} หัวข้อ` : `${completedSections}/${totalSections} sections`}
               </span>
             </div>
 
@@ -312,10 +379,10 @@ export default function PalmistryPage() {
                   color: 'var(--color-text-primary)',
                   margin: '0 0 4px',
                 }}>
-                  {section.title}
+                  {isTh ? section.titleTh : section.titleEn}
                 </h2>
                 <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '0 0 12px' }}>
-                  {section.description}
+                  {isTh ? section.descriptionTh : section.descriptionEn}
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {section.options.map((option) => {
@@ -348,10 +415,10 @@ export default function PalmistryPage() {
                             fontWeight: 600,
                             color: selected ? 'var(--color-accent-primary)' : 'var(--color-text-primary)',
                           }}>
-                            {option.label}
+                            {isTh ? option.labelTh : option.labelEn}
                           </div>
                           <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-                            {option.description}
+                            {isTh ? option.descriptionTh : option.descriptionEn}
                           </div>
                         </div>
                         {selected && (
@@ -381,7 +448,7 @@ export default function PalmistryPage() {
                 marginBottom: 32,
               }}
             >
-              🔍 วิเคราะห์ลักษณะมือ
+              {isTh ? '🔍 วิเคราะห์ลักษณะมือ' : '🔍 Analyze my hand'}
             </button>
           </>
         )}
@@ -406,7 +473,7 @@ export default function PalmistryPage() {
                 letterSpacing: 1.5,
                 marginBottom: 8,
               }}>
-                ลักษณะบุคลิกภาพของคุณ
+                {isTh ? 'ลักษณะบุคลิกภาพของคุณ' : 'Your personality profile'}
               </div>
               <h2 style={{
                 fontSize: 22,
@@ -414,7 +481,7 @@ export default function PalmistryPage() {
                 color: 'var(--color-text-primary)',
                 margin: '0 0 8px',
               }}>
-                {result.trait}
+                {isTh ? result.traitTh : result.traitEn}
               </h2>
               <p style={{
                 fontSize: 12,
@@ -431,7 +498,7 @@ export default function PalmistryPage() {
                 margin: 0,
                 textAlign: 'left',
               }}>
-                {result.insight}
+                {isTh ? result.insightTh : result.insightEn}
               </p>
             </div>
 
@@ -444,7 +511,9 @@ export default function PalmistryPage() {
               marginBottom: 16,
             }}>
               <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '0 0 12px' }}>
-                💬 ให้ Twin ช่วยเชื่อมโยงข้อมูลนี้กับ SELFPRINT Blueprint ของคุณ
+                {isTh
+                  ? '💬 ให้ Twin ช่วยเชื่อมโยงข้อมูลนี้กับ SELFPRINT Blueprint ของคุณ'
+                  : '💬 Let your Twin connect this to your SELFPRINT Blueprint'}
               </p>
               <button
                 onClick={handleChatWithTwin}
@@ -460,7 +529,7 @@ export default function PalmistryPage() {
                   cursor: 'pointer',
                 }}
               >
-                คุยกับ Twin เกี่ยวกับลักษณะนี้ →
+                {isTh ? 'คุยกับ Twin เกี่ยวกับลักษณะนี้ →' : 'Chat with Twin about this →'}
               </button>
             </div>
 
@@ -481,7 +550,7 @@ export default function PalmistryPage() {
                 cursor: 'pointer',
               }}
             >
-              🔄 เริ่มใหม่
+              {isTh ? '🔄 เริ่มใหม่' : '🔄 Start over'}
             </button>
           </div>
         )}

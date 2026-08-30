@@ -11,14 +11,17 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import './advanced-analytics.css';
 
 const AdvancedAnalytics: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const { data: analytics, isLoading } = useQuery({
-    queryKey: ['advancedAnalytics', userId],
+    queryKey: ['advancedAnalytics', userId, language],
     queryFn: async () => {
       // Mock data สำหรับตอนนี้
       return {
@@ -32,11 +35,17 @@ const AdvancedAnalytics: React.FC = () => {
           { metric: 'Decisions ↔ Pattern Discovery', strength: 'moderate' },
           { metric: 'Memories ↔ Context Understanding', strength: 'strong' },
         ],
-        predictions: [
-          'Accuracy จะมีแนวโน้มเพิ่มขึ้นต่อไป ถ้าคุณบันทึกข้อมูลอย่างต่อเนื่อง',
-          'Bias ที่ตรวจพบบ่อยสุด: Confirmation bias (ให้ความสำคัญกับสิ่งที่เห็นด้วย)',
-          'ข้อมูล 30 วันแรกบ่งชี้ว่า AI Twin มีความเข้าใจตัวคุณในด้าน work decisions',
-        ],
+        predictions: isTh
+          ? [
+              'Accuracy จะมีแนวโน้มเพิ่มขึ้นต่อไป ถ้าคุณบันทึกข้อมูลอย่างต่อเนื่อง',
+              'Bias ที่ตรวจพบบ่อยสุด: Confirmation bias (ให้ความสำคัญกับสิ่งที่เห็นด้วย)',
+              'ข้อมูล 30 วันแรกบ่งชี้ว่า AI Twin มีความเข้าใจตัวคุณในด้าน work decisions',
+            ]
+          : [
+              'Accuracy will likely keep improving if you keep logging data consistently',
+              'Most frequently detected bias: Confirmation bias (favoring what you already agree with)',
+              'Your first 30 days of data suggest your AI Twin understands you best in work decisions',
+            ],
       };
     },
     enabled: !!userId,
@@ -44,20 +53,20 @@ const AdvancedAnalytics: React.FC = () => {
   });
 
   if (!userId) {
-    return <div>กรุณาเข้าสู่ระบบ</div>;
+    return <div>{isTh ? 'กรุณาเข้าสู่ระบบ' : 'Please log in'}</div>;
   }
 
   if (isLoading) {
     return (
       <div className="analytics-loading">
         <div className="spinner" />
-        <p>กำลังวิเคราะห์ข้อมูล...</p>
+        <p>{isTh ? 'กำลังวิเคราะห์ข้อมูล...' : 'Analyzing data...'}</p>
       </div>
     );
   }
 
   if (!analytics) {
-    return <div>ไม่สามารถโหลดข้อมูล</div>;
+    return <div>{isTh ? 'ไม่สามารถโหลดข้อมูล' : 'Could not load data'}</div>;
   }
 
   return (
