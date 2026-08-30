@@ -63,7 +63,7 @@ npm audit             # Security check
 **Priority 1:** ✅ Data Persistence (FBS) — Complete
 **Priority 2:** ✅ Test Stabilization — testTimeout fixed, FeedbackService 11/11 passing  
 **Priority 3:** ✅ Security CVEs Assessment — 10 CVEs ACCEPTED (transitive devDeps, not exploitable in production)
-**Priority 4:** ⏸️ Linting DEFERRED — 318 warnings (unused vars), not blocking build.
+**Priority 4:** ⏸️ Linting DEFERRED — 219 warnings, 0 errors (verified 30 ส.ค. 2026 via oxlint, 550 files), not blocking build.
 **Priority 5:** ✅ E2E Tests — CI #157 green, SK-01 updated for story-mode landing
 **Priority 6:** ✅ Documentation — CLAUDE.md updated (this entry)
 
@@ -88,19 +88,24 @@ Landing (3 screens) → CREATE SELFPRINT → APP MODE
 → LIVING SELFPRINT → Phase B: Community
 ```
 
-### Infra: Vercel → Cloudflare Migration (NEXT)
+### Infra: Vercel → Cloudflare Migration — ✅ DONE (corrected 30 ส.ค. 2026)
 - Vercel paused: Edge Requests 2.8M/1M (k6 CI was hammering production)
 - k6 disabled on push — only manual workflow_dispatch now
-- Migration plan: CF Pages (frontend) + CF Workers (12 APIs)
-- `@vercel/node` in unified-handler.ts needs rewrite for Workers
-- `.wrangler` + `.dev.vars` already in .gitignore (CF setup started in Astrovera)
-- CF free tier: 100K requests/day (~3M/month) vs Vercel 1M/month
-- CF Workers: no cold start → subscription 504 issue resolves automatically
-
-### Remaining Before CF Migration
-- [ ] Documentation handoff (in progress)
-- [ ] Cloudflare Pages deploy (frontend first, ~30min)
-- [ ] CF Workers: port 12 APIs from @vercel/node format
+- **CF Pages deploy: ✅ LIVE** — selfprint.one running on Cloudflare Pages,
+  auto-deploy from `master` confirmed working
+- **CF Pages Functions: ✅ PORTED** — `functions/api/{nova,twin,og}.ts` +
+  `functions/api/[[route]].ts` (catch-all → `api/unified-handler.ts`, which
+  is fetch-style and does NOT use `@vercel/node` — that earlier note was
+  wrong, unified-handler.ts never needed the rewrite it was assumed to need)
+- `api/nova.ts`, `api/twin.ts`, `api/og.ts` (old Vercel format) kept
+  intentionally — still wired in `vercel.json` `functions` block as a
+  rollback path, not dead code, do not delete without a business decision
+- `src/pages/api/nova.ts` (Next.js-style, zero routing, 100% unreferenced)
+  — removed 30 ส.ค. 2026, was genuinely dead
+- **Known gap**: `api/metrics.ts` has no `functions/api/metrics.ts`
+  counterpart — `PerformanceMonitor.ts` POSTs to `/api/metrics` and gets
+  404 on CF Pages right now. Metrics are not being collected. Needs a
+  decision: port it or retire the feature. (P1, not yet fixed)
 
 ---
 Full glossary and deep context: `memory/`
