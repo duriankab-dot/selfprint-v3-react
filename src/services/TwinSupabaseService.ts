@@ -6,6 +6,40 @@
 import { supabase } from './supabase-service';
 import type { TwinProfile } from '../context/TwinContext';
 
+/**
+ * Custom error classes for Twin operations
+ * ให้ Caller สามารถแยก error type ได้
+ */
+export class TwinNotFoundError extends Error {
+  constructor(userId: string) {
+    super(`Twin not found for user ${userId}`);
+    this.name = 'TwinNotFoundError';
+  }
+}
+
+export class TwinPermissionError extends Error {
+  constructor(reason: string = 'Permission denied') {
+    super(`Twin permission denied: ${reason}`);
+    this.name = 'TwinPermissionError';
+  }
+}
+
+export class TwinNetworkError extends Error {
+  constructor(originalError: any) {
+    super(`Twin network error: ${originalError.message}`);
+    this.name = 'TwinNetworkError';
+    this.cause = originalError;
+  }
+}
+
+export class TwinServiceError extends Error {
+  constructor(message: string, originalError: any) {
+    super(message);
+    this.name = 'TwinServiceError';
+    this.cause = originalError;
+  }
+}
+
 export interface Twin extends TwinProfile {
   awakened_at: string;
   evolution_stage: number;
@@ -13,10 +47,18 @@ export interface Twin extends TwinProfile {
 
 /**
  * Get user's Twin from Supabase
+ *
+ * Throws specific errors:
+ * - TwinNotFoundError: Twin doesn't exist for this user
+ * - TwinPermissionError: RLS or auth permission denied
+ * - TwinNetworkError: Network/connection issue
+ * - TwinServiceError: Other Supabase errors
  */
-export async function fetchUserTwin(userId: string): Promise<Twin | null> {
+export async function fetchUserTwin(userId: string): Promise<Twin> {
   try {
-    if (!userId || !supabase) return null;
+    if (!userId || !supabase) {
+      throw new TwinServiceError('Invalid userId or Supabase unavailable', null);
+    }
 
     const { data, error } = await supabase
       .from('twins')
@@ -24,14 +66,52 @@ export async function fetchUserTwin(userId: string): Promise<Twin | null> {
       .eq('user_id', userId)
       .maybeSingle();
 
+    // Handle Supabase error response
     if (error) {
-      throw error;
+      // PGRST116 = "JSON object requested, multiple or no rows returned"
+      // Essentially means: row not found when using maybeSingle()
+      if (error.code === 'PGRST116') {
+        throw new TwinNotFoundError(userId);
+      }
+
+      // Permission errors — check message since PostgrestError doesn't have status
+      // RLS policy violations or auth issues typically have "permission" or "permission denied"
+      if (error.message?.toLowerCase().includes('permission') ||
+          error.message?.toLowerCase().includes('denied') ||
+          error.message?.toLowerCase().includes('rls')) {
+        throw new TwinPermissionError(error.message);
+      }
+
+      // Network-related errors
+      if (error.message?.includes('Failed to fetch') ||
+          error.message?.includes('Network') ||
+          error.message?.includes('ECONNREFUSED') ||
+          error.message?.includes('ENOTFOUND')) {
+        throw new TwinNetworkError(error);
+      }
+
+      // Generic service error for other Supabase errors
+      throw new TwinServiceError(`Supabase query failed: ${error.message}`, error);
+    }
+
+    // No error but also no data = Twin doesn't exist
+    if (!data) {
+      throw new TwinNotFoundError(userId);
     }
 
     return data as Twin;
   } catch (err) {
-    console.error('Failed to fetch Twin:', err);
-    return null;
+    // Re-throw custom errors (don't double-wrap)
+    if (err instanceof TwinNotFoundError ||
+        err instanceof TwinPermissionError ||
+        err instanceof TwinNetworkError ||
+        err instanceof TwinServiceError) {
+      throw err;
+    }
+
+    // Catch unknown errors and wrap them
+    console.error('Unexpected error in fetchUserTwin:', err);
+    throw new TwinServiceError('Unexpected error fetching Twin', err);
   }
 }
 

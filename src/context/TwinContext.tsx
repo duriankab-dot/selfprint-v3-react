@@ -20,6 +20,10 @@ import {
   createTwinInDatabase,
   updateTwinInDatabase,
   deleteTwinFromDatabase,
+  TwinNotFoundError,
+  TwinPermissionError,
+  TwinNetworkError,
+  TwinServiceError,
 } from '../services/TwinSupabaseService';
 import type { Twin } from '../services/TwinSupabaseService';
 
@@ -282,46 +286,62 @@ export function TwinProvider({ children }: { children: ReactNode }) {
       // right after login while this fetch is still in flight.
       setLoading(true);
       try {
+        // FIX 2: fetchUserTwin now throws specific errors
         const fetchedTwin = await fetchUserTwin(authUserId);
-        if (fetchedTwin) {
-          // TWINCONTEXT-LOAD-002: this used to spread the raw Supabase row
-          // (`...fetchedTwin`) straight into state. The row is snake_case
-          // (primary_archetype, secondary_archetype, maturity_score,
-          // user_id) but TwinProfile is camelCase — every other place that
-          // builds a TwinProfile from a raw row (createTwin, hydrateTwin
-          // above) does this mapping explicitly; this path was the one
-          // exception. Net effect: once a Twin *did* load successfully,
-          // twin.primaryArchetype / twin.maturityScore / twin.userId were
-          // all silently undefined (twin itself was non-null, so guards
-          // checking `!twin` didn't catch it) — archetype-driven visuals
-          // and maturity-based features had no idea a Twin existed.
-          setTwin({
-            id: fetchedTwin.id,
-            userId: authUserId,
-            name: fetchedTwin.name,
-            primaryArchetype: (fetchedTwin as any).primary_archetype,
-            secondaryArchetype: (fetchedTwin as any).secondary_archetype,
-            maturityScore: Math.max(0, Math.min(100, (fetchedTwin as any).maturity_score ?? 30)),
-            createdAt: new Date(fetchedTwin.awakened_at).getTime(),
-            updatedAt: Date.now(),
-          });
+
+        // TWINCONTEXT-LOAD-002: this used to spread the raw Supabase row
+        // (`...fetchedTwin`) straight into state. The row is snake_case
+        // (primary_archetype, secondary_archetype, maturity_score,
+        // user_id) but TwinProfile is camelCase — every other place that
+        // builds a TwinProfile from a raw row (createTwin, hydrateTwin
+        // above) does this mapping explicitly; this path was the one
+        // exception. Net effect: once a Twin *did* load successfully,
+        // twin.primaryArchetype / twin.maturityScore / twin.userId were
+        // all silently undefined (twin itself was non-null, so guards
+        // checking `!twin` didn't catch it) — archetype-driven visuals
+        // and maturity-based features had no idea a Twin existed.
+        setTwin({
+          id: fetchedTwin.id,
+          userId: authUserId,
+          name: fetchedTwin.name,
+          primaryArchetype: (fetchedTwin as any).primary_archetype,
+          secondaryArchetype: (fetchedTwin as any).secondary_archetype,
+          maturityScore: Math.max(0, Math.min(100, (fetchedTwin as any).maturity_score ?? 30)),
+          createdAt: new Date(fetchedTwin.awakened_at).getTime(),
+          updatedAt: Date.now(),
+        });
+        setError(null);
+      } catch (err) {
+        // FIX 2: Handle specific error types from fetchUserTwin()
+        if (err instanceof TwinNotFoundError) {
+          // No Twin exists yet — user hasn't completed Twin Birth
+          // This is a valid state, not an error
+          console.info('No Twin found for user — ready for Twin Birth', err.message);
+          setTwin(null);
           setError(null);
+        } else if (err instanceof TwinPermissionError) {
+          // RLS permission denied (401, 403)
+          // User is not allowed to access this Twin (shouldn't happen for own Twin)
+          console.error('Twin permission denied:', err.message);
+          setError(`Permission denied: ${err.message}`);
+          setTwin(null);
+        } else if (err instanceof TwinNetworkError) {
+          // Network error — might be temporary, will retry on next auth state change
+          console.warn('Twin network error — will retry:', err.message);
+          setError('Network error loading Twin — will retry automatically');
+          setTwin(null);
+        } else if (err instanceof TwinServiceError) {
+          // Other service errors
+          console.error('Twin service error:', err.message);
+          setError(err.message);
+          setTwin(null);
         } else {
-          // No row for this user — a real "no Twin yet" result (fetchUserTwin
-          // itself distinguishes this from a thrown error; see the catch
-          // below for the latter).
+          // Unexpected error type
+          const errorMsg = err instanceof Error ? err.message : 'Unknown error loading Twin';
+          console.error('Unexpected error loading Twin:', err);
+          setError(errorMsg);
           setTwin(null);
         }
-      } catch (err) {
-        // TWINCONTEXT-LOAD-001: previously swallowed into a console.warn
-        // only — `error` on this context was never set here, so a genuine
-        // fetch failure (network, RLS, auth-token-not-yet-attached) was
-        // visually identical to "no Twin exists" everywhere twin===null is
-        // checked. Surfacing it doesn't fix the underlying failure by
-        // itself, but makes it distinguishable and debuggable instead of
-        // silently collapsing to the same null.
-        console.warn('Failed to load Twin from Supabase:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load Twin');
       } finally {
         setLoading(false);
       }
