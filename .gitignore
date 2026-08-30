@@ -1,4 +1,5 @@
-# Logs
+
+e2e/.auth/user.json# Logs
 logs
 *.log
 npm-debug.log*
