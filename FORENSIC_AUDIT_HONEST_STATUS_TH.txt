@@ -174,7 +174,8 @@ Git History — ตรวจครบทั้ง 5 commit ✅
 | **api/metrics.ts → CF route หาย (P1 บั๊กจริง)** | 🔴 ต้องแก้ | Client เรียก `/api/metrics` จริง แต่ไม่มี route บน CF Pages — metrics ไม่ถูกเก็บเลย |
 | CI: เพิ่ม vitest job            | ✅ COMPLETE | เพิ่มแล้วในรอบนี้ |
 | CI: เอา `continue-on-error` ออกจาก E2E step | ✅ COMPLETE | แก้แล้วในรอบนี้ |
-| Phase B (Community features)   | 🎯 READY     | ตามแผนเดิม |
+| Phase B.1 (Insight Feed)       | ✅ COMPLETE  | สร้างแล้ว — migration 033, CommunityService.ts, CommunityPage.tsx (ดู docs/PHASE_B_COMMUNITY_SPEC_TH.md) — **รอ apply migration บน Windows** เพราะ Supabase CLI ก็ติด native-binding ข้าม OS เหมือน build/lint |
+| Phase B.2 (Leaderboard/Challenges/Matching) | 📋 ออกแบบแล้ว ยังไม่สร้าง | รายละเอียดเต็มใน docs/PHASE_B_COMMUNITY_SPEC_TH.md — Twin Matching ต้องตัดสินใจเรื่อง privacy/consent ก่อนเริ่ม |
 | Phase C (TwinBirth)             | 📋 PLANNED   | Backlog ตามเดิม |
 
 ═══════════════════════════════════════════════════════
