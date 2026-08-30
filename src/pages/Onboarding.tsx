@@ -7,6 +7,7 @@
 
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
+import { useLanguage } from '@/context/LanguageContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useAuth } from '@/context/AuthContext';
 import { EmotionSelector } from '@/components/features/EmotionSelector';
@@ -90,6 +91,8 @@ interface OnboardingProps {
 
 export default function Onboarding({ onComplete }: OnboardingProps) {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
   const { session, loading: authLoading } = useAuth();
@@ -443,7 +446,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
 
       if (!ok) {
         setLifecycleError(
-          useLifecycleStore.getState().error || 'ไม่สามารถบันทึกความคืบหน้าได้ กรุณาลองอีกครั้ง'
+          useLifecycleStore.getState().error ||
+            (isTh ? 'ไม่สามารถบันทึกความคืบหน้าได้ กรุณาลองอีกครั้ง' : 'Could not save your progress. Please try again.')
         );
         return;
       }
@@ -507,11 +511,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       >
         <div style={{ maxWidth: '440px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>
-            บันทึกความคืบหน้าไม่สำเร็จ
+            {isTh ? 'บันทึกความคืบหน้าไม่สำเร็จ' : 'Could not save your progress'}
           </h2>
           <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-            {lifecycleError} — เชื่อมต่อกับเซิร์ฟเวอร์ช้าหรือขาดหาย ข้อมูล AI Twin ของคุณยังอยู่
-            ลองอีกครั้งได้เลย
+            {lifecycleError}{' — '}
+            {isTh
+              ? 'เชื่อมต่อกับเซิร์ฟเวอร์ช้าหรือขาดหาย ข้อมูล AI Twin ของคุณยังอยู่ ลองอีกครั้งได้เลย'
+              : 'The connection to the server was slow or dropped. Your AI Twin data is still safe — go ahead and try again.'}
           </p>
           <button
             onClick={handleComplete}
@@ -528,7 +534,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               opacity: isCompletingLifecycle ? 0.7 : 1,
             }}
           >
-            {isCompletingLifecycle ? 'กำลังลองอีกครั้ง...' : 'ลองอีกครั้ง'}
+            {isCompletingLifecycle
+              ? (isTh ? 'กำลังลองอีกครั้ง...' : 'Retrying...')
+              : (isTh ? 'ลองอีกครั้ง' : 'Try again')}
           </button>
         </div>
       </div>
@@ -592,7 +600,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   marginBottom: '16px',
                 }}
               >
-                วันนี้คุณรู้สึกยังไง?
+                {isTh ? 'วันนี้คุณรู้สึกยังไง?' : 'How are you feeling today?'}
               </h1>
               <p
                 style={{
@@ -601,7 +609,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   lineHeight: 1.6,
                 }}
               >
-                อารมณ์ตอนนี้ของคุณจะช่วยให้ ฝาแฝด เข้าใจคุณได้ดีขึ้นตั้งแต่แรก
+                {isTh
+                  ? 'อารมณ์ตอนนี้ของคุณจะช่วยให้ ฝาแฝด เข้าใจคุณได้ดีขึ้นตั้งแต่แรก'
+                  : 'Your mood right now helps your Twin understand you better from the very start'}
               </p>
             </div>
             <EmotionSelector />
@@ -626,7 +636,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
                   (e.currentTarget.style.opacity = '1')
                 }
               >
-                ไปต่อ
+                {isTh ? 'ไปต่อ' : 'Continue'}
               </button>
             </div>
           </div>

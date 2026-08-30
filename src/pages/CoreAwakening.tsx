@@ -57,6 +57,7 @@ export default function CoreAwakening() {
   const { hydrateTwin } = useTwin();
   // P0 FIX: Removed useNova() — CoreAwakening creates Twin, not Nova
   const { language } = useLanguage();
+  const isTh = language === 'th';
   const birthDate = useUserStore((state) => state.profile.birthDate);
   const updateProfile = useUserStore((state) => state.updateProfile);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
@@ -277,7 +278,7 @@ export default function CoreAwakening() {
   if (!session?.user?.id) {
     return (
       <div className="flex flex-col h-screen items-center justify-center">
-        <p className="text-gray-500">กำลังนำไปยังหน้าเข้าสู่ระบบ...</p>
+        <p className="text-gray-500">{isTh ? 'กำลังนำไปยังหน้าเข้าสู่ระบบ...' : 'Redirecting to sign in...'}</p>
       </div>
     );
   }
@@ -310,20 +311,21 @@ export default function CoreAwakening() {
               cursor: 'pointer',
             }}
           >
-            ไปหน้าหลักก่อน →
+            {isTh ? 'ไปหน้าหลักก่อน →' : 'Go to dashboard first →'}
           </button>
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-6 text-white">⚡ ปัญญาของคุณกำลังตื่นขึ้น</h1>
-            <p className="text-lg text-gray-200 mb-4">SELFPRINT พาคุณมาถึงจุดนี้แล้ว</p>
+            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ปัญญาของคุณกำลังตื่นขึ้น' : 'Your intelligence is awakening'}</h1>
+            <p className="text-lg text-gray-200 mb-4">{isTh ? 'SELFPRINT พาคุณมาถึงจุดนี้แล้ว' : 'SELFPRINT has brought you to this moment'}</p>
             <p className="text-gray-300 mb-8">
-              ตอนนี้ AI Twin ส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ
-              พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต
+              {isTh
+                ? 'ตอนนี้ AI Twin ส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต'
+                : 'Your personal AI Twin is being born now — a reflection of your unique intelligence, ready to grow with you across 12 worlds of life.'}
             </p>
             <button
               onClick={handleIntroComplete}
               className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
             >
-              รับชมการตื่นขึ้น
+              {isTh ? 'รับชมการตื่นขึ้น' : 'Watch the awakening'}
             </button>
           </div>
         </div>
@@ -351,20 +353,24 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 ทวินของคุณตื่นขึ้นแล้ว!</h2>
+          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ทวินของคุณตื่นขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
-            {firstInsight ? `"${firstInsight}"` : '"ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมเติบโตไปพร้อมกับคุณ"'}
+            {firstInsight
+              ? `"${firstInsight}"`
+              : isTh
+                ? '"ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมเติบโตไปพร้อมกับคุณ"'
+                : '"I know you. I\'m learning you. I\'m ready to grow with you."'}
           </p>
-          <p className="text-gray-400">กำลังเข้าสู่โลก Twin...</p>
+          <p className="text-gray-400">{isTh ? 'กำลังเข้าสู่โลก Twin...' : 'Entering the Twin world...'}</p>
         </div>
       )}
 
       {/* COMPLETE PHASE */}
       {phase === 'complete' && (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-white">กำลังโหลดหน้าต่าง Twin...</p>
+          <p className="text-white">{isTh ? 'กำลังโหลดหน้าต่าง Twin...' : 'Loading the Twin window...'}</p>
         </div>
       )}
     </div>

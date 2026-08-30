@@ -1,8 +1,7 @@
 # English (/en) Translation — Handoff
 
-วันที่: 30 สิงหาคม 2026
-สถานะ: งานใหญ่ (98 ไฟล์มี Thai hardcode) — ทำ Tier 1-2 บางส่วนในเซสชันนี้
-ยังเหลืออีกมาก ต้องทำต่อในเซสชันถัดไป
+วันที่: 30 สิงหาคม 2026 (อัปเดตล่าสุด: Tier 2 เสร็จสมบูรณ์)
+สถานะ: Tier 1 + Tier 2 (core flow ทั้งหมด) เสร็จแล้ว — เหลือ Tier 3 (~85 ไฟล์)
 
 ## บริบท
 
@@ -22,7 +21,7 @@ translation function ให้ใช้ — **แต่ละ component ต้�
 - `src/components/layout/BottomNav.tsx`
 - `src/components/layout/Footer.tsx`
 
-**Tier 2 — Core flow (บางส่วน):**
+**Tier 2 — Core flow (เสร็จสมบูรณ์ทั้งหมด):**
 - `src/pages/Dashboard.tsx`
 - `src/pages/Login.tsx`
 - `src/pages/CommunityPage.tsx`
@@ -31,18 +30,25 @@ translation function ให้ใช้ — **แต่ละ component ต้�
   `TimeOfDayEngine.ts` + `EnvironmentEngine.ts` + 4 component ที่ใช้ยังไม่มี
   `labelEn` — ไม่ได้แก้รอบนี้ เพราะเป็นการเปลี่ยน data model ไม่ใช่แค่ข้อความ
   หน้าเว็บ ควรตัดสินใจ scope แยกต่างหาก)
+- `src/pages/FeatureMenu.tsx`, `src/pages/Chat.tsx`, `src/pages/ChatPage.tsx`
+- `src/pages/CoreAwakening.tsx` (เติม `isTh` ให้ครบทุกจุดที่เหลือ)
+- `src/components/onboarding/NovaConversation.tsx` (เติม error/placeholder
+  strings ที่เหลือ — `NOVA_MESSAGES_TH/EN` เดิมครบอยู่แล้ว)
+- `src/pages/LandingPage.tsx` (`STORY`/`SEO_COPY` เดิม bilingual ครบอยู่แล้ว —
+  แก้เพิ่ม: `TwinBornSvg`/`NovaEyeSvg` เคย hardcode label 12 มิติเป็นไทย
+  เสมอไม่ว่า `/en` หรือ `/th` — เพิ่ม `SICE_LABELS_EN`/`SICE_EN_LABELS` +
+  ส่ง `isTh` prop เข้าไปแล้ว)
+- `src/pages/Onboarding.tsx` (737 บรรทัด — ไม่เคยมี `useLanguage` เลยตั้งแต่ต้น
+  เพิ่ม import + แปลทุกจุด: emotion step h1/p/button, lifecycle-error screen,
+  retry button)
 
-**Verify**: `tsc -b` ผ่านสะอาดหลังทุกไฟล์
+**Verify**: `tsc -b` ผ่านสะอาดหลังทุกไฟล์/ทุก batch
 
-## 🔜 ยังไม่ได้ทำ — Tier 2 ที่เหลือ (core flow, priority สูง)
+## ✅ Tier 2 — เสร็จสมบูรณ์ทั้งหมด
 
-- `src/pages/Onboarding.tsx` (737 บรรทัด — ใหญ่ ใช้เวลานาน)
-- `src/pages/LandingPage.tsx` (1206 บรรทัด — ใหญ่มาก, **มี partial bilingual
-  อยู่แล้ว** ต้องตรวจว่า cover ครบหรือยัง ไม่ใช่เขียนใหม่ทั้งหมด)
-- `src/pages/CoreAwakening.tsx` (มี partial bilingual อยู่แล้ว เช่นกัน)
-- `src/components/onboarding/NovaConversation.tsx` (มี partial bilingual)
-- `src/pages/Chat.tsx`, `src/pages/ChatPage.tsx` (หน้าแชทหลัก)
-- `src/pages/FeatureMenu.tsx` (เมนู `/menu` ที่ NavBar ลิงก์ไป)
+Tier 2 (core app flow) ที่ user ระบุไว้ (Onboarding, LandingPage,
+CoreAwakening, NovaConversation, Chat, ChatPage, FeatureMenu) ทำครบทุกไฟล์แล้ว
+ในเซสชันนี้ — เหลือแค่ Tier 3
 
 ## 📋 Tier 3 — ที่เหลือทั้งหมด (~85 ไฟล์)
 
@@ -66,12 +72,11 @@ grep -rlP '[\x{0E00}-\x{0E7F}]' src/pages src/components --include="*.tsx" | gre
 - `src/components/intelligence/*`, `src/components/twin/*`,
   `src/components/chat/*` (~8 ไฟล์)
 
-## แนวทางแนะนำสำหรับ session ถัดไป
+## แนวทางแนะนำสำหรับ session ถัดไป (Tier 3)
 
-1. อย่าไล่ทำตามลำดับตัวอักษร — ทำตามความถี่ใช้งานจริง (Onboarding ก่อน
-   marketing pages เพราะ user ใหม่ทุกคนต้องผ่าน)
-2. เช็คไฟล์ที่มี partial bilingual อยู่แล้วก่อน (LandingPage, CoreAwakening,
-   NovaConversation) — อาจแค่เติมจุดที่ขาด ไม่ต้องเขียนใหม่ทั้งไฟล์
+1. อย่าไล่ทำตามลำดับตัวอักษร — ทำตามความถี่ใช้งานจริง (dashboard/onboarding
+   sub-component ก่อน marketing pages เพราะ user ที่ login แล้วเจอบ่อยกว่า)
+2. เช็คไฟล์ที่อาจมี partial bilingual อยู่แล้วก่อนเขียนใหม่ทั้งไฟล์เสมอ
 3. Pattern ทุกไฟล์: เพิ่ม `const { language } = useLanguage();` +
    `const isTh = language === 'th';` แล้ว wrap ข้อความด้วย
    `{isTh ? 'ไทย' : 'English'}` — ห้ามเปลี่ยนเป็น i18n library ใหม่

@@ -70,7 +70,8 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
   onComplete,
 }) => {
   const { language } = useLanguage();
-  const NOVA_MESSAGES = language === 'th' ? NOVA_MESSAGES_TH : NOVA_MESSAGES_EN;
+  const isTh = language === 'th';
+  const NOVA_MESSAGES = isTh ? NOVA_MESSAGES_TH : NOVA_MESSAGES_EN;
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -160,9 +161,11 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
     try {
       if (stage === 'dob') {
         if (!validateDate(userInput)) {
-          setErrors('รูปแบบวันที่ไม่ถูกต้อง กรุณาใช้ YYYY-MM-DD');
+          setErrors(isTh ? 'รูปแบบวันที่ไม่ถูกต้อง กรุณาใช้ YYYY-MM-DD' : 'Invalid date format. Please use YYYY-MM-DD');
           addNovaMessage(
-            'ไม่แน่ใจว่าเข้าใจถูกไหม ช่วยบอกวันเกิดอีกครั้งในรูปแบบ YYYY-MM-DD ได้ไหม?'
+            isTh
+              ? 'ไม่แน่ใจว่าเข้าใจถูกไหม ช่วยบอกวันเกิดอีกครั้งในรูปแบบ YYYY-MM-DD ได้ไหม?'
+              : "I'm not sure I got that right — could you give me your birth date again in YYYY-MM-DD format?"
           );
           setLoading(false);
           return;
@@ -173,9 +176,11 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
       } else if (stage === 'time') {
         if (userInput.toLowerCase() !== 'skip' && userInput !== '') {
           if (!validateTime(userInput)) {
-            setErrors('รูปแบบเวลาไม่ถูกต้อง กรุณาใช้ HH:MM หรือพิมพ์ "skip"');
+            setErrors(isTh ? 'รูปแบบเวลาไม่ถูกต้อง กรุณาใช้ HH:MM หรือพิมพ์ "skip"' : 'Invalid time format. Please use HH:MM or type "skip"');
             addNovaMessage(
-              'รูปแบบเวลาควรเป็น HH:MM (เช่น 14:30) หรือพิมพ์ "skip" เพื่อข้าม'
+              isTh
+                ? 'รูปแบบเวลาควรเป็น HH:MM (เช่น 14:30) หรือพิมพ์ "skip" เพื่อข้าม'
+                : 'The time should be in HH:MM format (e.g. 14:30), or type "skip" to skip it'
             );
             setLoading(false);
             return;
@@ -200,7 +205,7 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
         ) {
           onComplete(birthData);
         } else {
-          addNovaMessage('งั้นเริ่มใหม่ตั้งแต่ต้นนะ');
+          addNovaMessage(isTh ? 'งั้นเริ่มใหม่ตั้งแต่ต้นนะ' : "Alright, let's start over from the beginning");
           setStage('dob');
           setBirthData({ dob: '', time: '', place: '' });
           addNovaMessage(NOVA_MESSAGES.dob);
@@ -220,15 +225,15 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
   const getPlaceholder = (): string => {
     switch (stage) {
       case 'dob':
-        return 'เช่น 1990-01-15';
+        return isTh ? 'เช่น 1990-01-15' : 'e.g. 1990-01-15';
       case 'time':
-        return 'เช่น 14:30 หรือ skip';
+        return isTh ? 'เช่น 14:30 หรือ skip' : 'e.g. 14:30 or skip';
       case 'place':
-        return 'เช่น กรุงเทพฯ หรือ skip';
+        return isTh ? 'เช่น กรุงเทพฯ หรือ skip' : 'e.g. Bangkok or skip';
       case 'confirm':
-        return 'Yes หรือ No';
+        return isTh ? 'Yes หรือ No' : 'Yes or No';
       default:
-        return 'คำตอบของคุณ...';
+        return isTh ? 'คำตอบของคุณ...' : 'Your answer...';
     }
   };
 
@@ -271,7 +276,7 @@ export const NovaConversation: React.FC<NovaConversationProps> = ({
             color: 'var(--color-text-secondary)',
           }}
         >
-          มาทำความรู้จักกันหน่อย
+          {isTh ? 'มาทำความรู้จักกันหน่อย' : "Let's get to know each other"}
         </p>
       </div>
 
