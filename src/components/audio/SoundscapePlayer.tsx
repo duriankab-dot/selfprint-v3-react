@@ -172,21 +172,23 @@ interface SoundscapePlayerProps {
 export function SoundscapePlayer({ compact = false, className = '' }: SoundscapePlayerProps) {
   const { environment, isTransitioning } = useEnvironment();
   const audio = useAudio();
-  const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking, pool } =
+  const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking } =
     useSoundscapeAudio();
 
   const [isPlaying, setIsPlaying] = useState(false);
   const prevSoundscapeRef = useRef<SoundscapeConfig | undefined>(undefined);
 
-  // Audio context for CDN loader
+  // Audio context for the soundscape synth loader
   const audioContext = useMemo(() => {
     if (typeof window === 'undefined') return null;
     return new (window.AudioContext || (window as any).webkitAudioContext)();
   }, []);
 
-  // Load audio from CDN
+  // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader synthesizes the ambient
+  // drone live via Web Audio (no CDN involved any more — see that hook's
+  // header for why), so this buffer is the only source now.
   const soundscapeId = environment?.soundscape.id || null;
-  const { buffer: cdnBuffer, isLoading: isCdnLoading, error: cdnError, progress } = useSoundscapeAudioLoader(
+  const { buffer: soundscapeBuffer, isLoading: isSynthesizing, error: synthError, progress } = useSoundscapeAudioLoader(
     soundscapeId,
     audioContext
   );
@@ -219,78 +221,29 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     }
   }, [audio.state.isDucking, isInitialized, isPlaying, startDucking, stopDucking]);
 
-  // ─── Handle soundscape transitions with CDN audio ─────────────────────────
-  // (Try CDN first, fallback to synthesis if unavailable)
+  // ─── Handle soundscape transitions ─────────────────────────────────────────
+  // SOUNDSCAPE-SYNTH-001: previously tried a CDN buffer first and fell back
+  // to a crude 4-category oscillator sketch (keyed by exact soundscape.id
+  // against just 'cosmic'/'ambient'/'energetic'/'minimal', which no real id
+  // ever matched — it silently always played the same 3 sine tones for
+  // every soundscape). useSoundscapeAudioLoader now synthesizes a properly
+  // distinct drone per soundscape id itself, so this just plays whatever it
+  // produces once ready.
 
   useEffect(() => {
-    if (!environment || !isPlaying) return;
+    if (!environment || !isPlaying || !soundscapeBuffer) return;
 
     const { soundscape } = environment;
     if (prevSoundscapeRef.current?.id === soundscape.id) return;
 
-    // Prefer CDN buffer, fallback to synthesis
-    let bufferToPlay = cdnBuffer;
-
-    if (!bufferToPlay) {
-      // Fallback: Generate oscillator-based audio buffer for soundscape
-      // §23: Adaptive Background Music — Web Audio API synthesis
-      const generateSoundscapeBuffer = () => {
-        const ctx = pool.ctx;
-        if (!ctx) return null;
-
-        const duration = 30; // 30 second loop
-        const sampleRate = ctx.sampleRate;
-        const buffer = ctx.createBuffer(2, duration * sampleRate, sampleRate);
-        const left = buffer.getChannelData(0);
-        const right = buffer.getChannelData(1);
-
-        // Frequency map based on soundscape type
-        const frequencies: Record<string, number[]> = {
-          cosmic: [174, 285, 396],      // Deep bass chord
-          ambient: [264, 396, 528],     // Middle tones
-          energetic: [528, 640, 784],   // Higher energy
-          minimal: [111, 222, 333],     // Sparse low tones
-        };
-
-        const freqs = frequencies[soundscape.id] || frequencies.ambient;
-
-        // Generate polyphonic oscillator signal
-        for (let i = 0; i < buffer.length; i++) {
-          const t = i / sampleRate;
-          let sample = 0;
-
-          freqs.forEach((freq) => {
-            sample += Math.sin(2 * Math.PI * freq * t) * (1 / freqs.length);
-          });
-
-          // Envelope: fade in/out
-          const fadeDuration = 2;
-          if (t < fadeDuration) {
-            sample *= t / fadeDuration; // fade in
-          } else if (t > duration - fadeDuration) {
-            sample *= (duration - t) / fadeDuration; // fade out
-          }
-
-          left[i] = sample * 0.3; // Volume: 30%
-          right[i] = sample * 0.3;
-        }
-
-        return buffer;
-      };
-
-      bufferToPlay = generateSoundscapeBuffer();
-    }
-
     try {
-      if (bufferToPlay) {
-        play(bufferToPlay);
-      }
+      play(soundscapeBuffer);
     } catch (_error) {
       // Failed to play audio
     }
 
     prevSoundscapeRef.current = soundscape;
-  }, [environment, isPlaying, play, pool, cdnBuffer]);
+  }, [environment, isPlaying, play, soundscapeBuffer]);
 
   // ─── PlayControl ──────────────────────────────────────────────────────────
 
@@ -376,8 +329,8 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
         />
       )}
 
-      {/* Loading indicator (CDN) */}
-      {isCdnLoading && (
+      {/* Loading indicator (synthesizing the ambient drone) */}
+      {isSynthesizing && (
         <div
           style={{
             display: 'flex',
@@ -393,30 +346,31 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
         </div>
       )}
 
-      {/* Error indicator */}
-      {cdnError && !cdnBuffer && (
+      {/* Error indicator — synthesis itself failed (rare: e.g. no Web Audio
+          support); the loader already falls back to silence in this case. */}
+      {synthError && !soundscapeBuffer && (
         <span
-          title={cdnError.message}
+          title={synthError.message}
           style={{
             fontSize: '10px',
             opacity: 0.5,
             marginLeft: 'auto',
           }}
         >
-          ⚠️ (Synthesis)
+          ⚠️ (Silence)
         </span>
       )}
 
       {/* Status indicator */}
-      {isPlaying && !isCdnLoading && (
+      {isPlaying && !isSynthesizing && soundscapeBuffer && (
         <span
-          title={cdnBuffer ? 'CDN Audio' : 'Synthesized Audio'}
+          title="Synthesized ambient drone"
           style={{
             display: 'inline-block',
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: cdnBuffer ? 'var(--color-accent-primary)' : 'var(--color-warning)',
+            background: 'var(--color-accent-primary)',
             animation: 'pulse 2s infinite',
             marginLeft: 'auto',
           }}
