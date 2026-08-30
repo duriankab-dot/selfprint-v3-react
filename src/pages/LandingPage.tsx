@@ -168,8 +168,9 @@ const SEO_COPY: Record<'th' | 'en', Record<Segment, SeoCopy>> = {
 // Pure CSS animations — no Three.js, GPU-accelerated via will-change.
 
 const SICE_LABELS_TH = ['ตัวตน','จิตใจ','ความสัมพันธ์','ความรัก','อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต','การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต'];
+const SICE_LABELS_EN = ['Self','Mind','Relationships','Love','Career','Wealth','Life','Growth','Decisions','Purpose','Health','Future'];
 
-const TwinBornSvg = () => (
+const TwinBornSvg = ({ isTh }: { isTh: boolean }) => (
   <svg
     viewBox="0 0 400 340"
     fill="none"
@@ -217,7 +218,7 @@ const TwinBornSvg = () => (
 
     {/* ── 12 SICE orbit nodes (§4.2) ── */}
     <g style={{ transformOrigin: '200px 170px' }}>
-      {SICE_LABELS_TH.map((label, i) => {
+      {(isTh ? SICE_LABELS_TH : SICE_LABELS_EN).map((label, i) => {
         const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
         const r = 155;
         const cx = 200 + r * Math.cos(angle);
@@ -341,8 +342,14 @@ const SICE_TH_LABELS = [
   'อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต',
   'การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต',
 ];
+const SICE_EN_LABELS = [
+  'Self','Mind','Relationships','Love',
+  'Career','Wealth','Life','Growth',
+  'Decisions','Purpose','Health','Future',
+];
 
-const NovaEyeSvg = () => {
+const NovaEyeSvg = ({ isTh }: { isTh: boolean }) => {
+  const SICE_ORBIT_LABELS = isTh ? SICE_TH_LABELS : SICE_EN_LABELS;
   const CX = 190, CY = 190;
   const NODE_R = 118;   // node dot orbit radius
   const LABEL_R = 142;  // label text orbit radius
@@ -393,7 +400,7 @@ const NovaEyeSvg = () => {
       <circle cx={CX} cy={CY} r="32" fill="var(--color-accent-primary)" opacity="0.06"/>
 
       {/* Iris detail lines (12 radii) */}
-      {SICE_TH_LABELS.map((_, i) => {
+      {SICE_ORBIT_LABELS.map((_, i) => {
         const rad = (i * 30 * Math.PI) / 180;
         return (
           <line key={i}
@@ -425,8 +432,8 @@ const NovaEyeSvg = () => {
         <circle cx={CX} cy={CY - NODE_R + 6} r="3" fill="var(--color-accent-primary)" opacity="0.7"/>
       </g>
 
-      {/* 12 SICE orbit nodes with Thai labels */}
-      {SICE_TH_LABELS.map((label, i) => {
+      {/* 12 SICE orbit nodes */}
+      {SICE_ORBIT_LABELS.map((label, i) => {
         // start from top (-90°), go clockwise
         const angleDeg = i * 30 - 90;
         const rad = (angleDeg * Math.PI) / 180;
@@ -878,7 +885,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               zIndex: 1,
             }}
           >
-            <TwinBornSvg />
+            <TwinBornSvg isTh={lang === 'th'} />
           </div>
 
           {/* Scroll indicator */}
@@ -985,7 +992,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 transitionDelay: '0.1s',
               }}
             >
-              <NovaEyeSvg />
+              <NovaEyeSvg isTh={lang === 'th'} />
             </div>
 
             {/* Reading cards */}
