@@ -121,7 +121,7 @@ test('SK-04 Root / redirects to /en or /th', async ({ page }) => {
 
 // ─── SK-05: OG Image Edge Function ───────────────────────────────────────────
 
-test('SK-05 /api/og returns 200 image response', async ({ request }) => {
+test('SK-05 /api/og returns 200 HTML response', async ({ request }) => {
   const response = await request.get('/api/og?lang=th&segment=default', {
     timeout: 15000,
   });
@@ -130,12 +130,14 @@ test('SK-05 /api/og returns 200 image response', async ({ request }) => {
 
   const contentType = response.headers()['content-type'] ?? '';
   expect(
-    contentType.includes('image/png') || contentType.includes('image/'),
-    `Expected image content-type, got: ${contentType}`
+    contentType.includes('text/html'),
+    `Expected text/html content-type, got: ${contentType}`
   ).toBeTruthy();
 
-  const body = await response.body();
-  expect(body.length, 'OG image should be > 1KB').toBeGreaterThan(1024);
+  const body = await response.text();
+  expect(body.includes('SELFPRINT'), 'OG response should contain SELFPRINT brand').toBeTruthy();
+  expect(body.includes('selfprint.one'), 'OG response should contain site URL').toBeTruthy();
+  expect(body.length, 'OG response should be > 1KB').toBeGreaterThan(1024);
 
   console.log(`SK-05 ✓  /api/og: ${response.status()}, ${body.length} bytes, ${contentType}`);
 });
