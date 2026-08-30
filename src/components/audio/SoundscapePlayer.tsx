@@ -22,8 +22,14 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useEnvironment } from '@/context/EnvironmentContext';
 import { useAudio } from '@/context/AudioContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { useSoundscapeAudioLoader } from '@/hooks/useSoundscapeAudioLoader';
 import type { SoundscapeConfig } from '@/lib/experience/SoundscapeEngine';
+
+// NOTE (i18n): soundscape.labelThai / .descriptionThai and timeOfDay.labelThai
+// come from SoundscapeEngine.ts / TimeOfDayEngine.ts — genuine Thai-only
+// data-layer content (same precedent as InsightEngine / AmbientBadge.tsx).
+// Out of scope for a UI-string-level i18n pass.
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -172,6 +178,8 @@ interface SoundscapePlayerProps {
 export function SoundscapePlayer({ compact = false, className = '' }: SoundscapePlayerProps) {
   const { environment, isTransitioning } = useEnvironment();
   const audio = useAudio();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking } =
     useSoundscapeAudio();
 
@@ -299,7 +307,7 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
           alignItems: 'center',
           justifyContent: 'center',
         }}
-        aria-label={isPlaying ? '暂停' : '播放'}
+        aria-label={isPlaying ? (isTh ? 'หยุดชั่วคราว' : 'Pause') : (isTh ? 'เล่น' : 'Play')}
       >
         {isPlaying ? '⏸' : '▶'}
       </button>

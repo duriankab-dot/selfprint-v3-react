@@ -19,6 +19,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState } from '@/lib/intelligence/TwinStateEngine';
@@ -102,6 +103,8 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const engine = useMemo(() => new TwinStateEngine(), []);
@@ -145,12 +148,14 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   if (!userId) {
     return (
       <div className="living-twin">
-        <div className="living-twin__state-desc">กรุณาเข้าสู่ระบบเพื่อดู AI Twin ของคุณ</div>
+        <div className="living-twin__state-desc">
+          {isTh ? 'กรุณาเข้าสู่ระบบเพื่อดู AI Twin ของคุณ' : 'Please log in to see your AI Twin'}
+        </div>
         <button
           className="living-twin__btn living-twin__btn--primary"
           onClick={() => navigate('/onboarding')}
         >
-          เริ่ม Onboarding
+          {isTh ? 'เริ่ม Onboarding' : 'Start Onboarding'}
         </button>
       </div>
     );
@@ -169,7 +174,9 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
         </div>
         <div className="living-twin__processing">
           <div className="living-twin__processing-label">ANALYZING</div>
-          <div className="living-twin__processing-desc">กำลังทำความเข้าใจข้อมูล</div>
+          <div className="living-twin__processing-desc">
+            {isTh ? 'กำลังทำความเข้าใจข้อมูล' : 'Making sense of your data'}
+          </div>
           <div className="living-twin__processing-dots">
             <span /><span /><span />
           </div>
@@ -216,13 +223,15 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
       </div>
 
       {/* State label + description */}
-      <div className="living-twin__state-th">Twin ของคุณ: {labelTh}</div>
+      <div className="living-twin__state-th">
+        {isTh ? `Twin ของคุณ: ${labelTh}` : `Your Twin: ${labelEn}`}
+      </div>
       <div className="living-twin__state-desc">{description}</div>
 
       {/* Progress */}
       <div className="living-twin__progress-wrap">
         <div className="living-twin__progress-label">
-          <span>ความเข้าใจ</span>
+          <span>{isTh ? 'ความเข้าใจ' : 'Understanding'}</span>
           <span>{progress}%</span>
         </div>
         <div className="living-twin__progress-track">
@@ -238,7 +247,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
 
       {/* Next milestone */}
       <div className="living-twin__next">
-        <strong>ขั้นต่อไป</strong>
+        <strong>{isTh ? 'ขั้นต่อไป' : 'Next step'}</strong>
         {nextMilestone}
       </div>
 
@@ -248,7 +257,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
           className="living-twin__btn living-twin__btn--primary"
           onClick={() => navigate('/analysis')}
         >
-          🔍 ดูการวิเคราะห์เต็ม
+          🔍 {isTh ? 'ดูการวิเคราะห์เต็ม' : 'View Full Analysis'}
         </button>
         <button
           className="living-twin__btn living-twin__btn--outline"
@@ -256,7 +265,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
           // guide), wrong assistant for a "คุยกับ Twin" button.
           onClick={() => navigate('/chat/twin')}
         >
-          💬 คุยกับ Twin
+          💬 {isTh ? 'คุยกับ Twin' : 'Chat with Twin'}
         </button>
       </div>
     </div>

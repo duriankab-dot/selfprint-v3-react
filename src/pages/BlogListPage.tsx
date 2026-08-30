@@ -7,6 +7,14 @@
 import React, { useState, useEffect } from 'react';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
+import { useLanguage } from '@/context/LanguageContext';
+
+// i18n scope note: article bodies (STATIC_ARTICLES titles/excerpts/content
+// below, plus the ~25 dynamic articles fetched from /blog/*.md) are Thai-only
+// long-form editorial content — same data-layer gap already flagged for
+// WorldDetail.tsx's engine *Thai fields in the i18n handoff doc. Translating
+// full articles is a content project, not a UI-string fix; only this page's
+// UI chrome (buttons, headings, loading/empty states) is made bilingual here.
 
 interface Article {
   slug: string;
@@ -159,6 +167,8 @@ function buildArticleSchema(article: Article) {
 
 export default function BlogListPage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [active, setActive] = useState<Article | null>(null);
   const [activeContent, setActiveContent] = useState<string>('');
   const [dynamicArticles, setDynamicArticles] = useState<DynamicArticle[]>([]);
@@ -280,7 +290,7 @@ export default function BlogListPage() {
                 padding: 0,
               }}
             >
-              ← กลับไปดูบทความทั้งหมด
+              {isTh ? '← กลับไปดูบทความทั้งหมด' : '← Back to all articles'}
             </button>
 
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px' }}>
@@ -337,7 +347,7 @@ export default function BlogListPage() {
                 <>
                   {loadingContent && (
                     <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-                      กำลังโหลดบทความ...
+                      {isTh ? 'กำลังโหลดบทความ...' : 'Loading article...'}
                     </p>
                   )}
                   {activeContent &&
@@ -395,7 +405,7 @@ export default function BlogListPage() {
                       })}
                   {!loadingContent && !activeContent && (
                     <p style={{ color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '40px 0' }}>
-                      ไม่พบเนื้อหาบทความ — กรุณาลองใหม่อีกครั้ง
+                      {isTh ? 'ไม่พบเนื้อหาบทความ — กรุณาลองใหม่อีกครั้ง' : 'Article content not found — please try again'}
                     </p>
                   )}
                 </>
@@ -415,10 +425,12 @@ export default function BlogListPage() {
             >
               <div style={{ fontSize: '28px', marginBottom: '12px' }}>🚀</div>
               <p style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px' }}>
-                อยากเข้าใจตัวเองอย่างลึกซึ้ง?
+                {isTh ? 'อยากเข้าใจตัวเองอย่างลึกซึ้ง?' : 'Want to understand yourself more deeply?'}
               </p>
               <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-                ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติและค้นพบตัวเองที่แท้จริง
+                {isTh
+                  ? 'ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติและค้นพบตัวเองที่แท้จริง'
+                  : 'Let your AI Twin analyze 12 dimensions of behavior and discover who you really are'}
               </p>
               <button
                 onClick={() => navigate('/onboarding')}
@@ -433,7 +445,7 @@ export default function BlogListPage() {
                   cursor: 'pointer',
                 }}
               >
-                สร้าง SELFPRINT ของฉัน →
+                {isTh ? 'สร้าง SELFPRINT ของฉัน →' : 'Create my SELFPRINT →'}
               </button>
             </div>
           </div>
@@ -465,9 +477,13 @@ export default function BlogListPage() {
   return (
     <>
       <MetaTagManager
-        title="คลังบทความ SELFPRINT — วิทยาศาสตร์พฤติกรรม AI Twin และการพัฒนาตัวเอง"
-        description="อ่านบทความฟรีเกี่ยวกับวิทยาศาสตร์พฤติกรรม AI Twin ฝาแฝดดิจิทัล และวิธีเข้าใจตัวเองด้วยข้อมูล ไม่ใช่ดวงชะตา"
-        canonicalUrl="/th/blog"
+        title={isTh
+          ? 'คลังบทความ SELFPRINT — วิทยาศาสตร์พฤติกรรม AI Twin และการพัฒนาตัวเอง'
+          : 'SELFPRINT Blog — Behavioral Science, AI Twin, and Self-Development'}
+        description={isTh
+          ? 'อ่านบทความฟรีเกี่ยวกับวิทยาศาสตร์พฤติกรรม AI Twin ฝาแฝดดิจิทัล และวิธีเข้าใจตัวเองด้วยข้อมูล ไม่ใช่ดวงชะตา'
+          : 'Free articles on behavioral science, AI Twins, and understanding yourself through data — not horoscopes'}
+        canonicalUrl={isTh ? '/th/blog' : '/en/blog'}
       />
       {/* JSON-LD Blog + FAQ schema (AEO: ติดใน AI Overview / Featured Snippet) */}
       <script
@@ -518,12 +534,12 @@ export default function BlogListPage() {
                 padding: 0,
               }}
             >
-              ← กลับหน้าหลัก
+              {isTh ? '← กลับหน้าหลัก' : '← Back to home'}
             </button>
           </div>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📚</div>
           <h1 style={{ fontSize: 'clamp(28px,5vw,44px)', fontWeight: 900, margin: '0 0 16px' }}>
-            คลังบทความ SELFPRINT
+            {isTh ? 'คลังบทความ SELFPRINT' : 'SELFPRINT Blog'}
           </h1>
           <p
             style={{
@@ -534,9 +550,11 @@ export default function BlogListPage() {
               lineHeight: 1.7,
             }}
           >
-            วิทยาศาสตร์พฤติกรรม · AI Twin · พัฒนาตัวเอง
+            {isTh ? 'วิทยาศาสตร์พฤติกรรม · AI Twin · พัฒนาตัวเอง' : 'Behavioral Science · AI Twin · Self-Development'}
             <br />
-            <span style={{ fontSize: '14px' }}>{allArticles.length} บทความ (อ่านฟรีทุกบทความ)</span>
+            <span style={{ fontSize: '14px' }}>
+              {isTh ? `${allArticles.length} บทความ (อ่านฟรีทุกบทความ)` : `${allArticles.length} articles (all free to read)`}
+            </span>
           </p>
         </div>
 
@@ -580,7 +598,7 @@ export default function BlogListPage() {
                 {a.excerpt}
               </p>
               <span style={{ fontSize: '13px', color: 'var(--color-text-tertiary)', fontWeight: 600 }}>
-                อ่านเลย →
+                {isTh ? 'อ่านเลย →' : 'Read now →'}
               </span>
             </article>
           ))}

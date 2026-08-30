@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './voice-settings.css';
 
 interface VoiceSettingsProps {
@@ -16,13 +17,15 @@ interface VoiceSettingsProps {
 }
 
 const VoiceSettings: React.FC<VoiceSettingsProps> = ({ settings, onChange }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const handleChange = (key: string, value: any) => {
     onChange({ ...settings, [key]: value });
   };
 
   return (
     <div className="voice-settings">
-      <h3>⚙️ ตั้งค่าเสียง</h3>
+      <h3>⚙️ {isTh ? 'ตั้งค่าเสียง' : 'Voice Settings'}</h3>
 
       <div className="settings-group">
         <label>💭 Tone (บุคลิกเสียง)</label>

@@ -6,6 +6,7 @@
  */
 
 import { useHub } from '@/context/HubContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { HUB_OPTIONS } from '@/constants/hubs';
 
 interface HubSwitcherProps {
@@ -14,12 +15,14 @@ interface HubSwitcherProps {
 
 export const HubSwitcher: React.FC<HubSwitcherProps> = ({ className = '' }) => {
   const { currentHub, switchHub } = useHub();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   return (
     <div className={`hub-switcher ${className}`}>
       <div className="hub-switcher__label">
         <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--tx)' }}>
-          Hub ปัจจุบัน
+          {isTh ? 'Hub ปัจจุบัน' : 'Current Hub'}
         </p>
       </div>
 

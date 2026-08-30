@@ -6,6 +6,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/primitives/Button';
 import { Input } from '@/components/primitives/Input';
 import styles from './PasskeyLogin.module.css';
@@ -17,6 +18,8 @@ interface PasskeyLoginProps {
 
 export function PasskeyLogin({ onSuccess, onError }: PasskeyLoginProps) {
   const { isPasskeyAvailable, hasBiometric, signInWithPasskey } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -44,8 +47,8 @@ export function PasskeyLogin({ onSuccess, onError }: PasskeyLoginProps) {
   if (!isPasskeyAvailable) {
     return (
       <div className={styles.unavailable}>
-        <p>🔑 Passkey ไม่ได้รับการรองรับบนอุปกรณ์นี้</p>
-        <p className={styles.hint}>ลองใช้ Google, Apple, หรือ Magic Link แทน</p>
+        <p>{isTh ? '🔑 Passkey ไม่ได้รับการรองรับบนอุปกรณ์นี้' : '🔑 Passkey is not supported on this device'}</p>
+        <p className={styles.hint}>{isTh ? 'ลองใช้ Google, Apple, หรือ Magic Link แทน' : 'Try Google, Apple, or a Magic Link instead'}</p>
       </div>
     );
   }
@@ -53,8 +56,8 @@ export function PasskeyLogin({ onSuccess, onError }: PasskeyLoginProps) {
   return (
     <form onSubmit={handlePasskeyLogin} className={styles.form}>
       <div className={styles.header}>
-        <h2>🔑 {hasBiometric ? 'ลงชื่อเข้าใช้ด้วย Passkey' : 'ลงชื่อเข้าใช้'}</h2>
-        {hasBiometric && <p className={styles.subheader}>ใช้ Face ID, Touch ID, หรือ Windows Hello</p>}
+        <h2>🔑 {hasBiometric ? (isTh ? 'ลงชื่อเข้าใช้ด้วย Passkey' : 'Sign in with Passkey') : (isTh ? 'ลงชื่อเข้าใช้' : 'Sign in')}</h2>
+        {hasBiometric && <p className={styles.subheader}>{isTh ? 'ใช้ Face ID, Touch ID, หรือ Windows Hello' : 'Use Face ID, Touch ID, or Windows Hello'}</p>}
       </div>
 
       {!hasBiometric && (
@@ -79,17 +82,17 @@ export function PasskeyLogin({ onSuccess, onError }: PasskeyLoginProps) {
         {isLoading ? (
           <>
             <span className={styles.spinner}>⏳</span>
-            กำลังตรวจสอบ...
+            {isTh ? 'กำลังตรวจสอบ...' : 'Verifying...'}
           </>
         ) : hasBiometric ? (
           <>
             <span>🔓</span>
-            ลงชื่อเข้าใช้ด้วย Passkey
+            {isTh ? 'ลงชื่อเข้าใช้ด้วย Passkey' : 'Sign in with Passkey'}
           </>
         ) : (
           <>
             <span>🔑</span>
-            ลงชื่อเข้าใช้
+            {isTh ? 'ลงชื่อเข้าใช้' : 'Sign in'}
           </>
         )}
       </Button>
@@ -102,7 +105,7 @@ export function PasskeyLogin({ onSuccess, onError }: PasskeyLoginProps) {
 
       {hasBiometric && (
         <div className={styles.info}>
-          <p>💡 Passkey ของคุณจะถูกปลดล็อกโดยใช้ชีวมิติของอุปกรณ์นี้</p>
+          <p>{isTh ? '💡 Passkey ของคุณจะถูกปลดล็อกโดยใช้ชีวมิติของอุปกรณ์นี้' : '💡 Your Passkey unlocks using this device\'s biometrics'}</p>
         </div>
       )}
     </form>

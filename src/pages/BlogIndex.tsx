@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface ArticleListItem {
   id: string;
@@ -19,6 +20,8 @@ interface ArticleListItem {
 }
 
 export default function BlogIndex() {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [articles, setArticles] = useState<ArticleListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,7 +65,7 @@ export default function BlogIndex() {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">กำลังโหลดบทความ...</p>
+          <p className="text-slate-600">{isTh ? 'กำลังโหลดบทความ...' : 'Loading articles...'}</p>
         </div>
       </div>
     );
@@ -77,8 +80,9 @@ export default function BlogIndex() {
             The Selfprint Blog
           </h1>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto sm:mx-0">
-            Guided decision-making for career, relationships, and wellness.
-            Your Twin helps you think clearly about what matters.
+            {isTh
+              ? 'แนวทางการตัดสินใจสำหรับอาชีพ ความสัมพันธ์ และสุขภาวะ AI ฝาแฝดของคุณช่วยให้คิดเรื่องสำคัญได้ชัดเจนขึ้น'
+              : 'Guided decision-making for career, relationships, and wellness. Your Twin helps you think clearly about what matters.'}
           </p>
         </div>
 
@@ -88,7 +92,7 @@ export default function BlogIndex() {
           <div className="relative max-w-md">
             <input
               type="text"
-              placeholder="ค้นหาบทความ..."
+              placeholder={isTh ? 'ค้นหาบทความ...' : 'Search articles...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-3 pl-11 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
@@ -108,7 +112,7 @@ export default function BlogIndex() {
                     : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50'
                 }`}
               >
-                {cat === 'all' ? 'ทั้งหมด' : cat}
+                {cat === 'all' ? (isTh ? 'ทั้งหมด' : 'All') : cat}
               </button>
             ))}
           </div>
@@ -118,7 +122,7 @@ export default function BlogIndex() {
         {featuredArticles.length > 0 && (
           <div className="mb-16">
             <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <span>⭐</span> บทความแนะนำ
+              <span>⭐</span> {isTh ? 'บทความแนะนำ' : 'Featured articles'}
             </h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {featuredArticles.map((article) => (
@@ -141,7 +145,7 @@ export default function BlogIndex() {
                       {article.excerpt}
                     </p>
                     <div className="flex items-center gap-2 text-indigo-600 text-sm font-medium">
-                      อ่านบทความ →
+                      {isTh ? 'อ่านบทความ →' : 'Read article →'}
                     </div>
                   </div>
                 </Link>
@@ -153,12 +157,12 @@ export default function BlogIndex() {
         {/* All articles */}
         <div>
           <h2 className="text-2xl font-bold text-slate-900 mb-6">
-            บทความทั้งหมด {searchTerm && `(${filteredArticles.length})`}
+            {isTh ? 'บทความทั้งหมด' : 'All articles'} {searchTerm && `(${filteredArticles.length})`}
           </h2>
 
           {regularArticles.length === 0 && filteredArticles.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-xl shadow-sm">
-              <p className="text-slate-500">ไม่พบบทความที่ตรงกับคำค้นหา</p>
+              <p className="text-slate-500">{isTh ? 'ไม่พบบทความที่ตรงกับคำค้นหา' : 'No articles match your search'}</p>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -181,7 +185,7 @@ export default function BlogIndex() {
                       {article.excerpt}
                     </p>
                     <div className="flex items-center gap-2 text-indigo-600 text-sm font-medium">
-                      อ่าน →
+                      {isTh ? 'อ่าน →' : 'Read →'}
                     </div>
                   </div>
                 </Link>

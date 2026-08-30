@@ -20,6 +20,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import type { AccuracyMetrics } from '@/lib/intelligence/types';
 import './AccuracyBadge.css';
 
@@ -55,10 +56,12 @@ export const AccuracyBadge: React.FC<AccuracyBadgeProps> = ({
   compact = false,
   className = '',
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const accuracyPercent = Math.round(accuracy * 100);
   const badgeColor = getAccuracyColor(accuracy);
   const trendIcon = getTrendIcon(trend);
-  const trendLabel = getTrendLabel(trend);
+  const trendLabel = getTrendLabel(trend, isTh);
 
   if (compact) {
     return (
@@ -79,7 +82,7 @@ export const AccuracyBadge: React.FC<AccuracyBadgeProps> = ({
           <span className="accuracy-badge__percent" style={{ color: badgeColor }}>
             {accuracyPercent}%
           </span>
-          <span className="accuracy-badge__label">ความแม่นยำ</span>
+          <span className="accuracy-badge__label">{isTh ? 'ความแม่นยำ' : 'Accuracy'}</span>
         </div>
 
         {/* Trend */}
@@ -97,7 +100,9 @@ export const AccuracyBadge: React.FC<AccuracyBadgeProps> = ({
 
       {/* Helper text */}
       <p className="accuracy-badge__helper">
-        ตาม feedback ของคุณจาก {totalInsights} insights ที่ยูสให้ rating
+        {isTh
+          ? `ตาม feedback ของคุณจาก ${totalInsights} insights ที่ยูสให้ rating`
+          : `Based on your feedback from ${totalInsights} rated insights`}
       </p>
     </div>
   );
@@ -111,10 +116,13 @@ export const AccuracyBadgeFromMetrics: React.FC<AccuracyBadgeFromMetricsProps> =
   compact = false,
   className = '',
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+
   if (!metrics || metrics.totalInsights === 0) {
     return (
       <div className={`accuracy-badge accuracy-badge--empty ${className}`}>
-        <p>ยังไม่มี insights ให้ rating ส่วน AI ยัง learning...</p>
+        <p>{isTh ? 'ยังไม่มี insights ให้ rating ส่วน AI ยัง learning...' : 'No rated insights yet — AI is still learning...'}</p>
       </div>
     );
   }
@@ -165,14 +173,24 @@ function getTrendIcon(trend: 'improving' | 'stable' | 'declining'): string {
 /**
  * ✅ getTrendLabel() — label ตาม trend
  */
-function getTrendLabel(trend: 'improving' | 'stable' | 'declining'): string {
+function getTrendLabel(trend: 'improving' | 'stable' | 'declining', isTh: boolean): string {
+  if (isTh) {
+    switch (trend) {
+      case 'improving':
+        return 'ดีขึ้น';
+      case 'declining':
+        return 'ลดลง';
+      default:
+        return 'คงที่';
+    }
+  }
   switch (trend) {
     case 'improving':
-      return 'ดีขึ้น';
+      return 'Improving';
     case 'declining':
-      return 'ลดลง';
+      return 'Declining';
     default:
-      return 'คงที่';
+      return 'Stable';
   }
 }
 

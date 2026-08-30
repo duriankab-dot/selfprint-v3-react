@@ -14,6 +14,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './TwinEvolutionChart.css';
 
 interface TwinEvolutionChartProps {
@@ -22,6 +23,8 @@ interface TwinEvolutionChartProps {
 }
 
 export const TwinEvolutionChart: React.FC<TwinEvolutionChartProps> = ({ accuracy, trend }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const accuracyPercent = Math.round(accuracy * 100);
 
   // Mockup data: generate realistic trend data
@@ -54,17 +57,19 @@ export const TwinEvolutionChart: React.FC<TwinEvolutionChartProps> = ({ accuracy
       {/* Stats below chart */}
       <div className="chart-stats">
         <div className="stat-item">
-          <span className="stat-label">ปัจจุบัน</span>
+          <span className="stat-label">{isTh ? 'ปัจจุบัน' : 'Current'}</span>
           <span className="stat-value">{accuracyPercent}%</span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">แนวโน้ม</span>
+          <span className="stat-label">{isTh ? 'แนวโน้ม' : 'Trend'}</span>
           <span className={`stat-value trend-${trend}`}>
-            {trend === 'improving' ? '📈 ดีขึ้น' : trend === 'declining' ? '📉 ลดลง' : '➡️ คงที่'}
+            {isTh
+              ? (trend === 'improving' ? '📈 ดีขึ้น' : trend === 'declining' ? '📉 ลดลง' : '➡️ คงที่')
+              : (trend === 'improving' ? '📈 Improving' : trend === 'declining' ? '📉 Declining' : '➡️ Stable')}
           </span>
         </div>
         <div className="stat-item">
-          <span className="stat-label">เป้าหมาย</span>
+          <span className="stat-label">{isTh ? 'เป้าหมาย' : 'Target'}</span>
           <span className="stat-value">90%+</span>
         </div>
       </div>
@@ -72,11 +77,17 @@ export const TwinEvolutionChart: React.FC<TwinEvolutionChartProps> = ({ accuracy
       {/* Insight message */}
       <div className={`chart-insight insight-${trend}`}>
         <p>
-          {trend === 'improving'
-            ? '✅ Twin ของคุณ กำลังเรียนรู้ได้ดีขึ้น ให้ feedback ต่อไป!'
-            : trend === 'declining'
-              ? '⚠️ Twin accuracy ลดลง อาจจำเป็นต้องให้ feedback เพิ่มเติม'
-              : '➡️ Twin accuracy อยู่ในระดับคงที่ ทำให้ feedback เพิ่มเติมเพื่อปรับปรุง'}
+          {isTh
+            ? (trend === 'improving'
+                ? '✅ Twin ของคุณ กำลังเรียนรู้ได้ดีขึ้น ให้ feedback ต่อไป!'
+                : trend === 'declining'
+                  ? '⚠️ Twin accuracy ลดลง อาจจำเป็นต้องให้ feedback เพิ่มเติม'
+                  : '➡️ Twin accuracy อยู่ในระดับคงที่ ทำให้ feedback เพิ่มเติมเพื่อปรับปรุง')
+            : (trend === 'improving'
+                ? '✅ Your Twin is learning better — keep giving feedback!'
+                : trend === 'declining'
+                  ? '⚠️ Twin accuracy is declining — more feedback may help'
+                  : '➡️ Twin accuracy is stable — give more feedback to improve it')}
         </p>
       </div>
     </div>

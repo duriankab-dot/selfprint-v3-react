@@ -21,6 +21,7 @@ import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
@@ -32,10 +33,16 @@ import type { KnowledgeLevel } from '@/lib/intelligence/types';
 // Knowledge level labels
 // ============================================================================
 
-const KNOWLEDGE_LABEL: Record<KnowledgeLevel, string> = {
+const KNOWLEDGE_LABEL_TH: Record<KnowledgeLevel, string> = {
   KNOW: '✓ รู้แน่',
   INFER: '~ สรุปจากข้อมูล',
   UNKNOWN: '? ยังไม่ทราบ',
+};
+
+const KNOWLEDGE_LABEL_EN: Record<KnowledgeLevel, string> = {
+  KNOW: '✓ Known',
+  INFER: '~ Inferred',
+  UNKNOWN: '? Unknown',
 };
 
 const KNOWLEDGE_CLASS: Record<KnowledgeLevel, string> = {
@@ -52,6 +59,9 @@ export const ExecutiveSummary: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const KNOWLEDGE_LABEL = isTh ? KNOWLEDGE_LABEL_TH : KNOWLEDGE_LABEL_EN;
 
   // Stable instances (same pattern as IntelligencePanel — React Query dedupes calls)
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
@@ -122,10 +132,13 @@ export const ExecutiveSummary: React.FC = () => {
     return (
       <div className="exec-summary exec-summary--empty">
         <div className="exec-summary__empty-icon">🌱</div>
-        <h2 className="exec-summary__empty-title">Twin ของคุณเพิ่งเริ่มต้น</h2>
+        <h2 className="exec-summary__empty-title">
+          {isTh ? 'Twin ของคุณเพิ่งเริ่มต้น' : 'Your Twin has just started'}
+        </h2>
         <p className="exec-summary__empty-body">
-          บันทึกความทรงจำหรือทำ reflection สัก 2–3 ครั้ง
-          เพื่อให้ AI Twin เริ่มเรียนรู้และเข้าใจตัวคุณ
+          {isTh
+            ? 'บันทึกความทรงจำหรือทำ reflection สัก 2–3 ครั้ง เพื่อให้ AI Twin เริ่มเรียนรู้และเข้าใจตัวคุณ'
+            : 'Log a memory or do a few reflections so your AI Twin can start learning and understanding you'}
         </p>
       </div>
     );
@@ -140,7 +153,7 @@ export const ExecutiveSummary: React.FC = () => {
       {/* Header row */}
       <div className="exec-summary__header">
         <div>
-          <p className="exec-summary__eyebrow">AI Twin ของคุณ</p>
+          <p className="exec-summary__eyebrow">{isTh ? 'AI Twin ของคุณ' : 'Your AI Twin'}</p>
           <h2 className="exec-summary__headline">{summary.headline}</h2>
         </div>
         {metrics && metrics.totalInsights > 0 && (
@@ -149,7 +162,11 @@ export const ExecutiveSummary: React.FC = () => {
               confidence={metrics.accuracy}
               evidenceCount={metrics.totalInsights}
               compact
-              explanation={`Twin แม่นยำ ${Math.round(metrics.accuracy * 100)}% จาก ${metrics.totalInsights} feedbacks`}
+              explanation={
+                isTh
+                  ? `Twin แม่นยำ ${Math.round(metrics.accuracy * 100)}% จาก ${metrics.totalInsights} feedbacks`
+                  : `Twin is ${Math.round(metrics.accuracy * 100)}% accurate based on ${metrics.totalInsights} feedbacks`
+              }
             />
           </div>
         )}
@@ -183,7 +200,7 @@ export const ExecutiveSummary: React.FC = () => {
                 : '🔄'}
           </span>
           <div>
-            <p className="exec-summary__pattern-label">pattern ที่น่าสนใจ</p>
+            <p className="exec-summary__pattern-label">{isTh ? 'pattern ที่น่าสนใจ' : 'Notable pattern'}</p>
             <p className="exec-summary__pattern-text">{summary.topPattern.description}</p>
           </div>
           <ConfidenceIndicator
@@ -197,19 +214,19 @@ export const ExecutiveSummary: React.FC = () => {
       {/* Footer */}
       <div className="exec-summary__footer">
         <span className="exec-summary__depth-label">
-          {summary.dataDepth === 'minimal' && '🌱 ข้อมูลน้อย — Twin ยังเรียนรู้'}
-          {summary.dataDepth === 'growing' && '📈 Twin กำลังเติบโต'}
-          {summary.dataDepth === 'established' && '🧠 Twin เข้าใจคุณพอสมควรแล้ว'}
-          {summary.dataDepth === 'deep' && '✨ Twin เข้าใจคุณในระดับลึก'}
+          {summary.dataDepth === 'minimal' && (isTh ? '🌱 ข้อมูลน้อย — Twin ยังเรียนรู้' : '🌱 Limited data — Twin is still learning')}
+          {summary.dataDepth === 'growing' && (isTh ? '📈 Twin กำลังเติบโต' : '📈 Twin is growing')}
+          {summary.dataDepth === 'established' && (isTh ? '🧠 Twin เข้าใจคุณพอสมควรแล้ว' : '🧠 Twin understands you fairly well now')}
+          {summary.dataDepth === 'deep' && (isTh ? '✨ Twin เข้าใจคุณในระดับลึก' : '✨ Twin understands you deeply')}
         </span>
 
         {summary.readMoreEnabled && (
           <button
             className="exec-summary__read-more"
             onClick={() => navigate('/analysis')}
-            aria-label="อ่านการวิเคราะห์เต็มรูปแบบ"
+            aria-label={isTh ? 'อ่านการวิเคราะห์เต็มรูปแบบ' : 'Read the full analysis'}
           >
-            อ่านการวิเคราะห์เต็มรูปแบบ →
+            {isTh ? 'อ่านการวิเคราะห์เต็มรูปแบบ →' : 'Read the full analysis →'}
           </button>
         )}
       </div>

@@ -7,46 +7,49 @@
 
 import { useEmotion } from '@/context/EmotionContext';
 import type { Mood } from '@/context/EmotionContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 // ข้อมูล 6 moods
-const MOOD_OPTIONS: Array<{ id: Mood; label: string; description: string; icon: string }> = [
-  {
-    id: 'stressed',
-    label: 'เครียด',
-    description: 'กระเด็นไปมา จิตใจปั่น',
-    icon: '😰',
-  },
-  {
-    id: 'confused',
-    label: 'สับสน',
-    description: 'ไม่รู้เพราะอะไร ทิศทางไม่ชัด',
-    icon: '🤔',
-  },
-  {
-    id: 'confident',
-    label: 'มั่นใจ',
-    description: 'รู้ว่าจะไป ศรัทธาตัวเอง',
-    icon: '💪',
-  },
-  {
-    id: 'drained',
-    label: 'หมดแรง',
-    description: 'เหนื่อยมากๆ เต่าเคลื่อน',
-    icon: '😴',
-  },
-  {
-    id: 'ready',
-    label: 'พร้อม',
-    description: 'อยากเดินหน้า ลุยสิ่งใหม่',
-    icon: '🚀',
-  },
-  {
-    id: 'reflective',
-    label: 'สะท้อนใจ',
-    description: 'อยากคิด รื่องหาความหมาย',
-    icon: '🌙',
-  },
-];
+function getMoodOptions(isTh: boolean): Array<{ id: Mood; label: string; description: string; icon: string }> {
+  return [
+    {
+      id: 'stressed',
+      label: isTh ? 'เครียด' : 'Stressed',
+      description: isTh ? 'กระเด็นไปมา จิตใจปั่น' : 'Pulled in every direction, mind racing',
+      icon: '😰',
+    },
+    {
+      id: 'confused',
+      label: isTh ? 'สับสน' : 'Confused',
+      description: isTh ? 'ไม่รู้เพราะอะไร ทิศทางไม่ชัด' : "Not sure why, direction isn't clear",
+      icon: '🤔',
+    },
+    {
+      id: 'confident',
+      label: isTh ? 'มั่นใจ' : 'Confident',
+      description: isTh ? 'รู้ว่าจะไป ศรัทธาตัวเอง' : 'You know where you\'re going, trust yourself',
+      icon: '💪',
+    },
+    {
+      id: 'drained',
+      label: isTh ? 'หมดแรง' : 'Drained',
+      description: isTh ? 'เหนื่อยมากๆ เต่าเคลื่อน' : 'Exhausted, moving at a crawl',
+      icon: '😴',
+    },
+    {
+      id: 'ready',
+      label: isTh ? 'พร้อม' : 'Ready',
+      description: isTh ? 'อยากเดินหน้า ลุยสิ่งใหม่' : 'Ready to move forward, take on something new',
+      icon: '🚀',
+    },
+    {
+      id: 'reflective',
+      label: isTh ? 'สะท้อนใจ' : 'Reflective',
+      description: isTh ? 'อยากคิด รื่องหาความหมาย' : 'Want to think things through, find meaning',
+      icon: '🌙',
+    },
+  ];
+}
 
 interface EmotionSelectorProps {
   className?: string;
@@ -54,12 +57,15 @@ interface EmotionSelectorProps {
 
 export const EmotionSelector: React.FC<EmotionSelectorProps> = ({ className = '' }) => {
   const { mood, updateMood } = useEmotion();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const MOOD_OPTIONS = getMoodOptions(isTh);
 
   return (
     <div className={`emotion-selector ${className}`}>
       <div className="emotion-selector__label">
         <p style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: 'var(--color-text-primary)' }}>
-          อารมณ์ตอนนี้
+          {isTh ? 'อารมณ์ตอนนี้' : 'Current mood'}
         </p>
       </div>
 

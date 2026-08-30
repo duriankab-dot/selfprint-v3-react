@@ -11,6 +11,7 @@
 
 import React, { useState, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import VoiceInput from './VoiceInput';
 import VoiceOutput from './VoiceOutput';
 import ConversationHistory from './ConversationHistory';
@@ -43,6 +44,8 @@ interface VoiceSettings {
 const VoiceChat: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [isListening, setIsListening] = useState(false);
@@ -50,7 +53,7 @@ const VoiceChat: React.FC = () => {
   const [settings, setSettings] = useState<VoiceSettings>({
     tone: 'warm',
     pace: 'normal',
-    language: 'th',
+    language: isTh ? 'th' : 'en',
     volume: 100,
   });
   const [showSettings, setShowSettings] = useState(false);
@@ -79,7 +82,9 @@ const VoiceChat: React.FC = () => {
       const assistantMsg: Message = {
         id: `msg_${Date.now() + 1}`,
         role: 'assistant',
-        text: `คุณพูดว่า: "${transcript}"\n\nนี่คือคำตอบจาก AI Twin... (ยังไม่มี backend)`,
+        text: isTh
+          ? `คุณพูดว่า: "${transcript}"\n\nนี่คือคำตอบจาก AI Twin... (ยังไม่มี backend)`
+          : `You said: "${transcript}"\n\nThis is a response from your AI Twin... (no backend yet)`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
@@ -88,7 +93,7 @@ const VoiceChat: React.FC = () => {
   };
 
   const handleClearHistory = () => {
-    if (confirm('ลบประวัติการสนทนาทั้งหมดหรือ?')) {
+    if (confirm(isTh ? 'ลบประวัติการสนทนาทั้งหมดหรือ?' : 'Clear the entire conversation history?')) {
       setMessages([]);
     }
   };
@@ -100,7 +105,7 @@ const VoiceChat: React.FC = () => {
   if (!userId) {
     return (
       <div className="voice-chat">
-        <p>กรุณาเข้าสู่ระบบ</p>
+        <p>{isTh ? 'กรุณาเข้าสู่ระบบ' : 'Please log in'}</p>
       </div>
     );
   }
@@ -109,13 +114,13 @@ const VoiceChat: React.FC = () => {
     <div className="voice-chat">
       {/* Header */}
       <div className="voice-chat__header">
-        <h1>🎤 คุยกับ AI Twin</h1>
-        <p>พูดคุยกับ AI Twin ด้วยเสียง เพื่อสนทนาและรับคำแนะนำ</p>
+        <h1>🎤 {isTh ? 'คุยกับ AI Twin' : 'Talk with your AI Twin'}</h1>
+        <p>{isTh ? 'พูดคุยกับ AI Twin ด้วยเสียง เพื่อสนทนาและรับคำแนะนำ' : 'Talk with your AI Twin by voice to converse and get guidance'}</p>
         <button
           className="voice-chat__settings-btn"
           onClick={() => setShowSettings(!showSettings)}
         >
-          ⚙️ ตั้งค่า
+          ⚙️ {isTh ? 'ตั้งค่า' : 'Settings'}
         </button>
       </div>
 
@@ -160,12 +165,12 @@ const VoiceChat: React.FC = () => {
 
       {/* Status */}
       <div className="voice-chat__status">
-        {isListening && <span className="status-badge status-listening">🎙️ กำลังฟัง...</span>}
-        {isSpeaking && <span className="status-badge status-speaking">🔊 กำลังพูด...</span>}
+        {isListening && <span className="status-badge status-listening">🎙️ {isTh ? 'กำลังฟัง...' : 'Listening...'}</span>}
+        {isSpeaking && <span className="status-badge status-speaking">🔊 {isTh ? 'กำลังพูด...' : 'Speaking...'}</span>}
         {!isListening && !isSpeaking && (
-          <span className="status-badge status-ready">✅ พร้อม</span>
+          <span className="status-badge status-ready">✅ {isTh ? 'พร้อม' : 'Ready'}</span>
         )}
-        <span className="message-count">ข้อความทั้งหมด: {messages.length}</span>
+        <span className="message-count">{isTh ? 'ข้อความทั้งหมด' : 'Total messages'}: {messages.length}</span>
       </div>
     </div>
   );

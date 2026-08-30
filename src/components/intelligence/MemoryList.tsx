@@ -21,6 +21,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 import { MemoryManager } from '@/lib/intelligence/MemoryManager';
 import type { PersonalMemory, MemoryType } from '@/lib/intelligence/types';
 import './MemoryList.css';
@@ -53,6 +54,8 @@ export const MemoryList: React.FC<MemoryListProps> = ({
   onMemoryDeleted,
   onFilterChange,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [filterType, setFilterType] = useState<FilterType>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -85,7 +88,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
 
   // Handle delete
   const handleDelete = (id: string) => {
-    if (confirm('คุณแน่ใจหรือว่าต้องการลบ memory นี้?')) {
+    if (confirm(isTh ? 'คุณแน่ใจหรือว่าต้องการลบ memory นี้?' : 'Are you sure you want to delete this memory?')) {
       deleteMutation.mutate(id);
     }
   };
@@ -104,7 +107,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
     return (
       <div className="memory-list memory-list--loading">
         <div className="memory-list__spinner" />
-        <p>กำลังโหลด memories...</p>
+        <p>{isTh ? 'กำลังโหลด memories...' : 'Loading memories...'}</p>
       </div>
     );
   }
@@ -113,8 +116,8 @@ export const MemoryList: React.FC<MemoryListProps> = ({
     return (
       <div className="memory-list memory-list--empty">
         <p className="memory-list__empty-icon">💾</p>
-        <h3>ยังไม่มี Memories</h3>
-        <p>บันทึก memory แรกของคุณเพื่อเริ่มต้น</p>
+        <h3>{isTh ? 'ยังไม่มี Memories' : 'No memories yet'}</h3>
+        <p>{isTh ? 'บันทึก memory แรกของคุณเพื่อเริ่มต้น' : 'Log your first memory to get started'}</p>
       </div>
     );
   }
@@ -124,7 +127,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
       {/* Header + Filter */}
       <div className="memory-list__header">
         <div className="memory-list__stats">
-          <span className="memory-stat memory-stat--total">📌 รวม: {stats.total}</span>
+          <span className="memory-stat memory-stat--total">📌 {isTh ? 'รวม' : 'Total'}: {stats.total}</span>
           <span className="memory-stat memory-stat--win">🎉 Wins: {stats.small_win}</span>
           <span className="memory-stat memory-stat--moment">⭐ Moments: {stats.important_moment}</span>
           <span className="memory-stat memory-stat--discovery">💡 Discoveries: {stats.discovery}</span>
@@ -139,7 +142,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
                 className={`memory-filter-btn ${filterType === type ? 'active' : ''}`}
                 onClick={() => handleFilterChange(type)}
               >
-                {type === 'all' && 'ทั้งหมด'}
+                {type === 'all' && (isTh ? 'ทั้งหมด' : 'All')}
                 {type === 'small_win' && '🎉 Wins'}
                 {type === 'important_moment' && '⭐ Moments'}
                 {type === 'discovery' && '💡 Discoveries'}
@@ -165,7 +168,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
               </div>
 
               <div className="memory-item__meta">
-                <span className="memory-item__date">{formatDate(memory.createdAt)}</span>
+                <span className="memory-item__date">{formatDate(memory.createdAt, isTh)}</span>
                 <span className={`memory-item__badge ${memory.memoryType}`}>
                   {memory.memoryType.replace(/_/g, ' ')}
                 </span>
@@ -191,7 +194,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
                 {/* Confidence */}
                 {memory.confidence > 0 && (
                   <div className="memory-item__confidence">
-                    <span>ความมั่นใจ: {Math.round(memory.confidence * 100)}%</span>
+                    <span>{isTh ? 'ความมั่นใจ' : 'Confidence'}: {Math.round(memory.confidence * 100)}%</span>
                   </div>
                 )}
 
@@ -202,7 +205,7 @@ export const MemoryList: React.FC<MemoryListProps> = ({
                     onClick={() => handleDelete(memory.id)}
                     disabled={deleteMutation.isPending}
                   >
-                    🗑️ ลบ
+                    🗑️ {isTh ? 'ลบ' : 'Delete'}
                   </button>
                 </div>
               </div>
@@ -214,7 +217,9 @@ export const MemoryList: React.FC<MemoryListProps> = ({
       {/* Showing N of M */}
       <div className="memory-list__footer">
         <p>
-          แสดง {filteredMemories.length} จาก {memories.length} memories
+          {isTh
+            ? `แสดง ${filteredMemories.length} จาก ${memories.length} memories`
+            : `Showing ${filteredMemories.length} of ${memories.length} memories`}
         </p>
       </div>
     </div>
@@ -240,9 +245,9 @@ function getMemoryIcon(type: MemoryType): string {
   }
 }
 
-function formatDate(date: Date): string {
+function formatDate(date: Date, isTh: boolean): string {
   const d = new Date(date);
-  return d.toLocaleDateString('th-TH', {
+  return d.toLocaleDateString(isTh ? 'th-TH' : 'en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

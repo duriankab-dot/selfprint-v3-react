@@ -13,6 +13,8 @@
  * - Yes/Skip buttons for fine-tuning
  */
 
+import { useLanguage } from '@/context/LanguageContext';
+
 interface BlueprintData {
   decisionStyle: string;
   strengths: string[];
@@ -28,18 +30,32 @@ interface InitialBlueprintProps {
   ctaSource?: string;
 }
 
-const getNovaMessage = (ctaSource?: string): string => {
+const getNovaMessage = (ctaSource: string | undefined, isTh: boolean): string => {
+  if (isTh) {
+    switch (ctaSource) {
+      case 'why':
+        return 'จากส่วน "ทำไม" ที่คุณอ่าน ฉันรู้สึกว่าคุณอยากเข้าใจตัวเองมากขึ้น ตอนนี้ฉันเข้าใจรูปแบบการตัดสินใจของคุณ 60% แล้ว ช่วยตอบ 5 คำถามสั้นๆ เพื่อให้ฉันรู้จักคุณดีขึ้นไหม?';
+      case 'how':
+        return 'ฉันเห็นว่าคุณอยากเข้าใจกระบวนการ ตอนนี้ฉันเข้าใจวิธีตัดสินใจของคุณ 60% แล้ว ตอบ 5 คำถามเพื่อช่วยให้ฉันไปถึง 85% ได้ไหม?';
+      case 'who':
+        return 'คุณพร้อมเจาะลึกมากขึ้นแล้ว ตอนนี้ฉันเข้าใจว่าคุณเป็นใคร 60% แล้ว มาปรับความเข้าใจของฉันให้ละเอียดขึ้นด้วยอีก 5 คำถามไหม?';
+      case 'next':
+        return 'เริ่มกันเลย! ตอนนี้ฉันเข้าใจคุณ 60% แล้ว ช่วยให้ฉันไปถึงความแม่นยำ 85% ด้วยแค่ 5 คำถามสั้นๆ ไหม?';
+      default:
+        return 'ตอนนี้ฉันเข้าใจว่าคุณเป็นใคร 60% แล้ว ช่วยให้ฉันรู้จักคุณดีขึ้นไหม? แค่ 5 คำถามสั้นๆ จะพาฉันไปถึง 85%';
+    }
+  }
   switch (ctaSource) {
     case 'why':
-      return 'จากส่วน "ทำไม" ที่คุณอ่าน ฉันรู้สึกว่าคุณอยากเข้าใจตัวเองมากขึ้น ตอนนี้ฉันเข้าใจรูปแบบการตัดสินใจของคุณ 60% แล้ว ช่วยตอบ 5 คำถามสั้นๆ เพื่อให้ฉันรู้จักคุณดีขึ้นไหม?';
+      return 'From the "why" section you just read, I can tell you want to understand yourself better. I already understand about 60% of your decision-making style — would you answer 5 quick questions so I can get to know you better?';
     case 'how':
-      return 'ฉันเห็นว่าคุณอยากเข้าใจกระบวนการ ตอนนี้ฉันเข้าใจวิธีตัดสินใจของคุณ 60% แล้ว ตอบ 5 คำถามเพื่อช่วยให้ฉันไปถึง 85% ได้ไหม?';
+      return "I can see you're curious about the process. I already understand 60% of how you make decisions — 5 questions could help me reach 85%. Want to try?";
     case 'who':
-      return 'คุณพร้อมเจาะลึกมากขึ้นแล้ว ตอนนี้ฉันเข้าใจว่าคุณเป็นใคร 60% แล้ว มาปรับความเข้าใจของฉันให้ละเอียดขึ้นด้วยอีก 5 คำถามไหม?';
+      return "You're ready to go deeper. Right now I understand about 60% of who you are — shall we sharpen that with 5 more questions?";
     case 'next':
-      return 'เริ่มกันเลย! ตอนนี้ฉันเข้าใจคุณ 60% แล้ว ช่วยให้ฉันไปถึงความแม่นยำ 85% ด้วยแค่ 5 คำถามสั้นๆ ไหม?';
+      return "Let's get started! I already understand 60% of you — 5 quick questions could get me to 85% accuracy.";
     default:
-      return 'ตอนนี้ฉันเข้าใจว่าคุณเป็นใคร 60% แล้ว ช่วยให้ฉันรู้จักคุณดีขึ้นไหม? แค่ 5 คำถามสั้นๆ จะพาฉันไปถึง 85%';
+      return "Right now I understand about 60% of who you are — want to help me know you better? Just 5 quick questions could get me to 85%.";
   }
 };
 
@@ -51,6 +67,8 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
   onSkip,
   ctaSource,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const getMeterColor = (value: number): string => {
     if (value < 70) return '#FFA726'; // Amber for 60%
     if (value < 90) return '#FFD54F'; // Yellow for 70-90%
@@ -76,7 +94,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
             color: 'var(--color-text-primary)',
           }}
         >
-          🤖 AI Twin ของคุณ
+          🤖 {isTh ? 'AI Twin ของคุณ' : 'Your AI Twin'}
         </h2>
         <p
           style={{
@@ -85,7 +103,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
             margin: 0,
           }}
         >
-          ความแม่นยำ {accuracy}%
+          {isTh ? 'ความแม่นยำ' : 'Accuracy'} {accuracy}%
         </p>
         {prototypeCore && (
           <span
@@ -127,7 +145,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
               letterSpacing: '0.5px',
             }}
           >
-            🎯 รูปแบบการตัดสินใจ
+            🎯 {isTh ? 'รูปแบบการตัดสินใจ' : 'Decision style'}
           </h3>
           <p
             style={{
@@ -154,7 +172,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
               letterSpacing: '0.5px',
             }}
           >
-            💪 จุดแข็ง
+            💪 {isTh ? 'จุดแข็ง' : 'Strengths'}
           </h3>
           <ul
             style={{
@@ -201,7 +219,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
               letterSpacing: '0.5px',
             }}
           >
-            ⚠️ จุดบอด
+            ⚠️ {isTh ? 'จุดบอด' : 'Blind spot'}
           </h3>
           <p
             style={{
@@ -235,7 +253,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
               textTransform: 'uppercase',
             }}
           >
-            ความชัดเจน
+            {isTh ? 'ความชัดเจน' : 'Clarity'}
           </span>
           <span
             style={{
@@ -287,7 +305,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
             fontStyle: 'italic',
           }}
         >
-          <span style={{ fontWeight: 600 }}>SELFPRINT:</span> {getNovaMessage(ctaSource)}
+          <span style={{ fontWeight: 600 }}>SELFPRINT:</span> {getNovaMessage(ctaSource, isTh)}
         </p>
       </div>
 
@@ -316,7 +334,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
           onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
-          ✓ ช่วยให้รู้จักฉันดีขึ้น (5 คำถาม)
+          ✓ {isTh ? 'ช่วยให้รู้จักฉันดีขึ้น (5 คำถาม)' : 'Help me know you better (5 questions)'}
         </button>
         {onSkip && (
           <button
@@ -336,7 +354,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
             onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
             onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
           >
-            ข้ามไปก่อน
+            {isTh ? 'ข้ามไปก่อน' : 'Skip for now'}
           </button>
         )}
       </div>

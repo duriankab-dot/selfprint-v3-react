@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface AnalysisData {
   decisionStyle: string;
@@ -25,11 +26,18 @@ interface FullAnalysisProps {
   onHome: () => void;
 }
 
-const SCAN_MSGS = [
+const SCAN_MSGS_TH = [
   'กำลังวิเคราะห์รูปแบบการตัดสินใจ...',
   'ตรวจพบมิติพฤติกรรม 12 แบบ...',
   'สังเคราะห์ SELFPRINT Intelligence...',
   'พร้อมถอดรหัสตัวตนของคุณ ✓',
+] as const;
+
+const SCAN_MSGS_EN = [
+  'Analyzing your decision-making patterns...',
+  'Detecting 12 behavioral dimensions...',
+  'Synthesizing SELFPRINT Intelligence...',
+  'Ready to decode who you are ✓',
 ] as const;
 
 const SCAN_DURATION_MS = 2500;
@@ -41,6 +49,9 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
   accuracy = 85,
   onHome,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const SCAN_MSGS = isTh ? SCAN_MSGS_TH : SCAN_MSGS_EN;
   const [phase, setPhase]         = useState<'scanning' | 'reveal'>('scanning');
   const [scanStep, setScanStep]   = useState(0);
   const [scanPct, setScanPct]     = useState(0);
@@ -205,13 +216,13 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             {shown(0) && (
               <div style={{ textAlign: 'center', marginBottom: 44, animation: 'fa-fade-up 0.5s both' }}>
                 <p style={{ ...label, color: 'var(--accent-primary)', marginBottom: 10 }}>
-                  NOVA อ่านคุณออกแล้ว
+                  {isTh ? 'NOVA อ่านคุณออกแล้ว' : 'NOVA has read you'}
                 </p>
                 <h1 style={{
                   fontSize: 'clamp(26px, 5vw, 38px)', fontWeight: 700,
                   color: 'var(--color-text-primary)', lineHeight: 1.25, marginBottom: 14,
                 }}>
-                  เราค้นพบสิ่งสำคัญ<br />เกี่ยวกับคุณ
+                  {isTh ? <>เราค้นพบสิ่งสำคัญ<br />เกี่ยวกับคุณ</> : <>We found something<br />important about you</>}
                 </h1>
                 {prototypeCore && (
                   <span style={{
@@ -233,7 +244,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                 boxShadow: '0 0 32px var(--accent-glow, rgba(99,102,241,0.1))',
               }}>
                 <p style={{ ...label, color: 'var(--accent-primary)' }}>
-                  🎯 รูปแบบการตัดสินใจของคุณ
+                  🎯 {isTh ? 'รูปแบบการตัดสินใจของคุณ' : 'Your decision-making style'}
                 </p>
                 <p style={{
                   fontSize: 'clamp(18px, 3vw, 26px)', fontWeight: 700,
@@ -242,7 +253,9 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                   {profile.decisionStyle}
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: 0, lineHeight: 1.6 }}>
-                  นี่คือแนวทางหลักของคุณในการเลือกและแก้ปัญหา — มันส่งผลต่อทุกการตัดสินใจในชีวิต
+                  {isTh
+                    ? 'นี่คือแนวทางหลักของคุณในการเลือกและแก้ปัญหา — มันส่งผลต่อทุกการตัดสินใจในชีวิต'
+                    : 'This is your core approach to choosing and solving problems — it shapes every decision in your life.'}
                 </p>
               </div>
             )}
@@ -254,7 +267,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
               {shown(2) && (
                 <div style={{ ...card, marginBottom: 0, gridColumn: '1' }}>
                   <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
-                    💪 จุดแข็งของคุณ
+                    💪 {isTh ? 'จุดแข็งของคุณ' : 'Your strengths'}
                   </p>
                   <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                     {profile.strengths.map((s, i) => (
@@ -270,7 +283,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
               {shown(3) && (
                 <div style={{ ...card, marginBottom: 0, gridColumn: '2' }}>
                   <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
-                    🔍 ข้อมูลเชิงลึก
+                    🔍 {isTh ? 'ข้อมูลเชิงลึก' : 'Insights'}
                   </p>
                   <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                     {profile.insights.map((s, i) => (
@@ -288,7 +301,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             {profile.blindSpots && profile.blindSpots.length > 0 && shown(4) && (
               <div style={card}>
                 <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
-                  ⚠️ Blind Spots ที่ควรระวัง
+                  ⚠️ {isTh ? 'Blind Spots ที่ควรระวัง' : 'Blind spots to watch'}
                 </p>
                 <div className="fa-bs-grid" style={{
                   display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 24px',
@@ -307,7 +320,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             {shown(5) && (
               <div style={card}>
                 <p style={{ ...label, color: 'var(--color-text-secondary)' }}>
-                  🚀 โอกาสในการเติบโต
+                  🚀 {isTh ? 'โอกาสในการเติบโต' : 'Growth opportunities'}
                 </p>
                 <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
                   {profile.opportunities.map((s, i) => (
@@ -344,10 +357,12 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                     </span>
                   </div>
                   <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
-                    SELFPRINT Intelligence พร้อมแล้ว
+                    {isTh ? 'SELFPRINT Intelligence พร้อมแล้ว' : 'SELFPRINT Intelligence is ready'}
                   </p>
                   <p style={{ fontSize: 12, color: 'var(--color-text-secondary)', margin: '4px 0 0' }}>
-                    ความแม่นยำ {Math.round(accuracy)}% จาก 12 SICE Engines
+                    {isTh
+                      ? `ความแม่นยำ ${Math.round(accuracy)}% จาก 12 SICE Engines`
+                      : `${Math.round(accuracy)}% accuracy from 12 SICE Engines`}
                   </p>
                 </div>
 
@@ -363,9 +378,9 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                     margin: 0, lineHeight: 1.75, fontStyle: 'italic',
                   }}>
                     <strong style={{ fontStyle: 'normal' }}>SELFPRINT: </strong>
-                    ฉันรู้จักคุณแล้ว — ในระดับที่คนรอบข้างคุณอาจไม่เคยรู้
-                    Intelligence ของคุณพร้อมที่จะมีชีวิต พร้อมเรียนรู้จากคุณ
-                    และเติบโตไปกับคุณ ถึงเวลาแล้วที่จะตื่น
+                    {isTh
+                      ? 'ฉันรู้จักคุณแล้ว — ในระดับที่คนรอบข้างคุณอาจไม่เคยรู้ Intelligence ของคุณพร้อมที่จะมีชีวิต พร้อมเรียนรู้จากคุณ และเติบโตไปกับคุณ ถึงเวลาแล้วที่จะตื่น'
+                      : "I know you now — in ways the people around you may never have noticed. Your Intelligence is ready to come alive, ready to learn from you and grow with you. It's time to wake it up."}
                   </p>
                 </div>
 
@@ -381,13 +396,13 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
                     letterSpacing: '0.02em', display: 'block', margin: '0 auto',
                   }}
                 >
-                  ตื่น Twin ของฉัน →
+                  {isTh ? 'ตื่น Twin ของฉัน →' : 'Wake my Twin →'}
                 </button>
                 <p style={{
                   marginTop: 10, fontSize: 12,
                   color: 'var(--color-text-secondary)',
                 }}>
-                  ประสบการณ์ใช้เวลาประมาณ 30 วินาที
+                  {isTh ? 'ประสบการณ์ใช้เวลาประมาณ 30 วินาที' : 'The experience takes about 30 seconds'}
                 </p>
               </div>
             )}

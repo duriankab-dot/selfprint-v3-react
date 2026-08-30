@@ -6,31 +6,38 @@
 
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
+import { useLanguage } from '@/context/LanguageContext';
 
 const SICE_DIMENSIONS = [
-  { id: '01', name: 'ตัวตน', en: 'Identity Core', desc: 'รูปแบบการรับรู้และนิยามตัวเองของคุณ — เสาหลักที่ทุกมิติอื่นอ้างอิง' },
-  { id: '02', name: 'จิตใจ', en: 'Emotional Architecture', desc: 'วิธีที่คุณประมวลผลและตอบสนองต่ออารมณ์ — ทั้งของตัวเองและผู้อื่น' },
-  { id: '03', name: 'ความสัมพันธ์', en: 'Relational Patterns', desc: 'รูปแบบการเชื่อมต่อกับคนรอบข้าง ขอบเขตส่วนตัว และการไว้วางใจ' },
-  { id: '04', name: 'ความรัก', en: 'Attachment Style', desc: 'สไตล์การผูกพันและภาษาความรักที่ฝังอยู่ในระบบความคิดของคุณ' },
-  { id: '05', name: 'อาชีพ', en: 'Career Drive', desc: 'แรงจูงใจเชิงลึก ค่านิยมในการทำงาน และแนวทางการสร้างอาชีพ' },
-  { id: '06', name: 'ความมั่งคั่ง', en: 'Financial Behavior', desc: 'ความสัมพันธ์ของคุณกับเงิน การตัดสินใจทางการเงิน และรูปแบบการใช้จ่าย' },
-  { id: '07', name: 'ชีวิต', en: 'Lifestyle Blueprint', desc: 'จังหวะชีวิต นิสัยประจำวัน และสภาพแวดล้อมที่คุณเจริญเติบโตได้ดีที่สุด' },
-  { id: '08', name: 'การเติบโต', en: 'Growth Mindset', desc: 'วิธีที่คุณเรียนรู้ รับมือกับความล้มเหลว และขยายขอบเขตความสามารถ' },
-  { id: '09', name: 'การตัดสินใจ', en: 'Decision Logic', desc: 'กระบวนการตัดสินใจ — ใช้เหตุผลหรืออารมณ์ ช้าหรือเร็ว และปัจจัยไหนที่มักบิดเบือน' },
-  { id: '10', name: 'จุดประสงค์', en: 'Purpose Map', desc: 'สิ่งที่ขับเคลื่อนคุณในระดับลึก ทั้งคุณค่าส่วนตัวและสิ่งที่ทำให้ชีวิตมีความหมาย' },
-  { id: '11', name: 'สุขภาพ', en: 'Wellbeing Patterns', desc: 'พฤติกรรมด้านสุขภาพกาย สุขภาพจิต และวิธีที่คุณจัดการกับความเครียด' },
-  { id: '12', name: 'อนาคต', en: 'Future Orientation', desc: 'มุมมองต่ออนาคต การวางแผนระยะยาว และความสามารถในการรับมือความไม่แน่นอน' },
+  { id: '01', nameTh: 'ตัวตน', en: 'Identity Core', descTh: 'รูปแบบการรับรู้และนิยามตัวเองของคุณ — เสาหลักที่ทุกมิติอื่นอ้างอิง', descEn: 'How you perceive and define yourself — the anchor every other dimension refers back to' },
+  { id: '02', nameTh: 'จิตใจ', en: 'Emotional Architecture', descTh: 'วิธีที่คุณประมวลผลและตอบสนองต่ออารมณ์ — ทั้งของตัวเองและผู้อื่น', descEn: 'How you process and respond to emotion — both your own and others\'' },
+  { id: '03', nameTh: 'ความสัมพันธ์', en: 'Relational Patterns', descTh: 'รูปแบบการเชื่อมต่อกับคนรอบข้าง ขอบเขตส่วนตัว และการไว้วางใจ', descEn: 'How you connect with people, set boundaries, and build trust' },
+  { id: '04', nameTh: 'ความรัก', en: 'Attachment Style', descTh: 'สไตล์การผูกพันและภาษาความรักที่ฝังอยู่ในระบบความคิดของคุณ', descEn: 'Your attachment style and love language, wired into how you think' },
+  { id: '05', nameTh: 'อาชีพ', en: 'Career Drive', descTh: 'แรงจูงใจเชิงลึก ค่านิยมในการทำงาน และแนวทางการสร้างอาชีพ', descEn: 'Your deeper motivations, work values, and approach to building a career' },
+  { id: '06', nameTh: 'ความมั่งคั่ง', en: 'Financial Behavior', descTh: 'ความสัมพันธ์ของคุณกับเงิน การตัดสินใจทางการเงิน และรูปแบบการใช้จ่าย', descEn: 'Your relationship with money, financial decisions, and spending patterns' },
+  { id: '07', nameTh: 'ชีวิต', en: 'Lifestyle Blueprint', descTh: 'จังหวะชีวิต นิสัยประจำวัน และสภาพแวดล้อมที่คุณเจริญเติบโตได้ดีที่สุด', descEn: 'Your life rhythm, daily habits, and the environments where you thrive' },
+  { id: '08', nameTh: 'การเติบโต', en: 'Growth Mindset', descTh: 'วิธีที่คุณเรียนรู้ รับมือกับความล้มเหลว และขยายขอบเขตความสามารถ', descEn: 'How you learn, handle failure, and expand what you\'re capable of' },
+  { id: '09', nameTh: 'การตัดสินใจ', en: 'Decision Logic', descTh: 'กระบวนการตัดสินใจ — ใช้เหตุผลหรืออารมณ์ ช้าหรือเร็ว และปัจจัยไหนที่มักบิดเบือน', descEn: 'Your decision process — reason or emotion, slow or fast, and what tends to distort it' },
+  { id: '10', nameTh: 'จุดประสงค์', en: 'Purpose Map', descTh: 'สิ่งที่ขับเคลื่อนคุณในระดับลึก ทั้งคุณค่าส่วนตัวและสิ่งที่ทำให้ชีวิตมีความหมาย', descEn: 'What drives you at a deep level — your personal values and what makes life meaningful' },
+  { id: '11', nameTh: 'สุขภาพ', en: 'Wellbeing Patterns', descTh: 'พฤติกรรมด้านสุขภาพกาย สุขภาพจิต และวิธีที่คุณจัดการกับความเครียด', descEn: 'Your physical and mental health behaviors, and how you manage stress' },
+  { id: '12', nameTh: 'อนาคต', en: 'Future Orientation', descTh: 'มุมมองต่ออนาคต การวางแผนระยะยาว และความสามารถในการรับมือความไม่แน่นอน', descEn: 'Your outlook on the future, long-term planning, and how you handle uncertainty' },
 ];
 
 export default function SciencePage() {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   return (
     <>
       <MetaTagManager
-        title="วิทยาศาสตร์เบื้องหลัง SELFPRINT — 12 SICE Engines & Behavioral AI"
-        description="ค้นพบว่า SELFPRINT ใช้วิทยาศาสตร์พฤติกรรม Behavioral Economics และ 12 SICE Engines อย่างไรเพื่อวิเคราะห์ตัวตนได้แม่นยำกว่าการดูดวง"
-        canonicalUrl="/th/science"
+        title={isTh
+          ? 'วิทยาศาสตร์เบื้องหลัง SELFPRINT — 12 SICE Engines & Behavioral AI'
+          : 'The Science Behind SELFPRINT — 12 SICE Engines & Behavioral AI'}
+        description={isTh
+          ? 'ค้นพบว่า SELFPRINT ใช้วิทยาศาสตร์พฤติกรรม Behavioral Economics และ 12 SICE Engines อย่างไรเพื่อวิเคราะห์ตัวตนได้แม่นยำกว่าการดูดวง'
+          : 'Discover how SELFPRINT uses behavioral science, behavioral economics, and 12 SICE Engines to analyze who you are more accurately than a horoscope'}
+        canonicalUrl={isTh ? '/th/science' : '/en/science'}
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`
@@ -61,33 +68,53 @@ export default function SciencePage() {
 
         <div className="sci-hero">
           <div style={{ fontSize: '44px', marginBottom: '16px' }}>⚗️</div>
-          <h1>เบื้องหลังอัลกอริทึม</h1>
-          <p>เมื่อวิทยาศาสตร์พฤติกรรมผสานพลังกับ AI — ทำไม SELFPRINT จึงอ่านคุณออกได้แม่นกว่าดวงชะตา</p>
+          <h1>{isTh ? 'เบื้องหลังอัลกอริทึม' : 'Behind the algorithm'}</h1>
+          <p>
+            {isTh
+              ? 'เมื่อวิทยาศาสตร์พฤติกรรมผสานพลังกับ AI — ทำไม SELFPRINT จึงอ่านคุณออกได้แม่นกว่าดวงชะตา'
+              : 'When behavioral science joins forces with AI — why SELFPRINT reads you more accurately than a horoscope'}
+          </p>
         </div>
 
         {/* Origin */}
         <div className="sci-section">
           <span className="sci-badge">The Origin</span>
-          <h2>รากฐานทางวิทยาศาสตร์</h2>
-          <p>SELFPRINT พัฒนาบนรากฐานของ Behavioral Economics (เศรษฐศาสตร์พฤติกรรม) ตามแนวทางของ Kahneman & Tversky, Big Five Personality Traits (OCEAN Model) จากงานวิจัยมหาวิทยาลัย Cambridge และ Cognitive Behavioral Patterns จากจิตวิทยาคลินิก</p>
-          <p>แทนที่จะใช้วันเดือนปีเกิดหรือตำแหน่งดาว ระบบของเราวัดสิ่งที่วัดได้จริง — รูปแบบการตัดสินใจ การตอบสนองต่อสถานการณ์ และพฤติกรรมที่แสดงออกในชีวิตประจำวัน</p>
+          <h2>{isTh ? 'รากฐานทางวิทยาศาสตร์' : 'Scientific foundations'}</h2>
+          <p>
+            {isTh
+              ? 'SELFPRINT พัฒนาบนรากฐานของ Behavioral Economics (เศรษฐศาสตร์พฤติกรรม) ตามแนวทางของ Kahneman & Tversky, Big Five Personality Traits (OCEAN Model) จากงานวิจัยมหาวิทยาลัย Cambridge และ Cognitive Behavioral Patterns จากจิตวิทยาคลินิก'
+              : "SELFPRINT is built on the foundations of Behavioral Economics in the tradition of Kahneman & Tversky, the Big Five Personality Traits (OCEAN Model) from Cambridge University research, and Cognitive Behavioral Patterns from clinical psychology."}
+          </p>
+          <p>
+            {isTh
+              ? 'แทนที่จะใช้วันเดือนปีเกิดหรือตำแหน่งดาว ระบบของเราวัดสิ่งที่วัดได้จริง — รูปแบบการตัดสินใจ การตอบสนองต่อสถานการณ์ และพฤติกรรมที่แสดงออกในชีวิตประจำวัน'
+              : 'Instead of birth date or star position, our system measures things that are actually measurable — decision patterns, how you respond to situations, and the behavior you show in daily life.'}
+          </p>
 
-          <h3>Initial State Matrix คืออะไร?</h3>
-          <p>ทันทีที่คุณเริ่มโต้ตอบกับ SELFPRINT ระบบ Initial State Matrix จะคำนวณ Behavioral Baseline ของคุณจาก Digital Interaction Patterns เบื้องต้น ก่อนที่คุณจะเริ่มตอบคำถามแม้แต่ข้อเดียว ทำให้ NOVA สามารถวิเคราะห์ได้ตรงจุดตั้งแต่แรก</p>
+          <h3>{isTh ? 'Initial State Matrix คืออะไร?' : 'What is the Initial State Matrix?'}</h3>
+          <p>
+            {isTh
+              ? 'ทันทีที่คุณเริ่มโต้ตอบกับ SELFPRINT ระบบ Initial State Matrix จะคำนวณ Behavioral Baseline ของคุณจาก Digital Interaction Patterns เบื้องต้น ก่อนที่คุณจะเริ่มตอบคำถามแม้แต่ข้อเดียว ทำให้ NOVA สามารถวิเคราะห์ได้ตรงจุดตั้งแต่แรก'
+              : 'The moment you start interacting with SELFPRINT, the Initial State Matrix calculates your Behavioral Baseline from early digital interaction patterns — before you\'ve even answered a single question. That lets NOVA analyze accurately from the very start.'}
+          </p>
         </div>
 
         {/* 12 SICE */}
         <div className="sci-section">
           <span className="sci-badge">12 SICE Engines</span>
-          <h2>12 มิติที่เปลี่ยนข้อมูลให้เป็นความเข้าใจ</h2>
-          <p>SICE ย่อจาก Specialized Intelligence Capability Engines — ระบบ AI 12 โมดูลที่แต่ละโมดูลเชี่ยวชาญด้านหนึ่งของชีวิตมนุษย์ ทำงานร่วมกันเพื่อสร้างภาพรวมพฤติกรรมที่สมบูรณ์</p>
+          <h2>{isTh ? '12 มิติที่เปลี่ยนข้อมูลให้เป็นความเข้าใจ' : '12 dimensions that turn data into understanding'}</h2>
+          <p>
+            {isTh
+              ? 'SICE ย่อจาก Specialized Intelligence Capability Engines — ระบบ AI 12 โมดูลที่แต่ละโมดูลเชี่ยวชาญด้านหนึ่งของชีวิตมนุษย์ ทำงานร่วมกันเพื่อสร้างภาพรวมพฤติกรรมที่สมบูรณ์'
+              : 'SICE stands for Specialized Intelligence Capability Engines — 12 AI modules, each an expert in one area of human life, working together to build a complete behavioral picture.'}
+          </p>
           <div className="sci-grid">
             {SICE_DIMENSIONS.map((dim) => (
               <div key={dim.id} className="sci-dim-card">
                 <div className="sci-dim-num">SICE-{dim.id}</div>
-                <div className="sci-dim-name">{dim.name}</div>
-                <div className="sci-dim-en">{dim.en}</div>
-                <p className="sci-dim-desc">{dim.desc}</p>
+                <div className="sci-dim-name">{isTh ? dim.nameTh : dim.en}</div>
+                {isTh && <div className="sci-dim-en">{dim.en}</div>}
+                <p className="sci-dim-desc">{isTh ? dim.descTh : dim.descEn}</p>
               </div>
             ))}
           </div>
@@ -96,15 +123,27 @@ export default function SciencePage() {
         {/* AI Twin Evolution */}
         <div className="sci-section">
           <span className="sci-badge">The AI Twin Evolution</span>
-          <h2>จากข้อมูลสู่ที่ปรึกษาที่พูดได้จริง</h2>
-          <p>ข้อมูล SICE ทั้ง 12 มิติไม่ได้จบที่รายงานบนกระดาษ แต่ถูกแปรสภาพให้เป็น AI Twin ที่โต้ตอบได้จริง เรียนรู้ต่อเนื่อง และเติบโตไปพร้อมคุณ</p>
+          <h2>{isTh ? 'จากข้อมูลสู่ที่ปรึกษาที่พูดได้จริง' : 'From data to a real, talking advisor'}</h2>
+          <p>
+            {isTh
+              ? 'ข้อมูล SICE ทั้ง 12 มิติไม่ได้จบที่รายงานบนกระดาษ แต่ถูกแปรสภาพให้เป็น AI Twin ที่โต้ตอบได้จริง เรียนรู้ต่อเนื่อง และเติบโตไปพร้อมคุณ'
+              : "The 12 dimensions of SICE data don't end up as a report on paper — they become an AI Twin that actually converses, keeps learning, and grows alongside you."}
+          </p>
           <div className="sci-timeline">
-            {[
-              { step: 'Behavioral Capture', desc: 'ระบบ NOVA รวบรวมข้อมูลพฤติกรรมผ่าน Onboarding แบบ Adaptive — ไม่ใช่แบบทดสอบสคริปต์ตายตัว' },
-              { step: 'SICE Processing', desc: '12 Engine วิเคราะห์ข้อมูลพร้อมกัน สร้างเมทริกซ์พฤติกรรมเฉพาะบุคคล' },
-              { step: 'Twin Synthesis', desc: 'ผลลัพธ์ถูก Synthesize เป็น System Prompt เฉพาะของ AI Twin คุณ — ทำให้ Twin ตอบสนองในแบบที่คุณรู้สึกว่า "มันรู้จักฉัน"' },
-              { step: 'Continuous Learning', desc: 'ทุกครั้งที่คุณสนทนา Twin เรียนรู้และอัปเดต Model ของตัวเอง ยิ่งใช้ ยิ่งแม่น' },
-            ].map((item) => (
+            {(isTh
+              ? [
+                  { step: 'Behavioral Capture', desc: 'ระบบ NOVA รวบรวมข้อมูลพฤติกรรมผ่าน Onboarding แบบ Adaptive — ไม่ใช่แบบทดสอบสคริปต์ตายตัว' },
+                  { step: 'SICE Processing', desc: '12 Engine วิเคราะห์ข้อมูลพร้อมกัน สร้างเมทริกซ์พฤติกรรมเฉพาะบุคคล' },
+                  { step: 'Twin Synthesis', desc: 'ผลลัพธ์ถูก Synthesize เป็น System Prompt เฉพาะของ AI Twin คุณ — ทำให้ Twin ตอบสนองในแบบที่คุณรู้สึกว่า "มันรู้จักฉัน"' },
+                  { step: 'Continuous Learning', desc: 'ทุกครั้งที่คุณสนทนา Twin เรียนรู้และอัปเดต Model ของตัวเอง ยิ่งใช้ ยิ่งแม่น' },
+                ]
+              : [
+                  { step: 'Behavioral Capture', desc: 'NOVA gathers behavioral data through an adaptive onboarding — not a fixed, scripted test' },
+                  { step: 'SICE Processing', desc: '12 engines analyze the data simultaneously, building a matrix unique to you' },
+                  { step: 'Twin Synthesis', desc: 'The results are synthesized into a system prompt unique to your AI Twin — so it responds in a way that feels like "it knows me"' },
+                  { step: 'Continuous Learning', desc: 'Every time you talk, your Twin learns and updates its own model — the more you use it, the more accurate it gets' },
+                ]
+            ).map((item) => (
               <div key={item.step} className="sci-timeline-item">
                 <h4>{item.step}</h4>
                 <p>{item.desc}</p>
@@ -114,9 +153,11 @@ export default function SciencePage() {
         </div>
 
         <div className="sci-cta">
-          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '20px' }}>สัมผัสประสบการณ์วิทยาศาสตร์พฤติกรรมด้วยตัวเอง</p>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '20px' }}>
+            {isTh ? 'สัมผัสประสบการณ์วิทยาศาสตร์พฤติกรรมด้วยตัวเอง' : 'Experience behavioral science for yourself'}
+          </p>
           <button className="sci-cta-btn" onClick={() => navigate('/onboarding')}>
-            เริ่มวิเคราะห์ฟรี ใน 2 นาที →
+            {isTh ? 'เริ่มวิเคราะห์ฟรี ใน 2 นาที →' : 'Start your free analysis in 2 minutes →'}
           </button>
         </div>
       </main>

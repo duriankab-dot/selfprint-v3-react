@@ -1,7 +1,8 @@
 # English (/en) Translation — Handoff
 
-วันที่: 30 สิงหาคม 2026 (อัปเดตล่าสุด: Tier 2 เสร็จสมบูรณ์)
-สถานะ: Tier 1 + Tier 2 (core flow ทั้งหมด) เสร็จแล้ว — เหลือ Tier 3 (~85 ไฟล์)
+วันที่: 31 สิงหาคม 2026 (อัปเดตล่าสุด: Tier 3 เสร็จสมบูรณ์)
+สถานะ: **Tier 1 + Tier 2 + Tier 3 เสร็จสมบูรณ์ทั้งหมด** — เหลือเฉพาะ
+data-layer decision (ดูหัวข้อ "สิ่งที่ตั้งใจไม่แตะ" ด้านล่าง)
 
 ## บริบท
 
@@ -9,77 +10,90 @@
 ผ่าน `LanguageContext` (`useLanguage()` คืน `language: 'en' | 'th'`) แต่ไม่มี
 translation function ให้ใช้ — **แต่ละ component ต้องเขียน bilingual เอง**
 ด้วย pattern `const isTh = language === 'th'; ... {isTh ? 'ไทย' : 'English'}`
-(ตาม pattern ที่มีอยู่แล้วใน 10 ไฟล์เดิมก่อนเซสชันนี้)
 
 **อย่าลาก i18n library ใหม่เข้ามาโดยไม่ถาม jb_DEV ก่อน** (กติกาโปรเจกต์: ห้าม
-ลาก lib ใหม่โดยไม่ถาม) — ให้ทำตาม pattern เดิมต่อไป
+ลาก lib ใหม่โดยไม่ถาม) — ให้ทำตาม pattern เดิมต่อไปสำหรับไฟล์ใหม่ในอนาคต
 
-## ✅ ทำเสร็จแล้วในเซสชันนี้ (30 ส.ค. 2026)
+## ✅ Tier 1 — Shared layout (เสร็จสมบูรณ์)
 
-**Tier 1 — Shared layout (ขึ้นทุกหน้า, priority สูงสุด):**
-- `src/components/layout/NavBar.tsx`
-- `src/components/layout/BottomNav.tsx`
-- `src/components/layout/Footer.tsx`
+- `src/components/layout/NavBar.tsx`, `BottomNav.tsx`, `Footer.tsx`
 
-**Tier 2 — Core flow (เสร็จสมบูรณ์ทั้งหมด):**
-- `src/pages/Dashboard.tsx`
-- `src/pages/Login.tsx`
-- `src/pages/CommunityPage.tsx`
-- `src/pages/WorldDetail.tsx` (หมายเหตุ: `environment.soundscape.labelThai`
-  ยังเป็น Thai-only field ในชั้น data model — `SoundscapeEngine.ts` +
-  `TimeOfDayEngine.ts` + `EnvironmentEngine.ts` + 4 component ที่ใช้ยังไม่มี
-  `labelEn` — ไม่ได้แก้รอบนี้ เพราะเป็นการเปลี่ยน data model ไม่ใช่แค่ข้อความ
-  หน้าเว็บ ควรตัดสินใจ scope แยกต่างหาก)
-- `src/pages/FeatureMenu.tsx`, `src/pages/Chat.tsx`, `src/pages/ChatPage.tsx`
-- `src/pages/CoreAwakening.tsx` (เติม `isTh` ให้ครบทุกจุดที่เหลือ)
-- `src/components/onboarding/NovaConversation.tsx` (เติม error/placeholder
-  strings ที่เหลือ — `NOVA_MESSAGES_TH/EN` เดิมครบอยู่แล้ว)
-- `src/pages/LandingPage.tsx` (`STORY`/`SEO_COPY` เดิม bilingual ครบอยู่แล้ว —
-  แก้เพิ่ม: `TwinBornSvg`/`NovaEyeSvg` เคย hardcode label 12 มิติเป็นไทย
-  เสมอไม่ว่า `/en` หรือ `/th` — เพิ่ม `SICE_LABELS_EN`/`SICE_EN_LABELS` +
-  ส่ง `isTh` prop เข้าไปแล้ว)
-- `src/pages/Onboarding.tsx` (737 บรรทัด — ไม่เคยมี `useLanguage` เลยตั้งแต่ต้น
-  เพิ่ม import + แปลทุกจุด: emotion step h1/p/button, lifecycle-error screen,
-  retry button)
+## ✅ Tier 2 — Core app flow (เสร็จสมบูรณ์ทั้งหมด)
 
-**Verify**: `tsc -b` ผ่านสะอาดหลังทุกไฟล์/ทุก batch
+Dashboard, Onboarding, Login, LandingPage, CommunityPage, WorldDetail,
+FeatureMenu, Chat, ChatPage, CoreAwakening, NovaConversation — ครบทุกไฟล์
 
-## ✅ Tier 2 — เสร็จสมบูรณ์ทั้งหมด
+## ✅ Tier 3 — เสร็จสมบูรณ์ทั้งหมด (~85+ ไฟล์)
 
-Tier 2 (core app flow) ที่ user ระบุไว้ (Onboarding, LandingPage,
-CoreAwakening, NovaConversation, Chat, ChatPage, FeatureMenu) ทำครบทุกไฟล์แล้ว
-ในเซสชันนี้ — เหลือแค่ Tier 3
+**Batch 1 — dashboard components (14 ไฟล์):** AITwinSection, AnalyticsSummary,
+AskCoach, DecisionLogTable, ExecutiveSummary, ExportButton, FilterBar,
+FutureSelfPanel, GrowthSpace, IntelligencePanel(s), LivingTwin,
+PatternInsights, TrendChart ฯลฯ
 
-## 📋 Tier 3 — ที่เหลือทั้งหมด (~85 ไฟล์)
+**Batch 2 — features components (~21 ไฟล์):** decision/voice/twin
+sub-components ทั้งหมด
 
-ไฟล์เต็มอยู่ที่ (รันคำสั่งนี้เพื่อดู list ปัจจุบัน จะหด/ขยายตามที่ทำไปแล้ว):
-```bash
-grep -rlP '[\x{0E00}-\x{0E7F}]' src/pages src/components --include="*.tsx" | grep -v "__tests__\|\.test\.tsx"
-```
+**Batch 3 — intelligence + twin + chat components (~14 ไฟล์):** MemoryList,
+InsightCardWithFeedback, FeedbackSummary, AccuracyBadge, VoiceTwin,
+PatternDisplay ฯลฯ
 
-หมวดที่เหลือเยอะสุด:
-- `src/components/dashboard/*` (~10 ไฟล์ — AITwinSection, AnalyticsSummary,
-  AskCoach, DecisionLogTable, ExecutiveSummary, ExportButton, FilterBar,
-  FutureSelfPanel, GrowthSpace, IntelligencePanel(s), LivingTwin,
-  PatternInsights, TrendChart)
-- `src/components/features/*` (~16 ไฟล์ — decision/voice/twin components)
-- `src/components/onboarding/*` (~6 ไฟล์ที่เหลือ — AICreationSequence,
-  BirthdateInput, ClaimAccount, FinetuningQuestions, FullAnalysis,
-  InitialBlueprint)
-- `src/pages/*` marketing/content pages (~20 ไฟล์ — AboutPage, FAQPage,
-  SciencePage, TermsPage, PrivacyCenter, BlogIndex/BlogArticle,
-  PricingPage/PricingSuccessPage ฯลฯ)
-- `src/components/intelligence/*`, `src/components/twin/*`,
-  `src/components/chat/*` (~8 ไฟล์)
+**Batch 4 — onboarding remaining (6 ไฟล์):** BirthdateInput,
+AICreationSequence, ClaimAccount, InitialBlueprint, FullAnalysis,
+FinetuningQuestions (+ แก้ `components.test.tsx` เพิ่ม `LanguageProvider`
+wrapper เพราะ 3 component ที่ test เรียก `useLanguage()` ซึ่ง throw ถ้าไม่มี
+provider)
 
-## แนวทางแนะนำสำหรับ session ถัดไป (Tier 3)
+**Batch 5 — marketing/content pages (~23 ไฟล์):** TarotPage, ActivitiesPage,
+PalmistryPage, BlogListPage (UI chrome — บทความยังเป็นภาษาไทยล้วน ดูหมายเหตุ),
+AnalysisPage (UI chrome — `displayAnalysis` เป็น engine-generated), PrivacyCenter,
+PricingPage, PricingSuccessPage, PasskeySettings, SciencePage, MePage,
+VsAstrologyPage (bilingual อยู่แล้ว), blog-astrology-vs-behavioral (bilingual
+อยู่แล้ว), LifeHubsPage, ContactPage, AboutPage, TermsPage, BlogArticle,
+BlogIndex, Share, FAQPage (+ `src/constants/faqs.ts` แปลครบ 15 ข้อ),
+DecisionLoggerPage (wrapper เปล่า — ไม่มีข้อความ), VoiceChatPage (wrapper
+เปล่า), ExplorePage (UI chrome — hexagram data ยังเป็น Thai-only ดูหมายเหตุ)
 
-1. อย่าไล่ทำตามลำดับตัวอักษร — ทำตามความถี่ใช้งานจริง (dashboard/onboarding
-   sub-component ก่อน marketing pages เพราะ user ที่ login แล้วเจอบ่อยกว่า)
-2. เช็คไฟล์ที่อาจมี partial bilingual อยู่แล้วก่อนเขียนใหม่ทั้งไฟล์เสมอ
-3. Pattern ทุกไฟล์: เพิ่ม `const { language } = useLanguage();` +
-   `const isTh = language === 'th';` แล้ว wrap ข้อความด้วย
-   `{isTh ? 'ไทย' : 'English'}` — ห้ามเปลี่ยนเป็น i18n library ใหม่
-4. รัน `npx tsc -b` หลังทุกไฟล์หรือทุก batch เล็กๆ อย่าสะสมหลายไฟล์ก่อนเช็ค
-5. `environment.soundscape.labelThai` (data-layer, 7 ไฟล์เชื่อมกัน) เป็น
-   decision แยกที่ jb_DEV ควรตัดสินใจก่อน — ไม่ใช่แค่แปลข้อความ
+**Batch 6 — misc small components (7 ไฟล์):** LanguageSwitcher,
+PWAInstallPrompt, PendingOnboardingSaver (ไม่มีข้อความ UI), ShareButton
+(`src/components/viral/ShareButton.tsx`), landing/BirthDataInput (dead
+code — ไม่มีใคร import แต่แปลไว้เผื่ออนาคต), auth/PasskeyLogin,
+today/TodaySection (แปล `SECTION_LIBRARY` 9 การ์ดครบ)
+
+**Bug แถมที่เจอและแก้:** `SoundscapePlayer.tsx` มี aria-label เป็นภาษาจีน
+(`暂停`/`播放`) ผิดที่มาแต่แรก — แก้เป็น bilingual TH/EN แล้ว
+
+**Verify**: `tsc -b` ผ่านสะอาดหลังทุกไฟล์/ทุก batch — full sweep สุดท้ายก็ผ่าน
+
+## 🚫 สิ่งที่ตั้งใจไม่แตะ (data-layer / long-form content — ไม่ใช่ scope ของ
+งานแปล UI string)
+
+ทั้งหมดนี้ flag ไว้ด้วย code comment ในไฟล์ที่เกี่ยวข้องแล้ว:
+
+1. **`environment.soundscape.labelThai` / `.descriptionThai` /
+   `timeOfDay.labelThai`** — มาจาก `SoundscapeEngine.ts` +
+   `TimeOfDayEngine.ts` (data-layer, ใช้ร่วมกันใน `WorldDetail.tsx`,
+   `SoundscapePlayer.tsx`, `WorldEnvironment.tsx`, `AmbientBadge.tsx`) —
+   เปลี่ยน data model (เพิ่ม `labelEn`) ไม่ใช่แค่แก้ข้อความหน้าเว็บ
+2. **`hexagram.thaiName` / `.theme` / `.guidance` / `.keywords`**
+   (`HexagramEngine.ts`, ตาราง 64 รายการ) — ใช้ใน `ExplorePage.tsx`
+3. **InsightEngine / PersonalContextBuilder / PatternDetector** —
+   analysis text ที่ AI สร้างขึ้น เป็น Thai-only โดยธรรมชาติของ engine
+   (`AnalysisPage.tsx` แสดงผล `displayAnalysis`)
+4. **`BlogListPage.tsx`'s `STATIC_ARTICLES`** + บทความ markdown ~25 ไฟล์ที่
+   fetch จาก server — long-form editorial content, ไม่ใช่ UI string
+5. **`FinetuningQuestions.tsx`'s `QuestionOption.value`** — ค่า canonical
+   ภาษาไทยที่ `astrovera-adapter.ts`'s `PHASE_ANSWER_TO_KEY` ใช้ map (q5
+   เท่านั้น) — ห้ามแปล มิฉะนั้น mapping จะพัง (label ที่แสดงแปลแล้ว)
+
+ทั้งหมดนี้ต้องการ **decision แยกต่างหาก** จาก jb_DEV ว่าจะ:
+(ก) เพิ่ม field ภาษาอังกฤษคู่ขนานใน data model, หรือ
+(ข) ปล่อยให้เป็น Thai-only ต่อไปโดยเจตนา (เช่น engine-generated text
+อาจจะ prompt ให้ AI ตอบเป็นภาษาที่ user เลือกแทนก็ได้ ซึ่งเป็นงานคนละ scope)
+
+## แนวทางสำหรับไฟล์ใหม่ในอนาคต
+
+Pattern เดิม: เพิ่ม `const { language } = useLanguage();` +
+`const isTh = language === 'th';` แล้ว wrap ข้อความด้วย
+`{isTh ? 'ไทย' : 'English'}` — ห้ามเปลี่ยนเป็น i18n library ใหม่โดยไม่ถามก่อน
+รัน `npx tsc -b` หลังทุกไฟล์เพื่อจับ syntax error (โดยเฉพาะ apostrophe ใน
+string ภาษาอังกฤษที่ใช้ single quote — ต้องสลับเป็น double quote หรือ escape)

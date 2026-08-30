@@ -28,6 +28,7 @@
 
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import type { FeedbackType } from '@/lib/intelligence/types';
 import './InsightCardWithFeedback.css';
@@ -63,6 +64,8 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
   onFeedbackSubmitted,
 }) => {
   const queryClient = useQueryClient();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState<FeedbackType | null>(null);
 
@@ -110,7 +113,7 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
           <span className="confidence-badge__percent" style={{ color: confidenceColor }}>
             {confidencePercent}%
           </span>
-          <span className="confidence-badge__label">มั่นใจ</span>
+          <span className="confidence-badge__label">{isTh ? 'มั่นใจ' : 'Confidence'}</span>
         </div>
       </div>
 
@@ -122,7 +125,7 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
       {/* Evidence count */}
       {evidenceCount > 0 && (
         <div className="insight-card__metadata">
-          <span className="insight-metadata__item">📌 {evidenceCount} หลักฐาน</span>
+          <span className="insight-metadata__item">📌 {evidenceCount} {isTh ? 'หลักฐาน' : 'pieces of evidence'}</span>
         </div>
       )}
 
@@ -130,13 +133,13 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
       <div className="insight-card__feedback-section">
         {feedbackSubmitted && (
           <div className="insight-card__feedback-success">
-            <span>✅ ขอบคุณสำหรับ feedback!</span>
+            <span>✅ {isTh ? 'ขอบคุณสำหรับ feedback!' : 'Thanks for the feedback!'}</span>
           </div>
         )}
 
         {!feedbackSubmitted && (
           <div className="insight-card__feedback-prompt">
-            <p className="feedback-prompt__label">สิ่งนี้ตรงกับคุณไหม?</p>
+            <p className="feedback-prompt__label">{isTh ? 'สิ่งนี้ตรงกับคุณไหม?' : 'Does this match you?'}</p>
 
             <div className="feedback-buttons">
               <button
@@ -145,9 +148,9 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
                 }`}
                 onClick={() => handleFeedbackClick('very_true')}
                 disabled={submitFeedbackMutation.isPending}
-                title="ตรงกับฉันเลย"
+                title={isTh ? 'ตรงกับฉันเลย' : 'Matches me exactly'}
               >
-                👍 ถูกต้อง
+                👍 {isTh ? 'ถูกต้อง' : 'Accurate'}
               </button>
 
               <button
@@ -156,9 +159,9 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
                 }`}
                 onClick={() => handleFeedbackClick('somewhat')}
                 disabled={submitFeedbackMutation.isPending}
-                title="บางส่วนถูก"
+                title={isTh ? 'บางส่วนถูก' : 'Partially right'}
               >
-                🤔 บางส่วน
+                🤔 {isTh ? 'บางส่วน' : 'Somewhat'}
               </button>
 
               <button
@@ -167,9 +170,9 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
                 }`}
                 onClick={() => handleFeedbackClick('not_sure')}
                 disabled={submitFeedbackMutation.isPending}
-                title="ไม่แน่ใจ"
+                title={isTh ? 'ไม่แน่ใจ' : 'Not sure'}
               >
-                ❓ ไม่แน่
+                ❓ {isTh ? 'ไม่แน่' : 'Not sure'}
               </button>
 
               <button
@@ -178,9 +181,9 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
                 }`}
                 onClick={() => handleFeedbackClick('not_me')}
                 disabled={submitFeedbackMutation.isPending}
-                title="ไม่ใช่ฉัน"
+                title={isTh ? 'ไม่ใช่ฉัน' : 'Not me'}
               >
-                ❌ ไม่ใช่
+                ❌ {isTh ? 'ไม่ใช่' : 'Not me'}
               </button>
             </div>
           </div>
@@ -188,7 +191,7 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
 
         {submitFeedbackMutation.isError && (
           <div className="insight-card__feedback-error">
-            <span>⚠️ ไม่สามารถบันทึก feedback ได้</span>
+            <span>⚠️ {isTh ? 'ไม่สามารถบันทึก feedback ได้' : 'Could not save feedback'}</span>
           </div>
         )}
       </div>
@@ -197,7 +200,7 @@ export const InsightCardWithFeedback: React.FC<InsightCardWithFeedbackProps> = (
       {submitFeedbackMutation.isPending && (
         <div className="insight-card__loading">
           <span className="insight-card__spinner" />
-          <span>บันทึกข้อมูล...</span>
+          <span>{isTh ? 'บันทึกข้อมูล...' : 'Saving...'}</span>
         </div>
       )}
     </div>

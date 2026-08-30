@@ -13,12 +13,24 @@
  */
 
 import { useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
+
+interface QuestionOption {
+  /** Canonical value stored in the answer — always Thai, so
+   *  astrovera-adapter.ts's PHASE_ANSWER_TO_KEY lookup (q5) keeps working
+   *  regardless of the site's display language. Never localize this. */
+  value: string;
+  labelTh: string;
+  labelEn: string;
+}
 
 interface Question {
   id: string;
-  text: string;
-  novaContext: string; // What Nova says before this question
-  options: string[];
+  textTh: string;
+  textEn: string;
+  novaContextTh: string; // What Nova says before this question
+  novaContextEn: string;
+  options: QuestionOption[];
 }
 
 interface FinetuningQuestionsProps {
@@ -30,27 +42,55 @@ interface FinetuningQuestionsProps {
 export const QUESTIONS: Question[] = [
   {
     id: 'q1',
-    text: 'ปกติคุณตัดสินใจอย่างไร?',
-    novaContext: 'มาเจาะลึกรูปแบบการตัดสินใจของคุณกัน',
-    options: ['ใช้สัญชาตญาณ', 'ใช้เหตุผล', 'ใช้ความรู้สึก', 'สมดุลทั้งสองอย่าง'],
+    textTh: 'ปกติคุณตัดสินใจอย่างไร?',
+    textEn: 'How do you usually make decisions?',
+    novaContextTh: 'มาเจาะลึกรูปแบบการตัดสินใจของคุณกัน',
+    novaContextEn: "Let's dig into your decision-making style",
+    options: [
+      { value: 'ใช้สัญชาตญาณ', labelTh: 'ใช้สัญชาตญาณ', labelEn: 'Intuition' },
+      { value: 'ใช้เหตุผล', labelTh: 'ใช้เหตุผล', labelEn: 'Logic' },
+      { value: 'ใช้ความรู้สึก', labelTh: 'ใช้ความรู้สึก', labelEn: 'Feelings' },
+      { value: 'สมดุลทั้งสองอย่าง', labelTh: 'สมดุลทั้งสองอย่าง', labelEn: 'A balance of both' },
+    ],
   },
   {
     id: 'q2',
-    text: 'อะไรทำให้คุณมีพลังมากที่สุดในการทำงาน?',
-    novaContext: 'อยากรู้ว่าอะไรเป็นแรงขับเคลื่อนของคุณ',
-    options: ['ผู้คน', 'ไอเดีย', 'ธรรมชาติ', 'ความสำเร็จ'],
+    textTh: 'อะไรทำให้คุณมีพลังมากที่สุดในการทำงาน?',
+    textEn: 'What energizes you most at work?',
+    novaContextTh: 'อยากรู้ว่าอะไรเป็นแรงขับเคลื่อนของคุณ',
+    novaContextEn: 'I want to know what drives you',
+    options: [
+      { value: 'ผู้คน', labelTh: 'ผู้คน', labelEn: 'People' },
+      { value: 'ไอเดีย', labelTh: 'ไอเดีย', labelEn: 'Ideas' },
+      { value: 'ธรรมชาติ', labelTh: 'ธรรมชาติ', labelEn: 'Nature' },
+      { value: 'ความสำเร็จ', labelTh: 'ความสำเร็จ', labelEn: 'Achievement' },
+    ],
   },
   {
     id: 'q3',
-    text: 'สภาพแวดล้อมการทำงานในอุดมคติของคุณคือแบบไหน?',
-    novaContext: 'คุณทำงานได้ดีที่สุดที่ไหน?',
-    options: ['มีระบบชัดเจน', 'ยืดหยุ่น', 'ทำงานร่วมกับผู้อื่น', 'ทำงานคนเดียว'],
+    textTh: 'สภาพแวดล้อมการทำงานในอุดมคติของคุณคือแบบไหน?',
+    textEn: "What's your ideal work environment?",
+    novaContextTh: 'คุณทำงานได้ดีที่สุดที่ไหน?',
+    novaContextEn: 'Where do you do your best work?',
+    options: [
+      { value: 'มีระบบชัดเจน', labelTh: 'มีระบบชัดเจน', labelEn: 'Clear structure' },
+      { value: 'ยืดหยุ่น', labelTh: 'ยืดหยุ่น', labelEn: 'Flexible' },
+      { value: 'ทำงานร่วมกับผู้อื่น', labelTh: 'ทำงานร่วมกับผู้อื่น', labelEn: 'Working with others' },
+      { value: 'ทำงานคนเดียว', labelTh: 'ทำงานคนเดียว', labelEn: 'Working alone' },
+    ],
   },
   {
     id: 'q4',
-    text: 'คุณรับมือกับความเครียดอย่างไร?',
-    novaContext: 'คุณฟื้นตัวกลับมาได้อย่างไร?',
-    options: ['ลงมือทำ', 'ทบทวนตัวเอง', 'พูดคุยกับคนอื่น', 'พักผ่อน'],
+    textTh: 'คุณรับมือกับความเครียดอย่างไร?',
+    textEn: 'How do you handle stress?',
+    novaContextTh: 'คุณฟื้นตัวกลับมาได้อย่างไร?',
+    novaContextEn: 'How do you bounce back?',
+    options: [
+      { value: 'ลงมือทำ', labelTh: 'ลงมือทำ', labelEn: 'Taking action' },
+      { value: 'ทบทวนตัวเอง', labelTh: 'ทบทวนตัวเอง', labelEn: 'Reflecting' },
+      { value: 'พูดคุยกับคนอื่น', labelTh: 'พูดคุยกับคนอื่น', labelEn: 'Talking it out' },
+      { value: 'พักผ่อน', labelTh: 'พักผ่อน', labelEn: 'Resting' },
+    ],
   },
   {
     // คำถามนี้ตรงกับ Q3 ของแบบทดสอบจริงใน astrovera-v2 (index.html #q3) —
@@ -58,14 +98,34 @@ export const QUESTIONS: Question[] = [
     // astrovera-adapter.ts map คำตอบกลับเป็น phaseKey ('a'|'b'|'c'|'d') ได้
     // ตรงกับความหมายจริงที่ Astrovera Psychology module คาดหวัง แทนที่จะเดา
     // จาก mood (ดู docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md)
+    // NOTE: option `value`s below must stay the exact Thai strings — they're
+    // the canonical keys in PHASE_ANSWER_TO_KEY regardless of display language.
     id: 'q5',
-    text: 'ในช่วงชีวิตตอนนี้ คุณรู้สึกอย่างไร?',
-    novaContext: 'ข้อสุดท้าย — คำถามนี้ช่วยให้ SELFPRINT เข้าใจจังหวะชีวิตตอนนี้ของคุณ',
+    textTh: 'ในช่วงชีวิตตอนนี้ คุณรู้สึกอย่างไร?',
+    textEn: 'How do you feel about this stage of your life right now?',
+    novaContextTh: 'ข้อสุดท้าย — คำถามนี้ช่วยให้ SELFPRINT เข้าใจจังหวะชีวิตตอนนี้ของคุณ',
+    novaContextEn: 'Last one — this helps SELFPRINT understand where you are in life right now',
     options: [
-      'กำลังสร้างและเริ่มต้นสิ่งใหม่',
-      'ขยายและพัฒนาสิ่งที่มีอยู่',
-      'ต้องการพักและปรับทิศทาง',
-      'อยู่ในช่วงเปลี่ยนแปลงครั้งใหญ่',
+      {
+        value: 'กำลังสร้างและเริ่มต้นสิ่งใหม่',
+        labelTh: 'กำลังสร้างและเริ่มต้นสิ่งใหม่',
+        labelEn: 'Building and starting something new',
+      },
+      {
+        value: 'ขยายและพัฒนาสิ่งที่มีอยู่',
+        labelTh: 'ขยายและพัฒนาสิ่งที่มีอยู่',
+        labelEn: 'Expanding and growing what I have',
+      },
+      {
+        value: 'ต้องการพักและปรับทิศทาง',
+        labelTh: 'ต้องการพักและปรับทิศทาง',
+        labelEn: 'Needing rest and redirection',
+      },
+      {
+        value: 'อยู่ในช่วงเปลี่ยนแปลงครั้งใหญ่',
+        labelTh: 'อยู่ในช่วงเปลี่ยนแปลงครั้งใหญ่',
+        labelEn: 'In the middle of major change',
+      },
     ],
   },
 ];
@@ -86,6 +146,8 @@ export function FinetuningQuestions({
   onSkip,
   initialAccuracy = 60,
 }: FinetuningQuestionsProps) {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [answered, setAnswered] = useState(0);
@@ -96,10 +158,10 @@ export function FinetuningQuestions({
   const isLastQuestion = currentQuestionIdx === QUESTIONS.length - 1;
   const allAnswered = answered === QUESTIONS.length;
 
-  const handleAnswer = (option: string) => {
+  const handleAnswer = (value: string) => {
     if (answers[currentQuestion.id]) return; // Already answered this question
 
-    const newAnswers = { ...answers, [currentQuestion.id]: option };
+    const newAnswers = { ...answers, [currentQuestion.id]: value };
     setAnswers(newAnswers);
     setAnswered((prev) => prev + 1);
 
@@ -146,7 +208,7 @@ export function FinetuningQuestions({
               textAlign: 'center',
             }}
           >
-            ปรับแต่ง Twin ของคุณ 🎯
+            {isTh ? 'ปรับแต่ง Twin ของคุณ 🎯' : 'Fine-tune your Twin 🎯'}
           </h2>
           <p
             style={{
@@ -156,7 +218,9 @@ export function FinetuningQuestions({
               margin: 0,
             }}
           >
-            {QUESTIONS.length} คำถามเพื่อไปถึงความแม่นยำ 85%
+            {isTh
+              ? `${QUESTIONS.length} คำถามเพื่อไปถึงความแม่นยำ 85%`
+              : `${QUESTIONS.length} questions to reach 85% accuracy`}
           </p>
         </div>
 
@@ -178,7 +242,7 @@ export function FinetuningQuestions({
                 textTransform: 'uppercase',
               }}
             >
-              ความชัดเจน
+              {isTh ? 'ความชัดเจน' : 'Clarity'}
             </span>
             <span
               style={{
@@ -218,8 +282,8 @@ export function FinetuningQuestions({
               color: 'var(--color-text-secondary)',
             }}
           >
-            <span>60% (เริ่มต้น)</span>
-            <span style={{ marginLeft: 'auto' }}>85% (เป้าหมาย)</span>
+            <span>{isTh ? '60% (เริ่มต้น)' : '60% (start)'}</span>
+            <span style={{ marginLeft: 'auto' }}>{isTh ? '85% (เป้าหมาย)' : '85% (goal)'}</span>
           </div>
         </div>
 
@@ -258,7 +322,8 @@ export function FinetuningQuestions({
                 lineHeight: 1.4,
               }}
             >
-              <span style={{ fontWeight: 600 }}>SELFPRINT:</span> {currentQuestion.novaContext}
+              <span style={{ fontWeight: 600 }}>SELFPRINT:</span>{' '}
+              {isTh ? currentQuestion.novaContextTh : currentQuestion.novaContextEn}
             </p>
           </div>
 
@@ -273,7 +338,7 @@ export function FinetuningQuestions({
                 lineHeight: 1.4,
               }}
             >
-              {currentQuestion.text}
+              {isTh ? currentQuestion.textTh : currentQuestion.textEn}
             </h3>
             <p
               style={{
@@ -282,7 +347,9 @@ export function FinetuningQuestions({
                 margin: 0,
               }}
             >
-              คำถามที่ {currentQuestionIdx + 1} จาก {QUESTIONS.length}
+              {isTh
+                ? `คำถามที่ ${currentQuestionIdx + 1} จาก ${QUESTIONS.length}`
+                : `Question ${currentQuestionIdx + 1} of ${QUESTIONS.length}`}
             </p>
           </div>
 
@@ -296,27 +363,27 @@ export function FinetuningQuestions({
           >
             {currentQuestion.options.map((option) => (
               <button
-                key={option}
-                onClick={() => handleAnswer(option)}
+                key={option.value}
+                onClick={() => handleAnswer(option.value)}
                 disabled={!!answers[currentQuestion.id] || isCompleting}
                 style={{
                   padding: '12px 16px',
                   borderRadius: '8px',
                   border: '2px solid var(--color-border)',
                   background:
-                    answers[currentQuestion.id] === option
+                    answers[currentQuestion.id] === option.value
                       ? 'var(--accent-primary)'
                       : 'transparent',
                   color:
-                    answers[currentQuestion.id] === option
+                    answers[currentQuestion.id] === option.value
                       ? 'white'
                       : 'var(--color-text-primary)',
                   fontWeight:
-                    answers[currentQuestion.id] === option ? 600 : 500,
+                    answers[currentQuestion.id] === option.value ? 600 : 500,
                   fontSize: '14px',
                   cursor: answers[currentQuestion.id] ? 'default' : 'pointer',
                   transition: 'all 0.2s',
-                  opacity: answers[currentQuestion.id] && answers[currentQuestion.id] !== option ? 0.3 : 1,
+                  opacity: answers[currentQuestion.id] && answers[currentQuestion.id] !== option.value ? 0.3 : 1,
                 }}
                 onMouseEnter={(e) => {
                   if (!answers[currentQuestion.id] && !isCompleting) {
@@ -331,7 +398,7 @@ export function FinetuningQuestions({
                   }
                 }}
               >
-                {option}
+                {isTh ? option.labelTh : option.labelEn}
               </button>
             ))}
           </div>
@@ -400,7 +467,9 @@ export function FinetuningQuestions({
                   (e.currentTarget as HTMLButtonElement).style.opacity = '1';
               }}
             >
-              {isCompleting ? '✓ กำลังอัปเดต...' : '✓ เสร็จสิ้น (ความแม่นยำ 85%)'}
+              {isTh
+                ? (isCompleting ? '✓ กำลังอัปเดต...' : '✓ เสร็จสิ้น (ความแม่นยำ 85%)')
+                : (isCompleting ? '✓ Updating...' : '✓ Done (85% accuracy)')}
             </button>
           )}
           {/* Skip is always visible — users should never be forced through questions */}
@@ -427,7 +496,9 @@ export function FinetuningQuestions({
               if (!isCompleting) (e.currentTarget as HTMLButtonElement).style.opacity = '0.7';
             }}
           >
-            ข้ามไปก่อน (ความแม่นยำ {Math.round(accuracy)}%)
+            {isTh
+              ? `ข้ามไปก่อน (ความแม่นยำ ${Math.round(accuracy)}%)`
+              : `Skip for now (${Math.round(accuracy)}% accuracy)`}
           </button>
         </div>
       </div>

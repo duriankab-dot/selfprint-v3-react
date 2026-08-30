@@ -15,6 +15,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DailyBriefEngine } from '@/lib/intelligence/DailyBriefEngine';
 import { DailyInsightsList } from './DailyInsightsList';
 import type { DailyBrief as DailyBriefData, BriefObservation } from '@/lib/intelligence/DailyBriefEngine';
@@ -23,11 +24,11 @@ import type { DailyBrief as DailyBriefData, BriefObservation } from '@/lib/intel
 // TTS helpers (§22 — Adaptive Voice)
 // ============================================================================
 
-function speak(text: string, onEnd?: () => void): SpeechSynthesisUtterance | null {
+function speak(text: string, isTh: boolean, onEnd?: () => void): SpeechSynthesisUtterance | null {
   if (!('speechSynthesis' in window)) return null;
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = 'th-TH';
+  utt.lang = isTh ? 'th-TH' : 'en-US';
   utt.rate = 0.92;
   utt.pitch = 1.0;
   if (onEnd) utt.onend = onEnd;
@@ -58,9 +59,10 @@ interface ObservationCardProps {
   obs: BriefObservation;
   index: number;
   active: boolean;
+  isTh: boolean;
 }
 
-function ObservationCard({ obs, index, active }: ObservationCardProps) {
+function ObservationCard({ obs, index, active, isTh }: ObservationCardProps) {
   return (
     <div
       className={`brief-obs-card brief-obs-card--${obs.category} ${active ? 'brief-obs-card--active' : ''}`}
@@ -72,7 +74,9 @@ function ObservationCard({ obs, index, active }: ObservationCardProps) {
         <p className="brief-obs-detail">{obs.detail}</p>
         {obs.confidence > 0 && obs.evidenceCount > 0 && (
           <span className="brief-obs-confidence">
-            หลักฐาน {obs.evidenceCount} รายการ · ความมั่นใจ {Math.round(obs.confidence * 100)}%
+            {isTh
+              ? `หลักฐาน ${obs.evidenceCount} รายการ · ความมั่นใจ ${Math.round(obs.confidence * 100)}%`
+              : `${obs.evidenceCount} pieces of evidence · ${Math.round(obs.confidence * 100)}% confidence`}
           </span>
         )}
       </div>
@@ -88,6 +92,8 @@ const engine = new DailyBriefEngine();
 
 export function DailyBrief() {
   const { session } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const userId = session?.user?.id ?? null;
   const queryClient = useQueryClient();
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -109,7 +115,9 @@ export function DailyBrief() {
 
     if (!audioConsented) {
       const ok = window.confirm(
-        'เปิดเสียง Immersive Experience?\n\nTwin จะอ่าน Brief ให้ฟัง คุณสามารถปิดได้ตลอดเวลา'
+        isTh
+          ? 'เปิดเสียง Immersive Experience?\n\nTwin จะอ่าน Brief ให้ฟัง คุณสามารถปิดได้ตลอดเวลา'
+          : 'Turn on the immersive audio experience?\n\nYour Twin will read the brief aloud. You can turn it off anytime.'
       );
       if (!ok) return;
       localStorage.setItem('sp-audio-consent', 'true');
@@ -150,12 +158,12 @@ export function DailyBrief() {
         setActiveIdx(null);
       }
       current++;
-      uttRef.current = speak(part, speakNext);
+      uttRef.current = speak(part, isTh, speakNext);
     };
 
     setIsSpeaking(true);
     speakNext();
-  }, [brief, isSpeaking, audioConsented]);
+  }, [brief, isSpeaking, audioConsented, isTh]);
 
   // ── Render ──────────────────────────────────────────────────────────────
 
@@ -165,7 +173,7 @@ export function DailyBrief() {
     return (
       <div className="daily-brief daily-brief--loading">
         <div className="brief-twin-pulse" />
-        <p className="brief-loading-text">Twin กำลังเตรียม Brief ของคุณ...</p>
+        <p className="brief-loading-text">{isTh ? 'Twin กำลังเตรียม Brief ของคุณ...' : 'Your Twin is preparing your brief...'}</p>
       </div>
     );
   }
@@ -173,22 +181,24 @@ export function DailyBrief() {
   if (error || !brief) {
     return (
       <div className="daily-brief daily-brief--error">
-        <p>ไม่สามารถโหลด Daily Brief ได้ในขณะนี้</p>
+        <p>{isTh ? 'ไม่สามารถโหลด Daily Brief ได้ในขณะนี้' : 'Could not load your daily brief right now'}</p>
       </div>
     );
   }
 
   const hasTTS = 'speechSynthesis' in window;
-  const listenLabel = isSpeaking ? '⏸ หยุดฟัง' : '▶ ฟัง Brief';
+  const listenLabel = isSpeaking
+    ? (isTh ? '⏸ หยุดฟัง' : '⏸ Stop listening')
+    : (isTh ? '▶ ฟัง Brief' : '▶ Listen to Brief');
 
   return (
-    <section className="daily-brief" aria-label="Daily Brief จาก Twin">
+    <section className="daily-brief" aria-label={isTh ? 'Daily Brief จาก Twin' : "Daily Brief from your Twin"}>
       {/* Header */}
       <div className="brief-header">
         <div className="brief-twin-indicator" data-state={brief.twinState} />
         <div className="brief-header-text">
           <h2 className="brief-title">Daily Brief</h2>
-          <p className="brief-duration">~{brief.listenDurationEstimate} วินาที</p>
+          <p className="brief-duration">~{brief.listenDurationEstimate} {isTh ? 'วินาที' : 'sec'}</p>
         </div>
         {hasTTS && (
           <button
@@ -212,6 +222,7 @@ export function DailyBrief() {
             obs={obs}
             index={i}
             active={activeIdx === i}
+            isTh={isTh}
           />
         ))}
       </div>
@@ -222,7 +233,9 @@ export function DailyBrief() {
       {/* Data richness hint */}
       {brief.dataRichness === 'minimal' && (
         <div className="brief-richness-hint">
-          💡 Twin ยังรู้จักคุณน้อย — สะท้อนตัวเองเพิ่มเพื่อให้ Brief ลึกขึ้น
+          💡 {isTh
+            ? 'Twin ยังรู้จักคุณน้อย — สะท้อนตัวเองเพิ่มเพื่อให้ Brief ลึกขึ้น'
+            : 'Your Twin still knows little about you — reflect more to deepen your brief'}
         </div>
       )}
 

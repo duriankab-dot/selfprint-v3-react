@@ -16,6 +16,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { getUserDecisions } from '@/services/supabase-service';
 import { DecisionIntelligenceEngine } from '@/lib/intelligence/DecisionIntelligenceEngine';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
@@ -53,6 +54,8 @@ interface DecisionInfo {
 export const DecisionLogger: React.FC = () => {
   const { session } = useAuth();
   const userId = session?.user?.id ?? '';
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const [activeView, setActiveView] = useState<ActiveView>('list');
   const [lastSavedDecision, setLastSavedDecision] = useState<DecisionInfo | null>(null);
@@ -105,7 +108,7 @@ export const DecisionLogger: React.FC = () => {
   if (!userId) {
     return (
       <div className="decision-logger">
-        <Alert variant="warning" message="กรุณาเข้าสู่ระบบเพื่อใช้ Decision Logger" />
+        <Alert variant="warning" message={isTh ? 'กรุณาเข้าสู่ระบบเพื่อใช้ Decision Logger' : 'Please log in to use the Decision Logger'} />
       </div>
     );
   }
@@ -120,7 +123,7 @@ export const DecisionLogger: React.FC = () => {
     return (
       <div className="decision-logger decision-logger--loading">
         <div className="decision-logger__spinner" />
-        <p>กำลังโหลด Decision Logger...</p>
+        <p>{isTh ? 'กำลังโหลด Decision Logger...' : 'Loading Decision Logger...'}</p>
       </div>
     );
   }
@@ -133,9 +136,11 @@ export const DecisionLogger: React.FC = () => {
     <div className="decision-logger">
       {/* Header */}
       <div className="decision-logger__header">
-        <h1 className="decision-logger__title">📋 บันทึกการตัดสินใจ</h1>
+        <h1 className="decision-logger__title">📋 {isTh ? 'บันทึกการตัดสินใจ' : 'Decision Log'}</h1>
         <p className="decision-logger__subtitle">
-          บันทึกการตัดสินใจสำคัญและติดตามผลลัพธ์ เรียนรู้จากรูปแบบการตัดสินใจของคุณ
+          {isTh
+            ? 'บันทึกการตัดสินใจสำคัญและติดตามผลลัพธ์ เรียนรู้จากรูปแบบการตัดสินใจของคุณ'
+            : 'Log important decisions and track outcomes — learn from your decision patterns'}
         </p>
       </div>
 
@@ -143,7 +148,7 @@ export const DecisionLogger: React.FC = () => {
       {lastSavedDecision && (
         <Alert
           variant="success"
-          message={`✅ บันทึก "${lastSavedDecision.title}" เรียบร้อยแล้ว`}
+          message={isTh ? `✅ บันทึก "${lastSavedDecision.title}" เรียบร้อยแล้ว` : `✅ Saved "${lastSavedDecision.title}" successfully`}
           onClose={() => setLastSavedDecision(null)}
         />
       )}
@@ -156,7 +161,7 @@ export const DecisionLogger: React.FC = () => {
           className={`decision-logger__tab-btn${activeView === 'create' ? ' active' : ''}`}
           onClick={() => setActiveView('create')}
         >
-          ➕ เพิ่มการตัดสินใจ
+          ➕ {isTh ? 'เพิ่มการตัดสินใจ' : 'Add decision'}
         </button>
         <button
           role="tab"
@@ -164,7 +169,7 @@ export const DecisionLogger: React.FC = () => {
           className={`decision-logger__tab-btn${activeView === 'list' ? ' active' : ''}`}
           onClick={() => setActiveView('list')}
         >
-          📝 รายการ ({decisions.length})
+          📝 {isTh ? 'รายการ' : 'List'} ({decisions.length})
         </button>
         <button
           role="tab"
@@ -172,7 +177,7 @@ export const DecisionLogger: React.FC = () => {
           className={`decision-logger__tab-btn${activeView === 'analytics' ? ' active' : ''}`}
           onClick={() => setActiveView('analytics')}
         >
-          📊 สถิติ
+          📊 {isTh ? 'สถิติ' : 'Stats'}
         </button>
       </nav>
 
@@ -183,10 +188,10 @@ export const DecisionLogger: React.FC = () => {
           <div className="decision-logger__panel">
             {decisionAnalysis && (
               <div className="decision-logger__insight-box">
-                <h3>💡 ข้อเสนอแนะส่วนตัว</h3>
+                <h3>💡 {isTh ? 'ข้อเสนอแนะส่วนตัว' : 'Personal recommendation'}</h3>
                 <p className="insight-text">{decisionAnalysis.topInsight}</p>
                 <p className="insight-style">
-                  สไตล์การตัดสินใจของคุณ: <strong>{decisionAnalysis.styleProfile.type}</strong>
+                  {isTh ? 'สไตล์การตัดสินใจของคุณ:' : 'Your decision style:'} <strong>{decisionAnalysis.styleProfile.type}</strong>
                 </p>
               </div>
             )}
@@ -208,8 +213,12 @@ export const DecisionLogger: React.FC = () => {
             {decisions.length === 0 ? (
               <div className="decision-logger__empty">
                 <p className="decision-logger__empty-icon">📭</p>
-                <h3>ยังไม่มีการตัดสินใจที่บันทึก</h3>
-                <p>เริ่มบันทึกการตัดสินใจแรกของคุณ เพื่อเริ่มติดตามรูปแบบการตัดสินใจ</p>
+                <h3>{isTh ? 'ยังไม่มีการตัดสินใจที่บันทึก' : 'No decisions logged yet'}</h3>
+                <p>
+                  {isTh
+                    ? 'เริ่มบันทึกการตัดสินใจแรกของคุณ เพื่อเริ่มติดตามรูปแบบการตัดสินใจ'
+                    : 'Log your first decision to start tracking your decision patterns'}
+                </p>
               </div>
             ) : (
               <DecisionList
@@ -234,7 +243,7 @@ export const DecisionLogger: React.FC = () => {
       {/* Bias Warning Box (if high severity biases detected) */}
       {decisionAnalysis && decisionAnalysis.biasRisks.some(b => b.severity === 'high') && (
         <div className="decision-logger__bias-warning">
-          <h4>⚠️ เตือน: Cognitive Biases ที่พบบ่อยในรูปแบบการตัดสินใจของคุณ</h4>
+          <h4>⚠️ {isTh ? 'เตือน: Cognitive Biases ที่พบบ่อยในรูปแบบการตัดสินใจของคุณ' : 'Warning: cognitive biases common in your decision pattern'}</h4>
           <ul className="bias-list">
             {decisionAnalysis.biasRisks
               .filter(b => b.severity === 'high')

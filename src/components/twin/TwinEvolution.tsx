@@ -24,6 +24,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState, TwinStateResult } from '@/lib/intelligence/TwinStateEngine';
 import PersonalContextBuilder from '@/lib/intelligence/PersonalContextBuilder';
@@ -80,6 +81,8 @@ export interface TwinEvolutionProps {
 export function TwinEvolution({}: TwinEvolutionProps) {
   const { session } = useAuth();
   const userId = session?.user?.id;
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   // PersonalContextBuilder instance (stable across renders)
   const builderRef = useRef(new PersonalContextBuilder());
@@ -174,7 +177,7 @@ export function TwinEvolution({}: TwinEvolutionProps) {
     <div
       role="dialog"
       aria-live="polite"
-      aria-label={`Twin พัฒนาสู่ระดับ ${labels.en}`}
+      aria-label={isTh ? `Twin พัฒนาสู่ระดับ ${labels.en}` : `Twin evolved to ${labels.en}`}
       onClick={() => dismiss()}
       style={{
         position: 'fixed',
@@ -278,7 +281,7 @@ export function TwinEvolution({}: TwinEvolutionProps) {
             opacity: 0.6,
           }}
         >
-          แตะเพื่อดำเนินการต่อ
+          {isTh ? 'แตะเพื่อดำเนินการต่อ' : 'Tap to continue'}
         </p>
       </div>
 

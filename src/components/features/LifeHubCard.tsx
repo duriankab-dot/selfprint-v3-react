@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './life-hub-card.css';
 
 interface HubCardProps {
@@ -18,13 +19,15 @@ interface HubCardProps {
 }
 
 const LifeHubCard: React.FC<HubCardProps> = ({ hub, isSelected, onSelect }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   return (
     <div
       className={`life-hub-card${isSelected ? ' selected' : ''}`}
       onClick={onSelect}
     >
       <div className="card-emoji">{hub.emoji}</div>
-      <h3 className="card-name">{hub.thaiName}</h3>
+      <h3 className="card-name">{isTh ? hub.thaiName : hub.name}</h3>
       <div className="card-score">
         <div className="score-bar">
           <div className="score-fill" style={{ width: `${hub.score}%` }} />

@@ -3,6 +3,7 @@
  */
 
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './conversation-history.css';
 
 interface Message {
@@ -21,13 +22,15 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
   messages,
   onClear,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   return (
     <div className="conversation-history">
       {messages.length === 0 ? (
         <div className="history-empty">
           <p className="empty-icon">💬</p>
-          <p className="empty-text">ยังไม่มีการสนทนา</p>
-          <p className="empty-subtext">เริ่มพูดกับ AI Twin ได้เลย</p>
+          <p className="empty-text">{isTh ? 'ยังไม่มีการสนทนา' : 'No conversation yet'}</p>
+          <p className="empty-subtext">{isTh ? 'เริ่มพูดกับ AI Twin ได้เลย' : 'Start talking with your AI Twin'}</p>
         </div>
       ) : (
         <>
@@ -40,14 +43,14 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                 <div className="message-content">
                   <p className="message-text">{msg.text}</p>
                   <span className="message-time">
-                    {msg.timestamp.toLocaleTimeString('th-TH')}
+                    {msg.timestamp.toLocaleTimeString(isTh ? 'th-TH' : 'en-US')}
                   </span>
                 </div>
               </div>
             ))}
           </div>
           <button className="history-clear" onClick={onClear}>
-            🗑️ ลบประวัติ
+            🗑️ {isTh ? 'ลบประวัติ' : 'Clear history'}
           </button>
         </>
       )}

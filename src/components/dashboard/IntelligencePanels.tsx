@@ -5,6 +5,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { DecisionIntelligenceEngine } from '@/lib/intelligence/DecisionIntelligenceEngine';
 import { LifeIntelligencePackEngine } from '@/lib/intelligence/LifeIntelligencePackEngine';
 import { BehavioralForecastEngine } from '@/lib/intelligence/BehavioralForecastEngine';
@@ -18,6 +19,8 @@ interface DecisionCardProps {
 }
 
 export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const engine = useMemo(() => new DecisionIntelligenceEngine(), []);
   const [open, setOpen] = useState(false);
 
@@ -29,7 +32,9 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
   if (!report) {
     return (
       <div className="intel-card intel-card--empty">
-        <p className="intel-empty">เพิ่ม reflection เพื่อวิเคราะห์รูปแบบการตัดสินใจ</p>
+        <p className="intel-empty">
+          {isTh ? 'เพิ่ม reflection เพื่อวิเคราะห์รูปแบบการตัดสินใจ' : 'Add a reflection to analyze your decision patterns'}
+        </p>
       </div>
     );
   }
@@ -55,7 +60,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
 
       {report.biasRisks.length > 0 && (
         <div className="decision-biases">
-          <p className="intel-section-title">⚠️ Bias ที่ควรระวัง</p>
+          <p className="intel-section-title">⚠️ {isTh ? 'Bias ที่ควรระวัง' : 'Biases to watch'}</p>
           {report.biasRisks.slice(0, 2).map((b, i) => (
             <div key={i} className={`bias-item bias-item--${b.severity}`}>
               <span className="bias-name">{b.name}</span>
@@ -73,14 +78,14 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
         onClick={() => setOpen(!open)}
         type="button"
       >
-        {open ? '▲ ซ่อน' : '▼ ดู Frameworks + Checklist'}
+        {open ? (isTh ? '▲ ซ่อน' : '▲ Hide') : (isTh ? '▼ ดู Frameworks + Checklist' : '▼ View Frameworks + Checklist')}
       </button>
 
       {open && (
         <div className="decision-details">
           {report.recommendedFrameworks.length > 0 && (
             <div className="decision-frameworks">
-              <p className="intel-section-title">🛠 Frameworks แนะนำ</p>
+              <p className="intel-section-title">🛠 {isTh ? 'Frameworks แนะนำ' : 'Recommended Frameworks'}</p>
               {report.recommendedFrameworks.map((f, i) => (
                 <div key={i} className="framework-item">
                   <p className="framework-name">{f.nameThai}</p>
@@ -117,6 +122,8 @@ interface LifePackCarouselProps {
 }
 
 export const LifePackCarousel: React.FC<LifePackCarouselProps> = ({ context }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const engine = useMemo(() => new LifeIntelligencePackEngine(), []);
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -128,7 +135,9 @@ export const LifePackCarousel: React.FC<LifePackCarouselProps> = ({ context }) =
   if (!report) {
     return (
       <div className="intel-card intel-card--empty">
-        <p className="intel-empty">ยังไม่มีข้อมูลสำหรับ Life Intelligence Packs</p>
+        <p className="intel-empty">
+          {isTh ? 'ยังไม่มีข้อมูลสำหรับ Life Intelligence Packs' : 'No data yet for Life Intelligence Packs'}
+        </p>
       </div>
     );
   }
@@ -169,14 +178,14 @@ export const LifePackCarousel: React.FC<LifePackCarouselProps> = ({ context }) =
         )}
 
         <div className="life-pack-section">
-          <p className="intel-section-title">❓ คำถามสำคัญ</p>
+          <p className="intel-section-title">❓ {isTh ? 'คำถามสำคัญ' : 'Key Questions'}</p>
           <ul className="intel-list">
             {active.keyQuestions.slice(0, 3).map((q, i) => <li key={i}>{q}</li>)}
           </ul>
         </div>
 
         <div className="life-pack-section">
-          <p className="intel-section-title">🚀 Action แนะนำ</p>
+          <p className="intel-section-title">🚀 {isTh ? 'Action แนะนำ' : 'Recommended Actions'}</p>
           <ul className="intel-list intel-list--action">
             {active.recommendedActions.slice(0, 2).map((a, i) => <li key={i}>{a}</li>)}
           </ul>
@@ -193,6 +202,8 @@ interface ForecastWidgetProps {
 }
 
 export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const engine = useMemo(() => new BehavioralForecastEngine(), []);
 
   const forecast = useMemo(() => {
@@ -203,7 +214,9 @@ export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
   if (!forecast) {
     return (
       <div className="intel-card intel-card--empty">
-        <p className="intel-empty">เพิ่มข้อมูลเพื่อให้ AI ทำนายพฤติกรรมของคุณ</p>
+        <p className="intel-empty">
+          {isTh ? 'เพิ่มข้อมูลเพื่อให้ AI ทำนายพฤติกรรมของคุณ' : 'Add more data so AI can forecast your behavior'}
+        </p>
       </div>
     );
   }
@@ -220,18 +233,18 @@ export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
 
       <div className="forecast-mood-hub">
         <div className="forecast-pill forecast-pill--mood">
-          <span className="forecast-pill-label">สภาวะถัดไป</span>
+          <span className="forecast-pill-label">{isTh ? 'สภาวะถัดไป' : 'Next likely mood'}</span>
           <span className="forecast-pill-value">{forecast.nextLikelyMoodLabel}</span>
         </div>
         <div className="forecast-pill forecast-pill--hub">
-          <span className="forecast-pill-label">Hub ที่จะ focus</span>
+          <span className="forecast-pill-label">{isTh ? 'Hub ที่จะ focus' : 'Hub to focus on'}</span>
           <span className="forecast-pill-value">{forecast.predictedHubFocusLabel}</span>
         </div>
       </div>
 
       {forecast.positiveMomentum.length > 0 && (
         <div className="forecast-momentum">
-          <p className="intel-section-title">✨ Positive Momentum</p>
+          <p className="intel-section-title">✨ {isTh ? 'Positive Momentum' : 'Positive Momentum'}</p>
           {forecast.positiveMomentum.slice(0, 2).map((m, i) => (
             <div key={i} className="momentum-item">
               <p className="momentum-area">{m.area}</p>
@@ -243,7 +256,7 @@ export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
 
       {forecast.behavioralRisks.length > 0 && (
         <div className="forecast-risks">
-          <p className="intel-section-title">⚠️ ความเสี่ยงที่ควรระวัง</p>
+          <p className="intel-section-title">⚠️ {isTh ? 'ความเสี่ยงที่ควรระวัง' : 'Risks to Watch'}</p>
           {forecast.behavioralRisks.slice(0, 2).map((r, i) => (
             <div key={i} className={`risk-item risk-item--${r.likelihood}`}>
               <p className="risk-text">{r.risk}</p>

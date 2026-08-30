@@ -15,6 +15,7 @@ import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
+import { useLanguage } from '../context/LanguageContext';
 
 // label ต่อ tier
 const TIER_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
@@ -41,17 +42,19 @@ export default function MePage() {
   const { session } = useAuth();
   const { subscription } = useSubscription();
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const user = session?.user;
   const displayName = user?.user_metadata?.full_name
     || user?.user_metadata?.name
     || user?.email?.split('@')[0]
-    || 'ผู้ใช้';
+    || (isTh ? 'ผู้ใช้' : 'User');
   const email = user?.email || '';
   const tier = subscription?.tier || 'free';
   const tierInfo = TIER_LABELS[tier] ?? TIER_LABELS.free;
 
-  const SECTIONS: MenuSection[] = [
+  const SECTIONS: MenuSection[] = isTh ? [
     {
       title: 'AI ฝาแฝด',
       items: [
@@ -119,6 +122,78 @@ export default function MePage() {
           sublabel: tier === 'free'
             ? 'อัปเกรดเพื่อปลดล็อกฟีเจอร์ทั้งหมด'
             : 'ดูรายละเอียดและจัดการการสมัคร',
+          route: '/pricing',
+        },
+      ],
+    },
+  ] : [
+    {
+      title: 'AI Twin',
+      items: [
+        {
+          emoji: '📰',
+          label: 'Daily Brief',
+          sublabel: 'A daily brief from your AI Twin',
+          route: '/brief',
+        },
+        {
+          emoji: '👥',
+          label: 'AI Twin profile',
+          sublabel: 'Accuracy %, Evolution, Stats',
+          route: '/twin',
+        },
+        {
+          emoji: '🧬',
+          label: 'Self analysis',
+          sublabel: 'An overview of your Blueprint and Patterns',
+          route: '/analysis',
+        },
+        {
+          emoji: '🏅',
+          label: 'Badges',
+          sublabel: 'Your growth progress',
+          route: '/badges',
+        },
+        {
+          emoji: '🎯',
+          label: 'Life Hubs',
+          sublabel: 'Career / Relationships / Health / Growth / Balance',
+          route: '/life-hubs',
+        },
+        {
+          emoji: '📋',
+          label: 'Decision log',
+          sublabel: 'Decision Logger + stats',
+          route: '/decisions',
+        },
+      ],
+    },
+    {
+      title: 'Account & security',
+      items: [
+        {
+          emoji: '🔑',
+          label: 'Manage Passkeys',
+          sublabel: 'Add/remove sign-in keys',
+          route: '/settings/passkeys',
+        },
+        {
+          emoji: '🔒',
+          label: 'Privacy Center',
+          sublabel: 'PDPA, export, delete account',
+          route: '/privacy',
+        },
+      ],
+    },
+    {
+      title: 'Subscription',
+      items: [
+        {
+          emoji: tierInfo.emoji,
+          label: `${tierInfo.label} plan`,
+          sublabel: tier === 'free'
+            ? 'Upgrade to unlock every feature'
+            : 'View details and manage your subscription',
           route: '/pricing',
         },
       ],
@@ -217,7 +292,9 @@ export default function MePage() {
               color: 'var(--color-text-secondary)',
               margin: '0 0 14px',
             }}>
-              เข้าสู่ระบบเพื่อบันทึกข้อมูลและใช้งานฟีเจอร์ทั้งหมด
+              {isTh
+                ? 'เข้าสู่ระบบเพื่อบันทึกข้อมูลและใช้งานฟีเจอร์ทั้งหมด'
+                : 'Sign in to save your data and use every feature'}
             </p>
             <button
               onClick={() => navigate('/login')}
@@ -232,7 +309,7 @@ export default function MePage() {
                 cursor: 'pointer',
               }}
             >
-              เข้าสู่ระบบ
+              {isTh ? 'เข้าสู่ระบบ' : 'Sign in'}
             </button>
           </div>
         )}
@@ -315,7 +392,7 @@ export default function MePage() {
           color: 'var(--color-text-secondary)',
           fontSize: 12,
         }}>
-          SELFPRINT · รู้จักตัวเองให้ลึกขึ้น ทุกวัน
+          {isTh ? 'SELFPRINT · รู้จักตัวเองให้ลึกขึ้น ทุกวัน' : 'SELFPRINT · Know yourself more deeply, every day'}
         </div>
       </div>
 

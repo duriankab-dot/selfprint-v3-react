@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { EmotionProvider } from '@/context/EmotionContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import { InitialBlueprint } from '../InitialBlueprint';
 import { FinetuningQuestions } from '../FinetuningQuestions';
 import { FullAnalysis } from '../FullAnalysis';
@@ -18,9 +19,11 @@ import { FullAnalysis } from '../FullAnalysis';
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
     <BrowserRouter>
-      <EmotionProvider>
-        {component}
-      </EmotionProvider>
+      <LanguageProvider>
+        <EmotionProvider>
+          {component}
+        </EmotionProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 };

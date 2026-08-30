@@ -11,6 +11,7 @@
 
 import { useState } from 'react';
 import { useUserStore } from '@/store/userStore';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface BirthDataInputProps {
   className?: string;
@@ -22,6 +23,8 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
   onComplete,
 }) => {
   const { updateProfile } = useUserStore();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [formData, setFormData] = useState({
     dob: localStorage.getItem('birth_dob') || '',
     time: localStorage.getItem('birth_time') || '',
@@ -50,7 +53,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
     if (name === 'dob' && value && !validateDate(value)) {
       setErrors((prev) => ({
         ...prev,
-        dob: 'กรุณากรอกวันที่ให้ถูกต้อง (YYYY-MM-DD)',
+        dob: isTh ? 'กรุณากรอกวันที่ให้ถูกต้อง (YYYY-MM-DD)' : 'Please enter a valid date (YYYY-MM-DD)',
       }));
     }
 
@@ -60,7 +63,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
       if (!timeRegex.test(value)) {
         setErrors((prev) => ({
           ...prev,
-          time: 'กรุณากรอกเวลาในรูปแบบ HH:MM',
+          time: isTh ? 'กรุณากรอกเวลาในรูปแบบ HH:MM' : 'Please enter time in HH:MM format',
         }));
       }
     }
@@ -68,14 +71,14 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
 
   const handleSave = () => {
     if (!formData.dob) {
-      setErrors((prev) => ({ ...prev, dob: 'กรุณากรอกวันเกิด' }));
+      setErrors((prev) => ({ ...prev, dob: isTh ? 'กรุณากรอกวันเกิด' : 'Please enter your date of birth' }));
       return;
     }
 
     if (!validateDate(formData.dob)) {
       setErrors((prev) => ({
         ...prev,
-        dob: 'กรุณากรอกวันที่ให้ถูกต้อง',
+        dob: isTh ? 'กรุณากรอกวันที่ให้ถูกต้อง' : 'Please enter a valid date',
       }));
       return;
     }
@@ -117,7 +120,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
             color: 'var(--color-text-primary)',
           }}
         >
-          บอกเราว่าคุณเกิดเมื่อไหร่
+          {isTh ? 'บอกเราว่าคุณเกิดเมื่อไหร่' : 'Tell us when you were born'}
         </h3>
         <p
           style={{
@@ -127,7 +130,9 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
             lineHeight: 1.5,
           }}
         >
-          ข้อมูลนี้ช่วยให้ AI Twin เข้าใจแพทเทิร์นหลักของคุณ เวลาและสถานที่เกิดใส่หรือไม่ใส่ก็ได้
+          {isTh
+            ? 'ข้อมูลนี้ช่วยให้ AI Twin เข้าใจแพทเทิร์นหลักของคุณ เวลาและสถานที่เกิดใส่หรือไม่ใส่ก็ได้'
+            : 'This helps your AI Twin understand your core patterns. Time and place of birth are optional.'}
         </p>
 
         {/* Date of Birth */}
@@ -141,7 +146,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               color: 'var(--color-text-primary)',
             }}
           >
-            วันเกิด <span style={{ color: 'red' }}>*</span>
+            {isTh ? 'วันเกิด' : 'Date of birth'} <span style={{ color: 'red' }}>*</span>
           </label>
           <input
             type="date"
@@ -159,7 +164,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               fontSize: '14px',
               boxSizing: 'border-box',
             }}
-            aria-label="วันเกิด"
+            aria-label={isTh ? 'วันเกิด' : 'Date of birth'}
           />
           {errors.dob && (
             <p
@@ -185,7 +190,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               color: 'var(--color-text-primary)',
             }}
           >
-            เวลาเกิด (ไม่บังคับ)
+            {isTh ? 'เวลาเกิด (ไม่บังคับ)' : 'Time of birth (optional)'}
           </label>
           <input
             type="time"
@@ -203,7 +208,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               fontSize: '14px',
               boxSizing: 'border-box',
             }}
-            aria-label="เวลาเกิด"
+            aria-label={isTh ? 'เวลาเกิด' : 'Time of birth'}
           />
           {errors.time && (
             <p
@@ -229,14 +234,14 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               color: 'var(--color-text-primary)',
             }}
           >
-            สถานที่เกิด (ไม่บังคับ)
+            {isTh ? 'สถานที่เกิด (ไม่บังคับ)' : 'Place of birth (optional)'}
           </label>
           <input
             type="text"
             name="place"
             value={formData.place}
             onChange={handleChange}
-            placeholder="เช่น กรุงเทพฯ ประเทศไทย"
+            placeholder={isTh ? 'เช่น กรุงเทพฯ ประเทศไทย' : 'e.g. Bangkok, Thailand'}
             style={{
               width: '100%',
               padding: '10px 12px',
@@ -247,7 +252,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
               fontSize: '14px',
               boxSizing: 'border-box',
             }}
-            aria-label="สถานที่เกิด"
+            aria-label={isTh ? 'สถานที่เกิด' : 'Place of birth'}
           />
         </div>
 
@@ -269,7 +274,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
           onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
-          บันทึกและไปต่อ
+          {isTh ? 'บันทึกและไปต่อ' : 'Save and continue'}
         </button>
       </div>
     </div>

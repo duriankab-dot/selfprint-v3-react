@@ -21,6 +21,7 @@
 
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import './FeedbackSummary.css';
 
@@ -44,6 +45,8 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
   userId,
   isLoading: externalLoading = false,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
 
   // ฟ้ได้ accuracy metrics
@@ -109,7 +112,7 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
     return (
       <div className="feedback-summary feedback-summary--loading">
         <div className="feedback-summary__spinner" aria-hidden="true" />
-        <p>กำลังโหลดสถิติ feedback...</p>
+        <p>{isTh ? 'กำลังโหลดสถิติ feedback...' : 'Loading feedback stats...'}</p>
       </div>
     );
   }
@@ -118,8 +121,8 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
     return (
       <div className="feedback-summary feedback-summary--empty">
         <p className="feedback-summary__empty-icon">📊</p>
-        <h3>ยังไม่มี Feedback</h3>
-        <p>ให้ feedback กับ insights เพื่อให้ AI Twin เรียนรู้</p>
+        <h3>{isTh ? 'ยังไม่มี Feedback' : 'No feedback yet'}</h3>
+        <p>{isTh ? 'ให้ feedback กับ insights เพื่อให้ AI Twin เรียนรู้' : 'Give feedback on insights so your AI Twin can learn'}</p>
       </div>
     );
   }
@@ -137,11 +140,21 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
               <span className="accuracy-trend">{trendIcon}</span>
             </div>
             <div className="accuracy-labels">
-              <p className="accuracy-label">ความแม่นยำ</p>
+              <p className="accuracy-label">{isTh ? 'ความแม่นยำ' : 'Accuracy'}</p>
               <p className="accuracy-subtext">
-                {accuracyMetrics.trend === 'improving' && 'ดีขึ้น'}
-                {accuracyMetrics.trend === 'declining' && 'ลดลง'}
-                {accuracyMetrics.trend === 'stable' && 'คงที่'}
+                {isTh ? (
+                  <>
+                    {accuracyMetrics.trend === 'improving' && 'ดีขึ้น'}
+                    {accuracyMetrics.trend === 'declining' && 'ลดลง'}
+                    {accuracyMetrics.trend === 'stable' && 'คงที่'}
+                  </>
+                ) : (
+                  <>
+                    {accuracyMetrics.trend === 'improving' && 'Improving'}
+                    {accuracyMetrics.trend === 'declining' && 'Declining'}
+                    {accuracyMetrics.trend === 'stable' && 'Stable'}
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -151,7 +164,7 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
             </div>
-            <p className="progress-text">เป้าหมาย: {goalPercent}%</p>
+            <p className="progress-text">{isTh ? 'เป้าหมาย' : 'Goal'}: {goalPercent}%</p>
           </div>
         </div>
 
@@ -248,17 +261,35 @@ export const FeedbackSummary: React.FC<FeedbackSummaryProps> = ({
       <div className="feedback-insights">
         <h3 className="feedback-insights__title">💡 Tips</h3>
         <ul className="insights-list">
-          <li>
-            {accuracyPercent < 60 && '🎯 ให้ feedback มากขึ้นเพื่อปรับปรุงความแม่นยำ'}
-            {accuracyPercent >= 60 && accuracyPercent < 80 && '📈 AI Twin เรียนรู้ได้ดี ให้ feedback ต่อไป'}
-            {accuracyPercent >= 80 && '⭐ ยอดเยี่ยม AI Twin เข้าใจคุณเป็นอย่างดี'}
-          </li>
-          <li>
-            {feedbackBreakdown.not_me > feedbackBreakdown.very_true * 0.5
-              ? '🔄 ลองบันทึก memory ใหม่เพื่ออัปเดตข้อมูลของ AI'
-              : '✅ AI Twin สนับสนุนโดยข้อมูลที่มีความหมาย'}
-          </li>
-          <li>💬 Feedback ของคุณช่วยให้ AI Twin เข้าใจคุณได้ดีขึ้น</li>
+          {isTh ? (
+            <>
+              <li>
+                {accuracyPercent < 60 && '🎯 ให้ feedback มากขึ้นเพื่อปรับปรุงความแม่นยำ'}
+                {accuracyPercent >= 60 && accuracyPercent < 80 && '📈 AI Twin เรียนรู้ได้ดี ให้ feedback ต่อไป'}
+                {accuracyPercent >= 80 && '⭐ ยอดเยี่ยม AI Twin เข้าใจคุณเป็นอย่างดี'}
+              </li>
+              <li>
+                {feedbackBreakdown.not_me > feedbackBreakdown.very_true * 0.5
+                  ? '🔄 ลองบันทึก memory ใหม่เพื่ออัปเดตข้อมูลของ AI'
+                  : '✅ AI Twin สนับสนุนโดยข้อมูลที่มีความหมาย'}
+              </li>
+              <li>💬 Feedback ของคุณช่วยให้ AI Twin เข้าใจคุณได้ดีขึ้น</li>
+            </>
+          ) : (
+            <>
+              <li>
+                {accuracyPercent < 60 && '🎯 Give more feedback to improve accuracy'}
+                {accuracyPercent >= 60 && accuracyPercent < 80 && '📈 Your AI Twin is learning well — keep the feedback coming'}
+                {accuracyPercent >= 80 && '⭐ Excellent — your AI Twin understands you very well'}
+              </li>
+              <li>
+                {feedbackBreakdown.not_me > feedbackBreakdown.very_true * 0.5
+                  ? '🔄 Try logging a new memory to update your AI\'s data'
+                  : '✅ Your AI Twin is backed by meaningful data'}
+              </li>
+              <li>💬 Your feedback helps your AI Twin understand you better</li>
+            </>
+          )}
         </ul>
       </div>
     </div>

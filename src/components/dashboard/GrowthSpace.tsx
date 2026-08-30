@@ -19,6 +19,7 @@
 import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import type { BehavioralPattern } from '@/lib/intelligence/types';
 import '../../styles/growth-space.css';
@@ -35,38 +36,46 @@ interface GrowthLens {
   emptyLabel: string;
 }
 
-const LENSES: GrowthLens[] = [
-  {
-    key: 'growing',
-    label: 'สิ่งที่เติบโต',
-    icon: '🌱',
-    // Repeating patterns that are linked to strengths = growing
-    filter: (p) => p.patternType === 'repeating' && (p.strengths?.length ?? 0) > 0,
-    emptyLabel: 'ยังไม่พบสิ่งที่เติบโตชัดเจน — ใช้งานต่อเนื่องเพื่อให้ Twin สังเกตเห็น',
-  },
-  {
-    key: 'changing',
-    label: 'สิ่งที่เปลี่ยน',
-    icon: '🔄',
-    filter: (p) => p.patternType === 'changing',
-    emptyLabel: 'ยังไม่พบการเปลี่ยนแปลงที่ชัดเจนในช่วงนี้',
-  },
-  {
-    key: 'emerging',
-    label: 'สิ่งที่กำลังเกิดขึ้น',
-    icon: '✨',
-    filter: (p) => p.patternType === 'emerging',
-    emptyLabel: 'ยังไม่พบสัญญาณใหม่ — Twin จะแจ้งเมื่อพบ pattern ที่กำลังก่อตัว',
-  },
-  {
-    key: 'stuck',
-    label: 'สิ่งที่ยังติดอยู่',
-    icon: '⚓',
-    // Repeating patterns with no linked strengths = potential friction area
-    filter: (p) => p.patternType === 'repeating' && (p.strengths?.length ?? 0) === 0,
-    emptyLabel: 'ไม่พบสิ่งที่ติดขัดในขณะนี้ — ดี!',
-  },
-];
+function getLenses(isTh: boolean): GrowthLens[] {
+  return [
+    {
+      key: 'growing',
+      label: isTh ? 'สิ่งที่เติบโต' : "What's grown",
+      icon: '🌱',
+      // Repeating patterns that are linked to strengths = growing
+      filter: (p) => p.patternType === 'repeating' && (p.strengths?.length ?? 0) > 0,
+      emptyLabel: isTh
+        ? 'ยังไม่พบสิ่งที่เติบโตชัดเจน — ใช้งานต่อเนื่องเพื่อให้ Twin สังเกตเห็น'
+        : "Nothing clearly grown yet — keep using it so your Twin can notice",
+    },
+    {
+      key: 'changing',
+      label: isTh ? 'สิ่งที่เปลี่ยน' : "What's changed",
+      icon: '🔄',
+      filter: (p) => p.patternType === 'changing',
+      emptyLabel: isTh
+        ? 'ยังไม่พบการเปลี่ยนแปลงที่ชัดเจนในช่วงนี้'
+        : 'No clear changes found in this period yet',
+    },
+    {
+      key: 'emerging',
+      label: isTh ? 'สิ่งที่กำลังเกิดขึ้น' : "What's emerging",
+      icon: '✨',
+      filter: (p) => p.patternType === 'emerging',
+      emptyLabel: isTh
+        ? 'ยังไม่พบสัญญาณใหม่ — Twin จะแจ้งเมื่อพบ pattern ที่กำลังก่อตัว'
+        : "No new signals yet — your Twin will let you know when a forming pattern shows up",
+    },
+    {
+      key: 'stuck',
+      label: isTh ? 'สิ่งที่ยังติดอยู่' : "What's stuck",
+      icon: '⚓',
+      // Repeating patterns with no linked strengths = potential friction area
+      filter: (p) => p.patternType === 'repeating' && (p.strengths?.length ?? 0) === 0,
+      emptyLabel: isTh ? 'ไม่พบสิ่งที่ติดขัดในขณะนี้ — ดี!' : 'Nothing stuck right now — nice!',
+    },
+  ];
+}
 
 // ============================================================================
 // Skeleton
@@ -93,7 +102,7 @@ const Skeleton: React.FC = () => (
 // Timeline visual
 // ============================================================================
 
-const Timeline: React.FC<{ progress: number }> = ({ progress }) => (
+const Timeline: React.FC<{ progress: number; isTh: boolean }> = ({ progress, isTh }) => (
   <div className="growth__timeline-wrap">
     <div className="growth__timeline-labels">
       <span>PAST</span>
@@ -108,7 +117,7 @@ const Timeline: React.FC<{ progress: number }> = ({ progress }) => (
       <div
         className="growth__timeline-dot growth__timeline-dot--now"
         style={{ left: `${progress}%` }}
-        title="ตอนนี้"
+        title={isTh ? 'ตอนนี้' : 'Now'}
       />
     </div>
   </div>
@@ -120,9 +129,12 @@ const Timeline: React.FC<{ progress: number }> = ({ progress }) => (
 
 const GrowthSpace: React.FC = () => {
   const { session } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const userId = session?.user?.id ?? '';
 
   const detector = useMemo(() => new PatternDetector(), []);
+  const LENSES = useMemo(() => getLenses(isTh), [isTh]);
 
   // Shared cache key with IntelligencePanel
   const { data: patterns, isLoading } = useQuery({
@@ -147,14 +159,14 @@ const GrowthSpace: React.FC = () => {
     <div className="growth__card">
       {/* Header */}
       <div className="growth__header">
-        <h2 className="growth__title">🌿 การเติบโตของคุณ</h2>
+        <h2 className="growth__title">🌿 {isTh ? 'การเติบโตของคุณ' : 'Your Growth'}</h2>
         <p className="growth__subtitle">
-          Twin ติดตามการเปลี่ยนแปลงของคุณตามเวลา
+          {isTh ? 'Twin ติดตามการเปลี่ยนแปลงของคุณตามเวลา' : 'Your Twin tracks how you change over time'}
         </p>
       </div>
 
       {/* Timeline */}
-      <Timeline progress={progressScore} />
+      <Timeline progress={progressScore} isTh={isTh} />
 
       {/* 4 lenses grid */}
       <div className="growth__lenses">
@@ -179,7 +191,9 @@ const GrowthSpace: React.FC = () => {
                     </li>
                   ))}
                   {matched.length > 3 && (
-                    <li className="growth__lens-more">+{matched.length - 3} เพิ่มเติม</li>
+                    <li className="growth__lens-more">
+                      +{matched.length - 3} {isTh ? 'เพิ่มเติม' : 'more'}
+                    </li>
                   )}
                 </ul>
               )}
@@ -192,8 +206,17 @@ const GrowthSpace: React.FC = () => {
       {allPatterns.length === 0 && (
         <div className="growth__empty">
           <p>
-            Twin ยังไม่มีข้อมูลเพียงพอที่จะแสดงเส้นทางการเติบโตของคุณ<br />
-            ใช้งานและบันทึกความคิดเพิ่มขึ้นเรื่อย ๆ เพื่อให้ Twin เรียนรู้
+            {isTh ? (
+              <>
+                Twin ยังไม่มีข้อมูลเพียงพอที่จะแสดงเส้นทางการเติบโตของคุณ<br />
+                ใช้งานและบันทึกความคิดเพิ่มขึ้นเรื่อย ๆ เพื่อให้ Twin เรียนรู้
+              </>
+            ) : (
+              <>
+                Your Twin doesn't have enough data yet to show your growth path.<br />
+                Keep using it and logging your thoughts so your Twin can learn.
+              </>
+            )}
           </p>
         </div>
       )}

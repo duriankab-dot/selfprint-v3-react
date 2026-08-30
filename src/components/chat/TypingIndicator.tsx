@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import './TypingIndicator.css';
 
 interface TypingIndicatorProps {
@@ -9,6 +10,8 @@ interface TypingIndicatorProps {
  * Animated typing indicator - shows while Nova is thinking
  */
 export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ show }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   if (!show) return null;
 
   return (
@@ -18,7 +21,7 @@ export const TypingIndicator: React.FC<TypingIndicatorProps> = ({ show }) => {
         <span className="typing-dot"></span>
         <span className="typing-dot"></span>
       </div>
-      <span className="typing-text">⏳ SELFPRINT กำลังคิด...</span>
+      <span className="typing-text">⏳ {isTh ? 'SELFPRINT กำลังคิด...' : 'SELFPRINT is thinking...'}</span>
     </div>
   );
 };

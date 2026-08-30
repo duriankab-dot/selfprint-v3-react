@@ -5,9 +5,12 @@ import type { PairPreview } from '@/features/viral/api/shareService';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function SharePage() {
   const { code } = useParams<{ code: string }>();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [data, setData] = useState<PairPreview | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -54,7 +57,7 @@ export default function SharePage() {
             color: 'var(--color-text-primary)',
           }}
         >
-          เข้าร่วม SelfPrint
+          {isTh ? 'เข้าร่วม SelfPrint' : 'Join SelfPrint'}
         </h1>
         <p
           style={{
@@ -64,7 +67,7 @@ export default function SharePage() {
             marginBottom: '24px',
           }}
         >
-          เพื่อนของคุณชวนให้มาค้นพบ AI Twin ของตัวเอง
+          {isTh ? 'เพื่อนของคุณชวนให้มาค้นพบ AI Twin ของตัวเอง' : 'Your friend invited you to discover your own AI Twin'}
         </p>
 
         {loading && (
@@ -75,7 +78,7 @@ export default function SharePage() {
               marginBottom: '24px',
             }}
           >
-            กำลังโหลด...
+            {isTh ? 'กำลังโหลด...' : 'Loading...'}
           </p>
         )}
 
@@ -98,7 +101,7 @@ export default function SharePage() {
                 margin: '0 0 4px 0',
               }}
             >
-              {data.decisionStyle || 'AI Twin ของเขา'}
+              {data.decisionStyle || (isTh ? 'AI Twin ของเขา' : 'Their AI Twin')}
             </p>
             <p
               style={{
@@ -107,7 +110,7 @@ export default function SharePage() {
                 margin: 0,
               }}
             >
-              ความแม่นยำ {data.accuracyLevel}%
+              {isTh ? `ความแม่นยำ ${data.accuracyLevel}%` : `${data.accuracyLevel}% accuracy`}
             </p>
           </div>
         )}
@@ -128,7 +131,7 @@ export default function SharePage() {
                 margin: 0,
               }}
             >
-              ลิงก์แชร์นี้ไม่ถูกต้องหรือหมดอายุแล้ว
+              {isTh ? 'ลิงก์แชร์นี้ไม่ถูกต้องหรือหมดอายุแล้ว' : 'This share link is invalid or has expired'}
             </p>
           </div>
         )}
@@ -152,7 +155,7 @@ export default function SharePage() {
           onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
           onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
         >
-          รับโปรไฟล์ของคุณฟรี
+          {isTh ? 'รับโปรไฟล์ของคุณฟรี' : 'Get your free profile'}
         </a>
       </div>
       </div>

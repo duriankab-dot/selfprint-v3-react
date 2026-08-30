@@ -13,6 +13,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 
 // Extend Window to include the deferred prompt
 interface BeforeInstallPromptEvent extends Event {
@@ -32,6 +33,8 @@ function isInStandaloneMode(): boolean {
 const DISMISSED_KEY = 'selfprint_pwa_dismissed';
 
 export function PWAInstallPrompt() {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showIOSBanner, setShowIOSBanner] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -80,7 +83,7 @@ export function PWAInstallPrompt() {
   return (
     <div
       role="dialog"
-      aria-label="ติดตั้ง SELFPRINT บนหน้าจอหลัก"
+      aria-label={isTh ? 'ติดตั้ง SELFPRINT บนหน้าจอหลัก' : 'Install SELFPRINT to home screen'}
       style={{
         position: 'fixed',
         bottom: 72, // above BottomNav (56px) + gap
@@ -116,15 +119,17 @@ export function PWAInstallPrompt() {
           color: 'var(--color-text-primary)',
           marginBottom: 3,
         }}>
-          ติดตั้ง SELFPRINT
+          {isTh ? 'ติดตั้ง SELFPRINT' : 'Install SELFPRINT'}
         </div>
         {showIOSBanner ? (
           <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>
-            กด <strong>Share</strong> → <strong>"Add to Home Screen"</strong> เพื่อติดตั้ง
+            {isTh
+              ? <>กด <strong>Share</strong> → <strong>"Add to Home Screen"</strong> เพื่อติดตั้ง</>
+              : <>Tap <strong>Share</strong> → <strong>"Add to Home Screen"</strong> to install</>}
           </div>
         ) : (
           <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
-            ใช้งานได้เร็วขึ้น แม้ไม่มีอินเทอร์เน็ต
+            {isTh ? 'ใช้งานได้เร็วขึ้น แม้ไม่มีอินเทอร์เน็ต' : 'Faster access, even without internet'}
           </div>
         )}
       </div>
@@ -134,7 +139,7 @@ export function PWAInstallPrompt() {
         {!showIOSBanner && (
           <button
             onClick={handleInstall}
-            aria-label="ติดตั้งแอป"
+            aria-label={isTh ? 'ติดตั้งแอป' : 'Install app'}
             style={{
               background: 'var(--color-accent-primary)',
               color: '#fff',
@@ -147,12 +152,12 @@ export function PWAInstallPrompt() {
               whiteSpace: 'nowrap',
             }}
           >
-            ติดตั้ง
+            {isTh ? 'ติดตั้ง' : 'Install'}
           </button>
         )}
         <button
           onClick={handleDismiss}
-          aria-label="ปิดการแจ้งเตือน"
+          aria-label={isTh ? 'ปิดการแจ้งเตือน' : 'Dismiss notification'}
           style={{
             background: 'none',
             border: '1px solid var(--color-border)',

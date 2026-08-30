@@ -59,7 +59,7 @@ export function LanguageSwitcher() {
         transition: 'border-color 0.2s, background 0.2s',
         minWidth: '50px',
       }}
-      title={`สลับเป็น ${language === 'en' ? 'ไทย' : 'English'}`}
+      title={language === 'en' ? 'Switch to ไทย' : 'สลับเป็น English'}
     >
       {language === 'en' ? '🇬🇧 EN' : '🇹🇭 TH'}
     </button>

@@ -1,16 +1,19 @@
 import React from 'react';
 import type { PatternInsight } from '../../lib/patternDetection';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface PatternInsightsProps {
   patterns: PatternInsight[];
 }
 
 const PatternInsights: React.FC<PatternInsightsProps> = ({ patterns }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   if (patterns.length === 0) return null;
 
   return (
     <div className="insights-section">
-      <h2>รูปแบบที่พบ</h2>
+      <h2>{isTh ? 'รูปแบบที่พบ' : 'Patterns Found'}</h2>
       <ul
         style={{
           listStyle: 'none',

@@ -21,6 +21,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { useLanguage } from '@/context/LanguageContext';
 import { PROCESSING_STATES } from '@/lib/intelligence/TwinStateEngine';
 import type { ProcessingState } from '@/lib/intelligence/TwinStateEngine';
 import '../../styles/twin-synthesis.css';
@@ -73,6 +74,8 @@ const TwinSynthesis: React.FC<TwinSynthesisProps> = ({
   autoProgress = true,
   durationMs = 1800,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [stepIndex, setStepIndex] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -174,16 +177,16 @@ const TwinSynthesis: React.FC<TwinSynthesisProps> = ({
         {/* CTA when done */}
         {done && (
           <div className="synthesis__ready">
-            <div className="synthesis__ready-title">Twin ของคุณพร้อมแล้ว</div>
+            <div className="synthesis__ready-title">{isTh ? 'Twin ของคุณพร้อมแล้ว' : 'Your Twin is ready'}</div>
             <div className="synthesis__ready-desc">
-              AI กำลังเรียนรู้และเข้าใจตัวคุณมากขึ้นเรื่อย ๆ
+              {isTh ? 'AI กำลังเรียนรู้และเข้าใจตัวคุณมากขึ้นเรื่อย ๆ' : 'AI keeps learning and understanding you more over time'}
             </div>
             <button
               className="synthesis__ready-btn"
               onClick={onComplete}
               autoFocus
             >
-              เปิด Dashboard ของฉัน →
+              {isTh ? 'เปิด Dashboard ของฉัน →' : 'Open my Dashboard →'}
             </button>
           </div>
         )}

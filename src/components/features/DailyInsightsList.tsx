@@ -23,6 +23,7 @@
 
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLanguage } from '@/context/LanguageContext';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { InsightCardWithFeedback } from '@/components/intelligence/InsightCardWithFeedback';
 import { AccuracyBadgeFromMetrics } from '@/components/intelligence/AccuracyBadge';
@@ -58,6 +59,8 @@ export const DailyInsightsList: React.FC<DailyInsightsListProps> = ({
   insights,
   onFeedbackUpdate,
 }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const feedbackLoop = new AIFeedbackLoop();
 
   // Fetch accuracy metrics
@@ -79,9 +82,11 @@ export const DailyInsightsList: React.FC<DailyInsightsListProps> = ({
       <div className="daily-insights-list daily-insights-list--empty">
         <div className="insights-empty-state">
           <p className="insights-empty-icon">✨</p>
-          <h3>ยังไม่มี Insights วันนี้</h3>
+          <h3>{isTh ? 'ยังไม่มี Insights วันนี้' : 'No insights today yet'}</h3>
           <p>
-            ทำ reflection หรือบันทึก memories เพื่อให้ Twin เรียนรู้เพิ่มเติมเกี่ยวกับคุณ
+            {isTh
+              ? 'ทำ reflection หรือบันทึก memories เพื่อให้ Twin เรียนรู้เพิ่มเติมเกี่ยวกับคุณ'
+              : 'Do a reflection or log memories so your Twin can learn more about you'}
           </p>
         </div>
       </div>
@@ -93,7 +98,7 @@ export const DailyInsightsList: React.FC<DailyInsightsListProps> = ({
       {/* Accuracy header */}
       {!metricsLoading && accuracyMetrics && (
         <div className="insights-list__accuracy-header">
-          <h3 className="accuracy-header__title">ความแม่นยำของ Twin</h3>
+          <h3 className="accuracy-header__title">{isTh ? 'ความแม่นยำของ Twin' : "Twin's Accuracy"}</h3>
           <AccuracyBadgeFromMetrics metrics={accuracyMetrics} compact={false} />
         </div>
       )}
@@ -105,7 +110,7 @@ export const DailyInsightsList: React.FC<DailyInsightsListProps> = ({
             💡 Daily Insights ({insights.length})
           </h3>
           <p className="insights-list__subtitle">
-            ให้ feedback เพื่อช่วย Twin ให้เชี่ยวชาญมากขึ้น
+            {isTh ? 'ให้ feedback เพื่อช่วย Twin ให้เชี่ยวชาญมากขึ้น' : 'Give feedback to help your Twin get sharper'}
           </p>
         </div>
 
@@ -129,8 +134,18 @@ export const DailyInsightsList: React.FC<DailyInsightsListProps> = ({
       {/* Help text */}
       <div className="insights-list__help">
         <p className="insights-list__help-text">
-          💡 <strong>ทำไมให้ feedback?</strong> ความเห็นของคุณช่วยให้ Twin เข้าใจคุณได้ลึกขึ้น
-          และสร้าง insights ที่แม่นยำมากขึ้นในอนาคต
+          💡{' '}
+          {isTh ? (
+            <>
+              <strong>ทำไมให้ feedback?</strong> ความเห็นของคุณช่วยให้ Twin เข้าใจคุณได้ลึกขึ้น
+              และสร้าง insights ที่แม่นยำมากขึ้นในอนาคต
+            </>
+          ) : (
+            <>
+              <strong>Why give feedback?</strong> Your feedback helps your Twin understand you more deeply
+              and build more accurate insights in the future.
+            </>
+          )}
         </p>
       </div>
     </div>
