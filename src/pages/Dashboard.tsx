@@ -198,7 +198,7 @@ const Dashboard: React.FC = () => {
         {userId && (
           <TwinEvolution />
         )}
-      <div className="dashboard" style={{ flex: 1 }}>
+      <div className="dashboard" data-testid="dashboard-container" style={{ flex: 1 }}>
 
       {/* RECOVERY-001: Resume entry — V5 §4 requires existing users get a clear
           continuation point instead of repeating a completed journey */}
