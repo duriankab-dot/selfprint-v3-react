@@ -34,6 +34,7 @@ export default function WorldDetail() {
   const { worldId } = useParams<{ worldId: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const isTh = language === 'th';
   const { recordWorldVisit } = useWorld();
 
   const valid = isValidWorldId(worldId);
@@ -113,7 +114,7 @@ export default function WorldDetail() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
-                ← โลกทั้งหมด
+                {isTh ? '← โลกทั้งหมด' : '← All worlds'}
               </button>
               <button
                 onClick={() => navigate('/dashboard')}
@@ -128,20 +129,28 @@ export default function WorldDetail() {
                   cursor: 'pointer',
                 }}
               >
-                🏠 หน้าหลัก
+                🏠 {isTh ? 'หน้าหลัก' : 'Home'}
               </button>
             </div>
             <button
               onClick={ambientTone.toggle}
               aria-label={
                 environment
-                  ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
-                  : ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'
+                  ? (isTh
+                      ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
+                      : `${ambientTone.isPlaying ? 'Turn off' : 'Turn on'} ambient sound — suggested: ${environment.soundscape.labelThai}`)
+                  : (isTh
+                      ? (ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ')
+                      : (ambientTone.isPlaying ? 'Turn off ambient sound' : 'Turn on ambient sound'))
               }
               title={
                 environment
-                  ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
-                  : ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ'
+                  ? (isTh
+                      ? `${ambientTone.isPlaying ? 'ปิด' : 'เปิด'}เสียงบรรยากาศ — แนะนำ: ${environment.soundscape.labelThai}`
+                      : `${ambientTone.isPlaying ? 'Turn off' : 'Turn on'} ambient sound — suggested: ${environment.soundscape.labelThai}`)
+                  : (isTh
+                      ? (ambientTone.isPlaying ? 'ปิดเสียงบรรยากาศ' : 'เปิดเสียงบรรยากาศ')
+                      : (ambientTone.isPlaying ? 'Turn off ambient sound' : 'Turn on ambient sound'))
               }
               style={{
                 background: 'none',
@@ -154,8 +163,8 @@ export default function WorldDetail() {
               }}
             >
               {ambientTone.isPlaying
-                ? `🔊 ${environment?.soundscape.labelThai ?? 'เสียงบรรยากาศ'}`
-                : `🔈 ${environment?.soundscape.labelThai ?? 'เสียงบรรยากาศ'}`}
+                ? `🔊 ${environment?.soundscape.labelThai ?? (isTh ? 'เสียงบรรยากาศ' : 'Ambient sound')}`
+                : `🔈 ${environment?.soundscape.labelThai ?? (isTh ? 'เสียงบรรยากาศ' : 'Ambient sound')}`}
             </button>
           </div>
           <div className="wd-emoji">{world.emoji}</div>

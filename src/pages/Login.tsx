@@ -22,6 +22,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { PasskeyLogin } from '@/components/auth/PasskeyLogin';
 
 // ─── Icon SVGs (inline, zero deps) ───────────────────────────────────────────
@@ -55,6 +56,8 @@ const PasskeyIcon = () => (
 export default function Login() {
   const navigate = useNavigate();
   const { session, isPasskeyAvailable, hasBiometric, signInWithOAuth, signInWithMagicLink } = useAuth();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   const [email, setEmail]           = useState('');
   const [magicSent, setMagicSent]   = useState(false);
@@ -249,9 +252,9 @@ export default function Login() {
           >
             ✦
           </div>
-          <h1 style={heading}>กลับสู่ Selfprint</h1>
+          <h1 style={heading}>{isTh ? 'กลับสู่ Selfprint' : 'Welcome back to Selfprint'}</h1>
           <p style={subtext}>
-            เข้าสู่ระบบเพื่อดู AI ฝาแฝด ของคุณ
+            {isTh ? 'เข้าสู่ระบบเพื่อดู AI ฝาแฝด ของคุณ' : 'Sign in to see your AI Twin'}
           </p>
         </div>
 
@@ -260,17 +263,20 @@ export default function Login() {
           <div style={{ padding: '24px', borderRadius: '12px', border: '1.5px solid var(--color-border)', background: 'var(--color-bg-secondary)' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>📬</div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', color: 'var(--color-text-primary)' }}>
-              เช็คอีเมลของคุณ
+              {isTh ? 'เช็คอีเมลของคุณ' : 'Check your email'}
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-              ส่งลิงก์เข้าสู่ระบบไปที่ <strong>{email}</strong> แล้ว<br />
-              คลิกลิงก์ในอีเมลเพื่อเข้าสู่ระบบโดยอัตโนมัติ
+              {isTh ? (
+                <>ส่งลิงก์เข้าสู่ระบบไปที่ <strong>{email}</strong> แล้ว<br />คลิกลิงก์ในอีเมลเพื่อเข้าสู่ระบบโดยอัตโนมัติ</>
+              ) : (
+                <>We sent a sign-in link to <strong>{email}</strong><br />Click the link in the email to sign in automatically.</>
+              )}
             </p>
             <button
               onClick={() => setMagicSent(false)}
               style={{ marginTop: '16px', background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline' }}
             >
-              ใช้วิธีอื่น
+              {isTh ? 'ใช้วิธีอื่น' : 'Try another way'}
             </button>
           </div>
         ) : (
@@ -285,7 +291,7 @@ export default function Login() {
                       onClick={() => setShowPasskey(false)}
                       style={{ marginTop: '12px', background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '13px', cursor: 'pointer', textDecoration: 'underline', display: 'block', width: '100%', textAlign: 'center' }}
                     >
-                      ← ใช้วิธีอื่น
+                      {isTh ? '← ใช้วิธีอื่น' : '← Try another way'}
                     </button>
                   </div>
                 ) : (
@@ -294,14 +300,16 @@ export default function Login() {
                     onClick={() => setShowPasskey(true)}
                   >
                     <PasskeyIcon />
-                    {hasBiometric ? '🔓 ล๊อกอินด้วย Face ID / Biometric' : '🔑 ล๊อกอินด้วย Passkey'}
+                    {hasBiometric
+                      ? (isTh ? '🔓 ล๊อกอินด้วย Face ID / Biometric' : '🔓 Sign in with Face ID / Biometric')
+                      : (isTh ? '🔑 ล๊อกอินด้วย Passkey' : '🔑 Sign in with Passkey')}
                   </button>
                 )}
 
                 {!showPasskey && (
                   <div style={divider}>
                     <div style={dividerLine} />
-                    <span style={dividerText}>หรือ</span>
+                    <span style={dividerText}>{isTh ? 'หรือ' : 'or'}</span>
                     <div style={dividerLine} />
                   </div>
                 )}
@@ -319,7 +327,7 @@ export default function Login() {
                     style={oauthBtn(!!oauthLoading)}
                   >
                     <GoogleIcon />
-                    {oauthLoading === 'google' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Google'}
+                    {oauthLoading === 'google' ? (isTh ? 'กำลังเข้าสู่ระบบ...' : 'Signing in...') : (isTh ? 'เข้าสู่ระบบด้วย Google' : 'Sign in with Google')}
                   </button>
                   <button
                     type="button"
@@ -333,14 +341,14 @@ export default function Login() {
                     }}
                   >
                     <AppleIcon />
-                    {oauthLoading === 'apple' ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบด้วย Apple'}
+                    {oauthLoading === 'apple' ? (isTh ? 'กำลังเข้าสู่ระบบ...' : 'Signing in...') : (isTh ? 'เข้าสู่ระบบด้วย Apple' : 'Sign in with Apple')}
                   </button>
                 </div>
 
                 {/* ── Divider ─────────────────────────────────────────────────── */}
                 <div style={divider}>
                   <div style={dividerLine} />
-                  <span style={dividerText}>หรือใช้ Magic Link</span>
+                  <span style={dividerText}>{isTh ? 'หรือใช้ Magic Link' : 'or use Magic Link'}</span>
                   <div style={dividerLine} />
                 </div>
 
@@ -351,7 +359,7 @@ export default function Login() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="อีเมลของคุณ"
+                    placeholder={isTh ? 'อีเมลของคุณ' : 'Your email'}
                     autoComplete="email"
                     style={inputStyle}
                   />
@@ -361,7 +369,7 @@ export default function Login() {
                     disabled={submitting || !email.trim()}
                     style={primaryBtn(submitting || !email.trim())}
                   >
-                    {submitting ? 'กำลังส่ง...' : 'ส่ง Magic Link'}
+                    {submitting ? (isTh ? 'กำลังส่ง...' : 'Sending...') : (isTh ? 'ส่ง Magic Link' : 'Send Magic Link')}
                   </button>
                 </form>
               </>
@@ -371,12 +379,12 @@ export default function Login() {
 
         {/* ── Footer ────────────────────────────────────────────────────────── */}
         <div style={footerLink}>
-          ยังไม่มีบัญชีใช่ไหม?{' '}
+          {isTh ? 'ยังไม่มีบัญชีใช่ไหม?' : "Don't have an account yet?"}{' '}
           <Link
             to={window.location.pathname.startsWith('/th') ? '/th/onboarding' : '/en/onboarding'}
             style={{ color: 'var(--color-accent-primary)', textDecoration: 'none', fontWeight: 600 }}
           >
-            สร้าง AI ฝาแฝด ของคุณ →
+            {isTh ? 'สร้าง AI ฝาแฝด ของคุณ →' : 'Create your AI Twin →'}
           </Link>
         </div>
       </div>

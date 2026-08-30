@@ -10,6 +10,7 @@
  */
 
 import { Link, useLocation } from 'react-router-dom';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Tab {
   to: string;
@@ -76,16 +77,20 @@ const IconUser = () => (
 // Twin doesn't exist yet ("Complete Core Awakening first"). Also
 // reordered so the Twin tab sits in the center slot (position 3 of 5),
 // matching its role as the primary CTA.
-const TABS: Tab[] = [
-  { to: '/dashboard',  label: 'วันนี้',    icon: <IconHome /> },
-  { to: '/activities', label: 'กิจกรรม', icon: <IconActivity /> },
-  { to: '/chat/twin',  label: 'AI ฝาแฝด', icon: <IconCpu /> },
-  { to: '/explore',    label: 'สำรวจ',    icon: <IconCompass /> },
-  { to: '/me',         label: 'ฉัน',      icon: <IconUser /> },
-];
+function getTabs(isTh: boolean): Tab[] {
+  return [
+    { to: '/dashboard',  label: isTh ? 'วันนี้' : 'Today',    icon: <IconHome /> },
+    { to: '/activities', label: isTh ? 'กิจกรรม' : 'Activity', icon: <IconActivity /> },
+    { to: '/chat/twin',  label: isTh ? 'AI ฝาแฝด' : 'AI Twin', icon: <IconCpu /> },
+    { to: '/explore',    label: isTh ? 'สำรวจ' : 'Explore',   icon: <IconCompass /> },
+    { to: '/me',         label: isTh ? 'ฉัน' : 'Me',          icon: <IconUser /> },
+  ];
+}
 
 export function BottomNav() {
   const { pathname } = useLocation();
+  const { language } = useLanguage();
+  const TABS = getTabs(language === 'th');
 
   // ROUTELOOP-002 FIX: every real route lives under /en or /th (see
   // App.tsx) — these tabs used bare paths, which hit the app's catch-all

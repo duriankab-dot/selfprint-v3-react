@@ -22,6 +22,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useAuth } from '../context/AuthContext';
 import { useWorld } from '../context/WorldContext';
+import { useLanguage } from '../context/LanguageContext';
 import { WORLDS } from '../constants/worlds';
 import {
   getFeed,
@@ -32,21 +33,23 @@ import {
   type CommunityInsight,
 } from '../services/CommunityService';
 
-function timeAgo(iso: string): string {
+function timeAgo(iso: string, isTh: boolean): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'เมื่อสักครู่';
-  if (mins < 60) return `${mins} นาทีที่แล้ว`;
+  if (mins < 1) return isTh ? 'เมื่อสักครู่' : 'just now';
+  if (mins < 60) return isTh ? `${mins} นาทีที่แล้ว` : `${mins}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+  if (hours < 24) return isTh ? `${hours} ชั่วโมงที่แล้ว` : `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  return `${days} วันที่แล้ว`;
+  return isTh ? `${days} วันที่แล้ว` : `${days}d ago`;
 }
 
 export default function CommunityPage() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const { getTopWorlds } = useWorld();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   // Top world by visit count from WorldContext (real data, no mock)
   const topWorldIds = getTopWorlds(1);
@@ -137,33 +140,37 @@ export default function CommunityPage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
-      <MetaTagManager title="ชุมชน — SELFPRINT" description="เชื่อมต่อกับชุมชน SELFPRINT" />
+      <MetaTagManager
+        title={isTh ? 'ชุมชน — SELFPRINT' : 'Community — SELFPRINT'}
+        description={isTh ? 'เชื่อมต่อกับชุมชน SELFPRINT' : 'Connect with the SELFPRINT community'}
+      />
       <NavBar />
 
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
-            🤝 ชุมชน
+            🤝 {isTh ? 'ชุมชน' : 'Community'}
           </h1>
           <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '6px 0 0' }}>
-            พื้นที่แบ่งปันและเรียนรู้จากกัน
+            {isTh ? 'พื้นที่แบ่งปันและเรียนรู้จากกัน' : 'A space to share and learn from each other'}
           </p>
         </div>
 
         {/* Your contribution — Phase B.1: real compose + feed */}
         {isLoggedIn && (
-          <Section title="แบ่งปัน insight ของคุณ" emoji="💡">
+          <Section title={isTh ? 'แบ่งปัน insight ของคุณ' : 'Share your insight'} emoji="💡">
             <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '0 0 16px', lineHeight: 1.6 }}>
-              เขียนข้อคิดสั้นๆ ที่ได้จากการสำรวจตัวเองกับ Twin แบ่งปันให้คนอื่นได้อ่าน
-              — เขียนเองเท่านั้น ไม่มีการดึงข้อมูล Blueprint ส่วนตัวไปแชร์อัตโนมัติ
+              {isTh
+                ? 'เขียนข้อคิดสั้นๆ ที่ได้จากการสำรวจตัวเองกับ Twin แบ่งปันให้คนอื่นได้อ่าน — เขียนเองเท่านั้น ไม่มีการดึงข้อมูล Blueprint ส่วนตัวไปแชร์อัตโนมัติ'
+                : "Write a short reflection from exploring yourself with Twin and share it with others — written by you only, we never auto-share your private Blueprint data."}
             </p>
 
             {!composeOpen ? (
               <ActionCard
                 emoji="📤"
-                title="เขียน insight ใหม่"
-                description="แบ่งปันข้อคิดของคุณกับชุมชน"
+                title={isTh ? 'เขียน insight ใหม่' : 'Write a new insight'}
+                description={isTh ? 'แบ่งปันข้อคิดของคุณกับชุมชน' : 'Share your reflection with the community'}
                 onClick={() => setComposeOpen(true)}
                 accent
               />
@@ -180,7 +187,11 @@ export default function CommunityPage() {
                     setComposeText(e.target.value);
                     setComposeError(null);
                   }}
-                  placeholder="วันนี้คุณค้นพบอะไรเกี่ยวกับตัวเอง? (10-500 ตัวอักษร)"
+                  placeholder={
+                    isTh
+                      ? 'วันนี้คุณค้นพบอะไรเกี่ยวกับตัวเอง? (10-500 ตัวอักษร)'
+                      : 'What did you discover about yourself today? (10-500 characters)'
+                  }
                   rows={4}
                   maxLength={500}
                   style={{
@@ -219,7 +230,7 @@ export default function CommunityPage() {
                       cursor: 'pointer',
                     }}
                   >
-                    ยกเลิก
+                    {isTh ? 'ยกเลิก' : 'Cancel'}
                   </button>
                   <button
                     onClick={handlePost}
@@ -236,7 +247,7 @@ export default function CommunityPage() {
                       opacity: posting ? 0.7 : 1,
                     }}
                   >
-                    {posting ? 'กำลังแบ่งปัน...' : 'แบ่งปัน'}
+                    {posting ? (isTh ? 'กำลังแบ่งปัน...' : 'Sharing...') : (isTh ? 'แบ่งปัน' : 'Share')}
                   </button>
                 </div>
               </div>
@@ -246,13 +257,15 @@ export default function CommunityPage() {
 
         {/* Insight feed — Phase B.1 */}
         {isLoggedIn && (
-          <Section title="Insight จากชุมชน" emoji="🗨️">
+          <Section title={isTh ? 'Insight จากชุมชน' : 'Community insights'} emoji="🗨️">
             {feedLoading && (
-              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>กำลังโหลด...</p>
+              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                {isTh ? 'กำลังโหลด...' : 'Loading...'}
+              </p>
             )}
             {!feedLoading && feed.length === 0 && (
               <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
-                ยังไม่มี insight ในชุมชน — เป็นคนแรกที่แบ่งปันสิ!
+                {isTh ? 'ยังไม่มี insight ในชุมชน — เป็นคนแรกที่แบ่งปันสิ!' : 'No insights yet — be the first to share!'}
               </p>
             )}
             {feed.map((insight) => (
@@ -276,7 +289,7 @@ export default function CommunityPage() {
                     </span>
                   )}
                   <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginLeft: 'auto' }}>
-                    {timeAgo(insight.createdAt)}
+                    {timeAgo(insight.createdAt, isTh)}
                   </span>
                 </div>
                 <p style={{ fontSize: 14, color: 'var(--color-text-primary)', lineHeight: 1.6, margin: '0 0 10px' }}>
@@ -311,7 +324,7 @@ export default function CommunityPage() {
                         padding: 0,
                       }}
                     >
-                      ลบ
+                      {isTh ? 'ลบ' : 'Delete'}
                     </button>
                   )}
                 </div>
@@ -321,7 +334,7 @@ export default function CommunityPage() {
         )}
 
         {/* Explore worlds together */}
-        <Section title="สำรวจโลกร่วมกัน" emoji="🌍">
+        <Section title={isTh ? 'สำรวจโลกร่วมกัน' : 'Explore worlds together'} emoji="🌍">
           {topWorld && (
             <div style={{
               background: 'var(--color-bg-secondary)',
@@ -331,7 +344,7 @@ export default function CommunityPage() {
               marginBottom: 12,
             }}>
               <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 6 }}>
-                🔥 โลกที่คุณเยี่ยมชมบ่อยที่สุด
+                🔥 {isTh ? 'โลกที่คุณเยี่ยมชมบ่อยที่สุด' : 'Your most-visited world'}
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <span style={{ fontSize: 28 }}>{topWorld.emoji}</span>
@@ -349,38 +362,38 @@ export default function CommunityPage() {
 
           <ActionCard
             emoji="🗺️"
-            title="ดูโลกทั้งหมด"
-            description="12 โลกแห่งการเติบโตรอให้คุณสำรวจ"
+            title={isTh ? 'ดูโลกทั้งหมด' : 'View all worlds'}
+            description={isTh ? '12 โลกแห่งการเติบโตรอให้คุณสำรวจ' : '12 worlds of growth waiting to be explored'}
             onClick={() => navigate('/worlds')}
           />
         </Section>
 
         {/* Community activities */}
-        <Section title="กิจกรรมชุมชน" emoji="✨">
+        <Section title={isTh ? 'กิจกรรมชุมชน' : 'Community activities'} emoji="✨">
           <ActionCard
             emoji="🃏"
-            title="การอ่านสัญลักษณ์"
-            description="วาดไพ่และแบ่งปันผลการอ่านกับ Twin"
+            title={isTh ? 'การอ่านสัญลักษณ์' : 'Symbol reading'}
+            description={isTh ? 'วาดไพ่และแบ่งปันผลการอ่านกับ Twin' : 'Draw a card and share the reading with Twin'}
             onClick={() => navigate('/tarot')}
           />
           <div style={{ height: 10 }} />
           <ActionCard
             emoji="🖐️"
-            title="อ่านลักษณะมือ"
-            description="วิเคราะห์บุคลิกภาพผ่านลักษณะมือ"
+            title={isTh ? 'อ่านลักษณะมือ' : 'Palm reading'}
+            description={isTh ? 'วิเคราะห์บุคลิกภาพผ่านลักษณะมือ' : 'Analyze personality through palm features'}
             onClick={() => navigate('/palmistry')}
           />
           <div style={{ height: 10 }} />
           <ActionCard
             emoji="☯"
-            title="เปิดเซียมซี"
-            description="รับคำแนะนำจากสัญลักษณ์โบราณ"
+            title={isTh ? 'เปิดเซียมซี' : 'Draw a fortune stick'}
+            description={isTh ? 'รับคำแนะนำจากสัญลักษณ์โบราณ' : 'Get guidance from ancient symbols'}
             onClick={() => navigate('/explore')}
           />
         </Section>
 
         {/* Coming soon */}
-        <Section title="กำลังมาเร็วๆ นี้" emoji="🚀">
+        <Section title={isTh ? 'กำลังมาเร็วๆ นี้' : 'Coming soon'} emoji="🚀">
           <div style={{
             background: 'var(--color-bg-secondary)',
             border: '1px solid var(--color-border)',
@@ -388,9 +401,9 @@ export default function CommunityPage() {
             padding: 20,
           }}>
             {[
-              { emoji: '🏆', label: 'กระดานผู้นำชุมชน' },
-              { emoji: '🎯', label: 'ความท้าทายชุมชนรายสัปดาห์' },
-              { emoji: '🤝', label: 'จับคู่ Twin ที่คล้ายกัน' },
+              { emoji: '🏆', label: isTh ? 'กระดานผู้นำชุมชน' : 'Community leaderboard' },
+              { emoji: '🎯', label: isTh ? 'ความท้าทายชุมชนรายสัปดาห์' : 'Weekly community challenges' },
+              { emoji: '🤝', label: isTh ? 'จับคู่ Twin ที่คล้ายกัน' : 'Match with similar Twins' },
             ].map((item) => (
               <div
                 key={item.label}
@@ -413,7 +426,7 @@ export default function CommunityPage() {
                   borderRadius: 8,
                   padding: '2px 8px',
                 }}>
-                  เร็วๆ นี้
+                  {isTh ? 'เร็วๆ นี้' : 'Soon'}
                 </span>
               </div>
             ))}
@@ -431,7 +444,7 @@ export default function CommunityPage() {
             marginBottom: 24,
           }}>
             <p style={{ fontSize: 15, color: 'var(--color-text-primary)', margin: '0 0 16px' }}>
-              เข้าสู่ระบบเพื่อแบ่งปัน insight และเชื่อมต่อกับชุมชน
+              {isTh ? 'เข้าสู่ระบบเพื่อแบ่งปัน insight และเชื่อมต่อกับชุมชน' : 'Sign in to share insights and connect with the community'}
             </p>
             <button
               onClick={() => navigate('/login')}
@@ -446,7 +459,7 @@ export default function CommunityPage() {
                 cursor: 'pointer',
               }}
             >
-              เข้าสู่ระบบ
+              {isTh ? 'เข้าสู่ระบบ' : 'Sign in'}
             </button>
           </div>
         )}
