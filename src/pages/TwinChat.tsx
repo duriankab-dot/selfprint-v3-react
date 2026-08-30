@@ -34,7 +34,7 @@ interface Message {
 
 export default function TwinChat() {
   const { session } = useAuth();
-  const { twin, setCurrentWorld } = useTwin();
+  const { twin, loading: twinLoading, setCurrentWorld } = useTwin();
   const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
   // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
   // "intelligent from birth" — knows the user before the first message.
@@ -204,6 +204,20 @@ export default function TwinChat() {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
+
+  // TWINCHAT-LOADING-001: TwinContext's fetch from Supabase is async — right
+  // after login/navigation, `twin` is briefly null purely because the fetch
+  // hasn't resolved yet, not because no Twin exists. The guard below used to
+  // treat both cases identically ("hasn't awakened yet"), which is wrong
+  // and misleading during that window. Show a neutral loading state instead
+  // while TwinContext is still checking.
+  if (twinLoading) {
+    return (
+      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="text-gray-500 mb-4">Loading your Twin...</p>
+      </div>
+    );
+  }
 
   // GUARD: Check if Twin exists
   if (!twin) {
