@@ -18,6 +18,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LanguageSwitcher } from '../LanguageSwitcher';
+import { AudioSettingsButton } from '../AudioSettingsButton';
 
 interface NavBarProps {
   rightSlot?: React.ReactNode;
@@ -207,6 +208,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
           >
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+          <AudioSettingsButton />
           <LanguageSwitcher />
           {rightSlot || authAction}
         </div>
@@ -297,6 +299,10 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
               <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
               <span>{theme === 'dark' ? 'โหมดสว่าง' : 'โหมดมืด'}</span>
             </button>
+            <div style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <AudioSettingsButton />
+              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>เสียงพื้นหลัง</span>
+            </div>
             <LanguageSwitcher />
             {rightSlot || authAction}
           </div>
