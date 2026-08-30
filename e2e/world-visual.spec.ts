@@ -21,11 +21,11 @@ test('WORLD-01 12 Worlds visualization renders all dimensions', async ({ page })
   const worldsContainer = page.locator('[data-testid="worlds-container"]');
   await expect(worldsContainer).toBeVisible({ timeout: 10000 });
 
+  // toHaveCount retries until count stabilises (handles async React mount)
   const worldTiles = page.locator('[data-testid="world-tile"]');
-  const worldCount = await worldTiles.count();
+  await expect(worldTiles).toHaveCount(12, { timeout: 10000 });
 
-  expect(worldCount).toBe(12);
-  console.log(`✅ WORLD-01 PASS: All ${worldCount} worlds rendered`);
+  console.log('✅ WORLD-01 PASS: All 12 worlds rendered');
 });
 
 // ─── WORLD-02 ───────────────────────────────────────────────────────────────
@@ -73,15 +73,19 @@ test('WORLD-04 Scroll through worlds smoothly', async ({ page }) => {
   const worldsScroller = page.locator('[data-testid="worlds-scroller"]');
   await expect(worldsScroller).toBeVisible({ timeout: 5000 });
 
+  // Wait for all tiles to mount before asserting count
+  const worldTiles = page.locator('[data-testid="world-tile"]');
+  await expect(worldTiles).toHaveCount(12, { timeout: 10000 });
+
   const startTime = Date.now();
 
-  // Use evaluate to scroll (Playwright locator doesn't have .scroll())
-  await worldsScroller.evaluate((el) => { el.scrollTop = 500; });
-  await page.waitForTimeout(500);
+  // Page scroll (grid itself doesn't scroll, page does)
+  await page.evaluate(() => { window.scrollBy(0, 500); });
+  await page.waitForTimeout(300);
 
   const scrollTime = Date.now() - startTime;
 
-  const worldTiles = page.locator('[data-testid="world-tile"]');
+  // Count should still be 12 — all tiles remain in DOM after scroll
   const count = await worldTiles.count();
   expect(count).toBeGreaterThan(3);
 
@@ -150,7 +154,7 @@ test('WORLD-07 World insights personalized per Twin', async ({ page }) => {
   const twinSelector = page.locator('[data-testid="twin-selector"]');
 
   if (await twinSelector.isVisible({ timeout: 3000 }).catch(() => false)) {
-    worldTile.click();
+    await worldTile.click();
     const insight1 = await page.locator('[data-testid="world-insight"]').textContent();
 
     await twinSelector.selectOption({ label: 'Different Twin' });
