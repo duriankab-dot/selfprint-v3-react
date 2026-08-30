@@ -24,6 +24,27 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 jobs:
+  unit-tests:
+    name: Unit Tests (Vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
@@ -50,8 +71,11 @@ jobs:
           BASE_URL: ${{ env.BASE_URL }}
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
           TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
-        run: npm run test:e2e || true
-        continue-on-error: true
+        # Phase A smoke/auth/critical-journey tests must gate CI — no more
+        # silent-pass. (Phase B "chromium-staging" tests already fail open
+        # gracefully via test.fixme()/conditional-skip when STAGING_URL /
+        # E2E_SUPABASE_* secrets aren't set in CI, so this is safe to gate.)
+        run: npm run test:e2e
 
       - name: Upload Playwright Report
         if: always()
@@ -217,7 +241,7 @@ jobs:
     name: Generate Test Report
     runs-on: ubuntu-latest
     if: always()
-    needs: [e2e-tests, smoke-test, full-load-test]
+    needs: [unit-tests, e2e-tests, smoke-test, full-load-test]
 
     steps:
       - name: Checkout
@@ -241,6 +265,7 @@ jobs:
 
           | Test | Status | Duration |
           |------|--------|----------|
+          | Unit Tests (Vitest) | ${{ needs.unit-tests.result }} | < 10 min |
           | E2E Tests | ${{ needs.e2e-tests.result }} | 20-30 min |
           | Smoke Test | ${{ needs.smoke-test.result }} | 10 min |
           | Full Load Test | ${{ needs.full-load-test.result }} | 39 min |
