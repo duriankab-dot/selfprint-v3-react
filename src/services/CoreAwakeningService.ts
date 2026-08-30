@@ -108,6 +108,9 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
       return { success: false, message: 'ต้องมี User ID' };
     }
 
+    // FIX 3: Track failed critical operations for atomicity
+    const failedOps: string[] = [];
+
     // Run SICE orchestrator to generate personal intelligence
     const orchestrator = new SICEOrchestrator();
 
@@ -120,10 +123,7 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
     const orchestrationResult = await orchestrator.orchestrate(input);
 
     if (!orchestrationResult || !orchestrationResult.personalIntelligence) {
-      return {
-        success: false,
-        message: 'SICE orchestration ล้มเหลว — ไม่สามารถสร้าง personal intelligence',
-      };
+      failedOps.push('SICE orchestration failed');
     }
 
     // Extract Twin personality essence from orchestration results
@@ -150,17 +150,21 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
       .single();
 
     if (essenceError || !savedEssence) {
-      console.error('ล้มเหลวในการบันทึก essence:', essenceError);
+      failedOps.push('Essence persistence to Supabase failed');
+    }
+
+    // FIX 3: Atomicity check - return false if any critical op failed
+    if (failedOps.length > 0) {
       return {
         success: false,
-        message: `ไม่สามารถบันทึก essence: ${essenceError?.message || 'Database error'}`,
+        message: `Critical operations failed (atomicity violation): ${failedOps.join(', ')}`,
       };
     }
 
     return {
       success: true,
       message: 'กระบวนการ Awakening เริ่มต้น — Personal intelligence สร้างสำเร็จ ✨',
-      essenceId: savedEssence.id,
+      essenceId: savedEssence?.id,
     };
   } catch (error) {
     console.error('ข้อผิดพลาดในการ Awakening:', error);
