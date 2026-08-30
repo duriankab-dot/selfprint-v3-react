@@ -1,0 +1,228 @@
+================================================================================
+                    PHASE A QUICK REFERENCE CARD
+                    SELFPRINT V3 TESTING & RELEASE
+================================================================================
+
+📍 CURRENT STATE
+─────────────────────────────────────────────────────────────────────────────
+Code Status:         ✅ Deployed (commit 6f15a7e)
+Testing Status:      ❌ Not run (defined, not executed)
+Database Status:     🟡 Partially verified
+Production Status:   ✅ Live at https://www.selfprint.one
+Timeline:            🚀 TODAY (4 hours to complete)
+
+================================================================================
+                           📚 6 DOCUMENTS CREATED
+================================================================================
+
+FILE                                          | PURPOSE                 | READ
+──────────────────────────────────────────────┼─────────────────────────┼─────
+00_START_HERE_EXECUTIVE_SUMMARY_TH.md        | Start here              | 📍 1st
+PHASE_A_MASTER_SUMMARY_TH.md                 | Overview + checklist    | 2nd
+PHASE_A_TESTING_ACTION_PLAN_TH.md            | ⭐ EXECUTE THIS        | 3rd
+PHASE_A_TEST_CODE_SNIPPETS_TH.md             | Code to copy-paste      | Ref
+PHASE_A_DATABASE_PRODUCTION_CHECKLIST_TH.md  | After tests pass        | Ref
+PHASE_STATUS_SUMMARY_TH.md                   | Status matrix           | Ref
+
+================================================================================
+                         🚀 4-HOUR EXECUTION PLAN
+================================================================================
+
+PHASE 1: SETUP (15 min)
+  └─ git clone + npm install
+
+PHASE 2: TESTING (2.5 hours)
+  ├─ Run smoke tests (SK-01 to SK-12)
+  ├─ Add mobile tests (Pixel 5, iPhone 12)
+  ├─ Unskip auth tests (signup + login)
+  └─ Create critical journey E2E (Landing→Twin Birth)
+
+PHASE 3: VERIFICATION (45 min)
+  ├─ Verify database RLS policies
+  ├─ Check user isolation
+  └─ Run production smoke test
+
+PHASE 4: SIGN-OFF (15 min)
+  ├─ Generate test reports
+  ├─ Git commit + push
+  └─ Create tag: v1.0.0-phase-a-complete
+
+================================================================================
+                      🔴 BLOCKING ITEMS (ALL MUST PASS)
+================================================================================
+
+[ ] SK-01 to SK-12 smoke tests         ✅ Required
+[ ] Mobile E2E tests (375x667 viewport) ✅ Required
+[ ] Auth E2E tests (signup + login)    ✅ Required
+[ ] Critical journey E2E test           ✅ Required
+[ ] Production smoke test               ✅ Required
+[ ] Database RLS verified               ✅ Required
+[ ] All test artifacts generated        ✅ Required
+
+If ANY fail → Phase A blocked → Must fix before continuing
+
+================================================================================
+                          ✅ SUCCESS CRITERIA
+================================================================================
+
+✅ 31 E2E tests PASS (desktop + mobile + auth + critical)
+✅ Database RLS enabled on 7 tables
+✅ User isolation verified (no cross-user data access)
+✅ Production returning HTTP 200 (no 5xx errors)
+✅ Monitoring active (logs visible)
+✅ GitHub commit pushed with test results
+✅ Tag created: v1.0.0-phase-a-complete
+
+WHEN ALL ✅ → Phase A VERIFIED 100% → Phase B ready
+
+================================================================================
+                        🎯 QUICK START COMMANDS
+================================================================================
+
+# Clone + Setup
+git clone https://github.com/duriankab-dot/selfprint-v3-react.git
+cd selfprint-v3-react
+git checkout 6f15a7e
+npm install
+
+# Run Tests
+npm run test:e2e                    # All tests
+npm run test:e2e e2e/smoke.spec.ts # Smoke tests only
+npm run test:e2e:debug              # Debug mode
+npm run test:e2e:report             # View HTML report
+
+# Production Verification
+npm run test:e2e -- --baseURL=https://www.selfprint.one
+
+# Commit + Tag (when done)
+git add .
+git commit -m "chore: Phase A testing complete - all tests passing"
+git tag v1.0.0-phase-a-complete
+git push origin master --tags
+
+================================================================================
+                      📋 STEP-BY-STEP CHECKLIST
+================================================================================
+
+BEFORE YOU START:
+  [ ] Read: 00_START_HERE_EXECUTIVE_SUMMARY_TH.md
+  [ ] Read: PHASE_A_MASTER_SUMMARY_TH.md
+  [ ] Understand: 10-step roadmap in PHASE_A_TESTING_ACTION_PLAN_TH.md
+
+EXECUTION (Follow exactly):
+  [ ] Step 1: Setup (clone + npm install)
+  [ ] Step 2: Run smoke tests
+  [ ] Step 3: Fix failures (if any)
+  [ ] Step 4: Add mobile tests
+  [ ] Step 5: Unskip auth tests
+  [ ] Step 6: Create critical journey E2E
+  [ ] Step 7: Run full suite
+  [ ] Step 8: Production verification
+  [ ] Step 9: Generate reports
+  [ ] Step 10: Commit + Push
+
+VERIFICATION:
+  [ ] Database RLS verified (Supabase console)
+  [ ] User isolation confirmed (SQL checks)
+  [ ] Security verified (no injection/XSS)
+  [ ] Production monitoring active
+
+SIGN-OFF:
+  [ ] All 31 tests PASS ✅
+  [ ] All checklist items complete ✅
+  [ ] GitHub commit pushed ✅
+  [ ] Tag created ✅
+
+================================================================================
+                        ⏱️ TIME BREAKDOWN
+================================================================================
+
+Task                          | Duration | Cumulative
+──────────────────────────────┼──────────┼───────────
+Setup (clone + install)       | 15 min   | 15 min
+Smoke tests (SK-01 to SK-12)  | 20 min   | 35 min
+Fix failures                  | 30 min   | 65 min
+Mobile E2E tests              | 20 min   | 85 min
+Auth E2E (unskip)             | 15 min   | 100 min
+Critical journey E2E          | 30 min   | 130 min
+Full suite + production       | 45 min   | 175 min
+Database verification         | 30 min   | 205 min
+Commit + Sign-off             | 15 min   | 220 min
+─────────────────────────────┤──────────┤───────────
+TOTAL                         | ~4 hours | DONE ✅
+
+================================================================================
+                        🔧 IF YOU GET STUCK
+================================================================================
+
+Issue                              | Solution
+───────────────────────────────────┼───────────────────────────────────
+"Test failed: SK-05"               | Check Edge Function deployed
+"Playwright won't connect"         | npm install @playwright/test
+"Mobile tests not running"         | Update playwright.config.ts
+"Database connection error"        | Check .env + Supabase online
+"RLS policies not found"           | Verify in Supabase console
+"Critical journey test can't find" | Add test IDs or update selectors
+  element
+
+Debug Mode:  npm run test:e2e:debug
+Report:      npm run test:e2e:report
+
+================================================================================
+                      📞 PHASE A COMPLETION GATE
+================================================================================
+
+BLOCKING (MUST PASS):
+  ✅ All E2E tests pass
+  ✅ Database RLS verified
+  ✅ Production healthy
+  ✅ Test artifacts created
+  ✅ Git commit pushed
+
+SIGN-OFF COMPLETE:
+  ✅ Status: Phase A VERIFIED 100%
+  ✅ Tag: v1.0.0-phase-a-complete
+  ✅ Next: Phase B planning ready
+
+================================================================================
+                      🎯 FINAL MISSION
+================================================================================
+
+YOU HAVE:
+  ✅ Code (commit 6f15a7e)
+  ✅ Tests (defined SK-01 to SK-12)
+  ✅ Database (schema ready)
+  ✅ Production (live)
+  ✅ Roadmap (10-step plan)
+  ✅ Documentation (6 files)
+
+ALL YOU NEED TO DO:
+  1. Follow 10-step roadmap
+  2. Run tests + fix failures
+  3. Verify database + production
+  4. Commit + Tag
+
+TIME: ~4 hours
+OUTCOME: Phase A complete + verified 100% ✅
+
+================================================================================
+                        🚀 START NOW
+================================================================================
+
+👉 OPEN: 00_START_HERE_EXECUTIVE_SUMMARY_TH.md (5 min read)
+👉 THEN: PHASE_A_MASTER_SUMMARY_TH.md (10 min read)
+👉 THEN: Follow PHASE_A_TESTING_ACTION_PLAN_TH.md Steps 1-10 (4 hours)
+👉 DONE: Phase A verified + ready for Phase B 🎉
+
+DO NOT SKIP STEPS.
+DO NOT SKIP DATABASE VERIFICATION.
+DO NOT COMMIT UNTIL ALL TESTS PASS.
+
+YOU'VE GOT THIS! 💪
+
+================================================================================
+                        Created: 30 Aug 2026
+                        Status: 🚀 READY TO EXECUTE
+                        Timeline: TODAY (4 hours)
+                        Expected Result: Phase A ✅ COMPLETE
+================================================================================
