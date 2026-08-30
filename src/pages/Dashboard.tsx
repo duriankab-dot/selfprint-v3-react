@@ -239,7 +239,14 @@ const Dashboard: React.FC = () => {
 
       {/* Living AI Twin — §3 states, §4 cosmic visual, §5 processing states */}
       {/* TWIN-VISUAL-001: pass maturityScore to enable evolution */}
-      <LivingTwin maturityScore={twin?.maturityScore ?? 30} />
+      {/* DASHBOARD-TWIN-GHOST-001: previously rendered unconditionally with
+          maturityScore defaulted to 30, so a spinning Twin appeared even
+          when `twin` (TwinContext) was null — i.e. no Twin actually exists
+          yet. That directly contradicted TwinChat.tsx's own guard ("Your
+          Twin hasn't awakened yet"), showing the user two different answers
+          to "does my Twin exist?" on two screens. Only render once a real
+          Twin is loaded. */}
+      {twin && <LivingTwin maturityScore={twin.maturityScore ?? 30} />}
 
       {/* P0 #7 — Explore Worlds quick action */}
       <ExplorWorldsCard />

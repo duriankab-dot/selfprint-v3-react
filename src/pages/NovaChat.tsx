@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAIContext } from '../context/AIContext';
 import { useNova } from '../context/NovaContext';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NovaAvatar } from '../components/features/NovaAvatar';
 import { saveMessage } from '@/services/supabase-service';
 import { NOVA_INITIAL_PROMPT } from '../config/nova-prompts';
@@ -20,6 +21,7 @@ export default function NovaChat() {
   const { session } = useAuth();
   const { isNovaActive } = useAIContext();
   const { addInsight } = useNova();
+  const navigate = useNavigate();
 
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'nova'; content: string }>>([]);
@@ -33,6 +35,20 @@ export default function NovaChat() {
     }
   }, []);
 
+  // NOVACHAT-DEADEND-001: NovaChat is Act I-II only (pre-Twin guide). Every
+  // live entry point in the app (BottomNav, NavBar, TodaySection,
+  // ActivitiesPage, ExplorePage — see their own BOTTOMNAV-001/CHATROUTE-001
+  // comments) was already patched to skip this page and go straight to
+  // /chat/twin once a Twin exists, but this page itself still just showed a
+  // dead-end "Your Twin has awakened..." stub with no way forward for
+  // anyone who lands here directly (an old bookmark, a stale link, /chat's
+  // own redirect). Forward them to the real destination instead.
+  useEffect(() => {
+    if (session?.user?.id && !isNovaActive) {
+      navigate('/chat/twin', { replace: true });
+    }
+  }, [session, isNovaActive, navigate]);
+
   // GUARD: Verify user is logged in + Nova (Self Print) is active
   if (!session?.user?.id) {
     return (
@@ -43,11 +59,8 @@ export default function NovaChat() {
   }
 
   if (!isNovaActive) {
-    return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500">Your Twin has awakened. Continue with your Twin or return to Self Print.</p>
-      </div>
-    );
+    // Redirect is handled by the effect above — render nothing while it fires.
+    return null;
   }
 
   const handleSend = async () => {
