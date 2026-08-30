@@ -4,8 +4,10 @@
  *
  * ชุมชน SELFPRINT — พื้นที่เชื่อมต่อ แบ่งปัน และเรียนรู้จากกัน
  *
- * Phase B MVP: functional navigation to existing sharing + worlds features.
- * Community feed (public_insights table) is Phase C — backend table needed.
+ * Phase B.1 (this): live Insight Feed — community_insights table,
+ * see supabase/migrations/033_community_insights.sql + CommunityService.ts.
+ * Phase B.2 (designed, not built yet): leaderboard, weekly challenges,
+ * Twin matching — see docs/PHASE_B_COMMUNITY_SPEC_TH.md.
  *
  * Rules:
  * - CSS: var(--...) only
@@ -13,7 +15,7 @@
  * - No fake/mock data
  */
 
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
@@ -21,6 +23,25 @@ import { MetaTagManager } from '../components/MetaTagManager';
 import { useAuth } from '../context/AuthContext';
 import { useWorld } from '../context/WorldContext';
 import { WORLDS } from '../constants/worlds';
+import {
+  getFeed,
+  shareInsight,
+  toggleLike,
+  deleteInsight,
+  validateInsightContent,
+  type CommunityInsight,
+} from '../services/CommunityService';
+
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'เมื่อสักครู่';
+  if (mins < 60) return `${mins} นาทีที่แล้ว`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+  const days = Math.floor(hours / 24);
+  return `${days} วันที่แล้ว`;
+}
 
 export default function CommunityPage() {
   const navigate = useNavigate();
@@ -32,6 +53,87 @@ export default function CommunityPage() {
   const topWorld = topWorldIds[0] ? WORLDS[topWorldIds[0]] : null;
 
   const isLoggedIn = !!session?.user;
+  const userId = session?.user?.id ?? null;
+
+  // ─── Phase B.1: Insight Feed state ─────────────────────────────────────
+  const [feed, setFeed] = useState<CommunityInsight[]>([]);
+  const [feedLoading, setFeedLoading] = useState(true);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeText, setComposeText] = useState('');
+  const [composeError, setComposeError] = useState<string | null>(null);
+  const [posting, setPosting] = useState(false);
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setFeedLoading(false);
+      return;
+    }
+    let cancelled = false;
+    getFeed(userId).then((rows) => {
+      if (!cancelled) {
+        setFeed(rows);
+        setFeedLoading(false);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoggedIn, userId]);
+
+  async function handlePost() {
+    if (!userId) return;
+    const validationError = validateInsightContent(composeText);
+    if (validationError) {
+      setComposeError(validationError);
+      return;
+    }
+    setPosting(true);
+    setComposeError(null);
+    const result = await shareInsight(userId, composeText, {
+      world: topWorldIds[0],
+    });
+    setPosting(false);
+    if (!result.success) {
+      setComposeError(result.message);
+      return;
+    }
+    setComposeText('');
+    setComposeOpen(false);
+    // Refresh feed to show the new post
+    const rows = await getFeed(userId);
+    setFeed(rows);
+  }
+
+  async function handleToggleLike(insight: CommunityInsight) {
+    if (!userId) return;
+    // Optimistic update
+    setFeed((prev) =>
+      prev.map((i) =>
+        i.id === insight.id
+          ? { ...i, likedByMe: !i.likedByMe, likeCount: i.likeCount + (i.likedByMe ? -1 : 1) }
+          : i
+      )
+    );
+    const result = await toggleLike(insight.id, userId, insight.likedByMe);
+    if (result === null) {
+      // Revert on failure
+      setFeed((prev) =>
+        prev.map((i) =>
+          i.id === insight.id
+            ? { ...i, likedByMe: insight.likedByMe, likeCount: insight.likeCount }
+            : i
+        )
+      );
+    }
+  }
+
+  async function handleDelete(insightId: string) {
+    if (!userId) return;
+    const ok = await deleteInsight(insightId, userId);
+    if (ok) {
+      setFeed((prev) => prev.filter((i) => i.id !== insightId));
+    }
+  }
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
@@ -49,20 +151,172 @@ export default function CommunityPage() {
           </p>
         </div>
 
-        {/* Your contribution */}
+        {/* Your contribution — Phase B.1: real compose + feed */}
         {isLoggedIn && (
           <Section title="แบ่งปัน insight ของคุณ" emoji="💡">
             <p style={{ fontSize: 14, color: 'var(--color-text-secondary)', margin: '0 0 16px', lineHeight: 1.6 }}>
-              แชร์ข้อคิดจาก SELFPRINT Blueprint ของคุณให้คนอื่นได้อ่าน
-              — แต่ละ insight ที่แบ่งปันสร้างผลกระทบในชุมชน
+              เขียนข้อคิดสั้นๆ ที่ได้จากการสำรวจตัวเองกับ Twin แบ่งปันให้คนอื่นได้อ่าน
+              — เขียนเองเท่านั้น ไม่มีการดึงข้อมูล Blueprint ส่วนตัวไปแชร์อัตโนมัติ
             </p>
-            <ActionCard
-              emoji="📤"
-              title="สร้างลิงก์แบ่งปัน"
-              description="แชร์ insight จากหน้า Dashboard ของคุณ"
-              onClick={() => navigate('/dashboard')}
-              accent
-            />
+
+            {!composeOpen ? (
+              <ActionCard
+                emoji="📤"
+                title="เขียน insight ใหม่"
+                description="แบ่งปันข้อคิดของคุณกับชุมชน"
+                onClick={() => setComposeOpen(true)}
+                accent
+              />
+            ) : (
+              <div style={{
+                background: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-accent-primary)',
+                borderRadius: 16,
+                padding: 16,
+              }}>
+                <textarea
+                  value={composeText}
+                  onChange={(e) => {
+                    setComposeText(e.target.value);
+                    setComposeError(null);
+                  }}
+                  placeholder="วันนี้คุณค้นพบอะไรเกี่ยวกับตัวเอง? (10-500 ตัวอักษร)"
+                  rows={4}
+                  maxLength={500}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    background: 'var(--color-bg-primary)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: 12,
+                    padding: 12,
+                    fontSize: 14,
+                    color: 'var(--color-text-primary)',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                />
+                {composeError && (
+                  <p style={{ fontSize: 12, color: 'var(--color-accent-danger, #ef4444)', margin: '8px 0 0' }}>
+                    {composeError}
+                  </p>
+                )}
+                <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={() => {
+                      setComposeOpen(false);
+                      setComposeText('');
+                      setComposeError(null);
+                    }}
+                    disabled={posting}
+                    style={{
+                      background: 'transparent',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 10,
+                      padding: '10px 16px',
+                      fontSize: 14,
+                      color: 'var(--color-text-secondary)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ยกเลิก
+                  </button>
+                  <button
+                    onClick={handlePost}
+                    disabled={posting || composeText.trim().length === 0}
+                    style={{
+                      background: 'var(--color-accent-primary)',
+                      border: 'none',
+                      borderRadius: 10,
+                      padding: '10px 20px',
+                      fontSize: 14,
+                      fontWeight: 600,
+                      color: '#fff',
+                      cursor: posting ? 'default' : 'pointer',
+                      opacity: posting ? 0.7 : 1,
+                    }}
+                  >
+                    {posting ? 'กำลังแบ่งปัน...' : 'แบ่งปัน'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </Section>
+        )}
+
+        {/* Insight feed — Phase B.1 */}
+        {isLoggedIn && (
+          <Section title="Insight จากชุมชน" emoji="🗨️">
+            {feedLoading && (
+              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>กำลังโหลด...</p>
+            )}
+            {!feedLoading && feed.length === 0 && (
+              <p style={{ fontSize: 13, color: 'var(--color-text-secondary)' }}>
+                ยังไม่มี insight ในชุมชน — เป็นคนแรกที่แบ่งปันสิ!
+              </p>
+            )}
+            {feed.map((insight) => (
+              <div
+                key={insight.id}
+                style={{
+                  background: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  borderRadius: 14,
+                  padding: '14px 16px',
+                  marginBottom: 10,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    {insight.displayName}
+                  </span>
+                  {insight.world && WORLDS[insight.world as keyof typeof WORLDS] && (
+                    <span style={{ fontSize: 12 }}>
+                      {WORLDS[insight.world as keyof typeof WORLDS].emoji}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 11, color: 'var(--color-text-tertiary)', marginLeft: 'auto' }}>
+                    {timeAgo(insight.createdAt)}
+                  </span>
+                </div>
+                <p style={{ fontSize: 14, color: 'var(--color-text-primary)', lineHeight: 1.6, margin: '0 0 10px' }}>
+                  {insight.content}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <button
+                    onClick={() => handleToggleLike(insight)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: 13,
+                      color: insight.likedByMe ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: 0,
+                    }}
+                  >
+                    {insight.likedByMe ? '❤️' : '🤍'} {insight.likeCount}
+                  </button>
+                  {insight.isOwner && (
+                    <button
+                      onClick={() => handleDelete(insight.id)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: 12,
+                        color: 'var(--color-text-tertiary)',
+                        padding: 0,
+                      }}
+                    >
+                      ลบ
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </Section>
         )}
 
@@ -135,7 +389,6 @@ export default function CommunityPage() {
           }}>
             {[
               { emoji: '🏆', label: 'กระดานผู้นำชุมชน' },
-              { emoji: '💬', label: 'กระทู้แบ่งปันประสบการณ์' },
               { emoji: '🎯', label: 'ความท้าทายชุมชนรายสัปดาห์' },
               { emoji: '🤝', label: 'จับคู่ Twin ที่คล้ายกัน' },
             ].map((item) => (
