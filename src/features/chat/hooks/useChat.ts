@@ -15,7 +15,7 @@ import { useEmotion } from '@/context/EmotionContext';
 import { useTwin } from '@/context/TwinContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { selfprintChat, type SelfprintChatResponse } from '@/lib/api/selfprintChat';
+import { callNovaAPI } from '@/services/NovaAPIService';
 import { saveMessage, getChatHistory } from '@/services/supabase-service';
 
 export interface Message {
@@ -100,31 +100,26 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         // 'anonymous' เป็น placeholder ได้ เพราะ API นี้แค่ต้องการ string ไม่ได้
         // เอาไปเขียน Supabase ตรงๆ) ส่วนการบันทึกลง Supabase จริงด้านล่าง ใช้
         // realUserId (จาก Supabase Auth session) เท่านั้น ไม่ใช้ค่านี้
-        const chatApiUserId = session?.user?.id || 'anonymous';
         const realUserId = session?.user?.id;
-        const sessionId = localStorage.getItem('sessionId') || `session-${Date.now()}`;
 
-        const chatResponse: SelfprintChatResponse = await selfprintChat({
-          userId: chatApiUserId,
-          sessionId,
-          hub: currentHub as any,
-          mood: currentMood as any,
-          archetype: twin?.primaryArchetype,
-          question: userMessage,
-          language: language as 'en' | 'th',
-          history: messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-          twinProfile: twin ? {
-            id: twin.id,
-            userId: twin.userId,
-            name: twin.name,
-            primaryArchetype: twin.primaryArchetype,
-            secondaryArchetype: twin.secondaryArchetype,
-            maturityScore: twin.maturityScore,
-            createdAt: new Date(twin.createdAt).toISOString(),
-          } : undefined,
-          birthData: twin?.birthData,
-          plan: 'starter',
-        });
+        // P0-D/E FIX: Call canonical Nova API endpoint
+        const novaResponse = await callNovaAPI(
+          messages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })).concat([
+            { role: 'user' as const, content: userMessage }
+          ]),
+          undefined,
+          {
+            hub: currentHub,
+            mood: currentMood,
+            archetype: twin?.primaryArchetype,
+            language: language as 'en' | 'th',
+            maturityScore: twin?.maturityScore,
+            userProfile: twin ? {
+              primaryArchetype: twin.primaryArchetype,
+              secondaryArchetype: twin.secondaryArchetype,
+            } : undefined,
+          }
+        );
 
         // Calculate response time
         const responseTime = Date.now() - startTime;
@@ -132,8 +127,8 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         // เพิ่มข้อความ Nova เข้า state
         const assistantMsg: Message = {
           role: 'assistant',
-          content: chatResponse.response.text,
-          timestamp: chatResponse.metadata.timestamp,
+          content: novaResponse,
+          timestamp: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, assistantMsg]);
 
@@ -144,7 +139,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
         if (realUserId) {
           try {
             await saveMessage(realUserId, currentHub, currentMood, 'user', userMessage, autonomyLevel);
-            await saveMessage(realUserId, currentHub, currentMood, 'assistant', chatResponse.response.text, autonomyLevel);
+            await saveMessage(realUserId, currentHub, currentMood, 'assistant', novaResponse, autonomyLevel);
 
             // เขียนลง decision_log ผ่าน /api/autonomy-log (server-side, JWT
             // verify แล้วเอา user_id จาก token เสมอ — ดู comment หัวไฟล์
@@ -176,7 +171,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
                   hesitation: 0.5,
                   response_time_ms: responseTime,
                   message_length: userMessage.length,
-                  response_length: chatResponse.response.text.length,
+                  response_length: novaResponse.length,
                 }),
               });
             }
@@ -187,8 +182,7 @@ export function useChat(autonomyLevel: number = 50): UseChatReturn {
 
         console.log('✅ Chat response:', {
           responseTime,
-          tokens: `${chatResponse.metadata.inputTokens} → ${chatResponse.metadata.outputTokens}`,
-          maturity: chatResponse.persona.maturityLevel,
+          contentLength: novaResponse.length,
         });
       } catch (err) {
         const errorMsg = axios.isAxiosError(err)
