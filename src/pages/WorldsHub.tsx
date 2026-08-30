@@ -55,7 +55,7 @@ export default function WorldsHub() {
         <div className="wh-header">
           <h1>✨ The 12 Worlds</h1>
           <p className="wh-subtitle">
-            Explore the dimensions of your life with Twin as your guide
+            Explore all 12 dimensions of your life with Twin as your guide — scroll down to see them all
           </p>
         </div>
 
