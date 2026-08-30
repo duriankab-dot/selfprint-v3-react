@@ -24,6 +24,13 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
+      name: 'chromium-staging',
+      use: {
+        ...devices['Desktop Chrome'],
+        baseURL: process.env.STAGING_URL || 'https://staging.selfprint.one',
+      },
+    },
+    {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
     },
