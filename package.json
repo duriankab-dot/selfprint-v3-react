@@ -13,7 +13,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:staging": "node --env-file=.env.e2e.staging node_modules/.bin/playwright test --project=chromium-staging"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
