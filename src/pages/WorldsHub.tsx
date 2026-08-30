@@ -50,7 +50,7 @@ export default function WorldsHub() {
           canonicalUrl={`/${language}/worlds`}
         />
       )}
-      <div className="worlds-hub">
+      <div className="worlds-hub" data-testid="worlds-container">
         {/* Header */}
         <div className="wh-header">
           <h1>✨ The 12 Worlds</h1>
@@ -60,7 +60,7 @@ export default function WorldsHub() {
         </div>
 
         {/* World Grid */}
-        <div className="wh-worlds-grid">
+        <div className="wh-worlds-grid" data-testid="worlds-scroller">
           {worlds.map((world) => (
             <WorldCard
               key={world.id}
@@ -95,6 +95,7 @@ function WorldCard({ world, onClick, articleCount }: WorldCardProps) {
   return (
     <div
       className="world-card"
+      data-testid="world-tile"
       onClick={onClick}
       role="button"
       tabIndex={0}
@@ -103,8 +104,8 @@ function WorldCard({ world, onClick, articleCount }: WorldCardProps) {
       }}
       style={{ borderColor: world.color, '--world-color': world.color } as React.CSSProperties}
     >
-      <div className="wc-emoji">{world.emoji}</div>
-      <h3>{world.name}</h3>
+      <div className="wc-emoji" data-testid="world-icon">{world.emoji}</div>
+      <h3 data-testid="world-name">{world.name}</h3>
       <p>{world.tagline}</p>
       {articleCount > 0 && <span className="wc-articles">{articleCount} articles</span>}
     </div>
