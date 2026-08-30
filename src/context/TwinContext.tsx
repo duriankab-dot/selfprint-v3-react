@@ -274,17 +274,56 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     if (!authUserId) return; // not authenticated — nothing to load
 
     const loadTwin = async () => {
+      // TWINCONTEXT-LOAD-001: `loading` was declared on this context but
+      // never actually set during this effect — every consumer had no way
+      // to tell "still checking Supabase" apart from "confirmed no Twin
+      // exists", so TwinChat's `if (!twin)` guard could show "hasn't
+      // awakened yet" for a real, existing Twin during the brief window
+      // right after login while this fetch is still in flight.
+      setLoading(true);
       try {
         const fetchedTwin = await fetchUserTwin(authUserId);
         if (fetchedTwin) {
+          // TWINCONTEXT-LOAD-002: this used to spread the raw Supabase row
+          // (`...fetchedTwin`) straight into state. The row is snake_case
+          // (primary_archetype, secondary_archetype, maturity_score,
+          // user_id) but TwinProfile is camelCase — every other place that
+          // builds a TwinProfile from a raw row (createTwin, hydrateTwin
+          // above) does this mapping explicitly; this path was the one
+          // exception. Net effect: once a Twin *did* load successfully,
+          // twin.primaryArchetype / twin.maturityScore / twin.userId were
+          // all silently undefined (twin itself was non-null, so guards
+          // checking `!twin` didn't catch it) — archetype-driven visuals
+          // and maturity-based features had no idea a Twin existed.
           setTwin({
-            ...fetchedTwin,
+            id: fetchedTwin.id,
+            userId: authUserId,
+            name: fetchedTwin.name,
+            primaryArchetype: (fetchedTwin as any).primary_archetype,
+            secondaryArchetype: (fetchedTwin as any).secondary_archetype,
+            maturityScore: Math.max(0, Math.min(100, (fetchedTwin as any).maturity_score ?? 30)),
             createdAt: new Date(fetchedTwin.awakened_at).getTime(),
             updatedAt: Date.now(),
           });
+          setError(null);
+        } else {
+          // No row for this user — a real "no Twin yet" result (fetchUserTwin
+          // itself distinguishes this from a thrown error; see the catch
+          // below for the latter).
+          setTwin(null);
         }
       } catch (err) {
+        // TWINCONTEXT-LOAD-001: previously swallowed into a console.warn
+        // only — `error` on this context was never set here, so a genuine
+        // fetch failure (network, RLS, auth-token-not-yet-attached) was
+        // visually identical to "no Twin exists" everywhere twin===null is
+        // checked. Surfacing it doesn't fix the underlying failure by
+        // itself, but makes it distinguishable and debuggable instead of
+        // silently collapsing to the same null.
         console.warn('Failed to load Twin from Supabase:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load Twin');
+      } finally {
+        setLoading(false);
       }
     };
 
