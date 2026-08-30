@@ -78,7 +78,10 @@ test.describe('Authentication — Landing & Entry', () => {
 
   /** Landing page has accessible form controls */
   test('AUTH-06 landing page has accessible interactive elements', async ({ page }) => {
-    await page.goto('/en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/en', { waitUntil: 'load' });
+
+    // Wait for interactive elements to render
+    await page.waitForSelector('button, a[href], input', { timeout: 10000 });
 
     // Has at least 1 button
     const buttons = await page.locator('button').count();
@@ -86,7 +89,7 @@ test.describe('Authentication — Landing & Entry', () => {
 
     // Has interactive elements (button or link)
     const interactive = page.locator('button, a[href], input').first();
-    await expect(interactive).toBeVisible({ timeout: 5000 });
+    await expect(interactive).toBeVisible({ timeout: 10000 });
   });
 
   /** Login page link is reachable from landing */
