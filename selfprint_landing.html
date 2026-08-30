@@ -1,0 +1,966 @@
+<title>SELFPRINT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap">
+
+<style>
+/* ── Tokens ─────────────────────────────────────── */
+:root {
+  --bg:       #0B0F19;
+  --bg2:      #0E1220;
+  --bg3:      #111828;
+  --acc:      #5B5CEB;
+  --acc-dim:  rgba(91,92,235,0.13);
+  --acc-bdr:  rgba(91,92,235,0.22);
+  --cyan:     #06E8F8;
+  --cyan-dim: rgba(6,232,248,0.11);
+  --violet:   #818CF8;
+  --text:     #D8DCF2;
+  --muted:    #5E668E;
+  --bdr:      rgba(91,92,235,0.15);
+  --font-d:   'Syne', sans-serif;
+  --font-b:   'Inter', 'Noto Sans Thai', sans-serif;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-b);
+  font-size:16px;
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Nav ─────────────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  height:62px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,4vw,64px);
+  background:rgba(11,15,25,0.82);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--bdr);
+}
+.nav-logo{
+  font-family:var(--font-d);
+  font-size:17px;font-weight:900;
+  letter-spacing:-0.02em;color:var(--text);
+  cursor:pointer;
+}
+.nav-logo em{color:var(--acc);font-style:normal}
+.nav-r{display:flex;gap:10px;align-items:center}
+.btn-ghost{
+  padding:8px 16px;border-radius:8px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  background:transparent;color:var(--muted);
+  border:1px solid var(--bdr);font-family:var(--font-b);
+  transition:color .2s,border-color .2s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--acc-bdr)}
+.btn-prim{
+  padding:8px 20px;border-radius:8px;
+  font-size:13px;font-weight:700;cursor:pointer;
+  background:var(--acc);color:#fff;
+  border:none;font-family:var(--font-b);
+  transition:opacity .2s,transform .2s;
+}
+.btn-prim:hover{opacity:.88;transform:translateY(-1px)}
+
+/* ── Narrative wrap (S1+S2 share sticky SVG) ────── */
+.narr{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:200vh;
+  position:relative;
+}
+/* Sticky visual right panel */
+.vis-sticky{
+  position:sticky;top:0;
+  height:100vh;
+  align-self:start;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  padding:70px 24px 24px;
+  background:var(--bg);
+}
+#msvg{width:100%;max-width:448px;height:auto}
+
+/* Left scrollable content */
+.s1,.s2{
+  min-height:100vh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(80px,11vw,128px) clamp(20px,3.5vw,52px) clamp(60px,8vw,80px);
+}
+
+/* ── Typography ──────────────────────────────────── */
+.badge{
+  display:inline-block;
+  background:var(--acc-dim);color:var(--acc);
+  border:1px solid var(--acc-bdr);
+  padding:5px 14px;border-radius:20px;
+  font-size:10.5px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:26px;
+}
+.eyebrow{
+  display:inline-block;
+  color:var(--acc);font-size:10.5px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:18px;
+}
+h1.d{
+  font-family:var(--font-d);
+  font-size:clamp(36px,4.2vw,66px);
+  font-weight:900;line-height:1.05;
+  letter-spacing:-.03em;
+  color:#EEF0FF;
+  text-wrap:balance;
+  white-space:pre-line;
+  margin-bottom:26px;
+}
+h2.d{
+  font-family:var(--font-d);
+  font-size:clamp(28px,3.2vw,52px);
+  font-weight:800;line-height:1.09;
+  letter-spacing:-.025em;
+  color:#EEF0FF;
+  text-wrap:balance;
+  white-space:pre-line;
+  margin-bottom:18px;
+}
+.lead{
+  font-size:clamp(14px,1.5vw,16.5px);
+  color:var(--muted);line-height:1.95;
+  max-width:440px;margin-bottom:38px;
+}
+
+/* CTAs */
+.cta-stack{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.btn-cta{
+  padding:15px 34px;border-radius:12px;
+  font-family:var(--font-d);font-size:15.5px;font-weight:800;
+  cursor:pointer;background:var(--acc);color:#fff;
+  border:none;letter-spacing:-.01em;
+  box-shadow:0 0 0 0 rgba(91,92,235,.5);
+  transition:transform .2s,box-shadow .2s;
+  position:relative;overflow:hidden;
+}
+.btn-cta::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.09) 0%,transparent 55%);
+  pointer-events:none;
+}
+.btn-cta:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 40px rgba(91,92,235,.55),0 8px 24px rgba(91,92,235,.38);
+}
+.mcopy{font-size:12px;color:var(--acc);font-weight:600;opacity:.92}
+.a-link{
+  font-size:13px;color:var(--muted);
+  text-decoration:underline;text-decoration-color:var(--bdr);
+  cursor:pointer;transition:color .2s;
+}
+.a-link:hover{color:var(--text)}
+
+/* Scroll hint */
+.scroll-hint{
+  position:absolute;bottom:28px;left:clamp(20px,3.5vw,52px);
+  display:flex;flex-direction:column;gap:6px;opacity:.55;
+  animation:sh-bounce 2.4s ease-in-out infinite;
+}
+.scroll-hint span{font-size:10.5px;color:var(--muted);letter-spacing:.04em}
+@keyframes sh-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+/* ── S2 reading cards ────────────────────────────── */
+.rcards{display:flex;flex-direction:column;gap:9px;margin-top:28px}
+.rcard{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 15px;
+  background:var(--bg3);border-radius:10px;
+  border:1px solid var(--bdr);
+  opacity:0;transform:translateY(7px);
+  transition:opacity .4s ease,transform .4s ease,background .3s,border-color .3s;
+}
+.rcard.vis{opacity:1;transform:translateY(0)}
+.rcard.done{
+  background:color-mix(in srgb,var(--acc) 8%,var(--bg3));
+  border-color:color-mix(in srgb,var(--acc) 28%,transparent);
+}
+.rdot{
+  width:21px;height:21px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;
+  border:1.5px solid var(--bdr);color:var(--acc);
+  transition:background .3s,color .3s,border-color .3s;
+}
+.rcard.done .rdot{background:var(--acc);color:#fff;border-color:var(--acc)}
+.rtxt{font-size:13px;color:var(--muted);flex:1}
+.rcard.done .rtxt{color:var(--acc);font-weight:500}
+
+/* S2 stats */
+.stats{display:flex;gap:clamp(20px,4vw,52px);margin-top:36px;flex-wrap:wrap}
+.sv{font-family:var(--font-d);font-size:clamp(24px,3vw,38px);font-weight:800;color:var(--acc);line-height:1}
+.sl{font-size:11.5px;color:var(--muted);margin-top:4px}
+
+/* S2 reveal */
+.s2{
+  opacity:0;transform:translateY(18px);
+  transition:opacity .65s ease,transform .65s ease;
+}
+.s2.vis{opacity:1;transform:translateY(0)}
+
+/* ── S3 ──────────────────────────────────────────── */
+.s3{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:clamp(80px,10vw,120px) clamp(24px,5vw,80px);
+  background:var(--bg);
+  position:relative;overflow:hidden;
+}
+/* dot grid bg */
+.s3::before{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(circle, rgba(91,92,235,.07) 1px, transparent 1px);
+  background-size:32px 32px;
+  z-index:0;
+}
+/* center radial glow */
+.s3::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 45%,rgba(91,92,235,.12) 0%,transparent 62%);
+  z-index:0;
+}
+.s3-in{
+  position:relative;z-index:1;max-width:620px;
+}
+.s3-line{width:46px;height:3px;background:var(--acc);border-radius:2px;margin:0 auto 34px;opacity:.65}
+.blist{
+  list-style:none;
+  display:flex;flex-direction:column;gap:13px;
+  margin:0 auto 46px;max-width:440px;text-align:left;
+}
+.blist li{
+  display:flex;align-items:center;gap:12px;
+  font-size:15.5px;color:var(--muted);line-height:1.65;
+}
+.bico{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  background:var(--acc-dim);
+  border:1.5px solid color-mix(in srgb,var(--acc) 38%,transparent);
+  display:flex;align-items:center;justify-content:center;
+  font-size:9.5px;color:var(--acc);
+}
+.btn-xl{
+  padding:clamp(15px,2.2vw,20px) clamp(40px,6vw,72px);
+  border-radius:14px;
+  font-family:var(--font-d);
+  font-size:clamp(15px,1.9vw,19px);font-weight:800;
+  cursor:pointer;background:var(--acc);color:#fff;
+  border:none;letter-spacing:-.01em;
+  box-shadow:0 6px 36px rgba(91,92,235,.42);
+  transition:transform .2s,box-shadow .2s;
+  display:block;width:100%;max-width:400px;
+  margin:0 auto;position:relative;overflow:hidden;
+}
+.btn-xl::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.09) 0%,transparent 55%);
+  pointer-events:none;
+}
+.btn-xl:hover{
+  transform:translateY(-2px);
+  box-shadow:0 0 52px rgba(91,92,235,.62),0 12px 40px rgba(91,92,235,.42);
+}
+.trust{font-size:12.5px;color:var(--muted);margin-top:18px;opacity:.72}
+/* S3 corner accents */
+.corner{
+  position:absolute;width:80px;height:80px;
+  border-color:var(--acc-bdr);border-style:solid;
+  opacity:.5;z-index:1;
+}
+.corner-tl{top:40px;left:40px;border-width:1px 0 0 1px}
+.corner-tr{top:40px;right:40px;border-width:1px 1px 0 0}
+.corner-bl{bottom:40px;left:40px;border-width:0 0 1px 1px}
+.corner-br{bottom:40px;right:40px;border-width:0 1px 1px 0}
+
+/* ── Entrance ────────────────────────────────────── */
+.ent{animation:ent .8s ease both}
+@keyframes ent{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.08s}.d2{animation-delay:.22s}
+.d3{animation-delay:.38s}.d4{animation-delay:.54s}
+
+/* ── SVG ambient keyframes ───────────────────────── */
+@keyframes svg-pulse{0%,100%{opacity:.35}50%{opacity:.7}}
+@keyframes svg-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes svg-spin-rev{from{transform:rotate(0deg)}to{transform:rotate(-360deg)}}
+@keyframes svg-orb{0%,100%{opacity:.06}50%{opacity:.14}}
+@keyframes svg-stream{0%{stroke-dashoffset:60}100%{stroke-dashoffset:0}}
+@keyframes svg-float{
+  0%,100%{transform:translateY(0px)}
+  50%{transform:translateY(-4px)}
+}
+@keyframes svg-particle{
+  0%{opacity:1;transform:translateX(0)}
+  80%{opacity:.7}
+  100%{opacity:0;transform:translateX(145px)}
+}
+
+/* ── Mobile ──────────────────────────────────────── */
+@media(max-width:768px){
+  .narr{display:flex;flex-direction:column}
+  .vis-sticky{
+    position:relative;height:58vw;min-height:250px;
+    padding:70px 12px 0;order:-1;
+  }
+  .s1,.s2{min-height:auto;padding:36px 22px 52px}
+  .s2{opacity:1;transform:none}
+  .stats{gap:18px}
+  .corner{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- NAV                                             -->
+<!-- ═══════════════════════════════════════════════ -->
+<nav class="nav">
+  <!-- SELFPRINT fingerprint-S logo -->
+  <div class="nav-logo" style="display:flex;align-items:center;gap:10px;cursor:pointer">
+    <svg width="30" height="34" viewBox="0 0 60 68" fill="none" aria-label="SELFPRINT logo">
+      <!-- Outermost S curve -->
+      <path d="M47 14 C47 7 40 3 30 3 C20 3 13 7 13 14 C13 21 20 24 30 24 C40 24 47 27 47 35 C47 43 40 47 30 47 C20 47 13 43 13 36"
+        stroke="white" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <!-- Second layer -->
+      <path d="M43 14.5 C43 9 37 6 30 6 C23 6 17 9 17 14.5 C17 20 22 22.5 30 22.5 C38 22.5 43 25 43 31.5 C43 38 38 41 30 41 C22 41 17 38 17 32.5"
+        stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".78"/>
+      <!-- Third layer -->
+      <path d="M39 15 C39 11 35 9 30 9 C25 9 21 11 21 15 C21 19 25 21 30 21 C35 21 39 23 39 28 C39 33 35 36 30 36 C25 36 21 34 21 30"
+        stroke="white" stroke-width="2" fill="none" stroke-linecap="round" opacity=".58"/>
+      <!-- Fourth layer -->
+      <path d="M35 16 C35 13 33 11.5 30 11.5 C27 11.5 25 13 25 16 C25 19 27 20.5 30 20.5 C33 20.5 35 22 35 25.5 C35 29 33 31 30 31 C27 31 25 29.5 25 27"
+        stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".4"/>
+    </svg>
+    <span style="font-family:var(--font-d);font-size:17px;font-weight:900;letter-spacing:-.02em">SELF<em style="color:var(--acc);font-style:normal">PRINT</em></span>
+  </div>
+  <div class="nav-r">
+    <button class="btn-ghost">เข้าสู่ระบบ</button>
+    <button class="btn-prim">เริ่มฟรี</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- NARRATIVE WRAP (S1 + S2)                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="narr" id="narr">
+
+  <!-- ── LEFT: scrollable content ── -->
+  <div>
+    <!-- S1 -->
+    <section class="s1">
+      <div class="badge ent d1">12 SICE Engines · AI พฤติกรรม · ฟรี 2 นาที</div>
+      <h1 class="d ent d2">ถอดรหัสลับตัวตน!
+ปลดล็อก "ฝาแฝดดิจิทัล"
+ที่รู้จักคุณดีที่สุด</h1>
+      <p class="lead ent d3">เปลี่ยนทุกการวิเคราะห์ เรียนรู้ และตัดสินใจให้กลายเป็น AI Twin — ร่างจำลองที่จะเตือนสติ ชี้จุดบอด (Blind Spots) และนำทางชีวิตทั้งเรื่องงาน ความรัก และอนาคต</p>
+      <div class="cta-stack ent d4">
+        <button class="btn-cta">ให้กำเนิด AI Twin ของฉัน →</button>
+        <span class="mcopy">⚡ ปลดล็อกพิมพ์เขียวพฤติกรรม 12 มิติฟรี ใน 2 นาที</span>
+        <a class="a-link">มีบัญชีแล้ว? เข้าสู่ระบบ</a>
+      </div>
+      <div class="scroll-hint">
+        <span>เลื่อนดูวิธีที่ SELFPRINT อ่านคุณออก</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M10 3L10 17M4 11L10 17L16 11" stroke="#5B5CEB" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- S2 -->
+    <section class="s2" id="s2">
+      <div class="eyebrow">SELFPRINT ENGINE</div>
+      <h2 class="d">SELFPRINT อ่านคุณออก
+ก่อนที่คุณจะรู้จักตัวเอง</h2>
+      <p class="lead" style="margin-bottom:0">ระบบ Initial State Matrix วิเคราะห์รูปแบบพฤติกรรมของคุณผ่าน 12 มิติ — ก่อนที่คุณจะตอบคำถามแม้แต่ข้อเดียว ไม่ใช่แบบทดสอบ แต่คือวิทยาศาสตร์พฤติกรรมจริง</p>
+
+      <div class="rcards">
+        <div class="rcard" id="rc0"><span class="rdot">·</span><span class="rtxt">กำลังสแกน Initial State Matrix...</span></div>
+        <div class="rcard" id="rc1"><span class="rdot">·</span><span class="rtxt">ตรวจพบรูปแบบพฤติกรรม 12 มิติ</span></div>
+        <div class="rcard" id="rc2"><span class="rdot">·</span><span class="rtxt">พบ Blind Spots ที่ซ่อนอยู่</span></div>
+        <div class="rcard" id="rc3"><span class="rdot">✓</span><span class="rtxt">พร้อมถอดรหัสตัวตนของคุณ ✓</span></div>
+      </div>
+
+      <div class="stats">
+        <div><div class="sv">12</div><div class="sl">SICE Engines</div></div>
+        <div><div class="sv">&lt; 2 นาที</div><div class="sl">วิเคราะห์ครบ</div></div>
+        <div><div class="sv">100%</div><div class="sl">ฟรี</div></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ── RIGHT: sticky visual ── -->
+  <div class="vis-sticky">
+    <svg id="msvg" viewBox="0 0 480 520" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="rg-human" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#5B5CEB" stop-opacity=".32"/>
+          <stop offset="100%" stop-color="#5B5CEB" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="rg-twin" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#06E8F8" stop-opacity=".3"/>
+          <stop offset="100%" stop-color="#06E8F8" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="rg-orb" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#06E8F8" stop-opacity=".65"/>
+          <stop offset="35%" stop-color="#5B5CEB" stop-opacity=".35"/>
+          <stop offset="100%" stop-color="#5B5CEB" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="rg-orb-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#5B5CEB" stop-opacity=".22"/>
+          <stop offset="100%" stop-color="#5B5CEB" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="lg-stream" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#5B5CEB" stop-opacity=".9"/>
+          <stop offset="55%" stop-color="#818CF8"/>
+          <stop offset="100%" stop-color="#06E8F8" stop-opacity=".9"/>
+        </linearGradient>
+        <filter id="f-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="f-glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- ──────────────────────────── -->
+      <!-- P1 GROUP: figures + streams  -->
+      <!-- ──────────────────────────── -->
+      <g id="gp1">
+        <!-- ambient bg -->
+        <ellipse cx="240" cy="265" rx="190" ry="150"
+          fill="url(#rg-human)" style="animation:svg-orb 5s ease-in-out infinite"/>
+
+        <!-- Data streams (animated, shown via JS opacity) -->
+        <g id="gstreams" opacity="0">
+          <line x1="168" y1="205" x2="312" y2="205"
+            stroke="url(#lg-stream)" stroke-width=".7" stroke-dasharray="13 11"
+            style="animation:svg-stream 1.9s linear infinite"/>
+          <line x1="168" y1="222" x2="312" y2="219"
+            stroke="url(#lg-stream)" stroke-width="1.1" stroke-dasharray="14 10"
+            style="animation:svg-stream 1.7s .2s linear infinite"/>
+          <line x1="168" y1="239" x2="312" y2="238"
+            stroke="url(#lg-stream)" stroke-width="1.7" stroke-dasharray="18 8"
+            style="animation:svg-stream 1.6s .08s linear infinite"/>
+          <line x1="168" y1="256" x2="312" y2="258"
+            stroke="url(#lg-stream)" stroke-width="1.1" stroke-dasharray="13 11"
+            style="animation:svg-stream 1.95s .32s linear infinite"/>
+          <line x1="168" y1="272" x2="312" y2="275"
+            stroke="url(#lg-stream)" stroke-width=".7" stroke-dasharray="10 13"
+            style="animation:svg-stream 2.1s .45s linear infinite"/>
+          <!-- Particles -->
+          <circle cx="182" cy="230" r="2.4" fill="#5B5CEB" opacity=".9"
+            style="animation:svg-particle 2s 0s linear infinite;transform-box:fill-box;transform-origin:center"/>
+          <circle cx="198" cy="247" r="2" fill="#06E8F8" opacity=".85"
+            style="animation:svg-particle 2s .5s linear infinite;transform-box:fill-box;transform-origin:center"/>
+          <circle cx="175" cy="260" r="1.7" fill="#818CF8" opacity=".8"
+            style="animation:svg-particle 2.2s .85s linear infinite;transform-box:fill-box;transform-origin:center"/>
+          <circle cx="192" cy="213" r="1.5" fill="#06E8F8" opacity=".75"
+            style="animation:svg-particle 1.85s .3s linear infinite;transform-box:fill-box;transform-origin:center"/>
+        </g>
+
+        <!-- ISM grid (right side, fades in during ph1) -->
+        <g id="gism" opacity="0">
+          <text x="385" y="152" text-anchor="middle" font-size="7.5" font-weight="700"
+            fill="#06E8F8" opacity=".42" letter-spacing="2">INITIAL STATE MATRIX</text>
+          <g stroke="#06E8F8" stroke-width=".35" stroke-opacity=".14">
+            <line x1="322" y1="158" x2="322" y2="368"/>
+            <line x1="346" y1="158" x2="346" y2="368"/>
+            <line x1="370" y1="158" x2="370" y2="368"/>
+            <line x1="394" y1="158" x2="394" y2="368"/>
+            <line x1="418" y1="158" x2="418" y2="368"/>
+            <line x1="442" y1="158" x2="442" y2="368"/>
+            <line x1="320" y1="174" x2="444" y2="174"/>
+            <line x1="320" y1="198" x2="444" y2="198"/>
+            <line x1="320" y1="222" x2="444" y2="222"/>
+            <line x1="320" y1="246" x2="444" y2="246"/>
+            <line x1="320" y1="270" x2="444" y2="270"/>
+            <line x1="320" y1="294" x2="444" y2="294"/>
+            <line x1="320" y1="318" x2="444" y2="318"/>
+            <line x1="320" y1="342" x2="444" y2="342"/>
+          </g>
+        </g>
+
+        <!-- HUMAN figure (left, centered ~x=118) -->
+        <g id="ghuman" filter="url(#f-glow)" opacity="0">
+          <circle cx="118" cy="108" r="23" stroke="#5B5CEB" stroke-width="1.5" fill="none" opacity=".75"/>
+          <circle cx="118" cy="108" r="12" stroke="#5B5CEB" stroke-width=".7" fill="none" opacity=".32"/>
+          <line x1="118" y1="131" x2="118" y2="150" stroke="#5B5CEB" stroke-width="1.4" opacity=".65"/>
+          <path d="M79 152 Q118 144 157 152" stroke="#5B5CEB" stroke-width="1.4" fill="none" opacity=".72"/>
+          <path d="M82 154 L77 248 L118 260 L159 248 L154 154" stroke="#5B5CEB" stroke-width="1.15" fill="none" opacity=".58"/>
+          <line x1="118" y1="154" x2="118" y2="260" stroke="#5B5CEB" stroke-width=".65" opacity=".22" stroke-dasharray="4 4"/>
+          <line x1="81" y1="178" x2="155" y2="178" stroke="#5B5CEB" stroke-width=".4" opacity=".2"/>
+          <line x1="79" y1="202" x2="157" y2="202" stroke="#5B5CEB" stroke-width=".4" opacity=".2"/>
+          <line x1="78" y1="226" x2="158" y2="226" stroke="#5B5CEB" stroke-width=".4" opacity=".18"/>
+          <path d="M82 160 L65 218 L71 240" stroke="#5B5CEB" stroke-width="1.15" fill="none" opacity=".56"/>
+          <path d="M154 160 L171 218 L165 240" stroke="#5B5CEB" stroke-width="1.15" fill="none" opacity=".56"/>
+          <path d="M95 260 L88 334 L95 346" stroke="#5B5CEB" stroke-width="1.15" fill="none" opacity=".52"/>
+          <path d="M141 260 L148 334 L141 346" stroke="#5B5CEB" stroke-width="1.15" fill="none" opacity=".52"/>
+          <ellipse cx="118" cy="224" rx="46" ry="66" fill="url(#rg-human)" opacity=".55"/>
+          <text x="118" y="370" text-anchor="middle" font-size="8.5" font-weight="700"
+            fill="#5B5CEB" opacity=".55" letter-spacing="2.5">HUMAN</text>
+        </g>
+
+        <!-- AI TWIN figure (right, centered ~x=362) — built via dashoffset -->
+        <g id="gtwin" filter="url(#f-glow)">
+          <circle id="t-head" cx="362" cy="108" r="23"
+            stroke="#06E8F8" stroke-width="1.5" fill="none"
+            stroke-dasharray="145" stroke-dashoffset="145"/>
+          <circle id="t-head2" cx="362" cy="108" r="12"
+            stroke="#818CF8" stroke-width=".7" fill="none" opacity="0"/>
+          <line id="t-neck" x1="362" y1="131" x2="362" y2="150"
+            stroke="#06E8F8" stroke-width="1.4" opacity="0"/>
+          <path id="t-sh" d="M323 152 Q362 144 401 152"
+            stroke="#06E8F8" stroke-width="1.4" fill="none"
+            stroke-dasharray="82" stroke-dashoffset="82"/>
+          <path id="t-torso" d="M326 154 L321 248 L362 260 L403 248 L398 154"
+            stroke="#06E8F8" stroke-width="1.15" fill="none"
+            stroke-dasharray="248" stroke-dashoffset="248"/>
+          <line id="t-spine" x1="362" y1="154" x2="362" y2="260"
+            stroke="#06E8F8" stroke-width=".65" opacity="0" stroke-dasharray="4 4"/>
+          <line id="t-g1" x1="325" y1="178" x2="399" y2="178" stroke="#06E8F8" stroke-width=".4" opacity="0"/>
+          <line id="t-g2" x1="323" y1="202" x2="401" y2="202" stroke="#06E8F8" stroke-width=".4" opacity="0"/>
+          <line id="t-g3" x1="322" y1="226" x2="402" y2="226" stroke="#06E8F8" stroke-width=".4" opacity="0"/>
+          <path id="t-al" d="M326 160 L309 218 L315 240"
+            stroke="#818CF8" stroke-width="1.15" fill="none"
+            stroke-dasharray="100" stroke-dashoffset="100"/>
+          <path id="t-ar" d="M398 160 L415 218 L409 240"
+            stroke="#818CF8" stroke-width="1.15" fill="none"
+            stroke-dasharray="100" stroke-dashoffset="100"/>
+          <path id="t-ll" d="M339 260 L332 334 L339 346"
+            stroke="#818CF8" stroke-width="1.15" fill="none"
+            stroke-dasharray="90" stroke-dashoffset="90"/>
+          <path id="t-lr" d="M385 260 L392 334 L385 346"
+            stroke="#818CF8" stroke-width="1.15" fill="none"
+            stroke-dasharray="90" stroke-dashoffset="90"/>
+          <!-- synapse circuits appear when twin fully materializes -->
+          <path id="t-cir" d="M362 118 L362 188 L342 224 M362 152 L382 188 M342 204 L394 204"
+            stroke="#06E8F8" stroke-width=".85" fill="none" opacity="0"
+            stroke-dasharray="200" stroke-dashoffset="200"/>
+          <ellipse id="t-halo" cx="362" cy="226" rx="46" ry="66" fill="url(#rg-twin)" opacity="0"/>
+          <text id="t-label" x="362" y="370" text-anchor="middle" font-size="8.5" font-weight="700"
+            fill="#06E8F8" opacity="0" letter-spacing="2.5">AI TWIN</text>
+        </g>
+      </g>
+
+      <!-- ──────────────────────────────── -->
+      <!-- SPHERE GROUP: Core Synapse Orb   -->
+      <!-- ──────────────────────────────── -->
+      <g id="gsphere" opacity="0">
+        <!-- ═══ Core Synapse Sphere — 3D wireframe energy orb ═══ -->
+
+        <!-- outer ambient glow halo -->
+        <circle cx="240" cy="262" r="110" fill="url(#rg-orb-glow)"
+          style="animation:svg-orb 3.5s ease-in-out infinite"/>
+
+        <!-- 3D sphere boundary circle -->
+        <circle cx="240" cy="262" r="88"
+          stroke="#5B5CEB" stroke-width="1.2" fill="none" opacity=".45"/>
+
+        <!-- equatorial ellipse (horizontal band — latitude 0°) -->
+        <ellipse cx="240" cy="262" rx="88" ry="22"
+          stroke="#06E8F8" stroke-width="1" fill="none" opacity=".5"
+          stroke-dasharray="12 5"/>
+
+        <!-- tilted meridional ellipses — longitude lines -->
+        <!-- vertical meridian (90°) -->
+        <ellipse cx="240" cy="262" rx="22" ry="88"
+          stroke="#818CF8" stroke-width="0.9" fill="none" opacity=".38"
+          stroke-dasharray="10 6"/>
+
+        <!-- tilted 45° meridian -->
+        <ellipse cx="240" cy="262" rx="88" ry="22"
+          stroke="#5B5CEB" stroke-width="0.8" fill="none" opacity=".32"
+          stroke-dasharray="9 7"
+          transform="rotate(45,240,262)"/>
+
+        <!-- tilted -45° meridian -->
+        <ellipse cx="240" cy="262" rx="88" ry="22"
+          stroke="#5B5CEB" stroke-width="0.8" fill="none" opacity=".32"
+          stroke-dasharray="9 7"
+          transform="rotate(-45,240,262)"/>
+
+        <!-- inner secondary sphere shell -->
+        <circle cx="240" cy="262" r="56"
+          stroke="#818CF8" stroke-width="0.7" fill="none" opacity=".28"
+          stroke-dasharray="6 4"/>
+
+        <!-- inner equator -->
+        <ellipse cx="240" cy="262" rx="56" ry="14"
+          stroke="#06E8F8" stroke-width="0.7" fill="none" opacity=".3"
+          stroke-dasharray="7 5"/>
+
+        <!-- inner vertical meridian -->
+        <ellipse cx="240" cy="262" rx="14" ry="56"
+          stroke="#818CF8" stroke-width="0.6" fill="none" opacity=".22"
+          stroke-dasharray="7 6"/>
+
+        <!-- spinning outer orbit ring (equatorial tilt 30°) -->
+        <g style="transform-origin:240px 262px;animation:svg-spin 16s linear infinite">
+          <ellipse cx="240" cy="262" rx="88" ry="22"
+            stroke="#06E8F8" stroke-width="0.6" fill="none" opacity=".18"
+            stroke-dasharray="5 22"
+            transform="rotate(30,240,262)"/>
+          <!-- orbit particle -->
+          <circle r="3.5" fill="#06E8F8" opacity=".9" filter="url(#f-glow)">
+            <animateMotion dur="16s" repeatCount="indefinite">
+              <mpath href="#orbit-path-1"/>
+            </animateMotion>
+          </circle>
+        </g>
+
+        <!-- counter-spinning inner orbit ring -->
+        <g style="transform-origin:240px 262px;animation:svg-spin-rev 11s linear infinite">
+          <ellipse cx="240" cy="262" rx="56" ry="14"
+            stroke="#818CF8" stroke-width="0.6" fill="none" opacity=".18"
+            stroke-dasharray="4 16"
+            transform="rotate(-30,240,262)"/>
+          <circle r="2.5" fill="#818CF8" opacity=".85" filter="url(#f-glow)">
+            <animateMotion dur="11s" repeatCount="indefinite">
+              <mpath href="#orbit-path-2"/>
+            </animateMotion>
+          </circle>
+        </g>
+
+        <!-- orbit paths (hidden, used for animateMotion) -->
+        <defs>
+          <path id="orbit-path-1"
+            d="M328,262 A88,22 0 1,1 327.99,262Z"
+            fill="none"/>
+          <path id="orbit-path-2"
+            d="M296,262 A56,14 0 1,0 295.99,262Z"
+            fill="none"/>
+        </defs>
+
+        <!-- pulsing energy core — bright inner glow -->
+        <circle cx="240" cy="262" r="26"
+          fill="url(#rg-orb)" opacity=".85"
+          style="animation:svg-pulse 2.8s ease-in-out infinite"/>
+
+        <!-- hard bright core dot -->
+        <circle cx="240" cy="262" r="10"
+          fill="white" opacity=".9"
+          filter="url(#f-glow)"
+          style="animation:svg-pulse 2.2s .3s ease-in-out infinite"/>
+
+        <!-- inner quantum data lines -->
+        <g stroke="#06E8F8" stroke-width="0.7" opacity=".35" fill="none">
+          <path d="M240 196 L240 328" stroke-dasharray="20 8"
+            style="animation:svg-stream 2.2s ease-in-out infinite"/>
+          <path d="M152 262 L328 262" stroke-dasharray="20 8"
+            style="animation:svg-stream 2.4s .4s ease-in-out infinite"/>
+          <path d="M178 200 L302 324" stroke-dasharray="16 10"
+            style="animation:svg-stream 2.8s .2s ease-in-out infinite"/>
+          <path d="M302 200 L178 324" stroke-dasharray="16 10"
+            style="animation:svg-stream 3s .6s ease-in-out infinite"/>
+        </g>
+
+        <!-- label text above core -->
+        <text x="240" y="232" text-anchor="middle" font-size="6.5" font-weight="700"
+          fill="#06E8F8" opacity=".6" letter-spacing="3">CORE SYNAPSE</text>
+        <text x="240" y="299" text-anchor="middle" font-size="5.5" font-weight="600"
+          fill="#818CF8" opacity=".45" letter-spacing="2.5">SELFPRINT ENGINE</text>
+      </g>
+
+      <!-- ────────────────────── -->
+      <!-- P2 GROUP: 12 SICE nodes -->
+      <!-- ────────────────────── -->
+      <g id="gnodes" opacity="0"><!-- populated by JS --></g>
+
+      <!-- CLIMAX: Behavioral Map polygon -->
+      <polygon id="gmap" points="" fill="url(#rg-orb-glow)"
+        stroke="#06E8F8" stroke-width="1.3" stroke-opacity=".65" opacity="0"
+        filter="url(#f-glow)"/>
+
+      <!-- bottom label -->
+      <text x="240" y="510" text-anchor="middle" font-size="7.5"
+        fill="#5B5CEB" opacity=".28" letter-spacing="4">SELFPRINT ENGINE · 12 SICE DIMENSIONS</text>
+    </svg>
+  </div>
+</div><!-- /narr -->
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- S3: CTA                                         -->
+<!-- ═══════════════════════════════════════════════ -->
+<section class="s3">
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="s3-in">
+    <div class="s3-line"></div>
+    <h2 class="d">พร้อมพบกับ
+ฝาแฝดดิจิทัลของคุณแล้วหรือยัง?</h2>
+    <ul class="blist">
+      <li><span class="bico">✦</span>พิมพ์เขียวพฤติกรรม 12 มิติที่ซ่อนอยู่ในตัวคุณ</li>
+      <li><span class="bico">✦</span>Blind Spots ที่ขัดขวางการตัดสินใจของคุณ</li>
+      <li><span class="bico">✦</span>AI Twin ที่รู้จักคุณดีกว่าตัวเอง — และเติบโตไปพร้อมคุณ</li>
+    </ul>
+    <button class="btn-xl">ให้กำเนิด AI Twin ของฉัน →</button>
+    <p class="trust">ฟรี · ไม่ต้องใส่บัตรเครดิต · ใช้เวลาไม่ถึง 2 นาที</p>
+    <a class="a-link" style="display:inline-block;margin-top:14px;">มีบัญชีแล้ว? เข้าสู่ระบบ</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SCRIPT                                          -->
+<!-- ═══════════════════════════════════════════════ -->
+<script>
+/* ── SICE labels (grouped per spec) ── */
+const SICE = [
+  'ตัวตน','จิตใจ','การตัดสินใจ','จุดประสงค์',   // G1 Core Intellect
+  'อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต',   // G2 Action & Execution
+  'ความสัมพันธ์','ความรัก','สุขภาพ','อนาคต'     // G3 External Matrix
+];
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const CX = 240, CY = 262;
+const NODE_R = 152, LABEL_R = 186;
+// Group thresholds in ph2 (0→1) when each node becomes active
+const NODE_THRESH = [
+  .04,.07,.10,.13,   // G1 staggered
+  .32,.35,.38,.41,   // G2 staggered
+  .60,.63,.66,.69    // G3 staggered
+];
+// Polygon modifiers for organic Behavioral Map shape
+const POLY_MOD = [1.0,.86,1.1,.9,1.05,.76,1.14,.89,1.0,.83,.97,1.08];
+
+/* ── Build 12 SICE node elements into SVG ── */
+const gnodes = document.getElementById('gnodes');
+const dots = [], labels = [], spokes = [], pulses = [];
+
+SICE.forEach((lbl, i) => {
+  const deg = (i / 12) * 360 - 90;
+  const rad = deg * Math.PI / 180;
+  const nx = CX + NODE_R * Math.cos(rad);
+  const ny = CY + NODE_R * Math.sin(rad);
+  const lx = CX + LABEL_R * Math.cos(rad);
+  const ly = CY + LABEL_R * Math.sin(rad);
+  const col = i < 4 ? '#06E8F8' : i < 8 ? '#5B5CEB' : '#818CF8';
+
+  // spoke
+  const spk = document.createElementNS(SVG_NS,'line');
+  spk.setAttribute('x1',CX);spk.setAttribute('y1',CY);
+  spk.setAttribute('x2',nx);spk.setAttribute('y2',ny);
+  spk.setAttribute('stroke',col);spk.setAttribute('stroke-width','.45');
+  spk.setAttribute('stroke-dasharray','4 4');spk.setAttribute('opacity','0');
+  spk.style.transition='opacity .5s ease';
+  gnodes.appendChild(spk); spokes.push(spk);
+
+  // electric pulse line
+  const pul = document.createElementNS(SVG_NS,'line');
+  pul.setAttribute('x1',CX);pul.setAttribute('y1',CY);
+  pul.setAttribute('x2',nx);pul.setAttribute('y2',ny);
+  pul.setAttribute('stroke',col);pul.setAttribute('stroke-width','1.6');
+  pul.setAttribute('stroke-dasharray',NODE_R+' '+NODE_R);
+  pul.setAttribute('stroke-dashoffset',NODE_R);
+  pul.setAttribute('opacity','0');pul.style.transition='stroke-dashoffset .4s ease,opacity .3s ease';
+  gnodes.appendChild(pul); pulses.push(pul);
+
+  // dot
+  const dot = document.createElementNS(SVG_NS,'circle');
+  dot.setAttribute('cx',nx);dot.setAttribute('cy',ny);dot.setAttribute('r','5');
+  dot.setAttribute('fill',col);dot.setAttribute('opacity','0');
+  dot.style.transition='opacity .45s ease';
+  gnodes.appendChild(dot); dots.push(dot);
+
+  // label
+  const normDeg = ((deg % 360)+360) % 360;
+  const anchor = normDeg>15&&normDeg<165?'start':normDeg>195&&normDeg<345?'end':'middle';
+  const txt = document.createElementNS(SVG_NS,'text');
+  txt.setAttribute('x',lx);txt.setAttribute('y',ly+3);
+  txt.setAttribute('text-anchor',anchor);txt.setAttribute('dominant-baseline','middle');
+  txt.setAttribute('font-size','9');txt.setAttribute('font-weight','600');
+  txt.setAttribute('fill',col);txt.setAttribute('opacity','0');
+  txt.setAttribute('font-family',"'Inter','Noto Sans Thai',sans-serif");
+  txt.style.transition='opacity .5s ease';
+  txt.textContent=lbl;
+  gnodes.appendChild(txt); labels.push(txt);
+});
+
+/* ── Helpers ── */
+const cl01 = v => Math.max(0,Math.min(1,v));
+const lerp = (a,b,t) => a+(b-a)*t;
+function eio(t){ return t<.5 ? 2*t*t : -1+(4-2*t)*t }
+
+/* ── DOM refs ── */
+const narr    = document.getElementById('narr');
+const s2el    = document.getElementById('s2');
+const gp1     = document.getElementById('gp1');
+const gstreams= document.getElementById('gstreams');
+const gism    = document.getElementById('gism');
+const ghuman  = document.getElementById('ghuman');
+const gtwin   = document.getElementById('gtwin');
+const gsphere = document.getElementById('gsphere');
+const gnodes2 = document.getElementById('gnodes');
+const gmap    = document.getElementById('gmap');
+
+const t = {
+  head : document.getElementById('t-head'),
+  head2: document.getElementById('t-head2'),
+  neck : document.getElementById('t-neck'),
+  sh   : document.getElementById('t-sh'),
+  torso: document.getElementById('t-torso'),
+  spine: document.getElementById('t-spine'),
+  g1   : document.getElementById('t-g1'),
+  g2   : document.getElementById('t-g2'),
+  g3   : document.getElementById('t-g3'),
+  al   : document.getElementById('t-al'),
+  ar   : document.getElementById('t-ar'),
+  ll   : document.getElementById('t-ll'),
+  lr   : document.getElementById('t-lr'),
+  cir  : document.getElementById('t-cir'),
+  halo : document.getElementById('t-halo'),
+  lbl  : document.getElementById('t-label'),
+};
+
+/* ── Reading card sequence ── */
+let rcDone = false;
+function runReadingCards(){
+  if(rcDone) return; rcDone = true;
+  const ids = ['rc0','rc1','rc2','rc3'];
+  ids.forEach((id,i)=>{
+    setTimeout(()=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.classList.add('vis');
+      if(i>0){
+        const prev = document.getElementById(ids[i-1]);
+        if(prev){ prev.classList.add('done'); prev.querySelector('.rdot').textContent='✓'; }
+      }
+      if(i===3){ setTimeout(()=>{ el.classList.add('done'); },300); }
+    }, i*680);
+  });
+}
+
+/* ── Polygon points for Behavioral Map ── */
+function polyPts(scale){
+  return SICE.map((_,i)=>{
+    const rad = ((i/12)*360-90)*Math.PI/180;
+    const r = NODE_R * POLY_MOD[i] * scale;
+    return `${CX+r*Math.cos(rad)},${CY+r*Math.sin(rad)}`;
+  }).join(' ');
+}
+
+/* ── Main scroll handler ── */
+let lastP = -1;
+function onScroll(){
+  const rect = narr.getBoundingClientRect();
+  const total = rect.height - window.innerHeight;
+  const raw = -rect.top / total;
+  const p = cl01(raw);
+  if(Math.abs(p-lastP)<.0008) return;
+  lastP = p;
+
+  // Phase values
+  const ph1 = eio(cl01(p / .43));               // build twins: 0→.43
+  const phT = eio(cl01((p-.38) / .22));          // transition: .38→.60
+  const ph2 = eio(cl01((p-.56) / .44));          // nodes: .56→1.0
+  const phC = eio(cl01((p-.84) / .16));          // climax: .84→1.0
+
+  /* ── P1 opacity ── */
+  const p1op = cl01(1 - phT * 1.6);
+  gp1.style.opacity = p1op;
+
+  /* Human: quick fade-in */
+  ghuman.style.opacity = cl01(ph1 * 7);
+
+  /* Streams: fade with ph1 */
+  gstreams.style.opacity = ph1;
+
+  /* ISM grid */
+  gism.style.opacity = cl01((ph1-.18)*2.5);
+
+  /* ── AI Twin dashoffset build ── */
+  // head circle (circumference≈145)
+  t.head.setAttribute('stroke-dashoffset', lerp(145,0, cl01(ph1*1.5)));
+  t.head2.style.opacity = cl01((ph1-.14)*5);
+  t.neck.style.opacity  = cl01((ph1-.2)*6);
+  // shoulders (≈82)
+  t.sh.setAttribute('stroke-dashoffset', lerp(82,0, cl01((ph1-.24)*2.2)));
+  // torso (≈248)
+  t.torso.setAttribute('stroke-dashoffset', lerp(248,0, cl01((ph1-.3)*2)));
+  // spine
+  t.spine.style.opacity = cl01((ph1-.36)*6)*.22;
+  // grid lines
+  const go = cl01((ph1-.36)*6)*.18;
+  t.g1.style.opacity=go; t.g2.style.opacity=go; t.g3.style.opacity=go;
+  // arms (≈100 each)
+  t.al.setAttribute('stroke-dashoffset', lerp(100,0, cl01((ph1-.4)*3)));
+  t.ar.setAttribute('stroke-dashoffset', lerp(100,0, cl01((ph1-.43)*3)));
+  // legs (≈90 each)
+  t.ll.setAttribute('stroke-dashoffset', lerp(90,0, cl01((ph1-.5)*3)));
+  t.lr.setAttribute('stroke-dashoffset', lerp(90,0, cl01((ph1-.53)*3)));
+  // synapse circuits when twin near-complete
+  const cp = cl01((ph1-.74)*4);
+  t.cir.style.opacity = cp*.7;
+  t.cir.setAttribute('stroke-dashoffset', lerp(200,0,cp));
+  // glow halo + label
+  t.halo.style.opacity = cl01((ph1-.7)*4)*.5;
+  t.lbl.style.opacity  = cl01((ph1-.8)*5)*.7;
+
+  /* ── Transition: Synapse Sphere ── */
+  gsphere.style.opacity = phT;
+
+  /* ── P2: 12 SICE nodes ── */
+  gnodes2.style.opacity = ph2;
+
+  dots.forEach((_,i)=>{
+    const np = cl01((ph2 - NODE_THRESH[i]) / .1);
+    dots[i].style.opacity   = np;
+    spokes[i].style.opacity = np*.35;
+    labels[i].style.opacity = np*.82;
+    // electric pulse: flash then fade
+    const pp = cl01((ph2 - NODE_THRESH[i]) / .07);
+    const pf = cl01((ph2 - NODE_THRESH[i] - .09) / .08); // fade-out
+    pulses[i].style.opacity = pp * (1-pf) * .65;
+    pulses[i].setAttribute('stroke-dashoffset', lerp(NODE_R,0,pp));
+  });
+
+  /* S2 text reveal */
+  if(p>.42){ s2el.classList.add('vis'); runReadingCards(); }
+
+  /* ── Climax: Behavioral Map polygon ── */
+  if(phC>0){
+    gmap.setAttribute('points', polyPts(phC));
+    gmap.style.opacity = phC*.65;
+  } else {
+    gmap.style.opacity='0';
+  }
+}
+
+/* ── Floating labels animation ── */
+let raf;
+function floatLabels(){
+  const now = Date.now();
+  labels.forEach((lbl,i)=>{
+    const op = parseFloat(lbl.style.opacity)||0;
+    if(op>.05){
+      const fy = Math.sin(now/1300 + i*.72)*2.8;
+      lbl.style.transform=`translateY(${fy}px)`;
+    }
+  });
+  raf = requestAnimationFrame(floatLabels);
+}
+floatLabels();
+
+window.addEventListener('scroll', onScroll, {passive:true});
+window.addEventListener('resize', onScroll);
+onScroll(); // init state
+</script>
