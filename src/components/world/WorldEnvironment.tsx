@@ -60,13 +60,22 @@ function ArchetypePattern({ archetype, color, animate }: { archetype: WorldArche
   const driftClass = animate ? 'world-env-drift' : '';
 
   switch (archetype) {
-    case 'core': // SELF — crystal core, concentric energy rings
+    case 'core': // SELF — concentric energy rings, ambient only
+      // WORLDTWIN-OVERLAP-001: this used to also draw a solid diamond at
+      // dead center (50,50) — the exact spot TwinPresence.tsx places the
+      // Twin's own core glyph (which, for a 'diamond'/'crystal' archetype
+      // Twin, is *also* a diamond). Two unrelated systems (this World's own
+      // ambient background vs. the actual Twin) drawing solid shapes on top
+      // of each other read as "two overlapping twins" in the Self world
+      // specifically — every other archetype case here already keeps the
+      // center clear per the file's own §17 directive; this one didn't.
+      // Rings only now, and pushed outward so the center stays clear for
+      // whatever the Twin renders there.
       return (
         <g className={spinClass} style={{ transformOrigin: '50% 50%' }}>
           {[1, 2, 3, 4].map((n) => (
-            <circle key={n} cx="50%" cy="50%" r={`${n * 9}%`} fill="none" stroke={color} strokeWidth="1" opacity={0.5 - n * 0.09} />
+            <circle key={n} cx="50%" cy="50%" r={`${n * 9 + 12}%`} fill="none" stroke={color} strokeWidth="1" opacity={0.5 - n * 0.09} />
           ))}
-          <polygon points="50,38 58,50 50,62 42,50" fill={color} opacity="0.35" className={pulseClass} />
         </g>
       );
 
