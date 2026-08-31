@@ -199,6 +199,18 @@ export default function CoreAwakening() {
         throw new Error('User session lost');
       }
 
+      // TWINVOICE-001 FIX: speak the greeting synchronously here, before any
+      // `await` below — Safari/iOS (and some mobile Chrome builds) require
+      // speechSynthesis.speak() to fire within the same user-gesture chain
+      // as the click/submit that triggered it; once an async gap (like the
+      // initializeTwin() network round-trip below) has elapsed, the browser
+      // silently drops the call and the Twin never speaks. Everything the
+      // greeting needs — name, language — is already known at this point,
+      // so there is no reason to wait for the Twin record to exist first.
+      void speakTwinGreeting(buildTwinGreeting(twinName, language), {
+        lang: language === 'th' ? 'th-TH' : 'en-US',
+      });
+
       // P0-C: initializeTwin() grounds the Twin in the real SICE essence
       // (archetype from birth-date numerology + essence text, baseline
       // scores from actual engine confidence, birth memory from an actual
@@ -252,13 +264,9 @@ export default function CoreAwakening() {
       setPhase('celebration');
       celebrateTwinAwakening();
 
-      // TWINPRESENCE-005: free (Web Speech API) voice greeting — the Twin
-      // speaks its own name back at the moment of celebration. Fire-and-
-      // forget: speakTwinGreeting() never throws and a missing/unsupported
-      // voice must not block or delay the redirect below.
-      void speakTwinGreeting(buildTwinGreeting(twinName, language), {
-        lang: language === 'th' ? 'th-TH' : 'en-US',
-      });
+      // TWINPRESENCE-005: the greeting itself is now spoken earlier, before
+      // initializeTwin() (see TWINVOICE-001 FIX above) — this stage just
+      // continues into the celebration UI.
 
       // PHASE-B: Redirect to Identity World (self) first — user enters their
       // world immediately after birth, not the selector grid. From /worlds/self
@@ -314,18 +322,18 @@ export default function CoreAwakening() {
             {isTh ? 'ไปหน้าหลักก่อน →' : 'Go to dashboard first →'}
           </button>
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ปัญญาของคุณกำลังตื่นขึ้น' : 'Your intelligence is awakening'}</h1>
+            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ฝาแฝดของคุณกำลังตื่นขึ้น' : 'Your intelligence is awakening'}</h1>
             <p className="text-lg text-gray-200 mb-4">{isTh ? 'SELFPRINT พาคุณมาถึงจุดนี้แล้ว' : 'SELFPRINT has brought you to this moment'}</p>
             <p className="text-gray-300 mb-8">
               {isTh
-                ? 'ตอนนี้ AI Twin ส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต'
+                ? 'ตอนนี้ AI Twin ฝาแฝดส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต'
                 : 'Your personal AI Twin is being born now — a reflection of your unique intelligence, ready to grow with you across 12 worlds of life.'}
             </p>
             <button
               onClick={handleIntroComplete}
               className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
             >
-              {isTh ? 'รับชมการตื่นขึ้น' : 'Watch the awakening'}
+              {isTh ? 'รับชมพิธีการตื่นของฝาแฝด' : 'Watch the awakening'}
             </button>
           </div>
         </div>
@@ -353,7 +361,7 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ทวินของคุณตื่นขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
+          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ฝาแฝดของคุณตื่นขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">

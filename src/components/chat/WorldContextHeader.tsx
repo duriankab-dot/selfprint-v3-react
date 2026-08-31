@@ -5,6 +5,7 @@
 
 import type { ReactNode } from 'react';
 import { WORLDS, type WorldId } from '../../constants/worlds';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface WorldContextHeaderProps {
   world: WorldId;
@@ -13,6 +14,9 @@ interface WorldContextHeaderProps {
 
 export function WorldContextHeader({ world, compact = false }: WorldContextHeaderProps): ReactNode {
   const worldInfo = WORLDS[world];
+  const { language } = useLanguage();
+  const isTh = language === 'th';
+  const worldName = isTh ? worldInfo.nameTh : worldInfo.name;
 
   if (compact) {
     return (
@@ -30,7 +34,7 @@ export function WorldContextHeader({ world, compact = false }: WorldContextHeade
       >
         <span>{worldInfo.emoji}</span>
         <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          {worldInfo.name}
+          {worldName}
         </span>
       </div>
     );
@@ -52,10 +56,10 @@ export function WorldContextHeader({ world, compact = false }: WorldContextHeade
       <span style={{ fontSize: '20px' }}>{worldInfo.emoji}</span>
       <div>
         <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-          {worldInfo.name} World
+          {isTh ? `โลก${worldName}` : `${worldName} World`}
         </div>
         <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>
-          {worldInfo.tagline}
+          {isTh ? worldInfo.taglineTh : worldInfo.tagline}
         </div>
       </div>
     </div>

@@ -88,8 +88,8 @@ export default function WorldDetail() {
   return (
     <>
       <MetaTagManager
-        title={`${world.name} — Selfprint`}
-        description={world.description}
+        title={`${isTh ? world.nameTh : world.name} — Selfprint`}
+        description={isTh ? world.descriptionTh : world.description}
         canonicalUrl={`/${language}/worlds/${world.id}`}
       />
       {/* P0-H: full-screen procedural environment (directive §17/§23) —
@@ -168,18 +168,18 @@ export default function WorldDetail() {
             </button>
           </div>
           <div className="wd-emoji">{world.emoji}</div>
-          <h1>{world.name}</h1>
-          <p className="wd-tagline">{world.tagline} · {world.mood}</p>
+          <h1>{isTh ? world.nameTh : world.name}</h1>
+          <p className="wd-tagline">{isTh ? world.taglineTh : world.tagline} · {isTh ? world.moodTh : world.mood}</p>
           {environment && (
             <p className="wd-tagline" style={{ fontSize: '0.85rem', opacity: 0.75 }}>
               {environment.ambientDescription}
             </p>
           )}
-          <p className="wd-description">{world.description}</p>
+          <p className="wd-description">{isTh ? world.descriptionTh : world.description}</p>
 
           <div className="wh-focus-areas">
-            <span className="fa-label">Focus Areas:</span>
-            {world.focusAreas.map((area) => (
+            <span className="fa-label">{isTh ? 'จุดโฟกัส:' : 'Focus Areas:'}</span>
+            {(isTh ? world.focusAreasTh : world.focusAreas).map((area) => (
               <span key={area} className="fa-tag">{area}</span>
             ))}
           </div>
@@ -187,14 +187,14 @@ export default function WorldDetail() {
 
         {articles.length > 0 && (
           <div className="wh-articles">
-            <h3>📖 Explore This World</h3>
+            <h3>📖 {isTh ? `สำรวจโลก${world.nameTh}` : 'Explore This World'}</h3>
             <div className="articles-list">
               {articles.map((article) => (
                 <div key={article.slug} className="article-card">
-                  <h4>{article.title}</h4>
-                  <p className="article-excerpt">{article.excerpt}</p>
+                  <h4>{isTh ? article.titleTh : article.title}</h4>
+                  <p className="article-excerpt">{isTh ? article.excerptTh : article.excerpt}</p>
                   <div className="article-meta">
-                    <span className="meta-read-time">⏱️ {article.readTime} min</span>
+                    <span className="meta-read-time">⏱️ {article.readTime} {isTh ? 'นาที' : 'min'}</span>
                     <span className="meta-author">✍️ {article.author}</span>
                   </div>
                 </div>
@@ -204,12 +204,14 @@ export default function WorldDetail() {
         )}
 
         <div className="wh-twin-guidance">
-          <h3>💡 Twin's Guidance</h3>
+          <h3>💡 {isTh ? 'คำแนะนำจากทวิน' : "Twin's Guidance"}</h3>
           <p className="guidance-text">
-            Twin adapts expertise to {world.name} — insights and advice grounded in this world's focus.
+            {isTh
+              ? `ทวินปรับความเชี่ยวชาญให้เข้ากับโลก${world.nameTh} — ให้ข้อมูลเชิงลึกและคำแนะนำที่ยึดตามจุดโฟกัสของโลกนี้`
+              : `Twin adapts expertise to ${world.name} — insights and advice grounded in this world's focus.`}
           </p>
           <Link to={`/${language}/chat/twin?world=${world.id}`} className="btn-explore">
-            Chat with Twin about {world.name.toLowerCase()} →
+            {isTh ? `คุยกับทวินเรื่อง${world.nameTh} →` : `Chat with Twin about ${world.name.toLowerCase()} →`}
           </Link>
         </div>
       </div>

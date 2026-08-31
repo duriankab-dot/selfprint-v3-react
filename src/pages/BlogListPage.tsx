@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate as useRouterNavigate } from 'react-router-dom';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { useLanguage } from '@/context/LanguageContext';
@@ -106,17 +107,6 @@ const STATIC_ARTICLES: Article[] = [
   },
 ];
 
-/** Render inline markdown: **bold** → <strong>, strip remaining * */
-function renderInline(text: string): React.ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  if (parts.length === 1) return text.replace(/\*/g, '');
-  return parts.map((part, i) => {
-    if (part.startsWith('**') && part.endsWith('**'))
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
-    return part.replace(/\*/g, '');
-  });
-}
-
 /** FAQ schema สำหรับ AEO (Answer Engine Optimization) */
 function buildFaqSchema(articles: Article[]) {
   const faqs = [
@@ -167,12 +157,15 @@ function buildArticleSchema(article: Article) {
 
 export default function BlogListPage() {
   const navigate = useNavigate();
+  // BLOG-CODE-001 FIX: the /blog/:slug route (BlogArticle.tsx) has no
+  // language prefix, but useLangNavigate would force-prefix it with
+  // /en or /th and 404 into the catch-all redirect. Use the raw router
+  // navigate for that one link.
+  const routerNavigate = useRouterNavigate();
   const { language } = useLanguage();
   const isTh = language === 'th';
   const [active, setActive] = useState<Article | null>(null);
-  const [activeContent, setActiveContent] = useState<string>('');
   const [dynamicArticles, setDynamicArticles] = useState<DynamicArticle[]>([]);
-  const [loadingContent, setLoadingContent] = useState(false);
   const savedScrollY = React.useRef<number>(0);
 
   useEffect(() => {
@@ -192,29 +185,6 @@ export default function BlogListPage() {
     loadArticles();
   }, []);
 
-  // ใช้ filePath จาก index.json ตรงๆ — แก้ปัญหา category≠folder และ slug≠filename
-  const loadMarkdownContent = async (world: string, filePath: string) => {
-    setLoadingContent(true);
-    try {
-      const path = `/blog/${world}/${filePath}.md`;
-      const response = await fetch(path);
-      if (!response.ok) {
-        console.warn(`Blog article not found: ${path}`);
-        return;
-      }
-      const rawText = await response.text();
-      // Normalize Windows CRLF → LF (แก้ปัญหา regex ล้มเหลวบน Windows markdown files)
-      const markdown = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-      // Strip YAML frontmatter
-      const match = markdown.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
-      setActiveContent(match ? match[1].trim() : markdown.trim());
-    } catch (err) {
-      console.error('Error loading content:', err);
-    } finally {
-      setLoadingContent(false);
-    }
-  };
-
   const allArticles: Article[] = [
     ...STATIC_ARTICLES,
     ...dynamicArticles.map(da => ({
@@ -231,18 +201,22 @@ export default function BlogListPage() {
     })),
   ];
 
-  const handleArticleClick = async (a: Article) => {
-    // บันทึก scroll position ปัจจุบัน (ใช้ตอนกดกลับ)
-    savedScrollY.current = window.scrollY;
-    // Scroll ไปบนสุดก่อนแสดงบทความ
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    setActive(a);
-    setActiveContent('');
-    if (a.content) return; // static — built-in content
-
-    if (a.world && a.filePath) {
-      await loadMarkdownContent(a.world, a.filePath);
+  const handleArticleClick = (a: Article) => {
+    // Static articles (built-in content array) render in-place below.
+    if (a.content) {
+      savedScrollY.current = window.scrollY;
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      setActive(a);
+      return;
     }
+    // BLOG-CODE-001 FIX: dynamic (.md-sourced) articles used to be fetched
+    // and hand-parsed here with a naive line-splitter that didn't understand
+    // most real Markdown (numbered lists, links, tables, nested formatting,
+    // etc.) — any article using those showed raw Markdown syntax as literal
+    // text ("กลายเป็นโค้ด"). BlogArticle.tsx already renders these correctly
+    // via react-markdown, so send dynamic articles there instead of
+    // duplicating a second, broken renderer.
+    routerNavigate(`/blog/${a.slug}`);
   };
 
   const handleBackToList = () => {
@@ -341,75 +315,6 @@ export default function BlogListPage() {
                     {para}
                   </p>
                 ))}
-
-              {/* Dynamic markdown content */}
-              {!active.content && (
-                <>
-                  {loadingContent && (
-                    <p style={{ textAlign: 'center', color: 'var(--color-text-tertiary)' }}>
-                      {isTh ? 'กำลังโหลดบทความ...' : 'Loading article...'}
-                    </p>
-                  )}
-                  {activeContent &&
-                    activeContent
-                      .split('\n\n')
-                      .filter(p => p.trim())
-                      .map((para, i) => {
-                        const trimmed = para.trim();
-                        // Render headings
-                        if (trimmed.startsWith('# '))
-                          return (
-                            <h1
-                              key={i}
-                              style={{ fontSize: '28px', fontWeight: 900, marginTop: '40px', marginBottom: '16px' }}
-                            >
-                              {trimmed.replace(/^# /, '')}
-                            </h1>
-                          );
-                        if (trimmed.startsWith('## '))
-                          return (
-                            <h2
-                              key={i}
-                              style={{ fontSize: '22px', fontWeight: 800, marginTop: '36px', marginBottom: '12px' }}
-                            >
-                              {trimmed.replace(/^## /, '')}
-                            </h2>
-                          );
-                        if (trimmed.startsWith('### '))
-                          return (
-                            <h3
-                              key={i}
-                              style={{ fontSize: '18px', fontWeight: 700, marginTop: '24px', marginBottom: '8px' }}
-                            >
-                              {trimmed.replace(/^### /, '')}
-                            </h3>
-                          );
-                        // Render bullet list (lines starting with - or *)
-                        const lines = trimmed.split('\n');
-                        const isList = lines.every(l => !l.trim() || /^[-*]\s/.test(l.trim()));
-                        if (isList && lines.some(l => /^[-*]\s/.test(l.trim())))
-                          return (
-                            <ul key={i} style={{ marginBottom: '20px', paddingLeft: '24px' }}>
-                              {lines.filter(l => l.trim()).map((line, j) => (
-                                <li key={j} style={{ marginBottom: '8px' }}>
-                                  {renderInline(line.replace(/^[-*]\s*/, ''))}
-                                </li>
-                              ))}
-                            </ul>
-                          );
-                        return (
-                          <p key={i} style={{ marginBottom: '20px' }}>
-                            {renderInline(trimmed)}
-                          </p>
-                        );
-                      })}
-                  {!loadingContent && !activeContent && (
-                    <p style={{ color: 'var(--color-text-tertiary)', textAlign: 'center', padding: '40px 0' }}>
-                      {isTh ? 'ไม่พบเนื้อหาบทความ — กรุณาลองใหม่อีกครั้ง' : 'Article content not found — please try again'}
-                    </p>
-                  )}
-                </>
-              )}
             </div>
 
             {/* CTA */}

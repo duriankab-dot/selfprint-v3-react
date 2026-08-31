@@ -159,11 +159,16 @@ export function buildPrompt(config: BuildPromptConfig): string {
     }
 
     // TWIN_IDENTITY + TWIN_STATE + ACTIVE_WORLD via existing builder
+    // TWINLANG-001 FIX: userContext.language used to be accepted here but
+    // never actually passed to buildTwinSystemPrompt() — Nova already got a
+    // language-aware prompt (see novaContext.language above), Twin didn't.
     const twinPrompt = buildTwinSystemPrompt(
       twinState.name,
       twinState.profile,
       world,
       twinState.mood,
+      undefined,
+      userContext?.language ?? 'th',
     );
     segments.push(`[TWIN IDENTITY + STATE]\n${twinPrompt}`);
 

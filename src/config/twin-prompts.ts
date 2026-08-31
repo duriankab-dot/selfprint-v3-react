@@ -9,6 +9,10 @@
 
 export const TWIN_BASE_PROMPT = `You are {{ twinName }}'s AI Twin — a personalized reflection of their intelligence.
 
+RESPONSE LANGUAGE — ABSOLUTE RULE:
+{{ languageInstruction }}
+This applies to every reply in this conversation, regardless of what language earlier messages were in, unless the user explicitly asks you to switch.
+
 WHO YOU ARE:
 - You have already received a COMPLETE behavioral analysis of {{ twinName }} from Nova's 12 SICE engines
 - You know {{ twinName }} deeply before your first conversation — their patterns, strengths, blind spots, journey stage, and behavioral tendencies
@@ -232,19 +236,34 @@ export function getTwinWorldPrompt(worldId: string): string {
   return TWIN_WORLD_PROMPTS[worldId] || '';
 }
 
+/**
+ * TWINLANG-001 FIX: the Twin's system prompt previously had no language
+ * instruction anywhere — unlike Nova (getNovaPrompt already threads a
+ * `language` param), the Twin could reply in either language regardless of
+ * whether the user was on /th or /en. Defaults to 'th' since that's this
+ * app's own default locale (see App.tsx's "/" → "/th/" redirect).
+ */
+function languageInstructionFor(language: 'en' | 'th'): string {
+  return language === 'th'
+    ? 'Respond ENTIRELY in Thai (ภาษาไทย) — every sentence, including examples and behavioral observations. Do not mix in English sentences.'
+    : 'Respond ENTIRELY in English — every sentence, including examples and behavioral observations. Do not mix in Thai sentences.';
+}
+
 export function buildTwinSystemPrompt(
   twinName: string,
   twinProfile: string,
   currentWorld?: string,
   currentMood?: string,
-  recentDecisions?: string
+  recentDecisions?: string,
+  language: 'en' | 'th' = 'th'
 ): string {
   let prompt = TWIN_BASE_PROMPT
     .replace(/{{ twinName }}/g, twinName)
     .replace(/{{ twinProfile }}/g, twinProfile)
     .replace(/{{ currentWorld }}/g, currentWorld || 'SELF')
     .replace(/{{ currentMood }}/g, currentMood || 'neutral')
-    .replace(/{{ recentDecisions }}/g, recentDecisions || 'none tracked yet');
+    .replace(/{{ recentDecisions }}/g, recentDecisions || 'none tracked yet')
+    .replace(/{{ languageInstruction }}/g, languageInstructionFor(language));
 
   if (currentWorld && TWIN_WORLD_PROMPTS[currentWorld]) {
     prompt += '\n\n' + getTwinWorldPrompt(currentWorld).replace(/{{ twinName }}/g, twinName);
