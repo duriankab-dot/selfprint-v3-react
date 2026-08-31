@@ -246,11 +246,18 @@ function App() {
                           <EnvironmentProvider>
                             <EvolutionProvider>
                               <PopupProvider>
+                              {/* LANG-PROVIDER-001 FIX: TwinEvolution and PWAInstallPrompt both
+                                  call useLanguage() (added during the i18n pass), but were mounted
+                                  here — above/outside <LanguageProvider> — which threw "useLanguage
+                                  must be used within LanguageProvider" on every single page load and
+                                  crashed the entire app to a blank/error screen in production.
+                                  LanguageProvider now wraps this whole sibling group instead of just
+                                  <Routes>, with no change to any other provider's nesting order. */}
+                              <LanguageProvider>
                               <TwinEvolution />
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />
                               <PWAInstallPrompt />
-                              <LanguageProvider>
                               <Suspense fallback={null}>
                                 <Routes>
                                   {getLanguagePrefixedRoutes()}
