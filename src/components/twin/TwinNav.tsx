@@ -68,7 +68,12 @@ export function TwinNav({ currentTab, onTabChange }: TwinNavProps) {
     <nav className="twin-nav">
       <div className="twin-nav-container">
         <div className="twin-nav-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <BackButton fallbackTo="/dashboard" />
+          {/* BACKBUTTON-002 FIX: 'chat' (/chat/twin) is a BottomNav root
+              destination ("AI ฝาแฝด") — no back button there, same as
+              /dashboard/worlds/explore/me. The other 3 tabs (knows/
+              personality/settings) are real sub-pages reached by tapping a
+              tab here, so they keep it. */}
+          {activeTab !== 'chat' && <BackButton fallbackTo="/dashboard" />}
           <h2 className="twin-nav-title">
             {twin?.maturityScore !== undefined ? `Twin (${Math.floor(twin.maturityScore)}%)` : 'Twin'}
           </h2>

@@ -75,10 +75,14 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   const visibleLinks = getNavLinks(language).filter(link => !link.requiresAuth || session);
   const isTh = language === 'th';
 
-  // BACKBUTTON-001: Dashboard is the app's home/entry point — no back
-  // button there, matching how "วันนี้/Today" behaves as the root of the
-  // 5-destination app shell everywhere else (BottomNav/NavRail).
-  const showBackButton = !isActive('/dashboard');
+  // BACKBUTTON-002 FIX: a back button on a tab-root page is meaningless —
+  // there's nothing to "come back from," the bottom nav / nav rail IS the
+  // navigation there. Originally only /dashboard was excluded; extended to
+  // all 5 BottomNav/NavRail root destinations (exact-path match only, so
+  // sub-pages like /explore/palmistry or /me/settings still get a real
+  // back button).
+  const ROOT_TAB_PATHS = ['/dashboard', '/worlds', '/chat/twin', '/explore', '/me'];
+  const showBackButton = !ROOT_TAB_PATHS.some(isActive);
 
   const authAction = session ? (
     <button

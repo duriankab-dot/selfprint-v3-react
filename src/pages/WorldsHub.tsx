@@ -13,8 +13,8 @@ import { getAllWorlds, getWorldArticles } from '../constants/worlds';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { getSeoMetadata } from '../constants/seoMetadata';
-import { BackButton } from '../components/common/BackButton';
 import { NavRail } from '../components/layout/NavRail';
+import { BottomNav } from '../components/layout/BottomNav';
 import '../styles/worlds-hub.css';
 
 /**
@@ -53,25 +53,20 @@ export default function WorldsHub() {
           canonicalUrl={`/${language}/worlds`}
         />
       )}
-      {/* APPSHELL-006 FIX: user explicitly asked for the desktop nav rail
-          here too, overriding the earlier "full-immersion, no chrome"
-          decision — see WORLDSEXIT-001 below for why this page had no
-          NavBar/BottomNav in the first place. */}
+      {/* APPSHELL-006 FIX: desktop nav rail — overrides the earlier
+          "full-immersion, no chrome" decision, same as WorldDetail.tsx. */}
       <NavRail />
+      {/* BACKBUTTON-002 FIX: /worlds is a BottomNav root destination
+          ("โลก"), same as /dashboard, /explore, /chat/twin, /me — a
+          history-back button here made no sense ("อยู่หน้าแรก จะย้อนไปไหน").
+          WorldsHub previously had no BottomNav at all (leftover from the
+          old full-immersion design) and stood in a lone ad-hoc back button
+          as its only exit — replaced with the real 5-tab BottomNav that
+          every other root page already has, consistent with the App Shell
+          (see NavBar.tsx's ROOT_TAB_PATHS suppression for the matching fix
+          on pages that do use NavBar). */}
+      <BottomNav />
       <div className="worlds-hub" data-testid="worlds-container">
-        {/* WORLDSEXIT-001 FIX: WorldsHub renders with no NavBar/BottomNav
-            (full-immersion layout, like WorldDetail) but — unlike
-            WorldDetail — had no back/home control of its own, so a user
-            landing here had zero way out except the browser's own back
-            button. Mirrors WorldDetail.tsx's wd-back/home button pair.
-            BACKBUTTON-001: now real history-back (falls back to
-            /dashboard only when there's nothing to go back to). */}
-        <BackButton
-          className="wh-exit"
-          fallbackTo="/dashboard"
-          label={isTh ? 'ย้อนกลับ' : 'Back'}
-          data-testid="worlds-exit"
-        />
         {/* Header */}
         <div className="wh-header">
           <h1>✨ {isTh ? '12 โลกแห่งชีวิต' : 'The 12 Worlds'}</h1>

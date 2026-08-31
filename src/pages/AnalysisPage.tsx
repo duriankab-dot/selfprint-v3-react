@@ -33,6 +33,7 @@ import { Alert } from '@/components/composites/Alert';
 import { useAnalysisStore } from '@/store/analysisStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/services/supabase-service';
+import { useVoiceTwin } from '@/hooks/useVoiceTwin';
 import '../styles/analysis.css';
 
 // i18n scope note: displayAnalysis text (selfOverview, pattern names/
@@ -169,12 +170,18 @@ const AnalysisPage: React.FC = () => {
         confidenceScore?: number;
       };
       const siceArr = Array.isArray(data.sice_results) ? data.sice_results : [];
+      // FULLANALYSIS-001 FIX: this fallback path used to throw away most of
+      // the real computed intelligence — selfOverview only used the first 2
+      // of pi.insights, strengths only the first 4 of synth.themes — even
+      // when SICE had produced more. "ผลวิเคราะห์เต็ม จาก SICE ทั้งหมด" means
+      // using everything that's actually there, not a truncated preview.
+      const allInsights = pi.insights ?? [];
       return {
-        selfOverview: [pi.recommendedAction, ...(pi.insights ?? []).slice(0, 2)].filter(Boolean).join(' '),
+        selfOverview: [pi.recommendedAction, ...allInsights].filter(Boolean).join(' '),
         behavioralPatterns: [] as any[],
-        strengths: (synth.themes ?? []).slice(0, 4).map((t: string, i: number) => ({
+        strengths: (synth.themes ?? []).map((t: string, i: number) => ({
           name: t,
-          description: (pi.insights ?? [])[i] ?? t,
+          description: allInsights[i] ?? allInsights[i % Math.max(allInsights.length, 1)] ?? t,
           confidence: (pi.confidence ?? 70) / 100,
           evidence: [] as string[],
         })),
@@ -206,6 +213,50 @@ const AnalysisPage: React.FC = () => {
   const displayAnalysis = analysis ?? (essenceAnalysis ?? null);
 
   const isLoading = ctxLoading || patLoading;
+
+  // --------------------------------------------------------------------------
+  // FULLANALYSIS-001: play the full analysis as natural-Thai speech.
+  // Reuses useVoiceTwin (Web Speech API, th-TH) — same hook already used in
+  // CoreAwakening.tsx, no new dependency. Builds one flowing narrative
+  // paragraph from every real section of displayAnalysis (not a bullet-point
+  // read-out), so it reads like someone explaining the analysis out loud.
+  // --------------------------------------------------------------------------
+
+  const { state: voiceState, speak, stopSpeaking } = useVoiceTwin({ language: 'th-TH' });
+
+  const spokenNarrative = useMemo(() => {
+    if (!displayAnalysis) return '';
+    const parts: string[] = [];
+    if (displayAnalysis.selfOverview) parts.push(displayAnalysis.selfOverview);
+    if (displayAnalysis.strengths.length > 0) {
+      parts.push(
+        (isTh ? 'จุดแข็งของคุณคือ ' : 'Your strengths are ') +
+          displayAnalysis.strengths.map((s: { name: string }) => s.name).join(isTh ? ', ' : ', ') + '.'
+      );
+    }
+    if (displayAnalysis.blindSpots.length > 0) {
+      parts.push(
+        (isTh ? 'สิ่งที่ควรระวังคือ ' : 'Things worth watching for: ') +
+          displayAnalysis.blindSpots.map((b: { title: string }) => b.title).join(isTh ? ', ' : ', ') + '.'
+      );
+    }
+    if (displayAnalysis.guidance.length > 0) {
+      parts.push((isTh ? 'คำแนะนำสำหรับคุณ: ' : 'Guidance for you: ') + displayAnalysis.guidance.join(' '));
+    }
+    if (displayAnalysis.nextSteps.length > 0) {
+      parts.push((isTh ? 'ก้าวต่อไปที่แนะนำ: ' : 'Recommended next steps: ') + displayAnalysis.nextSteps.join(' '));
+    }
+    return parts.join(' ');
+  }, [displayAnalysis, isTh]);
+
+  const isSpeaking = voiceState.mode === 'speaking';
+  const handleTogglePlay = () => {
+    if (isSpeaking) {
+      stopSpeaking();
+    } else if (spokenNarrative) {
+      speak(spokenNarrative);
+    }
+  };
 
   // --------------------------------------------------------------------------
   // Redirect unauthenticated users — /analysis requires auth
@@ -256,9 +307,9 @@ const AnalysisPage: React.FC = () => {
           <button
             className="analysis__back-btn"
             onClick={() => navigate('/dashboard')}
-            aria-label={isTh ? 'กลับไป Dashboard' : 'Back to Dashboard'}
+            aria-label={isTh ? 'กลับไปหน้าหลัก' : 'Back to Dashboard'}
           >
-            ← Dashboard
+            {isTh ? '← หน้าหลัก' : '← Dashboard'}
           </button>
           <div>
             <h1 className="analysis__page-title">{isTh ? 'การวิเคราะห์ส่วนตัวของคุณ' : 'Your personal analysis'}</h1>
@@ -268,6 +319,20 @@ const AnalysisPage: React.FC = () => {
                 : 'A full picture from your AI twin — grounded in your real usage data'}
             </p>
           </div>
+          {/* FULLANALYSIS-001: play the whole analysis aloud (th-TH TTS via
+              useVoiceTwin — same engine as CoreAwakening's Twin voice).
+              Only rendered when there's real narrative text to read and the
+              browser supports speech synthesis. */}
+          {displayAnalysis && spokenNarrative && voiceState.supported && (
+            <button
+              type="button"
+              className="analysis__play-audio-btn"
+              onClick={handleTogglePlay}
+              aria-label={isTh ? (isSpeaking ? 'หยุดเล่นเสียง' : 'ฟังผลวิเคราะห์') : (isSpeaking ? 'Stop' : 'Play analysis')}
+            >
+              {isSpeaking ? '⏹ ' + (isTh ? 'หยุด' : 'Stop') : '🔊 ' + (isTh ? 'ฟังผลวิเคราะห์' : 'Play analysis')}
+            </button>
+          )}
           {metrics && metrics.totalInsights > 0 && (
             <div className="analysis__header-confidence">
               <ConfidenceIndicator

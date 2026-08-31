@@ -105,6 +105,14 @@
   --color-bg-primary: #FFFFFF;
   --color-bg-secondary: #F9FAFB;
   --color-bg-tertiary: #F3F4F6;
+  /* CARDBG-001 FIX: several component CSS files (living-twin.css,
+     growth-space.css, privacy.css) reference var(--color-bg-card, #fff)
+     but this token was never actually defined anywhere — every one of
+     those cards was silently rendering hardcoded white, including now on
+     the dark-navy default theme (a white card floating on a dark page).
+     Aliased to --color-bg-secondary so it follows [data-mode] correctly
+     like every other surface token. */
+  --color-bg-card: var(--color-bg-secondary);
 
   --color-text-primary: #0F172A;
   --color-text-secondary: #4B5563;

@@ -63,6 +63,30 @@
   flex-shrink: 0;
 }
 
+/* FULLANALYSIS-001: play-audio button — rounded, subtle shadow, lifts +
+   accent-tints on hover, matching the button style used across the rest of
+   the redesigned app shell. */
+.analysis__play-audio-btn {
+  background: var(--color-accent-primary);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  transition: transform 150ms, box-shadow 150ms, opacity 150ms;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.analysis__play-audio-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-primary) 45%, transparent);
+}
+
 /* ============================================================================
    Loading / Empty
    ============================================================================ */
