@@ -37,6 +37,7 @@ export default function WorldsHub() {
   const navigate = useWorldNavigate();
   const worlds = getAllWorlds();
   const { language } = useLanguage();
+  const isTh = language === 'th';
   const seoData = getSeoMetadata('worlds', language);
 
   return (
@@ -53,9 +54,11 @@ export default function WorldsHub() {
       <div className="worlds-hub" data-testid="worlds-container">
         {/* Header */}
         <div className="wh-header">
-          <h1>✨ The 12 Worlds</h1>
+          <h1>✨ {isTh ? '12 โลกแห่งชีวิต' : 'The 12 Worlds'}</h1>
           <p className="wh-subtitle">
-            Explore all 12 dimensions of your life with Twin as your guide — scroll down to see them all
+            {isTh
+              ? 'สำรวจทั้ง 12 มิติของชีวิตคุณ โดยมีทวินเป็นไกด์นำทาง — เลื่อนลงเพื่อดูทั้งหมด'
+              : 'Explore all 12 dimensions of your life with Twin as your guide — scroll down to see them all'}
           </p>
         </div>
 
@@ -65,6 +68,7 @@ export default function WorldsHub() {
             <WorldCard
               key={world.id}
               world={world}
+              isTh={isTh}
               onClick={() => navigate(`/${language}/worlds/${world.id}`)}
               articleCount={getWorldArticles(world.id).length}
             />
@@ -73,11 +77,11 @@ export default function WorldsHub() {
 
         {/* Info Section */}
         <div className="wh-info">
-          <h3>How the 12 Worlds Work</h3>
+          <h3>{isTh ? '12 โลกทำงานอย่างไร' : 'How the 12 Worlds Work'}</h3>
           <p>
-            Each World represents a dimension of your life. As you explore with Twin, you'll gain insights,
-            track decisions, and grow through each world. Your Twin adapts and learns to serve each world
-            according to your unique needs and values.
+            {isTh
+              ? 'แต่ละโลกแทนหนึ่งมิติของชีวิตคุณ เมื่อคุณสำรวจไปพร้อมกับทวิน คุณจะได้รับข้อมูลเชิงลึก ติดตามการตัดสินใจ และเติบโตผ่านแต่ละโลก ทวินของคุณจะปรับตัวและเรียนรู้เพื่อรับใช้แต่ละโลกตามความต้องการและคุณค่าเฉพาะตัวของคุณ'
+              : "Each World represents a dimension of your life. As you explore with Twin, you'll gain insights, track decisions, and grow through each world. Your Twin adapts and learns to serve each world according to your unique needs and values."}
           </p>
         </div>
       </div>
@@ -87,11 +91,12 @@ export default function WorldsHub() {
 
 interface WorldCardProps {
   world: ReturnType<typeof getAllWorlds>[0];
+  isTh: boolean;
   onClick: () => void;
   articleCount: number;
 }
 
-function WorldCard({ world, onClick, articleCount }: WorldCardProps) {
+function WorldCard({ world, isTh, onClick, articleCount }: WorldCardProps) {
   return (
     <div
       className="world-card"
@@ -105,9 +110,13 @@ function WorldCard({ world, onClick, articleCount }: WorldCardProps) {
       style={{ borderColor: world.color, '--world-color': world.color } as React.CSSProperties}
     >
       <div className="wc-emoji" data-testid="world-icon">{world.emoji}</div>
-      <h3 data-testid="world-name">{world.name}</h3>
-      <p>{world.tagline}</p>
-      {articleCount > 0 && <span className="wc-articles">{articleCount} articles</span>}
+      <h3 data-testid="world-name">{isTh ? world.nameTh : world.name}</h3>
+      <p>{isTh ? world.taglineTh : world.tagline}</p>
+      {articleCount > 0 && (
+        <span className="wc-articles">
+          {isTh ? `${articleCount} บทความ` : `${articleCount} articles`}
+        </span>
+      )}
     </div>
   );
 }

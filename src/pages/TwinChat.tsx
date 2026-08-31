@@ -13,6 +13,7 @@ import { useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useWorld } from '../context/WorldContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useUserStore } from '../store/userStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { WORLDS, type WorldId } from '../constants/worlds';
@@ -36,6 +37,10 @@ export default function TwinChat() {
   const { session } = useAuth();
   const { twin, loading: twinLoading, setCurrentWorld } = useTwin();
   const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
+  // TWINLANG-001 FIX: this page never read the site language at all — the
+  // Twin's system prompt had no language instruction (see twin-prompts.ts)
+  // so it could reply in either language regardless of /th vs /en.
+  const { language } = useLanguage();
   // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
   // "intelligent from birth" — knows the user before the first message.
   const userProfile = useUserStore(s => s.profile);
@@ -392,6 +397,7 @@ export default function TwinChat() {
         twinProfile,
         currentWorld || undefined,
         recentMemories,             // P0-I: inject memories into [RELEVANT MEMORY]
+        language,                   // TWINLANG-001 FIX: Twin replies in the site's language
       );
 
       // Save Twin's response to database (role must be 'user' | 'assistant')

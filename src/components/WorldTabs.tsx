@@ -12,6 +12,7 @@
 
 import { useWorld } from '../context/WorldContext';
 import { WORLDS, type WorldId } from '../constants/worlds';
+import { useLanguage } from '../context/LanguageContext';
 
 interface WorldTabsProps {
   className?: string;
@@ -40,6 +41,8 @@ export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
     worldStats,
     recordWorldVisit,
   } = useWorld();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
 
   /**
    * Handle world selection
@@ -58,7 +61,9 @@ export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
       {/* Header */}
       <div className="mb-3">
         <h3 className="text-sm font-bold text-white">
-          {currentWorld ? `🌍 ${WORLDS[currentWorld].name}` : '🌍 Select a World'}
+          {currentWorld
+            ? `🌍 ${isTh ? WORLDS[currentWorld].nameTh : WORLDS[currentWorld].name}`
+            : `🌍 ${isTh ? 'เลือกโลก' : 'Select a World'}`}
         </h3>
       </div>
 
@@ -66,6 +71,7 @@ export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
       <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2 mb-3">
         {worldIds.map((worldId) => {
           const world = WORLDS[worldId];
+          const worldName = isTh ? world.nameTh : world.name;
           const isActive = currentWorld === worldId;
           const stats = worldStats[worldId];
           const expertise = stats?.timeSpentMinutes ? Math.min((stats.timeSpentMinutes / 60) * 10, 100) : 10;
@@ -81,16 +87,16 @@ export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }
               `}
-              title={`${world.name}: ${stats?.visitsCount || 0} visits`}
+              title={isTh ? `${worldName}: ${stats?.visitsCount || 0} ครั้ง` : `${worldName}: ${stats?.visitsCount || 0} visits`}
               aria-pressed={isActive}
-              aria-label={`${world.name} world`}
+              aria-label={isTh ? `โลก${worldName}` : `${worldName} world`}
             >
               {/* Icon */}
               <span className="text-xl mb-1">{world.emoji}</span>
 
-              {/* Name */}
+              {/* Name — Thai names are already short; only truncate the English ones */}
               <span className="text-xs font-semibold truncate w-full text-center">
-                {world.name.substring(0, 4)}
+                {isTh ? worldName : worldName.substring(0, 4)}
               </span>
 
               {/* Expertise Bar */}
@@ -112,13 +118,13 @@ export function WorldTabs({ className = '', onWorldSelect }: WorldTabsProps) {
         <div className="bg-gray-900 rounded p-2 text-xs text-gray-300 border border-gray-700">
           <div className="grid grid-cols-3 gap-2">
             <div>
-              <span className="font-semibold text-white">Visits:</span> {worldStats[currentWorld].visitsCount}
+              <span className="font-semibold text-white">{isTh ? 'เข้าชม:' : 'Visits:'}</span> {worldStats[currentWorld].visitsCount}
             </div>
             <div>
-              <span className="font-semibold text-white">Decisions:</span> {worldStats[currentWorld].decisionsMade}
+              <span className="font-semibold text-white">{isTh ? 'การตัดสินใจ:' : 'Decisions:'}</span> {worldStats[currentWorld].decisionsMade}
             </div>
             <div>
-              <span className="font-semibold text-white">Insights:</span> {worldStats[currentWorld].insightsGained}
+              <span className="font-semibold text-white">{isTh ? 'ข้อมูลเชิงลึก:' : 'Insights:'}</span> {worldStats[currentWorld].insightsGained}
             </div>
           </div>
         </div>

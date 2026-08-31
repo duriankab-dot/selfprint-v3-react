@@ -1,7 +1,15 @@
 # Cloudflare Pages redirects
-# Blog static files - serve directly
-/blog/index.json  /blog/index.json  200
-/blog/*           /blog/*           200
+#
+# BLOG-CODE-001 FIX: no explicit passthrough rule is needed for
+# /blog/index.json or /blog/{world}/{file}.md — Cloudflare Pages always
+# checks for a matching static file BEFORE consulting this file, so real
+# static assets under /blog/ are served automatically regardless of the
+# rule below. The old `/blog/*  /blog/*  200` rule instead matched (and
+# swallowed) the SPA article route /blog/:slug too, since that also starts
+# with /blog/ but has no matching static file — on a direct load or hard
+# refresh of an article URL, Cloudflare served its platform 404 instead of
+# falling through to index.html, so React Router never got a chance to
+# mount BlogArticle.tsx. Removed so /blog/:slug falls through correctly.
 
 # React Router - SPA fallback
 /*                /index.html       200

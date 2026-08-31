@@ -53,6 +53,7 @@ export async function callTwinAPI(
   twinProfile: string,
   worldId?: string,
   memories?: Memory[],  // P0-I: inject twin_memories into system prompt
+  language: 'en' | 'th' = 'th', // TWINLANG-001 FIX: thread UI language into the system prompt
 ): Promise<string> {
   try {
     if (!messages.length) {
@@ -71,6 +72,7 @@ export async function callTwinAPI(
           name: twinName,
           profile: twinProfile,
         },
+        userContext: { language },
       });
     } catch {
       // Fallback: legacy builder (no memory injection)
@@ -80,6 +82,7 @@ export async function callTwinAPI(
         worldId,
         undefined,
         messages.filter(m => m.role === 'user').slice(-3).map(m => m.content).join(' | '),
+        language,
       );
     }
 
@@ -118,7 +121,8 @@ export async function streamTwinResponse(
   twinName: string,
   twinProfile: string,
   worldId: string,
-  onChunk: (chunk: string) => void
+  onChunk: (chunk: string) => void,
+  language: 'en' | 'th' = 'th', // TWINLANG-001 FIX: thread UI language into the system prompt
 ): Promise<void> {
   try {
     const systemPrompt = buildTwinSystemPrompt(
@@ -130,7 +134,8 @@ export async function streamTwinResponse(
         .filter(m => m.role === 'user')
         .slice(-3)
         .map(m => m.content)
-        .join(' | ')
+        .join(' | '),
+      language,
     );
 
     const response = await fetch('/api/twin-stream', {

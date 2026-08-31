@@ -164,178 +164,6 @@ const SEO_COPY: Record<'th' | 'en', Record<Segment, SeoCopy>> = {
   },
 };
 
-// ─── TwinBorn SVG ─────────────────────────────────────────────────────────────
-// Spec §4.1: Two human silhouettes connected by particle data stream.
-// Left = Real Human (illuminates on load). Right = AI Twin (materializes).
-// Pure CSS animations — no Three.js, GPU-accelerated via will-change.
-
-const SICE_LABELS_TH = ['ตัวตน','จิตใจ','ความสัมพันธ์','ความรัก','อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต','การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต'];
-const SICE_LABELS_EN = ['Self','Mind','Relationships','Love','Career','Wealth','Life','Growth','Decisions','Purpose','Health','Future'];
-
-const TwinBornSvg = ({ isTh }: { isTh: boolean }) => (
-  <svg
-    viewBox="0 0 400 340"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    style={{ width: '100%', maxWidth: 380, height: 'auto', willChange: 'transform' }}
-    aria-hidden="true"
-  >
-    <defs>
-      <radialGradient id="human-glow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="var(--color-accent-primary)" stopOpacity="0.3"/>
-        <stop offset="100%" stopColor="var(--color-accent-primary)" stopOpacity="0"/>
-      </radialGradient>
-      <radialGradient id="twin-glow" cx="50%" cy="50%" r="50%">
-        <stop offset="0%" stopColor="#00f2fe" stopOpacity="0.35"/>
-        <stop offset="100%" stopColor="#00f2fe" stopOpacity="0"/>
-      </radialGradient>
-      <filter id="glow-blur">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
-        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>
-
-    <style>{`
-      @keyframes tb-human-pulse{0%,100%{opacity:.55}50%{opacity:.9}}
-      @keyframes tb-twin-materialize{0%{opacity:.1;filter:url(#glow-blur)}30%{opacity:.45}70%{opacity:.75}100%{opacity:.9;filter:url(#glow-blur)}}
-      @keyframes tb-twin-pulse{0%,100%{opacity:.65;transform:scale(1)}50%{opacity:1;transform:scale(1.015)}}
-      @keyframes tb-particle1{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,-8px);opacity:0}}
-      @keyframes tb-particle2{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,5px);opacity:0}}
-      @keyframes tb-particle3{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,-18px);opacity:0}}
-      @keyframes tb-particle4{0%{transform:translate(0,0);opacity:1}100%{transform:translate(130px,14px);opacity:0}}
-      @keyframes tb-stream-dash{0%{stroke-dashoffset:40}100%{stroke-dashoffset:0}}
-      @keyframes tb-node-orbit{0%{transform:rotate(0deg) translateX(110px) rotate(0deg)}100%{transform:rotate(360deg) translateX(110px) rotate(-360deg)}}
-      @keyframes tb-node-pulse{0%,100%{opacity:.45;r:3}50%{opacity:.9;r:4}}
-      @keyframes tb-label-float{0%,100%{opacity:.5}50%{opacity:.85}}
-      .tb-human{animation:tb-human-pulse 3s ease-in-out infinite}
-      .tb-twin{animation:tb-twin-pulse 3.5s 1.5s ease-in-out infinite both;transform-origin:310px 155px}
-      .tb-p1{animation:tb-particle1 2.2s .0s ease-in-out infinite;will-change:transform,opacity}
-      .tb-p2{animation:tb-particle2 2.2s .55s ease-in-out infinite;will-change:transform,opacity}
-      .tb-p3{animation:tb-particle3 2.2s 1.1s ease-in-out infinite;will-change:transform,opacity}
-      .tb-p4{animation:tb-particle4 2.2s 1.65s ease-in-out infinite;will-change:transform,opacity}
-      .tb-stream{animation:tb-stream-dash 1.8s linear infinite}
-      .tb-node{animation:tb-node-pulse 2.8s ease-in-out infinite}
-      .tb-label{animation:tb-label-float 3s ease-in-out infinite;font-size:7.5px;fill:var(--color-accent-primary)}
-    `}</style>
-
-    {/* ── 12 SICE orbit nodes (§4.2) ── */}
-    <g style={{ transformOrigin: '200px 170px' }}>
-      {(isTh ? SICE_LABELS_TH : SICE_LABELS_EN).map((label, i) => {
-        const angle = (i / 12) * 2 * Math.PI - Math.PI / 2;
-        const r = 155;
-        const cx = 200 + r * Math.cos(angle);
-        const cy = 170 + r * Math.sin(angle);
-        return (
-          <g key={i}>
-            <circle
-              className="tb-node"
-              cx={cx} cy={cy} r={3}
-              fill="var(--color-accent-primary)"
-              opacity="0.5"
-              style={{ animationDelay: `${i * 0.23}s`, willChange: 'opacity' }}
-            />
-            <line
-              x1={200} y1={170} x2={cx} y2={cy}
-              stroke="var(--color-accent-primary)"
-              strokeWidth="0.5"
-              opacity="0.08"
-            />
-            <text
-              x={cx + (cx > 200 ? 5 : -5)}
-              y={cy + (cy > 170 ? 5 : -2)}
-              className="tb-label"
-              textAnchor={cx > 200 ? 'start' : 'end'}
-              style={{ animationDelay: `${i * 0.2}s` }}
-            >
-              {label}
-            </text>
-          </g>
-        );
-      })}
-    </g>
-
-    {/* ── Connecting data streams (L → R) ── */}
-    {[145, 155, 165, 175, 185].map((y, i) => (
-      <line
-        key={i}
-        className="tb-stream"
-        x1={140} y1={y} x2={265} y2={y}
-        stroke="var(--color-accent-primary)"
-        strokeWidth={i === 2 ? 1.2 : 0.7}
-        opacity={i === 2 ? 0.5 : 0.25}
-        strokeDasharray="12 8"
-        style={{ animationDelay: `${i * 0.35}s` }}
-      />
-    ))}
-
-    {/* ── Particles flying L → R ── */}
-    <circle className="tb-p1" cx={148} cy={158} r="2.5" fill="var(--color-accent-primary)" opacity="0.9"/>
-    <circle className="tb-p2" cx={148} cy={172} r="2"   fill="#00f2fe" opacity="0.85"/>
-    <circle className="tb-p3" cx={148} cy={148} r="1.8" fill="var(--color-accent-primary)" opacity="0.75"/>
-    <circle className="tb-p4" cx={148} cy={182} r="1.5" fill="#818cf8" opacity="0.8"/>
-
-    {/* ── Left: Human silhouette (mesh/wireframe style) ── */}
-    <g className="tb-human" filter="url(#glow-blur)">
-      {/* Head */}
-      <circle cx="100" cy="95" r="18" stroke="var(--color-accent-primary)" strokeWidth="1.5" fill="none" opacity="0.7"/>
-      <circle cx="100" cy="95" r="10" stroke="var(--color-accent-primary)" strokeWidth="0.75" fill="none" opacity="0.4"/>
-      {/* Neck */}
-      <line x1="100" y1="113" x2="100" y2="128" stroke="var(--color-accent-primary)" strokeWidth="1.5" opacity="0.6"/>
-      {/* Shoulders */}
-      <path d="M68 128 Q100 122 132 128" stroke="var(--color-accent-primary)" strokeWidth="1.5" fill="none" opacity="0.7"/>
-      {/* Torso */}
-      <path d="M72 128 L76 200 L100 210 L124 200 L128 128" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      {/* Center spine line */}
-      <line x1="100" y1="128" x2="100" y2="210" stroke="var(--color-accent-primary)" strokeWidth="0.75" opacity="0.3" strokeDasharray="4 4"/>
-      {/* Arms */}
-      <path d="M68 132 L55 180 L60 200" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      <path d="M132 132 L145 180 L140 200" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      {/* Legs */}
-      <path d="M80 210 L74 270 L82 280" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      <path d="M120 210 L126 270 L118 280" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      {/* Body grid lines */}
-      {[145, 162, 179, 196].map((y, i) => (
-        <line key={i} x1="76" y1={y} x2="124" y2={y} stroke="var(--color-accent-primary)" strokeWidth="0.5" opacity="0.2"/>
-      ))}
-      {/* Glow halo */}
-      <ellipse cx="100" cy="185" rx="40" ry="60" fill="url(#human-glow)" opacity="0.4"/>
-      {/* Label */}
-      <text x="100" y="295" textAnchor="middle" fontSize="9" fontWeight="600" fill="var(--color-accent-primary)" opacity="0.7" letterSpacing="1.5">HUMAN</text>
-    </g>
-
-    {/* ── Right: AI Twin silhouette (cyan, pulsates) ── */}
-    <g className="tb-twin">
-      {/* Head */}
-      <circle cx="310" cy="95" r="18" stroke="#00f2fe" strokeWidth="1.5" fill="none" opacity="0.75"/>
-      <circle cx="310" cy="95" r="10" stroke="#818cf8" strokeWidth="0.75" fill="none" opacity="0.45"/>
-      {/* Neck */}
-      <line x1="310" y1="113" x2="310" y2="128" stroke="#00f2fe" strokeWidth="1.5" opacity="0.6"/>
-      {/* Shoulders */}
-      <path d="M278 128 Q310 122 342 128" stroke="#00f2fe" strokeWidth="1.5" fill="none" opacity="0.7"/>
-      {/* Torso */}
-      <path d="M282 128 L286 200 L310 210 L334 200 L338 128" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.6"/>
-      <line x1="310" y1="128" x2="310" y2="210" stroke="#00f2fe" strokeWidth="0.75" opacity="0.3" strokeDasharray="4 4"/>
-      {/* Arms */}
-      <path d="M278 132 L265 180 L270 200" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      <path d="M342 132 L355 180 L350 200" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      {/* Legs */}
-      <path d="M290 210 L284 270 L292 280" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      <path d="M330 210 L336 270 L328 280" stroke="#818cf8" strokeWidth="1.2" fill="none" opacity="0.55"/>
-      {/* Body grid lines */}
-      {[145, 162, 179, 196].map((y, i) => (
-        <line key={i} x1="286" y1={y} x2="334" y2={y} stroke="#00f2fe" strokeWidth="0.5" opacity="0.22"/>
-      ))}
-      {/* Twin glow halo */}
-      <ellipse cx="310" cy="185" rx="40" ry="60" fill="url(#twin-glow)" opacity="0.5"/>
-      {/* Label */}
-      <text x="310" y="295" textAnchor="middle" fontSize="9" fontWeight="600" fill="#00f2fe" opacity="0.8" letterSpacing="1.5">AI TWIN</text>
-    </g>
-
-    {/* ── Center label ── */}
-    <text x="200" y="320" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)" opacity="0.4" letterSpacing="3">SELFPRINT ENGINE</text>
-  </svg>
-);
-
 // ─── Smart Entry Hook ─────────────────────────────────────────────────────────
 
 function useSmartEntry() {
@@ -475,6 +303,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const [readingStep, setReadingStep] = useState(0);
   const s2Ref = useRef<HTMLElement>(null);
   const s3Ref = useRef<HTMLElement>(null);
+  const s2VisualRef = useRef<HTMLDivElement>(null);
 
   const goFull = () => {
     setLandingContext({ mood });
@@ -577,7 +406,6 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         .hero-title{animation:hero-enter .8s .15s both}
         .hero-sub{animation:hero-enter .8s .3s both}
         .hero-cta{animation:hero-enter .7s .45s both}
-        .hero-visual{animation:hero-enter 1s .2s both}
         .hero-scroll{animation:sp-bounce 2.2s ease-in-out infinite}
         .sp-s2-enter{transition:opacity .6s ease,transform .6s ease}
         .sp-s3-enter{transition:opacity .7s ease,transform .7s ease}
@@ -586,8 +414,6 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         .sp-cta-btn:hover .sp-cta-arrow{transform:translateX(5px)}
         .sp-cta-arrow{display:inline-block;transition:transform .3s ease}
         @media(max-width:700px){
-          .sp-s2-grid{grid-template-columns:1fr!important}
-          .sp-nova-wrap{max-width:220px!important;margin:0 auto 32px!important}
           .sp-s3-bullets{text-align:left}
         }
       `}</style>
@@ -622,10 +448,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           style={{
             minHeight: '100vh',
             position: 'relative',
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-            gap: 'clamp(32px, 5vw, 64px)',
-            alignItems: 'center',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
             padding: 'clamp(100px, 14vw, 160px) clamp(24px, 5vw, 80px) clamp(60px, 8vw, 80px)',
             background: 'var(--color-bg-primary)',
             overflow: 'hidden',
@@ -649,8 +474,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             }}
           />
 
-          {/* Left: text content */}
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          {/* Text content — single column (visual now lives in Section 2 only) */}
+          <div style={{ position: 'relative', zIndex: 1, maxWidth: '760px', margin: '0 auto', width: '100%' }}>
             <span
               className="hero-badge"
               style={{
@@ -730,24 +555,6 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             </div>
           </div>
 
-          {/* Right: visual */}
-          <div
-            className="hero-visual"
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              padding: 'clamp(16px, 3vw, 28px)',
-              background: 'color-mix(in srgb, var(--color-accent-primary) 5%, var(--color-bg-secondary))',
-              borderRadius: '24px',
-              border: '1px solid var(--color-border)',
-              position: 'relative',
-              zIndex: 1,
-            }}
-          >
-            <TwinBornSvg isTh={lang === 'th'} />
-          </div>
-
           {/* Scroll indicator */}
           <div
             className="hero-scroll"
@@ -774,96 +581,86 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         <section
           ref={s2Ref}
           style={{
-            minHeight: '220vh',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'flex-start',
-            padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 80px) clamp(80px, 10vw, 120px)',
             background: 'var(--color-bg-secondary)',
             position: 'relative',
           }}
         >
-          {/* Section header */}
-          <div
-            className="sp-s2-enter"
-            style={{
-              textAlign: 'center',
-              marginBottom: 'clamp(48px, 6vw, 72px)',
-              opacity: s2Visible ? 1 : 0,
-              transform: s2Visible ? 'translateY(0)' : 'translateY(20px)',
-            }}
-          >
-            <span style={{
-              display: 'inline-block',
-              background: 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)',
-              color: 'var(--color-accent-primary)',
-              border: '1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent)',
-              padding: '4px 14px',
-              borderRadius: '20px',
-              fontSize: '11px',
-              fontWeight: 700,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              marginBottom: '20px',
-            }}>
-              {story.s2.eyeLabel}
-            </span>
-            <h2 style={{
-              fontSize: 'clamp(30px, 4.5vw, 58px)',
-              fontWeight: 900,
-              lineHeight: 1.15,
-              color: 'var(--color-text-primary)',
-              whiteSpace: 'pre-line',
-              letterSpacing: '-0.02em',
-              marginBottom: '16px',
-            }}>
-              {story.s2.h1}
-            </h2>
-            <p style={{
-              fontSize: 'clamp(15px, 2vw, 18px)',
-              color: 'var(--color-text-secondary)',
-              maxWidth: '600px',
-              margin: '0 auto',
-              lineHeight: 1.85,
-            }}>
-              {story.s2.sub}
-            </p>
-          </div>
-
-          {/* Two-column: EvolutionaryVisualSystem (sticky) + reading cards */}
-          <div
-            className="sp-s2-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: 'clamp(32px, 5vw, 72px)',
-              alignItems: 'start',
-              maxWidth: '960px',
-              margin: '0 auto',
-              width: '100%',
-              minHeight: '180vh',
-            }}
-          >
-            {/* Evolutionary visual — sticky within Section 2's scroll range */}
+          {/* Evolutionary visual — own tall scroll zone, sticky at top, full width,
+              BEFORE the text (not a side column). Animation plays out as the user
+              scrolls through this zone; once scrolled past, text below continues
+              in normal flow — decoupled from the text-reveal scroll ref below so
+              adding scroll room here never shifts the reading-card timing. */}
+          <div ref={s2VisualRef} style={{ position: 'relative', height: '200vh' }}>
             <div
-              className="sp-nova-wrap sp-s2-enter"
               style={{
                 position: 'sticky',
-                top: 'clamp(88px, 10vh, 120px)',
-                height: 'calc(100vh - clamp(88px, 10vh, 120px) - 24px)',
+                top: 0,
+                height: '100vh',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                opacity: s2Visible ? 1 : 0,
-                transform: s2Visible ? 'translateY(0)' : 'translateY(24px)',
-                transitionDelay: '0.1s',
+                padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 48px) clamp(24px, 4vw, 40px)',
+                background: 'var(--color-bg-secondary)',
               }}
             >
-              <EvolutionaryVisualSystem containerRef={s2Ref} isTh={lang === 'th'} />
+              <div style={{ width: '100%', maxWidth: '480px' }}>
+                <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: '0 clamp(24px, 5vw, 80px) clamp(80px, 10vw, 120px)' }}>
+            {/* Section header */}
+            <div
+              className="sp-s2-enter"
+              style={{
+                textAlign: 'center',
+                marginBottom: 'clamp(48px, 6vw, 72px)',
+                opacity: s2Visible ? 1 : 0,
+                transform: s2Visible ? 'translateY(0)' : 'translateY(20px)',
+              }}
+            >
+              <span style={{
+                display: 'inline-block',
+                background: 'color-mix(in srgb, var(--color-accent-primary) 12%, transparent)',
+                color: 'var(--color-accent-primary)',
+                border: '1px solid color-mix(in srgb, var(--color-accent-primary) 30%, transparent)',
+                padding: '4px 14px',
+                borderRadius: '20px',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+              }}>
+                {story.s2.eyeLabel}
+              </span>
+              <h2 style={{
+                fontSize: 'clamp(30px, 4.5vw, 58px)',
+                fontWeight: 900,
+                lineHeight: 1.15,
+                color: 'var(--color-text-primary)',
+                whiteSpace: 'pre-line',
+                letterSpacing: '-0.02em',
+                marginBottom: '16px',
+              }}>
+                {story.s2.h1}
+              </h2>
+              <p style={{
+                fontSize: 'clamp(15px, 2vw, 18px)',
+                color: 'var(--color-text-secondary)',
+                maxWidth: '600px',
+                margin: '0 auto',
+                lineHeight: 1.85,
+              }}>
+                {story.s2.sub}
+              </p>
             </div>
 
-            {/* Reading cards — vertically centered across the taller scroll column */}
-            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 'calc(100vh - clamp(88px, 10vh, 120px) - 24px)', gap: '12px' }}>
+            {/* Reading cards — single column, centered */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '600px', margin: '0 auto' }}>
               {story.s2.reading.map((line: string, i: number) => {
                 const isDone = i < readingStep;
                 const isActive = i === readingStep && s2Visible;
@@ -919,32 +716,32 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 );
               })}
             </div>
-          </div>
 
-          {/* Stats row */}
-          <div
-            className="sp-s2-enter"
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 'clamp(24px, 5vw, 64px)',
-              marginTop: 'clamp(48px, 6vw, 72px)',
-              flexWrap: 'wrap',
-              opacity: s2Visible ? 1 : 0,
-              transform: s2Visible ? 'translateY(0)' : 'translateY(16px)',
-              transitionDelay: '0.4s',
-            }}
-          >
-            {story.s2.stats.map((stat, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 800, color: 'var(--color-accent-primary)', lineHeight: 1.1 }}>
-                  {stat.value}
+            {/* Stats row */}
+            <div
+              className="sp-s2-enter"
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: 'clamp(24px, 5vw, 64px)',
+                marginTop: 'clamp(48px, 6vw, 72px)',
+                flexWrap: 'wrap',
+                opacity: s2Visible ? 1 : 0,
+                transform: s2Visible ? 'translateY(0)' : 'translateY(16px)',
+                transitionDelay: '0.4s',
+              }}
+            >
+              {story.s2.stats.map((stat, i) => (
+                <div key={i} style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 800, color: 'var(--color-accent-primary)', lineHeight: 1.1 }}>
+                    {stat.value}
+                  </div>
+                  <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', fontWeight: 500 }}>
+                    {stat.label}
+                  </div>
                 </div>
-                <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginTop: '4px', fontWeight: 500 }}>
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </section>
 
