@@ -160,3 +160,52 @@ export async function streamNovaResponse(
     throw err;
   }
 }
+
+/**
+ * SELFPRINTCHAT-001: general "how do I use this app" assistant for the
+ * floating Selfprint Chat widget — deliberately separate from the Twin
+ * (which knows the user personally) and from Nova's onboarding-guide
+ * prompt (getNovaPrompt is tuned for hub×mood×archetype onboarding
+ * framing, wrong tone for "how do I find X"). Reuses the same /api/nova
+ * endpoint (no new backend, no duplicate engine) with its own system
+ * prompt, and instructs the model itself to suggest the Twin once a
+ * question turns personal/deep — simpler and more reliable than trying to
+ * detect that client-side with keyword heuristics.
+ */
+export async function callSelfprintAssistant(
+  messages: Message[],
+  language: 'en' | 'th' = 'th'
+): Promise<string> {
+  const systemPrompt = language === 'th'
+    ? `คุณคือ "SELFPRINT" ผู้ช่วยทั่วไปของแอป SELFPRINT — หน้าที่ของคุณคือช่วยตอบคำถามเกี่ยวกับวิธีใช้งานแอป เช่น ฟีเจอร์ต่าง ๆ, 12 โลก, ทวิน, การตั้งค่า และคำถามทั่วไป
+ตอบสั้น กระชับ เป็นกันเองแต่สุภาพ เป็นภาษาไทยธรรมชาติเสมอ ไม่ใช้ศัพท์เทคนิคโดยไม่อธิบาย
+คุณไม่ใช่ทวิน (Twin) ของผู้ใช้ — คุณไม่รู้จักผู้ใช้เป็นการส่วนตัวและไม่มีประวัติของเขา
+ถ้าคำถามเริ่มลึกซึ้ง เป็นเรื่องส่วนตัว อารมณ์ความรู้สึก หรือต้องการคำแนะนำเฉพาะตัว ให้แนะนำอย่างอบอุ่นให้ไปคุยกับ "ทวิน" ของผู้ใช้แทน เพราะทวินรู้จักผู้ใช้ลึกซึ้งกว่า`
+    : `You are "SELFPRINT", the app's general assistant — help answer questions about how to use the app: features, the 12 Worlds, the Twin, settings, and general how-to questions.
+Keep answers short, warm, and clear, in natural language, no unexplained jargon.
+You are NOT the user's personal Twin — you don't know them personally and have no history with them.
+If a question turns deep, personal, emotional, or needs individual guidance, warmly suggest they talk to their Twin instead, since the Twin knows them much more deeply.`;
+
+  try {
+    const response = await fetch('/api/nova', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: messages.map(m => ({ role: m.role, content: m.content })),
+        temperature: 0.6,
+        max_tokens: 500,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.content || (language === 'th' ? 'ขอโทษค่ะ ลองถามอีกครั้งได้ไหม' : 'Sorry, could you try asking again?');
+  } catch (err) {
+    console.error('Selfprint assistant API error:', err);
+    throw err;
+  }
+}

@@ -1,13 +1,16 @@
-/* Decision Timeline Styles */
+/* Decision Timeline Styles
+ * CSSVARS-004 FIX: used --spacing-* (undefined; real scale is --space-*).
+ * Fallback values meant this file wasn't visibly broken, just silently
+ * ignoring the real token scale. */
 
 .decision-timeline-container {
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   background: var(--bg-secondary, #f9fafb);
   border-radius: var(--radius-lg, 12px);
 }
 
 .timeline-title {
-  margin: 0 0 var(--spacing-lg, 2rem) 0;
+  margin: 0 0 var(--space-lg, 2rem) 0;
   font-size: 1.5rem;
   font-weight: 600;
   color: var(--text-primary, #1f2937);
@@ -15,12 +18,12 @@
 
 .timeline {
   position: relative;
-  padding-left: var(--spacing-lg, 2rem);
+  padding-left: var(--space-lg, 2rem);
 }
 
 .timeline-item {
   display: flex;
-  margin-bottom: var(--spacing-lg, 2rem);
+  margin-bottom: var(--space-lg, 2rem);
   position: relative;
 }
 
@@ -55,7 +58,7 @@
 }
 
 .decision-entry {
-  padding: var(--spacing-md, 1.5rem);
+  padding: var(--space-md, 1.5rem);
   background: white;
   border-radius: var(--radius-md, 8px);
   border: 1px solid var(--border-color, #e5e7eb);
@@ -71,8 +74,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-md, 1.5rem);
-  margin-bottom: var(--spacing-sm, 1rem);
+  gap: var(--space-md, 1.5rem);
+  margin-bottom: var(--space-sm, 1rem);
 }
 
 .entry-title {
@@ -94,7 +97,7 @@
 }
 
 .entry-choice {
-  margin: var(--spacing-sm, 1rem) 0;
+  margin: var(--space-sm, 1rem) 0;
   font-size: 0.9375rem;
   color: var(--text-secondary, #6b7280);
 }
@@ -106,17 +109,17 @@
 .entry-date {
   font-size: 0.8125rem;
   color: var(--text-tertiary, #9ca3af);
-  margin-top: var(--spacing-sm, 1rem);
+  margin-top: var(--space-sm, 1rem);
 }
 
 .outcomes-section {
-  margin-top: var(--spacing-md, 1.5rem);
-  padding-top: var(--spacing-md, 1.5rem);
+  margin-top: var(--space-md, 1.5rem);
+  padding-top: var(--space-md, 1.5rem);
   border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
 .outcomes-title {
-  margin: 0 0 var(--spacing-sm, 1rem) 0;
+  margin: 0 0 var(--space-sm, 1rem) 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--text-primary, #1f2937);
@@ -125,14 +128,14 @@
 .outcomes-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm, 1rem);
+  gap: var(--space-sm, 1rem);
 }
 
 .outcome-item {
   display: flex;
   align-items: flex-start;
-  gap: var(--spacing-sm, 1rem);
-  padding: var(--spacing-sm, 1rem);
+  gap: var(--space-sm, 1rem);
+  padding: var(--space-sm, 1rem);
   background: var(--bg-secondary, #f9fafb);
   border-radius: var(--radius-sm, 4px);
 }
@@ -182,7 +185,7 @@
 }
 
 .outcomes-placeholder {
-  padding: var(--spacing-sm, 1rem);
+  padding: var(--space-sm, 1rem);
   text-align: center;
   color: var(--text-tertiary, #9ca3af);
   font-size: 0.875rem;
@@ -192,8 +195,8 @@
 .timeline-actions {
   display: flex;
   justify-content: center;
-  margin-top: var(--spacing-lg, 2rem);
-  padding-top: var(--spacing-lg, 2rem);
+  margin-top: var(--space-lg, 2rem);
+  padding-top: var(--space-lg, 2rem);
   border-top: 1px solid var(--border-color, #e5e7eb);
 }
 
@@ -217,7 +220,7 @@
 .timeline-skeleton,
 .timeline-error,
 .timeline-empty {
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   text-align: center;
   color: var(--text-secondary, #6b7280);
   font-size: 0.9375rem;
@@ -225,7 +228,7 @@
 
 @media (max-width: 640px) {
   .timeline {
-    padding-left: var(--spacing-lg, 2rem);
+    padding-left: var(--space-lg, 2rem);
   }
 
   .timeline-marker {

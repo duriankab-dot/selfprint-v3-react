@@ -2,6 +2,12 @@
  * nova-twin.css
  * Styling for Nova (Golden Guide) and Twin (Holographic Personal AI)
  * All colors use CSS variables for theme consistency
+ *
+ * CSSVARS-004 FIX: every spacing value here referenced `--spacing-*`
+ * (undefined anywhere in tokens.css, real scale is `--space-*`), so
+ * .twin-header/.twin-message/.twin-message-user/.ai-switcher all silently
+ * lost their padding — chat bubbles read as cramped text with no breathing
+ * room, part of "อ่านง่ายกว่านี้...ให้ความรู้สึกเป็นแอพไม่ใช่แชท".
  */
 
 /* ===== NOVA STYLING ===== */
@@ -13,7 +19,7 @@
 .nova-header {
   background: linear-gradient(90deg, #ffd70060, #ffa50040);
   border-left: 4px solid #ffd700;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   border-radius: var(--radius-md);
 }
 
@@ -36,7 +42,7 @@
 .nova-message {
   background: #fff9e6;
   border-left: 3px solid #ffd700;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
 }
@@ -58,7 +64,7 @@
 .twin-header {
   background: linear-gradient(90deg, #6366f160, #818cf840);
   border-left: 4px solid #6366f1;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   border-radius: var(--radius-md);
 }
 
@@ -82,7 +88,7 @@
 .twin-message {
   background: #f0f4ff;
   border-left: 3px solid #6366f1;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   border-radius: var(--radius-md);
   color: var(--color-text-primary);
   position: relative;
@@ -93,7 +99,7 @@
 .twin-message-user {
   background: #6366f1;
   color: white;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   border-radius: var(--radius-md);
 }
 
@@ -123,8 +129,8 @@
 
 .ai-switcher {
   display: flex;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  gap: var(--space-sm);
+  padding: var(--space-md);
   background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
@@ -132,7 +138,7 @@
 
 .ai-switcher-button {
   flex: 1;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--space-sm) var(--space-md);
   border: 2px solid transparent;
   border-radius: var(--radius-sm);
   background: var(--color-bg-primary);
@@ -212,7 +218,7 @@
 
   .ai-switcher {
     flex-direction: column;
-    gap: var(--spacing-xs);
+    gap: var(--space-xs);
   }
 
   .ai-switcher-button {
@@ -233,12 +239,12 @@
 
   .nova-header,
   .twin-header {
-    padding: var(--spacing-sm);
+    padding: var(--space-sm);
   }
 
   .nova-message,
   .twin-message {
-    padding: var(--spacing-sm);
+    padding: var(--space-sm);
     font-size: 14px;
   }
 }

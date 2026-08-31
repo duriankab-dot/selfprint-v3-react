@@ -1,13 +1,16 @@
 /**
  * Twin Personality page styles
  * P0 #7.1 - Twin Navigation Integration
+ *
+ * CSSVARS-004 FIX: used --spacing-* (undefined; real scale is --space-*),
+ * silently collapsing padding/gap across the whole page.
  */
 
 .twin-personality-page {
   width: 100%;
   min-height: 100vh;
   background-color: var(--bg-primary, #fff);
-  padding: var(--spacing-lg, 2rem) var(--spacing-md, 1rem);
+  padding: var(--space-lg, 2rem) var(--space-md, 1rem);
 }
 
 .twin-personality-page.loading {
@@ -24,16 +27,16 @@
 }
 
 .personality-header {
-  margin-bottom: var(--spacing-xl, 3rem);
+  margin-bottom: var(--space-xl, 3rem);
   border-bottom: 1px solid var(--border-color, #e0e0e0);
-  padding-bottom: var(--spacing-lg, 2rem);
+  padding-bottom: var(--space-lg, 2rem);
 }
 
 .personality-header h1 {
   font-size: var(--font-size-xl, 1.875rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--text-primary, #333);
-  margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+  margin: 0 0 var(--space-sm, 0.5rem) 0;
 }
 
 .personality-header p {
@@ -44,11 +47,11 @@
 
 /* Mood Section */
 .mood-section {
-  margin-bottom: var(--spacing-xl, 3rem);
+  margin-bottom: var(--space-xl, 3rem);
 }
 
 .mood-card {
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   background: linear-gradient(135deg, var(--color-primary, #4a90e2) 0%, var(--color-primary-light, #7ab8ff) 100%);
   border-radius: var(--radius-lg, 12px);
   color: white;
@@ -58,14 +61,14 @@
 .mood-card h2 {
   font-size: var(--font-size-lg, 1.25rem);
   font-weight: var(--font-weight-bold, 700);
-  margin: 0 0 var(--spacing-lg, 2rem) 0;
+  margin: 0 0 var(--space-lg, 2rem) 0;
 }
 
 .mood-indicator {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md, 1rem);
+  gap: var(--space-md, 1rem);
 }
 
 .mood-label {
@@ -86,30 +89,30 @@
 
 /* Metrics Section */
 .metrics-section {
-  margin-bottom: var(--spacing-xl, 3rem);
+  margin-bottom: var(--space-xl, 3rem);
 }
 
 .metrics-section h2 {
   font-size: var(--font-size-lg, 1.25rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--text-primary, #333);
-  margin: 0 0 var(--spacing-lg, 2rem) 0;
+  margin: 0 0 var(--space-lg, 2rem) 0;
 }
 
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg, 2rem);
+  gap: var(--space-lg, 2rem);
 }
 
 .metric-card {
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   border: 1px solid var(--border-color, #e0e0e0);
   border-radius: var(--radius-md, 8px);
   background-color: var(--bg-secondary, #f9f9f9);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md, 1rem);
+  gap: var(--space-md, 1rem);
 }
 
 .metric-name {
@@ -143,26 +146,26 @@
 
 /* Evolution Section */
 .evolution-section {
-  margin-bottom: var(--spacing-xl, 3rem);
+  margin-bottom: var(--space-xl, 3rem);
 }
 
 .evolution-section h2 {
   font-size: var(--font-size-lg, 1.25rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--text-primary, #333);
-  margin: 0 0 var(--spacing-lg, 2rem) 0;
+  margin: 0 0 var(--space-lg, 2rem) 0;
 }
 
 .evolution-timeline {
   position: relative;
-  padding: var(--spacing-lg, 2rem) 0;
+  padding: var(--space-lg, 2rem) 0;
 }
 
 .evolution-item {
   display: grid;
   grid-template-columns: 60px 1fr;
-  gap: var(--spacing-lg, 2rem);
-  margin-bottom: var(--spacing-xl, 3rem);
+  gap: var(--space-lg, 2rem);
+  margin-bottom: var(--space-xl, 3rem);
   position: relative;
 }
 
@@ -202,9 +205,9 @@
 }
 
 .evolution-content {
-  padding: var(--spacing-md, 1rem);
+  padding: var(--space-md, 1rem);
   border-left: 2px solid var(--border-color, #e0e0e0);
-  padding-left: var(--spacing-lg, 2rem);
+  padding-left: var(--space-lg, 2rem);
 }
 
 .evolution-item.unlocked .evolution-content {
@@ -219,19 +222,19 @@
   font-size: var(--font-size-base, 1rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--text-primary, #333);
-  margin: 0 0 var(--spacing-xs, 0.25rem) 0;
+  margin: 0 0 var(--space-xs, 0.25rem) 0;
 }
 
 .evolution-content p {
   font-size: var(--font-size-sm, 0.875rem);
   color: var(--text-secondary, #666);
-  margin: var(--spacing-xs, 0.25rem) 0;
+  margin: var(--space-xs, 0.25rem) 0;
 }
 
 .evolution-criteria {
   color: var(--text-tertiary, #999);
   font-style: italic;
-  margin-top: var(--spacing-sm, 0.5rem) !important;
+  margin-top: var(--space-sm, 0.5rem) !important;
 }
 
 .evolution-unlocked {
@@ -244,14 +247,14 @@
   left: 29px;
   top: 60px;
   width: 2px;
-  height: calc(100% + var(--spacing-lg, 2rem));
+  height: calc(100% + var(--space-lg, 2rem));
   background-color: var(--border-color, #e0e0e0);
   z-index: 1;
 }
 
 /* Next Milestone Section */
 .next-milestone-section {
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   background-color: var(--bg-secondary, #f9f9f9);
   border-left: 4px solid var(--color-primary, #4a90e2);
   border-radius: var(--radius-md, 8px);
@@ -261,12 +264,12 @@
   font-size: var(--font-size-lg, 1.25rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--text-primary, #333);
-  margin: 0 0 var(--spacing-lg, 2rem) 0;
+  margin: 0 0 var(--space-lg, 2rem) 0;
 }
 
 .next-milestone-card {
   background-color: white;
-  padding: var(--spacing-lg, 2rem);
+  padding: var(--space-lg, 2rem);
   border-radius: var(--radius-md, 8px);
   border: 1px solid var(--border-color, #e0e0e0);
 }
@@ -275,17 +278,17 @@
   font-size: var(--font-size-base, 1rem);
   font-weight: var(--font-weight-bold, 700);
   color: var(--color-primary, #4a90e2);
-  margin: 0 0 var(--spacing-sm, 0.5rem) 0;
+  margin: 0 0 var(--space-sm, 0.5rem) 0;
 }
 
 .next-milestone-card p {
   font-size: var(--font-size-sm, 0.875rem);
   color: var(--text-secondary, #666);
-  margin: var(--spacing-xs, 0.25rem) 0;
+  margin: var(--space-xs, 0.25rem) 0;
 }
 
 .milestone-criteria {
-  margin-top: var(--spacing-md, 1rem) !important;
+  margin-top: var(--space-md, 1rem) !important;
   color: var(--color-primary, #4a90e2);
   font-weight: var(--font-weight-bold, 700);
 }
@@ -302,7 +305,7 @@
 
   .evolution-item {
     grid-template-columns: 50px 1fr;
-    gap: var(--spacing-md, 1rem);
+    gap: var(--space-md, 1rem);
   }
 
   .evolution-marker {

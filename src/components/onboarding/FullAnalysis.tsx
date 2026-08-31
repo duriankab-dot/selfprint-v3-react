@@ -181,7 +181,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
           </div>
 
           <p style={{ ...label, color: 'var(--accent-primary)', marginBottom: 16 }}>
-            NOVA · SELFPRINT INTELLIGENCE
+            SELFPRINT INTELLIGENCE
           </p>
           <p style={{
             fontSize: 18, color: 'var(--color-text-primary)', fontWeight: 500,
@@ -216,7 +216,7 @@ export const FullAnalysis: React.FC<FullAnalysisProps> = ({
             {shown(0) && (
               <div style={{ textAlign: 'center', marginBottom: 44, animation: 'fa-fade-up 0.5s both' }}>
                 <p style={{ ...label, color: 'var(--accent-primary)', marginBottom: 10 }}>
-                  {isTh ? 'NOVA อ่านคุณออกแล้ว' : 'NOVA has read you'}
+                  {isTh ? 'SELFPRINT อ่านคุณออกแล้ว' : 'SELFPRINT has read you'}
                 </p>
                 <h1 style={{
                   fontSize: 'clamp(26px, 5vw, 38px)', fontWeight: 700,

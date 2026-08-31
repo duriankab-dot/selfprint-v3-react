@@ -24,6 +24,7 @@ import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
+import { FloatingSelfprintChat } from './components/chat/FloatingSelfprintChat';
 // CHUNK-SPLIT: TwinEvolutionSceneWrapper is a celebration overlay that fires
 // only at the milestone-30 Twin Evolution event — no reason to ship it in the
 // main bundle. Lazy-loading shaves it from the initial JS payload.
@@ -260,6 +261,11 @@ function App() {
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />
                               <PWAInstallPrompt />
+                              {/* SELFPRINTCHAT-001: floating draggable general-assistant
+                                  button, distinct from the Twin — see FloatingSelfprintChat.tsx.
+                                  Same global-mount pattern as the overlays above; renders
+                                  nothing itself until a session exists. */}
+                              <FloatingSelfprintChat />
                               <Suspense fallback={null}>
                                 <Routes>
                                   {getLanguagePrefixedRoutes()}

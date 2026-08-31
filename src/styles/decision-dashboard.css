@@ -1,12 +1,16 @@
 /**
  * decision-dashboard.css
  * Styling for Decision Tracking Dashboard and related components
+ *
+ * CSSVARS-004 FIX: every spacing value here referenced --spacing-*
+ * (undefined; real scale is --space-*) with no fallback anywhere — every
+ * padding/margin/gap in this file was silently computing to nothing.
  */
 
 .decision-dashboard {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
 }
 
 .decision-dashboard-error {
@@ -22,13 +26,13 @@
 
 .dd-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .dd-header h1 {
   font-size: 2.5rem;
   color: #6366f1;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .dd-subtitle {
@@ -41,15 +45,15 @@
 .dd-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .stat-card {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   text-align: center;
   transition: all 0.2s ease;
 }
@@ -62,13 +66,13 @@
 
 .stat-icon {
   font-size: 2rem;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .stat-label {
   font-size: 0.9rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -83,13 +87,13 @@
 
 .dd-controls {
   display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
   justify-content: center;
 }
 
 .btn-primary {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--space-md) var(--space-lg);
   background: linear-gradient(90deg, #6366f1, #a78bfa);
   color: white;
   border: none;
@@ -110,19 +114,19 @@
   background: rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .dd-new-decision-form h3 {
   color: #6366f1;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .form-note {
   color: var(--color-text-secondary);
   font-size: 0.95rem;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
   font-style: italic;
 }
 
@@ -132,43 +136,43 @@
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(249, 115, 115, 0.05));
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-xl);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
 }
 
 .dd-pending-section h2 {
   color: #ef4444;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .dd-pending-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--space-md);
 }
 
 .placeholder {
   color: var(--color-text-tertiary);
   text-align: center;
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
 }
 
 /* ===== DECISIONS SECTION ===== */
 
 .dd-decisions-section {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .dd-decisions-section h2 {
   color: #6366f1;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .dd-empty {
   background: rgba(99, 102, 241, 0.05);
   border: 2px dashed rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
+  padding: var(--space-xl);
   text-align: center;
   color: var(--color-text-secondary);
 }
@@ -178,14 +182,14 @@
 .dd-decisions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
+  gap: var(--space-lg);
 }
 
 .decision-card {
   background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.6));
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   transition: all 0.2s ease;
 }
 
@@ -199,8 +203,8 @@
   display: flex;
   justify-content: space-between;
   align-items: start;
-  margin-bottom: var(--spacing-md);
-  gap: var(--spacing-md);
+  margin-bottom: var(--space-md);
+  gap: var(--space-md);
 }
 
 .decision-header h3 {
@@ -212,7 +216,7 @@
 .decision-category {
   background: rgba(99, 102, 241, 0.2);
   color: #a78bfa;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
   text-transform: uppercase;
@@ -224,14 +228,14 @@
   color: var(--color-text-secondary);
   font-size: 0.95rem;
   line-height: 1.5;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .decision-meta {
   display: flex;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-  padding-bottom: var(--spacing-md);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-md);
   border-bottom: 1px solid rgba(99, 102, 241, 0.1);
 }
 
@@ -246,7 +250,7 @@
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .meta-value {
@@ -257,13 +261,13 @@
 /* ===== FOLLOW-UP PROGRESS ===== */
 
 .followup-progress {
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .progress-label {
   font-size: 0.85rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .progress-bar {
@@ -285,14 +289,14 @@
 
 .followup-markers {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   justify-content: space-around;
 }
 
 .marker {
   flex: 1;
   text-align: center;
-  padding: var(--spacing-sm) 0;
+  padding: var(--space-sm) 0;
   font-size: 0.8rem;
   font-weight: 600;
   border-radius: var(--radius-sm);
@@ -332,7 +336,7 @@
 
 @media (max-width: 480px) {
   .decision-dashboard {
-    padding: var(--spacing-md);
+    padding: var(--space-md);
   }
 
   .dd-stats-grid {
@@ -340,7 +344,7 @@
   }
 
   .stat-card {
-    padding: var(--spacing-md);
+    padding: var(--space-md);
   }
 
   .stat-icon {
@@ -352,15 +356,15 @@
   }
 
   .decision-card {
-    padding: var(--spacing-md);
+    padding: var(--space-md);
   }
 
   .followup-markers {
-    gap: var(--spacing-xs);
+    gap: var(--space-xs);
   }
 
   .marker {
-    padding: var(--spacing-xs) 0;
+    padding: var(--space-xs) 0;
     font-size: 0.75rem;
   }
 }

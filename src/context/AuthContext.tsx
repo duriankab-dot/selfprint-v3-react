@@ -141,10 +141,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
     }
 
+    // MAGICLINK-ROUTELOOP-001 FIX: same bug ROUTELOOP-002 already fixed for
+    // OAuth below, just never applied here — `window.location.origin` alone
+    // is the bare domain with no /en or /th prefix and no /dashboard path,
+    // so clicking the emailed link landed on the marketing landing page
+    // instead of resuming the app. From there nothing marks the visitor as
+    // "already signed in, continue" — it reads as a fresh visit, so the
+    // user re-enters onboarding instead of resuming
+    // ("กลับมาหน้าแรกใหม่ต้องออนบอร์ดตอบคำถามใหม่อีก"). Send it straight to
+    // /dashboard like OAuth does; Onboarding.tsx's own reentry check (see
+    // resumedAt / RETURNING-USER-FIX above) still applies from there for
+    // anyone genuinely mid-onboarding.
+    const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: `${window.location.origin}${langPrefix}/dashboard`,
       },
     });
 

@@ -1,11 +1,26 @@
 /* Passkey Login Component Styles */
 
+/* CSSVARS-001 FIX: this entire file referenced custom properties that were
+   never defined anywhere in the project (--surface-primary, --text-primary,
+   --spacing-4, --color-primary, --color-error-light, etc — a completely
+   different naming scheme than tokens.css's actual color, space and radius
+   token convention, with no fallback values). Every rule in this file
+   was silently rendering unstyled. Remapped to the real design tokens
+   throughout, which already respond to [data-mode="dark"] automatically —
+   so the old @media (prefers-color-scheme: dark) block (itself pointing at
+   a second layer of undefined "-dark"-suffixed variables) is no longer
+   needed and has been removed rather than fixed twice. This was very
+   likely the real cause behind "Face ID / passkey does not work" — an
+   unstyled, confusing-looking form reads as broken even when the
+   underlying WebAuthn logic works. */
+
 .form {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
-  padding: var(--spacing-6);
-  background: var(--surface-primary);
+  gap: var(--space-md, 16px);
+  padding: var(--space-xl, 24px);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   max-width: 400px;
@@ -14,36 +29,36 @@
 
 .header {
   text-align: center;
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--space-sm, 8px);
 }
 
 .header h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--spacing-2) 0;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-sm, 8px) 0;
 }
 
 .subheader {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .input {
-  padding: var(--spacing-3);
+  padding: var(--space-md, 12px);
   font-size: 1rem;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  background: var(--surface-secondary);
-  color: var(--text-primary);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
   transition: all 0.2s ease-in-out;
 }
 
 .input:focus {
   outline: none;
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent-primary) 20%, transparent);
 }
 
 .input:disabled {
@@ -52,23 +67,23 @@
 }
 
 .button {
-  padding: var(--spacing-3);
+  padding: var(--space-md, 12px);
   font-size: 1rem;
   font-weight: 500;
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-primary);
+  background: var(--color-accent-primary);
   color: var(--color-white);
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-2);
+  gap: var(--space-sm, 8px);
 }
 
 .button:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: var(--color-accent-primary-hover);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
@@ -97,21 +112,21 @@
 }
 
 .error {
-  padding: var(--spacing-3);
-  background: var(--color-error-light);
+  padding: var(--space-md, 12px);
+  background: color-mix(in srgb, var(--color-error) 12%, transparent);
   border-left: 3px solid var(--color-error);
   border-radius: var(--radius-md);
-  color: var(--color-error-dark);
+  color: var(--color-error);
   font-size: 0.875rem;
   line-height: 1.5;
 }
 
 .info {
-  padding: var(--spacing-3);
-  background: var(--color-info-light);
+  padding: var(--space-md, 12px);
+  background: color-mix(in srgb, var(--color-info) 12%, transparent);
   border-left: 3px solid var(--color-info);
   border-radius: var(--radius-md);
-  color: var(--color-info-dark);
+  color: var(--color-info);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -121,21 +136,21 @@
 }
 
 .unavailable {
-  padding: var(--spacing-4);
+  padding: var(--space-lg, 16px);
   text-align: center;
-  background: var(--surface-primary);
+  background: var(--color-bg-secondary);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
 }
 
 .unavailable p {
-  margin: var(--spacing-2) 0;
+  margin: var(--space-sm, 8px) 0;
   font-size: 0.9rem;
 }
 
 .hint {
-  color: var(--text-tertiary) !important;
+  color: var(--color-text-tertiary) !important;
   font-size: 0.8rem !important;
 }
 
@@ -151,28 +166,5 @@
 
   .button:hover:not(:disabled) {
     transform: none;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .form {
-    background: var(--surface-primary-dark);
-  }
-
-  .input {
-    background: var(--surface-secondary-dark);
-    color: var(--text-primary-dark);
-    border-color: var(--border-color-dark);
-  }
-
-  .error {
-    background: var(--color-error-light-dark);
-    color: var(--color-error-dark-dark);
-  }
-
-  .info {
-    background: var(--color-info-light-dark);
-    color: var(--color-info-dark-dark);
   }
 }

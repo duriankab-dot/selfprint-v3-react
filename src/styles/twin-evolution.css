@@ -1,27 +1,31 @@
 /**
  * twin-evolution.css
  * Styling for Twin Evolution Display component
+ *
+ * CSSVARS-004 FIX: every spacing value here referenced --spacing-*
+ * (undefined; real scale is --space-*) with no fallback anywhere — every
+ * padding/margin/gap in this file was silently computing to nothing.
  */
 
 .twin-evolution-container {
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  margin: var(--spacing-md) 0;
+  padding: var(--space-lg);
+  margin: var(--space-md) 0;
 }
 
 /* ===== HEADER ===== */
 
 .evolution-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .evolution-header h3 {
   font-size: 1.5rem;
   color: #a78bfa;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .twin-name {
@@ -36,8 +40,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-lg) 0;
+  margin-bottom: var(--space-xl);
+  padding: var(--space-lg) 0;
 }
 
 .stage-item-wrapper {
@@ -79,13 +83,13 @@
 .stage-info {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .stage-label {
   text-align: center;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: rgba(15, 23, 42, 0.6);
   border-radius: var(--radius-md);
   border: 1px solid rgba(99, 102, 241, 0.2);
@@ -103,14 +107,14 @@
   color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .stage-name {
   font-size: 0.95rem;
   font-weight: 600;
   color: #a78bfa;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .stage-desc {
@@ -122,14 +126,14 @@
 /* ===== PROGRESS ===== */
 
 .progress-section {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .progress-label {
@@ -166,13 +170,13 @@
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .metric-card {
   text-align: center;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(99, 102, 241, 0.15);
   border-radius: var(--radius-md);
@@ -187,14 +191,14 @@
 
 .metric-icon {
   font-size: 1.5rem;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .metric-value {
   font-size: 1.5rem;
   font-weight: 700;
   color: #a78bfa;
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .metric-label {
@@ -208,11 +212,11 @@
 
 .milestone-section {
   text-align: center;
-  padding: var(--spacing-md);
+  padding: var(--space-md);
   background: rgba(167, 139, 250, 0.1);
   border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: var(--radius-md);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .milestone-text {
@@ -225,7 +229,7 @@
   font-size: 0.95rem;
   color: #a78bfa;
   font-weight: 600;
-  margin-top: var(--spacing-sm);
+  margin-top: var(--space-sm);
   animation: pulse-text 2s ease-in-out infinite;
 }
 
@@ -244,12 +248,12 @@
   background: rgba(99, 102, 241, 0.1);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-md);
-  padding: var(--spacing-md);
+  padding: var(--space-md);
 }
 
 .current-stage-info h4 {
   color: #a78bfa;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .current-stage-info p {
@@ -263,11 +267,11 @@
 @media (max-width: 768px) {
   .stage-info {
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-sm);
+    gap: var(--space-sm);
   }
 
   .stage-label {
-    padding: var(--spacing-sm);
+    padding: var(--space-sm);
   }
 
   .stage-name {
@@ -279,18 +283,18 @@
   }
 
   .evolution-timeline {
-    padding: var(--spacing-md) 0;
+    padding: var(--space-md) 0;
   }
 }
 
 @media (max-width: 480px) {
   .twin-evolution-container {
-    padding: var(--spacing-md);
+    padding: var(--space-md);
   }
 
   .evolution-timeline {
     flex-direction: column;
-    gap: var(--spacing-md);
+    gap: var(--space-md);
   }
 
   .stage-connection {
@@ -299,11 +303,11 @@
 
   .stage-info {
     grid-template-columns: 1fr;
-    gap: var(--spacing-sm);
+    gap: var(--space-sm);
   }
 
   .stage-label {
-    padding: var(--spacing-sm);
+    padding: var(--space-sm);
   }
 
   .metrics-grid {

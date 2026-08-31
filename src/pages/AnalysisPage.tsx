@@ -215,14 +215,18 @@ const AnalysisPage: React.FC = () => {
   const isLoading = ctxLoading || patLoading;
 
   // --------------------------------------------------------------------------
-  // FULLANALYSIS-001: play the full analysis as natural-Thai speech.
-  // Reuses useVoiceTwin (Web Speech API, th-TH) — same hook already used in
+  // FULLANALYSIS-001: play the full analysis as speech.
+  // Reuses useVoiceTwin (Web Speech API) — same hook already used in
   // CoreAwakening.tsx, no new dependency. Builds one flowing narrative
   // paragraph from every real section of displayAnalysis (not a bullet-point
   // read-out), so it reads like someone explaining the analysis out loud.
+  // TTSLANG-001 FIX: was hardcoded to 'th-TH' regardless of site language —
+  // spokenNarrative below is already correctly bilingual (isTh throughout),
+  // so on /en/analysis this spoke English text with a Thai voice/lang tag,
+  // an obvious mismatch. Language now follows the page, same as the text.
   // --------------------------------------------------------------------------
 
-  const { state: voiceState, speak, stopSpeaking } = useVoiceTwin({ language: 'th-TH' });
+  const { state: voiceState, speak, stopSpeaking } = useVoiceTwin({ language: isTh ? 'th-TH' : 'en-US' });
 
   const spokenNarrative = useMemo(() => {
     if (!displayAnalysis) return '';

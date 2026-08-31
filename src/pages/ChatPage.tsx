@@ -474,9 +474,13 @@ export const ChatPage: React.FC = () => {
         </div>
 
         {/* §21 Voice Twin Panel — แสดงเมื่อ voiceMode เปิด */}
+        {/* TTSLANG-001 FIX: VoiceTwin's own `language` prop defaults to
+            'th-TH' when omitted — this call never passed it, so speech
+            stayed Thai even on /en, mismatching the text it was reading. */}
         {voiceMode && (
           <VoiceTwin
             mood={currentMood ?? undefined}
+            language={isTh ? 'th-TH' : 'en-US'}
             onUserSpeech={(text) => {
               setInputValue(text);
               // ส่งทันทีหลังได้ transcript

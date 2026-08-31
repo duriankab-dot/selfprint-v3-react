@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase-service';
 import { TwinNav } from '../components/twin/TwinNav';
@@ -22,9 +23,27 @@ interface TwinPreferences {
   personality_evolution_enabled: boolean;
 }
 
+// TWINSETTINGS-I18N-001 FIX: page had zero useLanguage() — 100% hardcoded
+// English regardless of /th vs /en ("ภาษาใน...ตั้งค่าก็ต้องเป็นภาษาไทยธรรมชาติด้วย").
+const TONE_LABELS: Record<TwinPreferences['personality_tone'], { en: string; th: string; hintEn: string; hintTh: string }> = {
+  warm: { en: 'Warm', th: 'อบอุ่น', hintEn: 'Caring and empathetic', hintTh: 'เอาใจใส่ เข้าอกเข้าใจ' },
+  analytical: { en: 'Analytical', th: 'เชิงวิเคราะห์', hintEn: 'Logical and detailed', hintTh: 'มีเหตุผล ละเอียดรอบคอบ' },
+  playful: { en: 'Playful', th: 'สนุกสนาน', hintEn: 'Fun and light-hearted', hintTh: 'สนุก เป็นกันเอง' },
+  supportive: { en: 'Supportive', th: 'ให้กำลังใจ', hintEn: 'Encouraging and balanced', hintTh: 'ให้กำลังใจ สมดุล' },
+};
+
+const FREQ_LABELS: Record<TwinPreferences['notification_frequency'], { en: string; th: string }> = {
+  high: { en: 'High', th: 'บ่อย' },
+  medium: { en: 'Medium', th: 'ปานกลาง' },
+  low: { en: 'Low', th: 'น้อย' },
+  none: { en: 'None', th: 'ไม่ต้องแจ้งเตือน' },
+};
+
 export default function TwinSettingsPage() {
   const { session } = useAuth();
   const { currentWorld } = useTwin();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const queryClient = useQueryClient();
 
   const [prefs, setPrefs] = useState<TwinPreferences>({
@@ -59,7 +78,7 @@ export default function TwinSettingsPage() {
   // Save preferences mutation
   const saveMutation = useMutation({
     mutationFn: async (newPrefs: TwinPreferences) => {
-      if (!session?.user?.id) throw new Error('User not authenticated');
+      if (!session?.user?.id) throw new Error(isTh ? 'เซสชันผู้ใช้หมดอายุ' : 'User not authenticated');
 
       const { error } = await supabase.auth.updateUser({
         data: {
@@ -76,7 +95,7 @@ export default function TwinSettingsPage() {
       queryClient.invalidateQueries({ queryKey: ['twinPreferences', session?.user?.id] });
     },
     onError: (error) => {
-      setSaveError(error instanceof Error ? error.message : 'Failed to save preferences');
+      setSaveError(error instanceof Error ? error.message : (isTh ? 'บันทึกการตั้งค่าไม่สำเร็จ' : 'Failed to save preferences'));
     },
   });
 
@@ -93,7 +112,11 @@ export default function TwinSettingsPage() {
   };
 
   if (isLoading) {
-    return <div className="twin-settings-page loading">Loading preferences...</div>;
+    return (
+      <div className="twin-settings-page loading">
+        {isTh ? 'กำลังโหลดการตั้งค่า...' : 'Loading preferences...'}
+      </div>
+    );
   }
 
   return (
@@ -103,15 +126,15 @@ export default function TwinSettingsPage() {
       <TwinNav currentTab="settings" />
       <div className="twin-settings-container">
         <header className="twin-settings-header">
-          <h1>Twin Settings</h1>
-          <p>Customize your Twin's personality and behavior</p>
+          <h1>{isTh ? 'ตั้งค่าทวิน' : 'Twin Settings'}</h1>
+          <p>{isTh ? 'ปรับแต่งบุคลิกภาพและพฤติกรรมของทวินคุณ' : "Customize your Twin's personality and behavior"}</p>
         </header>
 
         <div className="twin-settings-content">
           {/* Personality Tone */}
           <section className="settings-section">
-            <h2>Personality Tone</h2>
-            <p className="section-description">How should your Twin communicate?</p>
+            <h2>{isTh ? 'โทนบุคลิกภาพ' : 'Personality Tone'}</h2>
+            <p className="section-description">{isTh ? 'ทวินของคุณควรพูดคุยกับคุณแบบไหน?' : 'How should your Twin communicate?'}</p>
             <div className="settings-options">
               {(['warm', 'analytical', 'playful', 'supportive'] as const).map((tone) => (
                 <label key={tone} className="option-label">
@@ -124,13 +147,10 @@ export default function TwinSettingsPage() {
                     disabled={isSaving}
                   />
                   <span className="option-name">
-                    {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                    {isTh ? TONE_LABELS[tone].th : TONE_LABELS[tone].en}
                   </span>
                   <span className="option-hint">
-                    {tone === 'warm' && 'Caring and empathetic'}
-                    {tone === 'analytical' && 'Logical and detailed'}
-                    {tone === 'playful' && 'Fun and light-hearted'}
-                    {tone === 'supportive' && 'Encouraging and balanced'}
+                    {isTh ? TONE_LABELS[tone].hintTh : TONE_LABELS[tone].hintEn}
                   </span>
                 </label>
               ))}
@@ -139,8 +159,8 @@ export default function TwinSettingsPage() {
 
           {/* Notification Frequency */}
           <section className="settings-section">
-            <h2>Notification Frequency</h2>
-            <p className="section-description">How often should Twin reach out?</p>
+            <h2>{isTh ? 'ความถี่การแจ้งเตือน' : 'Notification Frequency'}</h2>
+            <p className="section-description">{isTh ? 'ทวินควรทักคุณบ่อยแค่ไหน?' : 'How often should Twin reach out?'}</p>
             <div className="settings-options">
               {(['high', 'medium', 'low', 'none'] as const).map((freq) => (
                 <label key={freq} className="option-label">
@@ -153,7 +173,7 @@ export default function TwinSettingsPage() {
                     disabled={isSaving}
                   />
                   <span className="option-name">
-                    {freq.charAt(0).toUpperCase() + freq.slice(1)}
+                    {isTh ? FREQ_LABELS[freq].th : FREQ_LABELS[freq].en}
                   </span>
                 </label>
               ))}
@@ -162,7 +182,7 @@ export default function TwinSettingsPage() {
 
           {/* Feature Toggles */}
           <section className="settings-section">
-            <h2>Features</h2>
+            <h2>{isTh ? 'ฟีเจอร์' : 'Features'}</h2>
             <div className="settings-toggles">
               <label className="toggle-label">
                 <input
@@ -171,7 +191,7 @@ export default function TwinSettingsPage() {
                   onChange={(e) => setPrefs({ ...prefs, voice_enabled: e.target.checked })}
                   disabled={isSaving}
                 />
-                <span>Voice Chat</span>
+                <span>{isTh ? 'แชทด้วยเสียง' : 'Voice Chat'}</span>
               </label>
               <label className="toggle-label">
                 <input
@@ -180,7 +200,7 @@ export default function TwinSettingsPage() {
                   onChange={(e) => setPrefs({ ...prefs, daily_brief_enabled: e.target.checked })}
                   disabled={isSaving}
                 />
-                <span>Daily Brief</span>
+                <span>{isTh ? 'สรุปประจำวัน' : 'Daily Brief'}</span>
               </label>
               <label className="toggle-label">
                 <input
@@ -189,18 +209,18 @@ export default function TwinSettingsPage() {
                   onChange={(e) => setPrefs({ ...prefs, personality_evolution_enabled: e.target.checked })}
                   disabled={isSaving}
                 />
-                <span>Personality Evolution</span>
+                <span>{isTh ? 'พัฒนาการบุคลิกภาพ' : 'Personality Evolution'}</span>
               </label>
             </div>
           </section>
 
           {/* Default World */}
           <section className="settings-section">
-            <h2>Default World</h2>
-            <p className="section-description">Which world should Twin focus on by default?</p>
+            <h2>{isTh ? 'โลกเริ่มต้น' : 'Default World'}</h2>
+            <p className="section-description">{isTh ? 'ทวินควรโฟกัสที่โลกไหนเป็นค่าเริ่มต้น?' : 'Which world should Twin focus on by default?'}</p>
             <input
               type="text"
-              placeholder="Leave empty for no preference"
+              placeholder={isTh ? 'เว้นว่างไว้หากไม่มีโลกที่ต้องการ' : 'Leave empty for no preference'}
               value={prefs.default_world || ''}
               onChange={(e) => setPrefs({ ...prefs, default_world: e.target.value || null })}
               disabled={isSaving}
@@ -218,14 +238,16 @@ export default function TwinSettingsPage() {
               disabled={isSaving || saveMutation.isPending}
               className="btn btn-primary"
             >
-              {isSaving || saveMutation.isPending ? 'Saving...' : 'Save Changes'}
+              {isSaving || saveMutation.isPending
+                ? (isTh ? 'กำลังบันทึก...' : 'Saving...')
+                : (isTh ? 'บันทึกการเปลี่ยนแปลง' : 'Save Changes')}
             </button>
             <button
               onClick={handleReset}
               disabled={isSaving || saveMutation.isPending}
               className="btn btn-secondary"
             >
-              Reset
+              {isTh ? 'ล้างค่า' : 'Reset'}
             </button>
           </div>
         </div>
