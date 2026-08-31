@@ -10,6 +10,7 @@
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NavRail } from '@/components/layout/NavRail';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
@@ -260,6 +261,7 @@ export default function VsAstrologyPage() {
       </main>
 
       <Footer />
+      <NavRail />
       <BottomNav />
     </>
   );

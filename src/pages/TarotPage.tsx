@@ -16,6 +16,7 @@ import { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
+import { NavRail } from '../components/layout/NavRail';
 import { useTwin } from '../context/TwinContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MetaTagManager } from '../components/MetaTagManager';
@@ -546,6 +547,7 @@ export default function TarotPage() {
         )}
       </div>
 
+      <NavRail />
       <BottomNav />
     </div>
   );

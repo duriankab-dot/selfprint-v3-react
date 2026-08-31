@@ -13,6 +13,7 @@
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
+import { NavRail } from '../components/layout/NavRail';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -396,6 +397,7 @@ export default function MePage() {
         </div>
       </div>
 
+      <NavRail />
       <BottomNav />
     </div>
   );

@@ -53,6 +53,12 @@ const ICON_MAP: Record<string, string> = {
   'วิทยาศาสตร์พฤติกรรม': '🧬',
   'AI Twin': '🤖',
   'พัฒนาตัวเอง': '🔬',
+  // BLOGFRAMEWORK-001: icons for the career/health/relationships article
+  // group, now indexed alongside the original 25 in the same list/renderer.
+  'Career Development': '💼',
+  'Health': '🧘',
+  'Health & Wellness': '🧘',
+  'Relationships': '🤝',
 };
 
 // 3 Static articles (evergreen SEO anchors)

@@ -1,9 +1,9 @@
 /**
  * BottomNav.tsx
  *
- * แถบเมนูด้านล่าง 5 แท็บ ตาม Master Directive §5.1
+ * แถบเมนูด้านล่าง 5 แท็บ — App Shell redesign (APPSHELL-001)
  *
- * วันนี้ | กิจกรรม | AI ฝาแฝด | สำรวจ | ฉันเอง
+ * วันนี้ | โลก (Worlds) | AI ฝาแฝด | สำรวจ (รวมกิจกรรมเดิม) | ฉันเอง
  *
  * แสดงเฉพาะจอ <= 760px (mobile) — desktop ใช้ NavBar ด้านบน
  * ใช้ inline SVG icons แทน emoji — ดูเป็น tech/app ไม่ใช่ fortune-telling
@@ -29,9 +29,11 @@ const IconHome = () => (
   </svg>
 );
 
-const IconActivity = () => (
+const IconWorlds = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+    <circle cx="12" cy="12" r="10"/>
+    <line x1="2" y1="12" x2="22" y2="12"/>
+    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
   </svg>
 );
 
@@ -74,16 +76,21 @@ const IconUser = () => (
 // stub with no way forward — the tab is literally named "AI Twin" but
 // opened the wrong assistant. Point it straight at /chat/twin
 // (TwinChat.tsx), which has its own correct guard for the rare case a
-// Twin doesn't exist yet ("Complete Core Awakening first"). Also
-// reordered so the Twin tab sits in the center slot (position 3 of 5),
-// matching its role as the primary CTA.
+// Twin doesn't exist yet ("Complete Core Awakening first").
+//
+// APPSHELL-001 FIX: per the app-shell redesign, the 5 destinations are now
+// วันนี้ | Worlds | AI ฝาแฝด | สำรวจ | ฉัน — "กิจกรรม" was its own tab with a
+// catalog that overlapped ExplorePage.tsx; that catalog is now a section of
+// Explore (see ExplorePage.tsx / ActivitiesPage.tsx), freeing this slot for
+// Worlds, which previously had no top-level nav entry at all despite being
+// a full first-class destination (WorldsHub.tsx + WorldDetail.tsx).
 function getTabs(isTh: boolean): Tab[] {
   return [
-    { to: '/dashboard',  label: isTh ? 'วันนี้' : 'Today',    icon: <IconHome /> },
-    { to: '/activities', label: isTh ? 'กิจกรรม' : 'Activity', icon: <IconActivity /> },
-    { to: '/chat/twin',  label: isTh ? 'AI ฝาแฝด' : 'AI Twin', icon: <IconCpu /> },
-    { to: '/explore',    label: isTh ? 'สำรวจ' : 'Explore',   icon: <IconCompass /> },
-    { to: '/me',         label: isTh ? 'ฉัน' : 'Me',          icon: <IconUser /> },
+    { to: '/dashboard', label: isTh ? 'วันนี้' : 'Today',    icon: <IconHome /> },
+    { to: '/worlds',    label: isTh ? 'โลก' : 'Worlds',      icon: <IconWorlds /> },
+    { to: '/chat/twin', label: isTh ? 'AI ฝาแฝด' : 'AI Twin', icon: <IconCpu /> },
+    { to: '/explore',   label: isTh ? 'สำรวจ' : 'Explore',   icon: <IconCompass /> },
+    { to: '/me',        label: isTh ? 'ฉัน' : 'Me',          icon: <IconUser /> },
   ];
 }
 

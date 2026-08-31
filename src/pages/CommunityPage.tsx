@@ -19,6 +19,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
+import { NavRail } from '../components/layout/NavRail';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useAuth } from '../context/AuthContext';
 import { useWorld } from '../context/WorldContext';
@@ -465,6 +466,7 @@ export default function CommunityPage() {
         )}
       </div>
 
+      <NavRail />
       <BottomNav />
     </div>
   );

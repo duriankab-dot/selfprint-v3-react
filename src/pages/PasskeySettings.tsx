@@ -23,6 +23,7 @@ import type { RegistrationOptions } from '../lib/auth/webauthn';
 import { NavBar } from '../components/layout/NavBar';
 import { Footer } from '../components/layout/Footer';
 import { BottomNav } from '../components/layout/BottomNav';
+import { NavRail } from '../components/layout/NavRail';
 import './PasskeySettings.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -346,6 +347,7 @@ const PasskeySettings: React.FC = () => {
       </main>
 
       <Footer />
+      <NavRail />
       <BottomNav />
     </div>
   );
