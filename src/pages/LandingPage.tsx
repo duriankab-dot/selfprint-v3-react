@@ -4,6 +4,7 @@
  * 3 fullscreen narrative screens:
  *   Screen 1 "คุณคือใคร จริงๆ?"             — behavioral hook
  *   Screen 2 "NOVA อ่านคุณออก..."           — NOVA reveal + reading cards
+ *                                              (sticky EvolutionaryVisualSystem, scroll-driven)
  *   Screen 3 CTA                             — single conversion action
  *
  * Smart Entry:  auto-detect language + segment (utm/ref) → SEO copy only
@@ -26,6 +27,7 @@ import { useTwin } from '@/context/TwinContext';
 import { Link } from 'react-router-dom';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useTheme } from '@/context/ThemeContext';
+import EvolutionaryVisualSystem from '@/components/landing/EvolutionaryVisualSystem';
 
 // ─── Story copy (display) ─────────────────────────────────────────────────────
 
@@ -333,148 +335,6 @@ const TwinBornSvg = ({ isTh }: { isTh: boolean }) => (
     <text x="200" y="320" textAnchor="middle" fontSize="8" fill="var(--color-accent-primary)" opacity="0.4" letterSpacing="3">SELFPRINT ENGINE</text>
   </svg>
 );
-
-// ─── SELFPRINT Engine Eye SVG ─────────────────────────────────────────────────
-// Section 2 visual: eye with SELFPRINT logo center + 12 Thai orbit nodes
-
-const SICE_TH_LABELS = [
-  'ตัวตน','จิตใจ','ความสัมพันธ์','ความรัก',
-  'อาชีพ','ความมั่งคั่ง','ชีวิต','การเติบโต',
-  'การตัดสินใจ','จุดประสงค์','สุขภาพ','อนาคต',
-];
-const SICE_EN_LABELS = [
-  'Self','Mind','Relationships','Love',
-  'Career','Wealth','Life','Growth',
-  'Decisions','Purpose','Health','Future',
-];
-
-const NovaEyeSvg = ({ isTh }: { isTh: boolean }) => {
-  const SICE_ORBIT_LABELS = isTh ? SICE_TH_LABELS : SICE_EN_LABELS;
-  const CX = 190, CY = 190;
-  const NODE_R = 118;   // node dot orbit radius
-  const LABEL_R = 142;  // label text orbit radius
-
-  return (
-    <svg
-      viewBox="0 0 380 380"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      style={{ width: '100%', maxWidth: 340, height: 'auto', willChange: 'transform' }}
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id="eye-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="var(--color-accent-primary)" stopOpacity="0.18"/>
-          <stop offset="100%" stopColor="var(--color-accent-primary)" stopOpacity="0"/>
-        </radialGradient>
-        <filter id="nova-blur"><feGaussianBlur stdDeviation="3"/></filter>
-      </defs>
-      <style>{`
-        @keyframes nova-scan{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-        @keyframes nova-dash{0%{stroke-dashoffset:0}100%{stroke-dashoffset:80}}
-        @keyframes nova-node{0%,100%{opacity:.4;r:3.5}50%{opacity:.9;r:4.5}}
-        @keyframes nova-glow{0%,100%{opacity:.07}50%{opacity:.14}}
-        .nova-scanner{animation:nova-scan 12s linear infinite;transform-origin:${CX}px ${CY}px;will-change:transform}
-        .nova-dash{animation:nova-dash 5s linear infinite}
-        .nova-glow{animation:nova-glow 4s ease-in-out infinite}
-      `}</style>
-
-      {/* Background glow */}
-      <circle className="nova-glow" cx={CX} cy={CY} r="150" fill="url(#eye-glow)"/>
-
-      {/* Eye lens shape */}
-      <path
-        d={`M30 ${CY} Q${CX} 60 350 ${CY} Q${CX} 320 30 ${CY}Z`}
-        fill="var(--color-accent-primary)" fillOpacity="0.04"
-        stroke="var(--color-accent-primary)" strokeWidth="1" strokeOpacity="0.35"
-      />
-
-      {/* Outer dashed orbit (node track) */}
-      <circle className="nova-dash" cx={CX} cy={CY} r={NODE_R}
-        stroke="var(--color-accent-primary)" strokeWidth="0.6" fill="none"
-        opacity="0.2" strokeDasharray="6 6"/>
-
-      {/* Inner rings */}
-      <circle cx={CX} cy={CY} r="80" stroke="var(--color-accent-primary)" strokeWidth="0.8" fill="none" opacity="0.2"/>
-      <circle cx={CX} cy={CY} r="52" stroke="var(--color-accent-primary)" strokeWidth="1.2" fill="none" opacity="0.35"/>
-      <circle cx={CX} cy={CY} r="32" fill="var(--color-accent-primary)" opacity="0.06"/>
-
-      {/* Iris detail lines (12 radii) */}
-      {SICE_ORBIT_LABELS.map((_, i) => {
-        const rad = (i * 30 * Math.PI) / 180;
-        return (
-          <line key={i}
-            x1={CX + 20 * Math.cos(rad)} y1={CY + 20 * Math.sin(rad)}
-            x2={CX + 50 * Math.cos(rad)} y2={CY + 50 * Math.sin(rad)}
-            stroke="var(--color-accent-primary)" strokeWidth="0.6" opacity="0.25"
-          />
-        );
-      })}
-
-      {/* SELFPRINT logo center */}
-      <image
-        href="/favicon.svg"
-        x={CX - 22} y={CY - 22}
-        width="44" height="44"
-        opacity="0.9"
-      />
-      {/* ENGINE label under logo */}
-      <text x={CX} y={CY + 34} textAnchor="middle"
-        fontSize="7" fontWeight="700" fill="var(--color-accent-primary)"
-        opacity="0.6" letterSpacing="2.5">
-        ENGINE
-      </text>
-
-      {/* Scanner arm */}
-      <g className="nova-scanner">
-        <line x1={CX} y1={CY} x2={CX} y2={CY - NODE_R + 4}
-          stroke="var(--color-accent-primary)" strokeWidth="1.2" opacity="0.45" strokeLinecap="round"/>
-        <circle cx={CX} cy={CY - NODE_R + 6} r="3" fill="var(--color-accent-primary)" opacity="0.7"/>
-      </g>
-
-      {/* 12 SICE orbit nodes */}
-      {SICE_ORBIT_LABELS.map((label, i) => {
-        // start from top (-90°), go clockwise
-        const angleDeg = i * 30 - 90;
-        const rad = (angleDeg * Math.PI) / 180;
-        const nx = CX + NODE_R * Math.cos(rad);
-        const ny = CY + NODE_R * Math.sin(rad);
-        const lx = CX + LABEL_R * Math.cos(rad);
-        const ly = CY + LABEL_R * Math.sin(rad);
-
-        // text-anchor: right half → start, left half → end, top/bottom → middle
-        const normAngle = ((angleDeg % 360) + 360) % 360;
-        const anchor = normAngle > 15 && normAngle < 165 ? 'start'
-          : normAngle > 195 && normAngle < 345 ? 'end'
-          : 'middle';
-        // baseline: above center → auto, below → hanging
-        const baseline = (normAngle > 195 && normAngle < 345) || normAngle < 15 || normAngle > 345
-          ? 'middle' : 'middle';
-
-        return (
-          <g key={label}>
-            {/* connector line node→label */}
-            <line
-              x1={nx} y1={ny} x2={lx} y2={ly}
-              stroke="var(--color-accent-primary)" strokeWidth="0.5" opacity="0.2"
-            />
-            {/* node dot (pulse staggered) */}
-            <circle cx={nx} cy={ny} r="4"
-              fill="var(--color-accent-primary)" opacity="0.6"
-              style={{ animation: `nova-node 3s ${(i * 0.25).toFixed(2)}s ease-in-out infinite`, willChange: 'opacity' }}
-            />
-            {/* Thai label */}
-            <text x={lx} y={ly} textAnchor={anchor} dominantBaseline={baseline}
-              fontSize="9" fontWeight="600" fill="var(--color-accent-primary)"
-              opacity="0.75" fontFamily="'Noto Sans Thai',sans-serif">
-              {label}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-};
 
 // ─── Smart Entry Hook ─────────────────────────────────────────────────────────
 
@@ -914,11 +774,11 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         <section
           ref={s2Ref}
           style={{
-            minHeight: '100vh',
+            minHeight: '220vh',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center',
-            padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 80px)',
+            justifyContent: 'flex-start',
+            padding: 'clamp(80px, 10vw, 120px) clamp(24px, 5vw, 80px) clamp(80px, 10vw, 120px)',
             background: 'var(--color-bg-secondary)',
             position: 'relative',
           }}
@@ -970,33 +830,40 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             </p>
           </div>
 
-          {/* Two-column: NOVA eye + reading cards */}
+          {/* Two-column: EvolutionaryVisualSystem (sticky) + reading cards */}
           <div
             className="sp-s2-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: 'clamp(32px, 5vw, 72px)',
-              alignItems: 'center',
+              alignItems: 'start',
               maxWidth: '960px',
               margin: '0 auto',
               width: '100%',
+              minHeight: '180vh',
             }}
           >
-            {/* NOVA SVG */}
+            {/* Evolutionary visual — sticky within Section 2's scroll range */}
             <div
               className="sp-nova-wrap sp-s2-enter"
               style={{
+                position: 'sticky',
+                top: 'clamp(88px, 10vh, 120px)',
+                height: 'calc(100vh - clamp(88px, 10vh, 120px) - 24px)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 opacity: s2Visible ? 1 : 0,
                 transform: s2Visible ? 'translateY(0)' : 'translateY(24px)',
                 transitionDelay: '0.1s',
               }}
             >
-              <NovaEyeSvg isTh={lang === 'th'} />
+              <EvolutionaryVisualSystem containerRef={s2Ref} isTh={lang === 'th'} />
             </div>
 
-            {/* Reading cards */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Reading cards — vertically centered across the taller scroll column */}
+            <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 'calc(100vh - clamp(88px, 10vh, 120px) - 24px)', gap: '12px' }}>
               {story.s2.reading.map((line: string, i: number) => {
                 const isDone = i < readingStep;
                 const isActive = i === readingStep && s2Visible;
