@@ -723,27 +723,14 @@ export default function ExplorePage() {
             onClick={() => navigate('/analysis')}
           />
 
-          {/* ลายนิ้วมือ — coming soon */}
-          <ExploreCard
-            emoji="👆"
-            title={isTh ? 'สำรวจลายนิ้วมือ' : 'Fingerprint exploration'}
-            subtitle="Dermatoglyphics"
-            available={false}
-            comingSoon
-            isTh={isTh}
-            onClick={() => {}}
-          />
-
-          {/* ลายมือ — coming soon */}
-          <ExploreCard
-            emoji="✋"
-            title={isTh ? 'สำรวจลายมือ' : 'Palmistry exploration'}
-            subtitle={isTh ? 'ลายเส้นชีวิต' : 'Lines of life'}
-            available={false}
-            comingSoon
-            isTh={isTh}
-            onClick={() => {}}
-          />
+          {/* EXPLOREACT-001 FIX: this section used to have two "coming
+              soon" stub cards here — "สำรวจลายนิ้วมือ" (fingerprint/
+              dermatoglyphics, never had a real feature behind it, removed
+              outright per product decision) and "สำรวจลายมือ" (palmistry,
+              which duplicated the *real, working* "อ่านลักษณะมือ" activity
+              already in the catalog below → /palmistry). Both stub cards
+              removed — palmistry now has exactly one entry point instead
+              of a dead stub plus a working one. */}
         </div>
 
         {/* APPSHELL-001: Activity catalog — merged in from the former

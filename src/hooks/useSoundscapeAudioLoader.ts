@@ -62,7 +62,50 @@ async function initAudioCache(): Promise<IDBDatabase> {
   });
 }
 
-async function getCachedAudio(soundscapeId: string): Promise<{ buffer: AudioBuffer; loadedAt: Date } | null> {
+// AUDIOCACHE-DATACLONE-001 FIX: an AudioBuffer is a live Web Audio API
+// object — it is NOT in the structured-clone algorithm's list of
+// cloneable types, so `store.put({ buffer: someAudioBuffer })` always
+// threw "DataCloneError: AudioBuffer object could not be cloned" and the
+// catch in saveCachedAudio() silently swallowed it. Net effect: caching
+// never worked, every play re-synthesized, and any caller that awaited
+// the write (there weren't any, but it was one `await` away from crashing
+// the whole load) would have broken outright. Fix: store the buffer as
+// its raw per-channel Float32Array data (which IS cloneable) plus the
+// numbers needed to rebuild it, and reconstruct a real AudioBuffer with
+// audioContext.createBuffer() on read.
+interface SerializedAudioBuffer {
+  sampleRate: number;
+  length: number;
+  numberOfChannels: number;
+  channelData: Float32Array<ArrayBuffer>[];
+}
+
+function serializeAudioBuffer(buffer: AudioBuffer): SerializedAudioBuffer {
+  const channelData: Float32Array<ArrayBuffer>[] = [];
+  for (let ch = 0; ch < buffer.numberOfChannels; ch++) {
+    // `new Float32Array(source)` copies the data out of the live buffer
+    // (so the stored array isn't tied to the original AudioBuffer's
+    // memory) and backs it with a plain ArrayBuffer, which TS's DOM lib
+    // requires for AudioBuffer.copyToChannel() on read.
+    channelData.push(new Float32Array(buffer.getChannelData(ch)));
+  }
+  return {
+    sampleRate: buffer.sampleRate,
+    length: buffer.length,
+    numberOfChannels: buffer.numberOfChannels,
+    channelData,
+  };
+}
+
+function deserializeAudioBuffer(data: SerializedAudioBuffer, audioContext: AudioContext): AudioBuffer {
+  const buffer = audioContext.createBuffer(data.numberOfChannels, data.length, data.sampleRate);
+  for (let ch = 0; ch < data.numberOfChannels; ch++) {
+    buffer.copyToChannel(data.channelData[ch], ch);
+  }
+  return buffer;
+}
+
+async function getCachedAudio(soundscapeId: string, audioContext: AudioContext): Promise<{ buffer: AudioBuffer; loadedAt: Date } | null> {
   try {
     const db = await initAudioCache();
     return new Promise((resolve, reject) => {
@@ -88,7 +131,7 @@ async function getCachedAudio(soundscapeId: string): Promise<{ buffer: AudioBuff
           store.delete(soundscapeId);
           resolve(null);
         } else {
-          resolve({ buffer: result.buffer, loadedAt });
+          resolve({ buffer: deserializeAudioBuffer(result.buffer, audioContext), loadedAt });
         }
       };
     });
@@ -106,7 +149,7 @@ async function saveCachedAudio(soundscapeId: string, buffer: AudioBuffer): Promi
       const store = tx.objectStore(CACHE_STORE_NAME);
       const req = store.put({
         soundscapeId,
-        buffer,
+        buffer: serializeAudioBuffer(buffer),
         loadedAt: new Date().toISOString(),
       });
 
@@ -123,7 +166,7 @@ async function saveCachedAudio(soundscapeId: string, buffer: AudioBuffer): Promi
 async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext): Promise<AudioBuffer> {
   // Try cache first — synthesis is cheap but not free, no reason to redo it
   // every play.
-  const cached = await getCachedAudio(soundscapeId);
+  const cached = await getCachedAudio(soundscapeId, audioContext);
   if (cached) {
     console.log(`[useSoundscapeAudioLoader] Using cached synthesized audio: ${soundscapeId}`);
     return cached.buffer;

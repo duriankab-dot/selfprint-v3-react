@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useWorld } from '../context/WorldContext';
@@ -36,6 +37,7 @@ interface Message {
 }
 
 export default function TwinChat() {
+  const navigate = useNavigate();
   const { session } = useAuth();
   const { twin, loading: twinLoading, setCurrentWorld } = useTwin();
   const { setCurrentWorld: setWorldContextCurrentWorld } = useWorld();
@@ -246,14 +248,48 @@ export default function TwinChat() {
   }
 
   // GUARD: Check if Twin exists
+  // TWINGUARD-001 FIX: this used to be small secondary-colored text with no
+  // way forward — a dead end. Now large, centered, with a CTA straight into
+  // Core Awakening (the only thing this screen actually needs the user to
+  // do).
   if (!twin) {
     return (
-      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          {isTh
-            ? 'ทวินของคุณยังไม่ตื่น กรุณาทำ Core Awakening ให้เสร็จก่อน'
-            : "Your Twin hasn't awakened yet. Complete Core Awakening first."}
-        </p>
+      <div className="flex flex-col h-screen">
+        <NavRail />
+        <div className="twin-container flex flex-col flex-1 items-center justify-center text-center max-w-2xl mx-auto p-6">
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
+          <h1
+            style={{
+              fontSize: '1.75rem',
+              fontWeight: 800,
+              color: 'var(--color-text-primary)',
+              margin: '0 0 12px',
+              lineHeight: 1.3,
+            }}
+          >
+            {isTh ? 'ทวินของคุณยังไม่ตื่น' : "Your Twin hasn't awakened yet"}
+          </h1>
+          <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 28px', fontSize: '1rem' }}>
+            {isTh
+              ? 'ทำ Core Awakening ให้เสร็จก่อน เพื่อให้ทวินของคุณตื่นขึ้นและพร้อมคุยกับคุณ'
+              : 'Complete Core Awakening first so your Twin can awaken and start talking with you.'}
+          </p>
+          <button
+            onClick={() => navigate('/core-awakening')}
+            style={{
+              padding: '14px 32px',
+              borderRadius: 12,
+              border: 'none',
+              background: '#6366f1',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '1rem',
+              cursor: 'pointer',
+            }}
+          >
+            {isTh ? '✨ ไปที่ Core Awakening' : '✨ Go to Core Awakening'}
+          </button>
+        </div>
       </div>
     );
   }
