@@ -19,6 +19,8 @@ import { useAnalysisStore } from '../store/analysisStore';
 import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
+import { TwinNav } from '../components/twin/TwinNav';
+import { NavRail } from '../components/layout/NavRail';
 import { saveMessage, supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
@@ -508,7 +510,14 @@ export default function TwinChat() {
   };
 
   return (
-    <div className="twin-container flex flex-col h-screen max-w-2xl mx-auto p-4">
+    <div className="flex flex-col h-screen">
+      <NavRail />
+      {/* APPSHELL-004: Twin app-space sub-nav — Conversation / What Twin
+          Knows / Personality / Settings. Sits above the chat column, not
+          inside it, so the conversation itself stays a plain focused
+          column (no Dashboard-style cards wrapping it). */}
+      <TwinNav currentTab="chat" />
+      <div className="twin-container flex flex-col flex-1 min-h-0 max-w-2xl mx-auto p-4 w-full">
       {/* World Context Header */}
       {currentWorld && <WorldContextHeader world={currentWorld} />}
 
@@ -660,6 +669,7 @@ export default function TwinChat() {
         >
           {isSending ? '...' : (isTh ? 'ส่ง' : 'Send')}
         </button>
+      </div>
       </div>
     </div>
   );

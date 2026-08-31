@@ -10,6 +10,8 @@ import { useTwin } from '../context/TwinContext';
 import { useQuery } from '@tanstack/react-query';
 import { PersonalContextBuilder } from '../services/sice/engines/PersonalContextBuilder';
 import type { PersonalContext } from '../types/sice';
+import { TwinNav } from '../components/twin/TwinNav';
+import { NavRail } from '../components/layout/NavRail';
 import '../styles/twin-personality.css';
 
 interface PersonalityMetrics {
@@ -172,6 +174,9 @@ export default function TwinPersonalityPage() {
 
   return (
     <div className="twin-personality-page">
+      <NavRail />
+      {/* APPSHELL-004: Twin app-space sub-nav */}
+      <TwinNav currentTab="personality" />
       <div className="personality-container">
         <header className="personality-header">
           <h1>Twin Personality</h1>

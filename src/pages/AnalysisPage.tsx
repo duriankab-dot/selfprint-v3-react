@@ -15,7 +15,7 @@
  * - No mocks, no hardcoding
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
@@ -28,6 +28,7 @@ import { ConfidenceIndicator } from '@/components/intelligence/ConfidenceIndicat
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NavRail } from '@/components/layout/NavRail';
 import { Alert } from '@/components/composites/Alert';
 import { useAnalysisStore } from '@/store/analysisStore';
 import { useLanguage } from '@/context/LanguageContext';
@@ -44,16 +45,29 @@ import '../styles/analysis.css';
 // Section header helper
 // ============================================================================
 
-const SectionHeader: React.FC<{ number: string; title: string; icon: string }> = ({
-  number,
-  title,
-  icon,
-}) => (
-  <div className="analysis__section-header">
+// APPSHELL-003 FIX: 9 sections used to render fully expanded at once —
+// reading like a generated report, not a self-discovery experience. Each
+// header is now a toggle; only the sections in `expandedSections` render
+// their body (see .analysis__section--collapsed in analysis.css). Content
+// and data-fetching are untouched — presentation layer only.
+const SectionHeader: React.FC<{
+  number: string;
+  title: string;
+  icon: string;
+  isOpen: boolean;
+  onToggle: () => void;
+}> = ({ number, title, icon, isOpen, onToggle }) => (
+  <button
+    type="button"
+    className="analysis__section-header"
+    onClick={onToggle}
+    aria-expanded={isOpen}
+  >
     <span className="analysis__section-number">{number}</span>
     <span className="analysis__section-icon" aria-hidden="true">{icon}</span>
     <h2 className="analysis__section-title">{title}</h2>
-  </div>
+    <span className="analysis__section-chevron" aria-hidden="true">{isOpen ? '▾' : '▸'}</span>
+  </button>
 );
 
 // ============================================================================
@@ -68,6 +82,19 @@ const AnalysisPage: React.FC = () => {
   const isTh = language === 'th';
   const setAnalysis = useAnalysisStore((state) => state.setAnalysis);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
+
+  // APPSHELL-003 FIX: progressive disclosure — only "01 Self Overview" (the
+  // quick-insight section) opens by default; the rest expand on tap instead
+  // of dumping all 9 sections at once.
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => new Set(['01']));
+  const toggleSection = (id: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
   // Stable instances
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
@@ -293,9 +320,26 @@ const AnalysisPage: React.FC = () => {
         {!isLoading && displayAnalysis && (
           <div className="analysis__content">
 
+            <div className="analysis__expand-all">
+              <button
+                type="button"
+                className="analysis__expand-all-btn"
+                onClick={() => setExpandedSections(new Set(['01', '02', '03', '04', '05', '06', '07', '08', '09']))}
+              >
+                {isTh ? 'ขยายทั้งหมด' : 'Expand all'}
+              </button>
+              <button
+                type="button"
+                className="analysis__expand-all-btn"
+                onClick={() => setExpandedSections(new Set(['01']))}
+              >
+                {isTh ? 'ย่อทั้งหมด' : 'Collapse all'}
+              </button>
+            </div>
+
             {/* 01 — ภาพรวมตัวตน */}
-            <section className="analysis__section" aria-labelledby="section-01">
-              <SectionHeader number="01" title={isTh ? 'ภาพรวมตัวตน' : 'Self Overview'} icon="🪞" />
+            <section className={`analysis__section${expandedSections.has('01') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-01">
+              <SectionHeader number="01" title={isTh ? 'ภาพรวมตัวตน' : 'Self Overview'} icon="🪞" isOpen={expandedSections.has('01')} onToggle={() => toggleSection('01')} />
               <div className="analysis__section-body">
                 <p className="analysis__overview-text">{displayAnalysis.selfOverview}</p>
                 {context && (
@@ -317,8 +361,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 02 — รูปแบบพฤติกรรม */}
-            <section className="analysis__section" aria-labelledby="section-02">
-              <SectionHeader number="02" title={isTh ? 'รูปแบบพฤติกรรม' : 'Behavioral Patterns'} icon="📊" />
+            <section className={`analysis__section${expandedSections.has('02') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-02">
+              <SectionHeader number="02" title={isTh ? 'รูปแบบพฤติกรรม' : 'Behavioral Patterns'} icon="📊" isOpen={expandedSections.has('02')} onToggle={() => toggleSection('02')} />
               <div className="analysis__section-body">
                 {displayAnalysis.behavioralPatterns.length === 0 ? (
                   <p className="analysis__empty-section">
@@ -357,8 +401,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 03 — จุดแข็ง */}
-            <section className="analysis__section" aria-labelledby="section-03">
-              <SectionHeader number="03" title={isTh ? 'จุดแข็ง' : 'Strengths'} icon="💪" />
+            <section className={`analysis__section${expandedSections.has('03') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-03">
+              <SectionHeader number="03" title={isTh ? 'จุดแข็ง' : 'Strengths'} icon="💪" isOpen={expandedSections.has('03')} onToggle={() => toggleSection('03')} />
               <div className="analysis__section-body">
                 {displayAnalysis.strengths.length === 0 ? (
                   <p className="analysis__empty-section">
@@ -390,8 +434,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 04 — ข้อควรระวัง */}
-            <section className="analysis__section" aria-labelledby="section-04">
-              <SectionHeader number="04" title="Blind Spots" icon="🔍" />
+            <section className={`analysis__section${expandedSections.has('04') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-04">
+              <SectionHeader number="04" title="Blind Spots" icon="🔍" isOpen={expandedSections.has('04')} onToggle={() => toggleSection('04')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
@@ -421,8 +465,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 05 — แนวโน้ม */}
-            <section className="analysis__section" aria-labelledby="section-05">
-              <SectionHeader number="05" title={isTh ? 'แนวโน้ม' : 'Trends'} icon="📈" />
+            <section className={`analysis__section${expandedSections.has('05') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-05">
+              <SectionHeader number="05" title={isTh ? 'แนวโน้ม' : 'Trends'} icon="📈" isOpen={expandedSections.has('05')} onToggle={() => toggleSection('05')} />
               <div className="analysis__section-body">
                 {displayAnalysis.trends.length === 0 ? (
                   <p className="analysis__empty-section">
@@ -448,8 +492,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 06 — เส้นทางชีวิต */}
-            <section className="analysis__section" aria-labelledby="section-06">
-              <SectionHeader number="06" title="Journey" icon="🗺" />
+            <section className={`analysis__section${expandedSections.has('06') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-06">
+              <SectionHeader number="06" title="Journey" icon="🗺" isOpen={expandedSections.has('06')} onToggle={() => toggleSection('06')} />
               <div className="analysis__section-body">
                 <div className="analysis__journey-stage">
                   <span className="analysis__journey-stage-label">{isTh ? 'ตอนนี้คุณอยู่ที่:' : 'Right now you are at:'}</span>
@@ -487,8 +531,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 07 — สิ่งที่ควรสนใจ */}
-            <section className="analysis__section" aria-labelledby="section-07">
-              <SectionHeader number="07" title={isTh ? 'สิ่งที่ควรให้ความสนใจ' : 'Focus Areas'} icon="🎯" />
+            <section className={`analysis__section${expandedSections.has('07') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-07">
+              <SectionHeader number="07" title={isTh ? 'สิ่งที่ควรให้ความสนใจ' : 'Focus Areas'} icon="🎯" isOpen={expandedSections.has('07')} onToggle={() => toggleSection('07')} />
               <div className="analysis__section-body">
                 {displayAnalysis.focusAreas.length === 0 ? (
                   <p className="analysis__empty-section">
@@ -508,8 +552,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 08 — ข้อแนะนำส่วนบุคคล */}
-            <section className="analysis__section" aria-labelledby="section-08">
-              <SectionHeader number="08" title="Personal Guidance" icon="🧭" />
+            <section className={`analysis__section${expandedSections.has('08') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-08">
+              <SectionHeader number="08" title="Personal Guidance" icon="🧭" isOpen={expandedSections.has('08')} onToggle={() => toggleSection('08')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
@@ -532,8 +576,8 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 09 — แผนพัฒนา */}
-            <section className="analysis__section analysis__section--last" aria-labelledby="section-09">
-              <SectionHeader number="09" title="Next Step" icon="🚀" />
+            <section className={`analysis__section analysis__section--last${expandedSections.has('09') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-09">
+              <SectionHeader number="09" title="Next Step" icon="🚀" isOpen={expandedSections.has('09')} onToggle={() => toggleSection('09')} />
               <div className="analysis__section-body">
                 <div className="analysis__next-steps">
                   {displayAnalysis.nextSteps.map((step, i) => (
@@ -577,6 +621,7 @@ const AnalysisPage: React.FC = () => {
       </main>
 
       <Footer />
+      <NavRail />
       <BottomNav />
     </div>
   );

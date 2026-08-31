@@ -27,6 +27,7 @@ import { supabase } from '@/lib/supabase/client';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NavRail } from '@/components/layout/NavRail';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import '../styles/privacy.css';
@@ -645,6 +646,7 @@ const PrivacyCenter: React.FC = () => {
       )}
 
       <Footer />
+      <NavRail />
       <BottomNav />
     </>
   );

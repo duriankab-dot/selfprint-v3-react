@@ -45,6 +45,7 @@ import './App.css';
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const IntelligenceHub = lazy(() => import('./pages/IntelligenceHub'));
 const AnalysisPage = lazy(() => import('./pages/AnalysisPage'));
 const PrivacyCenter = lazy(() => import('./pages/PrivacyCenter'));
 const Share = lazy(() => import('./pages/Share'));
@@ -137,6 +138,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/chat/twin', element: <TwinChat /> },
     { path: '/twin', element: <LangRedirect to="/chat/twin" /> },
     { path: '/dashboard', element: <Dashboard /> },
+    { path: '/intelligence', element: <IntelligenceHub /> },
     { path: '/analysis', element: <AnalysisPage /> },
     { path: '/privacy', element: <PrivacyCenter /> },
     { path: '/share/:code', element: <Share /> },

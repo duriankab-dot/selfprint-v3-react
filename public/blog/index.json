@@ -1,35 +1,1391 @@
 {
   "metadata": {
-    "totalArticles": 25,
-    "lastUpdated": "2026-08-27",
-    "version": "1.5",
-    "structure": "4 Awareness + 5 Education + 8 Conversion + 8 Advanced"
+    "totalArticles": 86,
+    "lastUpdated": "2026-08-31",
+    "version": "1.6",
+    "structure": "25 SELFPRINT editorial (4 Awareness + 5 Education + 8 Conversion + 8 Advanced) + 61 world decision guides (20 Career + 21 Health + 20 Relationships)"
   },
   "articles": [
-    {"id": "selfprint-awareness-1", "title": "ปีชงหรือพฤติกรรมชง?", "slug": "birth-chart-vs-behavior", "filePath": "awareness/01-birth-chart-vs-behavior", "excerpt": "ปีเกิดไม่ได้ตัดสินใจคุณ — พฤติกรรมถึงทำ", "world": "selfprint", "category": "Self-Discovery", "publishedAt": "2026-08-27", "featured": true, "keywords": ["ปีชง", "พฤติกรรม", "ปมขัดขวาง"]},
-    {"id": "selfprint-awareness-2", "title": "ลืมตารางสีเสื้อมงคลไปก่อน", "slug": "color-psychology-12-dimensions", "filePath": "awareness/02-color-psychology-12-dimensions", "excerpt": "สีมงคลไม่ใช่เรื่องลึกลับ แต่เรื่องวิทยาศาสตร์", "world": "selfprint", "category": "Self-Discovery", "publishedAt": "2026-08-27", "featured": true, "keywords": ["สีเสื้อมงคล", "Color Psychology"]},
-    {"id": "selfprint-awareness-3", "title": "เบื่อไหมกับ 'ราหูเล็ง'?", "slug": "blind-spots-vs-astrology", "filePath": "awareness/03-blind-spots-vs-astrology", "excerpt": "ราหูเล็ง vs Blind Spots: ทำไมการค้นหา 'จุดบอด' เป็นคีย์", "world": "selfprint", "category": "Self-Discovery", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Blind Spots", "จุดบอด"]},
-    {"id": "selfprint-awareness-4", "title": "จากรอ 'ราหูจากไป' มาเป็น 'รู้จักตัวเอง'", "slug": "opening-eyes-to-self-discovery", "filePath": "awareness/04-opening-eyes-to-self-discovery", "excerpt": "หยุดรอ ต้องรู้จักตัวเอง ก่อน", "world": "selfprint", "category": "Self-Discovery", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Self-Discovery"]},
-    {"id": "selfprint-education-1", "title": "AI Twin คืออะไร?", "slug": "ai-twin-what-is-it", "filePath": "education/01-ai-twin-what-is-it", "excerpt": "Digital Twin concept + personal AI Twin", "world": "selfprint", "category": "Features", "publishedAt": "2026-08-27", "featured": true, "keywords": ["AI Twin", "Digital Twin"]},
-    {"id": "selfprint-education-2", "title": "ก่อนจะตอบคำถามข้อแรก", "slug": "12-dimensions-explained", "filePath": "education/02-12-dimensions-explained", "excerpt": "12 behavioral dimensions + why 12 vs Big Five", "world": "selfprint", "category": "Features", "publishedAt": "2026-08-27", "featured": true, "keywords": ["12 มิติ"]},
-    {"id": "selfprint-education-3", "title": "รู้จัก Initial State Matrix", "slug": "initial-state-matrix", "filePath": "education/03-initial-state-matrix", "excerpt": "Hunter vs Planner archetypes", "world": "selfprint", "category": "Features", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Matrix"]},
-    {"id": "selfprint-education-4", "title": "จะดีไหมถ้ามี 'ร่างโคลนสมอง'", "slug": "ai-twin-decision-simulation", "filePath": "education/04-ai-twin-decision-simulation", "excerpt": "What-if analysis + decision simulation", "world": "selfprint", "category": "Features", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Decision Simulation"]},
-    {"id": "selfprint-education-5", "title": "เบื้องหลังพลัง 12 SICE Engines", "slug": "12-sice-engines", "filePath": "education/05-12-sice-engines", "excerpt": "12 SICE Engines architecture", "world": "selfprint", "category": "Features", "publishedAt": "2026-08-27", "featured": true, "keywords": ["SICE Engines"]},
-    {"id": "selfprint-conversion-1", "title": "ทำไมยิ่งพยายามเลือก ยิ่งเลือกผิด?", "slug": "decision-fatigue", "filePath": "conversion/01-decision-fatigue", "excerpt": "Decision Fatigue science", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Decision Fatigue"]},
-    {"id": "selfprint-conversion-2", "title": "ค้นหาไอเดียอาชีพจากพฤติกรรม 12 มิติ", "slug": "career-fit-12-dimensions", "filePath": "conversion/02-career-fit", "excerpt": "Career Fit analysis", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Career Fit"]},
-    {"id": "selfprint-conversion-3", "title": "รู้จัก 'จุดบอดเร้นลับ'", "slug": "blind-spots-deep-dive", "filePath": "conversion/03-blind-spots-deep-dive", "excerpt": "Blind Spots psychology", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Blind Spots"]},
-    {"id": "selfprint-conversion-4", "title": "วิธีอ่านพิมพ์เขียวพฤติกรรมคนรัก", "slug": "relationship-matrix", "filePath": "conversion/04-relationship-matrix", "excerpt": "Relationship Compatibility", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Relationship"]},
-    {"id": "selfprint-conversion-5", "title": "พัฒนาตัวเองแบบถูกจุด", "slug": "personal-development-authentic", "filePath": "conversion/05-personal-dev-correctly", "excerpt": "Strength-Based Growth", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Personal Development"]},
-    {"id": "selfprint-conversion-6", "title": "ทักษะการตัดสินใจในวิกฤต", "slug": "crisis-decision-making", "filePath": "conversion/06-crisis-decision", "excerpt": "Crisis Decision Framework", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Crisis Decision"]},
-    {"id": "selfprint-conversion-7", "title": "ทำไมอ่านหนังสือพัฒนาตัวเองกี่เล่มก็ไม่เปลี่ยน?", "slug": "overthinking-root-cause", "filePath": "conversion/07-why-books-dont-change", "excerpt": "Overthinking Loop", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Overthinking"]},
-    {"id": "selfprint-conversion-8", "title": "จากคนชอบคิดมาก สู่คนคิดอย่างเป็นระบบ", "slug": "systems-thinking-transformation", "filePath": "conversion/08-systems-thinking", "excerpt": "Systems Thinking Framework", "world": "selfprint", "category": "Problem-Solving", "publishedAt": "2026-08-27", "featured": true, "keywords": ["Systems Thinking"]},
-    {"id": "selfprint-advanced-1", "title": "ปรับแต่ง AI Twin ของคุณให้เพิ่ม Accuracy", "slug": "ai-twin-customization-accuracy", "filePath": "advanced/01-ai-twin-customization", "excerpt": "Twin Retrain + Feedback Loop", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["AI Twin Customization"]},
-    {"id": "selfprint-advanced-2", "title": "12 SICE Engines เจาะลึก", "slug": "12-sice-deep-dive", "filePath": "advanced/02-12-sice-deep-dive", "excerpt": "Deep dive each Engine", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["SICE Deep Dive"]},
-    {"id": "selfprint-advanced-3", "title": "Multi-Twin Families", "slug": "multi-twin-families", "filePath": "advanced/03-multi-twin-families", "excerpt": "Create Twin for family/team", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Multi-Twin"]},
-    {"id": "selfprint-advanced-4", "title": "Organizational 12D Analysis", "slug": "organizational-behavior-analysis", "filePath": "advanced/04-organizational-behavior", "excerpt": "Team culture + org DNA", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Org Behavior"]},
-    {"id": "selfprint-advanced-5", "title": "Case Study: Engineer → CTO", "slug": "career-case-study-engineer-to-cto", "filePath": "advanced/05-career-case-study", "excerpt": "Real career transformation", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Career Case"]},
-    {"id": "selfprint-advanced-6", "title": "Case Study: 7-Year Relationship", "slug": "relationship-case-study-7years", "filePath": "advanced/06-relationship-case-study", "excerpt": "Long-term deepening", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Relationship Case"]},
-    {"id": "selfprint-advanced-7", "title": "Case Study: Introvert CEO", "slug": "leadership-case-study-introvert-ceo", "filePath": "advanced/07-leadership-case-study", "excerpt": "Introvert success story", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Leadership Case"]},
-    {"id": "selfprint-advanced-8", "title": "Future of Personal AI", "slug": "future-personal-ai-2027", "filePath": "advanced/08-future-personal-ai", "excerpt": "AI Twin 2027-2030 vision", "world": "selfprint", "category": "Advanced", "publishedAt": "2026-08-27", "featured": false, "keywords": ["Future AI"]}
+    {
+      "id": "selfprint-awareness-1",
+      "title": "ปีชงหรือพฤติกรรมชง?",
+      "slug": "birth-chart-vs-behavior",
+      "filePath": "awareness/01-birth-chart-vs-behavior",
+      "excerpt": "ปีเกิดไม่ได้ตัดสินใจคุณ — พฤติกรรมถึงทำ",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "ปีชง",
+        "พฤติกรรม",
+        "ปมขัดขวาง"
+      ]
+    },
+    {
+      "id": "selfprint-awareness-2",
+      "title": "ลืมตารางสีเสื้อมงคลไปก่อน",
+      "slug": "color-psychology-12-dimensions",
+      "filePath": "awareness/02-color-psychology-12-dimensions",
+      "excerpt": "สีมงคลไม่ใช่เรื่องลึกลับ แต่เรื่องวิทยาศาสตร์",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "สีเสื้อมงคล",
+        "Color Psychology"
+      ]
+    },
+    {
+      "id": "selfprint-awareness-3",
+      "title": "เบื่อไหมกับ 'ราหูเล็ง'?",
+      "slug": "blind-spots-vs-astrology",
+      "filePath": "awareness/03-blind-spots-vs-astrology",
+      "excerpt": "ราหูเล็ง vs Blind Spots: ทำไมการค้นหา 'จุดบอด' เป็นคีย์",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Blind Spots",
+        "จุดบอด"
+      ]
+    },
+    {
+      "id": "selfprint-awareness-4",
+      "title": "จากรอ 'ราหูจากไป' มาเป็น 'รู้จักตัวเอง'",
+      "slug": "opening-eyes-to-self-discovery",
+      "filePath": "awareness/04-opening-eyes-to-self-discovery",
+      "excerpt": "หยุดรอ ต้องรู้จักตัวเอง ก่อน",
+      "world": "selfprint",
+      "category": "Self-Discovery",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Self-Discovery"
+      ]
+    },
+    {
+      "id": "selfprint-education-1",
+      "title": "AI Twin คืออะไร?",
+      "slug": "ai-twin-what-is-it",
+      "filePath": "education/01-ai-twin-what-is-it",
+      "excerpt": "Digital Twin concept + personal AI Twin",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "AI Twin",
+        "Digital Twin"
+      ]
+    },
+    {
+      "id": "selfprint-education-2",
+      "title": "ก่อนจะตอบคำถามข้อแรก",
+      "slug": "12-dimensions-explained",
+      "filePath": "education/02-12-dimensions-explained",
+      "excerpt": "12 behavioral dimensions + why 12 vs Big Five",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "12 มิติ"
+      ]
+    },
+    {
+      "id": "selfprint-education-3",
+      "title": "รู้จัก Initial State Matrix",
+      "slug": "initial-state-matrix",
+      "filePath": "education/03-initial-state-matrix",
+      "excerpt": "Hunter vs Planner archetypes",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Matrix"
+      ]
+    },
+    {
+      "id": "selfprint-education-4",
+      "title": "จะดีไหมถ้ามี 'ร่างโคลนสมอง'",
+      "slug": "ai-twin-decision-simulation",
+      "filePath": "education/04-ai-twin-decision-simulation",
+      "excerpt": "What-if analysis + decision simulation",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Decision Simulation"
+      ]
+    },
+    {
+      "id": "selfprint-education-5",
+      "title": "เบื้องหลังพลัง 12 SICE Engines",
+      "slug": "12-sice-engines",
+      "filePath": "education/05-12-sice-engines",
+      "excerpt": "12 SICE Engines architecture",
+      "world": "selfprint",
+      "category": "Features",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "SICE Engines"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-1",
+      "title": "ทำไมยิ่งพยายามเลือก ยิ่งเลือกผิด?",
+      "slug": "decision-fatigue",
+      "filePath": "conversion/01-decision-fatigue",
+      "excerpt": "Decision Fatigue science",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Decision Fatigue"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-2",
+      "title": "ค้นหาไอเดียอาชีพจากพฤติกรรม 12 มิติ",
+      "slug": "career-fit-12-dimensions",
+      "filePath": "conversion/02-career-fit",
+      "excerpt": "Career Fit analysis",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Career Fit"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-3",
+      "title": "รู้จัก 'จุดบอดเร้นลับ'",
+      "slug": "blind-spots-deep-dive",
+      "filePath": "conversion/03-blind-spots-deep-dive",
+      "excerpt": "Blind Spots psychology",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Blind Spots"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-4",
+      "title": "วิธีอ่านพิมพ์เขียวพฤติกรรมคนรัก",
+      "slug": "relationship-matrix",
+      "filePath": "conversion/04-relationship-matrix",
+      "excerpt": "Relationship Compatibility",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Relationship"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-5",
+      "title": "พัฒนาตัวเองแบบถูกจุด",
+      "slug": "personal-development-authentic",
+      "filePath": "conversion/05-personal-dev-correctly",
+      "excerpt": "Strength-Based Growth",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Personal Development"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-6",
+      "title": "ทักษะการตัดสินใจในวิกฤต",
+      "slug": "crisis-decision-making",
+      "filePath": "conversion/06-crisis-decision",
+      "excerpt": "Crisis Decision Framework",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Crisis Decision"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-7",
+      "title": "ทำไมอ่านหนังสือพัฒนาตัวเองกี่เล่มก็ไม่เปลี่ยน?",
+      "slug": "overthinking-root-cause",
+      "filePath": "conversion/07-why-books-dont-change",
+      "excerpt": "Overthinking Loop",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Overthinking"
+      ]
+    },
+    {
+      "id": "selfprint-conversion-8",
+      "title": "จากคนชอบคิดมาก สู่คนคิดอย่างเป็นระบบ",
+      "slug": "systems-thinking-transformation",
+      "filePath": "conversion/08-systems-thinking",
+      "excerpt": "Systems Thinking Framework",
+      "world": "selfprint",
+      "category": "Problem-Solving",
+      "publishedAt": "2026-08-27",
+      "featured": true,
+      "keywords": [
+        "Systems Thinking"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-1",
+      "title": "ปรับแต่ง AI Twin ของคุณให้เพิ่ม Accuracy",
+      "slug": "ai-twin-customization-accuracy",
+      "filePath": "advanced/01-ai-twin-customization",
+      "excerpt": "Twin Retrain + Feedback Loop",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "AI Twin Customization"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-2",
+      "title": "12 SICE Engines เจาะลึก",
+      "slug": "12-sice-deep-dive",
+      "filePath": "advanced/02-12-sice-deep-dive",
+      "excerpt": "Deep dive each Engine",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "SICE Deep Dive"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-3",
+      "title": "Multi-Twin Families",
+      "slug": "multi-twin-families",
+      "filePath": "advanced/03-multi-twin-families",
+      "excerpt": "Create Twin for family/team",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Multi-Twin"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-4",
+      "title": "Organizational 12D Analysis",
+      "slug": "organizational-behavior-analysis",
+      "filePath": "advanced/04-organizational-behavior",
+      "excerpt": "Team culture + org DNA",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Org Behavior"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-5",
+      "title": "Case Study: Engineer → CTO",
+      "slug": "career-case-study-engineer-to-cto",
+      "filePath": "advanced/05-career-case-study",
+      "excerpt": "Real career transformation",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Career Case"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-6",
+      "title": "Case Study: 7-Year Relationship",
+      "slug": "relationship-case-study-7years",
+      "filePath": "advanced/06-relationship-case-study",
+      "excerpt": "Long-term deepening",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Relationship Case"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-7",
+      "title": "Case Study: Introvert CEO",
+      "slug": "leadership-case-study-introvert-ceo",
+      "filePath": "advanced/07-leadership-case-study",
+      "excerpt": "Introvert success story",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Leadership Case"
+      ]
+    },
+    {
+      "id": "selfprint-advanced-8",
+      "title": "Future of Personal AI",
+      "slug": "future-personal-ai-2027",
+      "filePath": "advanced/08-future-personal-ai",
+      "excerpt": "AI Twin 2027-2030 vision",
+      "world": "selfprint",
+      "category": "Advanced",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "Future AI"
+      ]
+    },
+    {
+      "id": "career-career-burnout-decision",
+      "title": "Career Burnout: Time for a Change?",
+      "slug": "career-burnout-decision",
+      "filePath": "career-burnout-decision",
+      "excerpt": "Burnout feels like a signal to leave. But your Twin knows it's more complicated. Sometimes you need a change of pace, sometimes a new role, sometimes it's time to quit. Learn to distinguish what your burnout is actually telling you.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "burnout",
+        "job stress",
+        "career change signs",
+        "work life balance"
+      ]
+    },
+    {
+      "id": "career-career-goals-setting",
+      "title": "Career Goals: Setting Decisions That Stick",
+      "slug": "career-goals-setting",
+      "filePath": "career-goals-setting",
+      "excerpt": "Most career goals fail because they're not decisions. Learn your Twin's framework for setting goals that actually stick—by making them personal, specific, and tied to values instead of just ambition.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "career goals",
+        "setting goals",
+        "career planning",
+        "goal setting"
+      ]
+    },
+    {
+      "id": "career-company-culture-decision",
+      "title": "Company Culture Fit: Red Flags and Green Lights",
+      "slug": "company-culture-decision",
+      "filePath": "company-culture-decision",
+      "excerpt": "Company culture determines whether you'll thrive or slowly burn out. Your Twin helps you read the signs of healthy culture before you accept an offer—and know when it's time to leave.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "company culture",
+        "workplace culture",
+        "job fit",
+        "work environment"
+      ]
+    },
+    {
+      "id": "career-continuous-learning-career",
+      "title": "Staying Updated: Continuous Learning Decisions",
+      "slug": "continuous-learning-career",
+      "filePath": "continuous-learning-career",
+      "excerpt": "Your industry evolves constantly. The question isn't whether to learn—it's how to keep growing without burning out. Your Twin helps you build learning that sustains your career.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "professional development",
+        "continuous learning",
+        "skill development",
+        "career growth"
+      ]
+    },
+    {
+      "id": "career-career-transitions-decisions",
+      "title": "Decision-Making in Career Transitions: Your Twin's Framework",
+      "slug": "career-transitions-decisions",
+      "filePath": "decision-making-career-transitions",
+      "excerpt": "Career transitions are pivotal moments. Learn how Twin intelligence can guide your most important career decisions—from evaluating opportunities to navigating uncertainty. Discover a framework that turns career crossroads into confident choices.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": true,
+      "keywords": [
+        "career decisions",
+        "career transitions",
+        "career change",
+        "decision making"
+      ]
+    },
+    {
+      "id": "career-education-career-decision",
+      "title": "Further Education: MBA or Bootcamp Decision",
+      "slug": "education-career-decision",
+      "filePath": "education-career-decision",
+      "excerpt": "Considering further education? Your Twin helps you evaluate whether an MBA, bootcamp, or certification is worth the time and money—and which one actually moves your career forward.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "MBA",
+        "bootcamp",
+        "further education",
+        "career training",
+        "skill development"
+      ]
+    },
+    {
+      "id": "career-entrepreneur-vs-employment",
+      "title": "Entrepreneurship vs Employment: The Decision",
+      "slug": "entrepreneur-vs-employment",
+      "filePath": "entrepreneur-vs-employment",
+      "excerpt": "The choice between starting your own business and staying employed isn't about ambition—it's about tradeoffs. Your Twin breaks down the real differences so you can decide based on what you actually want, not just what sounds cooler.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "entrepreneurship",
+        "starting a business",
+        "business decision",
+        "self-employment"
+      ]
+    },
+    {
+      "id": "career-evaluate-job-offers-decision",
+      "title": "How to Evaluate Job Offers Like Your Twin Would",
+      "slug": "evaluate-job-offers-decision",
+      "filePath": "evaluate-job-offers",
+      "excerpt": "Job offer in hand—now what? Learn a framework to evaluate job offers beyond salary. Discover how to weigh culture fit, growth, stability, and fulfillment to make a decision you won't regret.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "job offer evaluation",
+        "career decisions",
+        "job comparison"
+      ]
+    },
+    {
+      "id": "career-freelance-decision",
+      "title": "Freelancing Decision: Freedom vs Security",
+      "slug": "freelance-decision",
+      "filePath": "freelance-decision",
+      "excerpt": "Freelancing promises freedom but demands uncertainty. Your Twin helps you evaluate whether you're ready for the tradeoffs—and whether freelancing is actually your best career move right now.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "freelancing",
+        "freelance work",
+        "independent contractor",
+        "side gig"
+      ]
+    },
+    {
+      "id": "career-geographic-move-career",
+      "title": "Geographic Move for Career: Twin Perspective",
+      "slug": "geographic-move-career",
+      "filePath": "geographic-move-career",
+      "excerpt": "Relocating for a job isn't just a career decision—it's a life decision. Your Twin helps you weigh opportunity against roots, cost of living against salary, career growth against personal stability.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relocate for job",
+        "moving for career",
+        "geographic decision",
+        "relocation"
+      ]
+    },
+    {
+      "id": "career-industry-switch-decision",
+      "title": "Industry Switch: Is Your Twin Guiding You Right?",
+      "slug": "industry-switch-decision",
+      "filePath": "industry-switch-decision",
+      "excerpt": "Changing industries feels like starting over. Your Twin helps you evaluate whether the switch is a genuine opportunity or just escape—and how to make the transition without losing what you've built.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "career change industry",
+        "changing careers",
+        "industry transition",
+        "new field"
+      ]
+    },
+    {
+      "id": "career-interview-prep-framework",
+      "title": "Interview Preparation: Decision-Making Framework",
+      "slug": "interview-prep-framework",
+      "filePath": "interview-prep-framework",
+      "excerpt": "Most interview prep focuses on answering questions. Your Twin knows the real skill is asking the right questions—and evaluating whether this company is actually right for you. Learn the framework that turns interviews into two-way decisions.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "interview tips",
+        "interview preparation",
+        "interview questions",
+        "job interview"
+      ]
+    },
+    {
+      "id": "career-job-loyalty-decision",
+      "title": "Staying vs Leaving a Job You Love",
+      "slug": "job-loyalty-decision",
+      "filePath": "job-loyalty-decision",
+      "excerpt": "Sometimes the hardest career decision isn't about jobs you hate—it's about staying at a job you love when growth has plateaued. Your Twin helps you know whether loyalty serves you or holds you back.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "leaving job",
+        "job satisfaction",
+        "career decision",
+        "when to quit"
+      ]
+    },
+    {
+      "id": "career-leadership-decision",
+      "title": "Leadership Role Decision: Are You Ready?",
+      "slug": "leadership-decision",
+      "filePath": "leadership-decision",
+      "excerpt": "Stepping into leadership is terrifying. Your Twin helps you evaluate whether you're ready for the role—and what you'll lose and gain in the transition.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "leadership",
+        "management role",
+        "team lead",
+        "leadership skills"
+      ]
+    },
+    {
+      "id": "career-mentorship-career",
+      "title": "Mentorship Decisions: Who Should Guide Your Career?",
+      "slug": "mentorship-career",
+      "filePath": "mentorship-career",
+      "excerpt": "The right mentor can accelerate your career by years. The wrong one can send you in circles. Your Twin helps you decide who deserves your trust and how to make mentorship actually work.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "mentorship",
+        "finding mentor",
+        "career mentor",
+        "professional guidance"
+      ]
+    },
+    {
+      "id": "career-networking-strategy-career",
+      "title": "Networking Decisions: Building Your Career",
+      "slug": "networking-strategy-career",
+      "filePath": "networking-strategy-career",
+      "excerpt": "Networking feels like forced socializing, but your Twin knows it's actually about making intentional decisions about relationships. Learn to build a network that feels authentic and supports your career without the exhaustion.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "networking tips",
+        "career networking",
+        "professional relationships",
+        "business networking"
+      ]
+    },
+    {
+      "id": "career-promotion-decision-guide",
+      "title": "Should You Take That Promotion? Twin Insights",
+      "slug": "promotion-decision-guide",
+      "filePath": "promotion-decision-guide",
+      "excerpt": "Not all promotions are good decisions. Your Twin knows how to evaluate whether a promotion aligns with your actual career, not just your ambition. Learn to say no to the wrong promotions.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "promotion decision",
+        "career advancement",
+        "take promotion",
+        "leadership"
+      ]
+    },
+    {
+      "id": "career-remote-work-decision",
+      "title": "Remote vs Office: Making the Work Location Decision",
+      "slug": "remote-work-decision",
+      "filePath": "remote-work-decision",
+      "excerpt": "The pandemic normalized remote work—but that doesn't mean it's right for everyone. Your Twin helps you decide based on your actual preferences, not just what's trendy or convenient.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "remote work",
+        "work from home",
+        "office vs remote",
+        "work flexibility"
+      ]
+    },
+    {
+      "id": "career-resume-career-change",
+      "title": "Resume Tips for Career Changers: Show Your Twin They Matter",
+      "slug": "resume-career-change",
+      "filePath": "resume-career-change",
+      "excerpt": "Career changers face a unique resume challenge: how to show you're serious about a new direction without erasing your past experience. Learn how to craft a resume that tells the story of your intentional transition.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "resume writing",
+        "career change resume",
+        "job search tips",
+        "career transition"
+      ]
+    },
+    {
+      "id": "career-salary-negotiation-guide",
+      "title": "Negotiating Your Salary: A Twin's Approach",
+      "slug": "salary-negotiation-guide",
+      "filePath": "salary-negotiation-guide",
+      "excerpt": "Salary negotiation terrifies most people—but your Twin knows it's just another decision. Learn the framework that separates emotion from clarity, so you negotiate from strength instead of fear.",
+      "world": "career",
+      "category": "Career Development",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "salary negotiation",
+        "negotiate salary",
+        "salary discussion",
+        "career advancement"
+      ]
+    },
+    {
+      "id": "health-body-image-decision",
+      "title": "Making Peace With Body Image Pressure",
+      "slug": "body-image-decision",
+      "filePath": "body-image-decision",
+      "excerpt": "You can't out-argue body image pressure with logic alone. Your Twin helps you build a different relationship with it, piece by piece.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-30",
+      "featured": false,
+      "keywords": [
+        "body image",
+        "self acceptance",
+        "body confidence",
+        "mental wellbeing"
+      ]
+    },
+    {
+      "id": "health-burnout-recovery-health",
+      "title": "Recovering From Burnout, Not Just Surviving It",
+      "slug": "burnout-recovery-health",
+      "filePath": "burnout-recovery-health",
+      "excerpt": "Pushing through burnout and recovering from it are different projects. Your Twin helps you tell which one you're actually doing.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-20",
+      "featured": false,
+      "keywords": [
+        "burnout recovery",
+        "exhaustion",
+        "rest",
+        "energy management"
+      ]
+    },
+    {
+      "id": "health-caregiver-burnout",
+      "title": "Managing Caregiver Burnout",
+      "slug": "caregiver-burnout",
+      "filePath": "caregiver-burnout",
+      "excerpt": "Caregiver burnout is one of the hardest to admit to, because someone else's needs feel more urgent than your own. Your Twin helps you hold both.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-31",
+      "featured": false,
+      "keywords": [
+        "caregiver burnout",
+        "caregiving stress",
+        "family caregiving",
+        "compassion fatigue"
+      ]
+    },
+    {
+      "id": "health-chronic-stress-management",
+      "title": "Managing Stress That Won't Go Away",
+      "slug": "chronic-stress-management",
+      "filePath": "chronic-stress-management",
+      "excerpt": "Chronic stress doesn't respond to the same tricks as a bad day. Your Twin helps you find what actually moves it.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-21",
+      "featured": false,
+      "keywords": [
+        "chronic stress",
+        "stress management",
+        "coping strategies",
+        "resilience"
+      ]
+    },
+    {
+      "id": "health-diet-approach-decision",
+      "title": "Choosing a Diet That Actually Fits Your Life",
+      "slug": "diet-approach-decision",
+      "filePath": "diet-approach-decision",
+      "excerpt": "The best diet isn't the one with the best results in a study. It's the one you can still be doing in a year. Your Twin helps you pick that one.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-18",
+      "featured": false,
+      "keywords": [
+        "diet decision",
+        "nutrition",
+        "sustainable eating",
+        "healthy habits"
+      ]
+    },
+    {
+      "id": "health-fitness-journey-start",
+      "title": "Starting a Fitness Journey: Your Twin's Framework",
+      "slug": "fitness-journey-start",
+      "filePath": "fitness-journey-start",
+      "excerpt": "Starting to exercise feels overwhelming. Your Twin helps you build a fitness journey that actually sticks—by starting small and focusing on consistency over intensity.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "fitness journey",
+        "start exercising",
+        "fitness for beginners",
+        "exercise routine"
+      ]
+    },
+    {
+      "id": "health-gym-home-workout-decision",
+      "title": "Gym vs Home Workouts: What Suits You?",
+      "slug": "gym-home-workout-decision",
+      "filePath": "gym-home-workout-decision",
+      "excerpt": "Gym or home? The answer depends on your personality and lifestyle. Your Twin helps you choose the environment where you'll actually stick with fitness.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "gym vs home workout",
+        "home exercise",
+        "gym membership",
+        "workout options"
+      ]
+    },
+    {
+      "id": "health-health-goal-setting",
+      "title": "Setting Health Goals That Actually Stick",
+      "slug": "health-goal-setting",
+      "filePath": "health-goal-setting",
+      "excerpt": "Most health goals fail at the setting stage, not the effort stage. Your Twin helps you set the kind that actually survives contact with a normal week.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "health goals",
+        "goal setting",
+        "sustainable habits",
+        "behavior change"
+      ]
+    },
+    {
+      "id": "health-injury-recovery-pace",
+      "title": "Pacing an Injury Recovery Without Losing Momentum",
+      "slug": "injury-recovery-pace",
+      "filePath": "injury-recovery-pace",
+      "excerpt": "Rushing back from an injury and never returning are both common failure modes. Your Twin helps you find the pace in between.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-25",
+      "featured": false,
+      "keywords": [
+        "injury recovery",
+        "rehab pacing",
+        "returning to exercise",
+        "overtraining"
+      ]
+    },
+    {
+      "id": "health-medical-second-opinion",
+      "title": "When to Get a Second Medical Opinion",
+      "slug": "medical-second-opinion",
+      "filePath": "medical-second-opinion",
+      "excerpt": "Wanting a second opinion isn't distrust — it's due diligence. Your Twin helps you know when it's actually warranted.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-22",
+      "featured": false,
+      "keywords": [
+        "second opinion",
+        "healthcare decisions",
+        "medical advice",
+        "patient advocacy"
+      ]
+    },
+    {
+      "id": "health-mental-health-day",
+      "title": "Taking a Mental Health Day Without the Guilt",
+      "slug": "mental-health-day",
+      "filePath": "mental-health-day",
+      "excerpt": "You don't need to justify a mental health day with a diagnosis. Your Twin helps you take it before you need it, not after.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-23",
+      "featured": false,
+      "keywords": [
+        "mental health day",
+        "burnout prevention",
+        "self care",
+        "work boundaries"
+      ]
+    },
+    {
+      "id": "health-preventive-care-decision",
+      "title": "Making Time for Preventive Care",
+      "slug": "preventive-care-decision",
+      "filePath": "preventive-care-decision",
+      "excerpt": "Preventive care always loses to urgent tasks — until it doesn't. Your Twin helps you treat it as non-negotiable before it becomes urgent.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-28",
+      "featured": false,
+      "keywords": [
+        "preventive care",
+        "checkups",
+        "health screening",
+        "proactive health"
+      ]
+    },
+    {
+      "id": "health-quit-bad-habit",
+      "title": "Quitting a Habit That's Not Working For You Anymore",
+      "slug": "quit-bad-habit",
+      "filePath": "quit-bad-habit",
+      "excerpt": "Willpower rarely wins against a habit loop. Your Twin helps you find what's actually driving it first.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-26",
+      "featured": false,
+      "keywords": [
+        "breaking bad habits",
+        "habit change",
+        "behavior change",
+        "self control"
+      ]
+    },
+    {
+      "id": "health-screen-time-boundaries",
+      "title": "Setting Screen Time Boundaries That Work",
+      "slug": "screen-time-boundaries",
+      "filePath": "screen-time-boundaries",
+      "excerpt": "Screen time limits fail when they fight the pull instead of redirecting it. Your Twin helps you build boundaries that actually hold.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-17",
+      "featured": false,
+      "keywords": [
+        "screen time",
+        "digital wellbeing",
+        "phone habits",
+        "tech boundaries"
+      ]
+    },
+    {
+      "id": "health-seasonal-mood-shift",
+      "title": "Handling the Seasonal Mood Shift",
+      "slug": "seasonal-mood-shift",
+      "filePath": "seasonal-mood-shift",
+      "excerpt": "A predictable seasonal dip deserves a planned response, not a surprised one every year. Your Twin helps you prepare ahead of it.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-18",
+      "featured": false,
+      "keywords": [
+        "seasonal mood",
+        "seasonal affective pattern",
+        "winter blues",
+        "mood management"
+      ]
+    },
+    {
+      "id": "health-sleep-schedule-decision",
+      "title": "Fixing a Broken Sleep Schedule",
+      "slug": "sleep-schedule-decision",
+      "filePath": "sleep-schedule-decision",
+      "excerpt": "Your sleep schedule didn't break overnight, and it won't fix overnight either. Your Twin helps you find the one lever that actually moves it.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-17",
+      "featured": false,
+      "keywords": [
+        "sleep schedule",
+        "circadian rhythm",
+        "insomnia",
+        "sleep hygiene"
+      ]
+    },
+    {
+      "id": "health-sleep-vs-productivity",
+      "title": "Trading Sleep for Productivity — Is It Worth It?",
+      "slug": "sleep-vs-productivity",
+      "filePath": "sleep-vs-productivity",
+      "excerpt": "Cutting sleep for output feels efficient in the moment. Your Twin helps you see the real trade you're making.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-29",
+      "featured": false,
+      "keywords": [
+        "sleep deprivation",
+        "productivity trade-off",
+        "cognitive performance",
+        "sleep debt"
+      ]
+    },
+    {
+      "id": "health-supplement-decision",
+      "title": "Cutting Through Supplement Hype",
+      "slug": "supplement-decision",
+      "filePath": "supplement-decision",
+      "excerpt": "Most supplement decisions are made from marketing, not evidence. Your Twin helps you tell the difference before you buy.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-24",
+      "featured": false,
+      "keywords": [
+        "supplements",
+        "nutrition science",
+        "health marketing",
+        "evidence-based health"
+      ]
+    },
+    {
+      "id": "health-therapy-decision",
+      "title": "Should You Start Therapy?",
+      "slug": "therapy-decision",
+      "filePath": "therapy-decision",
+      "excerpt": "You don't need a crisis to justify therapy. Your Twin helps you separate 'do I need this' from 'is this worth trying.'",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-19",
+      "featured": false,
+      "keywords": [
+        "therapy decision",
+        "mental health",
+        "counseling",
+        "when to seek help"
+      ]
+    },
+    {
+      "id": "health-wellness-decisions-guide",
+      "title": "Personal Wellness Decisions Guided by Your Twin",
+      "slug": "wellness-decisions-guide",
+      "filePath": "wellness-decisions-guide",
+      "excerpt": "Health is built on small decisions made consistently. Discover how Twin intelligence helps you navigate fitness, nutrition, mental health, and self-care with intention instead of guilt or willpower alone.",
+      "world": "health",
+      "category": "Health & Wellness",
+      "publishedAt": "2026-08-16",
+      "featured": true,
+      "keywords": [
+        "wellness decisions",
+        "health goals",
+        "self-care",
+        "fitness"
+      ]
+    },
+    {
+      "id": "health-work-life-health-boundary",
+      "title": "Protecting Your Health When Work Won't Slow Down",
+      "slug": "work-life-health-boundary",
+      "filePath": "work-life-health-boundary",
+      "excerpt": "Waiting for work to slow down before prioritizing your health means waiting forever. Your Twin helps you build boundaries that hold under pressure.",
+      "world": "health",
+      "category": "Health",
+      "publishedAt": "2026-08-27",
+      "featured": false,
+      "keywords": [
+        "work life balance",
+        "health boundaries",
+        "workplace stress",
+        "self care at work"
+      ]
+    },
+    {
+      "id": "relationships-breakup-decision",
+      "title": "Breaking Up: How to Know It's Time",
+      "slug": "breakup-decision",
+      "filePath": "breakup-decision",
+      "excerpt": "Knowing when to end a relationship is hard. Your Twin helps you distinguish between rough patches and genuine incompatibility—so you can decide with clarity instead of panic.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "breaking up",
+        "when to break up",
+        "red flags relationship",
+        "end relationship"
+      ]
+    },
+    {
+      "id": "relationships-commitment-conversation",
+      "title": "Commitment Conversations: When and How",
+      "slug": "commitment-conversation",
+      "filePath": "commitment-conversation",
+      "excerpt": "The \\\"where is this going\\\" conversation terrifies most people. Your Twin helps you navigate it with clarity instead of fear—so you both know what you want.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "commitment",
+        "define relationship",
+        "relationship status",
+        "where is this going"
+      ]
+    },
+    {
+      "id": "relationships-conflict-resolution-relationship",
+      "title": "Conflict Resolution Relationship: Twin Perspective",
+      "slug": "conflict-resolution-relationship",
+      "filePath": "conflict-resolution-relationship",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-dating-app-guide",
+      "title": "Dating App Dilemma: Swiping Smarter",
+      "slug": "dating-app-guide",
+      "filePath": "dating-app-guide",
+      "excerpt": "Dating apps can feel overwhelming. Your Twin helps you decide which app actually fits your style, how to spot real connections, and when to step back from the digital search.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "dating apps",
+        "online dating",
+        "dating tips",
+        "relationship app"
+      ]
+    },
+    {
+      "id": "relationships-first-date-guide",
+      "title": "First Date Decisions: Making a Great Impression",
+      "slug": "first-date-guide",
+      "filePath": "first-date-guide",
+      "excerpt": "First dates are high-stakes and low-information. Your Twin helps you choose dates that actually let you get to know someone—instead of performing a highlight reel.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "first date tips",
+        "dating advice",
+        "first date ideas",
+        "first impression"
+      ]
+    },
+    {
+      "id": "relationships-friendship-breakup",
+      "title": "Friendship Breakup: Twin Perspective",
+      "slug": "friendship-breakup",
+      "filePath": "friendship-breakup",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-friendship-romance-boundary",
+      "title": "Friendship Romance Boundary: Twin Perspective",
+      "slug": "friendship-romance-boundary",
+      "filePath": "friendship-romance-boundary",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-jealousy-boundaries",
+      "title": "Jealousy Boundaries: Twin Perspective",
+      "slug": "jealousy-boundaries",
+      "filePath": "jealousy-boundaries",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-kids-decision",
+      "title": "Kids Decision: Twin Perspective",
+      "slug": "kids-decision",
+      "filePath": "kids-decision",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-long-distance-decision",
+      "title": "Long Distance Love: Is It Worth It?",
+      "slug": "long-distance-decision",
+      "filePath": "long-distance-decision",
+      "excerpt": "Long distance relationships require intentionality. Your Twin helps you decide if this relationship is strong enough to survive distance—and what that actually requires.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "long distance relationship",
+        "long distance love",
+        "relationship distance",
+        "long distance dating"
+      ]
+    },
+    {
+      "id": "relationships-love-languages",
+      "title": "Love Languages: Twin Perspective",
+      "slug": "love-languages",
+      "filePath": "love-languages",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-marriage-proposal",
+      "title": "Marriage Proposal: Twin Wisdom on Forever",
+      "slug": "marriage-proposal",
+      "filePath": "marriage-proposal",
+      "excerpt": "Deciding to propose (or say yes) is one of life's biggest decisions. Your Twin helps you know if forever is truly what you want—and what you're actually committing to.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "marriage proposal",
+        "getting married",
+        "engagement",
+        "marriage decision"
+      ]
+    },
+    {
+      "id": "relationships-meet-family-decision",
+      "title": "Meeting the Family: Relationship Milestone",
+      "slug": "meet-family-decision",
+      "filePath": "meet-family-decision",
+      "excerpt": "Meeting your partner's family is a turning point. Your Twin helps you prepare and recognize what it means—and know if you're ready for that step.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "meeting parents",
+        "meeting family",
+        "relationship milestone",
+        "family approval"
+      ]
+    },
+    {
+      "id": "relationships-premarital-questions",
+      "title": "Premarital Questions: Twin Perspective",
+      "slug": "premarital-questions",
+      "filePath": "premarital-questions",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-reconnect-ex-decision",
+      "title": "Reconnecting with an Ex: Should You?",
+      "slug": "reconnect-ex-decision",
+      "filePath": "reconnect-ex-decision",
+      "excerpt": "Exes can seem appealing when current relationships are hard. Your Twin helps you know if reconnecting is healing or escaping.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "reconnecting with ex",
+        "getting back together",
+        "second chances",
+        "exes"
+      ]
+    },
+    {
+      "id": "relationships-relationship-decisions-guide",
+      "title": "Twin Guidance for Relationship Decisions",
+      "slug": "relationship-decisions-guide",
+      "filePath": "relationship-decisions-guide",
+      "excerpt": "Relationships are built on decisions—some small, some life-changing. Learn how Twin intelligence helps you navigate dating, commitment, trust, and love with clarity instead of fear or rushing.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": true,
+      "keywords": [
+        "relationship decisions",
+        "dating advice",
+        "love guidance",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-relationship-finances",
+      "title": "Relationship Finances: Twin Perspective",
+      "slug": "relationship-finances",
+      "filePath": "relationship-finances",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-relationship-model-decision",
+      "title": "Relationship Model Decision: Twin Perspective",
+      "slug": "relationship-model-decision",
+      "filePath": "relationship-model-decision",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-self-love-foundation",
+      "title": "Self Love Foundation: Twin Perspective",
+      "slug": "self-love-foundation",
+      "filePath": "self-love-foundation",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    },
+    {
+      "id": "relationships-trust-relationships",
+      "title": "Trust Relationships: Twin Perspective",
+      "slug": "trust-relationships",
+      "filePath": "trust-relationships",
+      "excerpt": "A relationship decision guide from your Twin's perspective.",
+      "world": "relationships",
+      "category": "Relationships",
+      "publishedAt": "2026-08-16",
+      "featured": false,
+      "keywords": [
+        "relationships",
+        "dating",
+        "commitment"
+      ]
+    }
   ]
 }

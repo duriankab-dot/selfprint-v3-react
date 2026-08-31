@@ -5,6 +5,7 @@ import type { PairPreview } from '@/features/viral/api/shareService';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NavRail } from '@/components/layout/NavRail';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function SharePage() {
@@ -160,6 +161,7 @@ export default function SharePage() {
       </div>
       </div>
       <Footer />
+      <NavRail />
       <BottomNav />
     </div>
   );

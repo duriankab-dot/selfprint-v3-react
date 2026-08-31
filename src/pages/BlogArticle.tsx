@@ -111,8 +111,14 @@ export default function BlogArticle() {
           slug: entry.slug || slug,
           excerpt: entry.excerpt || '',
           keywords: entry.keywords || [],
-          author: 'SELFPRINT',
-          date: new Date().toISOString().split('T')[0],
+          // BLOGFRAMEWORK-001 FIX: the career/health/relationships article
+          // group uses author: "Twin" (vs. "SELFPRINT" for the original 25)
+          // and dates the article via index.json's publishedAt rather than
+          // a frontmatter `date:` line — both are real, valid schemas for
+          // the same renderer, so seed from index.json first; a frontmatter
+          // `author`/`date` line below still overrides when present.
+          author: entry.author || 'SELFPRINT',
+          date: entry.publishedAt || new Date().toISOString().split('T')[0],
           category: entry.category || '',
           featured: entry.featured || false,
           filePath: entry.filePath || '',
@@ -133,7 +139,8 @@ export default function BlogArticle() {
             if (key === 'title') metadata.title = value;
             if (key === 'description' || key === 'excerpt') metadata.excerpt = value;
             if (key === 'author') metadata.author = value;
-            if (key === 'date') metadata.date = value;
+            // BLOGFRAMEWORK-001: recognize both frontmatter date schemas.
+            if (key === 'date' || key === 'publishedAt') metadata.date = value;
             if (key === 'category') metadata.category = value;
             if (key === 'featured') metadata.featured = value === 'true';
             if (key === 'keywords') {

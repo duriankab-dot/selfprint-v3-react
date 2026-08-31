@@ -134,11 +134,63 @@
   border-bottom: none;
 }
 
+/* APPSHELL-003: progressive disclosure — collapsed sections hide their
+   body but keep the header visible so the page reads as a list of
+   expandable topics, not a report dumped all at once. */
+.analysis__section--collapsed .analysis__section-body {
+  display: none;
+}
+
+.analysis__section--collapsed {
+  padding-bottom: 16px;
+}
+
 .analysis__section-header {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 20px;
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+}
+
+.analysis__section-header:hover .analysis__section-title {
+  color: var(--accent-primary, #4f46e5);
+}
+
+.analysis__section-chevron {
+  margin-left: auto;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary, #6c757d);
+  flex-shrink: 0;
+}
+
+.analysis__expand-all {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.analysis__expand-all-btn {
+  border: 1px solid var(--color-border, #e9ecef);
+  border-radius: 6px;
+  background: none;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #6c757d);
+  cursor: pointer;
+}
+
+.analysis__expand-all-btn:hover {
+  border-color: var(--accent-primary, #4f46e5);
+  color: var(--accent-primary, #4f46e5);
 }
 
 .analysis__section-number {

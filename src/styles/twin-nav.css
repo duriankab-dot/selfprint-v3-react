@@ -4,8 +4,8 @@
  */
 
 .twin-nav {
-  background-color: var(--bg-secondary, #f5f5f5);
-  border-bottom: 1px solid var(--border-color, #e0e0e0);
+  background-color: var(--color-bg-secondary, #f5f5f5);
+  border-bottom: 1px solid var(--color-border, #e0e0e0);
   padding: var(--spacing-md, 1rem) 0;
   position: sticky;
   top: 0;
@@ -30,7 +30,7 @@
 .twin-nav-title {
   font-size: var(--font-size-lg, 1.25rem);
   font-weight: var(--font-weight-bold, 700);
-  color: var(--text-primary, #333);
+  color: var(--color-text-primary, #333);
   margin: 0;
   padding: 0;
 }
@@ -50,7 +50,7 @@
   padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
   border: none;
   background: transparent;
-  color: var(--text-secondary, #666);
+  color: var(--color-text-secondary, #666);
   cursor: pointer;
   font-size: var(--font-size-base, 1rem);
   font-weight: var(--font-weight-medium, 500);
@@ -60,13 +60,13 @@
 }
 
 .twin-nav-tab:hover {
-  color: var(--text-primary, #333);
-  background-color: var(--bg-hover, rgba(0, 0, 0, 0.02));
+  color: var(--color-text-primary, #333);
+  background-color: var(--color-bg-hover, rgba(0, 0, 0, 0.02));
 }
 
 .twin-nav-tab.active {
-  color: var(--color-primary, #4a90e2);
-  border-bottom-color: var(--color-primary, #4a90e2);
+  color: var(--color-accent-primary, #4a90e2);
+  border-bottom-color: var(--color-accent-primary, #4a90e2);
 }
 
 .tab-icon {
@@ -93,7 +93,7 @@
 .status-badge {
   display: inline-block;
   padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-  background-color: var(--color-primary, #4a90e2);
+  background-color: var(--color-accent-primary, #4a90e2);
   color: white;
   border-radius: var(--radius-sm, 4px);
   font-size: var(--font-size-sm, 0.875rem);
@@ -102,7 +102,7 @@
 
 .status-time {
   font-size: var(--font-size-sm, 0.875rem);
-  color: var(--text-secondary, #666);
+  color: var(--color-text-secondary, #666);
 }
 
 /* Responsive */

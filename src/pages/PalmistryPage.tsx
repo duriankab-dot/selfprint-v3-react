@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { NavBar } from '../components/layout/NavBar';
 import { BottomNav } from '../components/layout/BottomNav';
+import { NavRail } from '../components/layout/NavRail';
 import { useLanguage } from '../context/LanguageContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 
@@ -556,6 +557,7 @@ export default function PalmistryPage() {
         )}
       </div>
 
+      <NavRail />
       <BottomNav />
     </div>
   );

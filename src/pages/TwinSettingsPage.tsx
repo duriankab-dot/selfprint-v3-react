@@ -9,6 +9,8 @@ import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase-service';
+import { TwinNav } from '../components/twin/TwinNav';
+import { NavRail } from '../components/layout/NavRail';
 import '../styles/twin-settings.css';
 
 interface TwinPreferences {
@@ -96,6 +98,9 @@ export default function TwinSettingsPage() {
 
   return (
     <div className="twin-settings-page">
+      <NavRail />
+      {/* APPSHELL-004: Twin app-space sub-nav */}
+      <TwinNav currentTab="settings" />
       <div className="twin-settings-container">
         <header className="twin-settings-header">
           <h1>Twin Settings</h1>

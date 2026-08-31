@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
+import { NavRail } from '@/components/layout/NavRail';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface Feature {
@@ -172,6 +173,7 @@ export default function FeatureMenu() {
         </div>
       </div>
       <Footer />
+      <NavRail />
       <BottomNav />
     </div>
   );
