@@ -6,7 +6,9 @@
  * Replaces the static AITwinSection card with an animated, state-aware Twin.
  *
  * - 6 Twin states: awakening → aware → connected → reflective → insightful → aligned
- * - Cosmic orb with glow, particles, breathing animation
+ * - TWIN-CONSISTENCY-001: Twin visual is TwinPresence (same archetype-driven
+ *   SVG glyph + glow/breathing rendered on the Worlds pages), not a
+ *   Dashboard-only plain orb — guarantees the two always look identical.
  * - Processing states: ANALYZING / SYNTHESIZING / CALIBRATING / AWAKENING / READY
  * - Progress ladder showing all 6 states
  * - Next milestone guidance
@@ -20,23 +22,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTwin } from '@/context/TwinContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState } from '@/lib/intelligence/TwinStateEngine';
+import { TwinPresence } from '@/components/twin/TwinPresence';
 import { ShareButton } from '@/components/viral/ShareButton';
 import '../../styles/living-twin.css';
-
-// ============================================================================
-// Particle nodes
-// ============================================================================
-
-const Particles: React.FC = () => (
-  <>
-    {Array.from({ length: 8 }).map((_, i) => (
-      <div key={i} className="living-twin__particle" />
-    ))}
-  </>
-);
 
 // ============================================================================
 // Ladder — all 6 states row
@@ -106,6 +98,9 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isTh = language === 'th';
+  // TWIN-CONSISTENCY-001: real archetype (shape/color identity), same source
+  // WorldDetail.tsx reads for TwinPresence — see below.
+  const { twin } = useTwin();
 
   const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const engine = useMemo(() => new TwinStateEngine(), []);
@@ -194,27 +189,34 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
     progress,
     nextMilestone,
     glowColor,
-    particleIntensity,
   } = twinResult;
 
   return (
     <div
-      className={`living-twin living-twin--intensity-${particleIntensity}`}
+      className="living-twin"
       style={{
         '--twin-glow': glowColor,
         // Scale glow intensity CSS vars based on maturityScore evolution
         '--twin-glow-intensity': glowMult.toString(),
         '--twin-glow-opacity': glowOpacity.toString(),
-        '--twin-outer-ring-opacity': (evolutionStage >= 3 ? 0.4 * glowMult : 0).toString(),
       } as React.CSSProperties}
     >
-      {/* Orb */}
-      <div className="living-twin__orb-wrap">
-        <div className="living-twin__orb-ring living-twin__orb-ring--outer" />
-        <div className="living-twin__orb-ring" />
-        <div className="living-twin__orb">
-          <Particles />
-        </div>
+      {/* TWIN-CONSISTENCY-001 FIX: this used to be a plain CSS circle
+          (.living-twin__orb — border-radius:50%, no archetype awareness at
+          all), while the Worlds pages render TwinPresence's per-archetype
+          SVG glyph (sphere/crystal/ring/diamond/bloom/wave). Two different
+          renderers meant the Dashboard Twin always looked like "just a
+          sphere" and never matched the Twin shown in Worlds — same root
+          component now, so both are guaranteed to render identically. */}
+      <div className="living-twin__orb-wrap living-twin__orb-wrap--presence">
+        <TwinPresence
+          contained
+          primaryArchetype={twin?.primaryArchetype}
+          secondaryArchetype={twin?.secondaryArchetype}
+          worldColor={glowColor}
+          seedKey={userId}
+          maturityScore={maturityScore ?? 30}
+        />
       </div>
 
       {/* State badge */}

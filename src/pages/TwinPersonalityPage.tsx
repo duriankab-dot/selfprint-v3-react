@@ -7,6 +7,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useQuery } from '@tanstack/react-query';
 import { PersonalContextBuilder } from '../services/sice/engines/PersonalContextBuilder';
 import type { PersonalContext } from '../types/sice';
@@ -25,52 +26,82 @@ interface PersonalityMetrics {
 interface EvolutionMilestone {
   stage: number;
   name: string;
+  nameTh: string;
   description: string;
+  descriptionTh: string;
   unlockedAt: string | null;
   nextCriteria: string;
+  nextCriteriaTh: string;
 }
 
+// TWINPERSONALITY-I18N-001 FIX: this whole page had zero useLanguage() —
+// 100% hardcoded English regardless of /th vs /en, exactly
+// "ภาษาใน บุคลิกภาพ...ก็ต้องเป็นภาษาไทยธรรมชาติด้วย".
 const EVOLUTION_STAGES: EvolutionMilestone[] = [
   {
     stage: 1,
     name: 'Twin Awakening',
+    nameTh: 'การตื่นขึ้นของทวิน',
     description: 'Your Twin is aware and ready to listen',
+    descriptionTh: 'ทวินของคุณตื่นขึ้นแล้ว พร้อมรับฟังคุณ',
     unlockedAt: null,
     nextCriteria: 'Complete first journal entry',
+    nextCriteriaTh: 'บันทึกไดอารีเป็นครั้งแรก',
   },
   {
     stage: 2,
     name: 'Pattern Finder',
+    nameTh: 'นักค้นหารูปแบบ',
     description: 'Your Twin recognizes your patterns',
+    descriptionTh: 'ทวินของคุณเริ่มมองเห็นรูปแบบพฤติกรรมของคุณ',
     unlockedAt: null,
     nextCriteria: 'Complete 10 journal entries',
+    nextCriteriaTh: 'บันทึกไดอารีให้ครบ 10 ครั้ง',
   },
   {
     stage: 3,
     name: 'Journey Explorer',
+    nameTh: 'นักสำรวจเส้นทางชีวิต',
     description: 'Your Twin explores your deeper journey',
+    descriptionTh: 'ทวินของคุณเริ่มสำรวจเส้นทางชีวิตที่ลึกขึ้น',
     unlockedAt: null,
     nextCriteria: 'Achieve 50% emotional insight',
+    nextCriteriaTh: 'เข้าใจอารมณ์ตนเองถึง 50%',
   },
   {
     stage: 4,
     name: 'Deep Thinker',
+    nameTh: 'นักคิดเชิงลึก',
     description: 'Your Twin provides profound insights',
+    descriptionTh: 'ทวินของคุณให้ข้อคิดที่ลึกซึ้งยิ่งขึ้น',
     unlockedAt: null,
     nextCriteria: 'Complete 50 journal entries',
+    nextCriteriaTh: 'บันทึกไดอารีให้ครบ 50 ครั้ง',
   },
   {
     stage: 5,
     name: 'Selfprint Complete',
+    nameTh: 'Selfprint สมบูรณ์',
     description: 'Your Twin reflects your complete self',
+    descriptionTh: 'ทวินของคุณสะท้อนตัวตนที่สมบูรณ์ของคุณ',
     unlockedAt: null,
     nextCriteria: 'Achieve full alignment',
+    nextCriteriaTh: 'บรรลุความสอดคล้องอย่างเต็มรูปแบบ',
   },
 ];
+
+const MOOD_LABELS_TH: Record<PersonalityMetrics['mood'], string> = {
+  contemplative: 'ครุ่นคิด',
+  energetic: 'กระตือรือร้น',
+  reflective: 'ใคร่ครวญ',
+  balanced: 'สมดุล',
+};
 
 export default function TwinPersonalityPage() {
   const { session } = useAuth();
   const { twin } = useTwin();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [metrics, setMetrics] = useState<PersonalityMetrics>({
     mood: 'balanced',
     emotionalState: 65,
@@ -163,7 +194,11 @@ export default function TwinPersonalityPage() {
   }, [twin?.maturityScore]);
 
   if (isLoading) {
-    return <div className="twin-personality-page loading">Loading personality...</div>;
+    return (
+      <div className="twin-personality-page loading">
+        {isTh ? 'กำลังโหลดข้อมูลบุคลิกภาพ...' : 'Loading personality...'}
+      </div>
+    );
   }
 
   // Calculate current stage from maturity score
@@ -179,16 +214,16 @@ export default function TwinPersonalityPage() {
       <TwinNav currentTab="personality" />
       <div className="personality-container">
         <header className="personality-header">
-          <h1>Twin Personality</h1>
-          <p>Your Twin's current state and evolution</p>
+          <h1>{isTh ? 'บุคลิกภาพของทวิน' : 'Twin Personality'}</h1>
+          <p>{isTh ? 'สถานะปัจจุบันและพัฒนาการของทวินคุณ' : "Your Twin's current state and evolution"}</p>
         </header>
 
         {/* Current Mood */}
         <section className="mood-section">
           <div className="mood-card">
-            <h2>Current Mood</h2>
+            <h2>{isTh ? 'อารมณ์ปัจจุบัน' : 'Current Mood'}</h2>
             <div className="mood-indicator">
-              <span className="mood-label">{metrics.mood}</span>
+              <span className="mood-label">{isTh ? MOOD_LABELS_TH[metrics.mood] : metrics.mood}</span>
               <div className="mood-visual">
                 {metrics.mood === 'contemplative' && '🤔'}
                 {metrics.mood === 'energetic' && '⚡'}
@@ -201,10 +236,10 @@ export default function TwinPersonalityPage() {
 
         {/* Personality Metrics */}
         <section className="metrics-section">
-          <h2>Personality Metrics</h2>
+          <h2>{isTh ? 'ตัวชี้วัดบุคลิกภาพ' : 'Personality Metrics'}</h2>
           <div className="metrics-grid">
             <div className="metric-card">
-              <span className="metric-name">Emotional State</span>
+              <span className="metric-name">{isTh ? 'สภาวะอารมณ์' : 'Emotional State'}</span>
               <div className="metric-bar">
                 <div
                   className="metric-fill"
@@ -215,7 +250,7 @@ export default function TwinPersonalityPage() {
             </div>
 
             <div className="metric-card">
-              <span className="metric-name">Growth Momentum</span>
+              <span className="metric-name">{isTh ? 'แรงขับเคลื่อนการเติบโต' : 'Growth Momentum'}</span>
               <div className="metric-bar">
                 <div
                   className="metric-fill"
@@ -226,7 +261,7 @@ export default function TwinPersonalityPage() {
             </div>
 
             <div className="metric-card">
-              <span className="metric-name">Self-Awareness</span>
+              <span className="metric-name">{isTh ? 'การรู้จักตนเอง' : 'Self-Awareness'}</span>
               <div className="metric-bar">
                 <div
                   className="metric-fill"
@@ -237,7 +272,7 @@ export default function TwinPersonalityPage() {
             </div>
 
             <div className="metric-card">
-              <span className="metric-name">Adaptability</span>
+              <span className="metric-name">{isTh ? 'ความยืดหยุ่นปรับตัว' : 'Adaptability'}</span>
               <div className="metric-bar">
                 <div
                   className="metric-fill"
@@ -251,7 +286,7 @@ export default function TwinPersonalityPage() {
 
         {/* Evolution Path */}
         <section className="evolution-section">
-          <h2>Evolution Path</h2>
+          <h2>{isTh ? 'เส้นทางพัฒนาการ' : 'Evolution Path'}</h2>
           <div className="evolution-timeline">
             {stages.map((stage, idx) => {
               const isUnlocked = stage.unlockedAt !== null;
@@ -267,13 +302,13 @@ export default function TwinPersonalityPage() {
                     <span className="marker-number">{stage.stage}</span>
                   </div>
                   <div className="evolution-content">
-                    <h3>{stage.name}</h3>
-                    <p>{stage.description}</p>
+                    <h3>{isTh ? stage.nameTh : stage.name}</h3>
+                    <p>{isTh ? stage.descriptionTh : stage.description}</p>
                     {!isUnlocked && (
-                      <p className="evolution-criteria">{stage.nextCriteria}</p>
+                      <p className="evolution-criteria">{isTh ? stage.nextCriteriaTh : stage.nextCriteria}</p>
                     )}
                     {isUnlocked && (
-                      <p className="evolution-unlocked">✓ Unlocked</p>
+                      <p className="evolution-unlocked">✓ {isTh ? 'ปลดล็อกแล้ว' : 'Unlocked'}</p>
                     )}
                   </div>
                   {idx < stages.length - 1 && <div className="evolution-line" />}
@@ -286,11 +321,13 @@ export default function TwinPersonalityPage() {
         {/* Next Milestone */}
         {nextStage && (
           <section className="next-milestone-section">
-            <h2>Next Milestone</h2>
+            <h2>{isTh ? 'เป้าหมายถัดไป' : 'Next Milestone'}</h2>
             <div className="next-milestone-card">
-              <h3>{nextStage.name}</h3>
-              <p>{nextStage.description}</p>
-              <p className="milestone-criteria">Get there by: {nextStage.nextCriteria}</p>
+              <h3>{isTh ? nextStage.nameTh : nextStage.name}</h3>
+              <p>{isTh ? nextStage.descriptionTh : nextStage.description}</p>
+              <p className="milestone-criteria">
+                {isTh ? `ทำสิ่งนี้ให้สำเร็จ: ${nextStage.nextCriteriaTh}` : `Get there by: ${nextStage.nextCriteria}`}
+              </p>
             </div>
           </section>
         )}

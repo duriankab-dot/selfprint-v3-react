@@ -71,8 +71,17 @@ export const TwinNaming: React.FC<TwinNamingProps> = ({
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="w-full max-w-sm">
+      <form onSubmit={handleSubmit} className="w-full max-w-sm" style={{ textAlign: 'center' }}>
         <div className="mb-6">
+          {/* CONTRAST-002 FIX: this input had no background class — Tailwind
+              relies on the browser's native white input background, but
+              global.css resets ALL input elements to background:transparent
+              (see "Input & Button Reset"). With no bg class here, the input
+              sat transparent directly on this page's dark navy gradient,
+              and text-gray-900 (near-black) typed into it was completely
+              invisible — exactly "พิมพ์ชื่อแล้วมองไม่เห็นตัวอักษร". Given an
+              explicit background + token-based text color so it reads
+              regardless of what's behind it. */}
           <input
             type="text"
             value={name}
@@ -80,10 +89,19 @@ export const TwinNaming: React.FC<TwinNamingProps> = ({
               setName(e.target.value);
               setError(null);
             }}
-            placeholder={isTh ? 'เช่น อาเรีย, โนวา, เอคโค่, เซจ...' : 'e.g., Aria, Nova, Echo, Sage...'}
+            placeholder={isTh ? 'เช่น อาเรีย, ธาดา, เอคโค่, ธีรา...' : 'e.g., Aria, Thada, Echo, Sage...'}
             disabled={isLoading}
             autoFocus
-            className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:bg-gray-100 transition-all text-gray-900"
+            className="w-full px-4 py-3 text-lg rounded-lg focus:outline-none transition-all"
+            style={{
+              textAlign: 'center',
+              background: 'var(--color-bg-secondary)',
+              color: 'var(--color-text-primary)',
+              border: '2px solid var(--color-border)',
+              opacity: isLoading ? 0.5 : 1,
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-accent-primary)'; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
           />
           {error && (
             <p className="text-red-400 text-sm mt-2">{error}</p>
@@ -93,7 +111,12 @@ export const TwinNaming: React.FC<TwinNamingProps> = ({
         <button
           type="submit"
           disabled={isLoading || !name.trim()}
-          className="w-full px-6 py-3 bg-blue-500 text-white font-medium rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="w-full px-6 py-3 font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          style={{
+            background: 'var(--color-accent-primary)',
+            color: 'white',
+            boxShadow: '0 2px 10px color-mix(in srgb, var(--color-accent-primary) 35%, transparent)',
+          }}
         >
           {isLoading ? (isTh ? 'กำลังปลุกทวิน...' : 'Awakening...') : (isTh ? 'ปลุกทวินของฉัน' : 'Awaken My Twin')}
         </button>

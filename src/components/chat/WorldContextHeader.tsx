@@ -41,6 +41,10 @@ export function WorldContextHeader({ world, compact = false }: WorldContextHeade
   }
 
   return (
+    // TWINCHAT-CENTER-001 FIX: was a left-aligned flex row (emoji + text
+    // block flush left) — "ทวินแชทชื่อโลกชื่อทวินให้อยู่ตรงกลาง" asked for
+    // the world/Twin identity to read as centered, matching .twin-header
+    // right below it (which already used text-center).
     <div
       style={{
         padding: '12px 16px',
@@ -49,8 +53,10 @@ export function WorldContextHeader({ world, compact = false }: WorldContextHeade
         borderLeft: `4px solid ${worldInfo.color}`,
         marginBottom: '16px',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        gap: '8px',
+        gap: '4px',
+        textAlign: 'center',
       }}
     >
       <span style={{ fontSize: '20px' }}>{worldInfo.emoji}</span>

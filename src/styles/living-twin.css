@@ -14,9 +14,9 @@
   border-radius: var(--radius-2xl, 24px);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--space-2xl, 40px);
-  /* TWINPRESENCE-004: extra top padding to give twin-orb-bob's upward
-     movement + the outer ring's -24px inset room before hitting the
-     card's `overflow: hidden` edge — previously only 28px, tight enough
+  /* TWINPRESENCE-004: extra top padding to give the orb's upward bob
+     movement + glow ring room before hitting the card's
+     `overflow: hidden` edge — previously only 28px, tight enough
      that the bob clipped visibly against the top of the card. */
   padding: 44px 24px 24px;
   display: flex;
@@ -48,7 +48,13 @@
   position: relative;
   width: 120px;
   height: 120px;
-  margin-bottom: 20px;
+  /* TWIN-OVERLAP-001 FIX: the (now-removed) outer glow ring used to sit at
+     inset:-24px, extending 24px past this wrapper's own box on every side.
+     A 20px margin-bottom was 4px too small to contain that, so the ring
+     visually bled into the state badge/content directly below it
+     ("ทวินทับ...ด้านล่าง"). Kept the larger gap since TwinPresence's own
+     glow/drop-shadow can extend similarly. */
+  margin-bottom: 28px;
   flex-shrink: 0;
   /* TWINPRESENCE-002: gentle vertical bob, matching the same motion added
      to the World-page Twin presence (TwinPresence.tsx's twin-presence-bob)
@@ -56,6 +62,15 @@
      the wrap so it doesn't fight the ring-pulse/orb-breathe animations
      already running on the nested elements below. */
   animation: twin-orb-bob 4s ease-in-out infinite;
+}
+
+/* TWIN-CONSISTENCY-001: when this wrap holds TwinPresence (the shared
+   Dashboard/Worlds Twin renderer) instead of the old plain orb, TwinPresence
+   already supplies its own bob/breathe motion internally — stacking this
+   wrap's bob on top doubled the vertical travel and made the Dashboard
+   Twin move differently from the identical Twin in Worlds. */
+.living-twin__orb-wrap--presence {
+  animation: none;
 }
 
 @keyframes twin-orb-bob {
@@ -70,14 +85,6 @@
   border-radius: 50%;
   border: 1px solid var(--twin-glow, rgba(79, 70, 229, 0.3));
   animation: twin-ring-pulse 3s ease-in-out infinite;
-}
-
-.living-twin__orb-ring--outer {
-  inset: -24px;
-  /* TWIN-VISUAL-001: opacity scales with evolution stage.
-     Nascent (stage 1-2): hidden; Active (3+): visible and scales */
-  opacity: var(--twin-outer-ring-opacity, 0);
-  animation-delay: 1s;
 }
 
 @keyframes twin-ring-pulse {
@@ -110,39 +117,6 @@
   0%, 100% { transform: scale(1);    box-shadow: 0 0 24px var(--twin-glow, rgba(79,70,229,0.4)), 0 0 48px var(--twin-glow, rgba(79,70,229,0.2)); }
   50%       { transform: scale(1.05); box-shadow: 0 0 32px var(--twin-glow, rgba(79,70,229,0.55)), 0 0 64px var(--twin-glow, rgba(79,70,229,0.3)); }
 }
-
-/* Particles (intensity 1–5) */
-.living-twin__particle {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.8);
-  animation: twin-particle-orbit linear infinite;
-}
-
-/* 8 particle positions at different orbit radii + delays */
-.living-twin__particle:nth-child(1)  { top: 5%;  left: 50%; animation-duration: 6s;  animation-delay: 0s;    transform-origin: 0 55px; }
-.living-twin__particle:nth-child(2)  { top: 20%; left: 88%; animation-duration: 8s;  animation-delay: -2s;   transform-origin: -28px 40px; }
-.living-twin__particle:nth-child(3)  { top: 60%; left: 92%; animation-duration: 5s;  animation-delay: -1s;   transform-origin: -32px -10px; }
-.living-twin__particle:nth-child(4)  { top: 85%; left: 60%; animation-duration: 7s;  animation-delay: -3s;   transform-origin: -10px -45px; }
-.living-twin__particle:nth-child(5)  { top: 80%; left: 15%; animation-duration: 9s;  animation-delay: -4s;   transform-origin: 25px -35px; }
-.living-twin__particle:nth-child(6)  { top: 40%; left: 5%;  animation-duration: 6.5s; animation-delay: -1.5s; transform-origin: 55px 10px; }
-.living-twin__particle:nth-child(7)  { top: 12%; left: 25%; animation-duration: 10s; animation-delay: -5s;   transform-origin: 25px 50px; }
-.living-twin__particle:nth-child(8)  { top: 5%;  left: 72%; animation-duration: 7.5s; animation-delay: -2.5s; transform-origin: -12px 55px; }
-
-@keyframes twin-particle-orbit {
-  from { transform: rotate(0deg); opacity: 0.8; }
-  50%  { opacity: 0.3; }
-  to   { transform: rotate(360deg); opacity: 0.8; }
-}
-
-/* Hide extra particles for low intensity states */
-.living-twin--intensity-1 .living-twin__particle:nth-child(n+3) { display: none; }
-.living-twin--intensity-2 .living-twin__particle:nth-child(n+4) { display: none; }
-.living-twin--intensity-3 .living-twin__particle:nth-child(n+6) { display: none; }
-.living-twin--intensity-4 .living-twin__particle:nth-child(n+7) { display: none; }
-/* intensity-5: all 8 visible */
 
 /* ============================================================================
    State label
@@ -429,7 +403,13 @@
    ============================================================================ */
 
 @media (max-width: 640px) {
-  .living-twin { padding: 20px 16px 20px; }
+  /* TWIN-OVERLAP-001 FIX: this override reset padding-top to 20px,
+     silently undoing the desktop rule's TWINPRESENCE-004 fix (44px,
+     sized for the outer ring's -24px inset + the -6px bob peak). On
+     mobile that meant the ring/bob overflowed past the card's own
+     overflow:hidden top edge — exactly "ทับขอบเฟรมด้านบน". Kept the
+     compact side/bottom padding but restored enough top clearance. */
+  .living-twin { padding: 40px 16px 20px; }
   .living-twin__orb-wrap { width: 96px; height: 96px; }
   .living-twin__orb { width: 96px; height: 96px; }
 }

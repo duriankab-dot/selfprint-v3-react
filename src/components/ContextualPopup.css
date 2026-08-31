@@ -1,11 +1,18 @@
 /* Contextual Popup Component */
 
+/* CSSVARS-002 FIX: was hardcoded background:white / color:#1a1a1a etc, with
+   a @media (prefers-color-scheme: dark) block trying to patch it based on
+   OS preference instead of the app's own [data-mode] theme system — so on
+   an OS set to light mode this stayed a white popup even inside the app's
+   dark-navy theme, and vice versa. Switched to real tokens (already
+   [data-mode]-aware); the old dark-mode media block is removed as no
+   longer needed. */
 .contextual-popup {
   position: fixed;
   bottom: 24px;
   right: 24px;
   max-width: 400px;
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
   animation: popupSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -55,14 +62,14 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--color-text-primary);
   line-height: 1.3;
 }
 
 .contextual-popup-description {
   margin: 0 0 16px 0;
   font-size: 0.9rem;
-  color: #4a4a4a;
+  color: var(--color-text-secondary);
   line-height: 1.5;
   max-height: 2.8em;
   overflow: hidden;
@@ -112,14 +119,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.05);
-  color: #666;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
   padding: 0;
   flex-shrink: 0;
 }
 
 .contextual-popup-dismiss-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--color-border);
 }
 
 /* Progress bar (auto-dismiss indicator) */
@@ -217,30 +224,5 @@
 
   .contextual-popup-primary:hover {
     transform: none;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .contextual-popup {
-    background: #2a2a2a;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-  }
-
-  .contextual-popup-title {
-    color: #ffffff;
-  }
-
-  .contextual-popup-description {
-    color: #b0b0b0;
-  }
-
-  .contextual-popup-dismiss-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #999;
-  }
-
-  .contextual-popup-dismiss-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
   }
 }

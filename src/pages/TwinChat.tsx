@@ -22,6 +22,7 @@ import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
 import { TwinNav } from '../components/twin/TwinNav';
 import { NavRail } from '../components/layout/NavRail';
+import { BottomNav } from '../components/layout/BottomNav';
 import { saveMessage, supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
@@ -256,6 +257,7 @@ export default function TwinChat() {
     return (
       <div className="flex flex-col h-screen">
         <NavRail />
+        <BottomNav />
         <div className="twin-container flex flex-col flex-1 items-center justify-center text-center max-w-2xl mx-auto p-6">
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
           <h1
@@ -548,6 +550,15 @@ export default function TwinChat() {
   return (
     <div className="flex flex-col h-screen">
       <NavRail />
+      {/* TWINCHAT-EXIT-001 FIX: this page only ever rendered NavRail
+          (desktop-only, hidden below 1024px) and TwinNav's own BackButton
+          is deliberately hidden on the 'chat' tab (see TwinNav.tsx) since
+          /chat/twin is a BottomNav root destination — except BottomNav
+          itself was never actually rendered here, so on mobile there was
+          truly no way out of this page at all ("ไม่มีปุ่มออก"). Same
+          NavRail+BottomNav pairing every other root tab page (Dashboard,
+          WorldsHub) already uses. */}
+      <BottomNav />
       {/* APPSHELL-004: Twin app-space sub-nav — Conversation / What Twin
           Knows / Personality / Settings. Sits above the chat column, not
           inside it, so the conversation itself stays a plain focused
@@ -676,7 +687,13 @@ export default function TwinChat() {
       </div>
 
       {/* Input Area */}
-      <div className="flex gap-2 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+      {/* TWINCHAT-COMPOSER-001 FIX: composer used to stretch full-width with
+          small (text-sm) type and a thin single-pixel border — read as a
+          generic web chatbot text box. Now hugs the right side of the
+          column (justify-end + a capped input width instead of flex-1),
+          with bigger text/padding and a visible 2px border so it reads as
+          a deliberate app input, not a chat widget. */}
+      <div className="flex gap-3 pt-4" style={{ borderTop: '1px solid var(--color-border)', justifyContent: 'flex-end' }}>
         <input
           type="text"
           value={message}
@@ -690,18 +707,21 @@ export default function TwinChat() {
               : (isTh ? 'ส่งข้อความถึงทวินของคุณ...' : 'Message your Twin...')
           }
           disabled={isSending}
-          className="flex-1 p-3 rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 text-sm"
+          className="p-4 rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 text-base"
           style={{
-            border: '1px solid var(--color-border)',
+            width: 'min(100%, 440px)',
+            flex: '0 1 auto',
+            border: '2px solid var(--color-border)',
             background: 'var(--color-bg-primary)',
             color: 'var(--color-text-primary)',
+            fontSize: '1.05rem',
           }}
         />
         <button
           onClick={() => handleSend()}
           disabled={isSending || !message.trim()}
-          className="px-6 py-3 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors hover:opacity-90"
-          style={{ background: '#6366f1' }}
+          className="px-7 py-4 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-semibold text-base transition-colors hover:opacity-90"
+          style={{ background: '#6366f1', flexShrink: 0 }}
         >
           {isSending ? '...' : (isTh ? 'ส่ง' : 'Send')}
         </button>

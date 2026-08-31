@@ -1,12 +1,22 @@
 /**
  * worlds-hub.css
  * Styling for 12 Worlds hub and world exploration
+ *
+ * CSSVARS-003 FIX: every spacing value in this file referenced
+ * `--spacing-*` (xs/sm/md/lg/xl), a naming scheme that was never defined
+ * anywhere in tokens.css — the real scale is `--space-*`. With no fallback
+ * values anywhere, every `padding`/`margin`/`gap` declaration in this file
+ * was silently computing to nothing: the world-selection cards had no gap
+ * between them, no internal padding, and the page had no section spacing
+ * at all — exactly "ปุ่มเลือกโลก...เว้นช่องไฟของแต่ละปุ่มด้วย". Borders were
+ * unaffected (`.world-card`'s border-color comes from an inline style, not
+ * this file) but now sit properly spaced instead of touching edge-to-edge.
  */
 
 .worlds-hub {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
 }
 
 /* ===== WORLD DETAIL (P0-D full-screen entry point) ===== */
@@ -14,18 +24,18 @@
 .world-detail {
   max-width: 900px;
   margin: 0 auto;
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   min-height: 100vh;
 }
 
 .wd-header {
   text-align: center;
-  padding: var(--spacing-xl) 0;
+  padding: var(--space-xl) 0;
 }
 
 .wd-back {
   display: inline-block;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
   background: none;
   border: none;
   color: var(--color-text-secondary);
@@ -35,25 +45,25 @@
 
 .wd-emoji {
   font-size: 4rem;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .wd-header h1 {
   font-size: 2.25rem;
   color: var(--world-color, #a78bfa);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .wd-tagline {
   font-style: italic;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .wd-description {
   color: var(--color-text-primary);
   max-width: 600px;
-  margin: 0 auto var(--spacing-md);
+  margin: 0 auto var(--space-md);
 }
 
 /* P0-H: WorldDetail is now a full-screen immersive page over WorldEnvironment
@@ -92,7 +102,7 @@
    NavBar/BottomNav (full-immersion layout), so this is the only way out. */
 .wh-exit {
   display: inline-block;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
   background: none;
   border: 1px solid var(--color-border, rgba(167, 139, 250, 0.3));
   border-radius: 8px;
@@ -109,13 +119,13 @@
 
 .wh-header {
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .wh-header h1 {
   font-size: 2.5rem;
   color: #a78bfa;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .wh-subtitle {
@@ -128,15 +138,15 @@
 .wh-worlds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-xl);
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
 }
 
 .world-card {
   background: rgba(99, 102, 241, 0.05);
   border: 2px solid;
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -155,19 +165,19 @@
 
 .wc-emoji {
   font-size: 2rem;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .world-card h3 {
   font-size: 1rem;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--space-xs);
 }
 
 .world-card p {
   font-size: 0.85rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .wc-articles {
@@ -175,7 +185,7 @@
   font-size: 0.75rem;
   background: rgba(167, 139, 250, 0.2);
   color: #a78bfa;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: 12px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -187,44 +197,44 @@
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  margin-bottom: var(--spacing-xl);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .wh-details-header {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .wh-details-header h2 {
   font-size: 2rem;
   color: #a78bfa;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .wh-world-description {
   font-size: 1.1rem;
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
   line-height: 1.6;
 }
 
 .wh-focus-areas {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-sm);
+  gap: var(--space-sm);
   align-items: center;
 }
 
 .fa-label {
   font-weight: 600;
   color: var(--color-text-secondary);
-  margin-right: var(--spacing-sm);
+  margin-right: var(--space-sm);
 }
 
 .fa-tag {
   background: rgba(167, 139, 250, 0.2);
   color: #a78bfa;
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-size: 0.85rem;
 }
@@ -232,24 +242,24 @@
 /* ===== ARTICLES ===== */
 
 .wh-articles {
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .wh-articles h3 {
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .articles-list {
   display: grid;
-  gap: var(--spacing-lg);
+  gap: var(--space-lg);
 }
 
 .article-card {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   transition: all 0.2s ease;
 }
 
@@ -261,29 +271,29 @@
 .article-card h4 {
   font-size: 1.1rem;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--space-sm);
 }
 
 .article-excerpt {
   color: var(--color-text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .article-meta {
   display: flex;
-  gap: var(--spacing-lg);
+  gap: var(--space-lg);
   font-size: 0.85rem;
   color: var(--color-text-tertiary);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .btn-read {
   background: linear-gradient(90deg, #6366f1, #a78bfa);
   color: white;
   border: none;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-weight: 600;
@@ -301,26 +311,26 @@
   background: rgba(167, 139, 250, 0.1);
   border: 1px solid rgba(167, 139, 250, 0.3);
   border-radius: var(--radius-md);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
   text-align: center;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--space-xl);
 }
 
 .wh-twin-guidance h3 {
   color: #a78bfa;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .guidance-text {
   color: var(--color-text-secondary);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--space-lg);
 }
 
 .btn-explore {
   display: inline-block;
   background: linear-gradient(90deg, #6366f1, #a78bfa);
   color: white;
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);
   text-decoration: none;
   font-weight: 600;
@@ -338,12 +348,12 @@
   background: rgba(99, 102, 241, 0.05);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--space-lg);
 }
 
 .wh-info h3 {
   color: #a78bfa;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--space-md);
 }
 
 .wh-info p {
@@ -355,7 +365,7 @@
 
 .wh-empty {
   text-align: center;
-  padding: var(--spacing-xl);
+  padding: var(--space-xl);
   color: var(--color-text-tertiary);
 }
 
@@ -367,7 +377,7 @@
   }
 
   .wh-details {
-    padding: var(--spacing-lg);
+    padding: var(--space-lg);
   }
 
   .wh-header h1 {
@@ -381,12 +391,12 @@
 
 @media (max-width: 480px) {
   .worlds-hub {
-    padding: var(--spacing-md);
+    padding: var(--space-md);
   }
 
   .wh-worlds-grid {
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: var(--spacing-sm);
+    gap: var(--space-sm);
   }
 
   .wh-header h1 {

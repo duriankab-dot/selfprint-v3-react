@@ -1,12 +1,17 @@
 /**
  * Twin Navigation bar styles
  * P0 #7.1 - Twin Navigation Integration
+ *
+ * CSSVARS-004 FIX: used --spacing-* (undefined; real scale is --space-*).
+ * Fallback values meant this file wasn't visibly broken, but was silently
+ * ignoring the actual token scale — fixed for consistency with the rest
+ * of the design system.
  */
 
 .twin-nav {
   background-color: var(--color-bg-secondary, #f5f5f5);
   border-bottom: 1px solid var(--color-border, #e0e0e0);
-  padding: var(--spacing-md, 1rem) 0;
+  padding: var(--space-md, 1rem) 0;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -15,11 +20,11 @@
 .twin-nav-container {
   max-width: var(--max-width, 1200px);
   margin: 0 auto;
-  padding: 0 var(--spacing-md, 1rem);
+  padding: 0 var(--space-md, 1rem);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-lg, 2rem);
+  gap: var(--space-lg, 2rem);
 }
 
 .twin-nav-header {
@@ -37,7 +42,7 @@
 
 .twin-nav-tabs {
   display: flex;
-  gap: var(--spacing-md, 1rem);
+  gap: var(--space-md, 1rem);
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -46,8 +51,8 @@
 .twin-nav-tab {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm, 0.5rem);
-  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  gap: var(--space-sm, 0.5rem);
+  padding: var(--space-sm, 0.5rem) var(--space-md, 1rem);
   border: none;
   background: transparent;
   color: var(--color-text-secondary, #666);
@@ -87,12 +92,12 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: var(--spacing-xs, 0.25rem);
+  gap: var(--space-xs, 0.25rem);
 }
 
 .status-badge {
   display: inline-block;
-  padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
+  padding: var(--space-xs, 0.25rem) var(--space-sm, 0.5rem);
   background-color: var(--color-accent-primary, #4a90e2);
   color: white;
   border-radius: var(--radius-sm, 4px);
@@ -110,7 +115,7 @@
   .twin-nav-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--spacing-sm, 0.5rem);
+    gap: var(--space-sm, 0.5rem);
   }
 
   .twin-nav-tabs {

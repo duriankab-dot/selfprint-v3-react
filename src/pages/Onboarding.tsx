@@ -383,7 +383,19 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // the Life Path fallback, whatever Claude/Astrovera returned otherwise)
     // instead of a hardcoded 85% regardless of outcome.
     const accuracy = Math.round(result.confidence * 100);
-    setSiceResult((prev) => (prev ? { ...prev, accuracy, finetuned: true } : prev));
+    // SKIP-BLANK-001 FIX: this used to return `prev` unchanged when siceResult
+    // was null — the 'complete' step's render guard is `siceResult &&
+    // analysisProfile`, so a null siceResult here meant answering all 5
+    // questions and submitting rendered a blank screen (indistinguishable
+    // from "nothing happened", exactly the reported "ปุ่มมีแต่ข้ามไม่ได้").
+    // Same defensive fallback already used elsewhere in this file
+    // (handleAICreationComplete / handleBirthDataSubmit) instead of trusting
+    // an earlier step to have set it.
+    setSiceResult((prev) =>
+      prev
+        ? { ...prev, accuracy, finetuned: true }
+        : { accuracy, disciplines: calculateInitialDisciplines(birthDate), finetuned: true }
+    );
     setStep('complete');
   };
 
@@ -716,12 +728,21 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               // GAP-RESUME fix: when restored from localStorage, analysisProfile is null
               // (not persisted — AnalysisResponse is too complex). Generate a fallback
               // before advancing so the 'complete' step always has a profile to render.
+              const birthDate = birthData?.dob ?? '';
               if (!analysisProfile) {
-                const birthDate = birthData?.dob ?? '';
                 setAnalysisProfile(
                   buildFallbackResponse({ mood, birthDate, finetuneAnswers: {} })
                 );
               }
+              // SKIP-BLANK-001 FIX: 'complete' step's render guard is
+              // `siceResult && analysisProfile` — skip only ever healed
+              // analysisProfile, so a null siceResult here (same scenario
+              // as the submit path) made "ข้าม/Skip" render a blank screen
+              // too, i.e. looked exactly like a dead button. Same
+              // self-healing fallback as handleFinetuneSubmit.
+              setSiceResult((prev) =>
+                prev ? prev : { accuracy: 70, disciplines: calculateInitialDisciplines(birthDate), finetuned: false }
+              );
               setStep('complete');
             }}
           />
