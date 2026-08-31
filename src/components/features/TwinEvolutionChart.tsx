@@ -4,7 +4,13 @@
  * **ทำหน้าที่:**
  * - Display Twin accuracy trend over time
  * - Show progress (improving ↑ / stable → / declining ↓)
- * - Mockup chart (in production: use Recharts/D3)
+ *
+ * NOPLACEHOLDER-001 FIX: this used to render a 20-bar history chart built
+ * from Math.random() (see the removed generateMockData helper) — a fake
+ * accuracy history displayed as if it were real. No persisted accuracy
+ * time-series exists yet to render honestly in its place, so this shows
+ * only the real accuracy/trend values it's actually given, as a single
+ * meter — no fabricated data points.
  *
  * **Input Props:**
  * - accuracy: number (0-1)
@@ -27,31 +33,15 @@ export const TwinEvolutionChart: React.FC<TwinEvolutionChartProps> = ({ accuracy
   const isTh = language === 'th';
   const accuracyPercent = Math.round(accuracy * 100);
 
-  // Mockup data: generate realistic trend data
-  const mockData = generateMockData(accuracy, trend);
-
   return (
     <div className="twin-evolution-chart">
-      {/* Simple bar chart mockup */}
-      <div className="chart-container">
-        <div className="chart-bars">
-          {mockData.map((point, idx) => (
-            <div key={idx} className="bar-wrapper">
-              <div
-                className={`bar ${point.highlight ? 'bar--highlight' : ''}`}
-                style={{ height: `${point.value}%` }}
-                title={`${point.value}% accuracy`}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Y-axis labels */}
-        <div className="chart-labels">
-          <div className="label">100%</div>
-          <div className="label">50%</div>
-          <div className="label">0%</div>
-        </div>
+      {/* Single real-data meter — see NOPLACEHOLDER-001 note above for why
+          this isn't a multi-point history chart. */}
+      <div className="chart-meter">
+        <div
+          className={`chart-meter-fill chart-meter-fill--${trend}`}
+          style={{ width: `${accuracyPercent}%` }}
+        />
       </div>
 
       {/* Stats below chart */}
@@ -93,35 +83,5 @@ export const TwinEvolutionChart: React.FC<TwinEvolutionChartProps> = ({ accuracy
     </div>
   );
 };
-
-// ============================================================================
-// Helper: Generate mockup data
-// ============================================================================
-
-function generateMockData(accuracy: number, trend: 'improving' | 'stable' | 'declining') {
-  const baseValue = Math.round(accuracy * 100);
-
-  // Generate 20 data points with trend
-  const data = [];
-  for (let i = 0; i < 20; i++) {
-    let value = baseValue * (0.7 + Math.random() * 0.3); // Vary around base
-
-    // Apply trend
-    if (trend === 'improving') {
-      value += (i * 0.5); // Gradually increase
-    } else if (trend === 'declining') {
-      value -= (i * 0.3); // Gradually decrease
-    }
-
-    value = Math.max(0, Math.min(100, value)); // Clamp to 0-100
-
-    data.push({
-      value: Math.round(value),
-      highlight: i === data.length - 1, // Highlight last point
-    });
-  }
-
-  return data;
-}
 
 export default TwinEvolutionChart;

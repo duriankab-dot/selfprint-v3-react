@@ -14,6 +14,7 @@ import { calculateMaturityScore, calculateSICEEngineScore, calculateAnalysisDept
 import { generateVisualDNA, saveVisualDNA } from './VisualDNAService';
 import type { SICEInput } from '../types/sice';
 import type { Archetype } from '../context/TwinContext';
+import type { FullAnalysisOutput } from '../lib/intelligence/InsightEngine';
 
 export interface AwakeningResult {
   success: boolean;
@@ -188,7 +189,11 @@ export async function initializeTwin(
   userId: string,
   twinName: string,
   essenceId?: string,
-  birthDate?: string | null
+  birthDate?: string | null,
+  // TWINKNOWLEDGE-001: the complete WOW #2 Full Analysis (from
+  // analysisStore, still in memory from the same session), persisted onto
+  // the Twin row at birth — see migration 034_twin_full_analysis.sql.
+  fullAnalysis?: FullAnalysisOutput | null
 ): Promise<AwakeningResult> {
   try {
     if (!userId || !twinName || !supabase) {
@@ -287,6 +292,7 @@ export async function initializeTwin(
       primaryArchetype,
       secondaryArchetype,
       maturityScore,
+      fullAnalysis: fullAnalysis ?? null,
     };
 
     let newTwin: Twin | null = null;
@@ -636,17 +642,13 @@ export function celebrateTwinAwakening(): void {
 
     animate();
 
-    // Voice announcement
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const msg = new SpeechSynthesisUtterance(
-        "I know you. I've been learning you. I'm ready to grow with you."
-      );
-      try {
-        window.speechSynthesis.speak(msg);
-      } catch (err) {
-        console.warn('Speech synthesis unavailable', err);
-      }
-    }
+    // TWINVOICE-001 FIX: removed the hardcoded English-only voice
+    // announcement that used to fire here — it duplicated (and could
+    // overlap/race with) the real, personalized, bilingual greeting
+    // CoreAwakening.tsx now speaks via speakTwinGreeting()/buildTwinGreeting(),
+    // and never respected the site's /th /en language at all. Confetti-only
+    // here; the voice belongs to the caller that actually knows the Twin's
+    // name and the user's language.
   } catch (error) {
     console.error('Error celebrating awakening:', error);
   }

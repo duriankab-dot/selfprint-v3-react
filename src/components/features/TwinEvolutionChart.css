@@ -12,61 +12,32 @@
   border: 1px solid var(--color-border, #e0e0e0);
 }
 
-/* Chart container */
-.chart-container {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  height: 160px;
+/* NOPLACEHOLDER-001: single real-data meter — replaced the old
+   Math.random()-generated 20-bar history chart (see TwinEvolutionChart.tsx). */
+.chart-meter {
+  height: 14px;
+  border-radius: 7px;
+  background: var(--color-bg-tertiary, #e5e7eb);
+  overflow: hidden;
 }
 
-.chart-labels {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-width: 40px;
-  font-size: 11px;
-  color: var(--color-text-secondary, #999);
-  text-align: right;
+.chart-meter-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.3s ease;
+  background: linear-gradient(90deg, #3b82f6, #1e40af);
 }
 
-.label {
-  height: 0; /* Align with chart bars */
+.chart-meter-fill--improving {
+  background: linear-gradient(90deg, #10b981, #059669);
 }
 
-/* Bars */
-.chart-bars {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
+.chart-meter-fill--declining {
+  background: linear-gradient(90deg, #ef4444, #b91c1c);
 }
 
-.bar-wrapper {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  min-height: 100%;
-}
-
-.bar {
-  width: 100%;
-  background: linear-gradient(180deg, #3b82f6, #1e40af);
-  border-radius: 4px 4px 0 0;
-  opacity: 0.7;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.bar:hover {
-  opacity: 1;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-.bar--highlight {
-  opacity: 1;
-  background: linear-gradient(180deg, #10b981, #059669);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+.chart-meter-fill--stable {
+  background: linear-gradient(90deg, #f59e0b, #b45309);
 }
 
 /* Stats below chart */
@@ -142,10 +113,6 @@
 
 /* Responsive */
 @media (max-width: 480px) {
-  .chart-container {
-    height: 120px;
-  }
-
   .chart-stats {
     grid-template-columns: 1fr;
   }

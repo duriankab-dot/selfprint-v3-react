@@ -88,6 +88,25 @@
 
 /* ===== HEADER ===== */
 
+/* WORLDSEXIT-001 FIX: back-to-dashboard control — WorldsHub has no
+   NavBar/BottomNav (full-immersion layout), so this is the only way out. */
+.wh-exit {
+  display: inline-block;
+  margin-bottom: var(--spacing-md);
+  background: none;
+  border: 1px solid var(--color-border, rgba(167, 139, 250, 0.3));
+  border-radius: 8px;
+  padding: 4px 12px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.wh-exit:hover {
+  border-color: #a78bfa;
+  color: #a78bfa;
+}
+
 .wh-header {
   text-align: center;
   margin-bottom: var(--spacing-xl);

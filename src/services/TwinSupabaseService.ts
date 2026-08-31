@@ -137,6 +137,9 @@ export async function createTwinInDatabase(
           secondary_archetype: twinData.secondaryArchetype,
           maturity_score: Math.max(0, Math.min(100, twinData.maturityScore || 30)),
           evolution_stage: 1,
+          // TWINKNOWLEDGE-001: persist the full WOW #2 analysis at birth —
+          // see migration 034_twin_full_analysis.sql for why.
+          full_analysis: twinData.fullAnalysis ?? null,
         },
       ])
       .select()

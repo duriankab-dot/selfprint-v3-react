@@ -88,6 +88,15 @@
   position: relative;
 }
 
+/* TWINCHAT-UI-001: user's own bubble in TwinChat.tsx — same accent as
+   .twin-header/.twin-label, distinct from the Twin's own .twin-message. */
+.twin-message-user {
+  background: #6366f1;
+  color: white;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+}
+
 .twin-message-stage-indicator {
   position: absolute;
   top: 8px;

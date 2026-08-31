@@ -41,6 +41,12 @@ export default function TwinChat() {
   // Twin's system prompt had no language instruction (see twin-prompts.ts)
   // so it could reply in either language regardless of /th vs /en.
   const { language } = useLanguage();
+  // TWINCHAT-UI-001 FIX: page had zero useLanguage-driven UI text (only the
+  // AI's own replies were language-aware via TWINLANG-001) and never used
+  // the .twin-container/.twin-message theme already built in nova-twin.css
+  // — it rendered with raw gray/blue Tailwind utilities instead. Both fixed
+  // below: isTh gates every UI string, and the JSX now uses the Twin theme.
+  const isTh = language === 'th';
   // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
   // "intelligent from birth" — knows the user before the first message.
   const userProfile = useUserStore(s => s.profile);
@@ -106,12 +112,23 @@ export default function TwinChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, twin, session]);
 
-  // ANALYSIS-PERSIST-001 FIX: fetch analysis from database when store is empty.
-  // Without this, Twin is only smart in the first session — on reload,
-  // currentAnalysis becomes null and Twin loses all strengths/blindSpots context.
+  // TWINKNOWLEDGE-001: twin.fullAnalysis is the complete, original Full
+  // Analysis persisted onto the Twin row at birth (see CoreAwakening.tsx +
+  // migration 034_twin_full_analysis.sql) — prefer it outright, no
+  // reconstruction needed, whenever it's present.
+  useEffect(() => {
+    if (currentAnalysis || !twin?.fullAnalysis) return;
+    setCurrentAnalysis(twin.fullAnalysis);
+  }, [currentAnalysis, twin?.fullAnalysis, setCurrentAnalysis]);
+
+  // ANALYSIS-PERSIST-001 FIX: fallback for twins created BEFORE
+  // TWINKNOWLEDGE-001 (twin.fullAnalysis is null for those) — reconstructs a
+  // rougher approximation from awakening_essence.personal_intelligence so
+  // even older Twins aren't left with zero context. Twins created after the
+  // fix above never reach this: the effect above already set currentAnalysis.
   // NOTE: data lives in awakening_essence.personal_intelligence (NOT profiles_blueprints.final_analysis)
   useEffect(() => {
-    if (currentAnalysis || !session?.user?.id || !supabase) return;
+    if (currentAnalysis || twin?.fullAnalysis || !session?.user?.id || !supabase) return;
 
     const fetchAnalysisFromDB = async () => {
       try {
@@ -218,8 +235,10 @@ export default function TwinChat() {
   // while TwinContext is still checking.
   if (twinLoading) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Loading your Twin...</p>
+      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          {isTh ? 'กำลังโหลดทวินของคุณ...' : 'Loading your Twin...'}
+        </p>
       </div>
     );
   }
@@ -227,8 +246,12 @@ export default function TwinChat() {
   // GUARD: Check if Twin exists
   if (!twin) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Your Twin hasn't awakened yet. Complete Core Awakening first.</p>
+      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          {isTh
+            ? 'ทวินของคุณยังไม่ตื่น กรุณาทำ Core Awakening ให้เสร็จก่อน'
+            : "Your Twin hasn't awakened yet. Complete Core Awakening first."}
+        </p>
       </div>
     );
   }
@@ -236,8 +259,10 @@ export default function TwinChat() {
   // GUARD: Check if user is logged in
   if (!session?.user?.id) {
     return (
-      <div className="flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="text-gray-500 mb-4">Please login to chat with your Twin</p>
+      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          {isTh ? 'กรุณาเข้าสู่ระบบเพื่อคุยกับทวินของคุณ' : 'Please login to chat with your Twin'}
+        </p>
       </div>
     );
   }
@@ -262,7 +287,9 @@ export default function TwinChat() {
       }
 
       if (!userMessage || !twinMessage) {
-        throw new Error('Could not find decision and response');
+        throw new Error(
+          isTh ? 'ไม่พบข้อความคำถามและคำตอบ' : 'Could not find decision and response'
+        );
       }
 
       // Get message data
@@ -287,7 +314,9 @@ export default function TwinChat() {
         setSavedDecisionIds(prev => new Set(prev).add(messageIndex));
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to save decision';
+      const errorMsg = err instanceof Error
+        ? err.message
+        : (isTh ? 'บันทึกการตัดสินใจไม่สำเร็จ' : 'Failed to save decision');
       console.error('Save decision error:', err);
       setError(errorMsg);
     } finally {
@@ -307,7 +336,7 @@ export default function TwinChat() {
     try {
       // GUARD: Ensure userId exists
       if (!session.user?.id) {
-        throw new Error('User session lost');
+        throw new Error(isTh ? 'เซสชันผู้ใช้หมดอายุ' : 'User session lost');
       }
 
       // Add user message to UI immediately
@@ -433,7 +462,9 @@ export default function TwinChat() {
       }
 
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Failed to send message';
+      const errorMsg = err instanceof Error
+        ? err.message
+        : (isTh ? 'ส่งข้อความไม่สำเร็จ' : 'Failed to send message');
       setError(errorMsg);
       console.error('Twin message error:', err);
     } finally {
@@ -477,13 +508,16 @@ export default function TwinChat() {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+    <div className="twin-container flex flex-col h-screen max-w-2xl mx-auto p-4">
       {/* World Context Header */}
       {currentWorld && <WorldContextHeader world={currentWorld} />}
 
-      <h1 className="text-2xl font-bold text-center mb-4">
-        💫 {twin.name || 'My Twin'}
-      </h1>
+      <div className="twin-header text-center mb-4">
+        <span className="twin-label">{isTh ? 'ทวินของคุณ' : 'Your Twin'}</span>
+        <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)', margin: 0 }}>
+          💫 {twin.name || (isTh ? 'ทวินของฉัน' : 'My Twin')}
+        </h1>
+      </div>
 
       {/* World Selector Tabs */}
       {/* DISCONNECT-001 FIX: onWorldSelect keeps this page's own local
@@ -508,16 +542,22 @@ export default function TwinChat() {
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto space-y-3 mb-4">
         {messages.length === 0 ? (
-          <div className="text-center text-gray-400 py-8">
+          <div className="text-center py-8" style={{ color: 'var(--color-text-tertiary)' }}>
             {currentWorld
-              ? `Start a conversation with your Twin about ${WORLDS[currentWorld]?.name || currentWorld}`
-              : 'Start a conversation with your AI Twin'}
+              ? (isTh
+                  ? `เริ่มคุยกับทวินเรื่อง${WORLDS[currentWorld]?.nameTh || WORLDS[currentWorld]?.name || currentWorld}`
+                  : `Start a conversation with your Twin about ${WORLDS[currentWorld]?.name || currentWorld}`)
+              : (isTh ? 'เริ่มคุยกับทวิน AI ของคุณ' : 'Start a conversation with your AI Twin')}
           </div>
         ) : (
           messages.map((msg, idx) => (
             <div key={idx}>
               <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'}`}>
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    msg.role === 'user' ? 'twin-message-user rounded-br-none' : 'twin-message rounded-bl-none'
+                  }`}
+                >
                   {msg.content}
                 </div>
               </div>
@@ -530,9 +570,18 @@ export default function TwinChat() {
                       onClick={() => handleSelectChoice(idx, option)}
                       className={`text-xs px-3 py-1 rounded border transition-colors ${
                         msg.selectedChoice === option
-                          ? 'bg-blue-500 text-white border-blue-500'
-                          : 'bg-white text-gray-700 border-gray-300 hover:border-blue-500'
+                          ? 'text-white'
+                          : 'hover:opacity-80'
                       }`}
+                      style={
+                        msg.selectedChoice === option
+                          ? { background: '#6366f1', borderColor: '#6366f1' }
+                          : {
+                              background: 'var(--color-bg-primary)',
+                              color: 'var(--color-text-secondary)',
+                              borderColor: 'var(--color-border)',
+                            }
+                      }
                     >
                       {option}
                     </button>
@@ -546,15 +595,23 @@ export default function TwinChat() {
                     onClick={() => handleSaveDecision(idx)}
                     disabled={savingDecisionIndex === idx || (msg.options && msg.options.length > 0 && !msg.selectedChoice)}
                     className="text-xs px-3 py-1 bg-green-100 text-green-800 rounded hover:bg-green-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                    title={msg.options && msg.options.length > 0 && !msg.selectedChoice ? 'Select an option first' : 'Save as decision'}
+                    title={
+                      msg.options && msg.options.length > 0 && !msg.selectedChoice
+                        ? (isTh ? 'เลือกตัวเลือกก่อน' : 'Select an option first')
+                        : (isTh ? 'บันทึกเป็นการตัดสินใจ' : 'Save as decision')
+                    }
                   >
-                    {savingDecisionIndex === idx ? 'Saving...' : '💾 Save as Decision'}
+                    {savingDecisionIndex === idx
+                      ? (isTh ? 'กำลังบันทึก...' : 'Saving...')
+                      : `💾 ${isTh ? 'บันทึกเป็นการตัดสินใจ' : 'Save as Decision'}`}
                   </button>
                 </div>
               )}
               {savedDecisionIds.has(idx) && (
                 <div className="flex justify-start mt-1 ml-0">
-                  <span className="text-xs text-green-600 font-semibold">✅ Decision saved</span>
+                  <span className="text-xs text-green-600 font-semibold">
+                    ✅ {isTh ? 'บันทึกการตัดสินใจแล้ว' : 'Decision saved'}
+                  </span>
                 </div>
               )}
             </div>
@@ -562,11 +619,11 @@ export default function TwinChat() {
         )}
         {isSending && (
           <div className="flex justify-start">
-            <div className="bg-gray-200 text-gray-800 p-3 rounded-lg">
+            <div className="twin-message p-3 rounded-lg rounded-bl-none">
               <div className="flex gap-1">
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-                <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
+                <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#6366f1' }} />
+                <div className="w-2 h-2 rounded-full animate-bounce delay-100" style={{ background: '#6366f1' }} />
+                <div className="w-2 h-2 rounded-full animate-bounce delay-200" style={{ background: '#6366f1' }} />
               </div>
             </div>
           </div>
@@ -574,22 +631,34 @@ export default function TwinChat() {
       </div>
 
       {/* Input Area */}
-      <div className="flex gap-2 pt-4 border-t border-gray-200">
+      <div className="flex gap-2 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && !isSending && handleSend()}
-          placeholder={currentWorld ? `Ask your Twin about ${WORLDS[currentWorld]?.name}...` : 'Message your Twin...'}
+          placeholder={
+            currentWorld
+              ? (isTh
+                  ? `ถามทวินเรื่อง${WORLDS[currentWorld]?.nameTh || WORLDS[currentWorld]?.name}...`
+                  : `Ask your Twin about ${WORLDS[currentWorld]?.name}...`)
+              : (isTh ? 'ส่งข้อความถึงทวินของคุณ...' : 'Message your Twin...')
+          }
           disabled={isSending}
-          className="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 text-sm"
+          className="flex-1 p-3 rounded-lg focus:outline-none focus:ring-2 disabled:opacity-50 text-sm"
+          style={{
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-bg-primary)',
+            color: 'var(--color-text-primary)',
+          }}
         />
         <button
           onClick={() => handleSend()}
           disabled={isSending || !message.trim()}
-          className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+          className="px-6 py-3 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors hover:opacity-90"
+          style={{ background: '#6366f1' }}
         >
-          {isSending ? '...' : 'Send'}
+          {isSending ? '...' : (isTh ? 'ส่ง' : 'Send')}
         </button>
       </div>
     </div>

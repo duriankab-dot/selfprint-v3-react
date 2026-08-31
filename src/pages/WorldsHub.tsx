@@ -52,6 +52,19 @@ export default function WorldsHub() {
         />
       )}
       <div className="worlds-hub" data-testid="worlds-container">
+        {/* WORLDSEXIT-001 FIX: WorldsHub renders with no NavBar/BottomNav
+            (full-immersion layout, like WorldDetail) but — unlike
+            WorldDetail — had no back/home control of its own, so a user
+            landing here had zero way out except the browser's own back
+            button. Mirrors WorldDetail.tsx's wd-back/home button pair. */}
+        <button
+          className="wh-exit"
+          onClick={() => navigate(`/${language}/dashboard`)}
+          aria-label={isTh ? 'กลับหน้าหลัก' : 'Back to dashboard'}
+          data-testid="worlds-exit"
+        >
+          {isTh ? '← หน้าหลัก' : '← Dashboard'}
+        </button>
         {/* Header */}
         <div className="wh-header">
           <h1>✨ {isTh ? '12 โลกแห่งชีวิต' : 'The 12 Worlds'}</h1>

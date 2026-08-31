@@ -23,6 +23,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState } from '@/lib/intelligence/TwinStateEngine';
+import { ShareButton } from '@/components/viral/ShareButton';
 import '../../styles/living-twin.css';
 
 // ============================================================================
@@ -267,6 +268,15 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
         >
           💬 {isTh ? 'คุยกับ Twin' : 'Chat with Twin'}
         </button>
+      </div>
+
+      {/* VIRAL-LOOP-001 FIX: ShareButton (features/viral/api/shareService.ts
+          -> /api/share, real endpoint in api/unified-handler.ts) lived only
+          inside AITwinSection.tsx, which LivingTwin replaced on the Dashboard
+          (see file header) without carrying ShareButton over — it became
+          unreachable dead code even though the backend was still fully wired. */}
+      <div className="living-twin__share">
+        <ShareButton />
       </div>
     </div>
   );

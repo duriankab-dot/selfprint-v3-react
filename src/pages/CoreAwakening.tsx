@@ -13,7 +13,9 @@ import { useTwin } from '../context/TwinContext';
 // P0 FIX: CoreAwakening ทำงานสร้าง Twin ไม่ใช่ Nova - ไม่ต้อง useNova()
 // (useNova เรียกใน NovaChat เท่านั้น ที่ wrap ใน NovaProvider)
 import { useUserStore } from '../store/userStore';
+import { useAnalysisStore } from '../store/analysisStore';
 import { useLanguage } from '../context/LanguageContext';
+import { useAudio } from '../context/AudioContext';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
@@ -21,6 +23,7 @@ import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
 import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
+import { primeCelebrationAudio, playCelebrationSound, stopCelebrationSound } from '../lib/twin/twinCelebrationSound';
 import type { Archetype } from '../context/TwinContext';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
@@ -58,8 +61,14 @@ export default function CoreAwakening() {
   // P0 FIX: Removed useNova() — CoreAwakening creates Twin, not Nova
   const { language } = useLanguage();
   const isTh = language === 'th';
+  const audio = useAudio();
   const birthDate = useUserStore((state) => state.profile.birthDate);
   const updateProfile = useUserStore((state) => state.updateProfile);
+  // TWINKNOWLEDGE-001: still in memory from the same session's Full Analysis
+  // (AnalysisPage.tsx → analysisStore) — passed into initializeTwin() below
+  // so it gets persisted onto the Twin row instead of being lost the moment
+  // this tab closes.
+  const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
 
@@ -103,6 +112,10 @@ export default function CoreAwakening() {
   // TWINPRESENCE-005: stop any in-progress/queued greeting if the user
   // navigates away mid-speech — it must not keep talking on the next page.
   useEffect(() => stopTwinVoice, []);
+
+  // TWINCELEBRATION-001: same reasoning — stop the celebration sound if the
+  // user navigates away before it finishes.
+  useEffect(() => stopCelebrationSound, []);
 
   // G5-PROFILE-RECOVERY: userStore no longer persists profile to localStorage
   // (G1-LOCALSTORAGE-POLICY in userStore.ts). birthDate survives the onboarding
@@ -210,12 +223,16 @@ export default function CoreAwakening() {
       void speakTwinGreeting(buildTwinGreeting(twinName, language), {
         lang: language === 'th' ? 'th-TH' : 'en-US',
       });
+      // TWINCELEBRATION-001: same gesture-timing reasoning — prime the
+      // celebration sound's AudioContext now too, so it isn't blocked when
+      // actually played a few seconds later once celebration phase starts.
+      primeCelebrationAudio();
 
       // P0-C: initializeTwin() grounds the Twin in the real SICE essence
       // (archetype from birth-date numerology + essence text, baseline
       // scores from actual engine confidence, birth memory from an actual
       // insight) instead of the previous saveTwinProfile() shallow path.
-      const result = await initializeTwin(session.user.id, twinName, essenceId, birthDate);
+      const result = await initializeTwin(session.user.id, twinName, essenceId, birthDate, currentAnalysis);
 
       if (!result.success || !result.twin || !result.twinId) {
         throw new Error(result.message || 'Failed to create Twin');
@@ -263,6 +280,14 @@ export default function CoreAwakening() {
       // Celebration phase
       setPhase('celebration');
       celebrateTwinAwakening();
+      // TWINCELEBRATION-001: the "celebration" soundscape (SoundscapeEngine.ts)
+      // already existed but was never triggered outside the Dashboard's
+      // SoundscapePlayer — play it here so the birth ceremony is actually
+      // heard, not just seen.
+      void playCelebrationSound({
+        enabled: audio.state.soundEnabled,
+        volumePercent: audio.state.volume,
+      });
 
       // TWINPRESENCE-005: the greeting itself is now spoken earlier, before
       // initializeTwin() (see TWINVOICE-001 FIX above) — this stage just
