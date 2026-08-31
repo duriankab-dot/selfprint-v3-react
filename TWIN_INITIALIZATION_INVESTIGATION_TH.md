@@ -421,3 +421,25 @@ PRODUCTION READY:  🟡 Conditional - depends on state/personality needs
 **วันที่ update:** 2026-08-25  
 **เขียนโดย:** AI Dev (Forensic Investigation)  
 **Status:** 🔍 Awaiting action on state/personality/capabilities decision
+
+---
+
+## 10. ปิดเคส (2026-08-31)
+
+**Option B ทำเสร็จแล้วก่อนหน้านี้** — `initializeTwin()` ใน CoreAwakeningService.ts
+สร้าง `twin_state` / `world_preferences` (12 worlds) / `twin_personality` /
+`twin_capabilities` ครบทั้ง 4 ตารางแล้ว (Operations 6-9, PHASE A.1 COMPLETE)
+ด้วยค่า dynamic จาก SICE essence จริง ไม่ใช่ hardcoded แบบระบบเก่า
+
+**Option A ทำแล้ววันนี้** — ลบ dead code cluster ทั้งหมด:
+- `src/pages/CoreAwakeningCeremony.tsx`
+- `src/components/TwinNamingDialog.tsx`
+- `src/components/animations/HolographicBirth.tsx`
+- `src/components/animations/ParticleFormation.tsx`
+- `src/components/animations/CelebrationSequence.tsx`
+- `src/services/TwinContextInitializer.ts`
+- `src/services/FirstConversationSetup.ts`
+
+ยืนยันด้วย `npx tsc -b` ผ่านหลังลบ — ไม่มีที่อื่นอ้างอิงไฟล์เหล่านี้เลย
+
+**A.1 Status ปัจจุบัน:** ✅ Complete — dynamic values + state/personality/capabilities/world_preferences ครบ + dead code ถูกลบแล้ว

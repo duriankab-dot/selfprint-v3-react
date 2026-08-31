@@ -12,6 +12,7 @@ import React, { createContext, useState, useCallback, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
+import type { FullAnalysisOutput } from '../lib/intelligence/InsightEngine';
 import { createDecision } from '../services/DecisionService';
 import { AuthContext } from './AuthContext';
 import { calculateMaturityScore } from '../services/DynamicValueCalculator';
@@ -62,6 +63,11 @@ export interface TwinProfile {
   maturityScore: number; // 0-100
   createdAt: number;
   updatedAt: number;
+  /** TWINKNOWLEDGE-001: the complete WOW #2 Full Analysis, persisted onto
+   *  the Twin at birth so it survives reloads/new sessions instead of only
+   *  living in analysisStore's volatile in-memory state. Null for twins
+   *  created before this fix, or if analysis wasn't available at birth. */
+  fullAnalysis?: FullAnalysisOutput | null;
   birthData?: {
     date: string;
     time?: string;
@@ -141,6 +147,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
           }),
           createdAt: new Date((savedTwin as any).awakened_at).getTime(),
           updatedAt: Date.now(),
+          fullAnalysis: (savedTwin as any).full_analysis ?? null,
         };
 
         setTwin(newTwin);
@@ -169,6 +176,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
       maturityScore: Math.max(0, Math.min(100, (savedTwin as any).maturity_score || 30)),
       createdAt: new Date((savedTwin as any).awakened_at).getTime(),
       updatedAt: Date.now(),
+      fullAnalysis: (savedTwin as any).full_analysis ?? null,
     };
     setTwin(newTwin);
     setError(null);
@@ -309,6 +317,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
           maturityScore: Math.max(0, Math.min(100, (fetchedTwin as any).maturity_score ?? 30)),
           createdAt: new Date(fetchedTwin.awakened_at).getTime(),
           updatedAt: Date.now(),
+          fullAnalysis: (fetchedTwin as any).full_analysis ?? null,
         });
         setError(null);
       } catch (err) {

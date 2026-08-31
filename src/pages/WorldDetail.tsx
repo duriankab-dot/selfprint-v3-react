@@ -11,7 +11,7 @@
  *   to it with the param set, so it never actually fired in production.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { WORLDS, getWorldArticles, type WorldId } from '../constants/worlds';
@@ -40,6 +40,10 @@ export default function WorldDetail() {
   const valid = isValidWorldId(worldId);
   const world = valid ? WORLDS[worldId] : null;
   const articles = valid ? getWorldArticles(worldId) : [];
+  // WORLDCONTENT-001 FIX: article cards used to be inert (no onClick, no
+  // link) — content existed nowhere to read even after being written.
+  // Click-to-expand in place, same pattern as BlogListPage.tsx.
+  const [openSlug, setOpenSlug] = useState<string | null>(null);
 
   // Hook must run unconditionally (Rules of Hooks) — falls back to 'self'
   // when the id is invalid; the invalid-id branch redirects away before
@@ -189,16 +193,46 @@ export default function WorldDetail() {
           <div className="wh-articles">
             <h3>📖 {isTh ? `สำรวจโลก${world.nameTh}` : 'Explore This World'}</h3>
             <div className="articles-list">
-              {articles.map((article) => (
-                <div key={article.slug} className="article-card">
-                  <h4>{isTh ? article.titleTh : article.title}</h4>
-                  <p className="article-excerpt">{isTh ? article.excerptTh : article.excerpt}</p>
-                  <div className="article-meta">
-                    <span className="meta-read-time">⏱️ {article.readTime} {isTh ? 'นาที' : 'min'}</span>
-                    <span className="meta-author">✍️ {article.author}</span>
+              {articles.map((article) => {
+                const isOpen = openSlug === article.slug;
+                return (
+                  <div
+                    key={article.slug}
+                    className="article-card"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOpenSlug(isOpen ? null : article.slug)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setOpenSlug(isOpen ? null : article.slug);
+                      }
+                    }}
+                    style={{ cursor: 'pointer' }}
+                    aria-expanded={isOpen}
+                  >
+                    <h4>{isTh ? article.titleTh : article.title}</h4>
+                    <p className="article-excerpt">{isTh ? article.excerptTh : article.excerpt}</p>
+                    <div className="article-meta">
+                      <span className="meta-read-time">⏱️ {article.readTime} {isTh ? 'นาที' : 'min'}</span>
+                      <span className="meta-author">✍️ {article.author}</span>
+                      <span className="meta-author">{isOpen ? '▲' : (isTh ? '▼ อ่านต่อ' : '▼ Read more')}</span>
+                    </div>
+                    {isOpen && (
+                      <div
+                        className="article-full-content"
+                        style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.15)' }}
+                      >
+                        {(isTh ? article.contentTh : article.content).map((para, i) => (
+                          <p key={i} style={{ marginBottom: 10, lineHeight: 1.7, opacity: 0.9 }}>
+                            {para}
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
