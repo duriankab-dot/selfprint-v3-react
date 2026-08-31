@@ -24,6 +24,8 @@ import { useWorldAmbientTone } from '../hooks/useWorldAmbientTone';
 import { useEnvironment } from '../context/EnvironmentContext';
 import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
+import { BackButton } from '../components/common/BackButton';
+import { NavRail } from '../components/layout/NavRail';
 import '../styles/worlds-hub.css';
 
 function isValidWorldId(id: string | undefined): id is WorldId {
@@ -110,6 +112,10 @@ export default function WorldDetail() {
         worldId={world.id}
         maturityScore={twin?.maturityScore}
       />
+      {/* APPSHELL-006 FIX: user explicitly asked for the desktop nav rail
+          here too, overriding the earlier "full-immersion, no chrome"
+          decision. */}
+      <NavRail />
       <div
         className="world-detail"
         style={{ '--world-color': world.color } as React.CSSProperties}
@@ -117,6 +123,11 @@ export default function WorldDetail() {
         <div className="wd-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              {/* BACKBUTTON-001: real history-back — goes to wherever the
+                  user actually came from (WorldsHub grid, a Twin chat link,
+                  etc), not always /worlds. "All worlds" below stays as a
+                  deliberate hierarchical shortcut, not a replacement. */}
+              <BackButton fallbackTo="/worlds" style={{ color: 'rgba(255,255,255,0.85)' }} />
               <button className="wd-back" onClick={() => navigate('/worlds')} aria-label="Back to worlds">
                 {isTh ? '← โลกทั้งหมด' : '← All worlds'}
               </button>

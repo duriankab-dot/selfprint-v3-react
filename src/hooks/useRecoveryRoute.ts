@@ -34,6 +34,21 @@ const LIFECYCLE_ROUTES: Record<string, string> = {
   WORLD_ACTIVE: '/worlds',
 };
 
+// REFRESH-REDIRECT-001 FIX: `recoveredForUserId` is a React ref — in-memory
+// only. RecoveryRouteHandler mounts at the app root on every single route
+// (see App.tsx), so a normal SPA navigation kept the ref set and this hook
+// correctly stayed quiet — but a hard refresh on ANY page (e.g. /explore,
+// /twin-profile, /intelligence) remounts the whole app, the ref resets to
+// null, and this "fires once per login" logic ran again as if it were a
+// fresh login. Since LIFECYCLE_ROUTES only maps 5 fixed destinations,
+// refreshing on any other real page (Explore, Twin sub-pages, Intelligence,
+// Me, ...) always failed the `currentPath.includes(targetRoute)` check and
+// force-navigated to /dashboard. Fix: persist the "already recovered" flag
+// in sessionStorage, which survives a reload within the same tab/session
+// (matching the hook's own "fires once per login" intent) but still clears
+// on a genuinely new session (new tab, browser restart).
+const RECOVERY_SESSION_KEY = 'sp_recovery_done_for_user';
+
 export function useRecoveryRoute() {
   const navigate = useNavigate();
   const { session, loading: authLoading } = useAuth();
@@ -52,12 +67,34 @@ export function useRecoveryRoute() {
     if (lifecycleError) return;
     if (!session?.user?.id) {
       recoveredForUserId.current = null; // logged out — re-arm
+      try {
+        sessionStorage.removeItem(RECOVERY_SESSION_KEY);
+      } catch {
+        // Non-critical
+      }
       return;
     }
 
-    // LOOP-002 FIX: fire once per login only, not on every status change
-    if (recoveredForUserId.current === session.user.id) return;
+    // LOOP-002 FIX: fire once per login only, not on every status change.
+    // REFRESH-REDIRECT-001: also check sessionStorage so this survives a
+    // hard refresh, not just SPA navigation within the same mount.
+    let recoveredInSession = false;
+    try {
+      recoveredInSession = sessionStorage.getItem(RECOVERY_SESSION_KEY) === session.user.id;
+    } catch {
+      // sessionStorage unavailable (private mode etc.) — fall back to the
+      // in-memory ref only, same as before this fix.
+    }
+    if (recoveredForUserId.current === session.user.id || recoveredInSession) {
+      recoveredForUserId.current = session.user.id;
+      return;
+    }
     recoveredForUserId.current = session.user.id;
+    try {
+      sessionStorage.setItem(RECOVERY_SESSION_KEY, session.user.id);
+    } catch {
+      // Non-critical — worst case this fires again on the next hard refresh.
+    }
 
     // 1. Classify entry path
     const entryPath: EntryPath = classifyEntryPath({

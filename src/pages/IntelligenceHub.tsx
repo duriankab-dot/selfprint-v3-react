@@ -20,6 +20,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import {
   getDashboardInsights,
   getDecisionLogs,
@@ -81,6 +82,7 @@ interface Filters {
 const contextBuilder = new PersonalContextBuilder();
 
 const IntelligenceHub: React.FC = () => {
+  const navigate = useNavigate();
   const { session } = useAuth();
   const userId = session?.user?.id || '';
   const { language } = useLanguage();
@@ -309,6 +311,16 @@ const IntelligenceHub: React.FC = () => {
               <LifePackCarousel context={personalContext} />
               <ForecastWidget context={personalContext} />
             </div>
+          </div>
+
+          {/* CTA-001: page used to end abruptly with no next step. */}
+          <div className="command-center-link">
+            <button
+              className="command-center-link__cta"
+              onClick={() => navigate('/chat/twin')}
+            >
+              💬 {isTh ? 'คุยกับฝาแฝดเรื่องนี้ →' : 'Talk to your Twin about this →'}
+            </button>
           </div>
         </div>
         <Footer />

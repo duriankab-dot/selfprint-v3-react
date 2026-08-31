@@ -1,6 +1,15 @@
+/* CONTRAST-001: this file used --text-primary/--text-secondary/--text-muted/
+   --surface-2/--surface-3/--border-subtle/--accent-primary throughout —
+   none of these custom properties are defined anywhere in the app (verified
+   via grep), so every color here was silently rendering its literal
+   fallback (or, for the four declarations with no fallback at all, an
+   unpredictable inherited color). The worst case was .future-self-empty-text
+   at rgba(255,255,255,0.4) — white 40% alpha — a genuine WCAG contrast
+   failure, part of the Lighthouse contrast findings. Remapped to the
+   project's actual design tokens (tokens.css) throughout this file. */
 .future-self-panel {
-  background: var(--surface-2, rgba(255,255,255,0.05));
-  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg, 16px);
   padding: var(--space-5, 20px);
   display: flex;
@@ -15,7 +24,7 @@
 }
 
 .future-self-empty-text {
-  color: var(--text-muted, rgba(255,255,255,0.4));
+  color: var(--color-text-tertiary);
   font-size: var(--text-sm, 14px);
 }
 
@@ -28,18 +37,18 @@
 .future-self-title {
   font-size: var(--text-lg, 18px);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .future-self-quality {
   font-size: var(--text-xs, 12px);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .future-self-narrative {
   font-size: var(--text-sm, 14px);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.6;
   margin: 0;
 }
@@ -51,8 +60,8 @@
 }
 
 .future-self-scenario {
-  background: var(--surface-3, rgba(255,255,255,0.03));
-  border: 1px solid var(--border-subtle);
+  background: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md, 12px);
   padding: var(--space-4, 16px);
   display: flex;
@@ -69,13 +78,13 @@
 .scenario-label {
   font-size: var(--text-base, 15px);
   font-weight: 600;
-  color: var(--accent-primary, var(--color-accent));
+  color: var(--color-accent-primary);
 }
 
 .scenario-confidence {
   font-size: var(--text-xs, 12px);
-  color: var(--text-muted);
-  background: var(--surface-2);
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-secondary);
   padding: 2px 8px;
   border-radius: 99px;
 }
@@ -83,7 +92,7 @@
 .scenario-section-title {
   font-size: var(--text-xs, 12px);
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 4px;
@@ -100,7 +109,7 @@
 
 .scenario-list li {
   font-size: var(--text-sm, 13px);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   line-height: 1.5;
   padding-left: 12px;
   position: relative;
@@ -110,7 +119,7 @@
   content: '·';
   position: absolute;
   left: 0;
-  color: var(--accent-primary, var(--color-accent));
+  color: var(--color-accent-primary);
 }
 
 .scenario-list--risk li::before {
@@ -126,7 +135,7 @@
 .scenario-question {
   display: flex;
   gap: var(--space-2, 8px);
-  background: var(--surface-2);
+  background: var(--color-bg-secondary);
   border-radius: var(--radius-sm, 8px);
   padding: var(--space-3, 12px);
   margin-top: auto;
@@ -136,22 +145,22 @@
 
 .scenario-question p {
   font-size: var(--text-sm, 13px);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   font-style: italic;
   margin: 0;
   line-height: 1.5;
 }
 
 .future-self-footer {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--color-border);
   padding-top: var(--space-3, 12px);
 }
 
 .future-self-anchor {
   font-size: var(--text-sm, 13px);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
 }
 
 .future-self-anchor strong {
-  color: var(--accent-primary, var(--color-accent));
+  color: var(--color-accent-primary);
 }

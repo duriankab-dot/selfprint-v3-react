@@ -119,24 +119,30 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* ========== DARK MODE ========== */
-
+/* ========== DARK MODE — "Dark Navy Blue Intelligence" ========== */
+/* DARKNAVY-001: this is now the app's default first-encounter theme
+   (see index.html data-mode="dark" + ThemeContext.tsx). Previously used
+   generic slate-gray (#0F172A/#1F2937/#374151) which doesn't read as
+   "navy blue" — switched to the existing brand navy scale
+   (--color-navy-900/800/700, defined above but previously unused for
+   surfaces) so the base theme actually matches the brand. Text stays
+   near-white for contrast (#0F1F3F → #F9FAFB is >13:1, well past WCAG AA). */
 [data-mode="dark"] {
-  --color-bg-primary: #0F172A;
-  --color-bg-secondary: #1F2937;
-  --color-bg-tertiary: #374151;
+  --color-bg-primary: var(--color-navy-900);
+  --color-bg-secondary: var(--color-navy-800);
+  --color-bg-tertiary: var(--color-navy-700);
 
   --color-text-primary: #F9FAFB;
-  --color-text-secondary: #D1D5DB;
-  --color-text-tertiary: #9CA3AF;
+  --color-text-secondary: #D6DEEA;
+  --color-text-tertiary: #A9B7CC; /* WCAG AA: 4.6:1 on --color-navy-900 */
 
-  --color-border: #374151;
-  --color-border-dark: #4B5563;
+  --color-border: #2D5A7F;
+  --color-border-dark: #3E6E96;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.35), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.35), 0 4px 6px -2px rgba(0, 0, 0, 0.25);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 /* ========== BORDER RADIUS ========== */

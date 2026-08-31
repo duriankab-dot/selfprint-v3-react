@@ -19,6 +19,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
 import { LanguageSwitcher } from '../LanguageSwitcher';
 import { AudioSettingsButton } from '../AudioSettingsButton';
+import { BackButton } from '../common/BackButton';
 
 interface NavBarProps {
   rightSlot?: React.ReactNode;
@@ -73,6 +74,11 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   // Filter nav links based on auth status
   const visibleLinks = getNavLinks(language).filter(link => !link.requiresAuth || session);
   const isTh = language === 'th';
+
+  // BACKBUTTON-001: Dashboard is the app's home/entry point — no back
+  // button there, matching how "วันนี้/Today" behaves as the root of the
+  // 5-destination app shell everywhere else (BottomNav/NavRail).
+  const showBackButton = !isActive('/dashboard');
 
   const authAction = session ? (
     <button
@@ -154,6 +160,7 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
+          {showBackButton && <BackButton fallbackTo="/dashboard" />}
           <Link
             to={getLangUrl('/')}
             onClick={() => setMobileOpen(false)}
@@ -203,7 +210,14 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
           </div>
         </div>
 
-        <div className="sp-navbar-desktop-action" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        {/* NAVBUTTONS-001 FIX: theme toggle + audio button used to live only
+            inside .sp-navbar-desktop-action (hidden below 760px) and the
+            mobile hamburger dropdown — a user on a narrow viewport who
+            never opened the hamburger had no visible way to find them at
+            all. Now always visible in the top bar at every width, right
+            before the hamburger; removed from the mobile dropdown below to
+            avoid showing them twice. */}
+        <div className="sp-navbar-always-action" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
           <button
             type="button"
             className="sp-theme-toggle"
@@ -213,6 +227,9 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <AudioSettingsButton />
+        </div>
+
+        <div className="sp-navbar-desktop-action" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <LanguageSwitcher />
           {rightSlot || authAction}
         </div>
@@ -280,33 +297,11 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
               {link.label}
             </Link>
           ))}
+          {/* NAVBUTTONS-001: theme + audio rows removed from here — both
+              now live as always-visible icon buttons in the top bar
+              (.sp-navbar-always-action) so they no longer need the
+              hamburger open to be found. */}
           <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={theme === 'dark' ? (isTh ? 'เปลี่ยนเป็นโหมดสว่าง' : 'Switch to light mode') : (isTh ? 'เปลี่ยนเป็นโหมดมืด' : 'Switch to dark mode')}
-              style={{
-                background: 'none',
-                border: '1px solid var(--color-border)',
-                borderRadius: 8,
-                padding: '12px 14px',
-                fontSize: 15,
-                fontWeight: 600,
-                color: 'var(--color-text-primary)',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                textAlign: 'left',
-              }}
-            >
-              <span>{theme === 'dark' ? '☀️' : '🌙'}</span>
-              <span>{theme === 'dark' ? (isTh ? 'โหมดสว่าง' : 'Light mode') : (isTh ? 'โหมดมืด' : 'Dark mode')}</span>
-            </button>
-            <div style={{ padding: '12px 14px', borderRadius: 8, border: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
-              <AudioSettingsButton />
-              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)' }}>{isTh ? 'เสียงพื้นหลัง' : 'Ambient sound'}</span>
-            </div>
             <LanguageSwitcher />
             {rightSlot || authAction}
           </div>

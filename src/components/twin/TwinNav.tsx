@@ -17,6 +17,7 @@ import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '../../context/AuthContext';
 import { useTwin } from '../../context/TwinContext';
 import { useLanguage } from '../../context/LanguageContext';
+import { BackButton } from '../common/BackButton';
 import '../../styles/twin-nav.css';
 
 type TwinTabId = 'chat' | 'knows' | 'personality' | 'settings';
@@ -66,7 +67,8 @@ export function TwinNav({ currentTab, onTabChange }: TwinNavProps) {
   return (
     <nav className="twin-nav">
       <div className="twin-nav-container">
-        <div className="twin-nav-header">
+        <div className="twin-nav-header" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <BackButton fallbackTo="/dashboard" />
           <h2 className="twin-nav-title">
             {twin?.maturityScore !== undefined ? `Twin (${Math.floor(twin.maturityScore)}%)` : 'Twin'}
           </h2>

@@ -1,5 +1,12 @@
 <!doctype html>
-<html lang="th">
+<!-- DARKNAVY-001: data-mode="dark" is set statically here (not by JS
+     after mount) so the very first pixels the browser paints — before
+     React/ThemeContext even runs — are the dark navy blue base theme,
+     not a white flash. ThemeContext.tsx still fully controls the theme
+     after hydration (a returning user's stored 'light' choice, or a
+     mood/AI-selected accent, applies immediately via useLayoutEffect
+     before the browser gets a chance to paint the wrong one). -->
+<html lang="th" data-mode="dark">
   <head>
     <meta charset="UTF-8" />
 
@@ -41,19 +48,24 @@
       media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
       href="/icons/splash-750x1334.png" />
 
-    <!-- P0-J + GAP-4: Preconnect for critical third-party origins -->
-    <link rel="preconnect" href="https://api.anthropic.com" crossorigin />
-    <link rel="dns-prefetch" href="https://api.anthropic.com" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Supabase: replace xxxx with your project ref if known -->
-    <link rel="dns-prefetch" href="https://supabase.co" />
-    <link rel="preconnect" href="https://supabase.co" crossorigin />
-    <!-- Stripe: preconnect for payment intent creation -->
-    <link rel="preconnect" href="https://api.stripe.com" crossorigin />
-    <link rel="dns-prefetch" href="https://api.stripe.com" />
-    <link rel="preconnect" href="https://js.stripe.com" crossorigin />
-    <link rel="dns-prefetch" href="https://js.stripe.com" />
+    <!-- LIGHTHOUSE-001: trimmed from 6 preconnects to 1. Lighthouse flagged
+         all 6 as "Unused preconnect" and this was correct, not a false
+         positive — verified by grepping src/ for each origin:
+           - api.anthropic.com: never called from the browser (proxied
+             server-side through this app's own /api/nova function) — removed.
+           - fonts.googleapis.com / fonts.gstatic.com: no <link rel=stylesheet>
+             or @import for Google Fonts anywhere in the app (tokens.css uses
+             system font stacks only) — removed.
+           - supabase.co (bare): wrong host entirely — the app connects to
+             the project subdomain, not the marketing domain, so the browser
+             never actually used this hint. Corrected to the real project
+             URL below (Supabase session check does run on every page load,
+             so this is the one origin actually worth preconnecting).
+           - api.stripe.com / js.stripe.com: Stripe isn't integrated
+             client-side yet (no loadStripe/@stripe usage anywhere) — removed.
+             Re-add if/when checkout ships. -->
+    <link rel="preconnect" href="https://orxteufqeohptpbwkqx.supabase.co" crossorigin />
+    <link rel="dns-prefetch" href="https://orxteufqeohptpbwkqx.supabase.co" />
 
     <!-- Open Graph / Social — updated for GEO/AEO (MetaTagManager overrides per-page) -->
     <meta property="og:type" content="website" />
