@@ -9,9 +9,11 @@
    ============================================================================ */
 
 .living-twin {
-  background: var(--color-bg-card, #fff);
+  background: var(--color-bg-card);
   border: 1px solid var(--color-border, #e9ecef);
-  border-radius: 20px;
+  border-radius: var(--radius-2xl, 24px);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: var(--space-2xl, 40px);
   /* TWINPRESENCE-004: extra top padding to give twin-orb-bob's upward
      movement + the outer ring's -24px inset room before hitting the
      card's `overflow: hidden` edge — previously only 28px, tight enough

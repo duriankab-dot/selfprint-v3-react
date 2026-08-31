@@ -112,8 +112,11 @@ const Dashboard: React.FC = () => {
       {/* §5.2 Dynamic วันนี้ Home — AI Orchestrator เลือก sections ตามเวลาและบริบท */}
       <TodaySection hasHistory={logs.length > 0} />
 
-      {/* §46 Ambient + Soundscape — compact strip */}
-      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 1rem 0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* §46 Ambient + Soundscape — compact strip.
+          DASHBOARD-POLISH-001: was bare padding with no bottom margin, so
+          it visually ran straight into ExecutiveSummary's card below —
+          exactly the "ข้อมูลไหลปนกันมั่ว" the redesign asked to avoid. */}
+      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 4px', marginBottom: 'var(--space-xl, 24px)', flexWrap: 'wrap', alignItems: 'center' }}>
         <AmbientBadge showSoundscape compact />
         <SoundscapePlayer compact />
       </div>
@@ -167,21 +170,24 @@ const Dashboard: React.FC = () => {
       </div>
       </div>
 
-      {/* Privacy Center link — Master Direction §38 */}
-      <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
+      {/* Privacy Center link — Master Direction §38. Kept deliberately
+          low-key (no card/shadow chrome) — a legal/utility link shouldn't
+          visually compete with the real CTAs above it. */}
+      <div style={{ textAlign: 'center', padding: 'var(--space-sm, 8px) 0 var(--space-lg, 20px)' }}>
         <button
           onClick={() => navigate('/privacy')}
           style={{
             background: 'none',
             border: 'none',
             fontSize: '0.8rem',
-            color: 'var(--color-text-secondary, #6c757d)',
+            color: 'var(--color-text-tertiary)',
             cursor: 'pointer',
             textDecoration: 'underline',
             padding: '4px 8px',
+            transition: 'color 150ms',
           }}
         >
-          🔒 {isTh ? 'ความเป็นส่วนตัว / PDPA' : 'Privacy / PDPA'}
+          🔒 {isTh ? 'ความเป็นส่วนตัว' : 'Privacy / PDPA'}
         </button>
       </div>
       <Footer />
