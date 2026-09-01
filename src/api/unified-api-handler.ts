@@ -415,15 +415,9 @@ async function handleStripe(request: Request, action: string, url: URL): Promise
 
   if (request.method === 'POST' && action === 'create-checkout') {
     const body = await request.json();
-    const { priceId, successUrl = '/dashboard', cancelUrl = '/plans' } = body;
-
-    if (!priceId) {
-      return Response.json({ success: false, error: 'priceId required' } as ApiResponse, {
-        status: 400,
-      });
-    }
-
     // ⚠️ DEAD CODE — this stub must never be called in production.
+    // Real handler: api/unified-handler.ts
+    void body;
     throw new Error('DEAD CODE: Use api/unified-handler.ts instead');
   }
 
