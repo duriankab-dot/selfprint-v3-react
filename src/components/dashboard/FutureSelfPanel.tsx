@@ -58,7 +58,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
               <p className="scenario-section-title">📈 {isTh ? 'แนวโน้ม' : 'Trajectory'}</p>
               <ul className="scenario-list">
                 {s.likelyTrajectory.map((t, i) => (
-                  <li key={i}>{t}</li>
+                  <li key={t || i}>{t}</li>
                 ))}
               </ul>
             </div>
@@ -67,7 +67,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
               <p className="scenario-section-title">↑ {isTh ? 'โอกาสเติบโต' : 'Growth Opportunities'}</p>
               <ul className="scenario-list">
                 {s.growthOpportunities.map((g, i) => (
-                  <li key={i}>{g}</li>
+                  <li key={g || i}>{g}</li>
                 ))}
               </ul>
             </div>
@@ -77,7 +77,7 @@ const FutureSelfPanel: React.FC<Props> = ({ context }) => {
                 <p className="scenario-section-title">⚠️ {isTh ? 'ระวัง' : 'Watch out for'}</p>
                 <ul className="scenario-list scenario-list--risk">
                   {s.riskAreas.map((r, i) => (
-                    <li key={i}>{r}</li>
+                    <li key={r || i}>{r}</li>
                   ))}
                 </ul>
               </div>

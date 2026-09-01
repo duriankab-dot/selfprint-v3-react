@@ -10,6 +10,10 @@ import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { useLanguage } from '@/context/LanguageContext';
 
+/** Serialize an object as JSON-LD, escaping `</` to prevent `</script>` injection. */
+const safeJsonLd = (obj: unknown): string =>
+  JSON.stringify(obj).replace(/<\//g, '<\\/');
+
 // i18n scope note: article bodies (STATIC_ARTICLES titles/excerpts/content
 // below, plus the ~25 dynamic articles fetched from /blog/*.md) are Thai-only
 // long-form editorial content — same data-layer gap already flagged for
@@ -246,7 +250,7 @@ export default function BlogListPage() {
         {/* JSON-LD Article schema for GEO/AEO */}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(articleSchema) }}
         />
         <main
           style={{
@@ -399,11 +403,11 @@ export default function BlogListPage() {
       {/* JSON-LD Blog + FAQ schema (AEO: ติดใน AI Overview / Featured Snippet) */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogListSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogListSchema) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(faqSchema) }}
       />
 
       <main

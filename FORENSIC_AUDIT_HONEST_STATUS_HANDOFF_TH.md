@@ -303,6 +303,7 @@ CRA convention ใน Vite project — `process.env.REACT_APP_*` = `undefined` �
 |-----|--------|-----------|
 | P0 | 1 ก.ย. 2026 | ชื่อตาราง DB ทั้งหมด, JWT auth nova/twin, CF routes stubs, env.example, circular import, Map.get()! |
 | P1 | 1 ก.ย. 2026 | .single()→.maybeSingle() x14, localhost fallbacks, Stripe stub dead code, OG escape, memory leaks, unified-handler JWT userId |
+| P2 | 1 ก.ย. 2026 | key={index}→stable keys ทุกไฟล์, safeJsonLd JSON-LD injection x8, handleSend→useCallback, NovaChat StrictMode ref guard, EvolutionaryVisualSystem deps verified |
 
 ---
 

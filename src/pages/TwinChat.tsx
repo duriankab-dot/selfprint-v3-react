@@ -8,7 +8,7 @@
  * QUERY PARAM: ?world=<worldId> (optional)
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
@@ -69,6 +69,32 @@ async function saveTwinMemory(
   } catch {
     // Non-fatal — Twin still responds even if memory persistence fails
   }
+}
+
+/**
+ * Extract options from Twin response.
+ * Looks for numbered lists (1., 2., 3.) or bullet points.
+ * Pure function — no component state; lives at module level.
+ */
+function extractOptions(text: string): string[] {
+  const lines = text.split('\n');
+  const options: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Match "1. Option text" or "- Option text"
+    const numberedMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+    const bulletMatch = trimmed.match(/^[-•]\s+(.+)$/);
+
+    if (numberedMatch) {
+      options.push(numberedMatch[1]);
+    } else if (bulletMatch) {
+      options.push(bulletMatch[1]);
+    }
+  }
+
+  // Return up to 5 options (reasonable limit)
+  return options.slice(0, 5);
 }
 
 export default function TwinChat() {
@@ -148,8 +174,7 @@ export default function TwinChat() {
       autoSentInitialMessage.current = true;
       handleSend(initial);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.state, twin, session]);
+  }, [location.state, twin, session, handleSend]);
 
   // TWINKNOWLEDGE-001: twin.fullAnalysis is the complete, original Full
   // Analysis persisted onto the Twin row at birth (see CoreAwakening.tsx +
@@ -265,6 +290,146 @@ export default function TwinChat() {
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
+
+  // TWINCHAT-STALECLOSURE-001 FIX: handleSend used to be a plain const defined
+  // after the early-return guards, making it impossible to list in any hook's
+  // deps array (Rules of Hooks: useCallback must precede every conditional
+  // return). Moved here — before all guards — and wrapped in useCallback so the
+  // useEffect at ~line 144 can safely depend on it without a stale closure.
+  // extractOptions was also promoted to module level (pure function, no deps).
+  const handleSend = useCallback(async (overrideText?: string) => {
+    const textToSend = overrideText ?? message;
+    if (!textToSend.trim()) return;
+
+    const userMessage = textToSend.trim();
+    setMessage('');
+    setIsSending(true);
+    setError(null);
+
+    try {
+      // GUARD: Ensure userId exists
+      if (!session.user?.id) {
+        throw new Error(isTh ? 'เซสชันผู้ใช้หมดอายุ' : 'User session lost');
+      }
+
+      // Add user message to UI immediately
+      setMessages(prev => [...prev, {
+        role: 'user',
+        content: userMessage,
+        world: currentWorld || undefined
+      }]);
+
+      // Save message to database with world tag
+      await saveTwinMemory(twin.id, currentWorld ?? null, 'user', userMessage);
+
+      // Convert messages to API format (role: 'user' | 'assistant')
+      const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
+        .filter(m => m.role === 'user' || m.role === 'twin')
+        .map(m => ({
+          role: (m.role === 'twin' ? 'assistant' : 'user') as 'user' | 'assistant',
+          content: m.content
+        }))
+        .concat([{ role: 'user' as const, content: userMessage }]);
+
+      // P0-I: Load recent twin_memories for context injection
+      // Fire-and-forget: if fetch fails, memories = [] and Twin still responds
+      const recentMemories = await loadRecentMemories(
+        twin.id,
+        currentWorld ?? null,
+      );
+
+      // TWIN-MEMORY-001: full behavioral profile — Twin knows the user from Nova's 12 SICE engines.
+      // Formatted as readable text (not raw JSON) so the LLM can use it confidently.
+      // All fields null-guarded so missing data degrades gracefully.
+      const a = currentAnalysis;
+      const twinProfile = [
+        `IDENTITY: ${twin.name} | Archetype: ${twin.primaryArchetype ?? 'unknown'}${twin.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin.maturityScore ?? 30}/100`,
+
+        userProfile.birthDate
+          ? `BIRTH DATA: ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
+          : null,
+
+        a?.selfOverview
+          ? `BEHAVIORAL OVERVIEW:\n${a.selfOverview}`
+          : null,
+
+        a?.strengths?.length
+          ? `STRENGTHS:\n${a.strengths.map(s => `• ${s.name}: ${s.description}`).join('\n')}`
+          : null,
+
+        a?.blindSpots?.length
+          ? `BLIND SPOTS:\n${a.blindSpots.map(b => `• ${b.title} (sensitivity: ${b.sensitivity}): ${b.description}`).join('\n')}`
+          : null,
+
+        a?.behavioralPatterns?.length
+          ? `BEHAVIORAL PATTERNS:\n${a.behavioralPatterns.slice(0, 5).map(p => `• [${p.type}] ${p.name}: ${p.insight}`).join('\n')}`
+          : null,
+
+        a?.journey
+          ? `JOURNEY STAGE: ${a.journey.currentStage}\n${a.journey.description}\nGrowing in: ${a.journey.growing.join(', ')}\nChanging: ${a.journey.changing.join(', ')}\nStill working on: ${a.journey.stillWorking.join(', ')}`
+          : null,
+
+        a?.focusAreas?.length
+          ? `FOCUS AREAS: ${a.focusAreas.join(', ')}`
+          : null,
+
+        a?.guidance?.length
+          ? `GUIDANCE FROM ANALYSIS:\n${a.guidance.map(g => `• ${g}`).join('\n')}`
+          : null,
+
+        a?.nextSteps?.length
+          ? `RECOMMENDED NEXT STEPS:\n${a.nextSteps.map(s => `• ${s}`).join('\n')}`
+          : null,
+
+        a?.modelAccuracy
+          ? `ANALYSIS CONFIDENCE: ${Math.round(a.modelAccuracy * 100)}%`
+          : null,
+      ].filter(Boolean).join('\n\n');
+
+      const twinResponse = await callTwinAPI(
+        apiMessages,
+        twin.name || 'Twin',
+        twinProfile,
+        currentWorld || undefined,
+        recentMemories,             // P0-I: inject memories into [RELEVANT MEMORY]
+        language,                   // TWINLANG-001 FIX: Twin replies in the site's language
+      );
+
+      // Save Twin's response to database
+      await saveTwinMemory(twin.id, currentWorld ?? null, 'twin', twinResponse);
+
+      // Extract options from Twin response
+      const options = extractOptions(twinResponse);
+
+      // Add Twin response to messages with extracted options
+      setMessages(prev => [...prev, {
+        role: 'twin',
+        content: twinResponse,
+        world: currentWorld || undefined,
+        options: options.length > 0 ? options : undefined,
+      }]);
+
+      // P0-D: record real per-world expertise growth. WorldExpertiseService
+      // existed and was fully built (twin_world_expertise table) but had
+      // zero production callers — expertise never actually accumulated with
+      // use. Non-blocking: a failure here must not break the chat response
+      // the user already received.
+      if (currentWorld) {
+        recordWorldInteraction(twin.id, currentWorld).catch((err) =>
+          console.error('Failed to record world interaction:', err)
+        );
+      }
+
+    } catch (err) {
+      const errorMsg = err instanceof Error
+        ? err.message
+        : (isTh ? 'ส่งข้อความไม่สำเร็จ' : 'Failed to send message');
+      setError(errorMsg);
+      console.error('Twin message error:', err);
+    } finally {
+      setIsSending(false);
+    }
+  }, [message, messages, twin, session, currentWorld, currentAnalysis, userProfile, language, isTh]);
 
   // TWINCHAT-LOADING-001: TwinContext's fetch from Supabase is async — right
   // after login/navigation, `twin` is briefly null purely because the fetch
@@ -398,166 +563,7 @@ export default function TwinChat() {
     }
   };
 
-  const handleSend = async (overrideText?: string) => {
-    const textToSend = overrideText ?? message;
-    if (!textToSend.trim()) return;
-
-    const userMessage = textToSend.trim();
-    setMessage('');
-    setIsSending(true);
-    setError(null);
-
-    try {
-      // GUARD: Ensure userId exists
-      if (!session.user?.id) {
-        throw new Error(isTh ? 'เซสชันผู้ใช้หมดอายุ' : 'User session lost');
-      }
-
-      // Add user message to UI immediately
-      setMessages(prev => [...prev, {
-        role: 'user',
-        content: userMessage,
-        world: currentWorld || undefined
-      }]);
-
-      // Save message to database with world tag
-      await saveTwinMemory(twin.id, currentWorld ?? null, 'user', userMessage);
-
-      // Convert messages to API format (role: 'user' | 'assistant')
-      const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
-        .filter(m => m.role === 'user' || m.role === 'twin')
-        .map(m => ({
-          role: (m.role === 'twin' ? 'assistant' : 'user') as 'user' | 'assistant',
-          content: m.content
-        }))
-        .concat([{ role: 'user' as const, content: userMessage }]);
-
-      // P0-I: Load recent twin_memories for context injection
-      // Fire-and-forget: if fetch fails, memories = [] and Twin still responds
-      const recentMemories = await loadRecentMemories(
-        twin.id,
-        currentWorld ?? null,
-      );
-
-      // TWIN-MEMORY-001: full behavioral profile — Twin knows the user from Nova's 12 SICE engines.
-      // Formatted as readable text (not raw JSON) so the LLM can use it confidently.
-      // All fields null-guarded so missing data degrades gracefully.
-      const a = currentAnalysis;
-      const twinProfile = [
-        `IDENTITY: ${twin.name} | Archetype: ${twin.primaryArchetype ?? 'unknown'}${twin.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin.maturityScore ?? 30}/100`,
-
-        userProfile.birthDate
-          ? `BIRTH DATA: ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
-          : null,
-
-        a?.selfOverview
-          ? `BEHAVIORAL OVERVIEW:\n${a.selfOverview}`
-          : null,
-
-        a?.strengths?.length
-          ? `STRENGTHS:\n${a.strengths.map(s => `• ${s.name}: ${s.description}`).join('\n')}`
-          : null,
-
-        a?.blindSpots?.length
-          ? `BLIND SPOTS:\n${a.blindSpots.map(b => `• ${b.title} (sensitivity: ${b.sensitivity}): ${b.description}`).join('\n')}`
-          : null,
-
-        a?.behavioralPatterns?.length
-          ? `BEHAVIORAL PATTERNS:\n${a.behavioralPatterns.slice(0, 5).map(p => `• [${p.type}] ${p.name}: ${p.insight}`).join('\n')}`
-          : null,
-
-        a?.journey
-          ? `JOURNEY STAGE: ${a.journey.currentStage}\n${a.journey.description}\nGrowing in: ${a.journey.growing.join(', ')}\nChanging: ${a.journey.changing.join(', ')}\nStill working on: ${a.journey.stillWorking.join(', ')}`
-          : null,
-
-        a?.focusAreas?.length
-          ? `FOCUS AREAS: ${a.focusAreas.join(', ')}`
-          : null,
-
-        a?.guidance?.length
-          ? `GUIDANCE FROM ANALYSIS:\n${a.guidance.map(g => `• ${g}`).join('\n')}`
-          : null,
-
-        a?.nextSteps?.length
-          ? `RECOMMENDED NEXT STEPS:\n${a.nextSteps.map(s => `• ${s}`).join('\n')}`
-          : null,
-
-        a?.modelAccuracy
-          ? `ANALYSIS CONFIDENCE: ${Math.round(a.modelAccuracy * 100)}%`
-          : null,
-      ].filter(Boolean).join('\n\n');
-
-      const twinResponse = await callTwinAPI(
-        apiMessages,
-        twin.name || 'Twin',
-        twinProfile,
-        currentWorld || undefined,
-        recentMemories,             // P0-I: inject memories into [RELEVANT MEMORY]
-        language,                   // TWINLANG-001 FIX: Twin replies in the site's language
-      );
-
-      // Save Twin's response to database
-      await saveTwinMemory(twin.id, currentWorld ?? null, 'twin', twinResponse);
-
-      // Extract options from Twin response
-      const options = extractOptions(twinResponse);
-
-      // Add Twin response to messages with extracted options
-      setMessages(prev => [...prev, {
-        role: 'twin',
-        content: twinResponse,
-        world: currentWorld || undefined,
-        options: options.length > 0 ? options : undefined,
-      }]);
-
-      // P0-D: record real per-world expertise growth. WorldExpertiseService
-      // existed and was fully built (twin_world_expertise table) but had
-      // zero production callers — expertise never actually accumulated with
-      // use. Non-blocking: a failure here must not break the chat response
-      // the user already received.
-      if (currentWorld) {
-        recordWorldInteraction(twin.id, currentWorld).catch((err) =>
-          console.error('Failed to record world interaction:', err)
-        );
-      }
-
-    } catch (err) {
-      const errorMsg = err instanceof Error
-        ? err.message
-        : (isTh ? 'ส่งข้อความไม่สำเร็จ' : 'Failed to send message');
-      setError(errorMsg);
-      console.error('Twin message error:', err);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
   // World selection now handled by WorldTabs component using WorldContext
-
-  /**
-   * Extract options from Twin response
-   * Looks for numbered lists (1., 2., 3.) or bullet points
-   */
-  const extractOptions = (text: string): string[] => {
-    const lines = text.split('\n');
-    const options: string[] = [];
-
-    for (const line of lines) {
-      const trimmed = line.trim();
-      // Match "1. Option text" or "- Option text"
-      const numberedMatch = trimmed.match(/^\d+\.\s+(.+)$/);
-      const bulletMatch = trimmed.match(/^[-•]\s+(.+)$/);
-
-      if (numberedMatch) {
-        options.push(numberedMatch[1]);
-      } else if (bulletMatch) {
-        options.push(bulletMatch[1]);
-      }
-    }
-
-    // Return up to 5 options (reasonable limit)
-    return options.slice(0, 5);
-  };
 
   const handleSelectChoice = (messageIndex: number, choice: string) => {
     setMessages(prev =>
@@ -627,7 +633,7 @@ export default function TwinChat() {
           </div>
         ) : (
           messages.map((msg, idx) => (
-            <div key={idx}>
+            <div key={`${idx}-${msg.role}`}>
               <div className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
                   className={`max-w-[80%] p-3 rounded-lg ${
@@ -642,7 +648,7 @@ export default function TwinChat() {
                 <div className="flex flex-wrap gap-2 justify-start mt-2 ml-0">
                   {msg.options.map((option, optIdx) => (
                     <button
-                      key={optIdx}
+                      key={option || optIdx}
                       onClick={() => handleSelectChoice(idx, option)}
                       className={`text-xs px-3 py-1 rounded border transition-colors ${
                         msg.selectedChoice === option

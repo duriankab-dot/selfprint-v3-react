@@ -26,7 +26,7 @@ const PatternInsights: React.FC<PatternInsightsProps> = ({ patterns }) => {
       >
         {patterns.map((pattern, idx) => (
           <li
-            key={idx}
+            key={pattern.message || idx}
             style={{
               background: 'var(--color-bg-secondary)',
               borderRadius: '12px',
