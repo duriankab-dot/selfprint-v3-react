@@ -99,7 +99,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
             <div className="decision-checklist">
               <p className="intel-section-title">✅ Pre-Decision Checklist</p>
               {report.preDecisionChecklist.map((c, i) => (
-                <div key={c || i} className="checklist-item">
+                <div key={c.question || i} className="checklist-item">
                   <span className="checklist-num">{i + 1}</span>
                   <div>
                     <p className="checklist-q">{c.question}</p>
