@@ -283,7 +283,7 @@ export class PersonalContextBuilder {
 
     // Save to database
     for (const entry of entries) {
-      await supabase.from('personal_context').insert({
+      await supabase.from('personal_contexts').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,
@@ -423,7 +423,7 @@ export class PersonalContextBuilder {
         updatedAt: new Date(),
       };
 
-      await supabase.from('personal_context').insert({
+      await supabase.from('personal_contexts').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,

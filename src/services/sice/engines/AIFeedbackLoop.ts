@@ -124,7 +124,8 @@ export class AIFeedbackLoop extends SICEBase {
         if (!engineScores.has(fb.engine_id)) {
           engineScores.set(fb.engine_id, []);
         }
-        engineScores.get(fb.engine_id)!.push(fb.feedback_score);
+        const scores = engineScores.get(fb.engine_id);
+        if (scores) scores.push(fb.feedback_score);
       });
 
       // Calculate averages

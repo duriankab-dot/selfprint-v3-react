@@ -1,5 +1,8 @@
 # Memory
 
+## ⚠️ อ่านก่อนเริ่มงานทุกครั้ง — สถานะโปรเจกต์จริงล่าสุด
+**`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`** (root ของ repo) คือเอกสารสถานะฉบับเดียวที่ถูกต้อง ณ ปัจจุบัน — repo นี้มีไฟล์ `HANDOFF_*.md`/`PHASE_A*.md`/`SESSION_*.md`/`*_STATUS_TH.md` เก่ากว่า 60 ไฟล์ที่ **ล้าสมัยและห้ามเชื่อ** อ่านไฟล์นั้นไฟล์เดียวก่อนแตะโค้ดใดๆ จะได้รู้ว่าอะไรแก้แล้วจริง (deploy+verify live), อะไรแก้ในโค้ดแล้วแต่ยังไม่ deploy, อะไรยังหาสาเหตุไม่เจอ
+
 ## Me
 **jb_DEV** (Durian Kab). Senior dev + entrepreneur. Solo SELFPRINT V3 developer. Code-first, ecosystem thinking, production-focused.
 
@@ -33,15 +36,6 @@ GitHub audit → GAP Matrix → AI Dev handoff →
 Implementation → Production verify → Documentation
 ```
 
-## Commands (Most Used)
-```
-npm test              # Run vitest suite
-npm run build         # TypeScript build + type check
-npm run lint          # ESLint + format check
-npm run dev           # Local dev server
-npm audit             # Security check
-```
-
 ## Preferences
 - **Async-first** communication
 - **Concise** answers in Thai
@@ -51,13 +45,6 @@ npm audit             # Security check
 - Actionable implementation instructions + acceptance criteria
 - Production completeness over theory
 - No cached assumptions—verify actual state first
-
-## Tech Stack
-- Frontend: React 18, TypeScript, Tailwind CSS
-- Backend: Node.js APIs, Edge Functions
-- Testing: Vitest, Playwright (E2E)
-- Tools: GitHub, npm, Docker
-- DB: PostgreSQL (or current setup)
 
 ## Session 2 Status
 **Priority 1:** ✅ Data Persistence (FBS) — Complete

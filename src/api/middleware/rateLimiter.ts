@@ -55,7 +55,9 @@ function getBucket(key: string, limit: typeof RATE_LIMITS[keyof typeof RATE_LIMI
       lastReset: Date.now(),
     });
   }
-  return buckets.get(key)!;
+  const bucket = buckets.get(key);
+  if (!bucket) throw new Error(`Rate limit bucket not found for key: ${key}`);
+  return bucket;
 }
 
 /**

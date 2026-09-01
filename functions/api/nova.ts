@@ -29,12 +29,15 @@
  */
 
 import Anthropic from '@anthropic-ai/sdk';
+import { verifyUser } from '../../api/_utils/verify-user.js';
 
 interface Env {
   ANTHROPIC_API_KEY?: string;
   NOVA_MODEL_ID?: string;
   CLAUDE_MODEL_ID?: string;
   NOVA_RATE_LIMIT?: string;
+  SUPABASE_URL?: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
 }
 
 interface PagesContext {
@@ -45,7 +48,7 @@ interface PagesContext {
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 function json(body: unknown, status = 200): Response {
@@ -78,6 +81,16 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   }
   if (request.method !== 'POST') {
     return json({ error: 'POST only' }, 405);
+  }
+
+  // Auth gate — verify Supabase JWT before touching Anthropic API
+  const authHeader = request.headers.get('authorization') ?? undefined;
+  if (!authHeader) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const user = await verifyUser(authHeader, env);
+  if (!user) {
+    return json({ error: 'Unauthorized' }, 401);
   }
 
   // Rate limit

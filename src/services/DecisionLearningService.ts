@@ -94,7 +94,7 @@ function generatePatternDescription(world: WorldId, successes: number, total: nu
   // Check cache first
   const cacheKey = `${world}:${successes}:${total}`;
   if (patternDescriptionCache.has(cacheKey)) {
-    return patternDescriptionCache.get(cacheKey)!;
+    return patternDescriptionCache.get(cacheKey) ?? '';
   }
 
   const successRate = (successes / total) * 100;

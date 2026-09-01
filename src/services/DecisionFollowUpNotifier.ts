@@ -208,7 +208,8 @@ export async function analyzeDecisionPatterns(userId: string): Promise<{
         patternMap.set(category, { count: 0, positive: 0 });
       }
 
-      const pattern = patternMap.get(category)!;
+      const pattern = patternMap.get(category);
+      if (!pattern) return; // should never happen — we just initialized above
       pattern.count++;
       if (o.outcome === 'positive') {
         pattern.positive++;

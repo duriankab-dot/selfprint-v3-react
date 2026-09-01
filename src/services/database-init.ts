@@ -77,7 +77,7 @@ export async function ensureUserProfile(userId: string): Promise<boolean> {
 
     // Check if profile exists
     const { data: existing, error: checkError } = await supabase
-      .from('user_profiles')
+      .schema('selfprint').from('users_profiles')
       .select('id')
       .eq('id', userId)
       .single();
@@ -94,7 +94,7 @@ export async function ensureUserProfile(userId: string): Promise<boolean> {
 
     // Create new profile
     const { error } = await supabase
-      .from('user_profiles')
+      .schema('selfprint').from('users_profiles')
       .insert([
         {
           id: userId,
@@ -125,7 +125,7 @@ export async function markFullAnalysisCompleted(userId: string): Promise<boolean
     }
 
     const { error } = await supabase
-      .from('user_profiles')
+      .schema('selfprint').from('users_profiles')
       .update({
         full_analysis_completed: true,
         full_analysis_completed_at: new Date().toISOString(),

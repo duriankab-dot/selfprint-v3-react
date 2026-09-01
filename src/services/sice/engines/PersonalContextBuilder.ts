@@ -74,7 +74,7 @@ export class PersonalContextBuilder extends SICEBase {
       // Also swapped .single() -> .maybeSingle(): a user who hasn't been
       // through ensureUserProfile() yet legitimately has 0 rows.
       const { data: profile } = await supabase
-        .from('user_profiles')
+        .schema('selfprint').from('users_profiles')
         .select('goals_json, focus_areas')
         .eq('id', userId)
         .maybeSingle();

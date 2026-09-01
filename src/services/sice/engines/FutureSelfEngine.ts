@@ -113,7 +113,7 @@ export class FutureSelfEngine extends SICEBase {
       // primary key is 'id' itself (see database-init.ts). maybeSingle()
       // since a user without a profile row yet is normal.
       const { data: profile } = await supabase
-        .from('user_profiles')
+        .schema('selfprint').from('users_profiles')
         .select('goals_json, focus_areas')
         .eq('id', userId)
         .maybeSingle();
