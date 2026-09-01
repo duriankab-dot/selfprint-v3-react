@@ -11,6 +11,10 @@
 
 import type { FC } from 'react';
 
+/** Serialize an object as JSON-LD, escaping `</` to prevent `</script>` injection. */
+const safeJsonLd = (obj: unknown): string =>
+  JSON.stringify(obj).replace(/<\//g, '<\\/');
+
 // ─── Organization ────────────────────────────────────────────────────────────
 
 export const OrganizationSchema: FC = () => {
@@ -37,7 +41,7 @@ export const OrganizationSchema: FC = () => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };
@@ -75,7 +79,7 @@ export const SoftwareApplicationSchema: FC = () => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };
@@ -134,7 +138,7 @@ export const ArticleSchema: FC<ArticleSchemaProps> = ({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };
@@ -167,7 +171,7 @@ export const FAQSchema: FC<FAQSchemaProps> = ({ items }) => {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 };

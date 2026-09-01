@@ -183,7 +183,7 @@ export const InitialBlueprint: React.FC<InitialBlueprintProps> = ({
           >
             {profile.strengths.slice(0, 2).map((strength, index) => (
               <li
-                key={index}
+                key={strength}
                 style={{
                   fontSize: '16px',
                   color: 'var(--color-text-primary)',

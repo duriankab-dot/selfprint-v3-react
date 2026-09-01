@@ -7,7 +7,7 @@
  * AFTER: Twin takes over (Act III)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useAIContext } from '../context/AIContext';
 import { useNova } from '../context/NovaContext';
@@ -28,12 +28,18 @@ export default function NovaChat() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Initialize with Nova's greeting
+  // NOVACHAT-STRICTMODE-001 FIX: React 18 StrictMode mounts → unmounts →
+  // remounts in dev; state is reset to its initial value on the second mount,
+  // so `messages.length === 0` is true again and the greeting was appended
+  // twice. useRef survives across the strict-mode remount cycle and blocks the
+  // second initialization cleanly.
+  const initializedRef = useRef(false);
   useEffect(() => {
-    if (messages.length === 0) {
+    if (!initializedRef.current && messages.length === 0) {
+      initializedRef.current = true;
       setMessages([{ role: 'nova', content: NOVA_INITIAL_PROMPT }]);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps — intentional mount-only
 
   // NOVACHAT-DEADEND-001: NovaChat is Act I-II only (pre-Twin guide). Every
   // live entry point in the app (BottomNav, NavBar, TodaySection,

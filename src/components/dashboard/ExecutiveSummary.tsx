@@ -175,7 +175,7 @@ export const ExecutiveSummary: React.FC = () => {
       {/* Insight lines */}
       <div className="exec-summary__insights" role="list">
         {summary.insights.map((line, i) => (
-          <div key={i} className="exec-summary__insight-row" role="listitem">
+          <div key={line.text || i} className="exec-summary__insight-row" role="listitem">
             <div className="exec-summary__insight-dot" aria-hidden="true" />
             <div className="exec-summary__insight-body">
               <p className="exec-summary__insight-text">{line.text}</p>

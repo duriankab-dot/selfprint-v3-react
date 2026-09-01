@@ -62,7 +62,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
         <div className="decision-biases">
           <p className="intel-section-title">⚠️ {isTh ? 'Bias ที่ควรระวัง' : 'Biases to watch'}</p>
           {report.biasRisks.slice(0, 2).map((b, i) => (
-            <div key={i} className={`bias-item bias-item--${b.severity}`}>
+            <div key={b.name || i} className={`bias-item bias-item--${b.severity}`}>
               <span className="bias-name">{b.name}</span>
               <span className={`bias-severity bias-severity--${b.severity}`}>{b.severity}</span>
               {b.personalizedNote && (
@@ -87,7 +87,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
             <div className="decision-frameworks">
               <p className="intel-section-title">🛠 {isTh ? 'Frameworks แนะนำ' : 'Recommended Frameworks'}</p>
               {report.recommendedFrameworks.map((f, i) => (
-                <div key={i} className="framework-item">
+                <div key={f.nameThai || i} className="framework-item">
                   <p className="framework-name">{f.nameThai}</p>
                   <p className="framework-desc">{f.descriptionThai}</p>
                 </div>
@@ -99,7 +99,7 @@ export const DecisionCard: React.FC<DecisionCardProps> = ({ context }) => {
             <div className="decision-checklist">
               <p className="intel-section-title">✅ Pre-Decision Checklist</p>
               {report.preDecisionChecklist.map((c, i) => (
-                <div key={i} className="checklist-item">
+                <div key={c || i} className="checklist-item">
                   <span className="checklist-num">{i + 1}</span>
                   <div>
                     <p className="checklist-q">{c.question}</p>
@@ -180,14 +180,14 @@ export const LifePackCarousel: React.FC<LifePackCarouselProps> = ({ context }) =
         <div className="life-pack-section">
           <p className="intel-section-title">❓ {isTh ? 'คำถามสำคัญ' : 'Key Questions'}</p>
           <ul className="intel-list">
-            {active.keyQuestions.slice(0, 3).map((q, i) => <li key={i}>{q}</li>)}
+            {active.keyQuestions.slice(0, 3).map((q, i) => <li key={q || i}>{q}</li>)}
           </ul>
         </div>
 
         <div className="life-pack-section">
           <p className="intel-section-title">🚀 {isTh ? 'Action แนะนำ' : 'Recommended Actions'}</p>
           <ul className="intel-list intel-list--action">
-            {active.recommendedActions.slice(0, 2).map((a, i) => <li key={i}>{a}</li>)}
+            {active.recommendedActions.slice(0, 2).map((a, i) => <li key={a || i}>{a}</li>)}
           </ul>
         </div>
       </div>
@@ -246,7 +246,7 @@ export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
         <div className="forecast-momentum">
           <p className="intel-section-title">✨ {isTh ? 'Positive Momentum' : 'Positive Momentum'}</p>
           {forecast.positiveMomentum.slice(0, 2).map((m, i) => (
-            <div key={i} className="momentum-item">
+            <div key={m.area || i} className="momentum-item">
               <p className="momentum-area">{m.area}</p>
               <p className="momentum-amplify">{m.howToAmplify}</p>
             </div>
@@ -258,7 +258,7 @@ export const ForecastWidget: React.FC<ForecastWidgetProps> = ({ context }) => {
         <div className="forecast-risks">
           <p className="intel-section-title">⚠️ {isTh ? 'ความเสี่ยงที่ควรระวัง' : 'Risks to Watch'}</p>
           {forecast.behavioralRisks.slice(0, 2).map((r, i) => (
-            <div key={i} className={`risk-item risk-item--${r.likelihood}`}>
+            <div key={r.risk || i} className={`risk-item risk-item--${r.likelihood}`}>
               <p className="risk-text">{r.risk}</p>
               <p className="risk-mitigation">{r.mitigation}</p>
             </div>

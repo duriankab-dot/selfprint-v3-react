@@ -18,6 +18,10 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/context/LanguageContext';
 
+/** Serialize an object as JSON-LD, escaping `</` to prevent `</script>` injection. */
+const safeJsonLd = (obj: unknown): string =>
+  JSON.stringify(obj).replace(/<\//g, '<\\/');
+
 interface ArticleMetadata {
   id: string;
   title: string;
@@ -204,7 +208,7 @@ export default function BlogArticle() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleSchema) }}
       />
 
       <main className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-24 pb-16">
