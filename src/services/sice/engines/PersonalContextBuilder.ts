@@ -66,11 +66,18 @@ export class PersonalContextBuilder extends SICEBase {
     try {
       if (!supabase) return [];
 
+      // USERPROFILES-PK-001 FIX: user_profiles has no 'user_id' column —
+      // its primary key IS the auth user id, stored as 'id' (verified
+      // against database-init.ts's working ensureUserProfile(), which
+      // inserts { id: userId, ... } and selects .eq('id', userId)).
+      // Filtering by 'user_id' here always 400'd ("column does not exist").
+      // Also swapped .single() -> .maybeSingle(): a user who hasn't been
+      // through ensureUserProfile() yet legitimately has 0 rows.
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('goals_json, focus_areas')
-        .eq('user_id', userId)
-        .single();
+        .eq('id', userId)
+        .maybeSingle();
 
       if (!profile) return [];
 
@@ -118,11 +125,12 @@ export class PersonalContextBuilder extends SICEBase {
       if (!supabase) return [];
 
       // Get twin id first
+      // TWINS406-001 FIX: .maybeSingle() — no Twin yet is a normal state.
       const { data: twin } = await supabase
         .from('twins')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) return [];
 
@@ -152,11 +160,12 @@ export class PersonalContextBuilder extends SICEBase {
     try {
       if (!supabase) return [];
 
+      // TWINS406-001 FIX: .maybeSingle() — no Twin yet is a normal state.
       const { data: twin } = await supabase
         .from('twins')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) return [];
 

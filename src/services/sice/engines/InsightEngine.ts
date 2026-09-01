@@ -94,13 +94,17 @@ export class InsightEngine extends SICEBase {
   private async generateDecisionInsight(userId: string, _world: string | null): Promise<Insight | null> {
     try {
       let query = supabase
+        // DECISIONS-USERID-001 FIX: 'decisions' table has no 'world_id'
+        // column — only 'world' (verified against the working insert in
+        // WorldDecisionRouter.ts). 'user_id' now exists too, see
+        // PRODUCTION_DB_CATCHUP_2026-09-01.sql.
         .from('decisions')
         .select('outcome')
         .eq('user_id', userId)
         .limit(20);
 
       if (_world) {
-        query = query.eq('world_id', _world);
+        query = query.eq('world', _world);
       }
 
       const { data: decisions } = await query;

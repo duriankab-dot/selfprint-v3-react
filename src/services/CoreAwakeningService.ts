@@ -11,7 +11,7 @@ import { ensureUserProfile } from './database-init';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
 import { calculateMaturityScore, calculateSICEEngineScore, calculateAnalysisDepth } from './DynamicValueCalculator';
-import { generateVisualDNA, saveVisualDNA } from './VisualDNAService';
+import { generateVisualDNA } from './VisualDNAService';
 import type { SICEInput } from '../types/sice';
 import type { Archetype } from '../context/TwinContext';
 import type { FullAnalysisOutput } from '../lib/intelligence/InsightEngine';
@@ -76,11 +76,14 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
     }
 
     // Check if Twin already exists (prevent re-awakening)
+    // TWINS406-001 FIX: .single() throws PostgREST 406 for the very common
+    // case of a brand-new user with zero twins yet. .maybeSingle() returns
+    // null instead, matching what the `if (existingTwin)` check expects.
     const { data: existingTwin } = await supabase
       .from('twins')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (existingTwin) {
       console.log('Twin already exists for this user');
@@ -405,12 +408,13 @@ export async function initializeTwin(
     }));
 
     // ✅ START ALL 9 OPERATIONS IN PARALLEL
+    // VISUALDNA-TABLE-001 FIX: Operation 5 (saveVisualDNA) was removed from
+    // the array below — one fewer slot to destructure here.
     const [
       essenceResult,
       ,
       scoresResult,
       memoryResult,
-      visualDnaResult,
       stateResult,
       worldPrefsResult,
       personalityResult,
@@ -429,13 +433,15 @@ export async function initializeTwin(
       // Operation 2: Get & update personal_context
       (async () => {
         try {
+          // PERSONALCONTEXTS406-001 FIX: .maybeSingle() — a user with no
+          // personal_contexts row yet is normal, shouldn't throw a 406.
           const { data: personalContext } = await supabase
             .from('personal_contexts')
             .select('id')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(1)
-            .single();
+            .maybeSingle();
 
           if (personalContext) {
             return await supabase
@@ -466,8 +472,18 @@ export async function initializeTwin(
         },
       }),
 
-      // Operation 5: Save Visual DNA for consistent Twin visuals
-      saveVisualDNA(userId, newTwin.id, visualDNA),
+      // VISUALDNA-TABLE-001 FIX: Operation 5 used to call saveVisualDNA(),
+      // which inserts into 'twin_visual_dna' — verified against a live
+      // pg_tables dump: that table doesn't exist (PostgREST 404, hint
+      // "Perhaps you meant 'public.twin_state'"). This surfaced directly to
+      // the user as a visible error during Twin creation ("❌ ไม่สามารถบันทึก
+      // Visual DNA: ..."). twin_state (created right below, Operation 6) is
+      // a generic per-twin JSONB bucket, unique on twin_id — folding
+      // visualDNA into its `data` payload avoids both the missing-table
+      // error and a duplicate-key race from two separate inserts targeting
+      // the same twin. saveVisualDNA()/getVisualDNA() in VisualDNAService.ts
+      // are fixed separately to read/write the same twin_state.data.visualDNA
+      // path for any future caller.
 
       // ✨ NEW Operation 6: Create twin_state (PHASE A.1)
       supabase.from('twin_state').insert({
@@ -479,6 +495,7 @@ export async function initializeTwin(
           birthDate: birthDate || new Date().toISOString().split('T')[0],
           maturityScore,
           archetypes: { primary: primaryArchetype, secondary: secondaryArchetype },
+          visualDNA,
         },
         created_at: now,
         updated_at: now,
@@ -525,12 +542,11 @@ export async function initializeTwin(
     if (memoryResult.status === 'rejected' || (memoryResult.status === 'fulfilled' && memoryResult.value.error)) {
       console.error('❌ ไม่สามารถสร้าง birth memory:', memoryResult.status === 'rejected' ? memoryResult.reason : memoryResult.value.error);
     }
-    if (visualDnaResult.status === 'rejected' || (visualDnaResult.status === 'fulfilled' && !visualDnaResult.value?.success)) {
-      const reason = visualDnaResult.status === 'rejected' ? visualDnaResult.reason : visualDnaResult.value?.error;
-      console.error('❌ ไม่สามารถบันทึก Visual DNA:', reason);
-    }
+    // VISUALDNA-TABLE-001 FIX: visualDnaResult removed — Visual DNA is now
+    // part of the twin_state payload, so a save failure shows up in
+    // stateResult's own error log right below instead.
     if (stateResult.status === 'rejected' || (stateResult.status === 'fulfilled' && stateResult.value.error)) {
-      console.error('❌ ไม่สามารถสร้าง twin_state:', stateResult.status === 'rejected' ? stateResult.reason : stateResult.value.error);
+      console.error('❌ ไม่สามารถสร้าง twin_state (รวม Visual DNA):', stateResult.status === 'rejected' ? stateResult.reason : stateResult.value.error);
     }
     if (worldPrefsResult.status === 'rejected' || (worldPrefsResult.status === 'fulfilled' && worldPrefsResult.value.error)) {
       console.error('❌ ไม่สามารถสร้าง world_preferences (12 worlds):', worldPrefsResult.status === 'rejected' ? worldPrefsResult.reason : worldPrefsResult.value.error);
@@ -668,12 +684,13 @@ export async function completeCoreAwakening(
     }
 
     // Get Twin ID
+    // TWINS406-001 FIX: see note above.
     const { data: twin, error: twinError } = await supabase
       .from('twins')
       .select('id')
       .eq('user_id', userId)
       .eq('name', twinName)
-      .single();
+      .maybeSingle();
 
     if (!twin || twinError) {
       return {

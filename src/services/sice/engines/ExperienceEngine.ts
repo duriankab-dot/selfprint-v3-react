@@ -79,13 +79,26 @@ export class ExperienceEngine extends SICEBase {
         return this.emptyProfile();
       }
 
-      // Fetch chat history to count interactions
-      const { data: messages, error: messageError } = await supabase
-        .from('chat_messages')
-        .select('id, hub, created_at')
+      // CHATMESSAGES-002 FIX: 'chat_messages' doesn't exist — same root
+      // cause as TwinChat.tsx's CHATMESSAGES-001 fix (verified against a
+      // live pg_tables dump). This exact query (select id,hub,created_at
+      // filtered by user_id) is one of the two chat_messages 404s reported
+      // live. Twin turns now live in twin_memories, keyed by twin_id with a
+      // world_id column (uppercase) instead of 'hub'.
+      const { data: twinRow } = await supabase
+        .from('twins')
+        .select('id')
         .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(500);
+        .maybeSingle();
+
+      const { data: messages, error: messageError } = twinRow
+        ? await supabase
+            .from('twin_memories')
+            .select('id, world_id, created_at')
+            .eq('twin_id', twinRow.id)
+            .order('created_at', { ascending: false })
+            .limit(500)
+        : { data: [], error: null };
 
       if (messageError || !messages) {
         return this.emptyProfile();
@@ -93,8 +106,10 @@ export class ExperienceEngine extends SICEBase {
 
       const totalInteractions = messages.length;
 
-      // Extract unique worlds/hubs
-      const worldsExplored = Array.from(new Set(messages.map((m: any) => m.hub)));
+      // Extract unique worlds
+      const worldsExplored = Array.from(
+        new Set(messages.map((m: any) => (m.world_id || 'self').toLowerCase()))
+      );
 
       // Calculate streaks
       const { currentStreak, longestStreak } = this.calculateStreaks(messages);

@@ -186,14 +186,18 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
         throw new Error('Supabase client not initialized');
       }
 
+      // LIFECYCLE406-001 FIX: .single() sent a real 406 over the network for
+      // every brand-new user (0 rows — normal pre-onboarding state), even
+      // though this code already special-cased PGRST116 in JS and recovered
+      // fine. .maybeSingle() gets the same recovered behavior (data: null,
+      // error: null) without the noisy 406 hitting the console/network tab.
       const { data, error } = await supabase
         .from('user_lifecycle')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows found
+      if (error) {
         throw error;
       }
 
@@ -291,12 +295,13 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       if (isAuthError && supabase) {
         try {
           await supabase.auth.refreshSession();
+          // LIFECYCLE406-001 FIX: see note above.
           const { data: retryData, error: retryError } = await supabase
             .from('user_lifecycle')
             .select('*')
             .eq('user_id', userId)
-            .single();
-          if (!retryError || retryError.code === 'PGRST116') {
+            .maybeSingle();
+          if (!retryError) {
             if (retryData) {
               const now = new Date();
               set({

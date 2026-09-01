@@ -137,11 +137,23 @@ export class BadgeEngine extends SICEBase {
         };
       }
 
-      // Count interactions
-      const { count: interactionCount } = await supabase
-        .from('chat_messages')
-        .select('id', { count: 'exact' })
-        .eq('user_id', userId);
+      // CHATMESSAGES-002 FIX: 'chat_messages' doesn't exist (same root cause
+      // as TwinChat.tsx's CHATMESSAGES-001 fix — verified against a live
+      // pg_tables dump). Twin conversation turns are written to
+      // twin_memories now, keyed by twin_id (not user_id), so resolve the
+      // Twin first.
+      const { data: twinRow } = await supabase
+        .from('twins')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const { count: interactionCount } = twinRow
+        ? await supabase
+            .from('twin_memories')
+            .select('id', { count: 'exact' })
+            .eq('twin_id', twinRow.id)
+        : { count: 0 };
 
       const interactions = interactionCount || 0;
 
