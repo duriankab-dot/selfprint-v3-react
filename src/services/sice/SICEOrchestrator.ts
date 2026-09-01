@@ -167,8 +167,10 @@ export class SICEOrchestrator {
 
       if (data.engines.size >= 2 && avgConfidence >= 50) {
         // Multiple engines agree on this theme
+        // ANALYSISLANG-001 FIX: translated — this feeds recommendedAction,
+        // which is directly user-visible.
         agreements.push(
-          `${theme} (${data.engines.size} engines, confidence: ${Math.round(avgConfidence)}%)`
+          `${theme} (${data.engines.size} ระบบเห็นตรงกัน, ความมั่นใจ ${Math.round(avgConfidence)}%)`
         );
       } else if (avgConfidence >= 60) {
         // Single engine, high confidence
@@ -212,21 +214,27 @@ export class SICEOrchestrator {
 
     try {
       switch (result.engineId) {
+        // ANALYSISLANG-001 FIX: see the note on extractInsightsFromEngine —
+        // these theme strings feed synthesis.agreements/synthesis.themes,
+        // which ARE user-visible (recommendedAction, the "รูปแบบพฤติกรรม"
+        // section). Translated to Thai; identifyConflicts() below is
+        // updated to match the new Thai keywords instead of the old English
+        // ones.
         case 1: // PersonalContextBuilder
           {
             const context = result.result as any;
             if (context?.emotionalState)
-              themes.push(`Emotional state: ${context.emotionalState}`);
+              themes.push(`สภาวะอารมณ์: ${context.emotionalState}`);
             if (context?.worldFocus)
-              themes.push(`World focus: ${context.worldFocus}`);
+              themes.push(`โฟกัสโลก: ${context.worldFocus}`);
             if (Array.isArray(context?.currentGoals)) {
               context.currentGoals.forEach((goal: string) =>
-                themes.push(`Goal: ${goal}`)
+                themes.push(`เป้าหมาย: ${goal}`)
               );
             }
             if (Array.isArray(context?.strengthAreas)) {
               context.strengthAreas.slice(0, 2).forEach((s: string) =>
-                themes.push(`Strength: ${s}`)
+                themes.push(`จุดแข็ง: ${s}`)
               );
             }
           }
@@ -237,9 +245,9 @@ export class SICEOrchestrator {
             const patterns = result.result as any;
             if (Array.isArray(patterns)) {
               patterns.forEach((p: any) => {
-                themes.push(`Pattern: ${p.name} (${p.impact})`);
+                themes.push(`รูปแบบ: ${p.name} (${p.impact})`);
                 if (p.frequency)
-                  themes.push(`  Frequency: ${p.frequency}x`);
+                  themes.push(`  ความถี่: ${p.frequency} ครั้ง`);
               });
             }
           }
@@ -250,9 +258,9 @@ export class SICEOrchestrator {
             const insights = result.result as any;
             if (Array.isArray(insights)) {
               insights.forEach((i: any) => {
-                if (i.title) themes.push(`Insight: ${i.title}`);
+                if (i.title) themes.push(`ข้อคิด: ${i.title}`);
                 if (i.suggestedAction)
-                  themes.push(`  Action: ${i.suggestedAction}`);
+                  themes.push(`  แนวทาง: ${i.suggestedAction}`);
               });
             }
           }
@@ -261,11 +269,11 @@ export class SICEOrchestrator {
         case 5: // TwinStateEngine
           {
             const state = result.result as any;
-            if (state?.mood) themes.push(`Twin mood: ${state.mood}`);
+            if (state?.mood) themes.push(`อารมณ์ทวิน: ${state.mood}`);
             if (state?.responseStyle)
-              themes.push(`Response style: ${state.responseStyle}`);
+              themes.push(`สไตล์การตอบสนอง: ${state.responseStyle}`);
             if (state?.focusArea)
-              themes.push(`Twin focus: ${state.focusArea}`);
+              themes.push(`จุดโฟกัสของทวิน: ${state.focusArea}`);
           }
           break;
 
@@ -298,8 +306,10 @@ export class SICEOrchestrator {
     const emotionalThemes = new Map<string, string[]>();
     enginesArray.forEach(([engine, themes]) => {
       themes.forEach((theme) => {
-        const lower = theme.toLowerCase();
-        if (lower.includes("mood") || lower.includes("motivation") || lower.includes("state")) {
+        // ANALYSISLANG-001 FIX: theme text is Thai now (see
+        // extractThemesFromEngine) — match the Thai keywords instead of the
+        // old English ones ("mood"/"motivation"/"state").
+        if (theme.includes("อารมณ์") || theme.includes("แรงจูงใจ") || theme.includes("สภาวะ")) {
           const category = "emotional";
           if (!emotionalThemes.has(category)) emotionalThemes.set(category, []);
           emotionalThemes.get(category)!.push(`${engine}: ${theme}`);
@@ -310,7 +320,7 @@ export class SICEOrchestrator {
     // Report conflicting emotional states
     emotionalThemes.forEach((themes) => {
       if (themes.length >= 2 && themes.length < enginesArray.length) {
-        conflicts.push(`Emotional state varies: ${themes.slice(0, 2).join(" vs ")}`);
+        conflicts.push(`สภาวะอารมณ์แตกต่างกัน: ${themes.slice(0, 2).join(" เทียบกับ ")}`);
       }
     });
 
@@ -461,14 +471,15 @@ export class SICEOrchestrator {
       .slice(0, 3);
 
     // World-specific guidance
+    // ANALYSISLANG-001 FIX: see note above — translated to Thai.
     const worldContext = input.currentWorld
-      ? ` within the ${input.currentWorld} world`
+      ? ` ในโลก${input.currentWorld}`
       : '';
 
     // Determine primary recommended action based on synthesis
-    let recommendedAction = `Continue self-discovery with Twin${worldContext}`;
+    let recommendedAction = `ค้นพบตัวเองต่อไปกับทวิน${worldContext}`;
     if (synthesis.agreements.length > 0) {
-      recommendedAction = `Focus on: ${synthesis.agreements[0].split('(')[0].trim()}${worldContext}`;
+      recommendedAction = `เน้นที่: ${synthesis.agreements[0].split('(')[0].trim()}${worldContext}`;
     } else if (topRecommendations.length > 0) {
       recommendedAction = topRecommendations[0];
     }
@@ -499,15 +510,24 @@ export class SICEOrchestrator {
 
     try {
       switch (result.engineId) {
+        // ANALYSISLANG-001 FIX: this whole switch hardcoded English
+        // sentences directly into the SICE insight/recommendation text
+        // (verified live on selfprint.one/th/analysis — "Define clear
+        // goals...", "Twin is feeling balanced — ready to guide your
+        // journey" appeared verbatim in the Thai analysis page). This class
+        // has no language plumbing (SICEInput carries no locale field) and
+        // the site is Thai-first end to end, so translating the strings
+        // directly here — rather than threading a new language param
+        // through every SICE engine — is the surgical fix.
         case 1: // PersonalContextBuilder
           {
             const context = result.result as any;
             if (context?.strengthAreas?.length > 0) {
-              insights.push(`Key strengths: ${context.strengthAreas.slice(0, 2).join(', ')}`);
+              insights.push(`จุดแข็งสำคัญ: ${context.strengthAreas.slice(0, 2).join(', ')}`);
             }
             if (context?.worldPersonality) {
               insights.push(
-                `In the ${context.worldFocus} world, your style is: ${context.worldPersonality.responseStyle}`
+                `ในโลก${context.worldFocus} สไตล์ของคุณคือ: ${context.worldPersonality.responseStyle}`
               );
             }
           }
@@ -522,7 +542,7 @@ export class SICEOrchestrator {
               );
               if (positivePatterns.length > 0) {
                 insights.push(
-                  `Positive pattern: You're ${positivePatterns[0].name.toLowerCase()}`
+                  `รูปแบบเชิงบวก: คุณเป็นคน${positivePatterns[0].name.toLowerCase()}`
                 );
               }
             }
@@ -545,7 +565,7 @@ export class SICEOrchestrator {
             const state = result.result as any;
             if (state?.mood) {
               insights.push(
-                `Twin is feeling ${state.mood} — ready to ${state.mood === 'playful' ? 'explore' : 'guide'} your journey`
+                `ทวินกำลังรู้สึก${state.mood} — พร้อม${state.mood === 'playful' ? 'สำรวจ' : 'นำทาง'}การเดินทางของคุณ`
               );
             }
           }
@@ -574,11 +594,11 @@ export class SICEOrchestrator {
             const context = result.result as any;
             if (context?.growthAreas?.length > 0) {
               recommendations.push(
-                `Work on: ${context.growthAreas[0]} (growth area)`
+                `พัฒนา: ${context.growthAreas[0]} (จุดที่ควรเติบโต)`
               );
             }
             if (context?.currentGoals?.length === 0) {
-              recommendations.push('Define clear goals to give Twin better context');
+              recommendations.push('กำหนดเป้าหมายให้ชัดเจน เพื่อให้ทวินเข้าใจบริบทของคุณมากขึ้น');
             }
           }
           break;
@@ -592,7 +612,7 @@ export class SICEOrchestrator {
               );
               if (negativePatterns.length > 0) {
                 recommendations.push(
-                  `Address: ${negativePatterns[0].name} (recurring challenge)`
+                  `จัดการ: ${negativePatterns[0].name} (ปัญหาที่เกิดซ้ำ)`
                 );
               }
             }
@@ -638,7 +658,7 @@ export class SICEOrchestrator {
               );
               if (negativePatterns.length > 0) {
                 warnings.push(
-                  `Caution: ${negativePatterns[0].name} detected`
+                  `ข้อควรระวัง: ตรวจพบ ${negativePatterns[0].name}`
                 );
               }
             }
@@ -649,7 +669,7 @@ export class SICEOrchestrator {
           {
             const state = result.result as any;
             if (state?.energy && state.energy < 30) {
-              warnings.push('Twin energy is low — take a break');
+              warnings.push('พลังงานของทวินต่ำ — พักสักครู่ก่อนนะ');
             }
           }
           break;

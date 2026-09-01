@@ -708,3 +708,42 @@ ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS goals_json JSONB;
 ALTER TABLE public.user_profiles ADD COLUMN IF NOT EXISTS focus_areas JSONB;
 
 SELECT 'USERPROFILES-GOALS-001 complete ✅ (goals_json + focus_areas columns)' as status;
+
+-- ============================================================================
+-- SICEFEEDBACK-001 FIX (เพิ่มเอง, ไม่ได้มาจาก migration ไฟล์เดิม)
+--
+-- สาเหตุ: 'sice_feedback' ไม่มีในตารางจริงเลย ไม่มี migration ไฟล์ไหนสร้างไว้
+-- ด้วย — src/services/sice/engines/AIFeedbackLoop.ts มี graceful-degradation
+-- อยู่แล้ว (ไม่ crash แค่ log "No feedback history available") แต่ทำให้เกิด
+-- 404 รบกวน console ทุกครั้งที่วิเคราะห์ เพิ่มตารางเพื่อให้ฟีเจอร์นี้ทำงานได้จริง
+-- ============================================================================
+
+CREATE TABLE IF NOT EXISTS public.sice_feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  engine_id INTEGER NOT NULL,
+  feedback_score INTEGER NOT NULL CHECK (feedback_score >= 0 AND feedback_score <= 100),
+  feedback_type TEXT,
+  context JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_sice_feedback_user_id ON public.sice_feedback(user_id, created_at DESC);
+
+ALTER TABLE public.sice_feedback ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view own sice feedback" ON public.sice_feedback;
+CREATE POLICY "Users can view own sice feedback"
+  ON public.sice_feedback FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can insert own sice feedback" ON public.sice_feedback;
+CREATE POLICY "Users can insert own sice feedback"
+  ON public.sice_feedback FOR INSERT
+  TO authenticated
+  WITH CHECK (user_id = auth.uid());
+
+GRANT SELECT, INSERT ON public.sice_feedback TO authenticated;
+
+SELECT 'SICEFEEDBACK-001 complete ✅ (sice_feedback table)' as status;
