@@ -81,7 +81,12 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
   // all 5 BottomNav/NavRail root destinations (exact-path match only, so
   // sub-pages like /explore/palmistry or /me/settings still get a real
   // back button).
-  const ROOT_TAB_PATHS = ['/dashboard', '/worlds', '/chat/twin', '/explore', '/me'];
+  // BACKBUTTON-003 FIX: the landing page ('/') was never in this list, so
+  // isActive('/') was always false and showBackButton stayed true on the
+  // very first page a visitor sees — verified live on selfprint.one
+  // (path "/th/"), confirmed by getLangUrl('/') === '/th/' matching
+  // location.pathname exactly. Added '/' so the home page is excluded too.
+  const ROOT_TAB_PATHS = ['/', '/dashboard', '/worlds', '/chat/twin', '/explore', '/me'];
   const showBackButton = !ROOT_TAB_PATHS.some(isActive);
 
   const authAction = session ? (
