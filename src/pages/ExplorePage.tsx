@@ -22,6 +22,7 @@ import { BottomNav } from '../components/layout/BottomNav';
 import { NavRail } from '../components/layout/NavRail';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { supabase } from '../services/supabase-service';
 import { calculateHexagram } from '../lib/intelligence/HexagramEngine';
 import type { HexagramResult } from '../lib/intelligence/HexagramEngine';
 
@@ -429,24 +430,22 @@ export default function ExplorePage() {
     setTodayQuestion(SELF_QUESTIONS[dayOfYear % SELF_QUESTIONS.length]);
   }, [SELF_QUESTIONS]);
 
-  // โหลด Hexagram จาก birth date ใน blueprint
+  // โหลด Hexagram จาก birth date ใน users_profiles
   const loadHexagram = async () => {
     setHexLoading(true);
     try {
       let dob = '';
 
-      // พยายาม fetch blueprint ถ้า login อยู่
-      if (session?.access_token) {
-        const res = await fetch('/api/blueprint', {
-          headers: { Authorization: `Bearer ${session.access_token}` },
-        });
-        if (res.ok) {
-          const ct = res.headers.get('content-type') ?? '';
-          if (ct.includes('application/json')) {
-            const json = await res.json();
-            dob = json.blueprint?.dob || json.blueprint?.content?.dob || '';
-          }
-        }
+      // ดึง birth_date จาก selfprint.users_profiles โดยตรง
+      const userId = session?.user?.id;
+      if (userId && supabase) {
+        const { data } = await supabase
+          .schema('selfprint')
+          .from('users_profiles')
+          .select('birth_date')
+          .eq('user_id', userId)
+          .maybeSingle();
+        dob = data?.birth_date ?? '';
       }
 
       // fallback: ใช้วันที่ปัจจุบันถ้าไม่มี DOB

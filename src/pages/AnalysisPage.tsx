@@ -15,7 +15,7 @@
  * - No mocks, no hardcoding
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
@@ -34,7 +34,36 @@ import { useAnalysisStore } from '@/store/analysisStore';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/services/supabase-service';
 import { useVoiceTwin } from '@/hooks/useVoiceTwin';
+import { WORLDS } from '@/constants/worlds';
+import type { WorldId } from '@/constants/worlds';
+import type { SICEOutput } from '@/types/sice';
 import '../styles/analysis.css';
+
+// ============================================================================
+// Helpers — SICE world mapping
+// ============================================================================
+
+const ENGINE_TO_WORLD: Record<number, WorldId> = {
+  1: 'self', 2: 'mind', 3: 'relationship', 4: 'love',
+  5: 'career', 6: 'wealth', 7: 'life', 8: 'growth',
+  9: 'decision', 10: 'purpose', 11: 'wellbeing', 12: 'future',
+};
+
+/** Extract a human-readable string from a SICEOutput result (unknown shape). */
+function extractResultText(result: unknown): string {
+  if (!result) return '';
+  if (typeof result === 'string') return result;
+  if (typeof result === 'object') {
+    const r = result as Record<string, unknown>;
+    for (const key of ['description', 'summary', 'text', 'insight', 'content', 'message', 'output', 'analysis']) {
+      if (typeof r[key] === 'string' && r[key]) return r[key] as string;
+    }
+    for (const val of Object.values(r)) {
+      if (typeof val === 'string' && val.length > 10) return val;
+    }
+  }
+  return '';
+}
 
 // i18n scope note: displayAnalysis text (selfOverview, pattern names/
 // descriptions, strengths, blindSpots, trends, journey, guidance, nextSteps)
@@ -141,9 +170,10 @@ const AnalysisPage: React.FC = () => {
     return insightEngine.generateFullAnalysis(context, patterns, metrics ?? null);
   }, [context, patterns, metrics, insightEngine]);
 
-  // ANALYSIS-FALLBACK-001: when personal_context is empty (sourceCount=0),
-  // the user's real data lives in awakening_essence (new awakening flow).
-  // Build a display-ready FullAnalysisOutput from personal_intelligence.
+  // PRIMARY data source: awakening_essence.sice_results (real SICE output).
+  // Always fetched on page load — personal_context (InsightEngine path) is
+  // now the fallback, not the primary. Raw sice_results + synthesis are
+  // included in the return value so the 12 world cards can render them directly.
   const { data: essenceAnalysis } = useQuery({
     queryKey: ['awakeningEssence', userId],
     queryFn: async () => {
@@ -169,14 +199,10 @@ const AnalysisPage: React.FC = () => {
         agreements?: string[];
         confidenceScore?: number;
       };
-      const siceArr = Array.isArray(data.sice_results) ? data.sice_results : [];
-      // FULLANALYSIS-001 FIX: this fallback path used to throw away most of
-      // the real computed intelligence — selfOverview only used the first 2
-      // of pi.insights, strengths only the first 4 of synth.themes — even
-      // when SICE had produced more. "ผลวิเคราะห์เต็ม จาก SICE ทั้งหมด" means
-      // using everything that's actually there, not a truncated preview.
+      const siceArr: SICEOutput[] = Array.isArray(data.sice_results) ? (data.sice_results as SICEOutput[]) : [];
       const allInsights = pi.insights ?? [];
       return {
+        // FullAnalysisOutput-compatible fields (used by existing 9 sections)
         selfOverview: [pi.recommendedAction, ...allInsights].filter(Boolean).join(' '),
         behavioralPatterns: [] as any[],
         strengths: (synth.themes ?? []).map((t: string, i: number) => ({
@@ -196,21 +222,34 @@ const AnalysisPage: React.FC = () => {
           changing: [] as string[],
           stillWorking: [] as string[],
         },
-        focusAreas: (pi.insights ?? []).slice(0, 3),
-        guidance: pi.insights ?? [],
+        focusAreas: allInsights.slice(0, 3),
+        guidance: allInsights,
         nextSteps: pi.nextStepsSuggested ?? [],
         generatedAt: new Date(),
         modelAccuracy: (pi.confidence ?? 70) / 100,
         sourceCount: siceArr.length > 0 ? siceArr.length : 12,
+        // Raw data for summary section and 12 world cards
+        _siceResults: siceArr,
+        _pi: pi,
+        _synth: synth,
       };
     },
-    enabled: !!userId && !analysis,  // only fetch when primary analysis is null
+    enabled: !!userId,  // always fetch — sice_results is primary source
     staleTime: 60_000,
     retry: false,
   });
 
-  // Use primary analysis (from personal_context) or fallback from awakening_essence
-  const displayAnalysis = analysis ?? (essenceAnalysis ?? null);
+  // essenceAnalysis (sice_results) is PRIMARY; InsightEngine analysis is fallback
+  const displayAnalysis = essenceAnalysis ?? analysis ?? null;
+
+  // Write to analysisStore on page load so Twin (CoreAwakening) always has data —
+  // previously only happened on "Awaken" button click, leaving the store empty
+  // if the user navigated away and came back.
+  useEffect(() => {
+    if (displayAnalysis) {
+      setAnalysis(displayAnalysis as any);
+    }
+  }, [displayAnalysis, setAnalysis]);
 
   const isLoading = ctxLoading || patLoading;
 
@@ -385,9 +424,134 @@ const AnalysisPage: React.FC = () => {
           </div>
         )}
 
-        {/* Full analysis — uses primary (personal_context) or fallback (awakening_essence) */}
+        {/* Full analysis — sice_results primary, InsightEngine fallback */}
         {!isLoading && displayAnalysis && (
           <div className="analysis__content">
+
+            {/* ── Top Summary ── astrology-style narrative from SICE synthesis */}
+            {essenceAnalysis && (essenceAnalysis._pi.recommendedAction || (essenceAnalysis._pi.insights ?? []).length > 0) && (
+              <section className="analysis__summary-section" aria-label={isTh ? 'ภาพรวมส่วนตัว' : 'Personal summary'}>
+                <div className="analysis__summary-header">
+                  <span className="analysis__summary-icon" aria-hidden="true">✨</span>
+                  <h2 className="analysis__summary-title">
+                    {isTh ? 'ภาพรวมส่วนตัวของคุณ' : 'Your Personal Overview'}
+                  </h2>
+                  {essenceAnalysis._synth.confidenceScore != null && (
+                    <span className="analysis__summary-confidence">
+                      {Math.round(essenceAnalysis._synth.confidenceScore)}% {isTh ? 'ความแม่นยำ' : 'confidence'}
+                    </span>
+                  )}
+                </div>
+
+                {essenceAnalysis._pi.recommendedAction && (
+                  <p className="analysis__summary-lead">{essenceAnalysis._pi.recommendedAction}</p>
+                )}
+
+                {(essenceAnalysis._pi.insights ?? []).length > 0 && (
+                  <div className="analysis__summary-insights">
+                    {(essenceAnalysis._pi.insights ?? []).map((insight, i) => (
+                      <p key={i} className="analysis__summary-insight">{insight}</p>
+                    ))}
+                  </div>
+                )}
+
+                {(essenceAnalysis._synth.themes ?? []).length > 0 && (
+                  <div className="analysis__summary-themes">
+                    <span className="analysis__summary-themes-label">
+                      {isTh ? 'แก่นสำคัญ:' : 'Key themes:'}
+                    </span>
+                    <div className="analysis__summary-theme-tags">
+                      {(essenceAnalysis._synth.themes ?? []).map((t, i) => (
+                        <span key={i} className="analysis__theme-tag">{t}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {(essenceAnalysis._synth.agreements ?? []).length > 0 && (
+                  <div className="analysis__summary-agreements">
+                    <p className="analysis__summary-agreements-label">
+                      {isTh ? 'สิ่งที่ SICE เห็นตรงกันทั้ง 12 มิติ:' : 'Patterns agreed across all 12 dimensions:'}
+                    </p>
+                    <ul className="analysis__summary-agreements-list">
+                      {(essenceAnalysis._synth.agreements ?? []).map((a, i) => (
+                        <li key={i}>{a}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {(essenceAnalysis._pi.nextStepsSuggested ?? []).length > 0 && (
+                  <div className="analysis__summary-nextsteps">
+                    <p className="analysis__summary-nextsteps-label">
+                      {isTh ? 'ก้าวต่อไปที่แนะนำ:' : 'Recommended next steps:'}
+                    </p>
+                    <ol className="analysis__summary-nextsteps-list">
+                      {(essenceAnalysis._pi.nextStepsSuggested ?? []).map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* ── 12 World Cards ── one per SICE engine */}
+            {essenceAnalysis && essenceAnalysis._siceResults.length > 0 && (
+              <section className="analysis__worlds-section" aria-label={isTh ? '12 มิติ SICE' : '12 SICE Dimensions'}>
+                <div className="analysis__worlds-header">
+                  <h2 className="analysis__worlds-title">
+                    {isTh ? '12 มิติชีวิตของคุณ' : 'Your 12 Life Dimensions'}
+                  </h2>
+                  <p className="analysis__worlds-subtitle">
+                    {isTh
+                      ? 'ผลวิเคราะห์จาก SICE ทั้ง 12 เครื่องยนต์ปัญญาประดิษฐ์'
+                      : 'Analysis from all 12 Specialized Intelligence Capability Engines'}
+                  </p>
+                </div>
+                <div className="analysis__world-grid">
+                  {essenceAnalysis._siceResults.map((r) => {
+                    const worldId = ENGINE_TO_WORLD[r.engineId];
+                    const world = worldId ? WORLDS[worldId] : null;
+                    const text = extractResultText(r.result);
+                    return (
+                      <div
+                        key={r.engineId}
+                        className="analysis__world-card"
+                        style={{ '--world-accent': world?.color ?? 'var(--accent-primary)' } as React.CSSProperties}
+                      >
+                        <div className="analysis__world-card-header">
+                          <span className="analysis__world-card-emoji" aria-hidden="true">
+                            {world?.emoji ?? '🌐'}
+                          </span>
+                          <div className="analysis__world-card-meta">
+                            <span className="analysis__world-card-name">
+                              {isTh ? (world?.nameTh ?? r.engineName) : (world?.name ?? r.engineName)}
+                            </span>
+                            {world && (
+                              <span className="analysis__world-card-mood">
+                                {isTh ? world.moodTh : world.mood}
+                              </span>
+                            )}
+                          </div>
+                          <span className="analysis__world-card-confidence">
+                            {r.confidence}%
+                          </span>
+                        </div>
+                        {text && (
+                          <p className="analysis__world-card-text">{text}</p>
+                        )}
+                        {r.error && (
+                          <p className="analysis__world-card-error">
+                            {isTh ? 'ไม่สามารถวิเคราะห์มิตินี้ได้' : 'Could not analyse this dimension'}
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
 
             <div className="analysis__expand-all">
               <button
