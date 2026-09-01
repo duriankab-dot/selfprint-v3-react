@@ -45,20 +45,27 @@ export function isWebAuthnAvailable(): boolean {
 }
 
 /**
- * Check if device is capable of resident key (discoverable credential)
- * Used to detect Passkey support
+ * Check if this device/browser can use Passkey login at all.
+ *
+ * PASSKEY-GATE-001 FIX: this used to be identical to isBiometricAvailable()
+ * below — it required isUserVerifyingPlatformAuthenticatorAvailable() (a
+ * built-in biometric sensor: Face ID / Touch ID / Windows Hello) just to
+ * show the Passkey section on the login page at all. Verified live on
+ * selfprint.one/th/login: the entire Passkey option was missing (only
+ * Google/Apple/Magic Link showed) because this environment has no platform
+ * authenticator configured — which is also true for a large share of real
+ * desktop users (no fingerprint reader / Windows Hello set up). WebAuthn
+ * itself (roaming authenticators — security keys, cross-device passkey via
+ * QR code) doesn't require a platform authenticator at all, and
+ * PasskeyLogin.tsx already has a working !hasBiometric fallback UI (email
+ * input, generic "Sign in" wording) — it just never got a chance to render
+ * because the outer gate in Login.tsx was too strict. Gate on WebAuthn
+ * support in general here; keep the stricter platform-authenticator check
+ * in isBiometricAvailable() below, which only controls the biometric-
+ * specific wording/UI, not whether Passkey shows up at all.
  */
 export async function isPasskeyAvailable(): Promise<boolean> {
-  if (!isWebAuthnAvailable()) {
-    return false;
-  }
-
-  try {
-    const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-    return available;
-  } catch {
-    return false;
-  }
+  return isWebAuthnAvailable();
 }
 
 /**

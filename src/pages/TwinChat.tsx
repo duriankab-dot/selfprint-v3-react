@@ -23,7 +23,7 @@ import { WorldTabs } from '../components/WorldTabs';
 import { TwinNav } from '../components/twin/TwinNav';
 import { NavRail } from '../components/layout/NavRail';
 import { BottomNav } from '../components/layout/BottomNav';
-import { saveMessage, supabase } from '@/services/supabase-service';
+import { supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
 import { recordWorldInteraction } from '../services/WorldExpertiseService';
@@ -35,6 +35,40 @@ interface Message {
   world?: WorldId;
   options?: string[]; // Extracted options from Twin response
   selectedChoice?: string; // User's selected option
+}
+
+// CHATMESSAGES-001 FIX: this page used to call saveMessage() from
+// supabase-service.ts, which inserts into 'chat_messages' — a table that
+// migration 011_chat_messages.sql created only for the (now archived)
+// offline journal-sync feature. It was never applied to the live database,
+// so every call here was failing with PGRST205 "Could not find the table
+// 'public.chat_messages'" (verified live on selfprint.one — every message
+// sent, every reply received, both 404'd silently). Worse: this also meant
+// no Twin conversation ever reached twin_memories, the table
+// loadRecentMemories()/the SICE engines actually read from — so the Twin
+// never accumulated real conversational memory. Writing directly to
+// twin_memories instead, matching the exact shape already used successfully
+// elsewhere (CoreAwakeningService.ts's birth-memory insert): twin_id,
+// world_id (uppercased to match the table's CHECK constraint — WorldId
+// values here are lowercase, e.g. 'career', but the constraint only allows
+// 'self'/'SELF' plus uppercase for every other world), role, content.
+async function saveTwinMemory(
+  twinId: string,
+  worldId: WorldId | null,
+  role: 'user' | 'twin',
+  content: string,
+) {
+  if (!supabase) return;
+  try {
+    await supabase.from('twin_memories').insert({
+      twin_id: twinId,
+      world_id: worldId ? worldId.toUpperCase() : 'self',
+      role,
+      content,
+    });
+  } catch {
+    // Non-fatal — Twin still responds even if memory persistence fails
+  }
 }
 
 export default function TwinChat() {
@@ -387,14 +421,7 @@ export default function TwinChat() {
       }]);
 
       // Save message to database with world tag
-      await saveMessage(
-        session.user.id,
-        currentWorld ? `twin-chat-${currentWorld}` : 'twin-chat',
-        'chat',
-        'user',
-        userMessage,
-        50 // autonomyLevel
-      );
+      await saveTwinMemory(twin.id, currentWorld ?? null, 'user', userMessage);
 
       // Convert messages to API format (role: 'user' | 'assistant')
       const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
@@ -469,15 +496,8 @@ export default function TwinChat() {
         language,                   // TWINLANG-001 FIX: Twin replies in the site's language
       );
 
-      // Save Twin's response to database (role must be 'user' | 'assistant')
-      await saveMessage(
-        session.user.id,
-        currentWorld ? `twin-chat-${currentWorld}` : 'twin-chat',
-        'chat',
-        'assistant',
-        twinResponse,
-        50 // autonomyLevel
-      );
+      // Save Twin's response to database
+      await saveTwinMemory(twin.id, currentWorld ?? null, 'twin', twinResponse);
 
       // Extract options from Twin response
       const options = extractOptions(twinResponse);
