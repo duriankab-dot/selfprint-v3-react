@@ -25,7 +25,6 @@ import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
 import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
 import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
 import { primeCelebrationAudio, playCelebrationSound, stopCelebrationSound } from '../lib/twin/twinCelebrationSound';
-import type { Archetype } from '../context/TwinContext';
 
 type Phase = 'intro' | 'birth' | 'naming' | 'celebration' | 'complete';
 
