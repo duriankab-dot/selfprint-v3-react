@@ -189,7 +189,7 @@ export async function saveDecisionForm(
 
   try {
     const { data: result, error } = await supabase
-      .from('decision_logs')
+      .from('decision_log')
       .insert({
         user_id: userId,
         title: data.title,
@@ -225,7 +225,7 @@ export async function getUserDecisions(
 
   try {
     const { data, error } = await supabase
-      .from('decision_logs')
+      .from('decision_log')
       .select('id, title, context, expected_outcome, confidence, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })

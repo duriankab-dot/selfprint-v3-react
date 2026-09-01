@@ -23,6 +23,14 @@
 -- twin_state แทนแล้ว ไม่จำเป็นต้องมีตารางนี้อีก)
 --
 -- วิธีใช้: copy ทั้งไฟล์ → วางใน Supabase Dashboard → SQL Editor → Run
+--
+-- แก้ไข 1 ก.ย. 2569 (รอบ 2): รอบแรกรันแล้ว error ที่บรรทัด CREATE POLICY แรกสุด
+-- ("policy already exists") เพราะไฟล์ migration ต้นฉบับ (013/020/029/030) เขียน
+-- CREATE POLICY ตรงๆ ไม่มี DROP POLICY IF EXISTS นำหน้า — Postgres ไม่มี
+-- "CREATE POLICY IF NOT EXISTS" ให้ใช้ ถ้าตาราง/policy ถูกสร้างไปแล้วบางส่วน
+-- (จากการรันรอบแรกที่ล้มกลางทาง) รันซ้ำจะ error ทันที เพิ่ม
+-- "DROP POLICY IF EXISTS ... ;" นำหน้าทุก CREATE POLICY ในไฟล์นี้แล้ว (32/32
+-- จุด) — ตอนนี้ปลอดภัย รันซ้ำกี่ครั้งก็ได้ ไม่ error แล้ว
 -- ============================================================================
 
 -- § 37 Offline Journal Queue
@@ -54,14 +62,17 @@ CREATE INDEX IF NOT EXISTS idx_journal_queue_user
 -- RLS: users can only access their own queue
 ALTER TABLE public.journal_queue ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can read own journal_queue"
   ON public.journal_queue FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can insert own journal_queue"
   ON public.journal_queue FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can update own journal_queue"
   ON public.journal_queue FOR UPDATE
   USING (auth.uid() = user_id)
@@ -142,6 +153,7 @@ ALTER TABLE decision_patterns ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Users can update own decisions" ON decision_log
 --   FOR UPDATE USING (auth.uid()::text = user_id);
 
+DROP POLICY IF EXISTS "Users can view own outcomes" ON decision_outcomes;
 CREATE POLICY "Users can view own outcomes" ON decision_outcomes
   FOR SELECT USING (
     decision_id IN (
@@ -149,6 +161,7 @@ CREATE POLICY "Users can view own outcomes" ON decision_outcomes
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own outcomes" ON decision_outcomes;
 CREATE POLICY "Users can insert own outcomes" ON decision_outcomes
   FOR INSERT WITH CHECK (
     decision_id IN (
@@ -156,6 +169,7 @@ CREATE POLICY "Users can insert own outcomes" ON decision_outcomes
     )
   );
 
+DROP POLICY IF EXISTS "Users can view own follow-ups" ON follow_up_schedule;
 CREATE POLICY "Users can view own follow-ups" ON follow_up_schedule
   FOR SELECT USING (
     decision_id IN (
@@ -163,6 +177,7 @@ CREATE POLICY "Users can view own follow-ups" ON follow_up_schedule
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own follow-ups" ON follow_up_schedule;
 CREATE POLICY "Users can update own follow-ups" ON follow_up_schedule
   FOR UPDATE USING (
     decision_id IN (
@@ -170,6 +185,7 @@ CREATE POLICY "Users can update own follow-ups" ON follow_up_schedule
     )
   );
 
+DROP POLICY IF EXISTS "Users can view own patterns" ON decision_patterns;
 CREATE POLICY "Users can view own patterns" ON decision_patterns
   FOR SELECT USING (auth.uid() = twin_id);
 -- Phase A Core Schema Tables (from 003_core_awakening_ceremony.sql)
@@ -344,23 +360,29 @@ ALTER TABLE conversation_memory ENABLE ROW LEVEL SECURITY;
 -- ============================================================================
 -- RLS POLICIES: Users can only see their own Twin's data
 -- ============================================================================
+DROP POLICY IF EXISTS "users_view_own_twin_state" ON twin_state;
 CREATE POLICY "users_view_own_twin_state" ON twin_state
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_update_own_twin_state" ON twin_state;
 CREATE POLICY "users_update_own_twin_state" ON twin_state
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_view_own_twin_personality" ON twin_personality;
 CREATE POLICY "users_view_own_twin_personality" ON twin_personality
   FOR SELECT USING (auth.uid() = user_id);
 
 -- RLS Policy removed: world_preferences already has policies from 021
 
+DROP POLICY IF EXISTS "users_view_own_twin_memory" ON twin_memory;
 CREATE POLICY "users_view_own_twin_memory" ON twin_memory
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_view_own_conversations" ON conversations;
 CREATE POLICY "users_view_own_conversations" ON conversations
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_view_own_messages" ON messages;
 CREATE POLICY "users_view_own_messages" ON messages
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -422,15 +444,19 @@ CREATE INDEX IF NOT EXISTS idx_evolution_progress_twin_id ON twin_evolution_prog
 ALTER TABLE twin_evolution_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE twin_evolution_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS evolution_history_rls ON twin_evolution_history;
 CREATE POLICY evolution_history_rls ON twin_evolution_history
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_history_insert_rls ON twin_evolution_history;
 CREATE POLICY evolution_history_insert_rls ON twin_evolution_history
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_progress_rls ON twin_evolution_progress;
 CREATE POLICY evolution_progress_rls ON twin_evolution_progress
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_progress_update_rls ON twin_evolution_progress;
 CREATE POLICY evolution_progress_update_rls ON twin_evolution_progress
   FOR UPDATE USING (user_id = auth.uid());
 
@@ -442,6 +468,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS evolution_progress_update_timestamp ON twin_evolution_progress;
 CREATE TRIGGER evolution_progress_update_timestamp
   BEFORE UPDATE ON twin_evolution_progress
   FOR EACH ROW
@@ -509,20 +536,25 @@ ALTER TABLE notification_queue ENABLE ROW LEVEL SECURITY;
 -- RLS removed for decision_follow_ups and decision_outcomes (already handled in 020)
 ALTER TABLE notification_analytics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS schedule_rls ON notification_schedule;
 CREATE POLICY schedule_rls ON notification_schedule
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS schedule_insert_rls ON notification_schedule;
 CREATE POLICY schedule_insert_rls ON notification_schedule
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS queue_rls ON notification_queue;
 CREATE POLICY queue_rls ON notification_queue
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS queue_update_rls ON notification_queue;
 CREATE POLICY queue_update_rls ON notification_queue
   FOR UPDATE USING (user_id = auth.uid());
 
 -- Policies removed: decision_follow_ups and decision_outcomes already handled in 020
 
+DROP POLICY IF EXISTS analytics_rls ON notification_analytics;
 CREATE POLICY analytics_rls ON notification_analytics
   FOR SELECT USING (user_id = auth.uid());
 
@@ -552,6 +584,7 @@ CREATE INDEX IF NOT EXISTS idx_decision_patterns_world ON decision_patterns(worl
 
 ALTER TABLE decision_patterns ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS decision_patterns_rls ON decision_patterns;
 CREATE POLICY decision_patterns_rls ON decision_patterns
   FOR ALL USING (
     twin_id IN (
@@ -598,16 +631,19 @@ CREATE INDEX IF NOT EXISTS idx_community_insights_user_id
 
 ALTER TABLE public.community_insights ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone authenticated can read published insights" ON public.community_insights;
 CREATE POLICY "Anyone authenticated can read published insights"
   ON public.community_insights FOR SELECT
   TO authenticated
   USING (status = 'published' OR user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can post their own insights" ON public.community_insights;
 CREATE POLICY "Users can post their own insights"
   ON public.community_insights FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their own insights" ON public.community_insights;
 CREATE POLICY "Users can delete their own insights"
   ON public.community_insights FOR DELETE
   TO authenticated
@@ -632,16 +668,19 @@ CREATE INDEX IF NOT EXISTS idx_community_insight_likes_insight_id
 
 ALTER TABLE public.community_insight_likes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone authenticated can read likes" ON public.community_insight_likes;
 CREATE POLICY "Anyone authenticated can read likes"
   ON public.community_insight_likes FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Users can like as themselves" ON public.community_insight_likes;
 CREATE POLICY "Users can like as themselves"
   ON public.community_insight_likes FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can unlike their own like" ON public.community_insight_likes;
 CREATE POLICY "Users can unlike their own like"
   ON public.community_insight_likes FOR DELETE
   TO authenticated

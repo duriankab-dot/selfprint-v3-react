@@ -4,7 +4,10 @@
  */
 
 import { supabase } from './supabase-service';
-import * as DecisionLearning from './DecisionLearningService';
+// NOTE: DecisionLearningService is NOT imported statically here — that would
+// create a circular dependency (DecisionLearningService → DecisionService →
+// DecisionLearningService). The single call below uses a dynamic import
+// instead, which breaks the cycle at the module graph level.
 import type { WorldId } from '../constants/worlds';
 import type { Decision, DecisionOutcome, FollowUpSchedule } from '../types/decision';
 
@@ -210,7 +213,9 @@ export async function recordOutcome(
     if (decisionData.data) {
       const { twin_id, world } = decisionData.data;
       // Asynchronously update Twin's expertise (don't wait for completion)
-      DecisionLearning.updateTwinExpertiseFromDecisions(twin_id, world).catch(err =>
+      import('./DecisionLearningService').then(m =>
+        m.updateTwinExpertiseFromDecisions(twin_id, world)
+      ).catch(err =>
         console.error('Background: Failed to update Twin expertise:', err)
       );
     }

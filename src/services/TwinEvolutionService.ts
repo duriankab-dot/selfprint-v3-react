@@ -151,7 +151,7 @@ export async function evolveTwin(
     // 3. Create evolution memory (for Twin context)
     const stageInfo = getStageInfo(newStage);
     await supabase
-      .from('twin_memory')
+      .from('twin_memories')
       .insert({
         twin_id: twinId,
         user_id: userId,
@@ -239,7 +239,7 @@ export async function getEvolutionStatus(
 
     // Query memory count
     const { count: memoryCount } = await supabase
-      .from('twin_memory')
+      .from('twin_memories')
       .select('*', { count: 'exact', head: true })
       .eq('twin_id', twinId);
 

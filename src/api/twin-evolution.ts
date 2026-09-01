@@ -96,7 +96,7 @@ async function handleCheckEvolution(
       .eq('twin_id', twinId);
 
     const { count: memoryCount } = await supabase
-      .from('twin_memory')
+      .from('twin_memories')
       .select('*', { count: 'exact', head: true })
       .eq('twin_id', twinId);
 

@@ -312,7 +312,8 @@ export class SICEOrchestrator {
         if (theme.includes("อารมณ์") || theme.includes("แรงจูงใจ") || theme.includes("สภาวะ")) {
           const category = "emotional";
           if (!emotionalThemes.has(category)) emotionalThemes.set(category, []);
-          emotionalThemes.get(category)!.push(`${engine}: ${theme}`);
+          const themeList = emotionalThemes.get(category);
+          if (themeList) themeList.push(`${engine}: ${theme}`);
         }
       });
     });

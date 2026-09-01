@@ -386,7 +386,7 @@ export class PatternDetector {
 
     // 2. Collect from personal_context reflections (if linked)
     const { data: contexts } = await supabase
-      .from('personal_context')
+      .from('personal_contexts')
       .select('id, description, created_at, inferred_from')
       .eq('user_id', userId);
 

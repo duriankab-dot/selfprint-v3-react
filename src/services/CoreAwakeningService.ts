@@ -65,7 +65,7 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
 
     // Check if user has completed Full Analysis
     const { data: profile, error } = await supabase
-      .from('user_profiles')
+      .schema('selfprint').from('users_profiles')
       .select('full_analysis_completed')
       .eq('id', userId)
       .single();
