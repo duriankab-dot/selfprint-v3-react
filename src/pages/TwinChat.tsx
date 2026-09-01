@@ -341,7 +341,10 @@ export default function TwinChat() {
       // TWIN-MEMORY-001: full behavioral profile — Twin knows the user from Nova's 12 SICE engines.
       // Formatted as readable text (not raw JSON) so the LLM can use it confidently.
       // All fields null-guarded so missing data degrades gracefully.
-      const a = currentAnalysis;
+      // SICE-FALLBACK-001: currentAnalysis may still be null for a brief window
+      // after mount if twin.fullAnalysis was loaded async — use it directly here
+      // rather than waiting for the useEffect sync. twin is already in deps.
+      const a = currentAnalysis ?? twin?.fullAnalysis ?? null;
       const twinProfile = [
         `IDENTITY: ${twin.name} | Archetype: ${twin.primaryArchetype ?? 'unknown'}${twin.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin.maturityScore ?? 30}/100`,
 

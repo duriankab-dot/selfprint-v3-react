@@ -702,3 +702,243 @@
   .analysis__journey-grid { grid-template-columns: 1fr; }
   .analysis__section { padding: 24px 0; }
 }
+
+/* ============================================================================
+   Summary Section — astrology-style narrative from SICE synthesis
+   ============================================================================ */
+
+.analysis__summary-section {
+  background: var(--surface-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--color-border, rgba(255,255,255,0.1));
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.analysis__summary-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.analysis__summary-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.analysis__summary-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #f1f5f9);
+  margin: 0;
+  flex: 1;
+}
+
+.analysis__summary-confidence {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #94a3b8);
+  background: var(--surface-tertiary, rgba(255,255,255,0.06));
+  border-radius: 20px;
+  padding: 4px 12px;
+  white-space: nowrap;
+}
+
+.analysis__summary-lead {
+  font-size: 1.15rem;
+  line-height: 1.75;
+  color: var(--color-text-primary, #f1f5f9);
+  font-weight: 500;
+  margin: 0 0 20px;
+}
+
+.analysis__summary-insights {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.analysis__summary-insight {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text-secondary, #cbd5e1);
+  margin: 0;
+  padding-left: 16px;
+  border-left: 3px solid var(--accent-primary, #4f46e5);
+}
+
+.analysis__summary-themes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.analysis__summary-themes-label {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #94a3b8);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 4px;
+}
+
+.analysis__summary-theme-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.analysis__theme-tag {
+  font-size: 0.82rem;
+  color: var(--accent-primary, #6366f1);
+  background: var(--accent-primary-alpha, rgba(99,102,241,0.12));
+  border: 1px solid var(--accent-primary-alpha, rgba(99,102,241,0.25));
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-weight: 500;
+}
+
+.analysis__summary-agreements {
+  margin-bottom: 20px;
+}
+
+.analysis__summary-agreements-label,
+.analysis__summary-nextsteps-label {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary, #94a3b8);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.analysis__summary-agreements-list,
+.analysis__summary-nextsteps-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--color-text-secondary, #cbd5e1);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.analysis__summary-agreements-list li,
+.analysis__summary-nextsteps-list li {
+  margin-bottom: 6px;
+}
+
+.analysis__summary-nextsteps {
+  margin-bottom: 4px;
+}
+
+/* ============================================================================
+   12 World Cards — one per SICE engine
+   ============================================================================ */
+
+.analysis__worlds-section {
+  margin-bottom: 36px;
+}
+
+.analysis__worlds-header {
+  margin-bottom: 20px;
+}
+
+.analysis__worlds-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-text-primary, #f1f5f9);
+  margin: 0 0 6px;
+}
+
+.analysis__worlds-subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #94a3b8);
+  margin: 0;
+}
+
+.analysis__world-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.analysis__world-card {
+  background: var(--surface-secondary, rgba(255,255,255,0.04));
+  border: 1px solid var(--world-accent, var(--color-border, rgba(255,255,255,0.1)));
+  border-radius: 12px;
+  padding: 20px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.analysis__world-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.analysis__world-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.analysis__world-card-emoji {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.analysis__world-card-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.analysis__world-card-name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--world-accent, var(--color-text-primary, #f1f5f9));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.analysis__world-card-mood {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #94a3b8);
+  margin-top: 2px;
+}
+
+.analysis__world-card-confidence {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--world-accent, var(--accent-primary, #6366f1));
+  background: var(--surface-tertiary, rgba(255,255,255,0.06));
+  border-radius: 20px;
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+.analysis__world-card-text {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary, #cbd5e1);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.analysis__world-card-error {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #64748b);
+  font-style: italic;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .analysis__world-grid { grid-template-columns: 1fr; }
+  .analysis__summary-section { padding: 20px; }
+  .analysis__summary-lead { font-size: 1rem; }
+}

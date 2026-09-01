@@ -21,6 +21,7 @@ import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
 import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
+import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
 import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
 import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
 import { primeCelebrationAudio, playCelebrationSound, stopCelebrationSound } from '../lib/twin/twinCelebrationSound';
@@ -75,6 +76,12 @@ export default function CoreAwakening() {
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  // BIRTHDATE-RACE-001: birthDate is recovered async from Supabase on mount
+  // when Zustand doesn't have it (no localStorage persistence). If the user
+  // reaches the naming phase before that fetch resolves, handleTwinNamed fires
+  // with birthDate still undefined. birthDateLoaded starts true when birthDate
+  // is already in the store; otherwise stays false until the fetch completes.
+  const [birthDateLoaded, setBirthDateLoaded] = useState<boolean>(!!birthDate);
   // P0-C: essenceId from startAwakening(), fed forward into initializeTwin()
   // so the Twin is grounded in real SICE orchestration output, not stubs.
   const [essenceId, setEssenceId] = useState<string | undefined>(undefined);
@@ -86,10 +93,29 @@ export default function CoreAwakening() {
   // initializeTwin() below calls once the Twin record is actually created),
   // so it can be computed here too, before naming, without creating the
   // Twin early or duplicating the derivation logic.
-  const birthArchetype = useMemo(
-    () => calculateInitialDisciplines(birthDate).prototypeCore.toLowerCase() as Archetype,
-    [birthDate]
-  );
+  // ARCHETYPE-ENGINE-001: was using prototypeCore (numerology-only, 1 science)
+  // — replaced with calculateArchetypes() which fuses all 12 sciences so the
+  // birth animation colour/shape matches exactly what gets stored in the DB.
+  const birthArchetype = useMemo(() => {
+    const disciplines = calculateInitialDisciplines(birthDate);
+    return calculateArchetypes({
+      birthDate: birthDate ?? '',
+      lifePathNumber: disciplines.lifePathNumber,
+      westernZodiac: disciplines.westernZodiac,
+      chineseZodiac: disciplines.chineseZodiac,
+      baziYearElement: disciplines.baziYearElement,
+      natalDominantElement: disciplines.natalDominantElement,
+      moonSign: disciplines.moonSign,
+      moonFullDegree: disciplines.moonFullDegree,
+      sunFullDegree: disciplines.sunFullDegree,
+      mercurySign: disciplines.mercurySign,
+      venusSign: disciplines.venusSign,
+      marsSign: disciplines.marsSign,
+      jupiterSign: disciplines.jupiterSign,
+      saturnSign: disciplines.saturnSign,
+      hexagramNumber: disciplines.hexagramNumber,
+    }).primary;
+  }, [birthDate]);
   const birthColor = useMemo(() => getTwinVisualDNA(birthArchetype).coreColor, [birthArchetype]);
   const birthShape = useMemo(() => getTwinVisualDNA(birthArchetype).coreShape, [birthArchetype]);
 
@@ -123,8 +149,20 @@ export default function CoreAwakening() {
   // would clear it. PendingOnboardingSaver already wrote birthDate to
   // selfprint.users_profiles via /api/profile when auth completed, so we can
   // recover it here for initializeTwin() which needs the value.
+  // BIRTHDATE-RACE-001: mark loaded once birthDate is already in the store
+  // (handles the case where we arrive here in the same session as onboarding
+  // — birthDate is already in Zustand memory and the recovery fetch below
+  // short-circuits immediately without ever setting birthDateLoaded).
   useEffect(() => {
-    if (birthDate || !session?.user?.id || !supabase) return;
+    if (birthDate) setBirthDateLoaded(true);
+  }, [birthDate]);
+
+  useEffect(() => {
+    if (birthDate || !session?.user?.id || !supabase) {
+      // BIRTHDATE-RACE-001: already have it — mark loaded immediately
+      if (birthDate) setBirthDateLoaded(true);
+      return;
+    }
     (async () => {
       const { data } = await supabase
         .schema('selfprint')
@@ -139,6 +177,8 @@ export default function CoreAwakening() {
           birthPlace: data.place_of_birth ? String(data.place_of_birth) : undefined,
         });
       }
+      // BIRTHDATE-RACE-001: fetch done (found or empty) — unblock the naming form
+      setBirthDateLoaded(true);
     })();
   }, [session?.user?.id, birthDate, updateProfile]);
 
@@ -385,7 +425,7 @@ export default function CoreAwakening() {
       {/* NAMING PHASE */}
       {phase === 'naming' && (
         <div className="flex-1 flex items-center justify-center px-6">
-          <TwinNaming onNameConfirmed={handleTwinNamed} isLoading={isLoading} />
+          <TwinNaming onNameConfirmed={handleTwinNamed} isLoading={isLoading || !birthDateLoaded} />
         </div>
       )}
 

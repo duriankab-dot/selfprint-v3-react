@@ -561,6 +561,18 @@ export class SICEOrchestrator {
           }
           break;
 
+        case 4: // AIFeedbackLoop
+          {
+            const feedback = result.result as any;
+            if (feedback?.averageScore !== undefined) {
+              insights.push(`คะแนนความแม่นยำโดยรวม: ${feedback.averageScore}/100`);
+            }
+            if (Array.isArray(feedback?.improvements) && feedback.improvements.length > 0) {
+              insights.push(`สิ่งที่ทวินกำลังพัฒนา: ${feedback.improvements[0]}`);
+            }
+          }
+          break;
+
         case 5: // TwinStateEngine
           {
             const state = result.result as any;
@@ -568,6 +580,90 @@ export class SICEOrchestrator {
               insights.push(
                 `ทวินกำลังรู้สึก${state.mood} — พร้อม${state.mood === 'playful' ? 'สำรวจ' : 'นำทาง'}การเดินทางของคุณ`
               );
+            }
+          }
+          break;
+
+        case 6: // ExperienceEngine
+          {
+            const exp = result.result as any;
+            if (Array.isArray(exp?.masteredAreas) && exp.masteredAreas.length > 0) {
+              insights.push(`ด้านที่เชี่ยวชาญ: ${exp.masteredAreas.slice(0, 2).join(', ')}`);
+            }
+            if (Array.isArray(exp?.keyLearnings) && exp.keyLearnings.length > 0) {
+              insights.push(`สิ่งที่เรียนรู้สำคัญ: ${exp.keyLearnings[0]}`);
+            }
+          }
+          break;
+
+        case 7: // EnvironmentEngine
+          {
+            const env = result.result as any;
+            if (env?.timeOfDay && env?.currentSeason) {
+              insights.push(`ช่วงเวลา: ${env.timeOfDay} | ฤดูกาล: ${env.currentSeason}`);
+            }
+            if (env?.twinState?.activeWorld) {
+              insights.push(`โลกที่กำลังสำรวจ: ${env.twinState.activeWorld}`);
+            }
+          }
+          break;
+
+        case 8: // BadgeEngine
+          {
+            const badges = result.result as any;
+            if (Array.isArray(badges?.unlockedBadges) && badges.unlockedBadges.length > 0) {
+              insights.push(`ปลดล็อกแล้ว ${badges.unlockedBadges.length} รางวัล`);
+            }
+            if (badges?.totalProgress !== undefined) {
+              insights.push(`ความคืบหน้าโดยรวม: ${badges.totalProgress}%`);
+            }
+          }
+          break;
+
+        case 9: // BehavioralForecastEngine
+          {
+            const forecast = result.result as any;
+            if (forecast?.nextMood) {
+              insights.push(`แนวโน้มอารมณ์: ${forecast.nextMood}`);
+            }
+            if (forecast?.predictedFocus) {
+              insights.push(`โฟกัสที่คาดการณ์: ${forecast.predictedFocus}`);
+            }
+          }
+          break;
+
+        case 10: // FutureSelfEngine
+          {
+            const future = result.result as any;
+            if (future?.vision) {
+              insights.push(`วิสัยทัศน์: ${future.vision}`);
+            }
+            if (Array.isArray(future?.focusAreas) && future.focusAreas.length > 0) {
+              insights.push(`จุดโฟกัส: ${future.focusAreas.slice(0, 2).join(', ')}`);
+            }
+          }
+          break;
+
+        case 11: // MemoryManagerEngine
+          {
+            const memory = result.result as any;
+            if (memory?.totalMemoriesStored > 0) {
+              insights.push(`ความทรงจำที่บันทึก: ${memory.totalMemoriesStored} รายการ`);
+            }
+            if (Array.isArray(memory?.primaryThemes) && memory.primaryThemes.length > 0) {
+              insights.push(`ธีมหลัก: ${memory.primaryThemes.slice(0, 2).join(', ')}`);
+            }
+          }
+          break;
+
+        case 12: // DecisionIntelligenceEngineAdapter
+          {
+            const decisions = result.result as any;
+            if (decisions?.totalDecisions > 0) {
+              insights.push(`การตัดสินใจทั้งหมด: ${decisions.totalDecisions} ครั้ง`);
+            }
+            if (decisions?.successRate !== undefined) {
+              insights.push(`อัตราความสำเร็จ: ${decisions.successRate}%`);
             }
           }
           break;
@@ -632,6 +728,80 @@ export class SICEOrchestrator {
           }
           break;
 
+        case 4: // AIFeedbackLoop
+          {
+            const feedback = result.result as any;
+            if (Array.isArray(feedback?.improvements) && feedback.improvements.length > 1) {
+              recommendations.push(feedback.improvements[1]);
+            }
+          }
+          break;
+
+        case 6: // ExperienceEngine
+          {
+            const exp = result.result as any;
+            if (Array.isArray(exp?.growthAreas) && exp.growthAreas.length > 0) {
+              recommendations.push(`พัฒนาด้าน: ${exp.growthAreas[0]}`);
+            }
+          }
+          break;
+
+        case 7: // EnvironmentEngine
+          {
+            const env = result.result as any;
+            if (Array.isArray(env?.recommendations) && env.recommendations.length > 0) {
+              recommendations.push(env.recommendations[0]);
+            }
+          }
+          break;
+
+        case 8: // BadgeEngine
+          {
+            const badges = result.result as any;
+            if (Array.isArray(badges?.nextMilestones) && badges.nextMilestones.length > 0) {
+              recommendations.push(`เป้าหมายถัดไป: ${badges.nextMilestones[0].name || badges.nextMilestones[0]}`);
+            }
+          }
+          break;
+
+        case 9: // BehavioralForecastEngine
+          {
+            const forecast = result.result as any;
+            if (Array.isArray(forecast?.opportunities) && forecast.opportunities.length > 0) {
+              recommendations.push(`โอกาส: ${forecast.opportunities[0]}`);
+            }
+          }
+          break;
+
+        case 10: // FutureSelfEngine
+          {
+            const future = result.result as any;
+            if (Array.isArray(future?.milestones) && future.milestones.length > 0) {
+              recommendations.push(`เป้าหมายระยะยาว: ${future.milestones[0]}`);
+            }
+          }
+          break;
+
+        case 11: // MemoryManagerEngine
+          {
+            const memory = result.result as any;
+            if (memory?.emotionalTone) {
+              recommendations.push(`โทนอารมณ์ปัจจุบัน: ${memory.emotionalTone} — ใช้พื้นที่นี้สะท้อนตัวเอง`);
+            }
+          }
+          break;
+
+        case 12: // DecisionIntelligenceEngineAdapter
+          {
+            const decisions = result.result as any;
+            if (decisions?.nextStepGuidance) {
+              recommendations.push(decisions.nextStepGuidance);
+            } else if (decisions?.bestPerformingArea) {
+              recommendations.push(`ด้านที่ตัดสินใจได้ดี: ${decisions.bestPerformingArea}`);
+            }
+          }
+          break;
+
         default:
           break;
       }
@@ -666,11 +836,47 @@ export class SICEOrchestrator {
           }
           break;
 
+        case 4: // AIFeedbackLoop
+          {
+            const feedback = result.result as any;
+            if (Array.isArray(feedback?.warnings) && feedback.warnings.length > 0) {
+              warnings.push(`ข้อควรระวัง (ทวิน): ${feedback.warnings[0]}`);
+            }
+          }
+          break;
+
         case 5: // TwinStateEngine
           {
             const state = result.result as any;
             if (state?.energy && state.energy < 30) {
               warnings.push('พลังงานของทวินต่ำ — พักสักครู่ก่อนนะ');
+            }
+          }
+          break;
+
+        case 7: // EnvironmentEngine
+          {
+            const env = result.result as any;
+            if (env?.stressLevel !== undefined && env.stressLevel > 70) {
+              warnings.push(`ระดับความเครียดสูง (${env.stressLevel}/100) — ควรจัดการความเครียดก่อน`);
+            }
+          }
+          break;
+
+        case 9: // BehavioralForecastEngine
+          {
+            const forecast = result.result as any;
+            if (Array.isArray(forecast?.risks) && forecast.risks.length > 0) {
+              warnings.push(`ความเสี่ยง: ${forecast.risks[0]}`);
+            }
+          }
+          break;
+
+        case 12: // DecisionIntelligenceEngineAdapter
+          {
+            const decisions = result.result as any;
+            if (decisions?.successRate !== undefined && decisions.successRate < 40 && decisions.totalDecisions > 5) {
+              warnings.push(`อัตราความสำเร็จต่ำ (${decisions.successRate}%) — ลองทบทวนวิธีการตัดสินใจ`);
             }
           }
           break;
