@@ -53,12 +53,23 @@ function dotPattern(): string {
   return dots;
 }
 
+// ─── HTML Escaping ─────────────────────────────────────────────────────────
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // ─── HTML OG Image ─────────────────────────────────────────────────────────
 
 function renderOGImage(headline: string, sub: string, worldBadge?: string): string {
   const fontSize = headline.length > 40 ? 46 : 56;
   const badge = worldBadge
-    ? `<span style="margin-left:8px;background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.4);color:#a5b4fc;font-size:13px;padding:4px 12px;border-radius:20px;text-transform:capitalize;">${worldBadge}</span>`
+    ? `<span style="margin-left:8px;background:rgba(129,140,248,0.15);border:1px solid rgba(129,140,248,0.4);color:#a5b4fc;font-size:13px;padding:4px 12px;border-radius:20px;text-transform:capitalize;">${escapeHtml(worldBadge)}</span>`
     : '';
 
   return `<!DOCTYPE html>
@@ -164,7 +175,7 @@ function renderOGImage(headline: string, sub: string, worldBadge?: string): stri
       ${badge}
     </div>
 
-    <div class="headline">${headline}</div>
+    <div class="headline">${escapeHtml(headline)}</div>
     <div class="sub">${sub}</div>
   </div>
 

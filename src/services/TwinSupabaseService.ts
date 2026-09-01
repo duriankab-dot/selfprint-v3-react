@@ -143,9 +143,10 @@ export async function createTwinInDatabase(
         },
       ])
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) return null;
 
     return data as Twin;
   } catch (err) {
@@ -178,9 +179,10 @@ export async function updateTwinInDatabase(
       })
       .eq('id', twinId)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) return null;
 
     return data as Twin;
   } catch (err) {

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
           .eq('id', blueprintId)
           .eq('user_id', userId)
           .eq('status', 'twin-birth-ready')
-          .single();
+          .maybeSingle();
 
         if (blueprintError || !blueprint) {
           return Response.json(
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
           .from('twin_state')
           .select('id')
           .eq('twin_id', twinId)
-          .single();
+          .maybeSingle();
 
         if (stateError || !twinState) {
           return Response.json(
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
           .select('id, status, twin_id')
           .eq('id', blueprintId)
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (!blueprint) {
           return Response.json(

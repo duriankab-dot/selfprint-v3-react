@@ -81,13 +81,13 @@ export async function handler(request: Request, env: Env): Promise<Response> {
 
     switch (module) {
       case 'notifications':
-        response = await handleNotifications(request, action, url, env);
+        response = await handleNotifications(request, action, url, env, user);
         break;
       case 'twin-evolution':
         response = await handleTwinEvolution(request, action, url, env);
         break;
       case 'sice':
-        response = await handleSICE(request, action, url, env);
+        response = await handleSICE(request, action, url, env, user);
         break;
       case 'stripe':
         response = await handleStripe(request, action, user, env);
@@ -130,16 +130,19 @@ export async function handler(request: Request, env: Env): Promise<Response> {
   }
 }
 
-async function handleNotifications(request: Request, action: string, url: URL, env: Env): Promise<Response> {
+async function handleNotifications(request: Request, action: string, url: URL, env: Env, user: VerifiedUser | null): Promise<Response> {
   const supabase = getAnonSupabase(env);
   if (request.method === 'GET') {
     if (action === 'list') {
-      const userId = url.searchParams.get('userId');
-      if (!userId) {
-        return Response.json({ success: false, error: 'userId required' } as ApiResponse, {
-          status: 400,
-        });
+      if (!user) {
+        return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
       }
+      // Use verified JWT user id; reject if URL param disagrees (misconfigured client)
+      const requestedUserId = url.searchParams.get('userId');
+      if (requestedUserId && requestedUserId !== user.id) {
+        return Response.json({ success: false, error: 'Forbidden' } as ApiResponse, { status: 403 });
+      }
+      const userId = user.id;
 
       if (!supabase) {
         return Response.json(
@@ -352,7 +355,7 @@ async function handleTwinEvolution(_request: Request, _action: string, url: URL,
   );
 }
 
-async function handleSICE(_request: Request, _action: string, url: URL, env: Env): Promise<Response> {
+async function handleSICE(_request: Request, _action: string, url: URL, env: Env, user: VerifiedUser | null): Promise<Response> {
   const supabase = getAnonSupabase(env);
   if (!supabase) {
     return Response.json(
@@ -361,12 +364,15 @@ async function handleSICE(_request: Request, _action: string, url: URL, env: Env
     );
   }
 
-  const userId = url.searchParams.get('userId');
-  if (!userId) {
-    return Response.json({ success: false, error: 'userId required' } as ApiResponse, {
-      status: 400,
-    });
+  if (!user) {
+    return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
   }
+  // Use verified JWT user id; reject if URL param disagrees (misconfigured client)
+  const requestedUserId = url.searchParams.get('userId');
+  if (requestedUserId && requestedUserId !== user.id) {
+    return Response.json({ success: false, error: 'Forbidden' } as ApiResponse, { status: 403 });
+  }
+  const userId = user.id;
 
   if (_action === 'get-patterns') {
     const { data, error } = await supabase

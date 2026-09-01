@@ -32,6 +32,8 @@ export class SelfPrintOrchestrator {
   private patternDetector = new PatternDetector();
   private insightEngine = new InsightEngine();
   private contextBuilder = new PersonalContextBuilder();
+  private _finetuningTimer: ReturnType<typeof setTimeout> | null = null;
+  private _twinBirthTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Initialize Self Print for user
@@ -48,9 +50,10 @@ export class SelfPrintOrchestrator {
         created_at: new Date(),
       })
       .select('id')
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
+    if (!data) throw new Error('Failed to create blueprint record');
     const blueprintId = data.id;
 
     // Store in local state cache
@@ -118,8 +121,9 @@ export class SelfPrintOrchestrator {
     // Trigger WOW 1 ceremony UI
     await this.triggerCeremony('wow-1', blueprintId, wow1Insight);
 
-    // Auto-transition after ceremony
-    setTimeout(() => this.beginFineTuning(blueprintId, userId), 8000); // 8 seconds for ceremony
+    // Auto-transition after ceremony — store ID so it can be cancelled in destroy()
+    if (this._finetuningTimer) clearTimeout(this._finetuningTimer);
+    this._finetuningTimer = setTimeout(() => this.beginFineTuning(blueprintId, userId), 8000); // 8 seconds for ceremony
 
     return wow1Insight;
   }
@@ -134,7 +138,7 @@ export class SelfPrintOrchestrator {
       .from('profiles_blueprints')
       .select('questionnaire_responses, detected_patterns')
       .eq('id', blueprintId)
-      .single();
+      .maybeSingle();
 
     if (!blueprint) throw new Error('Blueprint not found');
 
@@ -169,7 +173,7 @@ export class SelfPrintOrchestrator {
       .from('profiles_blueprints')
       .select('questionnaire_responses, detected_patterns, refined_patterns')
       .eq('id', blueprintId)
-      .single();
+      .maybeSingle();
 
     if (!blueprint) throw new Error('Blueprint not found');
 
@@ -206,7 +210,7 @@ export class SelfPrintOrchestrator {
       .from('profiles_blueprints')
       .select('comprehensive_analysis, detected_patterns, questionnaire_responses')
       .eq('id', blueprintId)
-      .single();
+      .maybeSingle();
 
     if (!blueprint) throw new Error('Blueprint not found');
 
@@ -231,8 +235,9 @@ export class SelfPrintOrchestrator {
     // Trigger WOW 2 ceremony UI
     await this.triggerCeremony('wow-2', blueprintId, wow2Insight);
 
-    // Auto-transition to twin birth ready
-    setTimeout(() => this.markTwinBirthReady(blueprintId, userId), 8000);
+    // Auto-transition to twin birth ready — store ID so it can be cancelled in destroy()
+    if (this._twinBirthTimer) clearTimeout(this._twinBirthTimer);
+    this._twinBirthTimer = setTimeout(() => this.markTwinBirthReady(blueprintId, userId), 8000);
 
     return wow2Insight;
   }
@@ -264,7 +269,7 @@ export class SelfPrintOrchestrator {
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     return (data?.status as SelfPrintPhase) || null;
   }
@@ -278,9 +283,18 @@ export class SelfPrintOrchestrator {
       .select('status')
       .eq('user_id', userId)
       .eq('status', 'twin-birth-ready')
-      .single();
+      .maybeSingle();
 
     return !!data;
+  }
+
+  /**
+   * Cancel any pending auto-transition timers to prevent memory leaks.
+   * Call when the orchestrator is no longer needed.
+   */
+  destroy(): void {
+    if (this._finetuningTimer) { clearTimeout(this._finetuningTimer); this._finetuningTimer = null; }
+    if (this._twinBirthTimer) { clearTimeout(this._twinBirthTimer); this._twinBirthTimer = null; }
   }
 
   // Private methods
@@ -321,7 +335,7 @@ export class SelfPrintOrchestrator {
         .from('twins')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) return patterns;
 
@@ -354,7 +368,7 @@ export class SelfPrintOrchestrator {
         .from('twins')
         .select('id')
         .eq('user_id', data.userId)
-        .single();
+        .maybeSingle();
 
       // Build analysis from questionnaire responses
       const responseCount = Object.keys(data.responses).length;
