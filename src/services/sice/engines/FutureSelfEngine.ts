@@ -51,11 +51,12 @@ export class FutureSelfEngine extends SICEBase {
       const userGoals = await this.analyzeUserGoals(userId);
 
       // Fetch Twin and analyze evolution
+      // TWINS406-001 FIX: .maybeSingle() — no Twin yet is a normal state.
       const { data: twin } = await supabase
         .from('twins')
         .select('id, created_at')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) {
         return this.getDefaultFuture();
@@ -108,11 +109,14 @@ export class FutureSelfEngine extends SICEBase {
    */
   private async analyzeUserGoals(userId: string): Promise<any> {
     try {
+      // USERPROFILES-PK-001 FIX: user_profiles has no 'user_id' column —
+      // primary key is 'id' itself (see database-init.ts). maybeSingle()
+      // since a user without a profile row yet is normal.
       const { data: profile } = await supabase
         .from('user_profiles')
         .select('goals_json, focus_areas')
-        .eq('user_id', userId)
-        .single();
+        .eq('id', userId)
+        .maybeSingle();
 
       if (!profile) {
         return { goals: [], worlds: [] };

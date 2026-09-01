@@ -32,11 +32,15 @@ export async function POST(req: Request) {
         }
 
         // Check if Twin already exists for this blueprint
+        // TWINS406-001 FIX: .single() throws PostgREST 406 when 0 rows match
+        // (very common here — most blueprints have no Twin yet). .maybeSingle()
+        // returns { data: null } instead, which the `if (existingTwin)` check
+        // below already handles correctly.
         const { data: existingTwin } = await supabase
           .from('twins')
           .select('id')
           .eq('blueprint_id', blueprintId)
-          .single();
+          .maybeSingle();
 
         if (existingTwin) {
           return Response.json(
@@ -63,12 +67,14 @@ export async function POST(req: Request) {
         const { twinId, twinName } = await req.json();
 
         // Verify Twin exists
+        // TWINS406-001 FIX: see note above — a wrong/stale twinId should
+        // read as "not found", not throw a 406.
         const { data: twin, error: twinError } = await supabase
           .from('twins')
           .select('id, user_id')
           .eq('id', twinId)
           .eq('user_id', userId)
-          .single();
+          .maybeSingle();
 
         if (twinError || !twin) {
           return Response.json(

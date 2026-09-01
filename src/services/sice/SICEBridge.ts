@@ -145,21 +145,24 @@ export class SICEBridge {
       const userId = orchestratorResult.userId;
       const pi = orchestratorResult.personalIntelligence;
 
-      // Save SICE intelligence snapshot to sice_results table for history
+      // SICERESULTS-001 FIX: 'sice_results' was never a real table — verified
+      // against a live pg_tables dump, it doesn't exist under public or
+      // selfprint (PostgREST 404, hint pointing at the unrelated
+      // 'public.slip_requests' — a false-positive fuzzy match, not the real
+      // intended table). migrations/025_create_awakening_essence.sql shows
+      // the actual table this data belongs in: 'awakening_essence' has a
+      // sice_results JSONB *column* ("ผลลัพธ์จากทั้ง 12 engines") alongside
+      // personal_intelligence/synthesis/execution_time — exactly this
+      // snapshot's shape. Writing there instead; twin_id is nullable
+      // ("NULL ระหว่าง awakening") so omitting it here is fine.
       const { data, error } = await supabase
-        .from('sice_results')
+        .from('awakening_essence')
         .insert({
           user_id: userId,
-          timestamp: orchestratorResult.timestamp,
-          total_execution_time: orchestratorResult.totalExecutionTime,
-          user_understanding: pi.userUnderstanding,
-          confidence: pi.confidence,
-          recommended_action: pi.recommendedAction,
-          insights: pi.insights,
-          next_steps: pi.nextStepsSuggested,
-          warnings: pi.warningsOrCautions,
-          synthesis_themes: orchestratorResult.synthesis.themes,
-          synthesis_confidence: orchestratorResult.synthesis.confidenceScore,
+          personal_intelligence: pi,
+          sice_results: orchestratorResult.results,
+          synthesis: orchestratorResult.synthesis,
+          execution_time: orchestratorResult.totalExecutionTime,
         })
         .select()
         .single();

@@ -228,23 +228,39 @@ function generateAccessories(params: {
 /**
  * Save Visual DNA to database at Twin birth
  */
+// VISUALDNA-TABLE-001 FIX: 'twin_visual_dna' was never a real table —
+// verified against a live pg_tables dump (PostgREST 404, hint "Perhaps you
+// meant 'public.twin_state'"). Twin birth now writes visualDNA straight into
+// twin_state.data (see CoreAwakeningService.ts Operation 6). These two
+// functions are kept for any other caller, but now read/write the same
+// twin_state.data.visualDNA path instead of the non-existent table.
 export async function saveVisualDNA(
-  userId: string,
+  _userId: string,
   twinId: string,
   visualDNA: VisualDNA
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase.from('twin_visual_dna').insert({
-      twin_id: twinId,
-      user_id: userId,
-      color_primary: visualDNA.colorPrimary,
-      color_secondary: visualDNA.colorSecondary,
-      color_accent: visualDNA.colorAccent,
-      visual_style: visualDNA.visualStyle,
-      accessories: visualDNA.accessories,
-      base_expression: visualDNA.baseExpression,
-      visual_metadata: visualDNA.visualMetadata || {},
-    });
+    const { data: existing } = await supabase
+      .from('twin_state')
+      .select('data')
+      .eq('twin_id', twinId)
+      .maybeSingle();
+
+    if (!existing) {
+      // No twin_state row yet for this twin — nothing to merge into safely
+      // (current_stage/consciousness_level are required, non-nullable
+      // columns this function doesn't own). Report clearly instead of
+      // guessing values.
+      return { success: false, error: 'twin_state row not found for this twin' };
+    }
+
+    const { error } = await supabase
+      .from('twin_state')
+      .update({
+        data: { ...(existing.data || {}), visualDNA },
+        updated_at: new Date().toISOString(),
+      })
+      .eq('twin_id', twinId);
 
     if (error) {
       console.error('Failed to save Visual DNA:', error);
@@ -267,27 +283,18 @@ export async function getVisualDNA(
 ): Promise<VisualDNA | null> {
   try {
     const { data, error } = await supabase
-      .from('twin_visual_dna')
-      .select('*')
+      .from('twin_state')
+      .select('data')
       .eq('twin_id', twinId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.warn('No Visual DNA found for Twin:', error);
       return null;
     }
 
-    if (!data) return null;
-
-    return {
-      colorPrimary: data.color_primary,
-      colorSecondary: data.color_secondary,
-      colorAccent: data.color_accent,
-      visualStyle: data.visual_style,
-      accessories: data.accessories,
-      baseExpression: data.base_expression,
-      visualMetadata: data.visual_metadata,
-    };
+    const visualDNA = data?.data?.visualDNA;
+    return visualDNA ?? null;
   } catch (err) {
     console.error('Error retrieving Visual DNA:', err);
     return null;

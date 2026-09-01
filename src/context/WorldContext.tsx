@@ -71,6 +71,19 @@ export function WorldProvider({ children }: { children: ReactNode }) {
   const [worldBadges, setWorldBadges] = useState<Record<WorldId, WorldBadgeProgress | null>>({} as Record<WorldId, WorldBadgeProgress | null>);
   const [totalWorldPoints, setTotalWorldPoints] = useState(0);
 
+  // WORLDCTX-SCHEMA-001 FIX: every query/upsert in this file used to call
+  // .schema('selfprint').from('world_preferences'/'world_stats'). Verified
+  // against a live `SELECT schemaname, tablename FROM pg_tables` dump from
+  // production: both tables only exist under `public` (selfprint schema
+  // only has blueprints/finetune_responses/share_links/users_profiles) —
+  // matching the user's real console log exactly (PGRST205 "Could not find
+  // the table 'selfprint.world_preferences'"/'selfprint.world_stats' in the
+  // schema cache", hint pointing at the unrelated 'selfprint.users_profiles').
+  // This broke world favorites, visit tracking, journal/decision/insight
+  // counters, and badge progress for every user. Removed .schema('selfprint')
+  // from all 8 call sites in this file — default client already targets
+  // `public`, where these tables actually live.
+
   // Load world preferences from Supabase
   const { data: preferencesData, isLoading, error } = useQuery({
     queryKey: ['worldPreferences', session?.user?.id],
@@ -78,13 +91,11 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return null;
 
       const { data: prefs } = await supabase
-        .schema('selfprint')
         .from('world_preferences')
         .select('*')
         .eq('user_id', session.user.id);
 
       const { data: stats } = await supabase
-        .schema('selfprint')
         .from('world_stats')
         .select('*')
         .eq('user_id', session.user.id);
@@ -152,7 +163,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
       const isFavorite = favoriteWorlds.includes(world);
       const { error: err } = await supabase
-        .schema('selfprint')
         .from('world_preferences')
         .upsert(
           {
@@ -187,7 +197,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
 
       // Update world_preferences.last_accessed
       const { error: err } = await supabase
-        .schema('selfprint')
         .from('world_preferences')
         .upsert(
           {
@@ -205,7 +214,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       // Update visits_count in world_stats — used by TwinStateEngine for maturity scoring
       const currentVisits = worldStats[world]?.visitsCount || 0;
       const { error: statsErr } = await supabase
-        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -232,7 +240,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
-        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -259,7 +266,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
-        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {
@@ -286,7 +292,6 @@ export function WorldProvider({ children }: { children: ReactNode }) {
       if (!session?.user?.id) return;
 
       const { error: err } = await supabase
-        .schema('selfprint')
         .from('world_stats')
         .upsert(
           {

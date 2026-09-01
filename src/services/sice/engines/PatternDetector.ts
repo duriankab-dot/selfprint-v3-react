@@ -23,6 +23,10 @@ export class PatternDetector extends SICEBase {
 
       try {
         // Query user's decision history to detect patterns
+        // DECISIONS-USERID-001 FIX: 'decisions' has no 'world_id' column,
+        // only 'world' (verified against WorldDecisionRouter.ts's working
+        // insert). 'user_id' now exists too, see
+        // PRODUCTION_DB_CATCHUP_2026-09-01.sql.
         let query = supabase
           .from('decisions')
           .select('*')
@@ -31,7 +35,7 @@ export class PatternDetector extends SICEBase {
           .limit(50);
 
         if (world) {
-          query = query.eq('world_id', world);
+          query = query.eq('world', world);
         }
 
         const { data: decisions, error } = await query;

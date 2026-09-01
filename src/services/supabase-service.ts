@@ -10,26 +10,48 @@ import supabase from '@/lib/supabase/client';
 // Re-export singleton client for backward compatibility
 export { supabase };
 
+// CHATMESSAGES-003 FIX: 'chat_messages' doesn't exist in production (same
+// root cause as CHATMESSAGES-001/002 — verified against a live pg_tables
+// dump). saveMessage()/getChatHistory() are still called from NovaChat.tsx
+// and features/chat/hooks/useChat.ts (both live, routed pages) — every call
+// was silently 404'ing. Rerouted both to twin_memories, resolving twin_id
+// from userId first. Keeping the exact same function signatures so none of
+// the 3 call sites need to change. mood/autonomyLevel aren't columns on
+// twin_memories — dropped (non-critical, wasn't read back by any caller).
+
+async function resolveTwinId(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('twins')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 /**
  * บันทึก message ไป Supabase
  */
 export async function saveMessage(
   userId: string,
   hub: string,
-  mood: string,
+  _mood: string,
   role: 'user' | 'assistant',
   content: string,
-  autonomyLevel: number = 50
+  _autonomyLevel: number = 50
 ): Promise<boolean> {
 
   try {
-    const { error } = await supabase.from('chat_messages').insert({
-      user_id: userId,
-      hub,
-      mood,
-      role,
+    const twinId = await resolveTwinId(userId);
+    if (!twinId) {
+      // No Twin yet (pre-awakening) — nothing to persist to.
+      return false;
+    }
+
+    const { error } = await supabase.from('twin_memories').insert({
+      twin_id: twinId,
+      world_id: hub ? hub.toUpperCase() : 'SELF',
+      role: role === 'assistant' ? 'twin' : 'user',
       content,
-      autonomy_at_time: autonomyLevel,
     });
 
     if (error) {
@@ -50,15 +72,18 @@ export async function saveMessage(
 export async function getChatHistory(userId: string, hub?: string, limit: number = 50) {
 
   try {
+    const twinId = await resolveTwinId(userId);
+    if (!twinId) return [];
+
     let query = supabase
-      .from('chat_messages')
+      .from('twin_memories')
       .select('*')
-      .eq('user_id', userId)
+      .eq('twin_id', twinId)
       .order('created_at', { ascending: false })
       .limit(limit);
 
     if (hub) {
-      query = query.eq('hub', hub);
+      query = query.eq('world_id', hub.toUpperCase());
     }
 
     const { data, error } = await query;
@@ -68,7 +93,13 @@ export async function getChatHistory(userId: string, hub?: string, limit: number
       return [];
     }
 
-    return data?.reverse() || [];
+    return (
+      data?.reverse().map((row: any) => ({
+        ...row,
+        hub: (row.world_id || 'self').toLowerCase(),
+        role: row.role === 'twin' ? 'assistant' : row.role,
+      })) || []
+    );
   } catch (err) {
     console.error('Get history error:', err);
     return [];

@@ -102,10 +102,12 @@ export async function getWorldContext(
 
     // Get Twin
     const { data: twin } = await supabase
+      // TWINS406-001 FIX: .single() throws 406 when the user has no Twin
+      // yet — a normal state pre-awakening. .maybeSingle() returns null.
       .from('twins')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (!twin) {
       return getDefaultWorldContext(worldId);
@@ -120,7 +122,7 @@ export async function getWorldContext(
       .select('interaction_count')
       .eq('twin_id', twin.id)
       .eq('world', worldId)
-      .single();
+      .maybeSingle();
 
     const interactionCount = expertise?.interaction_count || 0;
 
@@ -161,10 +163,12 @@ export async function analyzeTwinWorldExpertise(
 
     // Get Twin
     const { data: twin } = await supabase
+      // TWINS406-001 FIX: .single() throws 406 when the user has no Twin
+      // yet — a normal state pre-awakening. .maybeSingle() returns null.
       .from('twins')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (!twin) {
       return { dominantWorld: 'self', expertise: {} as Record<WorldId, number> };
@@ -216,10 +220,12 @@ export async function recordWorldInteraction(
 
     // Get Twin
     const { data: twin } = await supabase
+      // TWINS406-001 FIX: .single() throws 406 when the user has no Twin
+      // yet — a normal state pre-awakening. .maybeSingle() returns null.
       .from('twins')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (!twin) return;
 
@@ -233,7 +239,7 @@ export async function recordWorldInteraction(
       .select('id')
       .eq('user_id', userId)
       .eq('world_id', worldId)
-      .single();
+      .maybeSingle();
 
     if (prefs) {
       // Update last accessed

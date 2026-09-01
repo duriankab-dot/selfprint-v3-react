@@ -253,11 +253,13 @@ async function updateTwinSystemPromptWithPatterns(
 
   try {
     // 1. Fetch Twin's current system prompt
+    // TWINS406-001 FIX: .maybeSingle() — a stale/deleted twinId should read
+    // as "not found" (handled below), not throw a 406.
     const { data: twin, error: fetchError } = await supabase
       .from('twins')
       .select('system_prompt')
       .eq('id', twinId)
-      .single();
+      .maybeSingle();
 
     if (fetchError || !twin) {
       console.error('Failed to fetch Twin system prompt:', fetchError);
