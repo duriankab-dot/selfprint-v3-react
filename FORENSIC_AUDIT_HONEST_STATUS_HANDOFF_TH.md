@@ -297,6 +297,15 @@ CRA convention ใน Vite project — `process.env.REACT_APP_*` = `undefined` �
 
 ---
 
+## สถานะการแก้ไข (อัพเดต 1 ก.ย. 2026)
+
+| รอบ | วันที่ | สิ่งที่แก้ |
+|-----|--------|-----------|
+| P0 | 1 ก.ย. 2026 | ชื่อตาราง DB ทั้งหมด, JWT auth nova/twin, CF routes stubs, env.example, circular import, Map.get()! |
+| P1 | 1 ก.ย. 2026 | .single()→.maybeSingle() x14, localhost fallbacks, Stripe stub dead code, OG escape, memory leaks, unified-handler JWT userId |
+
+---
+
 ## ตารางสรุปปัญหาทั้งหมด
 
 | # | ระดับ | หมวด | ปัญหา | ไฟล์หลัก |

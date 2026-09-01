@@ -38,7 +38,11 @@ export async function submitPersonalModelFeedback(
   payload: FeedbackSubmissionPayload
 ): Promise<FeedbackResponse> {
   try {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+    if (!apiBaseUrl) {
+      console.warn('[PersonalModel] VITE_API_BASE_URL not set — feedback submission disabled');
+      return { success: false, message: 'API not configured', calibration: { status: 'scheduled', description: 'API not configured' } };
+    }
     const endpoint = `${apiBaseUrl}/api/personal-model`;
 
     const response = await fetch(endpoint, {
@@ -83,7 +87,11 @@ export async function submitPersonalModelFeedback(
  */
 export async function getPersonalModelStatus(userId: string) {
   try {
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? '';
+    if (!apiBaseUrl) {
+      console.warn('[PersonalModel] VITE_API_BASE_URL not set — status check disabled');
+      return null;
+    }
     const endpoint = `${apiBaseUrl}/api/personal-model/status?userId=${userId}`;
 
     const response = await fetch(endpoint, {

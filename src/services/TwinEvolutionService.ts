@@ -133,7 +133,7 @@ export async function evolveTwin(
     if (updateError) throw updateError;
 
     // 2. Create evolution history record
-    const { error: historyError } = await supabase
+    const { data: historyData, error: historyError } = await supabase
       .from('twin_evolution_history')
       .insert({
         twin_id: twinId,
@@ -144,9 +144,10 @@ export async function evolveTwin(
         metrics_snapshot: metrics,
       })
       .select()
-      .single();
+      .maybeSingle();
 
     if (historyError) throw historyError;
+    if (!historyData) throw new Error('Evolution history record not created');
 
     // 3. Create evolution memory (for Twin context)
     const stageInfo = getStageInfo(newStage);
@@ -210,7 +211,7 @@ export async function getEvolutionStatus(
       .select('stage, created_at')
       .eq('id', twinId)
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
 
     if (twinError || !twin) {
       return { success: false };
@@ -304,7 +305,7 @@ export async function notifyEvolution(
     const stageInfo = getStageInfo(newStage);
 
     // Create in-app notification
-    await supabase.from('notifications').insert({
+    const { error: notifyError } = await supabase.from('notifications').insert({
       user_id: userId,
       title: `${twinName} has evolved!`,
       message: `Your Twin reached ${stageInfo.name}: ${stageInfo.description}`,
@@ -313,9 +314,10 @@ export async function notifyEvolution(
       read: false,
       created_at: new Date().toISOString(),
     });
+    if (notifyError) console.error('Failed to insert notification:', notifyError.message);
 
     // Log evolution event for analytics
-    await supabase.from('analytics_events').insert({
+    const { error: analyticsError } = await supabase.from('analytics_events').insert({
       user_id: userId,
       event_type: 'twin_evolution',
       event_data: {
@@ -326,6 +328,7 @@ export async function notifyEvolution(
       },
       created_at: new Date().toISOString(),
     });
+    if (analyticsError) console.error('Failed to insert analytics_events:', analyticsError.message);
   } catch (error) {
     console.error('Error notifying evolution:', error);
     // Silently fail - evolution already succeeded

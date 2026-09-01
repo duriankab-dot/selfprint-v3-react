@@ -97,7 +97,12 @@ export function usePushSubscription(): PushSubscriptionResult {
       });
 
       // Step 4: Send subscription to backend
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL ?? '';
+      if (!backendUrl) {
+        console.warn('[PushSubscription] VITE_BACKEND_URL not set — push subscription disabled');
+        setIsLoading(false);
+        return false;
+      }
       const response = await fetch(`${backendUrl}/api/push`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -145,7 +150,13 @@ export function usePushSubscription(): PushSubscriptionResult {
       await sub.unsubscribe();
 
       // Notify backend (optional — proceed even if fails)
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL ?? '';
+      if (!backendUrl) {
+        console.warn('[PushSubscription] VITE_BACKEND_URL not set — push subscription disabled');
+        setIsSubscribed(false);
+        setIsLoading(false);
+        return true;
+      }
       await fetch(`${backendUrl}/api/push`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },

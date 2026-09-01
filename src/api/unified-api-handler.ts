@@ -1,3 +1,7 @@
+// ⚠️ DEAD CODE — DO NOT USE. Real handler: api/unified-handler.ts
+// This file is a frontend stub that is NOT wired to any route in CF Pages or Vercel.
+// It must not be called in production. The real server-side handler is api/unified-handler.ts.
+
 /**
  * Unified API Handler
  *
@@ -419,16 +423,8 @@ async function handleStripe(request: Request, action: string, url: URL): Promise
       });
     }
 
-    // Placeholder: actual Stripe integration handled in service
-    return Response.json({
-      success: true,
-      data: {
-        checkoutUrl: '/stripe/checkout',
-        sessionId: 'session_' + Date.now(),
-        successUrl,
-        cancelUrl,
-      },
-    } as ApiResponse);
+    // ⚠️ DEAD CODE — this stub must never be called in production.
+    throw new Error('DEAD CODE: Use api/unified-handler.ts instead');
   }
 
   return Response.json(

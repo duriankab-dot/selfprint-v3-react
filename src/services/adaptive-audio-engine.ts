@@ -51,6 +51,7 @@ export class AdaptiveAudioEngine {
   private deviceProfile: DeviceProfile | null = null;
   private cachedAudioResources = new Map<string, AudioBuffer>();
   private connectionChangeListener: ((profile: NetworkProfile) => void) | null = null;
+  private _networkChangeHandler: (() => void) | null = null;
 
   /**
    * Detect network profile using Connection API
@@ -84,13 +85,14 @@ export class AdaptiveAudioEngine {
 
     this.networkProfile = profile;
 
-    // Listen for network changes
-    if (connection.addEventListener) {
-      connection.addEventListener('change', () => {
+    // Listen for network changes — store handler reference so it can be removed in destroy()
+    if (connection.addEventListener && !this._networkChangeHandler) {
+      this._networkChangeHandler = () => {
         this.networkProfile = null; // Invalidate cache
         const updatedProfile = this.getNetworkProfile();
         this.connectionChangeListener?.(updatedProfile);
-      });
+      };
+      connection.addEventListener('change', this._networkChangeHandler);
     }
 
     return profile;
@@ -245,6 +247,23 @@ export class AdaptiveAudioEngine {
     const network = this.getNetworkProfile();
     const device = this.getDeviceProfile();
     return this.computeAudioProfile(network, device);
+  }
+
+  /**
+   * Destroy: remove event listeners and clear state to prevent memory leaks
+   */
+  destroy(): void {
+    const connection = (navigator as any).connection ||
+                      (navigator as any).mozConnection ||
+                      (navigator as any).webkitConnection;
+    if (connection && this._networkChangeHandler) {
+      connection.removeEventListener('change', this._networkChangeHandler);
+      this._networkChangeHandler = null;
+    }
+    this.cachedAudioResources.clear();
+    this.networkProfile = null;
+    this.deviceProfile = null;
+    this.connectionChangeListener = null;
   }
 
   /**

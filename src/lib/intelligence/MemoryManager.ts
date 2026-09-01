@@ -71,9 +71,10 @@ export class MemoryManager {
           tags: tags || [],
         })
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new IntelligenceError('Memory not returned after insert', 'INSERT_FAILED');
 
       return this.mapFromDB(data);
     } catch (error) {
@@ -135,7 +136,7 @@ export class MemoryManager {
         .from('personal_memory')
         .select('*')
         .eq('id', memoryId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (!data) throw new IntelligenceError('Memory not found', 'NOT_FOUND', 404);
@@ -175,9 +176,10 @@ export class MemoryManager {
         })
         .eq('id', memoryId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new IntelligenceError('Memory not found', 'NOT_FOUND', 404);
       return this.mapFromDB(data);
     } catch (error) {
       throw new IntelligenceError(
@@ -228,9 +230,10 @@ export class MemoryManager {
         })
         .eq('id', memoryId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!data) throw new IntelligenceError('Memory not found', 'NOT_FOUND', 404);
       return this.mapFromDB(data);
     } catch (error) {
       throw new IntelligenceError(
