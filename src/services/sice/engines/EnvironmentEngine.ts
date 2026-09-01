@@ -104,11 +104,12 @@ export class EnvironmentEngine extends SICEBase {
       }
 
       // Fetch Twin's latest memories to infer mood
+      // TWINS406-001 FIX: .maybeSingle() — no Twin yet is a normal state.
       const { data: twin } = await supabase
         .from('twins')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) {
         return { currentMood: 'neutral', activeWorld: 'general', dataPoints: 0 };

@@ -63,11 +63,12 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
       }
 
       // Get Twin first
+      // TWINS406-001 FIX: .maybeSingle() — no Twin yet is a normal state.
       const { data: twin } = await supabase
         .from('twins')
         .select('id')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (!twin) {
         return this.getDefaultAnalysis();
