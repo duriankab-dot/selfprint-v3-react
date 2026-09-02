@@ -13,7 +13,7 @@ export class FutureSelfEngine extends SICEBase {
     super(
       10,
       'FutureSelfEngine',
-      'Analyzes future trajectory and long-term vision'
+      'วิเคราะห์วิถีโคจรของอนาคตและวิสัยทัศน์ระยะยาว'
     );
   }
 
@@ -206,7 +206,7 @@ export class FutureSelfEngine extends SICEBase {
    */
   private generatePersonalizedVision(goals: any[], evolution: any): string {
     if (goals.length === 0) {
-      return 'Discover and pursue your authentic aspirations';
+      return 'ค้นพบและไปตามแรงบันดาลใจของตัวเอง';
     }
 
     const goalTitles = goals
@@ -216,20 +216,20 @@ export class FutureSelfEngine extends SICEBase {
 
     // Incorporate evolution stage into vision
     const trajectorySuffix = evolution.trajectory === 'mature'
-      ? ' with deepening mastery'
+      ? ' ด้วยการเชี่ยวชาญที่ลึกขึ้น'
       : evolution.trajectory === 'developing'
-        ? ' with intentional growth'
+        ? ' ด้วยการเติบโตที่ตั้งใจ'
         : '';
 
     if (goalTitles.length === 1) {
-      return `Master ${goalTitles[0]}${trajectorySuffix} while maintaining balance in other life areas`;
+      return `เชี่ยวชาญ ${goalTitles[0]}${trajectorySuffix} พร้อมรักษาความสมดุลในด้านอื่น ๆ ของชีวิต`;
     }
 
     if (goalTitles.length >= 2) {
-      return `Harmonize progress toward ${goalTitles.join(' and ')}${trajectorySuffix} with sustained growth`;
+      return `ปรับให้สอดคล้องกับความก้าวหน้าไปยัง ${goalTitles.join(' และ ')}${trajectorySuffix} พร้อมการเติบโตอย่างยั่งยืน`;
     }
 
-    return 'Evolve toward a more intentional and purposeful future';
+    return 'พัฒนาตัวเองไปสู่อนาคตที่มีจุดประสงค์และเป้าหมายชัดเจน';
   }
 
   /**
@@ -245,20 +245,20 @@ export class FutureSelfEngine extends SICEBase {
       if (title) {
         // Create SMART milestone
         if (goal.metric) {
-          milestones.push(`Achieve ${goal.metric} toward "${title}" by ${deadline}`);
+          milestones.push(`บรรลุ ${goal.metric} ต่อ "${title}" ภายใน ${deadline}`);
         } else {
-          milestones.push(`Complete meaningful progress on "${title}" by ${deadline}`);
+          milestones.push(`บรรลุความก้าวหน้าที่มีความหมายใน "${title}" ภายใน ${deadline}`);
         }
       }
     });
 
     // Add evolution-based milestone
     if (evolution.trajectory === 'early') {
-      milestones.push('Establish consistent decision-making and reflection habits');
+      milestones.push('สร้างนิสัยการตัดสินใจและสะท้อนตัวเองอย่างสม่ำเสมอ');
     } else if (evolution.trajectory === 'developing') {
-      milestones.push('Deepen understanding of personal patterns and preferences');
+      milestones.push('เข้าใจรูปแบบและความชอบส่วนตัวของตัวเองลึกขึ้น');
     } else {
-      milestones.push('Synthesize learning into coherent life strategy');
+      milestones.push('สังเคราะห์ความรู้เป็นกลยุทธ์ชีวิตที่เชื่อมโยงกัน');
     }
 
     return milestones.slice(0, 4);
@@ -269,18 +269,18 @@ export class FutureSelfEngine extends SICEBase {
    */
   private generateVision(worlds: string[]): string {
     if (worlds.length === 0) {
-      return 'Explore and discover your authentic path forward';
+      return 'สำรวจและค้นพบเส้นทางแท้จริงของคุณ';
     }
 
     if (worlds.length === 1) {
-      return `Deepen mastery in the ${worlds[0]} domain of your life`;
+      return `เชี่ยวชาญให้ลึกขึ้นในด้าน ${worlds[0]} ของชีวิตของคุณ`;
     }
 
     if (worlds.length >= 3) {
-      return `Integrate wisdom across ${worlds.length} life domains into a coherent whole`;
+      return `รวมสติปัญญาข้ามด้าน ${worlds.length} ของชีวิตเข้าเป็นเนื้อหนึ่ง`;
     }
 
-    return `Balance and grow across ${worlds.join(' and ')} dimensions`;
+    return `สมดุลและเติบโตข้ามมิติ ${worlds.join(' และ ')}`;
   }
 
   /**
@@ -290,23 +290,23 @@ export class FutureSelfEngine extends SICEBase {
     const milestones: string[] = [];
 
     if (worlds.includes('career')) {
-      milestones.push('Achieve clarity on career direction');
+      milestones.push('มีความชัดเจนเกี่ยวกับทิศทางอาชีพ');
     }
 
     if (worlds.includes('relationship')) {
-      milestones.push('Deepen meaningful connections');
+      milestones.push('เชื่อมต่อที่มีความหมายให้ลึกขึ้น');
     }
 
     if (worlds.includes('health')) {
-      milestones.push('Establish sustainable wellness practices');
+      milestones.push('สร้างการปฏิบัติในการดูแลสุขภาพที่ยั่งยืน');
     }
 
     if (worlds.includes('money')) {
-      milestones.push('Build financial confidence and stability');
+      milestones.push('สร้างความมั่นใจและความเสถียรทางการเงิน');
     }
 
     if (worlds.length === 0) {
-      milestones.push('Complete initial self-discovery');
+      milestones.push('บรรลุการค้นพบตัวเองในขั้นเริ่มต้น');
     }
 
     return milestones.slice(0, 3);
@@ -332,7 +332,7 @@ export class FutureSelfEngine extends SICEBase {
     ];
 
     const unexplored = allWorlds.filter((w) => !worlds.includes(w));
-    return unexplored.slice(0, 3).map((w) => `Explore ${w}`);
+    return unexplored.slice(0, 3).map((w) => `สำรวจ ${w}`);
   }
 
   /**
@@ -340,11 +340,11 @@ export class FutureSelfEngine extends SICEBase {
    */
   private getDefaultFuture(): any {
     return {
-      visionStatement: 'Step into your best self with Twin guidance',
+      visionStatement: 'เข้าสู่เวอร์ชันที่ดีที่สุดของคุณพร้อมคำแนะนำจากทวิน',
       focusAreas: [],
-      milestones: ['Discover your authentic path', 'Build consistent growth habits'],
-      opportunities: ['Self-discovery', 'Skill development', 'Relationship building'],
-      timeframe: '12 months',
+      milestones: ['ค้นพบเส้นทางแท้จริงของคุณ', 'สร้างนิสัยการเติบโตอย่างสม่ำเสมอ'],
+      opportunities: ['การค้นพบตัวเอง', 'พัฒนาทักษะ', 'สร้างความสัมพันธ์'],
+      timeframe: '12 เดือน',
       confidence: 40,
     };
   }

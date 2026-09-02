@@ -69,17 +69,17 @@ export class InsightEngine extends SICEBase {
     let description = '';
 
     if (emotionalState === 'stressed') {
-      title = 'Take a mindful pause';
-      description = 'Your emotional energy is depleted. Consider a short break or meditation session.';
+      title = 'พักใจด้วยสติ';
+      description = 'พลังใจของคุณถูกใช้จนหมด ลองพักสักครู่หรือการจดสมาธิดูครับ';
     } else if (emotionalState === 'energetic') {
-      title = 'Channel your energy';
-      description = 'You\'re in a high-energy state. Great time to tackle challenging goals.';
+      title = 'นำพลังของคุณไปใช้ประโยชน์';
+      description = 'คุณอยู่ในสภาพมีพลังสูง เวลาที่ดีที่สุดที่จะลุยเป้าหมายท้าทายครับ';
     } else if (emotionalState === 'reflective') {
-      title = 'Deep reflection opportunity';
-      description = 'Your mind is in a contemplative state. Journal your thoughts for clarity.';
+      title = 'โอกาสทำการสะท้อนตัวเองอย่างลึกซึ้ง';
+      description = 'จิตใจของคุณอยู่ในสภาพสำรวจตัวเอง จดบันทึกความคิดของคุณเพื่อความชัดเจนครับ';
     } else {
-      title = 'Maintain your balance';
-      description = 'You\'re in a balanced emotional state. This is optimal for decision-making.';
+      title = 'รักษาความสมดุลของคุณ';
+      description = 'คุณอยู่ในสภาพอารมณ์ที่สมดุล นี่คือเวลาที่ดีที่สุดสำหรับการตัดสินใจครับ';
     }
 
     return {
@@ -119,16 +119,16 @@ export class InsightEngine extends SICEBase {
 
       if (successRate >= 70) {
         return {
-          title: 'Strong decision-making pattern',
-          description: `You've achieved positive outcomes in ${Math.round(successRate)}% of recent decisions. Trust your instincts.`,
+          title: 'รูปแบบการตัดสินใจที่แข็งแกร่ง',
+          description: `คุณบรรลุผลลัพธ์เชิงบวกใน ${Math.round(successRate)}% ของการตัดสินใจเมื่อเร็ว ๆ นี้ เชื่อใจสัญชาตญาณของคุณครับ`,
           basedOnPatterns: ['decision_outcomes'],
           actionable: confidence >= this.ACTIONABLE_CONFIDENCE_THRESHOLD,
           relevance: Math.min(90, confidence),
         };
       } else if (successRate >= 50) {
         return {
-          title: 'Decision quality improving',
-          description: `Recent decisions show improvement. Continue learning from outcomes to refine your approach.`,
+          title: 'คุณภาพการตัดสินใจกำลังดีขึ้น',
+          description: `การตัดสินใจล่าสุดของคุณมีความดีขึ้น เรียนรู้จากผลลัพธ์เพื่อปรับปรุงวิธีการของคุณต่อไปครับ`,
           basedOnPatterns: ['decision_outcomes'],
           actionable: confidence >= this.ACTIONABLE_CONFIDENCE_THRESHOLD,
           relevance: Math.min(85, confidence),
@@ -164,8 +164,8 @@ export class InsightEngine extends SICEBase {
 
       if (totalEngagement >= 20) {
         return {
-          title: 'Consistent growth detected',
-          description: `You've gained ${totalInsights} insights from ${totalEngagement} interactions. Your self-awareness is developing.`,
+          title: 'ตรวจพบการเติบโตอย่างสม่ำเสมอ',
+          description: `คุณได้รับข้อคิด ${totalInsights} รายการจาก ${totalEngagement} ปฏิสัมพันธ์ ความตระหนักตัวของคุณกำลังพัฒนาครับ`,
           basedOnPatterns: ['engagement_trends'],
           actionable: true,
           relevance: Math.min(88, totalEngagement),

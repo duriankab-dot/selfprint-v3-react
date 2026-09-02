@@ -95,4 +95,108 @@ Landing (3 screens) → CREATE SELFPRINT → APP MODE
   decision: port it or retire the feature. (P1, not yet fixed)
 
 ---
+
+## Session 4 Status (2 ก.ย. 2026) — DB Unlock + SICE Diagnosis
+
+### ปัญหาหลักที่วินิจฉัยได้ในเซสชันนี้
+ทั้งหมดเชื่อมโยงจาก root cause เดียว: **`/api/profile` + `/api/blueprint` POST → 500** ทำให้ SICE ไม่เคยรันได้จริง → `awakening_essence` ว่าง → Twin ไม่รู้อะไรเลย → Analysis แสดง fallback ภาษาอังกฤษ
+
+### DB Fixes ที่รันผ่านแล้วใน Supabase SQL Editor ✅
+```sql
+-- decisions missing columns (42703)
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS outcome TEXT;
+ALTER TABLE decisions ADD COLUMN IF NOT EXISTS world VARCHAR(50);
+CREATE INDEX IF NOT EXISTS idx_decisions_world ON decisions(world);
+
+-- selfprint schema permissions (42501)
+GRANT USAGE ON SCHEMA selfprint TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA selfprint TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA selfprint TO anon, authenticated, service_role;
+
+-- RLS policies
+CREATE POLICY "Users can manage own profile" ON selfprint.users_profiles
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can manage own blueprint" ON selfprint.blueprints
+  FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+```
+
+### Code Fixes ที่ deploy แล้ว ✅
+| ไฟล์ | การแก้ไข |
+|------|---------|
+| `api/_utils/verify-user.ts` | เพิ่ม `auth: { autoRefreshToken: false, persistSession: false }` ใน service_role createClient |
+| `src/services/sice/engines/AIFeedbackLoop.ts` | ลบ `lastUpdated: new Date().toISOString()` ออกจาก result (เป็นสาเหตุที่ "การใช้ชีวิต" แสดง timestamp) |
+| `src/services/sice/engines/TwinStateEngine.ts` | เพิ่ม `description` field ภาษาไทยใน TwinState + interface |
+| `src/services/sice/engines/BehavioralForecastEngine.ts` | Engine 9 graceful fallback เมื่อไม่มี twinId แทน throw Error |
+| `src/pages/AnalysisPage.tsx` | UUID_RE filter ใน extractResultText, ลบ .schema('selfprint') จาก awakening_essence query |
+| `src/pages/TwinChat.tsx` | ลบ .schema('selfprint') จาก awakening_essence, SICE per-engine text extraction |
+| `src/components/AudioSettings.tsx` | Thai/English bilingual strings |
+| `src/components/AudioSettings.css` | box-sizing: border-box fix overflow mobile |
+| `public/sw.js` | CACHE_NAME v1→v3 (fix 503 stale chunks) |
+| `src/pages/CoreAwakening.tsx` | Twin birth sound: enabled=true always |
+
+### SW Cache Issue (ยังเกิดซ้ำได้)
+- เมื่อ deploy ใหม่ → หน้าขาว/503 → ต้อง Clear site data ใน Chrome DevTools → Application → Storage
+- สาเหตุ: SW cache เก่าเสิร์ฟ index.html ที่อ้าง chunk hash เก่าซึ่งไม่มีใน CF Pages แล้ว
+
+### ปัญหาที่ยังไม่แก้ (P1 — Critical Path)
+
+#### 1. /api/profile + /api/blueprint ยังอาจ 500 อยู่ — ROOT CAUSE ยังไม่ 100% แน่ใจ
+- Forensic agent วินิจฉัย: `SUPABASE_SERVICE_ROLE_KEY` ใน CF Pages อาจเป็น anon key ไม่ใช่ service_role key
+- service_role key (JWT) ต้อง decode แล้วมี `"role": "service_role"` ไม่ใช่ `"anon"`
+- env var ที่ code ใช้: `SUPABASE_URL` (ไม่ใช่ VITE_SUPABASE_URL) + `SUPABASE_SERVICE_ROLE_KEY`
+- **หากยังไม่หาย ให้รัน SQL นี้เพื่อ disable RLS บน selfprint tables:**
+  ```sql
+  ALTER TABLE selfprint.blueprints DISABLE ROW LEVEL SECURITY;
+  ALTER TABLE selfprint.users_profiles DISABLE ROW LEVEL SECURITY;
+  ```
+
+#### 2. SICE Output ภาษาอังกฤษ (เมื่อ profile/blueprint แก้แล้ว)
+- Engine output strings hardcode ภาษาอังกฤษทุกตัว
+- `SICEInput` ไม่มี `language` field
+- ไฟล์ที่ต้องแก้: `InsightEngine.ts`, `PatternDetector.ts`, `FutureSelfEngine.ts`, `PersonalContextBuilder.ts`
+- แนวทาง: เพิ่ม `language: 'th'` ใน SICEInput type → pass จาก CoreAwakeningService → แต่ละ engine branch ภาษา
+
+#### 3. Twin ยังไม่รู้ข้อมูล (เพราะ 1 ยังไม่แก้)
+- chain: profile 200 → blueprint 200 → SICE runs → awakening_essence populated → Twin/Analysis แสดงข้อมูลจริง
+
+#### 4. Analysis sections ที่ยังเป็น English
+- "ความสัมพันธ์", "การเติบโต", "อนาคต", "ความมั่งคั่ง", "แนวโน้ม", "สิ่งที่ควรให้ความสนใจ", "guidance", "nextStep"
+- เมื่อ SICE รันได้จริงด้วย Thai output → sections เหล่านี้จะได้ข้อมูลจริง
+- บางส่วนยัง hardcode English ใน engine — ต้องแปลแยก
+
+#### 5. TTS เสียงไม่ match ภาษา
+- Twin พูดภาษาอังกฤษแม้ UI เป็นไทย — ต้องตรวจ voice param ใน TTS call
+
+#### 6. Intelligence % stuck at 60%
+- `buildFallbackResponse` hardcode `confidence: 0.6`
+- ลำดับต่ำกว่า critical path — แก้ได้หลัง SICE ทำงาน
+
+### Architecture ปัจจุบัน (ยืนยันจากโค้ด)
+```
+CF Pages (selfprint.one) ← auto-deploy from master
+  ├── functions/api/[[route]].ts → api/unified-handler.ts (catch-all handler)
+  ├── functions/api/nova.ts → Claude AI integration
+  ├── functions/api/twin.ts → Twin chat
+  └── functions/api/og.ts → OG image
+
+DB (Supabase):
+  ├── selfprint schema: users_profiles, blueprints (need SUPABASE_URL + SERVICE_ROLE_KEY)
+  └── public schema: awakening_essence, decisions, twins, user_lifecycle, twin_memories
+
+SICE (12 engines client-side):
+  E1=PersonalContextBuilder, E2=PatternDetector, E3=InsightEngine,
+  E4=AIFeedbackLoop, E5=TwinStateEngine, E9=BehavioralForecastEngine,
+  E10=FutureSelfEngine, E12=DecisionIntelligenceEngineAdapter
+  → SICEOrchestrator → CoreAwakeningService → awakening_essence (DB)
+```
+
+### Priority Queue สำหรับ Session ถัดไป
+1. **[P0]** ยืนยัน SUPABASE_SERVICE_ROLE_KEY ใน CF Pages → test user ใหม่ → profile+blueprint 200
+2. **[P0]** เมื่อ profile/blueprint ผ่าน: test full onboarding flow ด้วย user ใหม่ → ดูว่า SICE รันครบ 12 engines
+3. **[P1]** แปล SICE engine output strings เป็นภาษาไทย (InsightEngine, PatternDetector, FutureSelfEngine)
+4. **[P1]** Analysis "ภาพรวมส่วนตัว" → narrative prose ไทย 400-500 คำจาก 12 SICE engines
+5. **[P2]** TTS language fix
+6. **[P2]** Intelligence % dynamic (ไม่ hardcode 0.6)
+
+---
 Full glossary and deep context: `memory/`
