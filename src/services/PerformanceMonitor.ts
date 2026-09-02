@@ -163,6 +163,7 @@ export function getMetricsSummary(): {
 
 /**
  * Report metrics to backend
+ * Sends collected metrics to /api/metrics for persistence in Supabase
  */
 export async function reportMetrics(userId?: string): Promise<void> {
   try {
@@ -176,7 +177,7 @@ export async function reportMetrics(userId?: string): Promise<void> {
       timestamp: new Date().toISOString(),
     };
 
-    // Send to backend
+    // Send to backend for persistence
     await fetch('/api/metrics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -184,6 +185,7 @@ export async function reportMetrics(userId?: string): Promise<void> {
     });
   } catch (err) {
     // Silently fail to avoid impacting app
+    console.warn('[PerformanceMonitor] Metrics reporting failed:', err);
   }
 }
 
