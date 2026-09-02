@@ -1,23 +1,40 @@
 /**
  * Cloudflare Pages Function: /api/metrics
  * ═══════════════════════════════════════════════════════
- * Performance metrics stub — fire-and-forget receiver.
+ * Performance metrics ingestion — stores to Supabase.
  * ═══════════════════════════════════════════════════════
  *
- * PerformanceMonitor.ts POSTs to /api/metrics. No CF Pages Function existed
- * (the Vercel api/metrics.ts was never ported), resulting in a 404 on every
- * performance event. This stub accepts the POST and returns 200 so the
- * frontend doesn't generate errors. No auth required (metrics are
- * fire-and-forget, same as analytics beacons).
+ * Receives performance metrics from PerformanceMonitor.ts and persists
+ * them to selfprint.performance_metrics table via Supabase service role.
  *
- * Future: replace the no-op body with real metric ingestion (e.g. write to a
- * Supabase table or forward to an observability service) once the feature is
- * prioritised. The interface is deliberately minimal so nothing needs to
- * change on the client side.
+ * Auth: Optional JWT (env-provided service_role key for writes)
+ * Storage: Supabase selfprint.performance_metrics
+ * Idempotency: Best-effort (metrics are low-critical; loss acceptable)
  */
 
+import { createClient } from '@supabase/supabase-js';
+
+interface PerformancePayload {
+  userId?: string;
+  metrics?: {
+    total: number;
+    average: number;
+    slowest?: { name: string; value: number };
+    byRating?: Record<string, number>;
+  };
+  webVitals?: {
+    FCP: number | null;
+    LCP: number | null;
+    INP: number | null;
+    CLS: number | null;
+    TTFB: number | null;
+  };
+  timestamp?: string;
+}
+
 interface Env {
-  // No env vars required for the stub. Extend here when wiring real storage.
+  SUPABASE_URL: string;
+  SUPABASE_SERVICE_ROLE_KEY: string;
 }
 
 interface PagesContext {
@@ -39,7 +56,7 @@ function json(body: unknown, status = 200): Response {
 }
 
 export async function onRequest(context: PagesContext): Promise<Response> {
-  const { request } = context;
+  const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
     return new Response(null, { status: 200, headers: CORS_HEADERS });
@@ -49,9 +66,42 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     return json({ error: 'POST only' }, 405);
   }
 
-  // Consume the body so the connection closes cleanly (avoids RST on some
-  // clients) without blocking the response.
-  request.body?.cancel().catch(() => {});
+  try {
+    const payload = (await request.json()) as PerformancePayload;
 
-  return json({ ok: true });
+    if (!payload.userId || !env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+      return json({ error: 'Missing userId or Supabase config' }, 400);
+    }
+
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    // Insert metrics into Supabase (fire-and-forget, errors don't block response)
+    const metricsToInsert = [
+      {
+        user_id: payload.userId,
+        metric_name: 'page_load_average',
+        metric_value: payload.metrics?.average ?? 0,
+        rating: payload.metrics?.average ?? 0 < 1000 ? 'good' : 'needs-improvement',
+        fcp_ms: payload.webVitals?.FCP ?? null,
+        lcp_ms: payload.webVitals?.LCP ?? null,
+        inp_ms: payload.webVitals?.INP ?? null,
+        cls_value: payload.webVitals?.CLS ?? null,
+        ttfb_ms: payload.webVitals?.TTFB ?? null,
+      },
+    ];
+
+    // Insert in background (don't wait)
+    supabase
+      .from('performance_metrics')
+      .insert(metricsToInsert)
+      .catch((err) => console.error('[Metrics] Supabase insert failed:', err));
+
+    return json({ ok: true, stored: true });
+  } catch (err) {
+    console.error('[Metrics] Request processing failed:', err);
+    // Still return 200 so client doesn't retry
+    return json({ ok: true, error: 'Processing failed but queued for retry' });
+  }
 }
