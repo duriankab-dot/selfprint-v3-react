@@ -70,7 +70,7 @@ export class PatternDetector extends SICEBase {
 
     if (avgPerDay >= 2) {
       patterns.push({
-        name: 'Frequent decision-maker',
+        name: 'ผู้ตัดสินใจอย่างต่อเนื่อง',
         frequency: Math.round(avgPerDay * 10) / 10,
         lastObserved: decisions[0]?.created_at || new Date().toISOString(),
         impact: 'positive',
@@ -85,7 +85,7 @@ export class PatternDetector extends SICEBase {
 
     if (successRate >= 60) {
       patterns.push({
-        name: 'Successful decision pattern',
+        name: 'รูปแบบการตัดสินใจที่ประสบความสำเร็จ',
         frequency: successfulDecisions,
         lastObserved: decisions.find((d: any) => d.outcome === 'positive')?.created_at || new Date().toISOString(),
         impact: 'positive',
@@ -103,7 +103,7 @@ export class PatternDetector extends SICEBase {
 
     if (topTopic && topTopic[1] >= 3) {
       patterns.push({
-        name: `Recurring focus: ${topTopic[0]}`,
+        name: `จุดโฟกัสที่ซ้ำ ๆ: ${topTopic[0]}`,
         frequency: topTopic[1],
         lastObserved: new Date().toISOString(),
         impact: 'neutral',
