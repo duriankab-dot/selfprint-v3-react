@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — HONEST STATUS TH
 ## SELFPRINT V3 — Living Handoff Document
-**อัพเดตล่าสุด:** 2 กันยายน 2026 (Session 6 — P2 Production Verification Complete)
+**อัพเดตล่าสุด:** 2 กันยายน 2026 (Session 7 — AnalysisNarrative Integration + P2 100% Complete)
 **เขียนโดย:** jb_DEV + Claude
 **วัตถุประสงค์:** เอกสารตั้งต้นสำหรับ AI agent ทุกตัวที่จะเข้ามาทำงานต่อ — อ่านไฟล์นี้ก่อนแตะโค้ดใดๆ ห้ามเชื่อ HANDOFF_*.md / PHASE_A*.md / SESSION_*.md ไฟล์อื่น
 
@@ -20,6 +20,8 @@
 | /api/metrics | ✅ Real Supabase storage (Session 6) |
 | /api/autonomy-log | ✅ Real Supabase storage (Session 6) |
 | PerformanceMonitor.ts | ✅ re-enabled + reports to /api/metrics |
+| Analysis Narrative | ✅ Wired to AnalysisPage (Session 7) |
+| P2 Status | ✅ 100% COMPLETE — Ready P3 |
 | UI/UX redesign | ⏳ วางแผนแล้ว ยังไม่ implement |
 | Rate limiting (CF) | ⚠️ in-memory per isolate (ไม่ scale) |
 | Code splitting/perf | ❌ ยังไม่แตะ — งาน architecture ใหญ่ |
@@ -117,6 +119,14 @@ personal_contexts          ← plural
 - ✅ TypeScript strict: `tsc -b --noEmit` = 0 errors
 - ✅ Commit 2c62758 LIVE on Cloudflare Pages (selfprint.one)
 - ✅ Zero stubs remaining — all endpoints production-ready
+
+### Session 7 — AnalysisNarrative Integration ✅ COMPLETE
+- ✅ AnalysisPage.tsx wired to generateAnalysisNarrative() (Session 5 integration)
+- ✅ Import generateAnalysisNarrative + OrchestratorResult type
+- ✅ useMemo generates 400-500 word Thai narrative from SICE results
+- ✅ Render in "01 ภาพรวมตัวตน" as "📖 บทสรุปวิเคราะห์ส่วนตัว"
+- ✅ Graceful fallback for incomplete SICE data
+- ✅ TypeScript strict: 0 errors (type casting verified)
 
 ---
 

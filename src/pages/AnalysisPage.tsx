@@ -35,8 +35,9 @@ import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/services/supabase-service';
 import { useVoiceTwin } from '@/hooks/useVoiceTwin';
 import { WORLDS } from '@/constants/worlds';
+import { generateAnalysisNarrative } from '@/lib/intelligence/AnalysisNarrativeBuilder';
 import type { WorldId } from '@/constants/worlds';
-import type { SICEOutput } from '@/types/sice';
+import type { SICEOutput, OrchestratorResult } from '@/types/sice';
 import '../styles/analysis.css';
 
 // ============================================================================
@@ -270,6 +271,34 @@ const AnalysisPage: React.FC = () => {
   }, [displayAnalysis, setAnalysis]);
 
   const isLoading = ctxLoading || patLoading;
+
+  // Generate Thai narrative from 12 SICE engines (Session 5 integration)
+  const analysisNarrative = useMemo(() => {
+    if (!essenceAnalysis?._siceResults || !essenceAnalysis?._synth) return '';
+    try {
+      return generateAnalysisNarrative({
+        userId: userId || '',
+        timestamp: new Date().toISOString(),
+        results: essenceAnalysis._siceResults,
+        synthesis: {
+          ...essenceAnalysis._synth,
+          conflicts: [],
+        } as any,
+        personalIntelligence: {
+          userUnderstanding: essenceAnalysis._pi?.userUnderstanding ?? 0,
+          recommendedAction: essenceAnalysis._pi?.recommendedAction ?? '',
+          confidence: essenceAnalysis._pi?.confidence ?? 0,
+          insights: essenceAnalysis._pi?.insights ?? [],
+          nextStepsSuggested: essenceAnalysis._pi?.nextStepsSuggested ?? [],
+          warningsOrCautions: essenceAnalysis._pi?.warningsOrCautions ?? [],
+        } as any,
+        totalExecutionTime: 0,
+      } as OrchestratorResult);
+    } catch (err) {
+      console.warn('[AnalysisPage] Failed to generate narrative:', err);
+      return '';
+    }
+  }, [essenceAnalysis, userId]);
 
   // --------------------------------------------------------------------------
   // FULLANALYSIS-001: play the full analysis as speech.
@@ -578,6 +607,14 @@ const AnalysisPage: React.FC = () => {
                     return e1 ? extractResultText(e1.result) : displayAnalysis.selfOverview;
                   })()}
                 </p>
+                {analysisNarrative && (
+                  <div className="analysis__narrative-section" style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(59,130,246,0.05)', borderRadius: '0.5rem', borderLeft: '3px solid rgb(59,130,246)' }}>
+                    <h3 style={{ marginTop: 0, fontSize: '0.95rem', fontWeight: 600, color: 'rgb(59,130,246)' }}>
+                      {isTh ? '📖 บทสรุปวิเคราะห์ส่วนตัว' : '📖 Analysis Summary'}
+                    </h3>
+                    <p style={{ margin: '0.75rem 0 0 0', lineHeight: 1.6, fontSize: '0.95rem' }}>{analysisNarrative}</p>
+                  </div>
+                )}
                 {context && (
                   <div className="analysis__meta-row">
                     <span className="analysis__meta-item">
