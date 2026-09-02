@@ -62,7 +62,6 @@ export class AIFeedbackLoop extends SICEBase {
           ),
           improvements,
           warnings,
-          lastUpdated: new Date().toISOString(),
         };
       } catch (err) {
         console.error('Feedback loop error:', err);
