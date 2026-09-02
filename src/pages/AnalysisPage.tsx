@@ -44,9 +44,18 @@ import '../styles/analysis.css';
 // ============================================================================
 
 const ENGINE_TO_WORLD: Record<number, WorldId> = {
-  1: 'self', 2: 'mind', 3: 'relationship', 4: 'love',
-  5: 'career', 6: 'wealth', 7: 'life', 8: 'growth',
-  9: 'decision', 10: 'purpose', 11: 'wellbeing', 12: 'future',
+  1: 'self',         // PersonalContextBuilder — ตัวตน
+  2: 'mind',         // PatternDetector — รูปแบบความคิด
+  3: 'purpose',      // InsightEngine (synthesis) — เป้าหมายและความหมาย
+  4: 'life',         // AIFeedbackLoop — บทเรียนชีวิต
+  5: 'relationship', // TwinStateEngine — ความสัมพันธ์กับตัวเอง
+  6: 'love',         // ExperienceEngine — ประสบการณ์และอารมณ์
+  7: 'wellbeing',    // EnvironmentEngine — สภาพแวดล้อมและสุขภาวะ
+  8: 'career',       // BadgeEngine — ความสำเร็จ
+  9: 'growth',       // BehavioralForecastEngine — แนวโน้มการเติบโต
+  10: 'future',      // FutureSelfEngine — ตัวตนในอนาคต
+  11: 'decision',    // MemoryManagerEngine — การตัดสินใจจากความทรงจำ
+  12: 'wealth',      // DecisionIntelligenceAdapter — ทรัพยากรและคุณค่า
 };
 
 /** Extract a human-readable string from a SICEOutput result (unknown shape). */
@@ -415,7 +424,7 @@ const AnalysisPage: React.FC = () => {
             <h2>{isTh ? 'ยังไม่มีข้อมูลเพียงพอ' : 'Not enough data yet'}</h2>
             <p>
               {isTh
-                ? 'ใช้ Selfprint ต่อไปสักระยะ บันทึกความทรงจำและ reflection เพื่อให้ ฝาแฝด สร้างการวิเคราะห์ที่ชัดเจนขึ้น'
+                ? 'ใช้ Selfprint ต่อไปสักระยะ บันทึกความทรงจำและ reflection (สิ่งที่คิด) เพื่อให้ ฝาแฝดของคุณ สร้างการวิเคราะห์ที่ชัดเจนขึ้น'
                 : 'Keep using Selfprint a while longer — log memories and reflections so your twin can build a clearer analysis'}
             </p>
             <button className="analysis__back-btn" onClick={() => navigate('/dashboard')}>
@@ -447,14 +456,6 @@ const AnalysisPage: React.FC = () => {
                   <p className="analysis__summary-lead">{essenceAnalysis._pi.recommendedAction}</p>
                 )}
 
-                {(essenceAnalysis._pi.insights ?? []).length > 0 && (
-                  <div className="analysis__summary-insights">
-                    {(essenceAnalysis._pi.insights ?? []).map((insight, i) => (
-                      <p key={i} className="analysis__summary-insight">{insight}</p>
-                    ))}
-                  </div>
-                )}
-
                 {(essenceAnalysis._synth.themes ?? []).length > 0 && (
                   <div className="analysis__summary-themes">
                     <span className="analysis__summary-themes-label">
@@ -481,18 +482,6 @@ const AnalysisPage: React.FC = () => {
                   </div>
                 )}
 
-                {(essenceAnalysis._pi.nextStepsSuggested ?? []).length > 0 && (
-                  <div className="analysis__summary-nextsteps">
-                    <p className="analysis__summary-nextsteps-label">
-                      {isTh ? 'ก้าวต่อไปที่แนะนำ:' : 'Recommended next steps:'}
-                    </p>
-                    <ol className="analysis__summary-nextsteps-list">
-                      {(essenceAnalysis._pi.nextStepsSuggested ?? []).map((s, i) => (
-                        <li key={i}>{s}</li>
-                      ))}
-                    </ol>
-                  </div>
-                )}
               </section>
             )}
 
@@ -574,7 +563,12 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('01') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-01">
               <SectionHeader number="01" title={isTh ? 'ภาพรวมตัวตน' : 'Self Overview'} icon="🪞" isOpen={expandedSections.has('01')} onToggle={() => toggleSection('01')} />
               <div className="analysis__section-body">
-                <p className="analysis__overview-text">{displayAnalysis.selfOverview}</p>
+                <p className="analysis__overview-text">
+                  {(() => {
+                    const e1 = essenceAnalysis?._siceResults.find(r => r.engineId === 1);
+                    return e1 ? extractResultText(e1.result) : displayAnalysis.selfOverview;
+                  })()}
+                </p>
                 {context && (
                   <div className="analysis__meta-row">
                     <span className="analysis__meta-item">
@@ -597,39 +591,30 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('02') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-02">
               <SectionHeader number="02" title={isTh ? 'รูปแบบพฤติกรรม' : 'Behavioral Patterns'} icon="📊" isOpen={expandedSections.has('02')} onToggle={() => toggleSection('02')} />
               <div className="analysis__section-body">
-                {displayAnalysis.behavioralPatterns.length === 0 ? (
-                  <p className="analysis__empty-section">
-                    {isTh
-                      ? 'ยังไม่พบรูปแบบที่ชัดเจน — ใช้งานต่อไปเพื่อให้ ฝาแฝด สังเกตรูปแบบที่ชัดเจนของคุณมากขึ้น'
-                      : 'No clear patterns yet — keep using Selfprint so your twin can notice clearer patterns'}
-                  </p>
-                ) : (
-                  <div className="analysis__pattern-list">
-                    {displayAnalysis.behavioralPatterns.map((p, i) => (
-                      <div key={i} className="analysis__pattern-item">
-                        <div className="analysis__pattern-item-header">
-                          <div>
-                            <span className="analysis__pattern-type-badge">
-                              {isTh
-                                ? (p.type === 'repeating' ? '🔁 ซ้ำ' : p.type === 'emerging' ? '🌱 เกิดขึ้นใหม่' : '🔄 เปลี่ยนแปลง')
-                                : (p.type === 'repeating' ? '🔁 Repeating' : p.type === 'emerging' ? '🌱 Emerging' : '🔄 Changing')}
-                            </span>
+                {(() => {
+                  const e2 = essenceAnalysis?._siceResults.find(r => r.engineId === 2);
+                  const text = e2 ? extractResultText(e2.result) : '';
+                  if (text) return <p className="analysis__overview-text">{text}</p>;
+                  if (displayAnalysis.behavioralPatterns.length > 0) {
+                    return (
+                      <div className="analysis__pattern-list">
+                        {displayAnalysis.behavioralPatterns.map((p, i) => (
+                          <div key={i} className="analysis__pattern-item">
                             <h3 className="analysis__pattern-name">{p.name}</h3>
+                            <p className="analysis__pattern-desc">{p.description}</p>
                           </div>
-                          <ConfidenceIndicator confidence={p.confidence} compact />
-                        </div>
-                        <p className="analysis__pattern-desc">{p.description}</p>
-                        {p.insight && (
-                          <p className="analysis__pattern-insight">💡 {p.insight}</p>
-                        )}
-                        <p className="analysis__pattern-freq">
-                          {isTh ? 'ความถี่' : 'Frequency'}: {p.frequency} · {isTh ? 'พบล่าสุด' : 'Last seen'}{' '}
-                          {p.lastDetected.toLocaleDateString(isTh ? 'th-TH' : 'en-US')}
-                        </p>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    );
+                  }
+                  return (
+                    <p className="analysis__empty-section">
+                      {isTh
+                        ? 'ยังไม่พบรูปแบบที่ชัดเจน — ใช้งานต่อไปเพื่อให้ ฝาแฝด สังเกตรูปแบบที่ชัดเจนของคุณมากขึ้น'
+                        : 'No clear patterns yet — keep using Selfprint so your twin can notice clearer patterns'}
+                    </p>
+                  );
+                })()}
               </div>
             </section>
 
@@ -637,32 +622,30 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('03') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-03">
               <SectionHeader number="03" title={isTh ? 'จุดแข็ง' : 'Strengths'} icon="💪" isOpen={expandedSections.has('03')} onToggle={() => toggleSection('03')} />
               <div className="analysis__section-body">
-                {displayAnalysis.strengths.length === 0 ? (
-                  <p className="analysis__empty-section">
-                    {isTh
-                      ? 'ฝาแฝด ยังไม่ได้ระบุจุดแข็งของคุณ — ใช้ Selfprint ต่อไปเพื่อให้ข้อมูลมากขึ้น'
-                      : "Your twin hasn't identified your strengths yet — keep using Selfprint to provide more data"}
-                  </p>
-                ) : (
-                  <div className="analysis__strength-grid">
-                    {displayAnalysis.strengths.map((s, i) => (
-                      <div key={i} className="analysis__strength-card">
-                        <div className="analysis__strength-header">
-                          <h3 className="analysis__strength-name">{s.name}</h3>
-                          <ConfidenceIndicator confidence={s.confidence} compact />
+                {(() => {
+                  const insights = essenceAnalysis?._pi.insights ?? [];
+                  const themes = essenceAnalysis?._synth.themes ?? [];
+                  const items = insights.length > 0 ? insights : themes;
+                  if (items.length === 0) {
+                    return (
+                      <p className="analysis__empty-section">
+                        {isTh
+                          ? 'ฝาแฝด ยังไม่ได้ระบุจุดแข็งของคุณ — ใช้ Selfprint ต่อไปเพื่อให้ข้อมูลมากขึ้น'
+                          : "Your twin hasn't identified your strengths yet — keep using Selfprint to provide more data"}
+                      </p>
+                    );
+                  }
+                  return (
+                    <div className="analysis__guidance-list">
+                      {items.map((item, i) => (
+                        <div key={i} className="analysis__guidance-item">
+                          <span className="analysis__guidance-bullet">✦</span>
+                          <p className="analysis__guidance-text">{item}</p>
                         </div>
-                        {s.description && (
-                          <p className="analysis__strength-desc">{s.description}</p>
-                        )}
-                        {s.evidence.length > 0 && (
-                          <p className="analysis__strength-evidence">
-                            {isTh ? `จาก ${s.evidence.length} หลักฐาน` : `From ${s.evidence.length} pieces of evidence`}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </section>
 
@@ -672,7 +655,7 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
-                    ? 'สิ่งเหล่านี้คือสิ่งที่ ฝาแฝดคุณ สังเกตว่าคุณอาจมองข้ามไป — ไม่ใช่การตัดสิน แต่เป็นพื้นที่ให้สำรวจ'
+                    ? 'สิ่งเหล่านี้คือสิ่งที่ ฝาแฝดของคุณ สังเกตว่าคุณอาจมองข้ามไป — ไม่ใช่การตัดสิน แต่เป็นพื้นที่ให้สำรวจ'
                     : "These are things your twin has noticed you might be overlooking — not a judgment, just areas worth exploring"}
                 </p>
                 {displayAnalysis.blindSpots.length === 0 ? (
@@ -701,26 +684,16 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('05') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-05">
               <SectionHeader number="05" title={isTh ? 'แนวโน้ม' : 'Trends'} icon="📈" isOpen={expandedSections.has('05')} onToggle={() => toggleSection('05')} />
               <div className="analysis__section-body">
-                {displayAnalysis.trends.length === 0 ? (
-                  <p className="analysis__empty-section">
-                    {isTh ? 'ยังไม่มีแนวโน้มการเปลี่ยนแปลงที่ชัดเจน — กลับมาดูในอีก 30 วัน' : 'No clear trends yet — check back in 30 days'}
-                  </p>
-                ) : (
-                  <div className="analysis__trend-list">
-                    {displayAnalysis.trends.map((t, i) => (
-                      <div key={i} className="analysis__trend-item">
-                        <p className="analysis__trend-desc">{t.description}</p>
-                        {t.insight && (
-                          <p className="analysis__trend-insight">💡 {t.insight}</p>
-                        )}
-                        <p className="analysis__trend-since">
-                          {isTh ? 'ตั้งแต่' : 'Since'} {t.since.toLocaleDateString(isTh ? 'th-TH' : 'en-US')} ·{' '}
-                          <ConfidenceIndicator confidence={t.confidence} compact />
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  const e9 = essenceAnalysis?._siceResults.find(r => r.engineId === 9);
+                  const text = e9 ? extractResultText(e9.result) : '';
+                  if (text) return <p className="analysis__overview-text">{text}</p>;
+                  return (
+                    <p className="analysis__empty-section">
+                      {isTh ? 'ยังไม่มีแนวโน้มการเปลี่ยนแปลงที่ชัดเจน — กลับมาดูในอีก 30 วัน' : 'No clear trends yet — check back in 30 days'}
+                    </p>
+                  );
+                })()}
               </div>
             </section>
 
@@ -728,38 +701,26 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('06') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-06">
               <SectionHeader number="06" title="Journey" icon="🗺" isOpen={expandedSections.has('06')} onToggle={() => toggleSection('06')} />
               <div className="analysis__section-body">
-                <div className="analysis__journey-stage">
-                  <span className="analysis__journey-stage-label">{isTh ? 'ตอนนี้คุณอยู่ที่:' : 'Right now you are at:'}</span>
-                  <span className="analysis__journey-stage-value">{displayAnalysis.journey.currentStage}</span>
-                </div>
-                <p className="analysis__journey-desc">{displayAnalysis.journey.description}</p>
-
-                <div className="analysis__journey-grid">
-                  {displayAnalysis.journey.growing.length > 0 && (
-                    <div className="analysis__journey-col">
-                      <h4 className="analysis__journey-col-title">🌱 {isTh ? 'สิ่งที่เติบโต' : 'Growing'}</h4>
-                      <ul className="analysis__journey-list">
-                        {displayAnalysis.journey.growing.map((g, i) => <li key={i}>{g}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {displayAnalysis.journey.changing.length > 0 && (
-                    <div className="analysis__journey-col">
-                      <h4 className="analysis__journey-col-title">🔄 {isTh ? 'สิ่งที่เปลี่ยนแปลง' : 'Changing'}</h4>
-                      <ul className="analysis__journey-list">
-                        {displayAnalysis.journey.changing.map((c, i) => <li key={i}>{c}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                  {displayAnalysis.journey.stillWorking.length > 0 && (
-                    <div className="analysis__journey-col">
-                      <h4 className="analysis__journey-col-title">⚙️ {isTh ? 'กำลังพัฒนา' : 'Still working on'}</h4>
-                      <ul className="analysis__journey-list">
-                        {displayAnalysis.journey.stillWorking.map((w, i) => <li key={i}>{w}</li>)}
-                      </ul>
-                    </div>
-                  )}
-                </div>
+                {(() => {
+                  const e3 = essenceAnalysis?._siceResults.find(r => r.engineId === 3);
+                  const journeyDesc = (e3 ? extractResultText(e3.result) : '') || displayAnalysis.journey.description;
+                  const agreements = essenceAnalysis?._synth.agreements ?? [];
+                  return (
+                    <>
+                      {journeyDesc && <p className="analysis__journey-desc">{journeyDesc}</p>}
+                      {agreements.length > 0 && (
+                        <div className="analysis__journey-col" style={{ marginTop: 'var(--space-md)' }}>
+                          <h4 className="analysis__journey-col-title">
+                            🌱 {isTh ? 'รูปแบบที่ระบบทั้ง 12 เห็นตรงกัน' : 'Patterns all 12 engines agree on'}
+                          </h4>
+                          <ul className="analysis__journey-list">
+                            {agreements.map((g, i) => <li key={i}>{g}</li>)}
+                          </ul>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             </section>
 
@@ -767,20 +728,16 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section${expandedSections.has('07') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-07">
               <SectionHeader number="07" title={isTh ? 'สิ่งที่ควรให้ความสนใจ' : 'Focus Areas'} icon="🎯" isOpen={expandedSections.has('07')} onToggle={() => toggleSection('07')} />
               <div className="analysis__section-body">
-                {displayAnalysis.focusAreas.length === 0 ? (
-                  <p className="analysis__empty-section">
-                    {isTh ? 'ฝาแฝด ยังไม่สามารถระบุพื้นที่ที่ควรให้ความสนใจได้ชัดเจน' : "Your twin can't identify clear focus areas yet"}
-                  </p>
-                ) : (
-                  <div className="analysis__focus-list">
-                    {displayAnalysis.focusAreas.map((area, i) => (
-                      <div key={i} className="analysis__focus-item">
-                        <span className="analysis__focus-number">{i + 1}</span>
-                        <span className="analysis__focus-text">{area}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  const e10 = essenceAnalysis?._siceResults.find(r => r.engineId === 10);
+                  const text = e10 ? extractResultText(e10.result) : '';
+                  if (text) return <p className="analysis__overview-text">{text}</p>;
+                  return (
+                    <p className="analysis__empty-section">
+                      {isTh ? 'ฝาแฝด ยังไม่สามารถระบุพื้นที่ที่ควรให้ความสนใจได้ชัดเจน' : "Your twin can't identify clear focus areas yet"}
+                    </p>
+                  );
+                })()}
               </div>
             </section>
 
@@ -790,21 +747,25 @@ const AnalysisPage: React.FC = () => {
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
-                    ? 'คำแนะนำเหล่านี้มาจากรูปแบบที่ ฝาแฝด สังเกตเห็น — เป็นแค่คำถามให้คุณลองสำรวจ'
-                    : "This guidance comes from patterns your twin has noticed — just questions worth exploring, not directives"}
+                    ? 'ก้าวต่อไปเหล่านี้มาจากการสังเคราะห์ของ SELFPRINT — ปรับให้เข้ากับบริบทของคุณเอง'
+                    : 'These next steps come from your SELFPRINT synthesis — adapt them to your own context'}
                 </p>
-                {displayAnalysis.guidance.length === 0 ? (
-                  <p className="analysis__empty-section">{isTh ? 'ยังไม่มีคำแนะนำเฉพาะบุคคลในตอนนี้' : 'No personal guidance yet'}</p>
-                ) : (
-                  <div className="analysis__guidance-list">
-                    {displayAnalysis.guidance.map((g, i) => (
-                      <div key={i} className="analysis__guidance-item">
-                        <span className="analysis__guidance-bullet">→</span>
-                        <p className="analysis__guidance-text">{g}</p>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {(() => {
+                  const steps = essenceAnalysis?._pi.nextStepsSuggested ?? displayAnalysis.nextSteps;
+                  if (steps.length === 0) {
+                    return <p className="analysis__empty-section">{isTh ? 'ยังไม่มีคำแนะนำเฉพาะบุคคลในตอนนี้' : 'No personal guidance yet'}</p>;
+                  }
+                  return (
+                    <div className="analysis__guidance-list">
+                      {steps.map((s, i) => (
+                        <div key={i} className="analysis__guidance-item">
+                          <span className="analysis__guidance-bullet">→</span>
+                          <p className="analysis__guidance-text">{s}</p>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             </section>
 
@@ -812,14 +773,19 @@ const AnalysisPage: React.FC = () => {
             <section className={`analysis__section analysis__section--last${expandedSections.has('09') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-09">
               <SectionHeader number="09" title="Next Step" icon="🚀" isOpen={expandedSections.has('09')} onToggle={() => toggleSection('09')} />
               <div className="analysis__section-body">
-                <div className="analysis__next-steps">
-                  {displayAnalysis.nextSteps.map((step, i) => (
-                    <div key={i} className="analysis__next-step">
-                      <div className="analysis__next-step-num">{i + 1}</div>
-                      <p className="analysis__next-step-text">{step}</p>
-                    </div>
-                  ))}
-                </div>
+                {(() => {
+                  const e12 = essenceAnalysis?._siceResults.find(r => r.engineId === 12);
+                  const e4 = essenceAnalysis?._siceResults.find(r => r.engineId === 4);
+                  const text = (e12 ? extractResultText(e12.result) : '') || (e4 ? extractResultText(e4.result) : '');
+                  if (text) return <p className="analysis__overview-text">{text}</p>;
+                  return (
+                    <p className="analysis__empty-section">
+                      {isTh
+                        ? 'ระบบยังวิเคราะห์ไม่เสร็จสมบูรณ์ — กลับมาหลังจากใช้งาน SELFPRINT เพิ่มเติม'
+                        : 'Analysis still building — come back after using SELFPRINT more'}
+                    </p>
+                  );
+                })()}
               </div>
             </section>
 
