@@ -53,7 +53,8 @@ export class BehavioralForecastEngine extends SICEBase {
       try {
         const twinId = (input as any).twinId || (input as any).context?.twinId;
         if (!twinId) {
-          throw new Error('Twin ID required for behavioral forecast');
+          // Twin ยังไม่ถูก create ตอน onboarding — return default gracefully
+          return this.generateDefaultForecast('new_user', input.userId);
         }
 
         // Analyze Twin's actual behavioral history
