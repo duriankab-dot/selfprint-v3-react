@@ -343,7 +343,10 @@ export default function TwinChat() {
     const fetchAnalysisFromDB = async () => {
       try {
         // Fetch latest awakening essence (real analysis source)
+        // SCHEMA-FIX-001: awakening_essence is in selfprint schema, not public —
+        // missing .schema() caused 0-row results, leaving Twin with no analysis.
         const { data, error } = await supabase
+          .schema('selfprint')
           .from('awakening_essence')
           .select('personal_intelligence, sice_results, synthesis')
           .eq('user_id', session.user.id)
@@ -372,13 +375,54 @@ export default function TwinChat() {
           };
           const siceArr = Array.isArray(data.sice_results) ? data.sice_results : [];
 
-          // Map PersonalIntelligence + synthesis → FullAnalysisOutput shape
+          // ────────────────────────────────────────────────────────────────────
+          // SICE-TEXT-EXTRACT: pull human-readable text from each engine result.
+          // UUIDs are filtered out (engine objects often contain userId as a key).
+          // ────────────────────────────────────────────────────────────────────
+          const UUID_PAT = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          const siceText = (engineId: number): string => {
+            const r = siceArr.find((e: { engineId?: number; result?: unknown }) => e.engineId === engineId);
+            if (!r) return '';
+            const res = r.result as unknown;
+            if (!res) return '';
+            if (typeof res === 'string') return UUID_PAT.test(res) ? '' : res;
+            if (typeof res === 'object') {
+              const obj = res as Record<string, unknown>;
+              for (const k of ['description', 'summary', 'text', 'insight', 'content', 'message', 'output', 'analysis']) {
+                if (typeof obj[k] === 'string' && obj[k] && !UUID_PAT.test(obj[k] as string)) return obj[k] as string;
+              }
+              for (const v of Object.values(obj)) {
+                if (typeof v === 'string' && v.length > 10 && !UUID_PAT.test(v)) return v;
+              }
+            }
+            return '';
+          };
+
+          // Engine assignments (mirrors AnalysisPage.tsx ENGINE_TO_WORLD):
+          // E1=PersonalContext E2=PatternDetector E3=InsightEngine
+          // E9=BehavioralForecast E10=FutureSelf E12=DecisionIntelligence
+          const e1 = siceText(1); // persona overview
+          const e2 = siceText(2); // behavioral patterns
+          const e3 = siceText(3); // insight / growth
+          const e9 = siceText(9); // behavioral forecast
+          const e10 = siceText(10); // future self
+          const e12 = siceText(12) || siceText(4); // decision / feedback
+
+          // Build overview: prefer Engine 1 analysis; fall back to recommendedAction
+          const overviewText = e1 || pi.recommendedAction || '';
+
+          // Build strengths from themes + distinct engine texts (not pi.insights, which would duplicate guidance)
+          const engineDescriptions = [e2, e3, e9, e10].filter(Boolean);
+          const themes = synth.themes ?? [];
+
+          // Map PersonalIntelligence + synthesis + SICE → FullAnalysisOutput shape
           setCurrentAnalysis({
-            selfOverview: [pi.recommendedAction, ...(pi.insights ?? []).slice(0, 2)].filter(Boolean).join(' '),
+            selfOverview: overviewText,
             behavioralPatterns: [],
-            strengths: (synth.themes ?? []).slice(0, 4).map((t, i) => ({
+            strengths: themes.slice(0, 4).map((t, i) => ({
               name: t,
-              description: (pi.insights ?? [])[i] ?? t,
+              // Use SICE engine text as description — not pi.insights (avoids duplication)
+              description: engineDescriptions[i] ?? t,
               confidence: (pi.confidence ?? 70) / 100,
               evidence: [],
             })),
@@ -391,12 +435,15 @@ export default function TwinChat() {
             trends: [],
             journey: {
               currentStage: 'awakening',
-              description: pi.recommendedAction ?? '',
-              growing: (synth.agreements ?? []).slice(0, 2),
-              changing: [],
+              // journey.description = E3 insight text or recommendedAction
+              description: e3 || pi.recommendedAction || '',
+              growing: (synth.agreements ?? []).slice(0, 3),
+              changing: e9 ? [e9] : [],
               stillWorking: [],
             },
-            focusAreas: (pi.insights ?? []).slice(0, 3),
+            // focusAreas = SICE future/decision insight (NOT the same as guidance/insights)
+            focusAreas: [e10, e12].filter(Boolean).slice(0, 3),
+            // guidance = pi.insights (one place only — not repeated in strengths)
             guidance: pi.insights ?? [],
             nextSteps: pi.nextStepsSuggested ?? [],
             generatedAt: new Date(),
