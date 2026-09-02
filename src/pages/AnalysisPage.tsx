@@ -195,8 +195,8 @@ const AnalysisPage: React.FC = () => {
     queryKey: ['awakeningEssence', userId],
     queryFn: async () => {
       if (!supabase) return null;
+      // awakening_essence is in PUBLIC schema (not selfprint) — do NOT add .schema()
       const { data, error } = await supabase
-        .schema('selfprint')
         .from('awakening_essence')
         .select('personal_intelligence, sice_results, synthesis')
         .eq('user_id', userId)

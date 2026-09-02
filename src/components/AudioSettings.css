@@ -20,6 +20,7 @@
   padding: 32px;
   max-width: 500px;
   width: 90%;
+  box-sizing: border-box; /* padding included in width → no overflow on mobile */
   color: white;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-height: 90vh;

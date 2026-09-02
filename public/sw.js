@@ -5,7 +5,9 @@
  * - Offline shell support
  */
 
-const CACHE_NAME = 'selfprint-v1';
+// Bump this version on every deploy so the activate handler clears stale cache.
+// v1→v2: fix 503 on reload caused by old chunks not being evicted.
+const CACHE_NAME = 'selfprint-v3';
 const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
   '/',

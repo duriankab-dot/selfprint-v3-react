@@ -323,8 +323,12 @@ export default function CoreAwakening() {
       // already existed but was never triggered outside the Dashboard's
       // SoundscapePlayer — play it here so the birth ceremony is actually
       // heard, not just seen.
+      // Play birth sound regardless of soundEnabled flag — the twin birth
+      // ceremony should always have audio for any user who has audio at all.
+      // soundEnabled only controls UI sound effects; birth is a ceremony.
+      // If the user hasn't interacted (no gesture), the browser silently no-ops.
       void playCelebrationSound({
-        enabled: audio.state.soundEnabled,
+        enabled: audio.state.soundEnabled || audio.state.musicEnabled || true,
         volumePercent: audio.state.volume,
       });
 
@@ -392,8 +396,8 @@ export default function CoreAwakening() {
             {isTh ? 'ไปหน้าหลักก่อน →' : 'Go to dashboard first →'}
           </button>
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ฝาแฝดของคุณกำลังตื่นขึ้น' : 'Your intelligence is awakening'}</h1>
-            <p className="text-lg text-gray-200 mb-4">{isTh ? 'SELFPRINT พาคุณมาถึงจุดนี้แล้ว' : 'SELFPRINT has brought you to this moment'}</p>
+            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ฝาแฝดของคุณกำลังตื่น' : 'Your intelligence is awakening'}</h1>
+            <p className="text-lg text-gray-200 mb-4">{isTh ? 'SELFPRINT พาคุณมาถึงแล้ว' : 'SELFPRINT has brought you to this moment'}</p>
             <p className="text-gray-300 mb-8">
               {isTh
                 ? 'ตอนนี้ AI Twin ฝาแฝดส่วนตัวของคุณกำลังถือกำเนิด — ภาพสะท้อนปัญญาเฉพาะตัวของคุณ พร้อมเติบโตไปพร้อมกันใน 12 โลกแห่งชีวิต'
@@ -403,7 +407,7 @@ export default function CoreAwakening() {
               onClick={handleIntroComplete}
               className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors"
             >
-              {isTh ? 'รับชมพิธีการตื่นของฝาแฝด' : 'Watch the awakening'}
+              {isTh ? 'รับชมพิธีการปลุกตื่นของฝาแฝด' : 'Watch the awakening'}
             </button>
           </div>
         </div>
@@ -431,14 +435,14 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ฝาแฝดของคุณตื่นขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
+          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ฝาแฝดของคุณกำเนิดขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
             {firstInsight
               ? `"${firstInsight}"`
               : isTh
-                ? '"ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมเติบโตไปพร้อมกับคุณ"'
+                ? '"ฉันคือฝาแฝดของคุณ ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมช่วยคุณ และ เติบโตไปพร้อมกันกับคุณ"'
                 : '"I know you. I\'m learning you. I\'m ready to grow with you."'}
           </p>
           <p className="text-gray-400">{isTh ? 'กำลังเข้าสู่โลก Twin...' : 'Entering the Twin world...'}</p>
