@@ -58,17 +58,25 @@ const ENGINE_TO_WORLD: Record<number, WorldId> = {
   12: 'wealth',      // DecisionIntelligenceAdapter — ทรัพยากรและคุณค่า
 };
 
+/** UUID pattern — used to skip IDs that leaked into result objects. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Extract a human-readable string from a SICEOutput result (unknown shape). */
 function extractResultText(result: unknown): string {
   if (!result) return '';
-  if (typeof result === 'string') return result;
+  if (typeof result === 'string') {
+    return UUID_RE.test(result) ? '' : result;
+  }
   if (typeof result === 'object') {
     const r = result as Record<string, unknown>;
+    // Priority: well-known keys first so we never accidentally return a userId
     for (const key of ['description', 'summary', 'text', 'insight', 'content', 'message', 'output', 'analysis']) {
-      if (typeof r[key] === 'string' && r[key]) return r[key] as string;
+      const v = r[key];
+      if (typeof v === 'string' && v && !UUID_RE.test(v)) return v;
     }
+    // Fallback: first string value that is human-readable (not UUID, not too short)
     for (const val of Object.values(r)) {
-      if (typeof val === 'string' && val.length > 10) return val;
+      if (typeof val === 'string' && val.length > 10 && !UUID_RE.test(val)) return val;
     }
   }
   return '';
@@ -188,6 +196,7 @@ const AnalysisPage: React.FC = () => {
     queryFn: async () => {
       if (!supabase) return null;
       const { data, error } = await supabase
+        .schema('selfprint')
         .from('awakening_essence')
         .select('personal_intelligence, sice_results, synthesis')
         .eq('user_id', userId)
