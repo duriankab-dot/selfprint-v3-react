@@ -8,6 +8,7 @@ import { supabase } from '../../supabase-service';
 import type { SICEInput, SICEOutput } from '../../../types/sice';
 
 export interface TwinState {
+  description?: string; // Thai-readable summary for display
   stage: number; // 1-5
   maturityScore: number; // 0-100
   worldSpecialization?: string; // How Twin specializes per world
@@ -66,7 +67,22 @@ export class TwinStateEngine extends SICEBase {
         // Get next milestone
         const nextMilestone = this.getNextMilestone(stage, maturityScore);
 
+        const STAGE_LABELS_TH = ['กำลังตื่น', 'กำลังเรียนรู้', 'กำลังพัฒนา', 'เติบโตแล้ว', 'รู้แจ้ง'];
+        const MILESTONE_TH = [
+          'การพูดคุยครั้งแรก',
+          'เขียนบันทึกแรกของคุณ',
+          'ตัดสินใจครั้งแรก',
+          'รับข้อมูลเชิงลึก 10 ครั้ง',
+          'เชี่ยวชาญโลกหนึ่งโลก',
+          'บรรลุการรู้แจ้ง',
+        ];
+        const stageTh = STAGE_LABELS_TH[Math.min(stage - 1, STAGE_LABELS_TH.length - 1)] || 'กำลังตื่น';
+        const milestoneTh = MILESTONE_TH[Math.min(stage, MILESTONE_TH.length - 1)] || 'เติบโตต่อไป';
+
         const twinState: TwinState = {
+          description: worldSpecialization
+            ? `Twin ของคุณ${stageTh} — ${worldSpecialization} • ขั้นถัดไป: ${milestoneTh}`
+            : `Twin ของคุณ${stageTh} • ขั้นถัดไป: ${milestoneTh}`,
           stage,
           maturityScore,
           worldSpecialization,
