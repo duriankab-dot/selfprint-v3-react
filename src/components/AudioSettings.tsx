@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAudio } from '@/context/AudioContext';
+import { useLanguage } from '@/context/LanguageContext';
 import './AudioSettings.css';
 
 /**
@@ -22,6 +23,8 @@ interface AudioSettingsProps {
 
 const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose }) => {
   const { state, toggleMusic, toggleSound, toggleVoice, setVolume, toggleReduceMotion } = useAudio();
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
   // Check if user has granted permission
@@ -93,22 +96,23 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
   return (
     <div className="audio-settings-modal">
       <div className="audio-settings-content">
-        <h2>Immersive Experience</h2>
+        <h2>{isTh ? '🎵 ประสบการณ์อิมเมอร์ซีฟ' : '🎵 Immersive Experience'}</h2>
 
         {/* Permission Gate */}
         {showPermissionPrompt && (
           <div className="audio-permission-prompt">
-            <p>🎵 Enable background music to enhance your experience?</p>
+            <p>{isTh ? '🎵 เปิดเพลงพื้นหลังเพื่อเพิ่มประสบการณ์?' : '🎵 Enable background music to enhance your experience?'}</p>
             <p className="permission-description">
-              Music adapts to your journey (reflection, focus, discovery, celebration) and automatically reduces when
-              your Twin speaks.
+              {isTh
+                ? 'เพลงจะปรับตามช่วงเวลาของคุณ (ไตร่ตรอง, โฟกัส, ค้นพบ, เฉลิมฉลอง) และลดเสียงอัตโนมัติเมื่อ Twin พูด'
+                : 'Music adapts to your journey (reflection, focus, discovery, celebration) and automatically reduces when your Twin speaks.'}
             </p>
             <div className="permission-actions">
               <button className="permission-enable" onClick={handleEnableImmersive}>
-                ✨ Enable Immersive
+                {isTh ? '✨ เปิดใช้งาน' : '✨ Enable Immersive'}
               </button>
               <button className="permission-skip" onClick={() => setShowPermissionPrompt(false)}>
-                Maybe Later
+                {isTh ? 'ภายหลัง' : 'Maybe Later'}
               </button>
             </div>
           </div>
@@ -126,16 +130,18 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
                   onChange={toggleMusic}
                   className="audio-setting-checkbox"
                 />
-                <span>🎵 Background Music</span>
+                <span>{isTh ? '🎵 เพลงพื้นหลัง' : '🎵 Background Music'}</span>
               </label>
-              <p className="audio-setting-desc">Ambient music adapts to your current hub (reflection, focus, discovery)</p>
+              <p className="audio-setting-desc">
+                {isTh ? 'เพลง ambient ปรับตามโซนปัจจุบัน (ไตร่ตรอง, โฟกัส, ค้นพบ)' : 'Ambient music adapts to your current hub (reflection, focus, discovery)'}
+              </p>
             </div>
 
             {/* Volume Slider (only when music enabled) */}
             {state.musicEnabled && (
               <div className="audio-setting-item">
                 <label htmlFor="music-volume" className="audio-setting-label">
-                  Volume
+                  {isTh ? 'ระดับเสียง' : 'Volume'}
                 </label>
                 <div className="audio-volume-control">
                   <span className="volume-icon">🔇</span>
@@ -163,9 +169,11 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
                   onChange={toggleSound}
                   className="audio-setting-checkbox"
                 />
-                <span>🔔 Sound Effects</span>
+                <span>{isTh ? '🔔 เสียงเอฟเฟกต์' : '🔔 Sound Effects'}</span>
               </label>
-              <p className="audio-setting-desc">Feedback sounds for interactions and milestones</p>
+              <p className="audio-setting-desc">
+                {isTh ? 'เสียงตอบสนองสำหรับการกระทำและ milestone' : 'Feedback sounds for interactions and milestones'}
+              </p>
             </div>
 
             {/* Voice Toggle */}
@@ -177,9 +185,11 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
                   onChange={toggleVoice}
                   className="audio-setting-checkbox"
                 />
-                <span>🎤 Voice</span>
+                <span>{isTh ? '🎤 เสียง Twin' : '🎤 Voice'}</span>
               </label>
-              <p className="audio-setting-desc">Your Twin can speak insights aloud</p>
+              <p className="audio-setting-desc">
+                {isTh ? 'Twin ของคุณจะพูด insight ออกเสียง' : 'Your Twin can speak insights aloud'}
+              </p>
             </div>
 
             {/* Reduce Motion */}
@@ -191,9 +201,11 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
                   onChange={toggleReduceMotion}
                   className="audio-setting-checkbox"
                 />
-                <span>⏸️ Reduce Motion</span>
+                <span>{isTh ? '⏸️ ลดการเคลื่อนไหว' : '⏸️ Reduce Motion'}</span>
               </label>
-              <p className="audio-setting-desc">Minimize animations and transitions</p>
+              <p className="audio-setting-desc">
+                {isTh ? 'ลด animation และ transition' : 'Minimize animations and transitions'}
+              </p>
             </div>
           </div>
         )}
@@ -201,7 +213,7 @@ const AudioSettings: React.FC<AudioSettingsProps> = ({ compact = false, onClose 
         {/* Close Button */}
         {onClose && (
           <button className="audio-settings-close" onClick={onClose}>
-            ✕ Close
+            {isTh ? '✕ ปิด' : '✕ Close'}
           </button>
         )}
       </div>

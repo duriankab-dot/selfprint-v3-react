@@ -343,10 +343,9 @@ export default function TwinChat() {
     const fetchAnalysisFromDB = async () => {
       try {
         // Fetch latest awakening essence (real analysis source)
-        // SCHEMA-FIX-001: awakening_essence is in selfprint schema, not public —
-        // missing .schema() caused 0-row results, leaving Twin with no analysis.
+        // awakening_essence is in PUBLIC schema — do NOT add .schema('selfprint')
+        // (table was created by migration 025 in public, not selfprint schema)
         const { data, error } = await supabase
-          .schema('selfprint')
           .from('awakening_essence')
           .select('personal_intelligence, sice_results, synthesis')
           .eq('user_id', session.user.id)
