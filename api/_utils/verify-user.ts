@@ -33,7 +33,9 @@ export function getSupabaseAdmin(env: Env): SupabaseClient<Database> | null {
   const supabaseServiceRoleKey = env.SUPABASE_SERVICE_ROLE_KEY;
   _supabaseAdmin =
     supabaseUrl && supabaseServiceRoleKey
-      ? createClient<Database>(supabaseUrl, supabaseServiceRoleKey)
+      ? createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+          auth: { autoRefreshToken: false, persistSession: false },
+        })
       : null;
   return _supabaseAdmin;
 }
