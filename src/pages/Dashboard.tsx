@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
           className="command-center-link__cta"
           onClick={() => navigate('/intelligence')}
         >
-          🧬 {isTh ? 'ดูปัญญาเชิงลึก →' : 'View Deep Intelligence →'}
+          🧬 {isTh ? 'ดูรายละเอียดปัญญาเชิงลึก →' : 'View Deep Intelligence →'}
         </button>
       </div>
       </div>

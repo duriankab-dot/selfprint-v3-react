@@ -15,7 +15,7 @@ export default function AboutPage() {
   const VALUES = isTh ? [
     { icon: '🔬', title: 'วิทยาศาสตร์จริง', desc: 'ทุกการวิเคราะห์อ้างอิงจากทฤษฎีพฤติกรรมศาสตร์ที่ผ่านการพิสูจน์ ไม่ใช่ความเชื่อหรือสถิติวันเดือนปีเกิด' },
     { icon: '🔒', title: 'ความเป็นส่วนตัวก่อน', desc: 'ข้อมูลของคุณเป็นของคุณ เข้ารหัสทั้งหมด ไม่ขาย ไม่แชร์ ลบได้ทุกเมื่อ' },
-    { icon: '🌱', title: 'เติบโตต่อเนื่อง', desc: 'AI Twin เรียนรู้และเติบโตไปพร้อมคุณ ไม่ใช่ snapshot เดียวที่ตายตัว' },
+    { icon: '🌱', title: 'เติบโตต่อเนื่อง', desc: 'AI Twin เรียนรู้และเติบโตไปพร้อมคุณ ไม่ใช่ snapshot ดูดวงอย่างเดียวที่ตายตัว' },
     { icon: '🤝', title: 'เข้าถึงได้ทุกคน', desc: 'ฟีเจอร์หลักฟรีตลอด ไม่มีกำแพงเงินที่บล็อกการรู้จักตัวเอง' },
   ] : [
     { icon: '🔬', title: 'Real science', desc: 'Every analysis is grounded in validated behavioral-science theory — not belief or birth-date statistics' },
@@ -29,7 +29,7 @@ export default function AboutPage() {
       <MetaTagManager
         title={isTh ? 'เกี่ยวกับ SELFPRINT — แพลตฟอร์ม AI วิเคราะห์พฤติกรรมเพื่อคนไทย' : 'About SELFPRINT — AI behavioral analysis platform'}
         description={isTh
-          ? 'SELFPRINT คือแพลตฟอร์มวิทยาศาสตร์พฤติกรรมที่สร้าง AI Twin เฉพาะบุคคล โดยอ้างอิงจาก 12 มิติพฤติกรรม ไม่ใช่ดวงชะตา'
+          ? 'SELFPRINT คือแพลตฟอร์มวิทยาศาสตร์พฤติกรรมที่สร้าง AI Twin ฝาแฝดเฉพาะบุคคล โดยอ้างอิงจาก 12 มิติพฤติกรรม ไม่ใช่โหราศาสตร์ดวงชะตา'
           : 'SELFPRINT is a behavioral-science platform that builds a personalized AI Twin from 12 behavioral dimensions — not astrology'}
         canonicalUrl={isTh ? '/th/about' : '/en/about'}
       />
