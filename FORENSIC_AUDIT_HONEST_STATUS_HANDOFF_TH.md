@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — HONEST STATUS TH
 ## SELFPRINT V3 — Living Handoff Document
-**อัพเดตล่าสุด:** 2 กันยายน 2026 (Session 7 — AnalysisNarrative Integration + P2 100% Complete)
+**อัพเดตล่าสุด:** 3 กันยายน 2026 (Session 10 — TD-04 + CG-03 ✅ COMPLETE, Deploy Live)
 **เขียนโดย:** jb_DEV + Claude
 **วัตถุประสงค์:** เอกสารตั้งต้นสำหรับ AI agent ทุกตัวที่จะเข้ามาทำงานต่อ — อ่านไฟล์นี้ก่อนแตะโค้ดใดๆ ห้ามเชื่อ HANDOFF_*.md / PHASE_A*.md / SESSION_*.md ไฟล์อื่น
 
@@ -22,6 +22,10 @@
 | PerformanceMonitor.ts | ✅ re-enabled + reports to /api/metrics |
 | Analysis Narrative | ✅ Wired to AnalysisPage (Session 7) |
 | P2 Status | ✅ 100% COMPLETE — Ready P3 |
+| TD-04: as any | ✅ 100% removed (50 occurrences, 10 files) |
+| CG-03: Thai i18n | ✅ translations.ts infrastructure ready |
+| CF Pages Deploy | ✅ LIVE (master c85a28a deployed 3 min ago) |
+| TypeScript | ✅ 0 errors (tsc -b --noEmit) |
 | UI/UX redesign | ⏳ วางแผนแล้ว ยังไม่ implement |
 | Rate limiting (CF) | ⚠️ in-memory per isolate (ไม่ scale) |
 | Code splitting/perf | ❌ ยังไม่แตะ — งาน architecture ใหญ่ |
