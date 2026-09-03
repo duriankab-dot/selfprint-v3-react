@@ -39,6 +39,8 @@ interface Env {
   TWIN_RATE_LIMIT?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
+  // ENVTYPE-001 — see functions/api/autonomy-log.ts
+  [key: string]: string | undefined;
 }
 
 interface PagesContext {
@@ -160,6 +162,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[functions/api/twin] Error:', msg);
-    return json({ error: 'Internal server error', message: msg }, 500);
+    // DEBUGLEAK-001: `msg` is raw Anthropic SDK error text — log only.
+    return json({ error: 'Internal server error' }, 500);
   }
 }

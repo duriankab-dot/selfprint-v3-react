@@ -17,7 +17,18 @@ import { useLanguage } from '@/context/LanguageContext';
 import { isInRollout } from '@/lib/rollout';
 import './AskCoach.css';
 
-const ROLLOUT_PERCENT = Number(import.meta.env.VITE_COACH_ROLLOUT_PERCENT ?? 10);
+// COACH404-001 FIX: default was 10, and VITE_COACH_ROLLOUT_PERCENT is not set
+// anywhere — so 10% of signed-in users were shown an "ถาม Coach" box that can
+// never work. /api/coach has NO handler on Cloudflare Pages: there is no
+// functions/api/coach.ts, and functions/api/[[route]].ts:33-40 only recognises
+// notifications | twin-evolution | sice | stripe | profile | blueprint | share,
+// so the request falls through to that file's JSON 404. The header comment
+// above ("backend เสร็จตั้งแต่ commit ed819f4") refers to api/_archived/coach.ts,
+// which is not deployed — and whose own imports are broken ('./_utils/safety.js'
+// resolves to a directory that does not exist).
+// Default is now 0 (feature hidden). To re-enable after porting the handler to
+// functions/api/coach.ts, set VITE_COACH_ROLLOUT_PERCENT in the CF Pages build env.
+const ROLLOUT_PERCENT = Number(import.meta.env.VITE_COACH_ROLLOUT_PERCENT ?? 0);
 
 type AskState = 'idle' | 'loading' | 'answered' | 'error';
 

@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "start": "ts-node server/index.ts",
     "lint": "oxlint",
+    "typecheck:functions": "tsc -p tsconfig.functions.json --noEmit",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

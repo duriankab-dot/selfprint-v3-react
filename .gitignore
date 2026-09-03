@@ -1,5 +1,13 @@
+# GITIGNORE-FIX-001 (3 ก.ย. 2026)
+# ไฟล์เดิมมีบั๊ก 2 จุดที่ทำให้กฎไม่ทำงานเลย:
+#   1. บรรทัดแรกเป็น `e2e/.auth/user.json# Logs` — `#` กลางบรรทัดไม่ใช่คอมเมนต์
+#      ใน gitignore syntax จึงกลายเป็น pattern เดียวที่ไม่ match อะไรเลย
+#   2. `"supabase/.temp/"` มีเครื่องหมายคำพูดติดมา gitignore ตีความว่าเป็นส่วนหนึ่ง
+#      ของ pattern → กฎไม่ทำงาน → supabase/.temp/ ถูก commit เข้า repo จริง
+# หมายเหตุสำคัญ: gitignore ไม่มีผลกับไฟล์ที่ "ถูก track ไปแล้ว" —
+# ดู FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md หัวข้อ SEC-01 สำหรับคำสั่ง untrack
 
-e2e/.auth/user.json# Logs
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -26,6 +34,13 @@ dist-ssr
 
 .vercel
 .env*
+# .env.example ต้อง track ไว้ (เป็นเอกสาร ไม่ใช่ secret) — `.env*` ด้านบนกินมันไปด้วย
+!.env.example
+
+# Secrets — SEC-01: KEY/ เคยถูก commit พร้อม OpenRouter API key ที่ใช้งานได้จริง
+KEY/
+*.pem
+*.key
 
 # E2E / Playwright artifacts
 test-results/
@@ -41,6 +56,5 @@ tsconfig.api-check.tmp.json
 .wrangler
 .dev.vars
 
-.vercel
-.env*
-"supabase/.temp/" 
+# Supabase local dev (เขียน service-role key ของ local stack ลงมาที่นี่)
+supabase/.temp/

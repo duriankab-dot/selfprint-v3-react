@@ -11,7 +11,8 @@ import { useLifecycleStore } from '../store/lifecycleStore';
 import { useAIContext } from '../context/AIContext';
 import { useTwin } from '../context/TwinContext';
 // P0 FIX: CoreAwakening ทำงานสร้าง Twin ไม่ใช่ Nova - ไม่ต้อง useNova()
-// (useNova เรียกใน NovaChat เท่านั้น ที่ wrap ใน NovaProvider)
+// (useNova เรียกใน NovaChat เท่านั้น — NOVAPROV-001: route นั้นถูก wrap ด้วย
+//  NovaProvider ใน App.tsx แล้ว ก่อนหน้านี้คอมเมนต์นี้ไม่จริง provider ไม่เคยถูก mount)
 import { useUserStore } from '../store/userStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { useLanguage } from '../context/LanguageContext';

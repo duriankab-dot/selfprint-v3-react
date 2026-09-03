@@ -31,11 +31,21 @@ interface ApiResponse<T = any> {
 // runtime; see that file's own fix). Built locally here instead, from the
 // real `env` object threaded through from functions/api/[[route]].ts, same
 // pattern as getSupabaseAdmin in _utils/verify-user.ts.
+//
+// ENVNAME-001 FIX: this read only `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`.
+// Those are *Vite build-time* variables. In the normal Cloudflare Pages setup
+// they are configured as build variables and are NOT bound to the Functions
+// runtime, so `env.VITE_*` came back undefined on every request, getAnonSupabase
+// returned null, and /api/twin-evolution, /api/sice/* and /api/notifications/*
+// all answered 500 "Database not initialized". Meanwhile _utils/verify-user.ts
+// in the same worker correctly reads the runtime names SUPABASE_URL /
+// SUPABASE_SERVICE_ROLE_KEY. Runtime names are now tried first, with the VITE_*
+// names kept as a fallback so nothing breaks if only those happen to be set.
 let _supabaseAnon: SupabaseClient | null | undefined;
 function getAnonSupabase(env: Env): SupabaseClient | null {
   if (_supabaseAnon !== undefined) return _supabaseAnon;
-  const url = env.VITE_SUPABASE_URL;
-  const key = env.VITE_SUPABASE_ANON_KEY;
+  const url = env.SUPABASE_URL || env.VITE_SUPABASE_URL;
+  const key = env.SUPABASE_ANON_KEY || env.VITE_SUPABASE_ANON_KEY;
   _supabaseAnon = url && key ? createClient(url, key) : null;
   return _supabaseAnon;
 }
@@ -84,7 +94,9 @@ export async function handler(request: Request, env: Env): Promise<Response> {
         response = await handleNotifications(request, action, url, env, user);
         break;
       case 'twin-evolution':
-        response = await handleTwinEvolution(request, action, url, env);
+        // TWINEVOAUTH-001: this was the only handler in the switch not given
+        // the verified `user`. See handleTwinEvolution for the ownership check.
+        response = await handleTwinEvolution(request, action, url, env, user);
         break;
       case 'sice':
         response = await handleSICE(request, action, url, env, user);
@@ -122,9 +134,12 @@ export async function handler(request: Request, env: Env): Promise<Response> {
 
     return response;
   } catch (error) {
+    // DEBUGLEAK-001 FIX: was `error: String(error)`, which returned raw
+    // exception text (including messages that name env vars and tables)
+    // verbatim to the client.
     console.error('Error in unified handler:', error);
     return Response.json(
-      { success: false, error: String(error) } as ApiResponse,
+      { success: false, error: 'Internal server error' } as ApiResponse,
       { status: 500 }
     );
   }
@@ -151,33 +166,51 @@ async function handleNotifications(request: Request, action: string, url: URL, e
         );
       }
 
+      // NOTIFCOL-001 FIX: these were camelCase (`userId`, `createdAt`, `readAt`)
+      // but notification_queue is snake_case — see
+      // supabase/migrations/030_phase_a_extended_schema.sql:94-107
+      // (user_id / created_at / read_at). PostgREST answers
+      // "column notification_queue.userId does not exist" (42703), so this
+      // endpoint returned 500 on every call.
       const { data: notifications, error } = await supabase
         .from('notification_queue')
         .select('*')
-        .eq('userId', userId)
-        .order('createdAt', { ascending: false })
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) {
-        return Response.json({ success: false, error: error.message } as ApiResponse, {
+        // DEBUGLEAK-001: log the Postgrest error, don't return it.
+        console.error('[notifications] list error:', error);
+        return Response.json({ success: false, error: 'Database error' } as ApiResponse, {
           status: 500,
         });
       }
 
-      const unread = notifications?.filter((n) => !n.readAt)?.length || 0;
+      const unread = notifications?.filter((n) => !n.read_at)?.length || 0;
       return Response.json({
         success: true,
         data: { notifications: notifications || [], total: notifications?.length || 0, unread },
       } as ApiResponse);
     }
   } else if (request.method === 'POST') {
+    // NOTIFAUTH-001 FIX: the GET 'list' branch above correctly uses the
+    // verified `user` and 403s on a mismatch, but all three POST actions took
+    // `userId` straight from the request body while the verified user object
+    // sat unused in scope — zero authorization at the application layer (only
+    // RLS on the anon client happened to contain it). Every POST action now
+    // requires a verified session and uses user.id.
+    if (!user) {
+      return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
+    }
     const body = await request.json();
 
     switch (action) {
       case 'schedule': {
-        const { userId, twinId, type, title, message, scheduledFor, timezone } = body;
-        if (!userId || !type) {
-          return Response.json({ success: false, error: 'userId and type required' } as ApiResponse, {
+        const { twinId, type, title, message, scheduledFor, timezone } = body;
+        const userId = user.id; // NOTIFAUTH-001: never body.userId
+        if (!type) {
+          return Response.json({ success: false, error: 'type required' } as ApiResponse, {
             status: 400,
           });
         }
@@ -207,7 +240,8 @@ async function handleNotifications(request: Request, action: string, url: URL, e
       }
 
       case 'mark-read': {
-        const { notificationId, userId } = body;
+        const { notificationId } = body;
+        const userId = user.id; // NOTIFAUTH-001
         if (!notificationId) {
           return Response.json({ success: false, error: 'notificationId required' } as ApiResponse, {
             status: 400,
@@ -221,14 +255,17 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           );
         }
 
+        // NOTIFCOL-001 FIX — snake_case, see the list branch above.
         const { error } = await supabase
           .from('notification_queue')
-          .update({ readAt: new Date().toISOString() })
+          .update({ read_at: new Date().toISOString() })
           .eq('id', notificationId)
-          .eq('userId', userId);
+          .eq('user_id', userId);
 
         if (error) {
-          return Response.json({ success: false, error: error.message } as ApiResponse, {
+          // DEBUGLEAK-001
+          console.error('[notifications] mark-read error:', error);
+          return Response.json({ success: false, error: 'Database error' } as ApiResponse, {
             status: 500,
           });
         }
@@ -241,10 +278,10 @@ async function handleNotifications(request: Request, action: string, url: URL, e
       }
 
       case 'record-outcome': {
-        const { decisionId, userId, twinId, decisionText, outcome, followUpDay, notes, timezone } =
-          body;
+        const { decisionId, twinId, decisionText, outcome, followUpDay, notes, timezone } = body;
+        const userId = user.id; // NOTIFAUTH-001
 
-        if (!decisionId || !userId || !['positive', 'neutral', 'negative'].includes(outcome)) {
+        if (!decisionId || !['positive', 'neutral', 'negative'].includes(outcome)) {
           return Response.json(
             { success: false, error: 'Invalid parameters' } as ApiResponse,
             { status: 400 }
@@ -270,7 +307,9 @@ async function handleNotifications(request: Request, action: string, url: URL, e
         });
 
         if (insertError) {
-          return Response.json({ success: false, error: insertError.message } as ApiResponse, {
+          // DEBUGLEAK-001
+          console.error('[notifications] record-outcome insert error:', insertError);
+          return Response.json({ success: false, error: 'Database error' } as ApiResponse, {
             status: 500,
           });
         }
@@ -317,13 +356,28 @@ async function handleNotifications(request: Request, action: string, url: URL, e
   );
 }
 
-async function handleTwinEvolution(_request: Request, _action: string, url: URL, env: Env): Promise<Response> {
+/**
+ * TWINEVOAUTH-001 FIX: this handler took `twinId` straight from the query
+ * string with no auth check at all — it was the only branch in the dispatch
+ * switch that was never even passed the verified `user`. The only reason it
+ * did not leak every twin's evolution state by id was accidental: it uses the
+ * anon client, so `auth.uid()` is NULL and the RLS policy at
+ * supabase/migrations/030_phase_a_extended_schema.sql:53 denies. Anyone
+ * "fixing" the empty results by switching to getSupabaseAdmin would have
+ * turned it into a full enumeration. Now the session is required and the row
+ * is filtered by the verified user id as well as the twin id.
+ */
+async function handleTwinEvolution(_request: Request, _action: string, url: URL, env: Env, user: VerifiedUser | null): Promise<Response> {
   const supabase = getAnonSupabase(env);
   if (!supabase) {
     return Response.json(
       { success: false, error: 'Database not initialized' } as ApiResponse,
       { status: 500 }
     );
+  }
+
+  if (!user) {
+    return Response.json({ success: false, error: 'Unauthorized' } as ApiResponse, { status: 401 });
   }
 
   if (_request.method === 'GET') {
@@ -338,10 +392,13 @@ async function handleTwinEvolution(_request: Request, _action: string, url: URL,
       .from('twin_evolution_progress')
       .select('*')
       .eq('twin_id', twinId)
+      .eq('user_id', user.id) // TWINEVOAUTH-001: ownership enforced in code, not only by RLS
       .single();
 
     if (error) {
-      return Response.json({ success: false, error: error.message } as ApiResponse, {
+      // DEBUGLEAK-001: don't return the Postgrest message to the client.
+      console.error('[twin-evolution] query error:', error);
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, {
         status: 500,
       });
     }
@@ -382,7 +439,9 @@ async function handleSICE(_request: Request, _action: string, url: URL, env: Env
       .limit(50);
 
     if (error) {
-      return Response.json({ success: false, error: error.message } as ApiResponse, {
+      // DEBUGLEAK-001
+      console.error('[sice] get-patterns error:', error);
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, {
         status: 500,
       });
     }
@@ -620,7 +679,23 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         const rawBody = await request.text();
         let event: Stripe.Event;
         try {
-          event = stripe.webhooks.constructEvent(rawBody, sig, webhookSecret);
+          // STRIPEWH-001 FIX: was the synchronous `constructEvent`, which uses
+          // Stripe's Node crypto provider and is not usable on the Cloudflare
+          // Workers runtime — every webhook would fail signature verification
+          // and return 400, so Stripe stops retrying and subscription state
+          // (checkout completed / cancelled / payment failed) silently never
+          // syncs. The async variant with SubtleCryptoProvider is the officially
+          // supported edge path. Note getStripe() already sets
+          // Stripe.createFetchHttpClient() at the client level — only the crypto
+          // provider had been missed.
+          const webCrypto = Stripe.createSubtleCryptoProvider();
+          event = await stripe.webhooks.constructEventAsync(
+            rawBody,
+            sig,
+            webhookSecret,
+            undefined,
+            webCrypto
+          );
         } catch (err) {
           const msg = err instanceof Error ? err.message : 'Webhook signature error';
           console.error('[stripe] Webhook verification failed:', msg);
@@ -648,18 +723,44 @@ async function handleStripe(request: Request, action: string, user: VerifiedUser
         return Response.json({ success: false, error: `Unknown stripe action: ${action}` } as ApiResponse, { status: 400 });
     }
   } catch (err) {
+    // DEBUGLEAK-001 FIX: `msg` here can be a config-disclosure string thrown
+    // upstream (e.g. "STRIPE_SECRET_KEY is not configured", "Env var X is not
+    // set"). Logged, not returned.
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error(`[stripe] ${action} error:`, msg);
-    return Response.json({ success: false, error: msg } as ApiResponse, { status: 500 });
+    return Response.json({ success: false, error: 'Payment service error' } as ApiResponse, { status: 500 });
   }
 }
 
 // ── handleShare ───────────────────────────────────────────────────────────────
 
+// CFBUFFER-001 FIX: this used `Buffer.from(bytes).toString('base64url')`.
+// `Buffer` is a Node global that only exists on the Cloudflare Workers
+// runtime when the `nodejs_compat` flag is enabled — and wrangler.toml:25-29
+// states that flag has to be set by hand in the CF dashboard and "is not
+// reliably picked up from this file". Verified in the built worker
+// (.wrangler/tmp/pages-*/functionsWorker-*.js): the bundler emits a bare
+// global `Buffer.from(...)`, not an import from node:buffer, so POST
+// /api/share was one unversioned dashboard toggle away from a hard
+// ReferenceError. Encoded with WebCrypto + a local base64url alphabet
+// instead — zero runtime dependencies, same 8-char output that the
+// /^[A-Za-z0-9_-]{8}$/ validator at handleShare (GET) expects.
+const B64URL_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
 function generateShareCode(): string {
   const bytes = new Uint8Array(6);
   globalThis.crypto.getRandomValues(bytes);
-  return Buffer.from(bytes).toString('base64url');
+  let out = '';
+  // 6 bytes → 8 base64url chars, no padding needed (6 is a multiple of 3).
+  for (let i = 0; i < bytes.length; i += 3) {
+    const n = (bytes[i] << 16) | (bytes[i + 1] << 8) | bytes[i + 2];
+    out +=
+      B64URL_ALPHABET[(n >> 18) & 63] +
+      B64URL_ALPHABET[(n >> 12) & 63] +
+      B64URL_ALPHABET[(n >> 6) & 63] +
+      B64URL_ALPHABET[n & 63];
+  }
+  return out;
 }
 
 // CF-PAGES-MIGRATION-001: pre-existing bug found live during production
@@ -699,16 +800,13 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       .eq('code', code)
       .maybeSingle();
     if (linkErr) {
-      // TEMP-DEBUG-SHARE-001: /api/share kept 500ing "Database error" in
-      // production even after confirming selfprint.share_links exists and
-      // is exposed. Surfacing the real Postgrest error message/code here
-      // (harmless — no user data, just a query-level error) to diagnose
-      // without needing CF dashboard log access. Revert once root-caused.
+      // DEBUGLEAK-001 FIX: TEMP-DEBUG-SHARE-001 used to return the raw
+      // Postgrest message/code/details/hint in the response body. This
+      // endpoint is UNAUTHENTICATED, and Postgrest hints routinely name
+      // schemas, tables and columns. The block was labelled "revert once
+      // root-caused" and never was. Errors now go to the worker log only.
       console.error('[share] linkErr:', linkErr);
-      return Response.json(
-        { success: false, error: 'Database error', debug: { message: linkErr.message, code: (linkErr as any).code, details: (linkErr as any).details, hint: (linkErr as any).hint } } as ApiResponse,
-        { status: 500 }
-      );
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
     }
     if (!link) {
       return Response.json({ success: false, error: 'Share link not found' } as ApiResponse, { status: 404 });
@@ -721,11 +819,9 @@ async function handleShare(request: Request, url: URL, env: Env): Promise<Respon
       .eq('is_latest', true)
       .maybeSingle();
     if (bpErr) {
+      // DEBUGLEAK-001 FIX — see the linkErr branch above.
       console.error('[share] bpErr:', bpErr);
-      return Response.json(
-        { success: false, error: 'Database error', debug: { message: bpErr.message, code: (bpErr as any).code, details: (bpErr as any).details, hint: (bpErr as any).hint } } as ApiResponse,
-        { status: 500 }
-      );
+      return Response.json({ success: false, error: 'Database error' } as ApiResponse, { status: 500 });
     }
     if (!blueprint) {
       return Response.json({ success: false, error: 'Owner has no AI Twin yet' } as ApiResponse, { status: 404 });
@@ -842,16 +938,10 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
         .select()
         .single();
       if (upsertError) {
-        // TEMP-DEBUG-PROFILE-001: production QA (2026-08-28) found POST
-        // /api/profile 500ing repeatedly during real onboarding, blocking
-        // users from ever reaching Core Awakening. Surfacing the real
-        // Postgrest error to diagnose without CF dashboard log access —
-        // revert once root-caused (see TEMP-DEBUG-SHARE-001 for precedent).
+        // DEBUGLEAK-001 FIX: TEMP-DEBUG-PROFILE-001 returned the raw Postgrest
+        // message/code/details/hint to the client. Kept in the worker log only.
         console.error('[profile] upsert error:', upsertError);
-        return Response.json(
-          { success: false, error: 'DB error', debug: { message: (upsertError as any).message, code: (upsertError as any).code, details: (upsertError as any).details, hint: (upsertError as any).hint } } as ApiResponse,
-          { status: 500 }
-        );
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
       }
       return Response.json({ success: true, profileId: (data as any)?.id, message: 'Profile saved' } as ApiResponse);
     }
@@ -859,7 +949,8 @@ async function handleProfile(request: Request, action: string, user: VerifiedUse
     return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
   } catch (error) {
     console.error('[handleProfile] Error:', error);
-    return Response.json({ success: false, error: String(error) } as ApiResponse, { status: 500 });
+    // DEBUGLEAK-001
+    return Response.json({ success: false, error: 'Internal server error' } as ApiResponse, { status: 500 });
   }
 }
 
@@ -946,13 +1037,9 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
         .select()
         .single();
       if (insertError) {
-        // TEMP-DEBUG-PROFILE-001 (see handleProfile) — same live 500 pattern
-        // hit /api/blueprint too, blocking onboarding completion.
+        // DEBUGLEAK-001 FIX — see handleProfile above.
         console.error('[blueprint] insert error:', insertError);
-        return Response.json(
-          { success: false, error: 'DB error', debug: { message: (insertError as any).message, code: (insertError as any).code, details: (insertError as any).details, hint: (insertError as any).hint } } as ApiResponse,
-          { status: 500 }
-        );
+        return Response.json({ success: false, error: 'DB error' } as ApiResponse, { status: 500 });
       }
       return Response.json({ success: true, blueprintId: (data as any)?.id, message: 'Blueprint saved' } as ApiResponse);
     }
@@ -960,7 +1047,8 @@ async function handleBlueprint(request: Request, action: string, user: VerifiedU
     return Response.json({ success: false, error: 'GET or POST only' } as ApiResponse, { status: 405 });
   } catch (error) {
     console.error('[handleBlueprint] Error:', error);
-    return Response.json({ success: false, error: String(error) } as ApiResponse, { status: 500 });
+    // DEBUGLEAK-001
+    return Response.json({ success: false, error: 'Internal server error' } as ApiResponse, { status: 500 });
   }
 }
 

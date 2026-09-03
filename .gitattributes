@@ -1,0 +1,31 @@
+# CRLF-001 (3 ก.ย. 2026)
+#
+# repo นี้ไม่เคยมี .gitattributes และ core.autocrlf ก็ไม่ได้ตั้งค่า git จึงเก็บ
+# ไบต์ตามที่เขียนลงดิสก์ตรง ๆ ผลคือสคริปต์ที่เขียนไฟล์กลับด้วย CRLF บน Windows
+# ทำให้ไฟล์ 43 ไฟล์ขึ้นเป็น "modified" ทั้งที่เนื้อหาไม่ต่างเลยแม้แต่ไบต์เดียว
+# (พิสูจน์แล้ว: git diff --stat = 8754 insertions / 8754 deletions เท่ากันเป๊ะ
+#  และ git diff --ignore-cr-at-eol = ว่างเปล่า)
+#
+# บรรทัดล่างนี้บังคับให้ text file ทุกไฟล์ถูก "เก็บ" ใน git เป็น LF เสมอ
+# โดยยังเช็คเอาต์บนดิสก์ได้ตามปกติ — ปัญหานี้จะไม่เกิดซ้ำอีก
+* text=auto eol=lf
+
+# ไฟล์ที่ต้องเป็น CRLF จริง ๆ บน Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary — ห้าม git ยุ่งกับ line ending
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.mp3 binary
+*.mp4 binary
+*.pdf binary

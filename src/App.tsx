@@ -20,6 +20,12 @@ import { PopupProvider } from './context/PopupContext';
 import { EvolutionProvider } from './context/EvolutionContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { EnvironmentProvider } from './context/EnvironmentContext';
+// NOVAPROV-001 FIX: NovaChat.tsx:23 calls useNova() unconditionally, but
+// NovaProvider was never mounted anywhere in the app — every visit to
+// /chat/nova (and /chat, which redirects there) threw "useNova must be used
+// within NovaProvider" and rendered a blank page. Scoped to the NovaChat
+// route only, so the rest of the tree keeps its current provider cost.
+import { NovaProvider } from './context/NovaContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { TwinEvolution } from './components/twin/TwinEvolution';
@@ -135,7 +141,7 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/onboarding', element: <Onboarding /> },
     { path: '/core-awakening', element: <CoreAwakening /> },
     { path: '/chat', element: <LangRedirect to="/chat/nova" /> },
-    { path: '/chat/nova', element: <NovaChat /> },
+    { path: '/chat/nova', element: <NovaProvider><NovaChat /></NovaProvider> }, // NOVAPROV-001
     { path: '/chat/twin', element: <TwinChat /> },
     { path: '/twin', element: <LangRedirect to="/chat/twin" /> },
     { path: '/dashboard', element: <Dashboard /> },

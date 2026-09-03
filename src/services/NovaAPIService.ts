@@ -11,6 +11,8 @@
  */
 
 import { getNovaPrompt, AVAILABLE_HUBS, AVAILABLE_MOODS, AVAILABLE_ARCHETYPES } from '../lib/nova-prompts/getNovaPrompt';
+// AUTHHDR-001 FIX: /api/nova returns 401 without a Bearer token.
+import { getAuthHeaders } from '../lib/supabase/client';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -78,7 +80,7 @@ export async function callNovaAPI(
 
     const response = await fetch('/api/nova', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(), // AUTHHDR-001
       body: JSON.stringify({
         system: systemPrompt,
         messages: messages.map(m => ({
@@ -189,7 +191,7 @@ If a question turns deep, personal, emotional, or needs individual guidance, war
   try {
     const response = await fetch('/api/nova', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(), // AUTHHDR-001
       body: JSON.stringify({
         system: systemPrompt,
         messages: messages.map(m => ({ role: m.role, content: m.content })),

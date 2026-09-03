@@ -1,0 +1,58 @@
+{
+  /*
+   * TSCONFIG-FUNCTIONS-001 (3 ก.ย. 2026)
+   *
+   * ปัญหา: `npm run build` = `tsc -b && vite build` และ tsconfig.json อ้างถึงแค่
+   * tsconfig.app.json (include: ["src"]) กับ tsconfig.node.json (include:
+   * ["vite.config.ts"]) เท่านั้น — แปลว่าโค้ดฝั่ง backend ทั้งหมดใน `functions/`
+   * และ `api/` **ไม่เคยถูก type-check เลยสักครั้ง**
+   *
+   * สิ่งที่ config นี้จับได้จริง (พิสูจน์แล้วรอบนี้ — มัน error 13 จุดตอนรันครั้งแรก):
+   * - `.schema('selfprint')` ที่ไม่มีอยู่ใน Database type (9 จุดใน unified-handler)
+   * - Env interface ที่ส่งเข้า verifyUser() ไม่ได้ (4 จุดใน functions/api/*)
+   *
+   * สิ่งที่ config นี้ **ยังจับไม่ได้** — พูดตรง ๆ ไม่โม้:
+   * - payload contract ระหว่าง client กับ handler (tsc มองข้ามเน็ตเวิร์กไม่ได้)
+   * - operator precedence bug ของ `rating` ใน metrics.ts — เพราะ createClient
+   *   ที่นั่นไม่ได้ใส่ generic <Database> ค่าที่ insert จึงเป็น any
+   * - `Buffer` ที่ไม่มีจริงบน Workers runtime — เพราะ "types": ["node"] ด้านล่าง
+   *   ประกาศ Buffer เป็น global ให้เอง config นี้จะ "อนุมัติ" โค้ดนั้นด้วยซ้ำ
+   *   ถ้าอยากให้จับได้ต้องติดตั้ง @cloudflare/workers-types แล้วเอา node ออก
+   *   (ยังไม่ทำ — ห้ามลาก lib ใหม่เข้ามาโดยไม่ถามก่อน)
+   *
+   * ตั้งใจ **ไม่** ผูกเข้ากับ `tsc -b` ใน build script เพื่อไม่ให้ deploy พังทันที
+   * รันแยกด้วย `npm run typecheck:functions` แล้วค่อยไล่แก้จนสะอาด จากนั้นจึงค่อย
+   * เพิ่ม { "path": "./tsconfig.functions.json" } ลงใน references ของ tsconfig.json
+   *
+   * ที่ exclude ไว้:
+   * - api/_archived/**  → dead code, import พังอยู่แล้ว ('./_utils/safety.js'
+   *   ชี้ไปยัง api/_archived/_utils/ ซึ่งไม่มีอยู่จริง)
+   * - functions/api/rate-limiter.ts → dead code (ไม่มี onRequest export จึงไม่เกิด
+   *   route และไม่มีไฟล์ไหน import เลย) และใช้ type KVNamespace ที่ต้องพึ่ง
+   *   @cloudflare/workers-types ซึ่งยังไม่ได้ติดตั้ง — ไม่ลากมาโดยไม่ถามก่อน
+   */
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "noEmit": true,
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["functions/**/*.ts", "api/**/*.ts", "api/**/*.tsx"],
+  "exclude": [
+    "api/_archived/**",
+    "api/__tests__/**",
+    "functions/api/rate-limiter.ts",
+    "node_modules",
+    "dist"
+  ]
+}
