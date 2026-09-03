@@ -274,14 +274,18 @@ const AnalysisPage: React.FC = () => {
 
   // Generate Thai narrative from 12 SICE engines (Session 5 integration)
   const analysisNarrative = useMemo(() => {
-    if (!essenceAnalysis?._siceResults || !essenceAnalysis?._synth) return '';
+    // Guard: SICE results must exist (user must have created Twin)
+    if (!essenceAnalysis?._siceResults || !essenceAnalysis?._synth) {
+      console.debug('[AnalysisPage] SICE data not yet available (Twin not created)');
+      return '';
+    }
     try {
       return generateAnalysisNarrative({
         userId: userId || '',
         timestamp: new Date().toISOString(),
-        results: essenceAnalysis._siceResults,
+        results: essenceAnalysis._siceResults || {},
         synthesis: {
-          ...essenceAnalysis._synth,
+          ...(essenceAnalysis._synth || {}),
           conflicts: [],
         } as any,
         personalIntelligence: {
