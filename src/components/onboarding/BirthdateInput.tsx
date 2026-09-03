@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
+import { t } from '@/constants/translations';
 
 interface BirthdateInputProps {
   onSubmit: (data: { dob: string; time?: string; place?: string }) => void;
@@ -15,7 +16,7 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!dob) {
-      alert(isTh ? 'กรุณากรอกวันเกิด' : 'Please enter your date of birth');
+      alert(t('birthDataRequired', language));
       return;
     }
     onSubmit({ dob, time, place });
@@ -23,10 +24,10 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-4">{isTh ? 'ข้อมูลวันเกิดของคุณ' : 'Your birth details'}</h2>
+      <h2 className="text-2xl font-bold mb-4">{t('birthDataRequired', language)}</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">{isTh ? 'วันเกิด *' : 'Date of birth *'}</label>
+          <label className="block text-sm font-medium mb-1">{t('enterBirthday', language)}</label>
           <input
             type="date"
             value={dob}

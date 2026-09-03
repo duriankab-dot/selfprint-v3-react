@@ -6,29 +6,29 @@
 
 ---
 
-## ⚡ TL;DR สถานะปัจจุบัน
+## ⚡ TL;DR สถานะปัจจุบัน (Session 12 — CG-03-P2 ✅ LIVE)
 
 | Layer | สถานะ |
 |-------|--------|
 | Production URL | ✅ selfprint.one (CF Pages, auto-deploy master) |
-| Build | ✅ ผ่าน (TypeScript strict, Vite 8, 0 errors) |
+| Build | ✅ ผ่าน (TypeScript strict, 0 errors) |
 | Database bugs (P0) | ✅ แก้+deploy แล้ว |
 | Runtime crashes (P1) | ✅ แก้+deploy แล้ว |
 | React warnings (P2) | ✅ แก้+deploy แล้ว |
 | SICE 12 Engines | ✅ ทำงานครบ (dynamic intelligence %) |
 | TTS Language | ✅ respects app locale (th-TH / en-US) |
-| /api/metrics | ✅ Real Supabase storage (Session 6) |
-| /api/autonomy-log | ✅ Real Supabase storage (Session 6) |
-| PerformanceMonitor.ts | ✅ re-enabled + reports to /api/metrics |
-| Analysis Narrative | ✅ Wired to AnalysisPage (Session 7) |
-| P2 Status | ✅ 100% COMPLETE — Ready P3 |
-| TD-04: as any | ✅ 100% removed (50 occurrences, 10 files) |
-| CG-03: Thai i18n | ✅ translations.ts infrastructure ready |
-| CF Pages Deploy | ✅ LIVE (master c85a28a deployed 3 min ago) |
-| TypeScript | ✅ 0 errors (tsc -b --noEmit) |
+| /api/metrics | ✅ Real Supabase storage |
+| /api/autonomy-log | ✅ Real Supabase storage |
+| PerformanceMonitor.ts | ✅ re-enabled + reports |
+| Analysis Narrative | ✅ Wired to AnalysisPage |
+| P2 Status | ✅ 100% COMPLETE |
+| TD-04: as any | ✅ SICE layer 100% (77 remain non-critical) |
+| CG-03: Thai i18n | ✅ Phase 1-2 LIVE (5 P0 pages + translations.ts 190+ keys) |
+| CF Pages Deploy | ✅ LIVE (master 9657ba5 deployed) |
+| TypeScript | ✅ 0 errors (tsc -b --noEmit verified) |
+| **CG-03 Phase 3** | ⏳ Ready (150 components, can automate) |
 | UI/UX redesign | ⏳ วางแผนแล้ว ยังไม่ implement |
-| Rate limiting (CF) | ⚠️ in-memory per isolate (ไม่ scale) |
-| Code splitting/perf | ❌ ยังไม่แตะ — งาน architecture ใหญ่ |
+| Rate limiting (CF) | ⚠️ in-memory per isolate |
 
 ---
 

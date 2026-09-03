@@ -157,7 +157,7 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
         {sent ? (
           <>
             <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '12px' }}>
-              {isTh ? 'เช็คอีเมลของคุณ 📬' : 'Check your email 📬'}
+              {language === 'th' ? 'เช็คอีเมลของคุณ 📬' : 'Check your email 📬'}
             </h2>
             <p style={{ fontSize: '14px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               {isTh ? (
@@ -191,17 +191,11 @@ export function ClaimAccount({ data, onDone }: ClaimAccountProps) {
                 opacity: resendCountdown > 0 ? 0.5 : 1,
               }}
             >
-              {isTh
-                ? submitting
-                  ? 'กำลังส่ง...'
-                  : resendCountdown > 0
-                    ? `ส่งใหม่ใน ${resendCountdown}s`
-                    : 'ส่งลิงก์ใหม่'
-                : submitting
-                  ? 'Sending...'
-                  : resendCountdown > 0
-                    ? `Resend in ${resendCountdown}s`
-                    : 'Resend link'}
+              {submitting
+                ? (language === 'th' ? 'กำลังส่ง...' : 'Sending...')
+                : resendCountdown > 0
+                  ? (language === 'th' ? `ส่งใหม่ใน ${resendCountdown}s` : `Resend in ${resendCountdown}s`)
+                  : (language === 'th' ? 'ส่งลิงก์ใหม่' : 'Resend link')}
             </button>
             <button
               onClick={onDone}
