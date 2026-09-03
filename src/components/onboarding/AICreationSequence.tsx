@@ -18,6 +18,7 @@ import {
 } from '@/lib/intelligence/PersonalContextInitializer';
 import { supabase } from '@/services/supabase-service';
 import { useLanguage } from '@/context/LanguageContext';
+import { t } from '@/constants/translations';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 import type { Mood } from '@/context/EmotionContext';
 
@@ -339,9 +340,7 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
                 margin: 0,
               }}
             >
-              {isTh
-                ? '⚡ AI Twin ของคุณถือกำเนิดแล้ว! มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...'
-                : "⚡ Your AI Twin has been born! Let's see what I understand about you so far..."}
+              ⚡ {t('twinRevealing', language)}! {language === 'th' ? 'มาดูกันว่าตอนนี้ฉันเข้าใจอะไรเกี่ยวกับคุณบ้าง...' : "Let's see what I understand about you so far..."}
             </p>
           </div>
         )}
