@@ -21,6 +21,7 @@ import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
 import { useEmotion } from '@/context/EmotionContext';
+import { t } from '@/constants/translations';
 import { useUserStore } from '@/store/userStore';
 import { useAuth } from '@/context/AuthContext';
 import { useTwin } from '@/context/TwinContext';
@@ -204,7 +205,7 @@ function WelcomeBackHero({ lang, twinName, onEnter }: { lang: 'th' | 'en'; twinN
   return (
     <section style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', textAlign: 'center', padding: 'clamp(48px,8vw,96px) clamp(20px,5vw,48px)', background: 'linear-gradient(135deg,var(--color-bg-primary) 0%,var(--color-bg-secondary) 100%)' }}>
       <span style={{ display: 'inline-block', background: 'var(--color-accent-primary)', color: 'white', padding: '4px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 24 }}>
-        {lang === 'th' ? 'ยินดีต้อนรับกลับ' : 'Welcome Back'}
+        {t('welcome', lang)}
       </span>
       <h1 style={{ fontSize: 'clamp(28px,4vw,52px)', fontWeight: 800, lineHeight: 1.25, marginBottom: 16, color: 'var(--color-text-primary)' }}>
         {lang === 'th' ? `${name} รอคุณอยู่` : `${name} is waiting for you`}
