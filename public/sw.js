@@ -6,8 +6,9 @@
  */
 
 // Bump this version on every deploy so the activate handler clears stale cache.
-// v1→v2: fix 503 on reload caused by old chunks not being evicted.
-const CACHE_NAME = 'selfprint-v3';
+// v1→v3: fix 503 stale chunks (Session 4)
+// v4→: force clear all old caches on activate (Session 7 fix)
+const CACHE_NAME = 'selfprint-v4';
 const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
   '/',
