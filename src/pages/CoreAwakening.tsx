@@ -16,6 +16,7 @@ import { useUserStore } from '../store/userStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { useLanguage } from '../context/LanguageContext';
 import { useAudio } from '../context/AudioContext';
+import { t } from '../constants/translations';
 import { HologramBirth } from '../components/twin/HologramBirth';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
@@ -435,7 +436,7 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ฝาแฝดของคุณกำเนิดขึ้นแล้ว!' : 'Your Twin has awakened!'}</h2>
+          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {t('twinAwakening', language)}!</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
@@ -445,14 +446,14 @@ export default function CoreAwakening() {
                 ? '"ฉันคือฝาแฝดของคุณ ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมช่วยคุณ และ เติบโตไปพร้อมกันกับคุณ"'
                 : '"I know you. I\'m learning you. I\'m ready to grow with you."'}
           </p>
-          <p className="text-gray-400">{isTh ? 'กำลังเข้าสู่โลก Twin...' : 'Entering the Twin world...'}</p>
+          <p className="text-gray-400">{t('twinGenesis', language)}...</p>
         </div>
       )}
 
       {/* COMPLETE PHASE */}
       {phase === 'complete' && (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-white">{isTh ? 'กำลังโหลดหน้าต่าง Twin...' : 'Loading the Twin window...'}</p>
+          <p className="text-white">{t('loadingPersonality', language)}...</p>
         </div>
       )}
     </div>
