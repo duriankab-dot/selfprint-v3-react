@@ -342,3 +342,39 @@ git push origin master  # trigger CF Pages auto-deploy
 ---
 
 *อัพเดตทุกครั้งที่ session สำคัญจบ — AI agent ทุกตัวอ่านก่อนเริ่มเสมอ*
+
+---
+
+## Session 8 Status (3 กันยายน 2026 — Service Worker + Tech Debt Prep)
+
+### ✅ Deployed (Master a9a0fb0)
+| Fix | Files | Status | Time |
+|-----|-------|--------|------|
+| **SW cache v5** | public/sw.js | ✅ LIVE | 9:03 AM |
+| **AnalysisPage guards** | src/pages/AnalysisPage.tsx | ✅ LIVE | 11 min ago |
+| **PerformanceMonitor safety** | src/services/PerformanceMonitor.ts | ✅ LIVE | 3 min ago |
+
+### ⏳ Pending (Next Session — FULL IMPLEMENTATION REQUIRED)
+| ID | Task | File(s) | Scope | Effort |
+|----|------|---------|-------|--------|
+| **TD-01** | Sentry DSN: `process.env.REACT_APP_` → `import.meta.env.VITE_` | SentryService.ts | Replace env var reference | 10 min |
+| **TD-03** | CF Rate Limiting: in-memory Map → CF KV persistence | functions/api/rate-limiter.ts | Full KV integration + tests | 45 min |
+| **TD-04** | Remove `as any` from SICE layer | SICEOrchestrator.ts, validators | Proper TypeScript typing | 30 min |
+| **TD-05** | structuredData.ts: replace placeholder | src/lib/seo/structuredData.ts | Real schema generation (ld+json) | 20 min |
+| **CG-03** | Thai language audit (full system) | Dashboard ✅, rest UI | Scan all .tsx for hardcoded English | 90 min |
+
+### 🚀 Next Session Instructions
+1. **Do NOT skip or mock these tasks** — all must be 100% production-ready
+2. **Token strategy**: CG-03 is heavy (~90 min) — may need 2 passes
+3. **Priority order**: TD-01 (quick) → TD-05 (quick) → TD-03 (moderate) → TD-04 (moderate) → CG-03 (heavy)
+4. **Verification**: TypeScript `tsc -b` must pass, all tasks merged to master before closing
+
+### ⚡ Quick Facts
+- **Latest deploy**: master a9a0fb0 (3 min ago — PerformanceMonitor fix + null guards)
+- **Build status**: ✅ TypeScript 0 errors, Vite build ready
+- **User action**: Clear site data in DevTools (v4→v5 cache) + reload to see fixes
+- **Database**: selfprint schema fully migrated, RLS ✅ (Session 4)
+- **SICE**: All 12 engines running, Thai output working, dynamic intelligence % ✅
+
+---
+

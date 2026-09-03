@@ -6,12 +6,20 @@
  * - FAQPage
  * - BlogPosting
  * - BreadcrumbList
+ * - LocalBusiness (with phone number + address)
+ * - SoftwareApplication
+ * - Pricing
  */
 
 const BASE_URL = 'https://selfprint.one';
 const ORGANIZATION_NAME = 'Selfprint';
 const ORGANIZATION_LOGO = `${BASE_URL}/logo.png`;
 const ORGANIZATION_EMAIL = 'hello@selfprint.app';
+
+// Business contact information (from environment or defaults)
+const BUSINESS_PHONE = import.meta.env.VITE_BUSINESS_PHONE || '+66-2-XXX-XXXX';
+const BUSINESS_ADDRESS_STREET = import.meta.env.VITE_BUSINESS_ADDRESS_STREET || 'Bangkok, Thailand';
+const BUSINESS_ADDRESS_POSTAL = import.meta.env.VITE_BUSINESS_ADDRESS_POSTAL || '10110';
 
 /**
  * Organization Schema
@@ -176,7 +184,12 @@ export function generateSoftwareApplicationSchema() {
 
 /**
  * LocalBusiness Schema
- * For local search visibility (GEO)
+ * For local search visibility (GEO) and contact information
+ *
+ * Business details are configurable via environment variables:
+ * - VITE_BUSINESS_PHONE: Business telephone number (format: +66-X-XXXX-XXXX)
+ * - VITE_BUSINESS_ADDRESS_STREET: Street address
+ * - VITE_BUSINESS_ADDRESS_POSTAL: Postal code
  */
 export function generateLocalBusinessSchema() {
   return {
@@ -186,14 +199,14 @@ export function generateLocalBusinessSchema() {
     url: BASE_URL,
     logo: ORGANIZATION_LOGO,
     description: 'Personal intelligence platform powered by AI Twin',
-    telephone: '+66-XX-XXXX-XXXX', // เปลี่ยนตามเบอร์จริง
+    telephone: BUSINESS_PHONE,
     email: ORGANIZATION_EMAIL,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: 'Bangkok, Thailand', // เปลี่ยนตามที่อยู่จริง
+      streetAddress: BUSINESS_ADDRESS_STREET,
       addressLocality: 'Bangkok',
       addressRegion: 'Bangkok',
-      postalCode: '10110',
+      postalCode: BUSINESS_ADDRESS_POSTAL,
       addressCountry: 'TH',
     },
     sameAs: [
