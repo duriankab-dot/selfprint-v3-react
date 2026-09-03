@@ -6,7 +6,7 @@
 
 ---
 
-## ⚡ TL;DR สถานะปัจจุบัน (Session 12 — CG-03-P2 ✅ LIVE)
+## ⚡ TL;DR สถานะปัจจุบัน (Session 12 FINAL — CG-03 P0+P2 ✅ COMPLETE + P3 AUTOMATION READY)
 
 | Layer | สถานะ |
 |-------|--------|
@@ -26,7 +26,7 @@
 | CG-03: Thai i18n | ✅ Phase 1-2 LIVE (5 P0 pages + translations.ts 190+ keys) |
 | CF Pages Deploy | ✅ LIVE (master 9657ba5 deployed) |
 | TypeScript | ✅ 0 errors (tsc -b --noEmit verified) |
-| **CG-03 Phase 3** | ⏳ Ready (150 components, can automate) |
+| **CG-03 Phase 3** | ✅ Automation script ready (scripts/cg03-phase3-automation.sh) |
 | UI/UX redesign | ⏳ วางแผนแล้ว ยังไม่ implement |
 | Rate limiting (CF) | ⚠️ in-memory per isolate |
 
