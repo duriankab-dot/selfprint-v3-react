@@ -1,1 +1,0 @@
-import{r as e,t}from"./jsx-runtime-BkSabwWG.js";import{n}from"./preload-helper-DoDjRTJy.js";var r=e(n(),1);t();var i=(0,r.createContext)(void 0);function a(){let e=r.useContext(i);if(!e)throw Error(`useNova must be used within NovaProvider`);return e}export{a as t};

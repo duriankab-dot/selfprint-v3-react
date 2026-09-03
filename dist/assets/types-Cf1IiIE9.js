@@ -1,1 +1,0 @@
-var e=class extends Error{code;statusCode=500;constructor(e,t,n){super(e),this.name=`IntelligenceError`,this.code=t,n&&(this.statusCode=n)}};export{e as t};
