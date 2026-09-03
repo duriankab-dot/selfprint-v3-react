@@ -10,7 +10,7 @@
  * Architecture: SICE ⊘ Orchestrator → SICEBridge → lib/intelligence → Supabase → UI
  */
 
-import type { OrchestratorResult, DetectedPattern } from '@/types/sice';
+import type { OrchestratorResult, DetectedPattern, BadgeResult } from '@/types/sice';
 import type { BehavioralPattern, EvidencePoint } from '@/lib/intelligence/types';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { BadgeEngine } from '@/lib/intelligence/BadgeEngine';
@@ -106,7 +106,7 @@ export class SICEBridge {
         };
       }
 
-      const badgeAnalysis = badgeResult.result as any;
+      const badgeAnalysis = badgeResult.result as BadgeResult;
       const unlockedBadges = badgeAnalysis?.unlockedBadges || [];
 
       if (unlockedBadges.length === 0) {
@@ -114,7 +114,9 @@ export class SICEBridge {
       }
 
       // Extract badge IDs and feed to lib BadgeEngine
-      const badgeIds = unlockedBadges.map((b: any) => b.id || b.name).filter(Boolean);
+      const badgeIds = unlockedBadges
+        .map((b: string | { name?: string }) => (typeof b === 'string' ? b : b.name))
+        .filter((b): b is string => Boolean(b));
 
       if (badgeIds.length > 0) {
         // Call lib BadgeEngine to unlock badges idempotently

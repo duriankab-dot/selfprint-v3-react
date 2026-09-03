@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, ExperienceResult } from '../../../types/sice';
 
 export interface ExperienceProfile {
   totalInteractions: number;
@@ -64,7 +64,7 @@ export class ExperienceEngine extends SICEBase {
     });
 
     // Confidence based on data richness
-    const dataRichness = (result as any).totalInteractions > 10 ? 75 : 50;
+    const dataRichness = ((result as ExperienceResult).totalInteractions || 0) > 10 ? 75 : 50;
     return this.createResult(result, dataRichness, executionTime);
   }
 

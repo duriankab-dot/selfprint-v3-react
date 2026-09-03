@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, MemoryManagerResult } from '../../../types/sice';
 
 export interface Memory {
   content: string;
@@ -50,7 +50,7 @@ export class MemoryManagerEngine extends SICEBase {
       }
     });
 
-    const memoryCount = (result as any).totalMemoriesStored || 0;
+    const memoryCount = (result as MemoryManagerResult).totalMemoriesStored || 0;
     const confidence = Math.min(100, 50 + Math.min(memoryCount, 50));
 
     return this.createResult(result, confidence, executionTime);

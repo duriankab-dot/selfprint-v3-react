@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, BadgeResult } from '../../../types/sice';
 
 export interface Achievement {
   id: string;
@@ -117,7 +117,7 @@ export class BadgeEngine extends SICEBase {
     });
 
     // Confidence based on data completeness
-    const badgeCount = (result as any).unlockedBadges.length;
+    const badgeCount = ((result as BadgeResult).unlockedBadges || []).length;
     const confidence = Math.min(100, 50 + badgeCount * 5);
 
     return this.createResult(result, confidence, executionTime);

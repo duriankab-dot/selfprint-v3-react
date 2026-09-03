@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, AIFeedbackResult } from '../../../types/sice';
 
 export interface FeedbackData {
   engineId: number;
@@ -76,7 +76,7 @@ export class AIFeedbackLoop extends SICEBase {
     });
 
     // Confidence based on feedback volume and consistency
-    const confidence = Math.min(100, 40 + (result as any).feedbackCount * 5);
+    const confidence = Math.min(100, 40 + ((result as AIFeedbackResult).feedbackCount || 0) * 5);
 
     return this.createResult(result, confidence, executionTime);
   }

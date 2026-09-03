@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, FutureSelfResult } from '../../../types/sice';
 
 export class FutureSelfEngine extends SICEBase {
   constructor() {
@@ -34,7 +34,7 @@ export class FutureSelfEngine extends SICEBase {
     });
 
     // Confidence is now calculated in analyzeFutureTrajectory based on actual data
-    const confidence = (result as any).confidence || 60;
+    const confidence = ((result as FutureSelfResult & { confidence?: number }).confidence) || 60;
     return this.createResult(result, confidence, executionTime);
   }
 

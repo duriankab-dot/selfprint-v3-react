@@ -5,7 +5,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput, Insight } from '../../../types/sice';
+import type { SICEInput, SICEOutput, Insight, PersonalContextResult } from '../../../types/sice';
 
 export class InsightEngine extends SICEBase {
   private readonly ACTIONABLE_CONFIDENCE_THRESHOLD = 70;
@@ -26,7 +26,7 @@ export class InsightEngine extends SICEBase {
 
       try {
         // Use PersonalContext from input if available
-        const personalContext = (input as any).personalContext;
+        const personalContext = (input.userContext as PersonalContextResult) || {};
 
         // Generate insights from context and patterns
         const insights: Insight[] = [];

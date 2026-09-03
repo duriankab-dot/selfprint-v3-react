@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, BehavioralForecastResult } from '../../../types/sice';
 
 interface MoodEntry {
   timestamp: string;
@@ -51,14 +51,15 @@ export class BehavioralForecastEngine extends SICEBase {
       }
 
       try {
-        const twinId = (input as any).twinId || (input as any).context?.twinId;
+        const twinId = (input.userContext as Record<string, unknown>)?.twinId ||
+                       ((input.userContext as Record<string, unknown>)?.context as Record<string, unknown>)?.twinId;
         if (!twinId) {
           // Twin ยังไม่ถูก create ตอน onboarding — return default gracefully
           return this.generateDefaultForecast('new_user', input.userId);
         }
 
         // Analyze Twin's actual behavioral history
-        const moodHistory = await this.analyzeMoodHistory(twinId);
+        const moodHistory = await this.analyzeMoodHistory(twinId as string);
         if (moodHistory.length === 0) {
           return this.generateDefaultForecast(
             'insufficient_data',
@@ -108,7 +109,7 @@ export class BehavioralForecastEngine extends SICEBase {
       }
     });
 
-    const confidence = (result as any).confidence || 50;
+    const confidence = ((result as BehavioralForecastResult).confidence) || 50;
     return this.createResult(result, confidence, executionTime);
   }
 
