@@ -34,34 +34,50 @@ export function initializePerformanceMonitor(): void {
   // Track Core Web Vitals using PerformanceObserver
   if ('PerformanceObserver' in window) {
     try {
-      // LCP
+      // LCP — guard undefined properties
       new PerformanceObserver(list => {
-        const entries = list.getEntries();
-        const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
-        webVitals.LCP = lastEntry.renderTime || lastEntry.loadTime || lastEntry.startTime;
+        try {
+          const entries = list.getEntries();
+          if (!entries.length) return;
+          const lastEntry = entries[entries.length - 1] as PerformanceEntry & { renderTime?: number; loadTime?: number };
+          webVitals.LCP = (lastEntry?.renderTime ?? lastEntry?.loadTime ?? lastEntry?.startTime) ?? null;
+        } catch (err) {
+          console.debug('[PerformanceMonitor] LCP observation error:', err);
+        }
       }).observe({ entryTypes: ['largest-contentful-paint'] });
 
-      // FCP
+      // FCP — guard undefined startTime
       new PerformanceObserver(list => {
-        list.getEntries().forEach(entry => {
-          if (entry.name === 'first-contentful-paint') {
-            webVitals.FCP = entry.startTime;
-          }
-        });
+        try {
+          list.getEntries().forEach(entry => {
+            if (entry.name === 'first-contentful-paint' && entry?.startTime != null) {
+              webVitals.FCP = entry.startTime;
+            }
+          });
+        } catch (err) {
+          console.debug('[PerformanceMonitor] FCP observation error:', err);
+        }
       }).observe({ entryTypes: ['paint'] });
 
-      // CLS
+      // CLS — guard undefined value property
       let clsValue = 0;
       new PerformanceObserver(list => {
-        list.getEntries().forEach(entry => {
-          if (!(entry as PerformanceEntry & { hadRecentInput?: boolean }).hadRecentInput) {
-            clsValue += (entry as unknown as { value: number }).value;
-          }
-        });
-        webVitals.CLS = clsValue;
+        try {
+          list.getEntries().forEach(entry => {
+            const hadRecentInput = (entry as PerformanceEntry & { hadRecentInput?: boolean }).hadRecentInput;
+            const entryValue = (entry as unknown as { value?: number }).value;
+            if (!hadRecentInput && entryValue != null) {
+              clsValue += entryValue;
+            }
+          });
+          webVitals.CLS = clsValue;
+        } catch (err) {
+          console.debug('[PerformanceMonitor] CLS observation error:', err);
+        }
       }).observe({ entryTypes: ['layout-shift'] });
     } catch (err) {
       // Performance observer not available
+      console.debug('[PerformanceMonitor] Observer setup error:', err);
     }
   }
 
