@@ -65,7 +65,7 @@ const sentry = new MockSentry();
  * Initialize Sentry
  */
 export function initializeSentry(dsn?: string): void {
-  const sentryDSN = dsn || process.env.REACT_APP_SENTRY_DSN;
+  const sentryDSN = dsn || import.meta.env.VITE_SENTRY_DSN;
   if (sentryDSN) {
     sentry.init(sentryDSN);
   }

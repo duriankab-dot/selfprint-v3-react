@@ -437,3 +437,28 @@ AnalysisPage.tsx (fetch essenceAnalysis)
 
 ---
 Full glossary and deep context: `memory/`
+
+---
+
+## Session 8 Status (3 ก.ย. 2026 — Cache Strategy + Tech Debt Roadmap)
+
+### ✅ Completed This Session
+- **SW cache v5**: Aggressive lifecycle + network-first strategy + 5s HTML timeout (prevent 503 chains)
+- **AnalysisPage fix**: Guards `_siceResults` + `_synth` undefined (no error when Twin not created)
+- **PerformanceMonitor safety**: null guards in Web Vitals observers (prevent crash on undefined properties)
+- **Deployment**: master a9a0fb0 live (CF auto-deploy working)
+
+### ⏳ Ready for Next Session (TD-01 through CG-03)
+**TD-01**: Sentry DSN swap (REACT_APP_ → VITE_)  
+**TD-03**: CF KV rate limiting  
+**TD-04**: Remove `as any` from SICE  
+**TD-05**: structuredData.ts schema  
+**CG-03**: Thai language full audit  
+
+**Requirement**: 100% production-ready, no stubs/mocks/shortcuts — full implementation.
+
+### Context Handoff
+- **Next session**: Read FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md (Session 8 addendum)
+- **Build**: TypeScript pass (0 errors), ready for any changes
+- **Token budget**: Heavy tasks ahead — CG-03 will require careful token management
+
