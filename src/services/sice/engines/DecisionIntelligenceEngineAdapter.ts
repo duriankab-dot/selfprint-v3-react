@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, DecisionIntelligenceResult } from '../../../types/sice';
 
 export interface DecisionAnalysis {
   totalDecisions: number;
@@ -47,7 +47,7 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
       }
     });
 
-    const decisionCount = (result as any).totalDecisions || 0;
+    const decisionCount = ((result as DecisionIntelligenceResult).totalDecisions) || 0;
     const confidence = Math.min(100, 50 + decisionCount * 3);
 
     return this.createResult(result, confidence, executionTime);
@@ -149,8 +149,8 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
     let successCount = 0;
     let totalWithOutcome = 0;
 
-    decisions.forEach((d) => {
-      const outcomes = (d as any).decision_outcomes || [];
+    decisions.forEach((d: Record<string, unknown>) => {
+      const outcomes = (d.decision_outcomes as Array<Record<string, unknown>>) || [];
       if (outcomes.length > 0) {
         totalWithOutcome++;
         const successfulOutcomes = outcomes.filter(

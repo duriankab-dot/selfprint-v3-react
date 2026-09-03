@@ -11,6 +11,20 @@ import type {
   CrossEngineSynthesis,
   FineTunedResult,
   PersonalIntelligence,
+  PersonalContextResult,
+  PatternResult,
+  InsightResult,
+  AIFeedbackResult,
+  TwinStateResult,
+  ExperienceResult,
+  EnvironmentResult,
+  BadgeResult,
+  BehavioralForecastResult,
+  FutureSelfResult,
+  MemoryManagerResult,
+  DecisionIntelligenceResult,
+  DetectedPattern,
+  Insight,
 } from '../../types/sice';
 import { SICEBase } from './SICEBase';
 import { PersonalContextBuilder } from './engines/PersonalContextBuilder';
@@ -222,7 +236,7 @@ export class SICEOrchestrator {
         // ones.
         case 1: // PersonalContextBuilder
           {
-            const context = result.result as any;
+            const context = result.result as PersonalContextResult;
             if (context?.emotionalState)
               themes.push(`สภาวะอารมณ์: ${context.emotionalState}`);
             if (context?.worldFocus)
@@ -242,9 +256,9 @@ export class SICEOrchestrator {
 
         case 2: // PatternDetector
           {
-            const patterns = result.result as any;
+            const patterns = result.result as PatternResult;
             if (Array.isArray(patterns)) {
-              patterns.forEach((p: any) => {
+              patterns.forEach((p: DetectedPattern) => {
                 themes.push(`รูปแบบ: ${p.name} (${p.impact})`);
                 if (p.frequency)
                   themes.push(`  ความถี่: ${p.frequency} ครั้ง`);
@@ -255,9 +269,9 @@ export class SICEOrchestrator {
 
         case 3: // InsightEngine
           {
-            const insights = result.result as any;
+            const insights = result.result as InsightResult;
             if (Array.isArray(insights)) {
-              insights.forEach((i: any) => {
+              insights.forEach((i: Insight) => {
                 if (i.title) themes.push(`ข้อคิด: ${i.title}`);
                 if (i.suggestedAction)
                   themes.push(`  แนวทาง: ${i.suggestedAction}`);
@@ -268,7 +282,7 @@ export class SICEOrchestrator {
 
         case 5: // TwinStateEngine
           {
-            const state = result.result as any;
+            const state = result.result as TwinStateResult;
             if (state?.mood) themes.push(`อารมณ์ทวิน: ${state.mood}`);
             if (state?.responseStyle)
               themes.push(`สไตล์การตอบสนอง: ${state.responseStyle}`);
@@ -522,11 +536,11 @@ export class SICEOrchestrator {
         // through every SICE engine — is the surgical fix.
         case 1: // PersonalContextBuilder
           {
-            const context = result.result as any;
-            if (context?.strengthAreas?.length > 0) {
+            const context = result.result as PersonalContextResult;
+            if (context?.strengthAreas && Array.isArray(context.strengthAreas) && context.strengthAreas.length > 0) {
               insights.push(`จุดแข็งสำคัญ: ${context.strengthAreas.slice(0, 2).join(', ')}`);
             }
-            if (context?.worldPersonality) {
+            if (context?.worldPersonality && context?.worldFocus) {
               insights.push(
                 `ในโลก${context.worldFocus} สไตล์ของคุณคือ: ${context.worldPersonality.responseStyle}`
               );
@@ -536,10 +550,10 @@ export class SICEOrchestrator {
 
         case 2: // PatternDetector
           {
-            const patterns = result.result as any;
+            const patterns = result.result as PatternResult;
             if (Array.isArray(patterns) && patterns.length > 0) {
               const positivePatterns = patterns.filter(
-                (p: any) => p.impact === 'positive'
+                (p: DetectedPattern) => p.impact === 'positive'
               );
               if (positivePatterns.length > 0) {
                 insights.push(
@@ -552,9 +566,9 @@ export class SICEOrchestrator {
 
         case 3: // InsightEngine
           {
-            const engineInsights = result.result as any;
+            const engineInsights = result.result as InsightResult;
             if (Array.isArray(engineInsights)) {
-              engineInsights.slice(0, 2).forEach((i: any) => {
+              engineInsights.slice(0, 2).forEach((i: Insight) => {
                 if (i.title) insights.push(i.title);
               });
             }
@@ -563,7 +577,7 @@ export class SICEOrchestrator {
 
         case 4: // AIFeedbackLoop
           {
-            const feedback = result.result as any;
+            const feedback = result.result as AIFeedbackResult;
             if (feedback?.averageScore !== undefined) {
               insights.push(`คะแนนความแม่นยำโดยรวม: ${feedback.averageScore}/100`);
             }
@@ -575,7 +589,7 @@ export class SICEOrchestrator {
 
         case 5: // TwinStateEngine
           {
-            const state = result.result as any;
+            const state = result.result as TwinStateResult;
             if (state?.mood) {
               insights.push(
                 `ทวินกำลังรู้สึก${state.mood} — พร้อม${state.mood === 'playful' ? 'สำรวจ' : 'นำทาง'}การเดินทางของคุณ`
@@ -586,7 +600,7 @@ export class SICEOrchestrator {
 
         case 6: // ExperienceEngine
           {
-            const exp = result.result as any;
+            const exp = result.result as ExperienceResult;
             if (Array.isArray(exp?.masteredAreas) && exp.masteredAreas.length > 0) {
               insights.push(`ด้านที่เชี่ยวชาญ: ${exp.masteredAreas.slice(0, 2).join(', ')}`);
             }
@@ -598,7 +612,7 @@ export class SICEOrchestrator {
 
         case 7: // EnvironmentEngine
           {
-            const env = result.result as any;
+            const env = result.result as EnvironmentResult;
             if (env?.timeOfDay && env?.currentSeason) {
               insights.push(`ช่วงเวลา: ${env.timeOfDay} | ฤดูกาล: ${env.currentSeason}`);
             }
@@ -610,7 +624,7 @@ export class SICEOrchestrator {
 
         case 8: // BadgeEngine
           {
-            const badges = result.result as any;
+            const badges = result.result as BadgeResult;
             if (Array.isArray(badges?.unlockedBadges) && badges.unlockedBadges.length > 0) {
               insights.push(`ปลดล็อกแล้ว ${badges.unlockedBadges.length} รางวัล`);
             }
@@ -622,7 +636,7 @@ export class SICEOrchestrator {
 
         case 9: // BehavioralForecastEngine
           {
-            const forecast = result.result as any;
+            const forecast = result.result as BehavioralForecastResult;
             if (forecast?.nextMood) {
               insights.push(`แนวโน้มอารมณ์: ${forecast.nextMood}`);
             }
@@ -634,7 +648,7 @@ export class SICEOrchestrator {
 
         case 10: // FutureSelfEngine
           {
-            const future = result.result as any;
+            const future = result.result as FutureSelfResult;
             if (future?.vision) {
               insights.push(`วิสัยทัศน์: ${future.vision}`);
             }
@@ -646,8 +660,8 @@ export class SICEOrchestrator {
 
         case 11: // MemoryManagerEngine
           {
-            const memory = result.result as any;
-            if (memory?.totalMemoriesStored > 0) {
+            const memory = result.result as MemoryManagerResult;
+            if (memory?.totalMemoriesStored !== undefined && memory.totalMemoriesStored > 0) {
               insights.push(`ความทรงจำที่บันทึก: ${memory.totalMemoriesStored} รายการ`);
             }
             if (Array.isArray(memory?.primaryThemes) && memory.primaryThemes.length > 0) {
@@ -658,8 +672,8 @@ export class SICEOrchestrator {
 
         case 12: // DecisionIntelligenceEngineAdapter
           {
-            const decisions = result.result as any;
-            if (decisions?.totalDecisions > 0) {
+            const decisions = result.result as DecisionIntelligenceResult;
+            if (decisions?.totalDecisions !== undefined && decisions.totalDecisions > 0) {
               insights.push(`การตัดสินใจทั้งหมด: ${decisions.totalDecisions} ครั้ง`);
             }
             if (decisions?.successRate !== undefined) {
@@ -688,13 +702,13 @@ export class SICEOrchestrator {
       switch (result.engineId) {
         case 1: // PersonalContextBuilder
           {
-            const context = result.result as any;
-            if (context?.growthAreas?.length > 0) {
+            const context = result.result as PersonalContextResult;
+            if (context?.growthAreas && Array.isArray(context.growthAreas) && context.growthAreas.length > 0) {
               recommendations.push(
                 `พัฒนา: ${context.growthAreas[0]} (จุดที่ควรเติบโต)`
               );
             }
-            if (context?.currentGoals?.length === 0) {
+            if (context?.currentGoals && Array.isArray(context.currentGoals) && context.currentGoals.length === 0) {
               recommendations.push('กำหนดเป้าหมายให้ชัดเจน เพื่อให้ทวินเข้าใจบริบทของคุณมากขึ้น');
             }
           }
@@ -702,10 +716,10 @@ export class SICEOrchestrator {
 
         case 2: // PatternDetector
           {
-            const patterns = result.result as any;
+            const patterns = result.result as PatternResult;
             if (Array.isArray(patterns)) {
               const negativePatterns = patterns.filter(
-                (p: any) => p.impact === 'negative'
+                (p: DetectedPattern) => p.impact === 'negative'
               );
               if (negativePatterns.length > 0) {
                 recommendations.push(
@@ -718,9 +732,9 @@ export class SICEOrchestrator {
 
         case 3: // InsightEngine
           {
-            const insights = result.result as any;
+            const insights = result.result as InsightResult;
             if (Array.isArray(insights)) {
-              const actionable = insights.find((i: any) => i.actionable);
+              const actionable = insights.find((i: Insight) => i.actionable);
               if (actionable?.suggestedAction) {
                 recommendations.push(actionable.suggestedAction);
               }
@@ -730,7 +744,7 @@ export class SICEOrchestrator {
 
         case 4: // AIFeedbackLoop
           {
-            const feedback = result.result as any;
+            const feedback = result.result as AIFeedbackResult;
             if (Array.isArray(feedback?.improvements) && feedback.improvements.length > 1) {
               recommendations.push(feedback.improvements[1]);
             }
@@ -739,7 +753,7 @@ export class SICEOrchestrator {
 
         case 6: // ExperienceEngine
           {
-            const exp = result.result as any;
+            const exp = result.result as ExperienceResult;
             if (Array.isArray(exp?.growthAreas) && exp.growthAreas.length > 0) {
               recommendations.push(`พัฒนาด้าน: ${exp.growthAreas[0]}`);
             }
@@ -748,7 +762,7 @@ export class SICEOrchestrator {
 
         case 7: // EnvironmentEngine
           {
-            const env = result.result as any;
+            const env = result.result as EnvironmentResult;
             if (Array.isArray(env?.recommendations) && env.recommendations.length > 0) {
               recommendations.push(env.recommendations[0]);
             }
@@ -757,16 +771,18 @@ export class SICEOrchestrator {
 
         case 8: // BadgeEngine
           {
-            const badges = result.result as any;
+            const badges = result.result as BadgeResult;
             if (Array.isArray(badges?.nextMilestones) && badges.nextMilestones.length > 0) {
-              recommendations.push(`เป้าหมายถัดไป: ${badges.nextMilestones[0].name || badges.nextMilestones[0]}`);
+              const milestone = badges.nextMilestones[0];
+              const milestoneName = typeof milestone === 'string' ? milestone : milestone.name;
+              recommendations.push(`เป้าหมายถัดไป: ${milestoneName}`);
             }
           }
           break;
 
         case 9: // BehavioralForecastEngine
           {
-            const forecast = result.result as any;
+            const forecast = result.result as BehavioralForecastResult;
             if (Array.isArray(forecast?.opportunities) && forecast.opportunities.length > 0) {
               recommendations.push(`โอกาส: ${forecast.opportunities[0]}`);
             }
@@ -775,7 +791,7 @@ export class SICEOrchestrator {
 
         case 10: // FutureSelfEngine
           {
-            const future = result.result as any;
+            const future = result.result as FutureSelfResult;
             if (Array.isArray(future?.milestones) && future.milestones.length > 0) {
               recommendations.push(`เป้าหมายระยะยาว: ${future.milestones[0]}`);
             }
@@ -784,7 +800,7 @@ export class SICEOrchestrator {
 
         case 11: // MemoryManagerEngine
           {
-            const memory = result.result as any;
+            const memory = result.result as MemoryManagerResult;
             if (memory?.emotionalTone) {
               recommendations.push(`โทนอารมณ์ปัจจุบัน: ${memory.emotionalTone} — ใช้พื้นที่นี้สะท้อนตัวเอง`);
             }
@@ -793,7 +809,7 @@ export class SICEOrchestrator {
 
         case 12: // DecisionIntelligenceEngineAdapter
           {
-            const decisions = result.result as any;
+            const decisions = result.result as DecisionIntelligenceResult;
             if (decisions?.nextStepGuidance) {
               recommendations.push(decisions.nextStepGuidance);
             } else if (decisions?.bestPerformingArea) {
@@ -822,10 +838,10 @@ export class SICEOrchestrator {
       switch (result.engineId) {
         case 2: // PatternDetector
           {
-            const patterns = result.result as any;
+            const patterns = result.result as PatternResult;
             if (Array.isArray(patterns)) {
               const negativePatterns = patterns.filter(
-                (p: any) => p.impact === 'negative'
+                (p: DetectedPattern) => p.impact === 'negative'
               );
               if (negativePatterns.length > 0) {
                 warnings.push(
@@ -838,7 +854,7 @@ export class SICEOrchestrator {
 
         case 4: // AIFeedbackLoop
           {
-            const feedback = result.result as any;
+            const feedback = result.result as AIFeedbackResult;
             if (Array.isArray(feedback?.warnings) && feedback.warnings.length > 0) {
               warnings.push(`ข้อควรระวัง (ทวิน): ${feedback.warnings[0]}`);
             }
@@ -847,7 +863,7 @@ export class SICEOrchestrator {
 
         case 5: // TwinStateEngine
           {
-            const state = result.result as any;
+            const state = result.result as TwinStateResult;
             if (state?.energy && state.energy < 30) {
               warnings.push('พลังงานของทวินต่ำ — พักสักครู่ก่อนนะ');
             }
@@ -856,7 +872,7 @@ export class SICEOrchestrator {
 
         case 7: // EnvironmentEngine
           {
-            const env = result.result as any;
+            const env = result.result as EnvironmentResult;
             if (env?.stressLevel !== undefined && env.stressLevel > 70) {
               warnings.push(`ระดับความเครียดสูง (${env.stressLevel}/100) — ควรจัดการความเครียดก่อน`);
             }
@@ -865,7 +881,7 @@ export class SICEOrchestrator {
 
         case 9: // BehavioralForecastEngine
           {
-            const forecast = result.result as any;
+            const forecast = result.result as BehavioralForecastResult;
             if (Array.isArray(forecast?.risks) && forecast.risks.length > 0) {
               warnings.push(`ความเสี่ยง: ${forecast.risks[0]}`);
             }
@@ -874,8 +890,8 @@ export class SICEOrchestrator {
 
         case 12: // DecisionIntelligenceEngineAdapter
           {
-            const decisions = result.result as any;
-            if (decisions?.successRate !== undefined && decisions.successRate < 40 && decisions.totalDecisions > 5) {
+            const decisions = result.result as DecisionIntelligenceResult;
+            if (decisions?.successRate !== undefined && decisions.successRate < 40 && decisions.totalDecisions !== undefined && decisions.totalDecisions > 5) {
               warnings.push(`อัตราความสำเร็จต่ำ (${decisions.successRate}%) — ลองทบทวนวิธีการตัดสินใจ`);
             }
           }

@@ -174,3 +174,112 @@ export interface DecisionIntelligence {
   confidenceInOutcome: number; // 0-100
   suggestedRefinements: string[];
 }
+
+/**
+ * Engine Result Types — Flexible Interfaces
+ * Each engine returns result data that may include subset of fields
+ */
+export type PersonalContextResult = Partial<PersonalContext>;
+
+export type PatternResult = Array<DetectedPattern>;
+
+export type InsightResult = Array<Insight>;
+
+export interface AIFeedbackResult {
+  feedbackCount?: number;
+  averageScore?: number;
+  averageSentiment?: number;
+  recommendedAdjustment?: string;
+  improvements?: string[];
+  warnings?: string[];
+  engineAccuracy?: Array<{ engineId: number; accuracy: number }>;
+}
+
+export type TwinStateResult = Partial<TwinState>;
+
+export interface ExperienceResult {
+  totalInteractions?: number;
+  masteredAreas?: string[];
+  keyLearnings?: string[];
+  growthAreas?: string[];
+  totalHours?: number;
+}
+
+export interface EnvironmentResult {
+  timeOfDay?: string;
+  currentSeason?: string;
+  twinState?: { activeWorld?: string };
+  stressLevel?: number;
+  recommendations?: string[];
+  confidence?: number;
+}
+
+export interface BadgeResult {
+  unlockedBadges?: string[] | Array<{ name?: string; id?: string }>;
+  totalProgress?: number;
+  nextMilestones?: Array<{ name?: string } | string>;
+}
+
+export interface BehavioralForecastResult extends Partial<BehaviorForecast> {
+  nextMood?: string;
+  predictedFocus?: string;
+  opportunities?: string[];
+  risks?: string[];
+  confidence?: number;
+}
+
+export interface FutureSelfResult extends Partial<FutureSelfVision> {
+  vision?: string;
+  focusAreas?: string[];
+  milestones?: string[];
+  confidence?: number;
+}
+
+export interface MemoryManagerResult {
+  totalMemoriesStored?: number;
+  primaryThemes?: string[];
+  emotionalTone?: string;
+}
+
+export interface DecisionIntelligenceResult {
+  totalDecisions?: number;
+  successRate?: number;
+  bestPerformingArea?: string;
+  nextStepGuidance?: string;
+  decisionQualityScore?: number;
+  successProbability?: number;
+  riskLevel?: 'low' | 'medium' | 'high';
+  timelineRealism?: 'optimistic' | 'realistic' | 'pessimistic';
+  confidenceInOutcome?: number;
+  suggestedRefinements?: string[];
+}
+
+/**
+ * Discriminated Union of all engine result types
+ */
+export type SICEEngineResult =
+  | PersonalContextResult
+  | PatternResult
+  | InsightResult
+  | AIFeedbackResult
+  | TwinStateResult
+  | ExperienceResult
+  | EnvironmentResult
+  | BadgeResult
+  | BehavioralForecastResult
+  | FutureSelfResult
+  | MemoryManagerResult
+  | DecisionIntelligenceResult
+  | null; // Error case
+
+/**
+ * Updated SICEOutput with typed result
+ */
+export interface SICEOutputTyped {
+  engineId: number;
+  engineName: string;
+  result: SICEEngineResult;
+  confidence: number; // 0-100
+  executionTime: number; // ms
+  error?: string;
+}

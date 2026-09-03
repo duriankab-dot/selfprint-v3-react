@@ -5,7 +5,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, PersonalContextResult } from '../../../types/sice';
 
 export interface TwinState {
   description?: string; // Thai-readable summary for display
@@ -48,7 +48,7 @@ export class TwinStateEngine extends SICEBase {
       try {
         const userId = input.userId;
         const world = input.currentWorld || null;
-        const personalContext = (input as any).personalContext;
+        const personalContext = (input.userContext as PersonalContextResult) || {};
 
         // Calculate maturity score from multiple signals
         const maturityScore = await this.calculateMaturityScore(userId, world);
@@ -123,7 +123,7 @@ export class TwinStateEngine extends SICEBase {
 
       let relevantStats = stats;
       if (world) {
-        relevantStats = stats.filter((s: any) => s.world_id === world);
+        relevantStats = stats.filter((s: Record<string, unknown>) => s.world_id === world);
       }
 
       if (relevantStats.length === 0) {
@@ -132,23 +132,23 @@ export class TwinStateEngine extends SICEBase {
 
       // Calculate maturity from:
       // - Total visits (0-20 points)
-      const totalVisits = relevantStats.reduce((sum: number, s: any) => sum + (s.visits_count || 0), 0);
+      const totalVisits = relevantStats.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.visits_count as number) || 0), 0);
       const visitScore = Math.min(20, Math.floor(totalVisits / 5));
 
       // - Journal entries (0-20 points)
-      const totalJournal = relevantStats.reduce((sum: number, s: any) => sum + (s.journal_entries || 0), 0);
+      const totalJournal = relevantStats.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.journal_entries as number) || 0), 0);
       const journalScore = Math.min(20, totalJournal * 4);
 
       // - Decisions made (0-20 points)
-      const totalDecisions = relevantStats.reduce((sum: number, s: any) => sum + (s.decisions_made || 0), 0);
+      const totalDecisions = relevantStats.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.decisions_made as number) || 0), 0);
       const decisionScore = Math.min(20, totalDecisions * 3);
 
       // - Insights gained (0-20 points)
-      const totalInsights = relevantStats.reduce((sum: number, s: any) => sum + (s.insights_gained || 0), 0);
+      const totalInsights = relevantStats.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.insights_gained as number) || 0), 0);
       const insightScore = Math.min(20, totalInsights * 3);
 
       // - Time spent (0-20 points)
-      const totalTime = relevantStats.reduce((sum: number, s: any) => sum + (s.time_spent_minutes || 0), 0);
+      const totalTime = relevantStats.reduce((sum: number, s: Record<string, unknown>) => sum + ((s.time_spent_minutes as number) || 0), 0);
       const timeScore = Math.min(20, Math.floor(totalTime / 30));
 
       const maturityScore = visitScore + journalScore + decisionScore + insightScore + timeScore;

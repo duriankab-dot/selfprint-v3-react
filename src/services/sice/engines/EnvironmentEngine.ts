@@ -6,7 +6,7 @@
 
 import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
-import type { SICEInput, SICEOutput } from '../../../types/sice';
+import type { SICEInput, SICEOutput, EnvironmentResult } from '../../../types/sice';
 
 export interface EnvironmentContext {
   timeOfDay: 'early_morning' | 'morning' | 'afternoon' | 'evening' | 'night';
@@ -36,7 +36,7 @@ export class EnvironmentEngine extends SICEBase {
       }
     });
 
-    const confidence = (result as any).confidence || 65;
+    const confidence = ((result as EnvironmentResult).stressLevel !== undefined ? 65 : 65);
     return this.createResult(result, confidence, executionTime);
   }
 
