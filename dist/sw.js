@@ -1,13 +1,17 @@
 /**
  * Service Worker — § 37 Offline Journal Queue
- * - Cache static assets
+ * - Cache static assets (network-first strategy)
  * - Background sync for journal queue
  * - Offline shell support
+ * - Robust cache versioning & lifecycle management
  */
 
-// Bump this version on every deploy so the activate handler clears stale cache.
-// v1→v2: fix 503 on reload caused by old chunks not being evicted.
-const CACHE_NAME = 'selfprint-v3';
+// CACHE_VERSION: bump this on every deploy to force SW cleanup and re-cache
+// CACHE_NAME: constructed from version for auto-invalidation across deploys
+// v1→v3: fix 503 stale chunks (Session 4)
+// v4→v5: aggressive cache-busting, network-first HTML, proper activate cleanup (Session 7 fix)
+const CACHE_VERSION = 5;
+const CACHE_NAME = `selfprint-v${CACHE_VERSION}`;
 const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
   '/',
@@ -15,40 +19,47 @@ const ASSETS_TO_CACHE = [
   '/manifest.json',
 ];
 
-// Install: cache critical assets
+// Install: cache critical assets with error recovery
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing...');
+  console.log('[SW] Installing (v' + CACHE_VERSION + ')...');
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching critical assets');
-      return cache.addAll(ASSETS_TO_CACHE).catch(() => {
-        // Some assets may not exist yet — that's OK
-        console.warn('[SW] Some assets not cached');
-      });
-    })
+    (async () => {
+      try {
+        const cache = await caches.open(CACHE_NAME);
+        console.log('[SW] Caching critical assets to ' + CACHE_NAME);
+        await cache.addAll(ASSETS_TO_CACHE);
+        console.log('[SW] All critical assets cached successfully');
+      } catch (err) {
+        // Some assets may 404 or network may be unavailable — that's OK
+        // fetch handler will use network-first strategy as fallback
+        console.warn('[SW] Some assets not cached during install:', err);
+      }
+    })()
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// Activate: aggressively delete old cache versions + claim all clients
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating...');
+  console.log('[SW] Activating (v' + CACHE_VERSION + ')...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('[SW] Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    (async () => {
+      const cacheNames = await caches.keys();
+      const deleteOld = cacheNames
+        .filter((name) => name !== CACHE_NAME)
+        .map((oldName) => {
+          console.log('[SW] Deleting stale cache: ' + oldName);
+          return caches.delete(oldName);
+        });
+
+      await Promise.all(deleteOld);
+      console.log('[SW] Old caches cleaned, claiming all clients');
+    })()
   );
   self.clients.claim();
 });
 
-// Fetch: network first, fallback to cache
+// Fetch: network-first strategy with proper HTML handling
 self.addEventListener('fetch', (event) => {
   const { request } = event;
 
@@ -57,11 +68,43 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // API calls: network only
+  // API calls: network only (no caching)
   if (request.url.includes('/api/')) {
     return;
   }
 
+  // Document requests (HTML): network-first with aggressive timeout
+  if (request.destination === 'document') {
+    event.respondWith(
+      fetch(request, { signal: AbortSignal.timeout(5000) })
+        .then((response) => {
+          // Cache successful responses
+          if (response.ok) {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, cloned);
+            });
+          }
+          return response;
+        })
+        .catch((err) => {
+          // Network failed or timeout — try cache, else offline shell
+          console.warn('[SW] Network failed for', request.url, '— checking cache');
+          return caches.match(request).then((cached) => {
+            if (cached) {
+              console.log('[SW] Serving cached document:', request.url);
+              return cached;
+            }
+            // Fallback to cached index.html
+            console.log('[SW] No cache, serving offline shell');
+            return caches.match('/index.html');
+          });
+        })
+    );
+    return;
+  }
+
+  // Other assets: network-first with cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
@@ -80,7 +123,7 @@ self.addEventListener('fetch', (event) => {
           if (cached) {
             return cached;
           }
-          // Return offline shell
+          // Return offline shell for documents
           if (request.destination === 'document') {
             return caches.match('/index.html');
           }
