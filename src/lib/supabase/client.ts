@@ -74,6 +74,30 @@ export async function getSession() {
 }
 
 /**
+ * AUTHHDR-001 FIX: every `/api/*` handler on Cloudflare Pages
+ * (functions/api/nova.ts:87-94, functions/api/twin.ts:90-97) rejects the
+ * request with 401 unless an `Authorization: Bearer <access_token>` header
+ * is present, but the client services were sending `Content-Type` only —
+ * so Nova chat, Twin chat and the floating assistant were failing on 100%
+ * of requests. This returns the headers those fetch calls need.
+ *
+ * Never throws: if there is no session (or the client can't be built at
+ * all) it returns just the Content-Type, so callers still get the server's
+ * own 401 rather than an unhandled exception at the call site.
+ */
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) headers.Authorization = `Bearer ${token}`;
+  } catch {
+    // no session / client unavailable — fall through with Content-Type only
+  }
+  return headers;
+}
+
+/**
  * Sign out current user
  */
 export async function signOut() {

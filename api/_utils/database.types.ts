@@ -112,94 +112,16 @@ export interface Database {
         };
         Relationships: [];
       };
-      blueprints: {
-        Row: {
-          id: string;
-          user_id: string;
-          profile_id?: string | null;
-          accuracy_level: number;
-          decision_style?: string | null;
-          strengths: string[];
-          insights: string[];
-          opportunities: string[];
-          blind_spots: string[];
-          prototype_core?: string | null;
-          is_latest: boolean;
-          source: string;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Insert: {
-          user_id: string;
-          profile_id?: string | null;
-          accuracy_level: number;
-          decision_style?: string | null;
-          strengths?: string[];
-          insights?: string[];
-          opportunities?: string[];
-          blind_spots?: string[];
-          prototype_core?: string | null;
-          is_latest?: boolean;
-          source?: string;
-        };
-        Update: {
-          user_id?: string;
-          profile_id?: string | null;
-          accuracy_level?: number;
-          decision_style?: string | null;
-          strengths?: string[];
-          insights?: string[];
-          opportunities?: string[];
-          blind_spots?: string[];
-          prototype_core?: string | null;
-          is_latest?: boolean;
-          source?: string;
-        };
-        Relationships: [];
-      };
-      users_profiles: {
-        Row: {
-          id: string;
-          user_id: string;
-          date_of_birth?: string | null;
-          time_of_birth?: string | null;
-          place_of_birth?: string | null;
-          initial_mood?: string | null;
-          updated_at?: string;
-        };
-        Insert: {
-          user_id: string;
-          date_of_birth?: string | null;
-          time_of_birth?: string | null;
-          place_of_birth?: string | null;
-          initial_mood?: string | null;
-        };
-        Update: {
-          user_id?: string;
-          date_of_birth?: string | null;
-          time_of_birth?: string | null;
-          place_of_birth?: string | null;
-          initial_mood?: string | null;
-        };
-        Relationships: [];
-      };
-      share_links: {
-        Row: {
-          id: string;
-          user_id: string;
-          code: string;
-          created_at?: string;
-        };
-        Insert: {
-          user_id: string;
-          code: string;
-        };
-        Update: {
-          user_id?: string;
-          code?: string;
-        };
-        Relationships: [];
-      };
+      // SCHEMA-TS-002 FIX (3 ก.ย. 2026): blueprints / users_profiles /
+      // share_links used to be declared here under `public`, but every query
+      // against them in api/unified-handler.ts goes through
+      // `.schema('selfprint')` — because migrations 002_profiles_blueprints.sql
+      // and 004_share_links.sql create them in a dedicated `selfprint` Postgres
+      // schema (this project already has unrelated public.blueprints /
+      // public.users_profiles belonging to a different product). There was no
+      // `selfprint` key on this interface at all, so `.schema('selfprint')`
+      // did not type-check — which nobody noticed because api/ was never in
+      // any tsconfig. Moved to the `selfprint` block at the bottom of this file.
       personal_models: {
         Row: {
           id: string;
@@ -267,6 +189,116 @@ export interface Database {
           content?: string;
           hub?: string | null;
           mood?: string | null;
+        };
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+  };
+  /**
+   * SCHEMA-TS-002: the dedicated `selfprint` Postgres schema.
+   * Source of truth: supabase/migrations/002_profiles_blueprints.sql and
+   * supabase/migrations/004_share_links.sql.
+   *
+   * หมายเหตุ: ยังมี drift ที่ยังไม่ได้แก้ในไฟล์นี้ (ดู FORENSIC_AUDIT_HONEST_
+   * STATUS_HANDOFF_TH.md หัวข้อ DB-05) — `blueprints.updated_at` ไม่มีจริงใน
+   * migration, `blueprints.version` มีจริงแต่ไม่ได้ประกาศไว้ที่นี่ และตารางอีก
+   * ~60 ตารางในระบบยังไม่มี type เลย วิธีแก้ที่ถูกต้องคือ generate ใหม่ทั้งไฟล์
+   * ด้วย `supabase gen types typescript --schema public --schema selfprint`
+   * หลังจากรวม migration ให้เรียบร้อยก่อน — ยังไม่ทำในรอบนี้เพราะจะไปแตะ
+   * migration ที่ apply ไปแล้ว (อยู่ในโซนห้ามแตะ ต้องให้เจ้าของตัดสินใจก่อน)
+   */
+  selfprint: {
+    Tables: {
+      blueprints: {
+        Row: {
+          id: string;
+          user_id: string;
+          profile_id?: string | null;
+          accuracy_level: number;
+          decision_style?: string | null;
+          strengths: string[];
+          insights: string[];
+          opportunities: string[];
+          blind_spots: string[];
+          prototype_core?: string | null;
+          is_latest: boolean;
+          source: string;
+          version?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Insert: {
+          user_id: string;
+          profile_id?: string | null;
+          accuracy_level: number;
+          decision_style?: string | null;
+          strengths?: string[];
+          insights?: string[];
+          opportunities?: string[];
+          blind_spots?: string[];
+          prototype_core?: string | null;
+          is_latest?: boolean;
+          source?: string;
+          version?: number;
+        };
+        Update: {
+          user_id?: string;
+          profile_id?: string | null;
+          accuracy_level?: number;
+          decision_style?: string | null;
+          strengths?: string[];
+          insights?: string[];
+          opportunities?: string[];
+          blind_spots?: string[];
+          prototype_core?: string | null;
+          is_latest?: boolean;
+          source?: string;
+          version?: number;
+        };
+        Relationships: [];
+      };
+      users_profiles: {
+        Row: {
+          id: string;
+          user_id: string;
+          date_of_birth?: string | null;
+          time_of_birth?: string | null;
+          place_of_birth?: string | null;
+          initial_mood?: string | null;
+          updated_at?: string;
+        };
+        Insert: {
+          user_id: string;
+          date_of_birth?: string | null;
+          time_of_birth?: string | null;
+          place_of_birth?: string | null;
+          initial_mood?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          date_of_birth?: string | null;
+          time_of_birth?: string | null;
+          place_of_birth?: string | null;
+          initial_mood?: string | null;
+        };
+        Relationships: [];
+      };
+      share_links: {
+        Row: {
+          id: string;
+          user_id: string;
+          code: string;
+          created_at?: string;
+        };
+        Insert: {
+          user_id: string;
+          code: string;
+        };
+        Update: {
+          user_id?: string;
+          code?: string;
         };
         Relationships: [];
       };

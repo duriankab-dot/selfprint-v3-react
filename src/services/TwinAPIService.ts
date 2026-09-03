@@ -11,6 +11,8 @@ import type { Memory } from '../lib/prompts/promptBuilder';
 import * as DecisionLearningService from './DecisionLearningService';
 import type { WorldId } from '../constants/worlds';
 import { supabase } from './supabase-service';
+// AUTHHDR-001 FIX: /api/twin returns 401 without a Bearer token.
+import { getAuthHeaders } from '../lib/supabase/client';
 
 /**
  * Input validation helper
@@ -89,7 +91,7 @@ export async function callTwinAPI(
     // Call Claude API
     const response = await fetch('/api/twin', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(), // AUTHHDR-001
       body: JSON.stringify({
         system: systemPrompt,
         messages: messages.map(m => ({

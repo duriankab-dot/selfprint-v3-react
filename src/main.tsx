@@ -3,6 +3,14 @@ import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './styles/global.css'
 import App from './App.tsx'
+// ERRBOUND-001 / SENTRY-INIT-001 FIX: @sentry/react was a dependency but
+// initializeSentry() had zero call sites, so production had no error
+// telemetry at all; and with no ErrorBoundary mounted, every render-time
+// throw became a blank white page. Both are wired here, at the root.
+import { ErrorBoundary } from './components/ErrorBoundary'
+import { initializeSentry } from './services/error-tracking'
+
+initializeSentry()
 
 /**
  * React Query client — shared across entire app
@@ -60,8 +68,10 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

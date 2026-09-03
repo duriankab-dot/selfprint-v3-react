@@ -169,6 +169,22 @@ export function useJournalQueue(): UseJournalQueueReturn {
             }),
           });
 
+          // JOURNAL404-001 FIX: /api/journal-sync has no handler on Cloudflare
+          // Pages (no functions/api/journal-sync.ts; the catch-all at
+          // functions/api/[[route]].ts:33-40 does not recognise the module, so
+          // it returns its own JSON 404). Every queued message therefore got
+          // markSyncFailed() and accumulated permanent failures forever, and
+          // the user saw a growing "N message(s) failed to sync" error.
+          // A 404/405 means the endpoint is not deployed — that is not a
+          // per-message failure. Abort the whole run and leave the messages
+          // queued (not failed), so they sync cleanly once the handler ships.
+          if (response.status === 404 || response.status === 405) {
+            console.warn('[useJournalQueue] /api/journal-sync is not deployed — sync skipped');
+            setPendingCount(messages.length - successCount);
+            return; // the outer finally still restores online/offline status
+
+          }
+
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
           }

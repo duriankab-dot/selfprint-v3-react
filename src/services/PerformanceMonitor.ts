@@ -3,6 +3,8 @@
  * Phase G: Web Vitals & Performance Tracking
  */
 
+import { getAuthHeaders } from '../lib/supabase/client';
+
 interface PerformanceMetric {
   name: string;
   value: number;
@@ -181,13 +183,15 @@ export function getMetricsSummary(): {
  * Report metrics to backend
  * Sends collected metrics to /api/metrics for persistence in Supabase
  */
-export async function reportMetrics(userId?: string): Promise<void> {
+export async function reportMetrics(_userId?: string): Promise<void> {
   try {
     const summary = getMetricsSummary();
     const vitals = getWebVitals();
 
+    // METRICS-FIX-001: userId is no longer sent — /api/metrics now derives it
+    // from the verified JWT and ignores anything the body claims. The param is
+    // kept so existing call sites don't need to change.
     const payload = {
-      userId,
       metrics: summary,
       webVitals: vitals,
       timestamp: new Date().toISOString(),
@@ -196,7 +200,7 @@ export async function reportMetrics(userId?: string): Promise<void> {
     // Send to backend for persistence
     await fetch('/api/metrics', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await getAuthHeaders(), // METRICS-FIX-001: endpoint requires a Bearer token
       body: JSON.stringify(payload),
     });
   } catch (err) {
