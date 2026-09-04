@@ -18,18 +18,24 @@
 `npm install` ถูกขัดจังหวะจนไฟล์ `.node` ถูกตัดกลางคัน
 (rolldown 248 KB จากของจริง 19.9 MB · lightningcss 2.8/10.0 MB · oxlint 1.1/16.0 MB)
 
-**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว**
+**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว (4 ก.ย. 2026)**
 
 | gate | ผล |
 |------|-----|
-| `tsc -b` | ✅ 0 errors |
-| `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ สำเร็จ (1.2 s) |
-| `oxlint` | ✅ 0 errors · 200 warnings · 484 files |
-| `vitest run` | ⚠️ 167 tests ผ่าน แต่รันแค่ **7 จาก 69 ไฟล์** (A8 ยังไม่ทำ) |
+| `tsc -b` | ✅ 0 errors — **`strict: true` เปิดแล้ว** |
+| `npm run typecheck:functions` | ✅ 0 errors — strict เช่นกัน |
+| `vite build` | ✅ สำเร็จ (1.3 s) |
+| `oxlint` | ✅ 0 errors · 195 warnings · 480 files |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1026 tests ผ่าน · 0 พัง** (skip 11 = REALBUG) |
 
-**ที่ยังต้องทำด้วยมือ:** apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`
+**Track A + B เสร็จหมดแล้ว** — เหลือ 6 ข้อที่ต้องทำด้วยมือหรือต้องตัดสินใจ (หัวข้อ 4)
+
+**เร่งด่วนที่สุด:** apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`
 — Core Awakening จะกลับมาทำงานได้ก็ต่อเมื่อรันไฟล์นี้ (ดูหัวข้อ 3)
+ทดสอบกับ **PostgreSQL 18.4 จริง** แล้ว 3 เคส: DB แบบ production / รันซ้ำ / DB ว่าง
+
+**อ่านต่อ:** `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` = ผล Phase 0 ครบ 10 หัวข้อ
+ต้องอ่านก่อนเริ่ม Track C ทุกกรณี
 
 ---
 
@@ -206,15 +212,29 @@ migration 035 Section B.1 (เพิ่ม 5 คอลัมน์) + Section D.
    (`DecisionIntelligenceEngineAdapter.ts:78-91` พยายาม join ข้ามระบบผิดทาง)
 4. migration ที่ track ใน git (013/020/029/030/033) push ขึ้น production จริงหรือยัง?
 
-### รายการที่เหลือใน Track A
+### 🔴 REALBUG-001..004 — บั๊กจริงที่เทสต์จับได้ (skip ไว้ 11 เทสต์ รอตัดสินใจ)
 
-| รหัส | เรื่อง | สถานะ |
-|------|-------|-------|
-| **A3** | FE-01a (login แล้ว `/th/` หน้าเปล่า), FE-01c..g | ทำไป 1 จาก 7 |
-| **A6** | RLS — SQL อยู่ใน migration 035 Section D แล้ว | รอ apply |
-| **A7** | เปิด `strict: true` + `as any` 101 จุด | ยังไม่เริ่ม |
-| **A8** | เปิด vitest ครบ 69 ไฟล์ (ตอนนี้ 7) + ตัดการยิงเน็ตจริงในเทสต์ | ยังไม่เริ่ม |
-| **B** | Phase 0 Visual + Performance Forensic | เริ่มแล้วบางส่วน (B0.3, B0.4) |
+พอเปิดเทสต์ครบ 66 ไฟล์เป็นครั้งแรก เทสต์จับบั๊กจริงได้ 4 ตัว
+**ไม่ได้แก้โค้ดโปรดักต์เอง** — `it.skip()` ไว้พร้อมคอมเมนต์อธิบายในโค้ด
+(grep `REALBUG` ในไฟล์ `.test.ts`/`.test.tsx`) แก้แล้วเอา skip ออกได้ทันที
+
+| รหัส | ไฟล์ | อาการที่ผู้ใช้เห็น |
+|------|------|-------------------|
+| **004** 🔴 | `ConfidenceIndicator.tsx:112` | เช็ค field `confidencePoints` ที่**ไม่มีในโปรเจกต์เลย** (ของจริงคือ `evidencePoints` ที่ `lib/intelligence/types.ts:199`) → branch นี้เป็น dead code → ตกไป fallback → การ์ดขึ้น **NaN% / Very Low / พื้นแดง** ทุกครั้งที่รับ BehavioralPattern เห็นจริงผ่าน `IntelligencePanel` + `ContextDisplay` · **แก้คำเดียว** |
+| **001** | `ContinuousImprovementService.ts:82` | `.order('severity', {ascending:false})` แต่ `severity` เป็น TEXT → Postgres เรียงตามตัวอักษร = `medium > low > high` เรื่องที่รุนแรงสุดไปอยู่ท้ายสุด |
+| **003** | `twin-prompts.ts:265` | แทน `{{currentWorld}}` ด้วย `currentWorld \|\| 'SELF'` แต่บรรทัด 268 guard ด้วย `if (currentWorld && ...)` → Twin ถูกบอกว่าอยู่ใน SELF แต่**ไม่ได้รับคำสั่ง identity ของ SELF เลย** |
+| **002** | `constants/worlds.ts:287` | `getWorld(id): World` คืน `undefined` ได้ทั้งที่ type บอกว่าไม่ได้ · **ไม่มี caller เลยนอกจากเทสต์ — ลบทิ้งก็ได้** |
+
+### 🔴 F-01 — Tailwind ไม่เคยถูกคอมไพล์เลย (จาก Phase 0)
+
+ยืนยัน 5 ชั้น: `@tailwind` อยู่ใน `src/index.css` ที่**ไม่มีใคร import**
+(`main.tsx:4` import `styles/global.css`) · **ไม่มี `postcss.config.js`** ·
+`vite.config.ts` ไม่มี tailwind plugin · ค้น `--tw-` ใน `dist/assets/*.css` **ไม่พบเลย**
+
+→ utility class ~800 จุดใน **37 ไฟล์ไม่มีผลอะไรทั้งสิ้น**
+ซ้ำ: `tailwind.config.js` เป็นไวยากรณ์ v3 แต่ติดตั้ง `tailwindcss ^4.3.3`
+
+**ต้องตัดสินใจก่อนเริ่ม Track C** ว่าจะเอา Tailwind ทางไหน — เรื่องนี้บล็อกทุกอย่าง
 
 ---
 

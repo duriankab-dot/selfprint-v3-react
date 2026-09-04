@@ -2,12 +2,13 @@
 
 ## ⚠️ อ่านก่อนเริ่มงานทุกครั้ง
 
-เอกสารที่เชื่อได้มี **3 ไฟล์เท่านั้น**
+เอกสารที่เชื่อได้มี **4 ไฟล์เท่านั้น**
 
 | ไฟล์ | ใช้ทำอะไร |
 |------|----------|
 | `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` | สถานะจริงของโปรเจกต์ · อะไรแก้แล้ว อะไรยัง |
 | `docs/PLAN_TRACKS_TH.md` | แผนงานรวม Track A (บั๊ก) / B (Phase 0 forensic) / C (visual redesign) |
+| `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` | **ผล Phase 0** — ต้องอ่านก่อนเริ่ม Track C ทุกกรณี |
 | ไฟล์นี้ | context ถาวร · เกร็ดที่ต้องรู้ก่อนแตะโค้ด |
 
 `.md` ที่ root อีก **84 ไฟล์ถูกลบทิ้งแล้ว** (3 ก.ย. 2026) เพราะอ้างสิ่งที่โค้ดไม่ได้ทำ
@@ -69,11 +70,11 @@ DB: Supabase — migration กระจาย 3 โฟลเดอร์ CLI app
 
 | gate | ผล |
 |------|-----|
-| `tsc -b` | ✅ 0 errors |
-| `npm run typecheck:functions` | ✅ 0 errors |
+| `tsc -b` | ✅ 0 errors (**strict: true** เปิดแล้ว) |
+| `npm run typecheck:functions` | ✅ 0 errors (strict เช่นกัน) |
 | `vite build` | ✅ สำเร็จ |
-| `oxlint` | ✅ 0 errors · 200 warnings · 484 files |
-| `vitest run` | ⚠️ 167 tests ผ่าน แต่รันแค่ **7 จาก 69 ไฟล์** |
+| `oxlint` | ✅ 0 errors · 195 warnings · 480 files |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1026 tests ผ่าน · 0 พัง** (skip 11 = REALBUG รอตัดสินใจ) |
 
 ## Commands
 ```powershell
@@ -87,18 +88,29 @@ npm run typecheck:functions   # typecheck functions/ + api/
 
 ---
 
-## 🔴 ค้างอยู่ — ต้องทำด้วยมือ
+## ✅ Track A + B เสร็จหมดแล้ว (4 ก.ย. 2026)
+A1 ลบ Vercel+dead code · A2 env+รหัสผ่าน e2e · A3 FE bugs · A4 OG image ·
+A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 66 ไฟล์ ·
+A9 ลบ .md 84 ไฟล์ · B Phase 0 forensic
 
-1. **git filter-repo** — คำสั่งที่แก้แล้วอยู่ในไฟล์ forensic หัวข้อ 2.1
-   (ต้นตอ: มีไฟล์ในประวัติชื่อ `feat(e2e): ...` ที่มี `:` → Windows สร้างไม่ได้)
-2. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**
+## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
+
+1. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**
    → **Core Awakening ขึ้นกับข้อนี้ ไม่เคยทำงานได้เลยจนกว่าจะรัน**
-3. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว** (ของเดิมหลุดใน git history)
-4. **SEC-02** — Edge Functions 4 ตัวไม่ verify JWT
-
-## 🟠 Track A ที่เหลือ
-A3 (FE bugs 6 จุด) · A6 (rอ apply 035) · A7 (strict mode + `as any` 101 จุด) ·
-A8 (เปิด vitest ครบ 69 ไฟล์) · B (Phase 0 forensic)
+   ทดสอบกับ PostgreSQL 18.4 จริงแล้ว 3 เคส (production-like / รันซ้ำ / DB ว่าง)
+2. **REALBUG-001..004** — บั๊กจริงที่เทสต์จับได้ skip ไว้ 11 เทสต์ รอตัดสินใจ
+   (grep `REALBUG` ในไฟล์ `.test.tsx` จะเจอคำอธิบายเต็มในโค้ด)
+   - **004 กระทบผู้ใช้มากสุด**: `ConfidenceIndicator.tsx:112` เช็ค field
+     `confidencePoints` ที่ไม่มีในโปรเจกต์ (ของจริง `evidencePoints`)
+     → การ์ดขึ้น **NaN% / Very Low / พื้นแดง** ทุกครั้งที่รับ BehavioralPattern
+3. **F-01 Tailwind ไม่เคยถูกคอมไพล์** — `@tailwind` อยู่ใน `src/index.css` ที่ไม่มีใคร
+   import · ไม่มี `postcss.config.js` · ไม่มี plugin ใน vite → utility class ใน
+   **37 ไฟล์ไม่มีผลอะไรเลย** ต้องตัดสินใจก่อนเริ่ม Track C ว่าจะเอา Tailwind ทางไหน
+4. **git filter-repo** — ยังไม่ได้ลง (`pip install git-filter-repo`) คำสั่งอยู่ในไฟล์
+   forensic หัวข้อ 2.1 · ไม่เร่งด่วนแล้วเพราะ key revoke ไปแล้ว เหลือแค่ลดขนาด repo
+5. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว** (ของเดิมหลุดใน git history)
+6. **SEC-02** — Edge Functions 4 ตัวไม่ verify JWT (`send-push`, `daily-brief`,
+   `pattern-detect` แก้ได้ทันที · passkey flow ต้องคุยก่อน)
 
 ---
 
