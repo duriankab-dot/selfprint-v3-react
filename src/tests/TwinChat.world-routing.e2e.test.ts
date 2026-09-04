@@ -64,9 +64,12 @@ describe('TwinChat World Routing E2E', () => {
       const testWorld: WorldId = 'love';
       const world = WORLDS[testWorld];
 
-      // Verify world has unique personality
-      expect(world.description).toContain('love') ||
-      expect(world.description).toContain('romantic');
+      // QA-02: two problems here. `expect(a) || expect(b)` is not an "or" —
+      // the first expect throws before the second is ever evaluated. And
+      // toContain() is case-sensitive: the LOVE world's description opens with
+      // a capitalised "Love, romance, intimacy, ...". Assert case-insensitively
+      // against the union that was actually intended.
+      expect(world.description.toLowerCase()).toMatch(/love|romantic/);
     });
 
     it('should include world focus areas in context', () => {

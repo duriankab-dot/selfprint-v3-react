@@ -4,15 +4,23 @@
  */
 
 import { describe, it, expect } from 'vitest';
+// TESTIMPORT-001 FIX (4 ก.ย. 2026): เทสต์นี้ไม่เคยถูกรันเลย (vitest include
+// เป็น allowlist 7 ไฟล์) จึงไม่มีใครเห็นว่า import ผิดโมดูลมาตลอด —
+// getFollowUpDueDate/calculateSuccessRate อยู่ใน services/DecisionService.ts
+// ส่วน getPendingFollowUps อยู่ใน services/DecisionFollowUpService.ts
+// ไม่มีตัวไหนอยู่ใน types/decision (ไฟล์นั้น export แต่ type)
+import type { Decision } from '../types/decision';
+// QA-02: getPendingFollowUps was being imported from DecisionFollowUpService,
+// which exports a *different* function of the same name — an async DB query
+// `getPendingFollowUps(twinId: string): Promise<FollowUp[]>`. The pure helper
+// these tests exercise (sync, takes ONE Decision, filters its own followUps
+// array) is DecisionService.getPendingFollowUps (DecisionService.ts:418).
 import {
   getFollowUpDueDate,
   calculateSuccessRate,
-  getPendingFollowUps,
-  Decision,
-} from '../types/decision';
-import {
   createDecision,
   getDecisionStats,
+  getPendingFollowUps,
 } from '../services/DecisionService';
 
 describe('Decision Types', () => {
@@ -31,8 +39,10 @@ describe('Decision Types', () => {
 
     it('should calculate 180-day follow-up', () => {
       const baseDate = '2026-08-16';
+      // QA-02: the expected value was simply wrong arithmetic.
+      // 2026-08-16 + 180d = 15 (Aug) + 30 + 31 + 30 + 31 + 31 = 168 → 12 Feb.
       const dueDate = getFollowUpDueDate(baseDate, 180);
-      expect(dueDate).toBe('2027-02-13');
+      expect(dueDate).toBe('2027-02-12');
     });
 
     it('should calculate 365-day follow-up', () => {
@@ -79,8 +89,8 @@ describe('Decision Types', () => {
   });
 
   describe('getPendingFollowUps', () => {
-    it('should return empty for no decisions', () => {
-      const pending = getPendingFollowUps([]);
+    it('should return empty for a decision with no follow-ups', () => {
+      const pending = getPendingFollowUps({ followUps: [] } as unknown as Decision);
       expect(pending).toHaveLength(0);
     });
 
@@ -120,78 +130,83 @@ describe('Decision Types', () => {
         updatedAt: '2026-08-16T00:00:00Z',
       };
 
-      const pending = getPendingFollowUps([decision]);
+      // QA-02: the helper takes ONE Decision, not an array of them.
+      const pending = getPendingFollowUps(decision);
       expect(pending).toHaveLength(1);
       expect(pending[0].id).toBe('fu_1');
     });
   });
 });
 
+// QA-02: this whole block used to call an API that does not exist anywhere in
+// the repo — `createDecision(userId, { title, description, category,
+// decisionDate, confidence, expectedOutcome })` returning
+// `{ success: boolean; decision: { followUps: [...] } }`. The real
+// DecisionService.createDecision (DecisionService.ts:339) is a single-argument
+// compatibility shim over recordDecision() — it takes the Twin-shaped payload
+// (twinId / world / question / options / twinRecommendation / userChoice) and
+// returns `Decision | null`; there is no `success` flag and follow-ups are rows
+// in `follow_up_schedule`, not a nested array on the returned object.
+// (The scheduling round-trip is covered in FollowUpScheduler.test.ts.)
+// Rewritten against the real contract, and its one live caller,
+// TwinContext.tsx:257, which passes exactly this shape.
 describe('DecisionService', () => {
   describe('createDecision', () => {
-    it('should fail with missing userId', async () => {
-      const result = await createDecision('', {
-        title: 'Test',
-        description: 'Test',
-        category: 'career',
-        decisionDate: '2026-08-16',
-        confidence: 80,
-        expectedOutcome: 'Good',
-        userId: '',
+    it('maps the inserted row back to a Decision', async () => {
+      const decision = await createDecision({
+        twinId: 'twin_1',
+        world: 'career',
+        question: 'Change careers?',
+        options: ['Stay', 'Switch to tech'],
+        twinRecommendation: 'Switch to tech',
+        userChoice: 'Switch to tech',
+        context: 'Switching from finance',
       });
 
-      expect(result.success).toBe(false);
+      expect(decision).not.toBeNull();
+      expect(decision?.id).toBeDefined();
+      expect(decision?.twinId).toBe('twin_1');
+      expect(decision?.world).toBe('career');
+      expect(decision?.question).toBe('Change careers?');
+      expect(decision?.options).toEqual(['Stay', 'Switch to tech']);
+      expect(decision?.twinRecommendation).toBe('Switch to tech');
+      expect(decision?.userChoice).toBe('Switch to tech');
+      expect(decision?.context).toBe('Switching from finance');
     });
 
-    it('should create decision with 4 follow-ups', async () => {
-      const result = await createDecision('user_1', {
-        title: 'Change careers',
-        description: 'Switch to tech from finance',
-        category: 'career',
-        decisionDate: '2026-08-16',
-        confidence: 75,
-        expectedOutcome: 'Better work-life balance',
-        userId: 'user_1',
+    it('defaults the optional fields when they are omitted', async () => {
+      const decision = await createDecision({
+        twinId: 'twin_2',
+        world: 'personal',
+        question: 'Test',
       });
 
-      expect(result.success).toBe(true);
-      expect(result.decision).toBeDefined();
-      expect(result.decision?.followUps).toHaveLength(4);
-      expect(result.decision?.followUps.map((f) => f.days)).toEqual([30, 90, 180, 365]);
-    });
-
-    it('should auto-schedule follow-ups', async () => {
-      const result = await createDecision('user_1', {
-        title: 'Test',
-        description: 'Test',
-        category: 'personal',
-        decisionDate: '2026-08-16',
-        confidence: 50,
-        expectedOutcome: 'Test',
-        userId: 'user_1',
-      });
-
-      if (result.decision?.followUps) {
-        expect(result.decision.followUps[0].scheduledDate).toBe('2026-09-15');
-        expect(result.decision.followUps[1].scheduledDate).toBe('2026-11-14');
-        expect(result.decision.followUps[2].scheduledDate).toBe('2027-02-13');
-        expect(result.decision.followUps[3].scheduledDate).toBe('2027-08-16');
-      }
+      expect(decision?.options).toEqual([]);
+      expect(decision?.twinRecommendation).toBe('');
+      expect(decision?.userChoice).toBe('');
     });
   });
 
   describe('getDecisionStats', () => {
+    // NOTE: getDecisionStats (DecisionService.ts:327) is currently a stub — it
+    // ignores both arguments and always answers zeros. These tests pin the
+    // contract that exists today (three numeric counters, never negative);
+    // there is no `successRate` field, which is what the old test asserted.
     it('should return zero stats for empty userId', async () => {
       const stats = await getDecisionStats('');
       expect(stats.total).toBe(0);
       expect(stats.completed).toBe(0);
     });
 
-    it('should return stats for valid userId', async () => {
-      const stats = await getDecisionStats('user_1');
+    it('should return the counter shape for a valid userId', async () => {
+      const stats = await getDecisionStats('twin_1');
       expect(stats).toBeDefined();
+      expect(typeof stats.total).toBe('number');
+      expect(typeof stats.completed).toBe('number');
+      expect(typeof stats.pendingFollowUps).toBe('number');
       expect(stats.total).toBeGreaterThanOrEqual(0);
-      expect(stats.successRate).toBeGreaterThanOrEqual(0);
+      expect(stats.completed).toBeGreaterThanOrEqual(0);
+      expect(stats.pendingFollowUps).toBeGreaterThanOrEqual(0);
     });
   });
 });

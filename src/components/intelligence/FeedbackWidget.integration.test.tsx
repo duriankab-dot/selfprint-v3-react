@@ -110,13 +110,14 @@ describe('FeedbackWidget Integration Tests', () => {
       // Verify Supabase was called with feedback data
       await waitFor(() => {
         expect(testMockFrom).toHaveBeenCalledWith('insight_feedback');
+        // QA-02: `id` and `created_at` are DB-generated defaults —
+        // AIFeedbackLoop.recordFeedback() deliberately does not send them
+        // (src/lib/intelligence/AIFeedbackLoop.ts:139-144).
         expect(testMockInsert).toHaveBeenCalledWith({
-          id: expect.any(String),
           user_id: mockUserId,
           insight_id: mockInsightId,
           feedback_type: 'very_true',
           comment: 'Yes, I definitely do this',
-          created_at: expect.any(String),
         });
       });
 
@@ -239,13 +240,12 @@ describe('FeedbackWidget Integration Tests', () => {
      * Verifies: error handling → user feedback
      */
     it('should handle feedback submission errors with user message', async () => {
-      const mockInsert = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
-            data: null,
-            error: { message: 'Database error' },
-          }),
-        }),
+      // QA-02: recordFeedback() awaits `.insert(...)` directly — it does not
+      // chain .select().single() — so the failure has to surface on the insert
+      // promise itself, otherwise `error` is undefined and nothing ever throws.
+      const mockInsert = vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: 'Database error' },
       });
 
       const mockFrom = vi.fn().mockReturnValue({
@@ -276,8 +276,12 @@ describe('FeedbackWidget Integration Tests', () => {
       fireEvent.click(submitButton);
 
       // Verify error message shown
+      // QA-02: recordFeedback() wraps the Supabase error in an IntelligenceError
+      // ('Failed to record feedback: ...', code RECORD_FEEDBACK_FAILED), and
+      // FeedbackWidget renders IntelligenceError as `Error: <message> (<code>)`.
       await waitFor(() => {
-        expect(screen.getByText(/Failed to submit feedback/i)).toBeInTheDocument();
+        expect(screen.getByText(/Failed to record feedback/i)).toBeInTheDocument();
+        expect(screen.getByText(/RECORD_FEEDBACK_FAILED/)).toBeInTheDocument();
       });
 
       // Verify state preserved (comment not cleared)
@@ -324,7 +328,10 @@ describe('FeedbackWidget Integration Tests', () => {
       );
 
       // Select feedback
-      const notSureButton = screen.getByRole('button', { name: /Not Sure/i });
+      // QA-02: in inline mode the option buttons render the emoji only, with the
+      // description on `title` (FeedbackWidget.tsx:163-177) — the accessible name
+      // is the emoji, not the label. Query the 'not_sure' option by its title.
+      const notSureButton = screen.getByTitle("I'm uncertain about this");
       fireEvent.click(notSureButton);
 
       // Submit
@@ -389,11 +396,12 @@ describe('FeedbackWidget Integration Tests', () => {
       // Verify feedback data structure correct
       await waitFor(() => {
         const callArgs = mockInsert.mock.calls[0][0];
-        expect(callArgs).toHaveProperty('user_id');
-        expect(callArgs).toHaveProperty('insight_id');
-        expect(callArgs).toHaveProperty('feedback_type');
-        expect(callArgs).toHaveProperty('comment');
-        expect(callArgs).toHaveProperty('created_at');
+        expect(callArgs).toHaveProperty('user_id', mockUserId);
+        expect(callArgs).toHaveProperty('insight_id', mockInsightId);
+        expect(callArgs).toHaveProperty('feedback_type', 'very_true');
+        expect(callArgs).toHaveProperty('comment', 'Perfect insight');
+        // QA-02: created_at is a DB default, not part of the insert payload.
+        expect(callArgs).not.toHaveProperty('created_at');
       });
     });
   });
@@ -481,17 +489,22 @@ describe('FeedbackWidget Integration Tests', () => {
         />
       );
 
+      // QA-02: the widget enforces explicit selection by *disabling* the submit
+      // control until an option is picked (FeedbackWidget.tsx:284-294) — the
+      // label reads "Select a feedback option" and only becomes "Submit Feedback"
+      // once selectedFeedback is set. It never shows a "Please select" error
+      // because the click can't happen.
+      const submitButton = screen.getByRole('button', { name: /Select a feedback option/i });
+      expect(submitButton).toBeDisabled();
+      expect(screen.queryByRole('button', { name: /Submit Feedback/i })).not.toBeInTheDocument();
+
       // Try to submit without selecting feedback
-      const submitButton = await screen.findByRole('button', { name: /Submit/i });
       fireEvent.click(submitButton);
 
-      // Verify Supabase NOT called (validation failed)
+      // Verify Supabase NOT called (no auto-feedback without user action)
       await waitFor(() => {
         expect(mockInsert).not.toHaveBeenCalled();
       });
-
-      // Verify error shown to user
-      expect(screen.getByText(/Please select your feedback/i)).toBeInTheDocument();
     });
   });
 });

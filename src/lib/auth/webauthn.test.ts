@@ -51,7 +51,13 @@ describe('WebAuthn Utilities', () => {
       const encoded = arrayBufferToBase64Url(original);
       const decoded = base64UrlToArrayBuffer(encoded);
 
-      expect(decoded).toEqual(original);
+      // QA-02: base64UrlToArrayBuffer returns `bytes.buffer` — a raw
+      // ArrayBuffer, which is also what its signature declares and what its
+      // caller needs (webauthn.ts:25-33 and :121, where it feeds
+      // PublicKeyCredentialCreationOptions.challenge, a BufferSource). It has
+      // never returned a Uint8Array. Wrap it in a view to compare bytes.
+      expect(decoded).toBeInstanceOf(ArrayBuffer);
+      expect(new Uint8Array(decoded)).toEqual(original);
     });
 
     it('should handle empty arrays', () => {
@@ -74,8 +80,10 @@ describe('WebAuthn Utilities', () => {
       const b64 = 'AAECAw';
       const result = base64UrlToArrayBuffer(b64);
 
-      expect(result).toBeInstanceOf(Uint8Array);
-      expect(result).toEqual(new Uint8Array([0, 1, 2, 3]));
+      // QA-02: returns an ArrayBuffer, not a Uint8Array — see the note in the
+      // roundtrip test above.
+      expect(result).toBeInstanceOf(ArrayBuffer);
+      expect(new Uint8Array(result)).toEqual(new Uint8Array([0, 1, 2, 3]));
     });
 
     it('should handle URL-safe characters (- and _)', () => {
@@ -83,8 +91,8 @@ describe('WebAuthn Utilities', () => {
       const b64UrlSafe = 'AB-_CD';
       const result = base64UrlToArrayBuffer(b64UrlSafe);
 
-      expect(result).toBeInstanceOf(Uint8Array);
-      expect(result.length).toBeGreaterThan(0);
+      expect(result).toBeInstanceOf(ArrayBuffer);
+      expect(result.byteLength).toBeGreaterThan(0);
     });
 
     it('should handle missing padding', () => {
@@ -92,8 +100,8 @@ describe('WebAuthn Utilities', () => {
       const b64NoPadding = 'AAECAw';
       const result = base64UrlToArrayBuffer(b64NoPadding);
 
-      expect(result).toBeInstanceOf(Uint8Array);
-      expect(result).toEqual(new Uint8Array([0, 1, 2, 3]));
+      expect(result).toBeInstanceOf(ArrayBuffer);
+      expect(new Uint8Array(result)).toEqual(new Uint8Array([0, 1, 2, 3]));
     });
 
     it('should throw on invalid base64', () => {

@@ -9,7 +9,24 @@
  * - Success criteria validation
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// QA-02: this file never actually ran. Under the global mock in
+// src/test/setup.ts its worker died with
+// "FATAL ERROR: Reached heap limit — JavaScript heap out of memory" during
+// 'Daily scheduler task executes without errors', and vitest then reported all
+// 27 tests as "pending" while still exiting non-zero — which is why the suite
+// looked green-ish but `npm test` failed. Root cause: that mock's select
+// terminal hands back the *live* testDataStore array for the table, and
+// runDailyFollowUpTask() → getAllPendingFollowUps() → triggerFollowUp() writes
+// back into the very arrays it is iterating, so the pending list grows without
+// bound. The stateful in-memory store returns a fresh filtered array per query
+// and models the .or() due/incomplete predicate, so the loop terminates.
+vi.mock('../services/supabase-service', async () => {
+  const helper = await import('../test/supabase-mock-helper');
+  return { supabase: helper.getStatefulStore().client };
+});
+
 import * as DecisionService from '../services/DecisionService';
 import * as FollowUpScheduler from '../services/FollowUpScheduler';
 import * as DecisionLearningService from '../services/DecisionLearningService';

@@ -144,8 +144,17 @@ describe('getNextMilestoneText', () => {
   });
 });
 
+// QA-02: all three service functions gained a required `twinId` argument
+// (TwinEvolutionService.ts:44, 109, 192) — the Twin row is now addressed by its
+// own id plus user_id, not by user_id alone. The tests were still calling the
+// old 3-arg / 2-arg / 1-arg signatures, so the arguments landed in the wrong
+// slots: checkMicroEvolution(userId, metrics, 5) put `metrics` in `twinId` and
+// `5` in `metrics`, leaving currentStage undefined → the "invalid" early return
+// (progress 0) instead of the stage-5 branch (progress 100). Same shift caused
+// evolveTwin/getEvolutionStatus to hit their `Invalid parameters` guards.
 describe('TwinEvolutionService', () => {
-  const testUserId = 'user_test_123';
+  const testUserId = 'user-test-123';
+  const testTwinId = 'mock-twin-id';
   const baseMetrics: ProgressMetrics = {
     daysSinceAwakening: 0,
     messageCount: 0,
@@ -156,12 +165,12 @@ describe('TwinEvolutionService', () => {
 
   describe('checkMicroEvolution', () => {
     it('should return false for invalid inputs', async () => {
-      const result = await checkMicroEvolution('', baseMetrics, 1);
+      const result = await checkMicroEvolution('', testTwinId, baseMetrics, 1);
       expect(result.evolved).toBe(false);
     });
 
     it('should return false for stage 5', async () => {
-      const result = await checkMicroEvolution(testUserId, baseMetrics, 5);
+      const result = await checkMicroEvolution(testUserId, testTwinId, baseMetrics, 5);
       expect(result.evolved).toBe(false);
       expect(result.progress).toBe(100);
     });
@@ -174,13 +183,13 @@ describe('TwinEvolutionService', () => {
         memoryCount: 0,
         feedbackCount: 0,
       };
-      const result = await checkMicroEvolution(testUserId, readyMetrics, 1);
+      const result = await checkMicroEvolution(testUserId, testTwinId, readyMetrics, 1);
       expect(result.evolved).toBe(true);
       expect(result.newStage).toBe(2);
     });
 
     it('should track progress', async () => {
-      const result = await checkMicroEvolution(testUserId, baseMetrics, 1);
+      const result = await checkMicroEvolution(testUserId, testTwinId, baseMetrics, 1);
       expect(result.progress).toBeGreaterThanOrEqual(0);
       expect(result.progress).toBeLessThanOrEqual(100);
     });
@@ -188,24 +197,24 @@ describe('TwinEvolutionService', () => {
 
   describe('evolveTwin', () => {
     it('should fail with invalid inputs', async () => {
-      const result = await evolveTwin('', 2);
+      const result = await evolveTwin('', testTwinId, 1, 2, baseMetrics);
       expect(result.success).toBe(false);
     });
 
     it('should evolve Twin successfully', async () => {
-      const result = await evolveTwin(testUserId, 2);
+      const result = await evolveTwin(testUserId, testTwinId, 1, 2, baseMetrics);
       expect(result.success).toBe(true);
     });
   });
 
   describe('getEvolutionStatus', () => {
     it('should fail with invalid userId', async () => {
-      const result = await getEvolutionStatus('');
+      const result = await getEvolutionStatus('', testTwinId);
       expect(result.success).toBe(false);
     });
 
     it('should return status for valid userId', async () => {
-      const result = await getEvolutionStatus(testUserId);
+      const result = await getEvolutionStatus(testUserId, testTwinId);
       expect(result.success).toBe(true);
       expect(result.currentStage).toBeDefined();
       expect(result.metrics).toBeDefined();

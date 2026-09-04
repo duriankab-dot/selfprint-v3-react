@@ -8,7 +8,11 @@ import MemoryManager from './MemoryManager';
 import { PersonalMemory } from './types';
 
 // Mock Supabase
-const mockSupabase = {
+// QA-02: vi.mock() is hoisted above every const in this file, so referencing a
+// plain top-level `const mockSupabase` from the factory below threw
+// "There was an error when mocking a module ... top level variables inside"
+// and took the whole suite down. vi.hoisted() lifts the definition with it.
+const mockSupabase = vi.hoisted(() => ({
   from: vi.fn(() => ({
     insert: vi.fn().mockReturnThis(),
     select: vi.fn().mockReturnThis(),
@@ -31,11 +35,28 @@ const mockSupabase = {
       },
       error: null
     }),
+    // QA-02: MemoryManager moved from .single() to .maybeSingle() for every
+    // read/write terminal (MemoryManager.ts:62,135,166,225). The mock still
+    // only stubbed .single(), so addMemory/getMemory/updateMemory/linkMemory
+    // all blew up with "maybeSingle is not a function".
+    maybeSingle: vi.fn().mockResolvedValue({
+      data: {
+        id: '123',
+        user_id: 'test-user',
+        memory_type: 'small_win',
+        title: 'Test Memory',
+        content: 'Test content',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      error: null
+    }),
   })),
-};
+}));
 
 vi.mock('@/lib/supabase/client', () => ({
   supabase: mockSupabase,
+  default: mockSupabase,
 }));
 
 describe('MemoryManager', () => {

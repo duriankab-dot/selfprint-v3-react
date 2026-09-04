@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import ContextDisplay from './ContextDisplay';
 import {
   PersonalContext,
@@ -110,8 +110,16 @@ describe('ContextDisplay Component', () => {
         <ContextDisplay context={mockContext} compact={true} />
       );
 
-      expect(screen.getByText(/Values/i)).toBeInTheDocument();
-      expect(screen.getByText('1')).toBeInTheDocument(); // values count
+      // QA-02: the compact card lists Values, Goals and Blind Spots counts
+      // (ContextDisplay.tsx:110-121). The fixture has exactly one of each, so a
+      // bare getByText('1') matched three elements and threw. Scope each count
+      // to its own row.
+      const rowFor = (label: string) => within(screen.getByText(label).parentElement!);
+
+      expect(screen.getByText('Values')).toBeInTheDocument();
+      expect(rowFor('Values').getByText('1')).toBeInTheDocument();
+      expect(rowFor('Goals').getByText('1')).toBeInTheDocument();
+      expect(rowFor('Blind Spots').getByText('1')).toBeInTheDocument();
     });
 
     /**

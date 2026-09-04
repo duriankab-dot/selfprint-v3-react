@@ -450,15 +450,37 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 // Mock the supabase client service using relative paths (Vitest vi.mock cannot resolve @ aliases)
-vi.mock('../../lib/supabase/client', () => ({
-  default: mockSupabaseClient,
-  supabase: mockSupabaseClient,
-}))
+//
+// QA-02 FIX (4 ก.ย. 2026): these two paths used to be '../../lib/supabase/client'
+// and '../../services/supabase-service'. This file lives in src/test/, so '../..'
+// is the REPO ROOT — neither path exists, and both vi.mock registrations were
+// silently no-ops. Tests still got a mock client (because '@supabase/supabase-js'
+// is mocked above and client.ts calls createClient), but they got it *through*
+// the lazy Proxy in src/lib/supabase/client.ts, whose `get` trap returns
+// `value.bind(client)` — a fresh bound function, NOT the vi.fn(). That is why
+// every `(supabase.from as any).mockImplementation(...)` blew up with
+// "mockImplementation is not a function". One '..' too many.
+//
+// importOriginal + spread keeps the module's other real exports
+// (db, getAuthHeaders, getAuthUser, getSession, signOut, saveMessage, ...)
+// intact — only the client instance itself is swapped for the mock.
+vi.mock('../lib/supabase/client', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>()
+  return {
+    ...actual,
+    default: mockSupabaseClient,
+    supabase: mockSupabaseClient,
+  }
+})
 
 // Mock the services/supabase-service re-export for backward compatibility
-vi.mock('../../services/supabase-service', () => ({
-  supabase: mockSupabaseClient,
-}))
+vi.mock('../services/supabase-service', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>()
+  return {
+    ...actual,
+    supabase: mockSupabaseClient,
+  }
+})
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Mock SICEOrchestrator globally so CoreAwakeningService gets the mock version

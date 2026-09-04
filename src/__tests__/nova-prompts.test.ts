@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getNovaPrompt } from '../lib/nova-prompts/getNovaPrompt';
+import { getNovaPrompt, AVAILABLE_ARCHETYPES } from '../lib/nova-prompts/getNovaPrompt';
 
 describe('getNovaPrompt - System Prompt Builder', () => {
   describe('Basic Functionality', () => {
@@ -27,8 +27,13 @@ describe('getNovaPrompt - System Prompt Builder', () => {
         archetype: 'healer',
       });
 
+      // QA-02: BASE_PERSONA was rewritten in Thai and the assistant is named
+      // SELFPRINT there (getNovaPrompt.ts:33-38) — the literal string "AI Twin"
+      // is nowhere in it. Assert the persona block's actual markers.
       expect(prompt).toContain('Nova');
-      expect(prompt).toContain('AI Twin');
+      expect(prompt).toContain('SELFPRINT');
+      expect(prompt).toContain('Core Competencies');
+      expect(prompt).toContain('Communication Approach');
     });
 
     it('should include Hub Context for each hub', () => {
@@ -62,7 +67,13 @@ describe('getNovaPrompt - System Prompt Builder', () => {
 
   describe('Personality Combinations', () => {
     it('should generate unique prompts for different archetypes', () => {
-      const archetypes = ['strategist', 'healer', 'guide', 'explorer', 'creator'];
+      // QA-02: 'healer' and 'guide' are not archetypes in this codebase — the
+      // set is the 18 keys of ARCHETYPE_VOICES (getNovaPrompt.ts:318). Both
+      // unknown names fell through to the `|| ARCHETYPE_VOICES.sage` default
+      // (getNovaPrompt.ts:657) and produced byte-identical prompts, so 5 inputs
+      // yielded 4 unique outputs. Drive the test off the exported list instead,
+      // which also covers all 18 rather than a hand-picked 5.
+      const archetypes = AVAILABLE_ARCHETYPES;
 
       const prompts = archetypes.map(arch =>
         getNovaPrompt({
@@ -123,17 +134,23 @@ describe('getNovaPrompt - System Prompt Builder', () => {
   });
 
   describe('Token Count', () => {
-    it('should generate prompts between 1,000-1,500 tokens (estimated)', () => {
-      // Rough estimate: 1 token ≈ 4 characters in English
+    it('should keep the assembled prompt inside its size budget', () => {
+      // QA-02: this used to divide prompt.length by 4 ("1 token ≈ 4 chars"),
+      // which is an English-only heuristic. BASE_PERSONA, HUB_CONTEXTS and
+      // MOOD_MODULATIONS are now mostly Thai, where a token covers roughly one
+      // to two characters — so the char/4 estimate understates the real token
+      // count by several times and the 1,000-token floor was unreachable by
+      // construction, not because the prompt got smaller. Assert the character
+      // budget directly: measured range across all 12×6×18 = 1,296
+      // combinations is 2,372-3,091 chars.
       const prompt = getNovaPrompt({
         hub: 'decision',
         mood: 'ready',
         archetype: 'strategist',
       });
 
-      const estimatedTokens = prompt.length / 4;
-      expect(estimatedTokens).toBeGreaterThan(1000);
-      expect(estimatedTokens).toBeLessThan(2000); // Conservative upper bound
+      expect(prompt.length).toBeGreaterThan(2000);
+      expect(prompt.length).toBeLessThan(4000);
     });
 
     it('should maintain consistent token count across different combinations', () => {

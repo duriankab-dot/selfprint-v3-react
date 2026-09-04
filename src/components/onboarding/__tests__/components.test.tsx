@@ -74,7 +74,10 @@ describe('InitialBlueprint Component', () => {
       />
     );
 
-    expect(screen.getByText(/Nova:/i)).toBeInTheDocument();
+    // QA-02: the speaker label in the UI was renamed from "Nova:" to
+    // "SELFPRINT:" (InitialBlueprint.tsx:308) — Nova is only the internal
+    // implementation name now.
+    expect(screen.getByText('SELFPRINT:')).toBeInTheDocument();
   });
 
   it('should call onContinue when continue button is clicked', async () => {
@@ -240,7 +243,15 @@ describe('FullAnalysis Component', () => {
     opportunities: ['มอบหมายงาน', 'ยืดหยุ่นมากขึ้น', 'แสดงความรู้สึก'],
   };
 
-  it('should render with 85%+ accuracy', () => {
+  // QA-02: FullAnalysis was rebuilt as the "WOW2 revelation" flow. It now opens
+  // on a 2.5s scanning phase and only then staggers the result cards in, one
+  // every 420ms (FullAnalysis.tsx:42-43, 62-101). Nothing these tests looked
+  // for exists on the first synchronous paint, so every assertion below has to
+  // wait for its slot. Slot 6 (accuracy badge, closing message, CTA) lands
+  // around 2.5s + 6*0.42s ≈ 5s, hence the explicit timeouts.
+  const REVEAL_TIMEOUT = { timeout: 10000 };
+
+  it('should render with 85%+ accuracy', async () => {
     renderWithProviders(
       <FullAnalysis
         profile={mockProfile}
@@ -249,10 +260,10 @@ describe('FullAnalysis Component', () => {
       />
     );
 
-    expect(screen.getByText('85%')).toBeInTheDocument();
+    expect(await screen.findByText('85%', {}, REVEAL_TIMEOUT)).toBeInTheDocument();
   });
 
-  it('should display all analysis sections', () => {
+  it('should display all analysis sections', async () => {
     renderWithProviders(
       <FullAnalysis
         profile={mockProfile}
@@ -261,13 +272,15 @@ describe('FullAnalysis Component', () => {
       />
     );
 
-    expect(screen.getByText(/รูปแบบการตัดสินใจ/)).toBeInTheDocument();
-    expect(screen.getByText(/จุดแข็งของคุณ/)).toBeInTheDocument();
-    expect(screen.getByText(/ข้อมูลเชิงลึกสำคัญ/)).toBeInTheDocument();
-    expect(screen.getByText(/โอกาสในการเติบโต/)).toBeInTheDocument();
+    expect(await screen.findByText(/รูปแบบการตัดสินใจ/, {}, REVEAL_TIMEOUT)).toBeInTheDocument();
+    expect(await screen.findByText(/จุดแข็งของคุณ/, {}, REVEAL_TIMEOUT)).toBeInTheDocument();
+    // QA-02: the insights card header is now "ข้อมูลเชิงลึก" — the trailing
+    // "สำคัญ" was dropped (FullAnalysis.tsx:284).
+    expect(await screen.findByText(/ข้อมูลเชิงลึก/, {}, REVEAL_TIMEOUT)).toBeInTheDocument();
+    expect(await screen.findByText(/โอกาสในการเติบโต/, {}, REVEAL_TIMEOUT)).toBeInTheDocument();
   });
 
-  it('should display correct number of strengths', () => {
+  it('should display correct number of strengths', async () => {
     renderWithProviders(
       <FullAnalysis
         profile={mockProfile}
@@ -276,27 +289,19 @@ describe('FullAnalysis Component', () => {
       />
     );
 
+    await screen.findByText(/จุดแข็งของคุณ/, {}, REVEAL_TIMEOUT);
     const strengthElements = screen.queryAllByText(/มองการณ์ไกล|ใส่ใจรายละเอียด|มีเหตุผล|ผู้นำ/);
     expect(strengthElements.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('should use green color meter for 90%+', () => {
-    // getMeterColor in FullAnalysis.tsx only turns green at >=90 (85-89 is
-    // still yellow #FFD54F) — use 95 here to actually exercise the green case.
-    const { container } = renderWithProviders(
-      <FullAnalysis
-        profile={mockProfile}
-        accuracy={95}
-        onHome={vi.fn()}
-      />
-    );
+  // QA-02: the old 'should use green color meter for 90%+' test was removed.
+  // The accuracy meter it inspected — an inline-hex progress bar whose colour
+  // switched at 90% (#66BB6A) / 85% (#FFD54F) — no longer exists. The rebuilt
+  // component renders a circular badge coloured entirely from CSS custom
+  // properties (var(--accent-primary), FullAnalysis.tsx:340-357), so there is
+  // no per-threshold colour left to assert.
 
-    // Green color (#66BB6A = rgb(102, 187, 106)) should be used for 90%+
-    const progressBar = container.querySelector('div[style*="rgb(102, 187, 106)"]');
-    expect(progressBar).toBeTruthy();
-  });
-
-  it('should call onHome when dashboard button is clicked', async () => {
+  it('should call onHome when the CTA button is clicked', async () => {
     const onHome = vi.fn();
     const user = userEvent.setup();
 
@@ -308,13 +313,15 @@ describe('FullAnalysis Component', () => {
       />
     );
 
-    const homeBtn = screen.getByText(/แดชบอร์ด/i);
+    // QA-02: the final CTA is no longer labelled "แดชบอร์ด" — it reads
+    // "ตื่น Twin ของฉัน →" (FullAnalysis.tsx:401).
+    const homeBtn = await screen.findByRole('button', { name: /ตื่น Twin ของฉัน/ }, REVEAL_TIMEOUT);
     await user.click(homeBtn);
 
     expect(onHome).toHaveBeenCalled();
   });
 
-  it('should have Nova closing message', () => {
+  it('should have a closing message and accuracy caption', async () => {
     renderWithProviders(
       <FullAnalysis
         profile={mockProfile}
@@ -323,15 +330,19 @@ describe('FullAnalysis Component', () => {
       />
     );
 
-    expect(screen.getByText(/Nova:/i)).toBeInTheDocument();
-    // Caption is now dynamic (ties to real confidence, not hardcoded "85%") —
-    // see Onboarding.tsx's handleFinetuneSubmit / FullAnalysis.tsx hero.
-    expect(screen.getByText(/ระดับความชัดเจน 85%/)).toBeTruthy();
+    // QA-02: speaker label renamed "Nova:" → "SELFPRINT:"
+    // (FullAnalysis.tsx:379) and the caption copy is now
+    // "ความแม่นยำ 85% จาก 12 SICE Engines" (FullAnalysis.tsx:363-365),
+    // not "ระดับความชัดเจน 85%".
+    expect(await screen.findByText('SELFPRINT:', {}, REVEAL_TIMEOUT)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/ความแม่นยำ 85% จาก 12 SICE Engines/, {}, REVEAL_TIMEOUT)
+    ).toBeInTheDocument();
   });
 });
 
 describe('Component Integration', () => {
-  it('should pass data through accuracy progression', () => {
+  it('should pass data through accuracy progression', async () => {
     const profile = {
       decisionStyle: 'เชิงกลยุทธ์',
       strengths: ['A', 'B'],
@@ -349,19 +360,27 @@ describe('Component Integration', () => {
     expect(screen.getByText('เชิงกลยุทธ์')).toBeInTheDocument();
     expect(screen.getByText('60%')).toBeInTheDocument();
 
+    // QA-02: this rerender dropped the LanguageProvider that renderWithProviders
+    // supplies, and FullAnalysis calls useLanguage() (FullAnalysis.tsx:52), so it
+    // threw "useLanguage must be used within LanguageProvider". It also has to
+    // wait for the reveal phase (see the note in the FullAnalysis block above).
     rerender(
       <BrowserRouter>
-        <EmotionProvider>
-          <FullAnalysis
-            profile={{ ...profile, insights: [], opportunities: [] }}
-            accuracy={85}
-            onHome={vi.fn()}
-          />
-        </EmotionProvider>
+        <LanguageProvider>
+          <EmotionProvider>
+            <FullAnalysis
+              profile={{ ...profile, insights: [], opportunities: [] }}
+              accuracy={85}
+              onHome={vi.fn()}
+            />
+          </EmotionProvider>
+        </LanguageProvider>
       </BrowserRouter>
     );
 
-    expect(screen.getByText('เชิงกลยุทธ์')).toBeInTheDocument();
-    expect(screen.getByText('85%')).toBeInTheDocument();
+    // Decision style lands in reveal slot 1, the accuracy badge in slot 6 —
+    // await each one separately rather than assuming they paint together.
+    expect(await screen.findByText('เชิงกลยุทธ์', {}, { timeout: 10000 })).toBeInTheDocument();
+    expect(await screen.findByText('85%', {}, { timeout: 10000 })).toBeInTheDocument();
   });
 });
