@@ -296,7 +296,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const lang = (language === 'th' ? 'th' : 'en') as 'th' | 'en';
   const story = STORY[lang];
   const seo = SEO_COPY[lang][segment] ?? SEO_COPY[lang]['default'];
-  const ogUrl = `https://selfprint.one/api/og?lang=${lang}&segment=${segment}`;
+  // OGSTATIC-001: /api/og คืน HTML ไม่ใช่รูป (และตอนนี้ถูกลบทิ้งแล้ว)
+  // ใช้ไฟล์ .jpg static ขนาด 1200×630 ใน public/ แทน — absolute URL เสมอ
+  const ogUrl = `https://selfprint.one/og-default-${lang}.jpg`;
 
   // Scroll-triggered animation state
   const [s2Visible, setS2Visible] = useState(false);

@@ -6,7 +6,7 @@
  * Twin = Personal AI Intelligence Entity (Act III: Living phase)
  */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '../services/supabase-service';
@@ -108,7 +108,10 @@ export function AIProvider({ children }: AIProviderProps) {
     }
   };
 
-  const value: AIContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<AIContextType>(() => ({
     activeAI,
     isTwinAwakened,
     twinName,
@@ -117,7 +120,7 @@ export function AIProvider({ children }: AIProviderProps) {
     setTwinAwakened: handleSetTwinAwakened,
     isNovaActive: activeAI === 'nova',
     isTwinActive: activeAI === 'twin',
-  };
+  }), [activeAI, isTwinAwakened, twinName, switchToNova, switchToTwin, handleSetTwinAwakened]);
 
   return <AIContext.Provider value={value}>{children}</AIContext.Provider>;
 }

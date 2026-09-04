@@ -442,10 +442,12 @@ export default function ExplorePage() {
         const { data } = await supabase
           .schema('selfprint')
           .from('users_profiles')
-          .select('birth_date')
+          // DBCOL-001 FIX: คอลัมน์จริงชื่อ date_of_birth (migration 002:38)
+          // birth_date มีอยู่บน public.personal_profiles คนละตารางกัน
+          .select('date_of_birth')
           .eq('user_id', userId)
           .maybeSingle();
-        dob = data?.birth_date ?? '';
+        dob = data?.date_of_birth ?? '';
       }
 
       // fallback: ใช้วันที่ปัจจุบันถ้าไม่มี DOB

@@ -143,19 +143,35 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
 
   // ─── Initial compute + periodic tick ──────────────────────────────────────
 
+  // ENVTICK-001 FIX (3 ก.ย. 2026): `setInterval(compute, ...)` ถูกลงทะเบียนใน
+  // useEffect ที่ deps เป็น [] จึงจับ `compute` ตัวแรกสุดตอน mount ค้างไว้ตลอด
+  // แต่ `compute` เป็น useCallback ที่ deps = [engine, worldForEnv, mood, audio]
+  // → เปลี่ยนตัวใหม่ทุกครั้งที่ world/mood เปลี่ยน
+  // ผลคือทุก 60 วินาที interval จะคำนวณด้วย world/mood **ตอน mount** แล้วเขียน
+  // CSS var ทับค่าที่ถูกต้องซึ่ง effect ด้านล่าง ([worldForEnv, mood]) เพิ่ง set ไป
+  // → บรรยากาศของแอปเด้งกลับไปเป็นของโลกเดิมเงียบ ๆ ทุกนาที
+  //
+  // แก้ด้วยการเก็บ compute ตัวล่าสุดไว้ใน ref แล้วให้ interval เรียกผ่าน ref
+  // (ไม่ใส่ compute ลง deps เพราะจะทำให้ interval ถูก re-arm ใหม่ทุกครั้งที่
+  //  world/mood เปลี่ยน แล้ว tick 60 วินาทีจะถูกรีเซ็ตไม่ตรงเวลาจริง)
+  const computeRef = useRef(compute);
+  useEffect(() => {
+    computeRef.current = compute;
+  }, [compute]);
+
   useEffect(() => {
     // คำนวณทันที
-    compute();
+    computeRef.current();
 
-    // Tick ทุก 60 วินาที
-    tickTimerRef.current = setInterval(compute, TICK_INTERVAL_MS);
+    // Tick ทุก 60 วินาที — เรียก compute ตัวล่าสุดเสมอ
+    tickTimerRef.current = setInterval(() => computeRef.current(), TICK_INTERVAL_MS);
 
     return () => {
       if (tickTimerRef.current)  clearInterval(tickTimerRef.current);
       if (transTimerRef.current) clearTimeout(transTimerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // mount only — recompute via hub/mood effects below
+    // mount only — recompute via hub/mood effects below
+  }, []);
 
   // ─── Recompute on world/mood change ────────────────────────────────────────
   // (period transitions already handled by timer; world/mood changes recompute immediately)
@@ -180,11 +196,14 @@ export function EnvironmentProvider({ children }: { children: ReactNode }) {
 
   // ─── Context value ─────────────────────────────────────────────────────────
 
-  const value: EnvironmentContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<EnvironmentContextType>(() => ({
     environment,
     isTransitioning,
     refresh: compute,
-  };
+  }), [environment, isTransitioning, compute]);
 
   return (
     <EnvironmentContext.Provider value={value}>

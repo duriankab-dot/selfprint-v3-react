@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '@/services/supabase-service';
@@ -186,7 +186,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   }, []);
 
-  const value: AuthContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<AuthContextType>(() => ({
     session,
     loading,
     isPasskeyAvailable,
@@ -196,7 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signInWithMagicLink,
     signInWithOAuth,
     signOut,
-  };
+  }), [session, loading, isPasskeyAvailable, hasBiometric, registerPasskey, signInWithPasskey, signInWithMagicLink, signInWithOAuth, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

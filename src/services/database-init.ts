@@ -76,10 +76,15 @@ export async function ensureUserProfile(userId: string): Promise<boolean> {
     }
 
     // Check if profile exists
+    // DBKEY-001 FIX (3 ก.ย. 2026): `selfprint.users_profiles.id` เป็น surrogate
+    // key ที่ default เป็น gen_random_uuid() ไม่ใช่ auth uid — คอลัมน์ที่ผูกกับ
+    // ผู้ใช้จริงคือ `user_id UUID NOT NULL` (supabase/migrations/002:36)
+    // การ .eq('id', userId) จึงไม่เคย match แถวไหนเลย → ฟังก์ชันนี้คิดว่ายังไม่มี
+    // profile ทุกครั้งแล้วพยายาม insert ใหม่ซ้ำ ๆ
     const { data: existing, error: checkError } = await supabase
       .schema('selfprint').from('users_profiles')
       .select('id')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (checkError && checkError.code !== 'PGRST116') {
@@ -97,7 +102,9 @@ export async function ensureUserProfile(userId: string): Promise<boolean> {
       .schema('selfprint').from('users_profiles')
       .insert([
         {
-          id: userId,
+          // DBKEY-001 FIX: ส่ง user_id (NOT NULL) แทนการ override id
+          // ของเดิมไม่ส่ง user_id เลย → insert ล้มด้วย not-null violation ทุกครั้ง
+          user_id: userId,
           full_analysis_completed: false,
           created_at: new Date().toISOString(),
         },
@@ -131,7 +138,8 @@ export async function markFullAnalysisCompleted(userId: string): Promise<boolean
         full_analysis_completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       })
-      .eq('id', userId);
+      // DBKEY-001 FIX — ดูคอมเมนต์ใน ensureUserProfile ด้านบน
+      .eq('user_id', userId);
 
     if (error) {
       console.error('Error marking analysis complete:', error);

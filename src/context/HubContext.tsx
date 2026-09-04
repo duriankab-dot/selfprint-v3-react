@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect, useContext } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { AuthContext } from './AuthContext';
 import { logEvent } from '../services/analytics';
@@ -77,11 +77,14 @@ export function HubProvider({ children }: { children: ReactNode }) {
     [userId]
   );
 
-  const value: HubContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<HubContextType>(() => ({
     currentHub,
     hubHistory,
     switchHub,
-  };
+  }), [currentHub, hubHistory, switchHub]);
 
   return (
     <HubContext.Provider value={value}>

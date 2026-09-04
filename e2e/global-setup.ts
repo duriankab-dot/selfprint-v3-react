@@ -54,7 +54,8 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email: 'test-phase-b@selfprint.one',
-    password: 'Test@PhaseB123!',
+    // E2EPW-001: อ่านจาก env ไม่ hardcode รหัสจริงลง repo
+    password: process.env.E2E_TEST_PASSWORD ?? '',
   });
 
   if (error || !data.session) {

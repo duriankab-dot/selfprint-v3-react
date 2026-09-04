@@ -1,480 +1,303 @@
-# FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3 (ฉบับแทนที่ทั้งหมด)
+# FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**วันที่:** 3 กันยายน 2026
-**Baseline:** `3cbbaf6` (= HEAD ของ `master` บน GitHub ตรงกับเครื่อง)
-**วิธีตรวจ:** อ่านซอร์สโค้ดจริงอย่างเดียว — **ไม่เชื่อไฟล์ `.md` ใด ๆ ในรีโปนี้เลย**
-รวมถึงไฟล์ฉบับเดิมของไฟล์นี้เอง (รีโปมีไฟล์ `.md` ที่ root 87 ไฟล์ ส่วนใหญ่ล้าสมัย
-และหลายไฟล์อ้างสิ่งที่โค้ดไม่ได้ทำ)
-**เครื่องมือ:** clone ใหม่จาก GitHub + typecheck จริง + agent 5 ตัว (security / backend /
-frontend / database / adversarial review ของงานแก้เอง)
+**อัปเดตล่าสุด:** 3 กันยายน 2026 (รอบที่ 2 — หลังลงมือแก้)
+**Baseline:** `62987f6` + งานที่ยังไม่ commit ในรอบนี้
+**วิธีตรวจ:** อ่านซอร์สโค้ดจริงอย่างเดียว — **ไม่เชื่อไฟล์ `.md` ใด ๆ** รวมถึงฉบับก่อนของไฟล์นี้เอง
+**เครื่องมือ:** clone จาก GitHub + รัน build/test/lint จริง + agent เฉพาะทาง 6 ตัว
 
-> ⚠️ **ไฟล์นี้แทนที่เอกสารสถานะเดิมทั้งหมด** ไฟล์ `HANDOFF_*.md`, `PHASE_A*.md`,
-> `SESSION_*.md`, `*_STATUS_TH.md`, `PHASE_3_AUTOMATION_CLEANUP_HANDOFF.md`
-> **ล้าสมัยและห้ามเชื่อ** — ดูหัวข้อ "เอกสารที่โกหก" ท้ายไฟล์
+> ⚠️ **ไฟล์นี้คือเอกสารสถานะฉบับเดียวที่ถูกต้อง** — ไฟล์ `.md` ที่ root อีก 84 ไฟล์
+> ถูกลบทิ้งแล้วในรอบนี้เพราะอ้างสิ่งที่โค้ดไม่ได้ทำ (ดูหัวข้อ 8)
+> แผนงานรวมอยู่ที่ `docs/PLAN_TRACKS_TH.md`
 
 ---
 
-## 0. TL;DR — 6 บรรทัดสำหรับคนรีบ
+## 0. TL;DR
 
-1. **แชททั้งระบบพังมาตลอด 100% ของ request** — client ไม่เคยส่ง `Authorization` แต่ CF Pages บังคับ → 401 ทุกครั้ง (แก้แล้ว)
-2. **`/chat/nova` จอขาวทุกครั้ง** — `useNova()` ถูกเรียกโดยไม่มี `NovaProvider` ที่ไหนเลย (แก้แล้ว)
-3. **ไม่มี ErrorBoundary ทั้งโปรเจกต์** — error ทุกตัวกลายเป็นจอขาวเปล่า และ Sentry ติดตั้งไว้แต่ไม่เคย init (แก้แล้ว)
-4. **OpenRouter API key ที่ใช้งานได้จริงอยู่ใน repo สาธารณะ** — `KEY/open_router API KEY.txt` ⚠️ **ต้อง revoke เดี๋ยวนี้**
-5. **เอกสารอ้าง "91 TypeScript errors จาก Phase 3" — ไม่จริงเลย** ไฟล์ 43 ไฟล์นั้นต่างกันแค่ CRLF ไม่มี error สักตัว
-6. **`npm test` รันแค่ 7 จาก 73 ไฟล์เทสต์** — เพราะ `vitest.config.ts` ล็อก allowlist ไว้ ที่ผ่านมาที่เห็นเขียว = เขียวจาก 9.6% ของ suite
+**ปลดล็อกใหญ่:** `npm run build` / `test` / `lint` **รันได้แล้ว** — ที่เอกสารเก่าบอกว่า
+"Rolldown ใช้กับ Linux ไม่ได้" มาหลายเซสชันนั้น **วินิจฉัยผิด** สาเหตุจริงคือ
+`npm install` ถูกขัดจังหวะจนไฟล์ `.node` ถูกตัดกลางคัน
+(rolldown 248 KB จากของจริง 19.9 MB · lightningcss 2.8/10.0 MB · oxlint 1.1/16.0 MB)
 
----
+**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว**
 
-## 1. สิ่งที่แก้เสร็จแล้วในรอบนี้ (verify ด้วย compiler จริง)
+| gate | ผล |
+|------|-----|
+| `tsc -b` | ✅ 0 errors |
+| `npm run typecheck:functions` | ✅ 0 errors |
+| `vite build` | ✅ สำเร็จ (1.2 s) |
+| `oxlint` | ✅ 0 errors · 200 warnings · 484 files |
+| `vitest run` | ⚠️ 167 tests ผ่าน แต่รันแค่ **7 จาก 69 ไฟล์** (A8 ยังไม่ทำ) |
 
-ทุกข้อผ่าน `tsc` แล้ว — ดูหลักฐานหัวข้อ 4
-
-| # | รหัส | เรื่อง | ไฟล์ที่แตะ |
-|---|------|--------|-----------|
-| 1 | `AUTHHDR-001` | เพิ่ม `Authorization: Bearer` ให้ทุก fetch ที่เรียก `/api/nova`, `/api/twin`, `/api/metrics` | `src/lib/supabase/client.ts` (+`getAuthHeaders()`), `NovaAPIService.ts`, `TwinAPIService.ts`, `PerformanceMonitor.ts` |
-| 2 | `NOVAPROV-001` | ครอบ route `/chat/nova` ด้วย `<NovaProvider>` | `src/App.tsx`, comment ใน `CoreAwakening.tsx` |
-| 3 | `ERRBOUND-001` + `SENTRY-INIT-001` | สร้าง ErrorBoundary + เรียก `initializeSentry()` | `src/components/ErrorBoundary.tsx` (ใหม่), `src/main.tsx` |
-| 4 | `AUTONOMY-FIX-001` | เขียนใหม่ทั้งไฟล์: verifyUser, CORS allowlist, payload ตรงกับ client, เขียนลงตารางที่มีจริง, await insert | `functions/api/autonomy-log.ts` |
-| 5 | `METRICS-FIX-001` | verifyUser, CORS allowlist, `.schema('selfprint')`, แก้ operator precedence ของ `rating`, await insert | `functions/api/metrics.ts` |
-| 6 | `CFBUFFER-001` | เลิกใช้ `Buffer` ใน `generateShareCode()` | `api/unified-handler.ts` |
-| 7 | `STRIPEWH-001` | `constructEvent` → `constructEventAsync` + `createSubtleCryptoProvider()` | `api/unified-handler.ts` |
-| 8 | `ENVNAME-001` | `getAnonSupabase` อ่าน `SUPABASE_URL`/`SUPABASE_ANON_KEY` ก่อน แล้วค่อย fallback `VITE_*` | `api/unified-handler.ts` |
-| 9 | `NOTIFAUTH-001` | POST ของ notifications ทุก action ต้อง login และใช้ `user.id` ไม่ใช่ `body.userId` | `api/unified-handler.ts` |
-| 10 | `NOTIFCOL-001` | `notification_queue` เลิกใช้ชื่อคอลัมน์ camelCase → snake_case | `api/unified-handler.ts` |
-| 11 | `TWINEVOAUTH-001` | `/api/twin-evolution` ต้อง login + filter `user_id` | `api/unified-handler.ts` |
-| 12 | `DEBUGLEAK-001` | ลบการส่ง Postgres error / stack ให้ client ทั้งหมด 10 จุด | `api/unified-handler.ts`, `functions/api/{nova,twin}.ts` |
-| 13 | `COACH404-001` | ปิด AskCoach (rollout default 10 → 0) เพราะ `/api/coach` ไม่มี handler | `src/components/dashboard/AskCoach.tsx` |
-| 14 | `JOURNAL404-001` | เจอ 404 แล้วหยุด ไม่ mark ข้อความว่า failed ถาวร | `src/hooks/useJournalQueue.ts` |
-| 15 | `SCHEMA-TS-002` | ย้าย `blueprints`/`users_profiles`/`share_links` ไป schema `selfprint` ใน type file | `api/_utils/database.types.ts` |
-| 16 | `TSCONFIG-FUNCTIONS-001` | เพิ่ม typecheck ให้ `functions/` + `api/` (ไม่เคยมีมาก่อน) | `tsconfig.functions.json` (ใหม่), `package.json` |
-| 17 | `GITIGNORE-FIX-001` + `CRLF-001` | แก้ `.gitignore` 2 บรรทัดที่เขียนผิดจนกฎไม่ทำงาน + เพิ่ม `.gitattributes` | `.gitignore`, `.gitattributes` |
+**ที่ยังต้องทำด้วยมือ:** apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`
+— Core Awakening จะกลับมาทำงานได้ก็ต่อเมื่อรันไฟล์นี้ (ดูหัวข้อ 3)
 
 ---
 
-## 2. รายละเอียดปัญหา P0 — สาเหตุ + หลักฐาน + วิธีแก้
+## 1. งานที่แก้เสร็จแล้ว — ผ่าน compiler จริงทุกข้อ
 
-### P0-1 · แชททั้งระบบตอบ 401 ทุก request ✅ แก้แล้ว
+### รอบที่ 1 — P0 ที่ทำให้โปรดักต์พัง
 
-**อาการ:** Nova chat, Twin chat, floating assistant ใช้ไม่ได้เลย
+| รหัส | เรื่อง |
+|------|-------|
+| `AUTHHDR-001` | **แชททั้งระบบตอบ 401 ทุก request** — client ไม่เคยส่ง `Authorization` แต่ CF Pages บังคับ → Nova/Twin/floating chat ใช้ไม่ได้เลย 100% |
+| `NOVAPROV-001` | **`/chat/nova` จอขาวทุกครั้ง** — `useNova()` ถูกเรียกโดยไม่มี `NovaProvider` mount ที่ไหนเลย |
+| `ERRBOUND-001` + `SENTRY-INIT-001` | ไม่มี ErrorBoundary ทั้งโปรเจกต์ + Sentry ติดตั้งแต่ไม่เคย `init()` → error ทุกตัว = จอขาวเงียบ ๆ |
+| `AUTONOMY-FIX-001` | `/api/autonomy-log` พัง 4 ชั้น บันทึกได้ 0 แถวมาตลอด (ไม่มี auth / payload คนละ contract / เขียนผิดตาราง / โกหกว่าสำเร็จ) |
+| `METRICS-FIX-001` | `/api/metrics` ไม่มี auth + เขียนผิด schema + บั๊ก operator precedence ทำให้ `rating` เป็นตัวเลข |
+| `CFBUFFER-001` | `Buffer` ใน `generateShareCode()` ไม่มีบน Workers runtime |
+| `STRIPEWH-001` | Stripe webhook ใช้ `constructEvent` (sync/node crypto) → subscription ไม่เคย sync |
+| `ENVNAME-001` | `getAnonSupabase` อ่าน `VITE_*` ที่ไม่มีใน runtime → 3 endpoint ตอบ 500 |
+| `NOTIFAUTH-001` | notification POST ทุก action เชื่อ `body.userId` ทั้งที่มี `user` ที่ verify แล้วในขอบเขต |
+| `NOTIFCOL-001` | `notification_queue` ใช้ชื่อคอลัมน์ camelCase แต่ schema เป็น snake_case |
+| `TWINEVOAUTH-001` | `/api/twin-evolution` ไม่มี auth เลย (รอดเพราะ RLS บังเอิญ) |
+| `DEBUGLEAK-001` | ส่ง Postgres error / stack ให้ client 10 จุด (มี endpoint ที่ไม่ต้อง login ด้วย) |
+| `COACH404-001` | AskCoach rollout default 10% แต่ `/api/coach` ไม่มี handler → ผู้ใช้ 10% เห็นฟีเจอร์พัง |
+| `JOURNAL404-001` | journal-sync 404 แล้ว mark failed ถาวร |
+| `SCHEMA-TS-002` | ย้าย `blueprints`/`users_profiles`/`share_links` ไป schema `selfprint` ใน type file |
+| `TSCONFIG-FUNCTIONS-001` | เพิ่ม typecheck ให้ `functions/` + `api/` **ครั้งแรกในประวัติโปรเจกต์** → เจอ 13 errors ที่ซ่อนอยู่ แก้ครบ |
+| `GITIGNORE-FIX-001` + `CRLF-001` | แก้ `.gitignore` 2 บรรทัดที่เขียนผิดจนกฎไม่ทำงาน + เพิ่ม `.gitattributes` |
 
-**สาเหตุ (หลักฐาน):**
-- `functions/api/nova.ts:87-94` และ `functions/api/twin.ts:90-97` — `if (!authHeader) return 401`
-- แต่ผู้เรียกทุกจุดส่งแค่ `Content-Type`:
-  `NovaAPIService.ts:79-81`, `NovaAPIService.ts:190-192`, `TwinAPIService.ts:90-92`
-- ทั้งโปรเจกต์ไม่มี global fetch interceptor เลย (grep `window.fetch =` → ไม่เจอ)
-- ผู้เรียกจริง: `pages/NovaChat.tsx:114`, `features/chat/hooks/useChat.ts:106`,
-  `components/chat/FloatingSelfprintChat.tsx:93`, `pages/TwinChat.tsx:235`
+### รอบที่ 2 — Track A
 
-**แก้:** เพิ่ม `getAuthHeaders()` ใน `src/lib/supabase/client.ts` แล้วใช้ที่ 3 จุด
+**A1 · ล้าง Vercel + dead code** — ลบ 65 ไฟล์ ตรวจ importer ทุกไฟล์ก่อนลบ
 
-**เกณฑ์ยืนยัน:** login แล้วเปิด DevTools → Network → พิมพ์ข้อความ →
-`POST /api/twin` ต้องมี header `Authorization: Bearer ey...` และตอบ 200
-
-**⚠️ หมายเหตุตรงไปตรงมา:** `/chat/nova` ถูกจดไว้ใน `publicPages` (`App.tsx:144`)
-แต่ backend บังคับ login — **ผู้ใช้ที่ยังไม่ล็อกอินจะยังเจอ 401 อยู่** ต่างจากเดิมตรงที่
-ตอนนี้เห็นข้อความ error แทนจอขาว ต้องตัดสินใจ: ย้าย route ไปเป็น protected
-หรือปล่อยให้ Nova ตอบได้แบบ anonymous
-
----
-
-### P0-2 · `/chat/nova` จอขาวทุกครั้ง ✅ แก้แล้ว
-
-**สาเหตุ:** `pages/NovaChat.tsx:23` เรียก `useNova()` ก่อน guard `!session`
-แต่ grep ทั้งรีโปแล้ว **ไม่มีที่ไหน mount `NovaProvider` เลย** → throw
-`"useNova must be used within NovaProvider"` (`NovaContext.tsx:93`) ทุกครั้ง
-
-คอมเมนต์ที่ `CoreAwakening.tsx:14` เขียนว่า *"useNova เรียกใน NovaChat เท่านั้น
-ที่ wrap ใน NovaProvider"* — **คอมเมนต์นั้นไม่จริง** (แก้คอมเมนต์แล้วด้วย)
-
-**แก้:** `App.tsx:144` → `<NovaProvider><NovaChat /></NovaProvider>`
-
-**เกณฑ์ยืนยัน:** เปิด `/th/chat/nova` → หน้าต้อง render ไม่ใช่จอขาว
-
----
-
-### P0-3 · ไม่มี ErrorBoundary + Sentry ไม่เคยทำงาน ✅ แก้แล้ว
-
-**สาเหตุ:**
-- `grep -rn "componentDidCatch|ErrorBoundary|getDerivedStateFromError" src/` → **ไม่เจอเลย**
-- `<Suspense fallback={null}>` (`App.tsx:269`) จับแค่ *loading* ไม่จับ *throw*
-- `@sentry/react` อยู่ใน dependencies, `initializeSentry()` มีอยู่ 2 ตัว
-  (`services/error-tracking.ts:20`, `services/SentryService.ts:67`) แต่
-  **ไม่มีใครเรียกสักตัว** → production ไม่มี error telemetry เลย
-
-**ผลรวม:** lazy chunk 404 หลัง deploy (ปัญหา SW cache ที่บันทึกไว้หลายเซสชัน)
-= จอขาวเงียบ ๆ ไม่มี log ไม่มีทางกู้
-
-**แก้:** `src/components/ErrorBoundary.tsx` (ไทย/อังกฤษ, ตรวจจับ stale-chunk error
-แล้วเสนอปุ่มโหลดใหม่โดยเฉพาะ) + `main.tsx` เรียก `initializeSentry()` และครอบ tree
-
-**เกณฑ์ยืนยัน:** โยน error ปลอมในคอมโพเนนต์ → ต้องเห็นการ์ด error ไม่ใช่จอขาว
-
----
-
-### P0-4 · `/api/autonomy-log` — พัง 4 ชั้นซ้อนกัน บันทึกได้ 0 แถวมาตลอด ✅ แก้แล้ว
-
-| ชั้น | ปัญหา | หลักฐาน |
-|-----|-------|---------|
-| 1 | **ไม่มี auth เลย** ทั้งที่คอมเมนต์หัวไฟล์เขียนว่า "JWT verified" | เดิม `functions/api/autonomy-log.ts:13` vs โค้ดจริงที่ไม่มี `verifyUser` |
-| 2 | **payload คนละ contract** — handler ขอ `{userId,twinId,autonomyLevel}` แต่ client ส่ง `{hub,mood,autonomy_level,...}` → **400 ทุกครั้ง** | `useChat.ts:166-175` |
-| 3 | **เขียนผิดตาราง** — `autonomy_signals` สร้างใน `migrations/` ที่ CLI ไม่เคย apply และ migration นั้น **รันไม่ผ่านอยู่แล้ว** เพราะอ้าง `selfprint.twins` ที่ไม่มีจริง | `migrations/autonomy_signals_table.sql:7` |
-| 4 | **โกหกว่าสำเร็จ** — insert แบบ fire-and-forget แล้ว return `{ok:true,stored:true}` ทุกกรณี | เดิมบรรทัด 93-95 |
-
-**แก้:** เขียนใหม่ทั้งไฟล์ — บังคับ `verifyUser`, เอา `user_id` จาก token เท่านั้น,
-รับ payload ตามที่ client ส่งจริง, เขียนลง `public.decision_log` (ตารางที่มีจริง +
-มี RLS policy จริง — `supabase/migrations/001_decision_log_autonomy_tracking.sql:15-36`),
-`await` insert แล้วรายงานผลตามจริง, CORS เปลี่ยนจาก `*` เป็น allowlist
-
-**เกณฑ์ยืนยัน:** คุยกับ Twin 1 รอบ → `SELECT * FROM decision_log ORDER BY created_at DESC LIMIT 1;`
-ต้องมีแถวใหม่ที่ `user_id` ตรงกับผู้ใช้ที่ล็อกอิน
-
----
-
-### P0-5 · `/api/metrics` — ไม่มี auth + เขียนผิด schema + บั๊ก precedence ✅ แก้โค้ดแล้ว (แต่ยังมีเงื่อนไข DB)
-
-**สาเหตุ 4 ข้อ:**
-1. ไม่มี `verifyUser` + `CORS: *` + ใช้ service_role + อ่าน `user_id` จาก body →
-   ใครก็ได้บนอินเทอร์เน็ตเขียนแถวสวมชื่อคนอื่นได้ ข้าม RLS
-2. `.from('performance_metrics')` ตกไปที่ `public` ซึ่ง**ไม่มี**คอลัมน์
-   `fcp_ms/lcp_ms/inp_ms/cls_value/ttfb_ms` (`migrations/002_security_tables.sql:44`)
-3. **บั๊ก operator precedence:**
-   ```ts
-   rating: payload.metrics?.average ?? 0 < 1000 ? 'good' : 'needs-improvement'
-   ```
-   `<` ผูกแน่นกว่า `??` → parse เป็น `average ?? ((0<1000) ? 'good' : '...')`
-   แปลว่า `rating` ได้ค่า **ตัวเลข** ผิด `CHECK (rating IN ('good','needs-improvement','poor'))`
-4. return `{ok:true,stored:true}` เสมอ ทำให้ทั้ง 3 ข้อบนไม่มีใครเห็น
-
-**⚠️ ยังต้องเช็คก่อน deploy (DB-02):** `selfprint.performance_metrics` สร้างไว้ใน
-`migrations/metrics_table.sql` ซึ่งอยู่ในโฟลเดอร์ที่ CLI ไม่เคย apply — เหตุผลเดียวกับที่ทำให้
-`autonomy_signals` ใช้ไม่ได้ **ต้องรันคำสั่งนี้ก่อน:**
-```sql
-SELECT to_regclass('selfprint.performance_metrics');
--- ได้ NULL → เอา migrations/metrics_table.sql ไปรันใน SQL Editor ก่อน
+```
+.vercel/ · vercel.json · .vercelignore
+api/{twin,nova,og,og.tsx,metrics}.ts · api/_archived/ · api/edge/ · api/__tests__/
+server/ ทั้งโฟลเดอร์  (พังอยู่แล้ว: server/index.ts:28 import ../api/decisions ที่ไม่มีจริง)
+src/api/ · src/middleware/ · src/lib/api/ · src/components/decision/ ทั้งโฟลเดอร์
+src/services/{nova-ai,personalModel}.ts · src/lib/supabase/supabase.ts
+src/hooks/usePushSubscription.ts · functions/api/rate-limiter.ts
+components/{TwinEvolutionDisplay,WorldEnvironment}.tsx  (ตัวจริงอยู่ในโฟลเดอร์ย่อย)
+dependency ที่ไม่มีใครใช้ 10 ตัว: three, @types/three, @vercel/og, @vercel/node,
+  express, cors, helmet, dotenv, ts-node, concurrently, web-push, @types/{express,cors}
 ```
 
-**หมายเหตุ:** `PerformanceMonitor.reportMetrics()` **ยังไม่มีใครเรียกเลย** ทั้งโปรเจกต์
-(ตรวจแล้ว 0 importers) — endpoint นี้จึงยังไม่มี traffic จริงจนกว่าจะไปเรียกใน `main.tsx`
+> 📌 **audit รอบแรกผิด 1 จุด** — `components/features/DecisionList.tsx` ถูกใช้จริงโดย
+> `features/DecisionLogger.tsx:24` ผมจึงเก็บไว้ ไม่ได้ลบตามที่ audit แนะนำ
+
+**A2 · env + รหัสผ่าน** (`E2EPW-001`, `ENVDOC-001`)
+ย้ายรหัสผ่านบัญชี staging 6 ตัวออกจากโค้ดไปเป็น env (มี `requireEnv()` ที่ fail ดัง ๆ
+ถ้าไม่ได้ตั้งค่า) + ลบรหัสออกจาก `console.log` สรุปท้ายสคริปต์ +
+เขียน `.env.example` ใหม่ทั้งไฟล์ให้ครบทั้งฝั่ง client / server / e2e
+
+**A4 · OG image** (`OGSTATIC-001`, `OGABS-001`, `OGFONT-001`)
+เจอหนักกว่าที่ audit บอก — ไม่ใช่แค่ `/api/og` คืน HTML แต่ **ไฟล์ `/og-*.jpg` ทั้ง 12 ไฟล์
+ไม่มีอยู่จริงใน `public/` เลย** social preview จึงพังทุกหน้า ไม่ใช่แค่หน้าแรก
+
+สร้างรูปจริงครบ 12 ไฟล์ ขนาด 1200×630 ด้วย design token ของโปรเจกต์เอง
+(navy `#0F1F3F` → `#1E3A5F`, accent `#5B5CEB`) รองรับไทย+อังกฤษผสมในบรรทัดเดียว
++ แก้ให้เป็น absolute URL + เพิ่ม `og:image:width/height` + `twitter:card`
++ ลบ `functions/api/og.ts` ทิ้ง
+
+**A9 · ล้างเอกสาร** — ลบ `.md` ที่ root **84 ไฟล์** + ไฟล์ขยะจากคำสั่ง git ที่พิมพ์ผิด 14 ไฟล์
++ `dist/` + `playwright-report/` + `test-results/` เหลือที่ root 4 ไฟล์:
+`README.md` · `CLAUDE.md` · `CONTRIBUTING.md` · ไฟล์นี้
+
+**A3 (บางส่วน) · `ENVTICK-001`**
+`EnvironmentContext` ตั้ง `setInterval(compute, 60s)` ใน `useEffect` ที่ deps เป็น `[]`
+จึงค้าง closure ของ `compute` ตอน mount ไว้ตลอด แต่ `compute` เปลี่ยนตัวใหม่ทุกครั้ง
+ที่ world/mood เปลี่ยน → **ทุก 60 วินาที บรรยากาศของแอปเด้งกลับไปเป็นของโลกเดิม**
+แก้ด้วย ref pattern โดยไม่ re-arm interval
+
+**A5 (โค้ดฝั่ง client) · `DBTBL-001`, `DBCOL-001`, `DBKEY-001`**
+
+| ไฟล์ | เดิม | แก้เป็น | ผลกระทบ |
+|------|-----|--------|---------|
+| `PersonalContextBuilder.ts:286,426` | `.from('personal_contexts')` | `.from('personal_context')` | insert ล้มทุกครั้ง (42703) |
+| `PatternDetector.ts:389` | `.from('personal_contexts')` | `.from('personal_context')` | select คอลัมน์ที่ไม่มี |
+| `ExplorePage.tsx:445` | `.select('birth_date')` | `.select('date_of_birth')` | คอลัมน์ผิดชื่อ |
+| `CoreAwakeningService.ts:70` | `.eq('id', userId)` | `.eq('user_id', userId)` | `id` เป็น surrogate key ไม่ใช่ auth uid |
+| `database-init.ts:82,134` | `.eq('id', userId)` | `.eq('user_id', userId)` | ไม่เคย match แถวไหนเลย |
+| `database-init.ts:100` | `{ id: userId, ... }` | `{ user_id: userId, ... }` | ไม่ส่ง `user_id` (NOT NULL) → insert ล้มทุกครั้ง |
 
 ---
 
-### P0-6 · 🔴 Secrets หลุดใน repo สาธารณะ — ยังไม่ปิด ต้องทำด้วยมือ
+## 2. ⚠️ ต้องรันด้วยมือ — ยังไม่เสร็จจนกว่าจะทำ
 
-**ยืนยันแล้วว่า repo เป็น public** (clone ได้โดยไม่ต้อง auth)
+### 2.1 git filter-repo — คำสั่งที่แก้แล้ว
 
-| ไฟล์ | สิ่งที่หลุด | ความร้ายแรง |
-|------|-----------|-------------|
-| `KEY/open_router API KEY.txt:3` | `sk-or-v1-4bc0...` **key ใช้งานได้จริง** | 🔴 P0 — ใครก็ได้เอาไปใช้จ่ายเงินคุณ |
-| `.env.local:2` | `VERCEL_OIDC_TOKEN` (หมดอายุ 2026-08-26 แล้ว) | 🟠 P1 — ปัญหาเชิงโครงสร้าง ครั้งหน้าจะหลุดของจริง |
-| `e2e/fixtures/test-user.ts:13,92-94`, `scripts/seed-test-users.ts:44+` | รหัสผ่านบัญชี staging จริง | 🟡 P2 |
-| `supabase/.temp/.../docker.env:3` | service-role key ของ Supabase local (เป็น demo key สาธารณะ ไม่อันตราย) | 🟡 P2 — แต่กฎ gitignore พังจึงหลุดมาได้ |
+ในประวัติ git มีไฟล์ชื่อ `feat(e2e): Add global-setup auth + Phase B test isolation in playwright.config`
+(เกิดจากพิมพ์ `git commit` ผิด) ชื่อมี `:` ซึ่ง Windows สร้างไฟล์ไม่ได้ → filter-repo
+เขียนประวัติเสร็จแต่ checkout index ล้มเหลว **สแกนพาธทั้ง 11,887 พาธแล้ว มีตัวนี้ตัวเดียวที่ผิดกฎ**
 
-**ต้นตอเชิงโครงสร้าง:** `.gitignore` มี `.env*` และ `node_modules` อยู่แล้ว **แต่
-gitignore ไม่มีผลกับไฟล์ที่ถูก track ไปแล้ว** — และตัวไฟล์เองมีบั๊กเขียน 2 จุด:
-- บรรทัดแรกเดิม: `e2e/.auth/user.json# Logs` → `#` กลางบรรทัดไม่ใช่คอมเมนต์
-- `"supabase/.temp/"` → มีเครื่องหมายคำพูดติดมา กฎเลยไม่ทำงาน
+```powershell
+cd D:\selfprint-v3-react
+git bundle create ..\selfprint-backup.bundle --all      # สำรองก่อน
 
-**แก้แล้ว:** `.gitignore` เขียนใหม่ทั้งไฟล์ + เพิ่ม `KEY/`, `*.pem`, `*.key`, `!.env.example`
+$lines = @(
+  'literal:feat(e2e): Add global-setup auth + Phase B test isolation in playwright.config',
+  'regex:^KEY/',
+  'literal:.env.local',
+  'regex:^supabase/\.temp/',
+  'regex:^node_modules/',
+  'regex:^dist/'
+)
+[IO.File]::WriteAllLines("$PWD\purge.txt", $lines, (New-Object Text.UTF8Encoding $false))
 
-**❗ สิ่งที่ต้องทำด้วยมือ (ผมทำแทนไม่ได้):**
+git filter-repo --invert-paths --paths-from-file purge.txt --force
+git remote add origin https://github.com/duriankab-dot/selfprint-v3-react.git
+git push --force origin master
+git push --force origin p0-a/restore-lifecycle
+del purge.txt
+```
 
-1. **revoke OpenRouter key เดี๋ยวนี้** ที่ openrouter.ai → Keys → ออกใหม่
-2. ลบ `.git\index.lock` ก่อน (มี lock ค้างจาก sandbox — git จะฟ้อง "Another git process")
-3. untrack ของที่หลุด:
-   ```powershell
-   cd D:\selfprint-v3-react
-   del .git\index.lock
-   git rm --cached -r ".env.local" "KEY" "supabase/.temp"
-   git rm -r --cached node_modules dist
-   git add .gitignore .gitattributes
-   git commit -m "SEC-01: untrack secrets, node_modules, dist"
-   ```
-4. **ล้างประวัติ** (key ยังกู้จาก history เก่าได้ ต่อให้ลบไฟล์แล้ว):
-   ```powershell
-   git filter-repo --path "KEY/" --path ".env.local" --invert-paths
-   git push --force origin master
-   ```
-5. เปลี่ยนรหัสบัญชี staging ที่อยู่ใน `e2e/fixtures/test-user.ts`
+ยืนยัน syntax จาก `git-filter-repo --help` แล้ว — `--paths-from-file` รองรับ prefix
+`literal:` / `glob:` / `regex:` ต้องใช้ `literal:` กับชื่อที่มี `:` `(` `)` เพราะถ้าใส่เป็น
+argument ตรง ๆ PowerShell กับ regex จะตีความผิดทั้งคู่
+
+### 2.2 apply migration 035 — Core Awakening ขึ้นกับข้อนี้
+
+```
+supabase/migrations/035_forensic_consolidation_2026-09-03.sql   (717 บรรทัด)
+```
+
+ปลอดภัยรันซ้ำได้ 100% · ไม่มี `DROP TABLE` / `DROP COLUMN` / `TRUNCATE` / `DELETE` จริงสักคำสั่ง
+มี Section E เป็นชุด `SELECT` สำหรับพิสูจน์ผลหลังรัน
+
+### 2.3 เปลี่ยนรหัสผ่านบัญชี staging ทั้ง 6 ตัว
+รหัสเดิมหลุดใน git history ไปแล้ว การย้ายมาไว้ใน env แก้แค่ปัญหาข้างหน้า ไม่ได้แก้ของที่หลุด
 
 ---
 
-## 3. ปัญหาที่ยัง **ไม่ได้แก้** — ต้องให้เจ้าของตัดสินใจ
+## 3. 🔴 Core Awakening — วินิจฉัยจบแล้ว
 
-### 🔴 SEC-02 · Supabase Edge Functions 4 ตัวเปิดโล่ง — IDOR ระดับร้ายแรง
+ไล่ `src/services/CoreAwakeningService.ts` ทีละบรรทัด:
 
-โฟลเดอร์ `supabase/functions/` มี 13 ฟังก์ชัน ในนั้น **4 ตัวไม่ verify JWT เลย**
-แต่ใช้ service_role และอ่าน `userId` จาก body ตรง ๆ:
+| ขั้น | สถานะ | สาเหตุ |
+|-----|-------|--------|
+| `checkReadyForAwakening()` | dead ในโปรดักชัน (เรียกจาก test เท่านั้น) | มีบั๊ก `.eq('id')` — **แก้แล้ว** |
+| `startAwakening()` | ✅ ทำงานได้ | schema ตรงกับ migration 025 |
+| `initializeTwin()` → `createTwinInDatabase()` | ❌ **พังทุกครั้ง** | `INSERT INTO twins(primary_archetype, secondary_archetype, maturity_score, evolution_stage)` แต่ migration 024 สร้าง `twins` แค่ 6 คอลัมน์พื้นฐาน → 42703 → catch แล้ว `return {success:false}` |
+| ↳ หลังแก้คอลัมน์แล้ว | ❌ ยังพังซ้อนอีก 3 จุด | `twin_state` / `twin_personality` / `twin_capabilities` **ไม่มี INSERT policy** → RLS บล็อกเงียบ ๆ (log เป็น warning ไม่ throw จึงไม่เห็นจาก UI) |
+| `completeCoreAwakening()` | ✅ ทำงานได้ | แต่ไปไม่ถึงเพราะติดข้างบน |
+
+**สรุป: Core Awakening ไม่เคยทำงานได้เลยสักครั้งในโค้ดปัจจุบัน**
+migration 035 Section B.1 (เพิ่ม 5 คอลัมน์) + Section D.1–D.3 (เพิ่ม INSERT policy)
+แก้ทั้ง 2 ชั้น — **แต่ต้องทดสอบจริงบน staging ก่อนถือว่าเสร็จ**
+
+---
+
+## 4. 🔴 ยังไม่แก้ — ต้องตัดสินใจก่อน
+
+### SEC-02 · Supabase Edge Functions 4 ตัวเปิดโล่ง
 
 | ไฟล์ | ทำอะไรได้ |
 |------|----------|
-| `send-push/index.ts:234-254` | ส่ง push notification ข้อความอะไรก็ได้ ไปหาผู้ใช้คนไหนก็ได้ → ช่องทาง phishing ที่ใส่แบรนด์คุณเอง |
-| `daily-brief/index.ts:34-102` | อ่าน decision log + journal ของ **คนอื่น** แล้ว **ส่งกลับมาใน response** |
+| `send-push/index.ts:234-254` | ส่ง push ข้อความอะไรก็ได้ ไปหาใครก็ได้ → ช่องทาง phishing ที่ใส่แบรนด์คุณเอง |
+| `daily-brief/index.ts:34-102` | อ่าน decision log + journal ของ **คนอื่น** แล้วส่งกลับใน response |
 | `pattern-detect/index.ts:54-200` | อ่าน **และเขียน** behavioral pattern ของคนอื่น |
-| `auth-registration-options` + `auth-register-passkey` | **account takeover** — ผูก passkey ของตัวเองเข้ากับอีเมลเหยื่อได้ เช็คแค่ว่า email ที่ส่งมาตรงกับ challenge ที่ตัวเองเพิ่งสร้างด้วย email เดียวกัน |
+| `auth-registration-options` + `auth-register-passkey` | **account takeover** — ผูก passkey ตัวเองเข้ากับอีเมลเหยื่อได้ |
 
 เพิ่มเติม: `auth-verify-passkey/index.ts:130-137` **ปั้น JWT ด้วย signature เป็นศูนย์ 32 ไบต์**
-(`// For MVP, skip signature verification`) แล้วส่งกลับเป็น `session.access_token`
 
-> **ทำไมยังไม่แก้ให้:** ไฟล์เหล่านี้ deploy แยกผ่าน Supabase CLI ไม่ได้อยู่ใน build ของ CF Pages
-> การแก้ auth ของ passkey flow กระทบ flow ล็อกอินจริงของผู้ใช้ปัจจุบัน — ต้องคุยก่อนว่าจะ
-> migrate ผู้ใช้เดิมยังไง **แต่ 3 ตัวแรก (`send-push`, `daily-brief`, `pattern-detect`)
-> แก้ได้ทันทีและควรแก้ก่อนอย่างอื่น** — ก็อป pattern จาก `data-export/index.ts:74-87`
-> ในรีโปเดียวกันที่ทำถูกอยู่แล้ว
+> 3 ตัวแรกแก้ได้ทันที ก็อป pattern จาก `data-export/index.ts:74-87` ในรีโปเดียวกัน
+> ที่ทำถูกอยู่แล้ว ส่วน passkey flow กระทบการล็อกอินของผู้ใช้ปัจจุบัน ต้องคุยก่อน
+> เจ้าของแจ้งว่า "ยังไม่มีผู้ใช้จริงกระทบ" และกำลังจะปรับ UX/UI อยู่แล้ว → ทำได้เลย
 
----
+### คำถามเปิดจาก agent DB — ตอบไม่ได้จากโค้ด
 
-### 🔴 DB-01 · Migration 3 โฟลเดอร์ ทับกัน มีแค่โฟลเดอร์เดียวที่ถูกรัน
+1. **`selfprint` schema เปิด expose ใน PostgREST ของ production หรือยัง?**
+   `supabase/config.toml:13` ระบุแค่ `["public", "graphql_public"]` — ถ้าตรงกับ production จริง
+   `.schema('selfprint')` **ทุกจุด**จะพังไม่ว่าตาราง/คอลัมน์จะถูกแค่ไหน
+   เช็คที่ Supabase Dashboard → Settings → API → Exposed schemas
+2. `user_passkeys` (settings page) กับ `user_credentials` (login จริง) — merge หรือแยก?
+3. `decisions` กับ `decision_log` — ตั้งใจให้เป็น 2 ระบบคู่ขนานหรือควรรวม?
+   (`DecisionIntelligenceEngineAdapter.ts:78-91` พยายาม join ข้ามระบบผิดทาง)
+4. migration ที่ track ใน git (013/020/029/030/033) push ขึ้น production จริงหรือยัง?
 
-`supabase/config.toml` ชี้ไปที่ `supabase/migrations/` เท่านั้น → ที่เหลือ**ไม่เคยถูก apply**:
+### รายการที่เหลือใน Track A
 
-| โฟลเดอร์ | ตารางที่โค้ดใช้จริงแต่ไม่เคยถูกสร้าง |
-|---------|-----------------------------------|
-| `migrations/` | `user_feedback`, `quality_metrics`, `improvement_actions`, `twin_prompt_updates`, `feedback_sentiment`, `csrf_tokens`, `sessions`, `error_logs`, `security_audit_log`, `twin_world_expertise`, `user_lifecycle`, `performance_metrics`, `autonomy_signals` |
-| `src/services/migrations/` | `user_profiles` |
-| `src/services/supabase-schema.sql` | 13 ตาราง รวมถึง `twins` เวอร์ชันที่มีคอลัมน์ archetype |
-| root `20260825_add_archetype_columns.sql` | `world_preferences.primary_archetype/secondary_archetype` |
-
-**เลขซ้ำกันด้วย:** `001`–`004` มีอยู่ 2–3 ที่ เนื้อหาคนละเรื่องกันสิ้นเชิง
-
-**ผลที่ตามมาโดยตรง:** `FeedbackService`, `QualityMetricsService`,
-`ContinuousImprovementService`, `SecurityService`, `AlertingService`,
-`WorldExpertiseService`, `lifecycleStore` — **ทั้งหมดเขียนลงตารางที่ไม่มีอยู่จริง**
-(คือ subsystem feedback + security ทั้งชุดเป็น no-op) ซึ่งขัดกับที่ CLAUDE.md อ้างว่า
-"P1 ✅ Data Persistence (FBS) — Complete"
-
----
-
-### 🔴 DB-02 · Migration 028 ↔ 029 ตีกัน
-
-`028_consolidate_phase_a_schema.sql:134` สั่ง `DROP TABLE IF EXISTS twin_memory CASCADE;`
-เพื่อล้างชื่อตารางที่ชนกัน แต่ Supabase apply เรียงตามชื่อไฟล์ → **028 รันก่อน 029**
-แล้ว `029_phase_a_core_schema.sql:50` สร้าง `twin_memory` กลับมาใหม่
-คอมเมนต์ที่ `028:6-7` เขียนว่า "this will run last" — จริงตอนที่ไฟล์ยังชื่อ
-`20260825_001_...` แต่หลังเปลี่ยนเลขแล้ว**ไม่จริงอีกต่อไป**
-
----
-
-### 🔴 DB-03 · โค้ดคุยกับตารางที่ไม่มีอยู่ ~20 ตาราง
-
-ตัวอย่างที่กระทบ flow หลัก (รายการเต็มอยู่ในผลตรวจ agent):
-
-| ไฟล์ | query | ปัญหา |
+| รหัส | เรื่อง | สถานะ |
 |------|-------|-------|
-| `src/services/SelfPrintOrchestrator.ts` (12 จุด) | `.from('profiles_blueprints')` | ไม่มี migration ไหนสร้าง |
-| `src/services/TwinSupabaseService.ts:136-139` | `twins.insert({primary_archetype, secondary_archetype, maturity_score, evolution_stage})` | คอลัมน์เหล่านี้อยู่แค่ใน `supabase-schema.sql` ที่ไม่ถูก apply |
-| `src/services/TwinEvolutionService.ts:127,211` | `twins.update({stage})` | คอลัมน์ชื่อ `evolution_stage` ไม่ใช่ `stage` → **evolution ไม่เคยถูกบันทึกเลย** |
-| `src/services/DecisionService.ts:80-88` | `decision_log.insert({twin_id, world, question, ...})` | ใช้ `decision_log` เหมือนเป็น `decisions` — ผิดตาราง ผิดคอลัมน์ 6 ตัว และขาด NOT NULL `hub` |
-| `src/services/database-init.ts:80-128` | `.schema('selfprint').from('users_profiles').eq('id', userId)` | ผิด schema (ของจริงอยู่ `public.user_profiles`) + ขาด NOT NULL `user_id` |
-| `src/pages/PasskeySettings.tsx:92+` | `.from('user_passkeys')` | ตารางจริงชื่อ `user_credentials` |
-| `src/lib/intelligence/PersonalContextBuilder.ts:286` | `personal_contexts.insert({context_type,title,...})` | คอลัมน์พวกนี้อยู่บน `personal_context` (เอกพจน์) คนละตาราง |
+| **A3** | FE-01a (login แล้ว `/th/` หน้าเปล่า), FE-01c..g | ทำไป 1 จาก 7 |
+| **A6** | RLS — SQL อยู่ใน migration 035 Section D แล้ว | รอ apply |
+| **A7** | เปิด `strict: true` + `as any` 101 จุด | ยังไม่เริ่ม |
+| **A8** | เปิด vitest ครบ 69 ไฟล์ (ตอนนี้ 7) + ตัดการยิงเน็ตจริงในเทสต์ | ยังไม่เริ่ม |
+| **B** | Phase 0 Visual + Performance Forensic | เริ่มแล้วบางส่วน (B0.3, B0.4) |
 
 ---
 
-### 🟠 SEC-03 · RLS เปิดแต่ไม่มี policy INSERT — ฟีเจอร์เงียบ ๆ ไม่ทำงาน
-
-ตารางที่ client เขียนด้วย anon key แต่ policy ไม่อนุญาต INSERT:
-`twin_capabilities`, `twin_personality`, `twin_state`, `notification_queue`,
-`notification_analytics`, `follow_up_schedule`, `twin_visual_dna`,
-`twin_learning_profiles`, `conversation_settings`, `conversation_memory`
-→ insert ถูกปฏิเสธเงียบ ๆ (`029:164-190`, `030:140-148`, `020:88-99`)
-
-**และ 3 policy ที่เปิดกว้างเกินจริง:**
-- `019_daily_briefs.sql:28-31` — `FOR ALL USING (true)` ชื่อ policy บอกว่า "Service role"
-  แต่ `USING (true)` ใช้กับ **ทุก role** → anon อ่าน/เขียน daily brief ของทุกคนได้
-- `032_twin_learning_profiles.sql:30-34` — แบบเดียวกันสำหรับ UPDATE
-- `001_decision_log_autonomy_tracking.sql:68-84` — view `autonomy_analytics`
-  `GRANT SELECT TO anon` และ view ไม่ถูก RLS กรอง (ไม่มี `security_invoker`)
-  → anon ดึงสถิติ autonomy/confidence ของผู้ใช้ทุกคนได้
-
----
-
-### 🟠 API-01 · Endpoint ที่ client เรียกแต่ไม่มี handler (404 บน CF Pages)
-
-`functions/api/[[route]].ts:33-40` รู้จักแค่ 7 module: `notifications`,
-`twin-evolution`, `sice`, `stripe`, `profile`, `blueprint`, `share`
-
-| path | ผู้เรียก | สถานะ |
-|------|---------|-------|
-| `/api/coach` | `AskCoach.tsx:78` | 404 → **ปิดฟีเจอร์แล้ว (COACH404-001)** |
-| `/api/journal-sync` | `useJournalQueue.ts:157` | 404 → **หยุด mark failed แล้ว (JOURNAL404-001)** แต่ยังไม่ sync |
-| `/api/nova-stream`, `/api/twin-stream` | `streamNovaResponse`, `streamTwinResponse` | 404 แต่ 2 ฟังก์ชันนี้ไม่มีใครเรียก (dead) |
-| `/api/chat`, `/api/push`, `/api/personal-model` | chain ที่ตายแล้วทั้งหมด | ไม่กระทบผู้ใช้ |
-
----
-
-### 🟠 API-02 · `/api/og` คืน HTML ไม่ใช่รูป — social preview พังทุกช่อง
-
-`functions/api/og.ts:209-215` return `Content-Type: text/html`
-แต่ `index.html:75,87` และ `src/constants/seoMetadata.ts:44,50` ใช้เป็น `og:image`
-(ตัวเดิมบน Vercel ใช้ `ImageResponse` จาก `@vercel/og` ซึ่ง render PNG จริง —
-ตอน port มา CF เหลือแต่ template HTML)
-
-เพิ่มเติม: `og:image` ต้องเป็น absolute URL แต่ที่ใส่ไว้เป็น root-relative
-
-**ทางเลือก:** render PNG บน Worker (satori + resvg) **หรือ** ใช้ `.jpg` static
-เหมือนอีก 5 หน้าที่ทำถูกอยู่แล้ว (`seoMetadata.ts:60-130`) — อย่างหลังง่ายกว่ามาก
-
----
-
-### 🟠 QA-01 · `npm test` รันแค่ 9.6% ของ suite
-
-`vitest.config.ts` มี `include` เป็น allowlist แค่ 7 pattern
-แต่ในรีโปมีไฟล์เทสต์ที่ vitest รันได้ **73 ไฟล์** (+ playwright อีก 8 spec)
+## 5. B0.3 — Bundle baseline (วัดจริงครั้งแรก)
 
 ```
-73 ไฟล์เทสต์ใน src/ + api/
- 7 ไฟล์ที่ include ครอบถึง  →  9.6%
+chunk                              raw        gzip
+------------------------------------------------------
+chunk-intelligence                345.77 kB   87.31 kB   ← ใหญ่สุด
+vendor-react                      181.75 kB   57.16 kB
+index (entry)                     145.40 kB   43.66 kB
+vendor-misc                       116.00 kB   35.16 kB
+worlds                             95.41 kB   26.22 kB
+CoreAwakening                      94.22 kB   29.44 kB
+IntelligenceHub                    87.60 kB   20.78 kB
+Onboarding                         65.69 kB   17.36 kB
+LandingPage                        45.06 kB   11.80 kB
 ```
 
-แปลว่า "test ผ่านหมด" ที่เขียนไว้ในทุกเอกสาร = ผ่านจาก 7 ไฟล์
-**ต้องตัดสินใจ:** เปิด include ให้ครบแล้วไล่แก้ที่พัง หรือลบเทสต์ 66 ไฟล์ที่ไม่ได้ใช้ทิ้ง —
-สภาพปัจจุบัน (มีเทสต์แต่ไม่รัน) แย่กว่าทั้งสองทาง เพราะให้ความมั่นใจปลอม
+**B0.4 — dependency audit (บางส่วน)**
+- `three` ไม่มีไฟล์ไหน import เลยสักบรรทัด → `vendor-three` chunk **ไม่เคยถูกสร้าง** ลบทิ้งแล้ว
+  (คอมเมนต์ใน `vite.config.ts` ที่อธิบาย chunk นี้ว่า "~350 KB ตัวใหญ่สุด" อธิบายโค้ดที่ไม่มีอยู่)
+- build เตือน `INEFFECTIVE_DYNAMIC_IMPORT`: `DecisionLearningService.ts` ถูก dynamic import
+  จาก `DecisionService.ts` แต่ static import จากอีก 3 ที่ → code splitting ไม่เกิดผล
 
 ---
 
-### 🟡 QA-02 · TypeScript **ไม่ได้เปิด strict mode**
+## 6. Commands
 
-`tsconfig.app.json` ไม่มี `"strict": true` (grep แล้ว = 0)
-มีแค่ `noUnusedLocals`/`noUnusedParameters` เอกสารที่เขียนว่า
-"TypeScript strict mode passes" (CLAUDE.md Session 6) **ไม่ตรงกับ config**
-
-`as any` ที่เหลือใน `src/`+`api/`+`functions/` (ไม่นับไฟล์เทสต์) = **101 จุด**
-(เอกสาร Session 11 บอก 77 — ตัวเลขนั้นก็ล้าสมัยแล้ว)
-
----
-
-### 🟡 CODE-01 · Dead code ที่หลอกให้เข้าใจผิด
-
-| ของ | หลักฐาน |
-|-----|---------|
-| `functions/api/rate-limiter.ts` | ไม่ export `onRequest` → ไม่เกิด route และ **ไม่มีไฟล์ไหน import** เอกสาร Session 9/10 บอก "TD-03 CF KV rate limiting ✅ DONE" — **ไม่จริง โค้ดไม่เคยอยู่บน request path** และ `checkRateLimitSync` fallback เป็น `allowed: true` เสมอ |
-| `src/middleware/csrf-middleware.ts` | 0 call site (แต่ API นี้ใช้ bearer token ไม่ใช่ cookie → ไม่ต้องมี CSRF อยู่แล้ว **ควรลบทิ้ง** ไม่ใช่ไป wire) |
-| `src/middleware/rate-limit-middleware.ts`, `src/api/middleware/rateLimiter.ts` | rate limiter ตัวที่ 3 และ 4 ทั้งคู่ตาย |
-| `src/api/unified-api-handler.ts` | บรรทัดที่ 1 เขียนเองว่า DEAD CODE |
-| `src/api/core-awakening.ts` | สร้าง service_role client อยู่ใน `src/` (ยัง tree-shake ทิ้งเพราะไม่มีใคร import — แต่ถ้าใครเผลอ import เมื่อไหร่ key จะถูก inline ลง bundle ที่เบราว์เซอร์โหลดได้) |
-| `server/` ทั้งโฟลเดอร์ | `server/index.ts:28` import `../api/decisions` ที่ไม่มีอยู่ → `npm run start` / `npm run dev:backend` พังทั้งคู่ |
-| duplicate components 5 คู่ | `components/decision/DecisionForm.tsx`, `components/decision/DecisionLogger.tsx`, `components/TwinEvolutionDisplay.tsx`, `components/WorldEnvironment.tsx`, `components/features/DecisionList.tsx` — ทั้ง 5 ไม่มีใคร import (ตัวจริงอยู่ในโฟลเดอร์ย่อย) แก้ผิดไฟล์แล้วจะงงว่าทำไมไม่มีอะไรเปลี่ยน |
-| `three` ใน dependencies | grep `from 'three'` ทั่ว `src/` = **0 จุด** แต่ `vite.config.ts:34` ยังมี `manualChunks` สร้าง `vendor-three` พร้อมคอมเมนต์อธิบายโค้ดที่ไม่มีอยู่ |
-
----
-
-### 🟡 REPO-01 · `node_modules` + `dist` ถูก commit เข้า git
-
-```
-node_modules → 10,650 ไฟล์ถูก track
-dist         →    105 ไฟล์ถูก track
-.git         →     38 MB, clone ทั้ง repo = 253 MB
+```powershell
+npm install
+npm run dev
+npm run build                 # tsc -b && vite build
+npm test                      # ⚠️ รันแค่ 7/69 ไฟล์ (A8)
+npm run lint                  # oxlint — 0 errors / 200 warnings
+npm run typecheck:functions   # typecheck functions/ + api/
 ```
 
-`.gitignore` เขียนถูก แต่ไฟล์ถูก add ก่อนกฎ → กฎไม่มีผล ทำให้ทุก `npm install`
-กลายเป็น diff มหาศาล และ binary ของ Windows (`@oxlint/binding-win32-x64-msvc`,
-`@rolldown/binding-win32-x64-msvc`) ติดไปกับ repo ด้วย
+⚠️ ถ้า build/test พังด้วย **bus error** = ไฟล์ native ติดตั้งไม่ครบ ไม่ใช่ Linux ไม่รองรับ
+เช็คขนาด: `@rolldown/binding-*` ต้อง ~19.9 MB · `lightningcss-*` ~10 MB · `@oxlint/binding-*` ~16 MB
+ถ้าเล็กกว่านั้นมาก ให้ `rm -rf node_modules && npm install` ใหม่ให้จบจริง
 
 ---
 
-### 🟡 FE-01 · Frontend อื่น ๆ ที่เจอ
+## 7. โซนห้ามแตะ
 
-| รหัส | เรื่อง | หลักฐาน |
-|------|-------|---------|
-| FE-01a | ผู้ใช้ที่ล็อกอินแล้วเปิด `/th/` ได้ **หน้าเปล่าถาวร** — `HomeRoute` return `null` เมื่อมี session แล้วโยนให้ `useRecoveryRoute` แต่ hook นั้นปิดตัวเองหลังทำงานครั้งแรก (`sessionStorage['sp_recovery_done_for_user']`) → ไม่มีใคร navigate | `App.tsx:113-115` + `useRecoveryRoute.ts:85-93,124-127` |
-| FE-01b | `EnvironmentContext` ตั้ง `setInterval` 60 วิ ด้วย `useEffect(..., [])` แต่ `compute` เป็น `useCallback` ที่เปลี่ยนตาม world/mood → interval ค้างที่ closure ตอน mount แล้วเขียนทับ CSS var ด้วยค่าเก่าทุกนาที | `EnvironmentContext.tsx:146-158` vs `:142` |
-| FE-01c | `FeedbackProvider` ไม่ถูก mount → `useFeedback()` จะ throw (ตอนนี้ยังไม่ระเบิดเพราะ chain ทั้งเส้นเป็น dead code) | `contexts/FeedbackContext.tsx:20,44` |
-| FE-01d | context value object ไม่ทำ `useMemo` เลยสัก provider (8 ตัว) — มี 14 provider ซ้อนกัน setState ตัวบนสุดครั้งเดียว re-render ทั้งแอป | `AuthContext.tsx:189`, `WorldContext.tsx:375`, ฯลฯ |
-| FE-01e | `LanguageContext` เริ่มที่ `'en'` แล้วค่อยแก้ใน `useEffect` แต่ `/` redirect ไป `/th/` → คนไทยเห็นเฟรมภาษาอังกฤษ 1 เฟรมทุกครั้ง | `LanguageContext.tsx:14,18-23` |
-| FE-01f | fetch ใน `useEffect` 8 จุดไม่มี AbortController — `BlogArticle.tsx:92,104` มี race จริง (เปลี่ยน slug เร็ว ๆ แล้วได้บทความผิด) | `BlogArticle.tsx`, `BlogListPage.tsx:184`, `AskCoach.tsx:49,78` |
-| FE-01g | `translations.ts` มี 161 key แต่ใช้จริง 15 key — i18n จริงในโปรเจกต์ทำด้วย `isTh ? ... : ...` inline ประมาณ 40 คอมโพเนนต์ ตอนนี้มี 2 ระบบซ้อนกัน | `src/constants/translations.ts` |
+- `.env*`, `KEY/`, secret ทุกชนิด
+- `supabase/migrations/*` ที่ apply ไป production แล้ว (035 เป็นไฟล์ใหม่ ไม่แตะของเดิม)
+- SICE / SICE Orchestrator / AI pipeline / Zustand business state / Auth / lifecycle / routing core
+- rename NOVA ในโค้ด
 
 ---
 
-## 4. หลักฐานการ verify (รันจริง ไม่ใช่คำกล่าวอ้าง)
+## 8. เอกสารที่เคยโกหก — เก็บไว้เป็นบทเรียน
 
-```
-สภาพแวดล้อม: clone ใหม่จาก GitHub @3cbbaf6 + npm install + ก็อปไฟล์ที่แก้ทับ
+| เอกสารเคยอ้าง | ความจริงจากโค้ด |
+|--------------|----------------|
+| "Phase 3 automation → 91 TypeScript errors, 72 ไฟล์พัง" | **ไม่จริงเลย** 43 ไฟล์ต่างกันแค่ LF→CRLF (`git diff --ignore-cr-at-eol` = ว่าง, insertions = deletions เป๊ะ 8754) |
+| "build ไม่ได้ — Rolldown ใช้กับ Linux ไม่ได้" | ไฟล์ native ติดตั้งไม่ครบ ติดตั้งใหม่แล้วรันได้ทันที |
+| "Auth: JWT verified via Authorization header" (`autonomy-log.ts:13`) | ไม่มีโค้ด verify ในไฟล์เลย |
+| "TD-03 CF KV rate limiting ✅ DONE (deployed)" | `checkRateLimitKV` ไม่มีใคร import และไฟล์ไม่ export `onRequest` → ไม่เกิด route ด้วยซ้ำ |
+| "TypeScript strict mode passes" | `tsconfig.app.json` ไม่มี `"strict"` เลย |
+| "P1 ✅ Data Persistence (FBS) Complete" | ตาราง `user_feedback` ฯลฯ อยู่ในโฟลเดอร์ที่ CLI ไม่เคย apply |
+| "P2 Production Verification ✅ 100%, zero stubs" | `/api/metrics` + `/api/autonomy-log` บันทึกได้ 0 แถว |
+| "test ผ่านหมด" | vitest include ครอบ 7 จาก 69 ไฟล์ |
+| "no `dangerouslySetInnerHTML` found (0 occurrences)" | มี 7 จุด (บังเอิญปลอดภัย แต่ผลสแกนผิด) |
+| "TD-04 ลบ `as any` ครบ 50 จุด" | SICE layer สะอาดจริง ✅ แต่ทั้งโปรเจกต์ยังเหลือ 101 จุด |
 
-✅ npx tsc -p tsconfig.app.json --noEmit         → 0 errors   (src/, 458 ไฟล์)
-✅ npx tsc -p tsconfig.functions.json --noEmit   → 0 errors   (functions/ + api/)
-```
-
-**negative control** (พิสูจน์ว่า typecheck ทำงานจริงไม่ใช่ผ่านเปล่า ๆ):
-แทรก `const x: number = "str"` ลงใน `main.tsx` → รายงาน `error TS2322` ตามคาด แล้วลบออก
-
-**ตอนรัน `tsconfig.functions.json` ครั้งแรกเจอ 13 errors** ซึ่งซ่อนอยู่มาตลอด
-เพราะ `functions/` และ `api/` ไม่เคยอยู่ใน tsconfig ไหนเลย — แก้ครบทั้ง 13 แล้ว:
-- 9 จุด: `.schema('selfprint')` ที่ Database type ไม่มี schema นั้น
-- 4 จุด: `Env` interface ส่งเข้า `verifyUser()` ไม่ได้ (ไม่มี index signature)
-
-### ❌ สิ่งที่ verify ในเซสชันนี้ **ไม่ได้** — พูดตรง ๆ
-
-| คำสั่ง | ผล | เหตุผล |
-|--------|-----|--------|
-| `npm run build` (vite) | ❌ bus error (exit 135) | native binding ของ Rolldown crash ใน Linux sandbox |
-| `npm test` (vitest) | ❌ bus error (exit 135) | สาเหตุเดียวกัน |
-| `npm run lint` (oxlint) | ❌ bus error (exit 135) | สาเหตุเดียวกัน |
-
-**ต้องรัน 3 คำสั่งนี้บน Windows เองก่อน deploy** — `tsc` ผ่านแล้วแต่ไม่ครอบคลุม
-runtime และ bundling **อย่าเพิ่งถือว่าเสร็จจนกว่าจะรันผ่าน**
+**บทเรียน:** `.md` 84 ไฟล์ที่ root คือหนี้เชิงข้อมูล ไม่ใช่แค่ของรก มันทำให้เซสชันถัดไป
+เริ่มจากสมมติฐานผิดแล้วแก้ผิดจุด — ลบไปแล้วในรอบนี้
 
 ---
 
-## 5. ลำดับที่ควรทำต่อ
+## 9. รหัสอ้างอิงทั้งหมด (grep เจอคอมเมนต์อธิบายในโค้ด)
 
-### ทำวันนี้ (ยังมีความเสี่ยงค้างอยู่)
-1. 🔴 **revoke OpenRouter key** — เป็นข้อเดียวที่ของหลุดออกไปนอกมือคุณแล้ว
-2. 🔴 ลบ `.git\index.lock` → untrack secrets/node_modules/dist → filter-repo → force push
-3. 🔴 แก้ auth ของ `send-push`, `daily-brief`, `pattern-detect` (ก็อป pattern จาก `data-export/index.ts:74-87`)
-4. 🟠 รัน `npm run build` + `npm test` + `npm run lint` บน Windows ให้ผ่าน
-5. 🟠 เช็ค `SELECT to_regclass('selfprint.performance_metrics');` ก่อน deploy metrics
-
-### สัปดาห์นี้
-6. ล้าง CRLF: `del .git\index.lock` → `git add --renormalize .` → commit (มี `.gitattributes` แล้ว)
-7. ตัดสินใจเรื่อง migration 3 โฟลเดอร์ (DB-01) — นี่คือ root cause ของ "ฟีเจอร์เขียน DB ไม่ลง" เกือบทั้งหมด
-8. แก้ 028↔029 (DB-02): ย้าย `DROP TABLE twin_memory` ไป migration ที่เลขมากกว่า 030
-9. ตัดสินใจ QA-01: เปิด vitest include ให้ครบ หรือลบเทสต์ที่ไม่ใช้
-10. แก้ FE-01a (หน้าเปล่าเมื่อ login แล้วกดโลโก้) — ผู้ใช้เจอบ่อยแน่นอน
-
-### เมื่อว่าง
-11. เลือกทางเดียวระหว่าง Vercel กับ Cloudflare แล้วลบอีกฝั่งทิ้ง — โค้ด auth ที่แตกเป็น 2 ชุด
-    คือต้นตอของช่องโหว่หลายข้อในรายงานนี้ (`api/twin.ts` / `api/nova.ts` ไม่มี auth
-    ขณะที่ `functions/api/` เวอร์ชันเดียวกันมี)
-12. ลบ dead code ตาม CODE-01 — ทำให้ audit รอบหน้าเชื่อถือได้
-13. เปิด `"strict": true` แล้วไล่แก้ `as any` 101 จุด
-14. เพิ่ม `tsconfig.functions.json` เข้า `references` ของ `tsconfig.json` เมื่อพร้อมให้ build fail ได้
+`AUTHHDR-001` · `NOVAPROV-001` · `ERRBOUND-001` · `SENTRY-INIT-001` · `AUTONOMY-FIX-001` ·
+`METRICS-FIX-001` · `CORS-ALLOWLIST-001` · `CFBUFFER-001` · `STRIPEWH-001` · `ENVNAME-001` ·
+`NOTIFAUTH-001` · `NOTIFCOL-001` · `TWINEVOAUTH-001` · `DEBUGLEAK-001` · `COACH404-001` ·
+`JOURNAL404-001` · `SCHEMA-TS-002` · `ENVTYPE-001` · `TSCONFIG-FUNCTIONS-001` ·
+`GITIGNORE-FIX-001` · `CRLF-001` · `DEADDEP-001` · `E2EPW-001` · `ENVDOC-001` ·
+`OGSTATIC-001` · `OGABS-001` · `OGFONT-001` · `ENVTICK-001` · `DBTBL-001` · `DBCOL-001` · `DBKEY-001`
 
 ---
 
-## 6. เอกสารที่โกหก — เทียบกับโค้ดจริง
-
-| เอกสารอ้าง | ที่มา | ความจริงจากโค้ด |
-|-----------|------|----------------|
-| "Phase 3 automation → 91 TypeScript errors, 72 ไฟล์พัง" | `CLAUDE.md` Session 12, `PHASE_3_AUTOMATION_CLEANUP_HANDOFF.md` | **ไม่จริงเลย** 43 ไฟล์ต่างกันแค่ LF→CRLF (`git diff --ignore-cr-at-eol` = ว่าง, insertions = deletions เป๊ะ ๆ 8754 = 8754) ไม่มี TS error สักตัว |
-| "Auth: JWT verified via Authorization header" | `functions/api/autonomy-log.ts:13` (เดิม) | ไม่มีโค้ด verify ในไฟล์เลย |
-| "TD-03 CF KV rate limiting ✅ DONE (deployed)" | `CLAUDE.md` Session 9, `SESSION_10_HANDOFF.md:112` | `checkRateLimitKV` ไม่มีใคร import และไฟล์ไม่ export `onRequest` → ไม่เกิด route ด้วยซ้ำ |
-| "TypeScript strict mode passes" | `CLAUDE.md` Session 6 | `tsconfig.app.json` ไม่มี `"strict"` เลย |
-| "P1 ✅ Data Persistence (FBS) Complete" | `CLAUDE.md` Session 2 | ตาราง `user_feedback` ฯลฯ อยู่ใน `migrations/` ที่ CLI ไม่เคย apply |
-| "P2 Production Verification ✅ 100%, zero stubs" | `CLAUDE.md` Session 6 | `/api/metrics` เขียนผิด schema + `rating` เป็นตัวเลข, `/api/autonomy-log` 400 ทุก request — ทั้งคู่บันทึกได้ 0 แถว |
-| "รันแค่ทดสอบผ่านหมด / test ผ่าน" | หลายไฟล์ | vitest include ครอบ 7 จาก 73 ไฟล์ |
-| "no `dangerouslySetInnerHTML` found (0 occurrences)" | `docs/SECURITY_AUDIT_2026-08-18.md:143` | มี 7 จุด (บังเอิญปลอดภัย เพราะ escape `</` ถูกต้อง แต่ผลสแกนผิด) |
-| "TD-04 ลบ `as any` ครบ 50 จุด" | `CLAUDE.md` Session 10 | SICE layer สะอาดจริง ✅ แต่ทั้งโปรเจกต์ยังเหลือ 101 จุด (Session 11 นับได้ 77 ก็ล้าสมัยแล้ว) |
-| `src/api/core-awakening.ts` เป็น dead code | ไฟล์นี้ฉบับเดิม | ✅ **ข้อนี้จริง** — verify แล้วไม่มีใคร import |
-
-**บทเรียน:** ไฟล์ `.md` 87 ไฟล์ที่ root คือหนี้เชิงข้อมูล ไม่ใช่แค่ของรก
-มันทำให้เซสชันถัดไปเริ่มจากสมมติฐานที่ผิดแล้วแก้ผิดจุด
-**ควรลบให้เหลือไฟล์นี้ไฟล์เดียว + `docs/` ที่ยังมีสาระ**
-
----
-
-## 7. รหัสอ้างอิงทั้งหมดในรอบนี้
-
-`AUTHHDR-001` · `NOVAPROV-001` · `ERRBOUND-001` · `SENTRY-INIT-001` ·
-`AUTONOMY-FIX-001` · `METRICS-FIX-001` · `CORS-ALLOWLIST-001` · `CFBUFFER-001` ·
-`STRIPEWH-001` · `ENVNAME-001` · `NOTIFAUTH-001` · `NOTIFCOL-001` ·
-`TWINEVOAUTH-001` · `DEBUGLEAK-001` · `COACH404-001` · `JOURNAL404-001` ·
-`SCHEMA-TS-002` · `ENVTYPE-001` · `TSCONFIG-FUNCTIONS-001` · `GITIGNORE-FIX-001` · `CRLF-001`
-
-grep รหัสเหล่านี้ในโค้ดจะเจอคอมเมนต์อธิบายว่าแก้อะไรและทำไม ตรงจุดที่แก้
-
----
-
-**เขียนโดย:** Claude (forensic audit + fix session) — 3 ก.ย. 2026
-**หลักการ:** ตรวจจากโค้ด ไม่ตรวจจากเอกสาร · แยก "แก้แล้ว verify แล้ว" ออกจาก
-"แก้แล้วแต่ verify ไม่ได้" ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ
+**หลักการของเอกสารนี้:** ตรวจจากโค้ด ไม่ตรวจจากเอกสาร · แยก "แก้แล้ว verify แล้ว"
+ออกจาก "แก้แล้วแต่ verify ไม่ได้" ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ

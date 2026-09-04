@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useLayoutEffect } from "react";
+import React, { createContext, useState, useCallback, useLayoutEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 
 type Theme = 'light' | 'dark';
@@ -47,11 +47,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.setAttribute('data-mode', theme);
   }, [theme]);
 
-  const value: ThemeContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<ThemeContextType>(() => ({
     theme,
     toggleTheme,
     setTheme,
-  };
+  }), [theme, toggleTheme, setTheme]);
 
   return (
     <ThemeContext.Provider value={value}>

@@ -110,15 +110,26 @@ function LangRedirect({ to }: { to: string }) {
   return <Navigate to={`${langPrefix}${to}`} replace />;
 }
 
+/**
+ * HOMEBLANK-001 FIX (4 ก.ย. 2026): เดิมบรรทัดนี้ `return null` เมื่อมี session
+ * โดยฝากให้ useRecoveryRoute เป็นคนพาไปหน้าถัดไป — แต่ hook นั้นปิดตัวเอง
+ * หลังทำงานครั้งแรกต่อ login หนึ่งครั้ง (เช็ค sessionStorage
+ * `sp_recovery_done_for_user` ที่ useRecoveryRoute.ts:83-91 แล้ว return ออกก่อน
+ * จะเรียก navigate() ที่บรรทัด 126)
+ *
+ * ผลคือ: พอ recovery ทำงานไปแล้วรอบหนึ่งในแท็บนั้น ผู้ใช้ที่ล็อกอินอยู่แล้ว
+ * กดโลโก้ / กดกลับหน้าแรก / พิมพ์ `/th/` เอง → เจอ **หน้าขาวถาวร** ไม่มีอะไร
+ * render และไม่มีใคร navigate ต่อ ต้องปิดแท็บทิ้งอย่างเดียว
+ *
+ * แก้โดยให้ HomeRoute แสดง LandingPage ตามปกติแทนการคืน null —
+ * useRecoveryRoute ยังทำงานเหมือนเดิมทุกประการ (มันอยู่ใน RecoveryRouteHandler
+ * แยกต่างหาก) ถ้ามันจะ navigate ก็ navigate ทับได้อยู่แล้ว
+ * LandingPage มี WelcomeBackHero สำหรับผู้ใช้ที่ล็อกอินอยู่แล้วโดยเฉพาะ
+ * จึงเป็นสิ่งที่ควรเห็นอยู่แล้ว ไม่ใช่หน้าว่าง
+ */
 function HomeRoute({ onStartOnboarding }: { onStartOnboarding: () => void }) {
   const auth = useContext(AuthContext);
   if (auth?.loading) return null;
-  // P0 FIX: If logged in → let useRecoveryRoute handle routing
-  // (useRecoveryRoute fires inside RecoveryRouteHandler → decides onboarding/dashboard/etc)
-  // HomeRoute just shows LandingPage while auth/recovery loading happens
-  if (auth?.session) {
-    return null; // Let useRecoveryRoute navigate
-  }
   return <LandingPage onStartOnboarding={onStartOnboarding} />;
 }
 

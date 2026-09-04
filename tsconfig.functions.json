@@ -44,7 +44,9 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": false,
+    // QA-02 (4 ก.ย. 2026): เปิด strict แล้ว — ตรวจแล้วว่า functions/ + api/
+    // ผ่าน 0 errors ตั้งแต่ครั้งแรกโดยไม่ต้องแก้อะไร
+    "strict": true,
     "noFallthroughCasesInSwitch": true
   },
   "include": ["functions/**/*.ts", "api/**/*.ts", "api/**/*.tsx"],

@@ -38,10 +38,25 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 // --- Test Users -------------------------------------------------------
 
+
+/**
+ * E2EPW-001 FIX (3 ก.ย. 2026): รหัสผ่านของบัญชี staging จริงเคย hardcode ในไฟล์นี้
+ * และไฟล์นี้ถูก track ใน git ของ repo สาธารณะ ตอนนี้อ่านจาก env เท่านั้น
+ * ⚠️ รหัสเดิมหลุดไปแล้วใน git history — ต้องเปลี่ยนรหัสบัญชี staging ทุกตัวด้วย
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.error(`❌ Missing required env var ${name} — set it in .env.e2e.staging or CI secrets`);
+    process.exit(1);
+  }
+  return value;
+}
+
 const TEST_USERS = [
   {
     email: 'test-phase-b@selfprint.one',
-    password: 'Test@PhaseB123!',
+    password: requireEnv('E2E_TEST_PASSWORD'),
     name: 'Test User Phase B',
     metadata: { stage: 'active', onboardingComplete: true },
     profile: {
@@ -54,7 +69,7 @@ const TEST_USERS = [
   },
   {
     email: 'test-voice@selfprint.one',
-    password: 'Test@Voice123!',
+    password: requireEnv('E2E_VOICE_PASSWORD'),
     name: 'Test Voice User',
     metadata: { stage: 'onboarding_voice', onboardingComplete: false },
     profile: {
@@ -66,7 +81,7 @@ const TEST_USERS = [
   },
   {
     email: 'test-twin@selfprint.one',
-    password: 'Test@Twin123!',
+    password: requireEnv('E2E_TWIN_PASSWORD'),
     name: 'Test Twin User',
     metadata: { stage: 'active', onboardingComplete: true },
     profile: {
@@ -79,7 +94,7 @@ const TEST_USERS = [
   },
   {
     email: 'tech-buddy@selfprint.one',
-    password: 'Test@TechBuddy123!',
+    password: requireEnv('E2E_TECHBUDDY_PASSWORD'),
     name: 'Tech Buddy',
     metadata: { stage: 'active', onboardingComplete: true },
     profile: {
@@ -92,7 +107,7 @@ const TEST_USERS = [
   },
   {
     email: 'mindful-leader@selfprint.one',
-    password: 'Test@Leader123!',
+    password: requireEnv('E2E_MINDFULLEADER_PASSWORD'),
     name: 'Mindful Leader',
     metadata: { stage: 'active', onboardingComplete: true },
     profile: {
@@ -105,7 +120,7 @@ const TEST_USERS = [
   },
   {
     email: 'creative@selfprint.one',
-    password: 'Test@Creative123!',
+    password: requireEnv('E2E_CREATIVE_PASSWORD'),
     name: 'Creative User',
     metadata: { stage: 'active', onboardingComplete: true },
     profile: {
@@ -245,12 +260,13 @@ async function main(): Promise<void> {
   console.log(`✅ Success: ${successCount} users`);
   if (failCount > 0) console.log(`❌ Failed:  ${failCount} users`);
   console.log('\n📋 Test Credentials:');
-  console.log('  Main:           test-phase-b@selfprint.one / Test@PhaseB123!');
-  console.log('  Voice stage:    test-voice@selfprint.one / Test@Voice123!');
-  console.log('  Twin created:   test-twin@selfprint.one / Test@Twin123!');
-  console.log('  Tech Buddy:     tech-buddy@selfprint.one / Test@TechBuddy123!');
-  console.log('  Mindful Leader: mindful-leader@selfprint.one / Test@Leader123!');
-  console.log('  Creative:       creative@selfprint.one / Test@Creative123!');
+  console.log('  Main:           test-phase-b@selfprint.one');
+  console.log('  Voice stage:    test-voice@selfprint.one');
+  console.log('  Twin created:   test-twin@selfprint.one');
+  console.log('  Tech Buddy:     tech-buddy@selfprint.one');
+  console.log('  Mindful Leader: mindful-leader@selfprint.one');
+  console.log('  Creative:       creative@selfprint.one');
+  console.log('  (รหัสผ่านอ่านจาก env — ดู E2EPW-001 ในไฟล์นี้)');
   console.log('\n🚀 Ready to run Phase B tests!');
   console.log('   BASE_URL=https://staging.selfprint.one npm run test:e2e -- --project=chromium-staging');
 }
