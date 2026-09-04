@@ -10,6 +10,11 @@ import userEvent from '@testing-library/user-event';
 import MemoryRecorder from './MemoryRecorder';
 import { PersonalMemory } from '@/lib/intelligence/types';
 
+// QA-02: MemoryManager terminates its insert/select chains with
+// .maybeSingle(), not .single() (MemoryManager.ts:62,135,166,225). Every mock
+// below stubbed only .single(), so `.select().maybeSingle` was undefined —
+// addMemory() threw a TypeError before Supabase was ever "called", which is why
+// the insert spy showed 0 calls. All six chains now stub maybeSingle.
 // Mock Supabase client
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
@@ -52,7 +57,7 @@ describe('MemoryRecorder Integration Tests', () => {
       // Mock Supabase response
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
+          maybeSingle: vi.fn().mockResolvedValue({
             data: {
               id: mockMemoryResponse.id,
               user_id: mockMemoryResponse.userId,
@@ -141,7 +146,7 @@ describe('MemoryRecorder Integration Tests', () => {
     it('should handle Supabase network errors with user-friendly message', async () => {
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockRejectedValue(new Error('Network error')),
+          maybeSingle: vi.fn().mockRejectedValue(new Error('Network error')),
         }),
       });
 
@@ -166,7 +171,14 @@ describe('MemoryRecorder Integration Tests', () => {
 
       // Verify error message displayed
       await waitFor(() => {
-        expect(screen.getByText((content) => /failed.*save.*memory/i.test(content))).toBeInTheDocument();
+        // QA-02: MemoryManager wraps the failure as
+        // IntelligenceError('Failed to add memory: ...', 'ADD_MEMORY_FAILED')
+        // (MemoryManager.ts:80-84) and MemoryRecorder renders an
+        // IntelligenceError as `Error: <message> (<code>)`
+        // (MemoryRecorder.tsx:116-117) — so the user-facing text says "add",
+        // not "save". The generic "Failed to save memory: ..." branch is only
+        // reached for non-IntelligenceError throws.
+        expect(screen.getByText((content) => /failed.*add.*memory/i.test(content))).toBeInTheDocument();
       });
 
       // Verify form NOT cleared (data preserved)
@@ -183,7 +195,7 @@ describe('MemoryRecorder Integration Tests', () => {
 
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
+          maybeSingle: vi.fn().mockResolvedValue({
             data: {
               id: mockMemoryResponse.id,
               user_id: mockUserId,
@@ -253,7 +265,7 @@ describe('MemoryRecorder Integration Tests', () => {
 
         const mockInsert = vi.fn().mockReturnValue({
           select: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({
+            maybeSingle: vi.fn().mockResolvedValue({
               data: {
                 id: `mem-${key}`,
                 user_id: mockUserId,
@@ -314,7 +326,7 @@ describe('MemoryRecorder Integration Tests', () => {
     it('should create memory in compact mode through full integration', async () => {
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
+          maybeSingle: vi.fn().mockResolvedValue({
             data: {
               id: mockMemoryResponse.id,
               user_id: mockUserId,
@@ -370,7 +382,7 @@ describe('MemoryRecorder Integration Tests', () => {
     it('should parse and send tags correctly to Supabase', async () => {
       const mockInsert = vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({
+          maybeSingle: vi.fn().mockResolvedValue({
             data: {
               id: mockMemoryResponse.id,
               user_id: mockUserId,

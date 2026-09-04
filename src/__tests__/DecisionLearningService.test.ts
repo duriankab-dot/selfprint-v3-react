@@ -10,7 +10,19 @@
  * - calculateTwinConfidenceInWorld()
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// QA-02: another round-trip integration suite (record decisions + outcomes,
+// then ask the learning service what patterns it found). The global mock in
+// src/test/setup.ts never persists writes, so getUserDecisions() came back with
+// a single stub row and getDecisionOutcomesBatch() with none — every pattern
+// list was empty ("expected 0 to be greater than 0"). Use the stateful
+// in-memory store so the decisions this file records are the ones it reads back.
+vi.mock('../services/supabase-service', async () => {
+  const helper = await import('../test/supabase-mock-helper');
+  return { supabase: helper.getStatefulStore().client };
+});
+
 import * as DecisionLearningService from '../services/DecisionLearningService';
 import * as DecisionService from '../services/DecisionService';
 

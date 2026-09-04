@@ -7,8 +7,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 const useAuthMock = vi.fn();
 const useEmotionMock = vi.fn();
@@ -30,6 +33,25 @@ import AskCoach from '../AskCoach';
 
 const SESSION = { access_token: 'tok-123', user: { id: 'user-1' } };
 
+// QA-02: AskCoach calls useLanguage() (AskCoach.tsx:43), which throws outside a
+// LanguageProvider; LanguageProvider itself calls useLocation(), so it needs a
+// Router above it. Both were added to the app after this test was written.
+// Neither wrapper emits DOM, so `container.firstChild === null` still holds.
+function Providers({ children }: { children: ReactNode }) {
+  return (
+    <MemoryRouter initialEntries={['/th/dashboard']}>
+      <LanguageProvider>{children}</LanguageProvider>
+    </MemoryRouter>
+  );
+}
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: Providers });
+
+// QA-02: the fake responses had no `headers`. AskCoach.tsx:63-64 now guards the
+// /api/profile response with `res.headers.get('content-type')` (so an HTML 404
+// page can't be parsed as a profile). Reading `.get` off undefined threw inside
+// the component's try/catch, birthDate stayed null, the ask button stayed
+// disabled, and both submit tests silently never submitted anything.
 function mockFetchSequence(responses: Array<{ ok: boolean; json: unknown }>) {
   let call = 0;
   global.fetch = vi.fn(() => {
@@ -37,6 +59,7 @@ function mockFetchSequence(responses: Array<{ ok: boolean; json: unknown }>) {
     call++;
     return Promise.resolve({
       ok: r.ok,
+      headers: new Headers({ 'content-type': 'application/json' }),
       json: () => Promise.resolve(r.json),
     }) as unknown as Promise<Response>;
   });
@@ -71,6 +94,9 @@ describe('AskCoach', () => {
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/ควรเปลี่ยนงาน/)).toBeInTheDocument();
     });
+    // birthDate loaded → the "no birth date" hint must be gone, and the button
+    // is disabled only because the question box is still empty.
+    expect(screen.queryByText(/ต้องมีวันเกิดในโปรไฟล์ก่อน/)).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'ถาม Coach' })).toBeDisabled();
   });
 

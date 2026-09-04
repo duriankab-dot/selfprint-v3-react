@@ -15,13 +15,19 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import React from 'react';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 // ============================================================================
 // Mocks — must be declared before imports that use them
 // ============================================================================
 
-const useAuthMock = vi.fn();
+// QA-02: every one of these used to be a plain top-level `const`, referenced
+// from inside a vi.mock() factory. vi.mock is hoisted above them, so the whole
+// suite died at collection time with "There was an error when mocking a module
+// ... top level variables inside". vi.hoisted() lifts the definitions with it.
+const useAuthMock = vi.hoisted(() => vi.fn());
 
 vi.mock('@/context/AuthContext', () => ({
   useAuth: () => useAuthMock(),
@@ -29,11 +35,13 @@ vi.mock('@/context/AuthContext', () => ({
 
 // Supabase channel mock — returns a chainable object that does nothing
 const channelUnsubscribe = vi.fn();
-const channelMock = {
-  on: vi.fn().mockReturnThis(),
-  subscribe: vi.fn().mockReturnThis(),
-};
-const removeChannelMock = vi.fn();
+const { channelMock, removeChannelMock } = vi.hoisted(() => ({
+  channelMock: {
+    on: vi.fn().mockReturnThis(),
+    subscribe: vi.fn().mockReturnThis(),
+  },
+  removeChannelMock: vi.fn(),
+}));
 
 vi.mock('@/lib/supabase/client', () => ({
   supabase: {
@@ -43,9 +51,11 @@ vi.mock('@/lib/supabase/client', () => ({
 }));
 
 // Intelligence class mocks
-const getContextMock = vi.fn();
-const detectPatternsMock = vi.fn();
-const getAccuracyMetricsMock = vi.fn();
+const { getContextMock, detectPatternsMock, getAccuracyMetricsMock } = vi.hoisted(() => ({
+  getContextMock: vi.fn(),
+  detectPatternsMock: vi.fn(),
+  getAccuracyMetricsMock: vi.fn(),
+}));
 
 vi.mock('@/lib/intelligence/PersonalContextBuilder', () => ({
   PersonalContextBuilder: vi.fn().mockImplementation(function () {
@@ -161,8 +171,16 @@ function renderWithQuery(ui: React.ReactElement) {
       },
     },
   });
+  // QA-02: IntelligencePanel now calls useLanguage() (LanguageContext.tsx:56),
+  // which throws outside a LanguageProvider — and LanguageProvider itself calls
+  // useLocation(), so it needs a Router above it. Both providers were added to
+  // the app after this test was written.
   return render(
-    <QueryClientProvider client={client}>{ui}</QueryClientProvider>
+    <MemoryRouter initialEntries={['/th/dashboard']}>
+      <LanguageProvider>
+        <QueryClientProvider client={client}>{ui}</QueryClientProvider>
+      </LanguageProvider>
+    </MemoryRouter>
   );
 }
 
@@ -284,24 +302,12 @@ describe('IntelligencePanel', () => {
     expect(screen.getByText(/ยังไม่พบรูปแบบพฤติกรรม/i)).toBeInTheDocument();
   });
 
-  it('renders FeedbackWidget for each pattern', async () => {
-    useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
-    detectPatternsMock.mockResolvedValue([MOCK_PATTERN]);
-    getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
-
-    renderWithQuery(<IntelligencePanel />);
-    await waitFor(() => screen.getByTestId('context-display'));
-
-    await userEvent.click(screen.getByRole('tab', { name: /รูปแบบ/i }));
-
-    await waitFor(() => {
-      expect(screen.getByTestId('feedback-widget')).toBeInTheDocument();
-      expect(
-        screen.getByText(`FeedbackWidget id=${MOCK_PATTERN.id}`)
-      ).toBeInTheDocument();
-    });
-  });
+  // QA-02: the old test 'renders FeedbackWidget for each pattern' was removed.
+  // The patterns tab no longer mounts one FeedbackWidget per pattern — it now
+  // renders a single <PatternDisplay patterns={...} showConfidence /> block
+  // (IntelligencePanel.tsx:355-363). The behaviour it asserted no longer exists;
+  // what the tab actually renders is covered by 'shows pattern name and insight
+  // text' below.
 
   it('shows pattern name and insight text', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
@@ -386,10 +392,14 @@ describe('IntelligencePanel', () => {
 
     renderWithQuery(<IntelligencePanel />);
 
+    // QA-02: the personalContext query sets `retry: 2` at the call site
+    // (IntelligencePanel.tsx:89), which overrides the QueryClient's retry:false.
+    // React Query backs off 1s then 2s before the error state lands, so the
+    // default 1s waitFor timeout expired before the Alert ever rendered.
     await waitFor(() => {
       expect(
         screen.getByText(/DB connection failed/i)
       ).toBeInTheDocument();
-    });
+    }, { timeout: 10_000 });
   });
 });

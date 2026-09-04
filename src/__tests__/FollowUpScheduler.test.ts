@@ -10,7 +10,30 @@
  * - runDailyFollowUpTask()
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+
+// ═══════════════════════════════════════════════════════════════════════════
+// QA-02: this file was written as an INTEGRATION test against a live Supabase
+// (create a decision → complete day 30 → read the next milestone back). It has
+// never been in the vitest allowlist, so nobody noticed that under the global
+// mock in src/test/setup.ts nothing is persisted: every read of
+// `follow_up_schedule` returned the same stub row with no day*_completed
+// columns, so getNextFollowUpDay() answered 30 forever and 5 assertions failed
+// (expected 30 to be 90 / 180 / 365 / null).
+//
+// FollowUpScheduler.ts and DecisionService.ts are both correct — they read and
+// write exactly the columns the migration defines. What was missing is a store
+// that remembers writes. This is a small stateful in-memory stand-in for the
+// two tables these services touch, so the round-trip the test describes is
+// actually exercised instead of being silently short-circuited.
+// ═══════════════════════════════════════════════════════════════════════════
+
+vi.mock('../services/supabase-service', async () => {
+  const helper = await import('../test/supabase-mock-helper');
+  return { supabase: helper.getStatefulStore().client };
+});
+
+
 import * as FollowUpScheduler from '../services/FollowUpScheduler';
 import * as DecisionService from '../services/DecisionService';
 

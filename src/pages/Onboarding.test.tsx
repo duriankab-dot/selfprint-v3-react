@@ -16,19 +16,40 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import Onboarding from './Onboarding';
+// TESTPROV-001 FIX: component ใช้ useLanguage() (เพิ่มตอนทำ i18n)
+// แต่เทสต์ไม่เคยถูกรัน จึงไม่มีใครเห็นว่าขาด provider ตัวนี้
+import { LanguageProvider } from '@/context/LanguageContext';
 import { EmotionProvider } from '@/context/EmotionContext';
+// QA-02: Onboarding.tsx:98 also calls useAuth() (added when the page started
+// persisting onboarding progress against the signed-in user), which throws
+// outside an AuthProvider. Same class of bug as the LanguageProvider one above.
+import { AuthProvider } from '@/context/AuthContext';
 import { useUserStore } from '@/store/userStore';
 
 const MOOD_STORAGE_KEY = 'selfprint_mood';
 
-const renderOnboarding = () => {
-  return render(
+// QA-02: Onboarding renders NOTHING on the first paint. It gates the whole
+// tree behind `reentryChecked`, which is only set once the re-entry effect has
+// run, and that effect bails out while `authLoading || isLifecycleLoading`
+// (Onboarding.tsx:120-124). AuthProvider's `loading` only flips to false after
+// supabase.auth.getSession() resolves — a microtask later. So every assertion
+// made synchronously after render() saw an empty <div />. Wait for first paint.
+const renderOnboarding = async () => {
+  const result = render(
     <BrowserRouter>
+      <LanguageProvider>
+      <AuthProvider>
       <EmotionProvider>
         <Onboarding />
       </EmotionProvider>
+      </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
+  await waitFor(() => {
+    expect(result.container.textContent).not.toBe('');
+  });
+  return result;
 };
 
 describe('Onboarding Flow', () => {
@@ -40,15 +61,15 @@ describe('Onboarding Flow', () => {
   });
 
   describe('STEP 1: เช็คอินอารมณ์ (Emotion Selector)', () => {
-    it('แสดงหน้าเช็คอินอารมณ์เมื่อเข้าครั้งแรก', () => {
-      renderOnboarding();
+    it('แสดงหน้าเช็คอินอารมณ์เมื่อเข้าครั้งแรก', async () => {
+      await renderOnboarding();
       expect(
         screen.getByRole('heading', { name: 'วันนี้คุณรู้สึกยังไง?' })
       ).toBeInTheDocument();
     });
 
-    it('มีตัวเลือกอารมณ์ครบ 6 แบบ', () => {
-      renderOnboarding();
+    it('มีตัวเลือกอารมณ์ครบ 6 แบบ', async () => {
+      await renderOnboarding();
       const moods = ['เครียด', 'สับสน', 'มั่นใจ', 'หมดแรง', 'พร้อม', 'สะท้อนใจ'];
       moods.forEach((label) => {
         expect(screen.getByRole('button', { name: new RegExp(label) })).toBeInTheDocument();
@@ -56,7 +77,7 @@ describe('Onboarding Flow', () => {
     });
 
     it('เลือกอารมณ์แล้วบันทึกลง localStorage', async () => {
-      renderOnboarding();
+      await renderOnboarding();
       const user = userEvent.setup();
 
       const readyButton = screen.getByRole('button', { name: /พร้อม/ });
@@ -66,13 +87,17 @@ describe('Onboarding Flow', () => {
     });
 
     it('กดปุ่ม "ไปต่อ" แล้วไปหน้าบทสนทนากับ Nova', async () => {
-      renderOnboarding();
+      await renderOnboarding();
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: 'ไปต่อ' }));
 
       await waitFor(() => {
-        expect(screen.getByText('Nova')).toBeInTheDocument();
+        // QA-02: the conversation panel is no longer labelled "Nova" — the
+        // header is "🤖 SELFPRINT" with the subtitle below
+        // (NovaConversation.tsx:270,279). The subtitle is unique to this step
+        // (the emotion step also contains the word "SelfPrint").
+        expect(screen.getByText('มาทำความรู้จักกันหน่อย')).toBeInTheDocument();
       });
     });
 
@@ -80,11 +105,15 @@ describe('Onboarding Flow', () => {
       // จำลองว่าผู้ใช้เช็คอินอารมณ์มาแล้วจากที่อื่น (เช่นหน้าแรก)
       localStorage.setItem(MOOD_STORAGE_KEY, 'ready');
 
-      renderOnboarding();
+      await renderOnboarding();
 
       // ไม่ควรเห็นหน้าเช็คอินอารมณ์อีก ต้องข้ามไปหน้า Nova เลย
       await waitFor(() => {
-        expect(screen.getByText('Nova')).toBeInTheDocument();
+        // QA-02: the conversation panel is no longer labelled "Nova" — the
+        // header is "🤖 SELFPRINT" with the subtitle below
+        // (NovaConversation.tsx:270,279). The subtitle is unique to this step
+        // (the emotion step also contains the word "SelfPrint").
+        expect(screen.getByText('มาทำความรู้จักกันหน่อย')).toBeInTheDocument();
       });
       expect(
         screen.queryByRole('heading', { name: 'วันนี้คุณรู้สึกยังไง?' })
@@ -94,7 +123,7 @@ describe('Onboarding Flow', () => {
 
   describe('STEP 2: บทสนทนากับ Nova (เก็บวันเกิด)', () => {
     it('แสดงข้อความทักทายจาก Nova หลังเลือกอารมณ์', async () => {
-      renderOnboarding();
+      await renderOnboarding();
       const user = userEvent.setup();
 
       // เลือกอารมณ์ครั้งแรกทำให้ hasCheckedIn เปลี่ยนเป็น true ซึ่งไปทริกเกอร์
@@ -103,14 +132,17 @@ describe('Onboarding Flow', () => {
       await user.click(screen.getByRole('button', { name: /พร้อม/ }));
 
       await waitFor(() => {
+        // QA-02: the Thai greeting was rewritten (NOVA_MESSAGES_TH.greeting,
+        // NovaConversation.tsx:40-41) — "ขอถามอะไรบางอย่างที่สำคัญ" no longer
+        // appears anywhere in the copy.
         expect(
-          screen.getByText(/ขอถามอะไรบางอย่างที่สำคัญ/)
+          screen.getByText(/ผมจะไม่ทำนายดวง/)
         ).toBeInTheDocument();
       });
     });
 
     it('ถามวันเกิดต่อจากคำทักทาย', async () => {
-      renderOnboarding();
+      await renderOnboarding();
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /พร้อม/ }));
@@ -126,7 +158,7 @@ describe('Onboarding Flow', () => {
 
   describe('State Management & Persistence', () => {
     it('เก็บอารมณ์ที่เลือกไว้ใน localStorage', async () => {
-      renderOnboarding();
+      await renderOnboarding();
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /หมดแรง/ }));
@@ -136,13 +168,13 @@ describe('Onboarding Flow', () => {
   });
 
   describe('Accessibility', () => {
-    it('มี heading หลักระดับ 1 ในหน้าเช็คอินอารมณ์', () => {
-      renderOnboarding();
+    it('มี heading หลักระดับ 1 ในหน้าเช็คอินอารมณ์', async () => {
+      await renderOnboarding();
       expect(screen.getAllByRole('heading', { level: 1 }).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('ปุ่มทุกปุ่มมี label ที่อ่านได้', () => {
-      renderOnboarding();
+    it('ปุ่มทุกปุ่มมี label ที่อ่านได้', async () => {
+      await renderOnboarding();
       screen.getAllByRole('button').forEach((btn) => {
         expect(btn.textContent?.trim()).toBeTruthy();
       });
@@ -150,8 +182,10 @@ describe('Onboarding Flow', () => {
   });
 
   describe('Error Handling', () => {
-    it('ไม่ throw error ตอน render ครั้งแรก', () => {
-      expect(() => renderOnboarding()).not.toThrow();
+    it('ไม่ throw error ตอน render ครั้งแรก', async () => {
+      // renderOnboarding() is async now (see the comment on the helper), so a
+      // sync .not.toThrow() would pass vacuously — assert the promise settles.
+      await expect(renderOnboarding()).resolves.toBeDefined();
     });
   });
 });

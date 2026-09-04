@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render as rtlRender, screen, waitFor } from '@testing-library/react';
+import type { ReactNode } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 const useAuthMock = vi.fn();
 const getAnalyticsSummaryMock = vi.fn();
@@ -15,6 +18,21 @@ vi.mock('@/services/analytics', () => ({
 import AnalyticsSummary from '../AnalyticsSummary';
 
 const SESSION = { access_token: 'tok', user: { id: 'user-1' } };
+
+// QA-02: AnalyticsSummaryView calls useLanguage() (AnalyticsSummary.tsx:24),
+// which throws outside a LanguageProvider; LanguageProvider itself calls
+// useLocation(), so it needs a Router above it. Both were added to the app
+// after this test was written. Neither wrapper emits DOM, so the
+// `container.firstChild === null` assertions still mean what they used to.
+function Providers({ children }: { children: ReactNode }) {
+  return (
+    <MemoryRouter initialEntries={['/th/dashboard']}>
+      <LanguageProvider>{children}</LanguageProvider>
+    </MemoryRouter>
+  );
+}
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: Providers });
 
 describe('AnalyticsSummary', () => {
   beforeEach(() => {

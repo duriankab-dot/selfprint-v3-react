@@ -7,12 +7,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { ReactNode } from 'react';
+// TESTPROV-001 FIX (4 ก.ย. 2026): AIProvider เรียก useAuth() ข้างใน
+// (src/context/AIContext.tsx) จึงต้องมี AuthProvider ครอบอีกชั้น
+// เทสต์นี้ไม่เคยถูกรันเลยตั้งแต่เขียน จึงไม่มีใครเห็น
+import { AuthProvider } from '../context/AuthContext';
 import { AIProvider, useAIContext } from '../context/AIContext';
 
 describe('AIContext', () => {
   it('should provide default values', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });
@@ -26,7 +30,7 @@ describe('AIContext', () => {
 
   it('should switch to Nova', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });
@@ -41,7 +45,7 @@ describe('AIContext', () => {
 
   it('should prevent switching to Twin before awakening', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });
@@ -57,7 +61,7 @@ describe('AIContext', () => {
 
   it('should awaken Twin and switch to it', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });
@@ -75,7 +79,7 @@ describe('AIContext', () => {
 
   it('should allow switching to Twin after awakening', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });
@@ -96,7 +100,7 @@ describe('AIContext', () => {
 
   it('should deawaken Twin and reset to Nova', () => {
     const wrapper = ({ children }: { children: ReactNode }) => (
-      <AIProvider>{children}</AIProvider>
+      <AuthProvider><AIProvider>{children}</AIProvider></AuthProvider>
     );
 
     const { result } = renderHook(() => useAIContext(), { wrapper });

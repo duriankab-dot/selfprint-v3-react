@@ -15,14 +15,16 @@ describe('NovaAvatar', () => {
     expect(avatar).toBeDefined();
   });
 
-  it('should display Nova label when showLabel is true', () => {
+  // QA-02: "Nova" is the code/implementation name only — the label the user
+  // sees was renamed to "Self Print" (NovaAvatar.tsx:88).
+  it('should display the Self Print label when showLabel is true', () => {
     render(<NovaAvatar showLabel={true} />);
-    expect(screen.getByText('Nova')).toBeDefined();
+    expect(screen.getByText('Self Print')).toBeInTheDocument();
   });
 
   it('should not display label when showLabel is false', () => {
     const { container } = render(<NovaAvatar showLabel={false} />);
-    expect(container.textContent).not.toContain('Nova');
+    expect(container.textContent).not.toContain('Self Print');
   });
 
   it('should render all size variants', () => {
@@ -36,7 +38,12 @@ describe('NovaAvatar', () => {
   it('should have golden glow styling', () => {
     const { container } = render(<NovaAvatar showLabel={false} />);
     const avatar = container.querySelector('div[style*="radial-gradient"]');
-    expect(avatar?.getAttribute('style')).toContain('ffd700');
+    // QA-02: jsdom's CSS serialiser normalises hex colours to rgb(), so the
+    // #ffd700 written in NovaAvatar.tsx:38 comes back as rgb(255, 215, 0) —
+    // the literal 'ffd700' is never in the serialised style attribute. Same
+    // colour, different notation.
+    expect(avatar?.getAttribute('style')).toContain('radial-gradient');
+    expect(avatar?.getAttribute('style')).toMatch(/rgb\(255,\s*215,\s*0\)|#ffd700/i);
   });
 
   it('should accept className prop', () => {

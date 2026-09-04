@@ -7,6 +7,173 @@
 
 import { vi } from 'vitest';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// QA-02: STATEFUL in-memory Supabase stand-in.
+//
+// The mock in src/test/setup.ts is stateless-ish: reads always answer from a
+// fixed DEFAULT_DATA row, so a service that writes a value and then reads it
+// back gets the stub, not what it wrote. Several suites (FollowUpScheduler,
+// ContinuousImprovementService) are round-trip tests — "complete day 30, then
+// ask which milestone is next" — and were failing purely because nothing was
+// ever persisted. This keeps rows in memory so those round-trips are real.
+//
+// Usage (the dynamic import inside the factory is what keeps vi.mock's
+// hoisting happy — a plain top-level import would be in the TDZ):
+//
+//   vi.mock('../services/supabase-service', async () => {
+//     const h = await import('../../test/supabase-mock-helper');
+//     return { supabase: h.getStatefulStore().client };
+//   });
+//   import { getStatefulStore } from '../../test/supabase-mock-helper';
+//   const store = getStatefulStore();   // same instance; reset it per test
+// ═══════════════════════════════════════════════════════════════════════════
+
+type Row = Record<string, any>;
+type RowFilter = (row: Row) => boolean;
+
+export interface StatefulStore {
+  tables: Record<string, Row[]>;
+  reset: () => void;
+  seed: (table: string, rows: Row[]) => void;
+  client: { from: (table: string) => any };
+}
+
+export function createStatefulSupabaseMock(): StatefulStore {
+  const tables: Record<string, Row[]> = {};
+  let seq = 0;
+  const nextId = () => `mock-row-${++seq}`;
+  const rowsOf = (t: string) => (tables[t] ||= []);
+
+  function builder(table: string) {
+    const filters: RowFilter[] = [];
+    let mode: 'select' | 'insert' | 'update' | 'delete' = 'select';
+    let written: Row | null = null;
+    let payload: Row | null = null;
+    let applied = false;
+
+    const matching = () => rowsOf(table).filter((r) => filters.every((f) => f(r)));
+
+    const apply = () => {
+      if (applied) return;
+      applied = true;
+      if (mode === 'update' && payload) {
+        for (const row of matching()) Object.assign(row, payload);
+      }
+      if (mode === 'delete') {
+        const doomed = new Set(matching());
+        tables[table] = rowsOf(table).filter((r) => !doomed.has(r));
+      }
+    };
+
+    // PostgREST semantics: .order() sorts by the raw column value (so a TEXT
+    // column sorts lexicographically, not by any domain meaning), .limit() caps
+    // the row count. Modelled faithfully — tests that depend on ordering should
+    // see what Postgres would actually return.
+    let orderBy: { column: string; ascending: boolean } | null = null;
+    let rowLimit: number | null = null;
+
+    const finalize = (rows: Row[]) => {
+      let out = rows;
+      if (orderBy) {
+        const { column, ascending } = orderBy;
+        out = [...out].sort((a, b) => {
+          const x = a[column];
+          const y = b[column];
+          if (x === y) return 0;
+          const cmp = x > y ? 1 : -1;
+          return ascending ? cmp : -cmp;
+        });
+      }
+      if (rowLimit !== null) out = out.slice(0, rowLimit);
+      return out;
+    };
+
+    const api: any = {
+      select: () => api,
+      order: (column: string, opts?: { ascending?: boolean }) => {
+        orderBy = { column, ascending: opts?.ascending !== false };
+        return api;
+      },
+      limit: (n: number) => { rowLimit = n; return api; },
+      is: (col: string, val: any) => {
+        filters.push((r) => (val === null ? r[col] == null : r[col] === val));
+        return api;
+      },
+      eq: (col: string, val: any) => { filters.push((r) => r[col] === val); return api; },
+      neq: (col: string, val: any) => { filters.push((r) => r[col] !== val); return api; },
+      in: (col: string, vals: any[]) => { filters.push((r) => vals.includes(r[col])); return api; },
+      gte: (col: string, val: any) => { filters.push((r) => r[col] >= val); return api; },
+      lte: (col: string, val: any) => { filters.push((r) => r[col] <= val); return api; },
+      gt: (col: string, val: any) => { filters.push((r) => r[col] > val); return api; },
+      lt: (col: string, val: any) => { filters.push((r) => r[col] < val); return api; },
+      // The only .or() any service in this repo builds is the follow-up
+      // scheduler's "any milestone whose due date has passed and which is not
+      // yet completed" — modelled directly rather than parsed.
+      or: () => {
+        filters.push((r) =>
+          [30, 90, 180, 365].some((d) => {
+            const due = r[`day${d}_due`];
+            return typeof due === 'string' && due <= new Date().toISOString() && !r[`day${d}_completed`];
+          })
+        );
+        return api;
+      },
+      insert: (data: Row) => {
+        mode = 'insert';
+        written = {
+          id: nextId(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          ...data,
+        };
+        rowsOf(table).push(written);
+        return api;
+      },
+      update: (data: Row) => { mode = 'update'; payload = data; return api; },
+      delete: () => { mode = 'delete'; return api; },
+      single: () => {
+        if (mode === 'insert') return Promise.resolve({ data: written, error: null });
+        apply();
+        const hit = finalize(matching())[0];
+        return Promise.resolve(
+          hit ? { data: hit, error: null } : { data: null, error: { message: 'No rows found' } }
+        );
+      },
+      maybeSingle: () => {
+        if (mode === 'insert') return Promise.resolve({ data: written, error: null });
+        apply();
+        return Promise.resolve({ data: finalize(matching())[0] ?? null, error: null });
+      },
+      then: (onFulfilled: any, onRejected: any) => {
+        if (mode === 'insert') {
+          return Promise.resolve({ data: [written], error: null }).then(onFulfilled, onRejected);
+        }
+        apply();
+        const data = mode === 'select' ? finalize(matching()) : [];
+        return Promise.resolve({ data, error: null }).then(onFulfilled, onRejected);
+      },
+    };
+    return api;
+  }
+
+  return {
+    tables,
+    reset: () => { for (const k of Object.keys(tables)) delete tables[k]; },
+    seed: (table: string, rows: Row[]) => { rowsOf(table).push(...rows); },
+    client: { from: (table: string) => builder(table) },
+  };
+}
+
+let sharedStatefulStore: StatefulStore | null = null;
+
+/**
+ * Per-test-file singleton — vitest gives each test file its own module
+ * registry, so this is not shared between files.
+ */
+export function getStatefulStore(): StatefulStore {
+  return (sharedStatefulStore ||= createStatefulSupabaseMock());
+}
+
 export interface MockBuilderConfig {
   tableName?: string;
   shouldResolveToNull?: boolean;

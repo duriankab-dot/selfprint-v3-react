@@ -5,6 +5,7 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import PersonalContextBuilder from './PersonalContextBuilder';
+import { supabase, db } from '@/lib/supabase/client';
 import { InitializeContextRequest, PersonalContext } from './types';
 
 // Mock Supabase
@@ -51,7 +52,21 @@ describe('PersonalContextBuilder', () => {
       expect(result.memories).toBeDefined();
     });
 
-    it('should handle missing userId gracefully', async () => {
+    // QA-02: this used to just call initialize({ userId: '' }) and expect
+    // success:false. PersonalContextBuilder has no client-side userId guard —
+    // it hands the value straight to `personal_profiles.insert`
+    // (PersonalContextBuilder.ts:209) and relies on the column's NOT NULL
+    // constraint, so with a mock that always succeeds nothing failed and the
+    // assertion could never hold. Model the rejection Postgres actually returns
+    // and assert the graceful-degradation path the method does implement.
+    it('should handle a rejected profile insert gracefully', async () => {
+      vi.mocked(supabase.from).mockReturnValueOnce({
+        insert: vi.fn().mockResolvedValue({
+          data: null,
+          error: { message: 'null value in column "user_id" violates not-null constraint' },
+        }),
+      } as never);
+
       const request: InitializeContextRequest = {
         userId: '',
         mood: 'thoughtful',
@@ -62,6 +77,10 @@ describe('PersonalContextBuilder', () => {
       const result = await builder.initialize(request);
 
       expect(result.success).toBe(false);
+      expect(result.userId).toBe('');
+      expect(result.patterns).toEqual([]);
+      expect(result.memories).toEqual([]);
+      expect(result.message).toBe('Failed to initialize context');
     });
 
     it('should create personal profile', async () => {
@@ -91,10 +110,27 @@ describe('PersonalContextBuilder', () => {
       expect(context.strengths).toBeDefined();
     });
 
-    it('should throw error on missing userId', async () => {
-      expect(async () => {
-        await builder.getContext('');
-      }).rejects.toThrow();
+    // QA-02: the old test was `expect(async () => { await builder.getContext('')
+    // }).rejects.toThrow()` — which asserts on the *function object*, never
+    // awaits it, and so passed or failed for reasons unrelated to getContext.
+    // getContext() has no empty-userId guard either: it queries with
+    // user_id: '' and returns an empty context (PersonalContextBuilder.ts:128).
+    // The failure mode it does implement is wrapping a DB error in an
+    // IntelligenceError, which is what this now checks.
+    it('should wrap DB failures in an IntelligenceError', async () => {
+      vi.mocked(db.selectMany).mockRejectedValueOnce(new Error('connection refused'));
+
+      await expect(builder.getContext('test-user-123')).rejects.toThrow(
+        /Failed to get context/
+      );
+    });
+
+    it('should return an empty context for an unknown user rather than throwing', async () => {
+      const context = await builder.getContext('');
+
+      expect(context.userId).toBe('');
+      expect(context.sourceCount).toBe(0);
+      expect(context.values).toEqual([]);
     });
 
     it('should calculate overall confidence', async () => {

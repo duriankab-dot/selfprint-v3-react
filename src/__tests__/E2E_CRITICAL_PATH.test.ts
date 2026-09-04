@@ -9,7 +9,7 @@
  * @status IMPLEMENTATION TARGET
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest';
 
 interface TestUser {
   email: string;
@@ -35,7 +35,14 @@ interface TestScenario {
 describe('CRITICAL PATH E2E: Production Flow Verification', () => {
   let scenario: TestScenario;
 
-  beforeEach(() => {
+  // QA-02: this was `beforeEach`, which wiped the accumulated scenario before
+  // every single test. The suite is deliberately sequential — P1 assigns
+  // scenario.user.userId, P3 assigns scenario.twin.id, P4/P6/P7 push into
+  // memory/decisions/followUpNotifications, and the FINAL block asserts that
+  // all of it is still there. With a per-test reset the FINAL block always saw
+  // the empty initial object ("expected '' not to be ''"). One shared
+  // beforeAll is what the design requires.
+  beforeAll(() => {
     scenario = {
       user: {
         email: 'e2e-test@selfprint.ai',

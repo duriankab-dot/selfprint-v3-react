@@ -8,6 +8,16 @@ import { describe, it, expect, beforeAll, vi } from 'vitest';
 import type { SICEInput, SICEOutput } from '../../../types/sice';
 import { SICEOrchestrator } from '../SICEOrchestrator';
 
+// QA-02: src/test/setup.ts installs a GLOBAL vi.mock for
+// '../services/sice/SICEOrchestrator' (a stub class whose orchestrate()
+// resolves to { results: { engine1: 'result1' }, ... }) so that
+// CoreAwakeningService tests don't spin up all 12 engines. That stub was also
+// being handed to this file — the one suite whose entire purpose is verifying
+// the REAL orchestrator — which is why result.results had no length,
+// result.synthesis/personalIntelligence were undefined, and getEngineStatus()
+// "was not a function". Opt out of the global mock here.
+vi.unmock('../SICEOrchestrator');
+
 // Mock Supabase for test environment (no real network calls)
 vi.mock('../../supabase-service', () => ({
   supabase: null, // Mock: Supabase unavailable in test env
