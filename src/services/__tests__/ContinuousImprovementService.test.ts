@@ -104,7 +104,7 @@ describe('ContinuousImprovementService', () => {
       expect(improvements).toEqual([]);
     });
 
-    // REALBUG-001: getPendingImprovements() orders with
+    // REALBUG-001 [แก้แล้ว 4 ก.ย. 2026 — เทสต์นี้ควรผ่าน]: getPendingImprovements() orders with
     //   .order('severity', { ascending: false })
     // (ContinuousImprovementService.ts:82) but `severity` is a plain TEXT
     // column (migrations/001_feedback_tables.sql:46 — TEXT with a CHECK
@@ -114,7 +114,7 @@ describe('ContinuousImprovementService', () => {
     // documented intent ("rank improvements by severity"). Fixing it needs a
     // product change — either an enum/severity_rank column or an explicit
     // CASE ordering — so this stays skipped pending that decision.
-    it.skip('should rank improvements by severity', async () => {
+    it('should rank improvements by severity', async () => {
       for (const severity of ['low', 'high', 'medium'] as const) {
         await ContinuousImprovementService.processImprovementAction({
           feedbackId: `feedback-${severity}`,

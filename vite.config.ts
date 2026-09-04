@@ -1,9 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// TWFIX-001 (4 ก.ย. 2026): Tailwind ไม่เคยถูกคอมไพล์เลยตั้งแต่ต้นโปรเจกต์ —
+// @tailwind directive อยู่ใน src/index.css ที่ไม่มีใคร import, ไม่มี
+// postcss.config.js, และ vite ไม่มี plugin ตัวนี้ → utility class ~800 จุด
+// ใน 37 ไฟล์ไม่มีผลอะไรเลย (ยืนยันจาก dist: ไม่มี --tw- สักตัว)
+// Tailwind v4 ใช้ plugin ของ vite โดยตรง ไม่ผ่าน postcss แล้ว
+import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),
@@ -52,9 +58,6 @@ export default defineConfig({
           // 6. State management — zustand
           if (id.includes('node_modules/zustand')) return 'vendor-state';
 
-          // 7. Animation — framer-motion (if imported)
-          if (id.includes('node_modules/framer-motion')) return 'vendor-motion';
-
           // 8. SEO — react-helmet-async
           if (
             id.includes('node_modules/react-helmet-async') ||
@@ -74,15 +77,17 @@ export default defineConfig({
           // is statically imported by AIContext (a core provider in App.tsx), so
           // any module that imports supabase-service cannot be moved to a separate
           // chunk; Rollup would inline it into the main bundle anyway.
+          // DEADCHUNK-001 (4 ก.ย. 2026): ลบ branch ที่ตายไปแล้ว 2 อัน —
+          // vendor-motion (ไม่มี framer-motion ใน dependencies) และ
+          // decision-components (ชี้ src/components/decision/ ที่ถูกลบทั้งโฟลเดอร์)
+          //
+          // ⚠️ chunk-intelligence 345 kB ที่เห็นใน build **ไม่ใช่** โค้ดใน
+          // lib/intelligence — Rollup กลืน @supabase/supabase-js เข้ามาทั้งก้อน
+          // เพราะ supabase-service.ts ถูก static import จาก AIContext ซึ่งเป็น
+          // provider หลักใน App.tsx → chunk นี้ถูกโหลดทุกหน้ารวมหน้าแรก
+          // (ดู F-02 ใน docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md)
+          // การแก้ต้องตัด static import chain ก่อน = งานของ Track C Phase 1
           if (id.includes('/src/lib/intelligence')) return 'chunk-intelligence';
-
-          // Decision feature components (used only in /decisions route)
-          if (
-            id.includes('/src/components/decision/DecisionStats') ||
-            id.includes('/src/components/decision/DecisionInsights') ||
-            id.includes('/src/components/decision/DecisionTimeline') ||
-            id.includes('/src/components/decision/TwinConfidenceIndicator')
-          ) return 'decision-components';
 
           if (
             id.includes('/src/services/DecisionService') ||

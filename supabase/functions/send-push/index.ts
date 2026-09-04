@@ -5,9 +5,26 @@
  * ใช้ VAPID auth + AES-128-GCM payload encryption (RFC 8291 + RFC 8188)
  *
  * @route POST /functions/v1/send-push
- * Body: { userId, title, body, type?, url?, icon? }
+ * Body: { title, body, type?, url?, icon? }   ← userId ถูกตัดออก (ดู SEC-02)
+ *
+ * Auth required — JWT จาก Supabase Auth (`Authorization: Bearer <token>`)
+ *
+ * ── SEC-02 (แก้ 4 ก.ย. 2026) ────────────────────────────────────────────────
+ * ปัญหาเดิม: ฟังก์ชันนี้ใช้ service_role key แต่ไม่ verify JWT เลย และอ่าน
+ * `userId` จาก request body ตรง ๆ → ใครก็ได้ที่รู้ URL สามารถยิง push
+ * ข้อความอะไรก็ได้ไปหาผู้ใช้คนไหนก็ได้ (phishing ที่ใส่แบรนด์ของเราเอง)
+ *
+ * แก้เป็น: บังคับ `Authorization: Bearer <token>` แล้ว verify ด้วย
+ * `auth.getUser()` ผ่าน anon client — เอา user id จาก token เท่านั้น
+ * ถ้า body ยังส่ง `userId` มาและไม่ตรงกับ token → 403
+ * (ยึด pattern เดียวกับ `data-export/index.ts` ในรีโปนี้)
+ *
+ * หมายเหตุ: ไม่ได้เปิดช่องทาง cron/service-role เพราะตรวจแล้วไม่พบหลักฐานว่า
+ * ฟังก์ชันนี้ถูกเรียกจาก cron จริง (ไม่มี pg_cron / net.http_post ใน
+ * supabase/migrations/ และไม่มี call site ใน src/)
  *
  * Environment vars required:
+ *   SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY
  *   VAPID_PUBLIC_KEY   - base64url-encoded P-256 public key
  *   VAPID_PRIVATE_KEY  - base64url-encoded P-256 private key (PKCS8)
  *   VAPID_SUBJECT      - mailto: or https: contact URL
@@ -218,7 +235,11 @@ async function buildVapidAuthHeader(
 // ─── Main handler ─────────────────────────────────────────────────────────────
 
 interface PushPayload {
-  userId: string;
+  /**
+   * SEC-02: ไม่ใช้เป็นแหล่งความจริงอีกแล้ว — เก็บไว้เพื่อ backward-compat
+   * ถ้าส่งมาแล้วไม่ตรงกับ user ใน JWT จะถูกปฏิเสธด้วย 403
+   */
+  userId?: string;
   title: string;
   body: string;
   type?: 'reflection' | 'pattern' | 'journey' | 'milestone';
@@ -231,27 +252,53 @@ serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
   const vapidPrivateKey = Deno.env.get('VAPID_PRIVATE_KEY');
   const vapidSubject = Deno.env.get('VAPID_SUBJECT') || 'mailto:hello@selfprint.one';
 
-  if (!supabaseUrl || !serviceKey) return json({ error: 'Supabase not configured' }, 500);
+  if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
+    return json({ error: 'Supabase not configured' }, 500);
+  }
   if (!vapidPublicKey || !vapidPrivateKey) return json({ error: 'VAPID keys not configured' }, 500);
+
+  // ─── SEC-02: บังคับ verify JWT ก่อนทำอะไรทั้งสิ้น ─────────────────────────
+  // ต้องเช็คก่อนแตะ service_role client เพื่อไม่ให้ผู้ไม่ยืนยันตัวตนอ่าน/เขียน DB ได้
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const token = authHeader.slice(7);
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: { user }, error: authErr } = await userClient.auth.getUser();
+  if (authErr || !user) return json({ error: 'Invalid or expired token' }, 401);
+
+  // user id มาจาก token เท่านั้น — ห้ามเชื่อ body
+  const userId = user.id;
 
   try {
     const body = (await req.json()) as PushPayload;
-    if (!body.userId || !body.title || !body.body) {
-      return json({ error: 'userId, title, body required' }, 400);
+
+    // SEC-02: ถ้า client ยังส่ง userId มา ต้องตรงกับเจ้าของ token เท่านั้น
+    if (body.userId && body.userId !== userId) {
+      return json({ error: 'Forbidden: userId does not match authenticated user' }, 403);
+    }
+
+    if (!body.title || !body.body) {
+      return json({ error: 'title, body required' }, 400);
     }
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Get active subscriptions for user
+    // Get active subscriptions for the authenticated user
     const { data: subs, error: subErr } = await supabase
       .from('push_subscriptions')
       .select('endpoint, keys_p256dh, keys_auth')
-      .eq('user_id', body.userId)
+      .eq('user_id', userId)
       .eq('is_active', true);
 
     if (subErr) throw new Error(`DB error: ${subErr.message}`);
@@ -295,7 +342,7 @@ serve(async (req) => {
             .from('push_subscriptions')
             .update({ is_active: false })
             .eq('endpoint', sub.endpoint)
-            .eq('user_id', body.userId);
+            .eq('user_id', userId); // SEC-02: จาก token ไม่ใช่ body
         } else {
           errors.push(`HTTP ${pushRes.status} for ${sub.endpoint.slice(-30)}`);
         }

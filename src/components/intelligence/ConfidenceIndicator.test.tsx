@@ -315,7 +315,7 @@ describe('ConfidenceIndicator Component', () => {
     /**
      * Test 21: Extracts metrics from BehavioralPattern
      */
-    // REALBUG-004: ConfidenceIndicator.tsx:112 tests `'confidencePoints' in
+    // REALBUG-004 [แก้แล้ว 4 ก.ย. 2026 — เทสต์นี้ควรผ่าน]: ConfidenceIndicator.tsx:112 tests `'confidencePoints' in
     // source` before treating `source` as a BehavioralPattern. No such field
     // exists anywhere in the repo — BehavioralPattern's is `evidencePoints`
     // (lib/intelligence/types.ts:199) — so the branch is unreachable, the
@@ -324,7 +324,7 @@ describe('ConfidenceIndicator Component', () => {
     // as "Very Low"/UNKNOWN and paints red no matter what the pattern says.
     // Every ConfidenceIndicator fed a pattern (IntelligencePanel,
     // ContextDisplay) is affected. One-word product fix; owner's call.
-    it.skip('should extract metrics from BehavioralPattern source', () => {
+    it('should extract metrics from BehavioralPattern source', () => {
       const pattern: BehavioralPattern = {
         id: 'pat-1',
         userId: 'user-1',

@@ -88,29 +88,49 @@ npm run typecheck:functions   # typecheck functions/ + api/
 
 ---
 
-## ✅ Track A + B เสร็จหมดแล้ว (4 ก.ย. 2026)
-A1 ลบ Vercel+dead code · A2 env+รหัสผ่าน e2e · A3 FE bugs · A4 OG image ·
-A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 66 ไฟล์ ·
-A9 ลบ .md 84 ไฟล์ · B Phase 0 forensic
+## ✅ Track A + B + C0 เสร็จหมดแล้ว (4 ก.ย. 2026) — เหลือแต่ Track C
+
+**Track A** A1 ลบ Vercel+dead code · A2 env+รหัสผ่าน e2e · A3 FE bugs · A4 OG image ·
+A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 66 ไฟล์ · A9 ลบ .md 84 ไฟล์
+**Track B** Phase 0 forensic ครบ 10 หัวข้อ
+**C0 (เคลียร์ทางให้ Track C)**
+- `TWFIX-001` ติดตั้ง Tailwind v4 ให้ทำงานจริง (`@tailwindcss/vite`) — **ตั้งใจไม่เปิด
+  preflight** เพื่อไม่ให้ทับ CSS เขียนมือ ~30 ไฟล์ก่อนที่ Track C จะได้ออกแบบใหม่
+  พิสูจน์แล้ว: `--tw-` 545 จุดใน bundle, `@config` อ่าน token เดิมได้
+- `REALBUG-001..004` แก้ครบ → un-skip 11 เทสต์ ผ่านหมด (1037/1037)
+- `SEC-02` `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT แล้ว
+- `NAVGAP-001` nav หายช่วง 761–1023 px · `DEADCHUNK-001` ลบ manualChunks ที่ตาย 2 branch
+- `ASSET404-001` แก้ asset ที่อ้างแต่ไม่มีจริง 8 รายการ · ลบ `hero.png` 778 kB ที่ไม่มีใครใช้
+- `RAFLOOP-001` rAF loop บนหน้าแรก เคารพ `prefers-reduced-motion` + หยุดเมื่อแท็บถูกซ่อน
 
 ## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
 
 1. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**
    → **Core Awakening ขึ้นกับข้อนี้ ไม่เคยทำงานได้เลยจนกว่าจะรัน**
    ทดสอบกับ PostgreSQL 18.4 จริงแล้ว 3 เคส (production-like / รันซ้ำ / DB ว่าง)
-2. **REALBUG-001..004** — บั๊กจริงที่เทสต์จับได้ skip ไว้ 11 เทสต์ รอตัดสินใจ
-   (grep `REALBUG` ในไฟล์ `.test.tsx` จะเจอคำอธิบายเต็มในโค้ด)
-   - **004 กระทบผู้ใช้มากสุด**: `ConfidenceIndicator.tsx:112` เช็ค field
-     `confidencePoints` ที่ไม่มีในโปรเจกต์ (ของจริง `evidencePoints`)
-     → การ์ดขึ้น **NaN% / Very Low / พื้นแดง** ทุกครั้งที่รับ BehavioralPattern
-3. **F-01 Tailwind ไม่เคยถูกคอมไพล์** — `@tailwind` อยู่ใน `src/index.css` ที่ไม่มีใคร
-   import · ไม่มี `postcss.config.js` · ไม่มี plugin ใน vite → utility class ใน
-   **37 ไฟล์ไม่มีผลอะไรเลย** ต้องตัดสินใจก่อนเริ่ม Track C ว่าจะเอา Tailwind ทางไหน
+2. **deploy Edge Functions ที่แก้แล้ว**
+   `supabase functions deploy send-push daily-brief pattern-detect`
+   แล้วทดสอบ: ไม่มี header → 401 · token จริง + userId คนอื่นใน body → 403
+3. **Passkey flow ยังไม่แก้ — ต้องตัดสินใจ**
+   `auth-verify-passkey` ปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ และ
+   `auth-registration-options` ผูก passkey เข้าอีเมลใครก็ได้ (account takeover)
+   **แต่ passkey login ใช้งานจริงไม่ได้อยู่แล้ว** เพราะ `AuthContext.tsx:130` เรียกแค่
+   `setSession()` ของ React ไม่ได้เรียก `supabase.auth.setSession()` → token ปลอม
+   ไม่เคยเข้า supabase client → RLS ยังเป็น anonymous
+   → ทางที่ปลอดภัยสุดตอนนี้คือ **undeploy 3 ฟังก์ชันนั้น** (magic link / OAuth ไม่กระทบ)
 4. **git filter-repo** — ยังไม่ได้ลง (`pip install git-filter-repo`) คำสั่งอยู่ในไฟล์
    forensic หัวข้อ 2.1 · ไม่เร่งด่วนแล้วเพราะ key revoke ไปแล้ว เหลือแค่ลดขนาด repo
 5. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว** (ของเดิมหลุดใน git history)
-6. **SEC-02** — Edge Functions 4 ตัวไม่ verify JWT (`send-push`, `daily-brief`,
-   `pattern-detect` แก้ได้ทันที · passkey flow ต้องคุยก่อน)
+6. **`PasskeyProvider.ts` เรียก Edge Function ที่ไม่มีอยู่จริง 4 ตัว**
+   `auth-list-credentials` (`:144`), `auth-rename-credential` (`:157`),
+   `auth-delete-credential` (`:170`), `auth-delete-all-credentials` (`:183`)
+   → พัง runtime ถ้ามีคนกดใช้
+
+## 🎯 Track C เริ่มได้แล้ว
+อ่าน `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` ก่อน — โดยเฉพาะ **F-02**:
+`chunk-intelligence` 345 kB ไม่ใช่ `lib/intelligence` แต่คือ `@supabase/supabase-js`
+ทั้งก้อนที่ถูกดูดเข้ามาผ่าน static import chain ของ `AIContext` → โหลดทุกหน้ารวมหน้าแรก
+ตัด chain นี้ = งานแรกของ Phase 1
 
 ---
 

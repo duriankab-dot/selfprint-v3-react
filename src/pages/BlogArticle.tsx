@@ -55,7 +55,7 @@ function buildArticleSchema(article: Article, isTh: boolean) {
     'publisher': {
       '@type': 'Organization',
       'name': 'SELFPRINT',
-      'logo': { '@type': 'ImageObject', 'url': 'https://selfprint.one/logo.png' },
+      'logo': { '@type': 'ImageObject', 'url': 'https://selfprint.one/icons/icon-512x512.png' },
     },
     'mainEntityOfPage': {
       '@type': 'WebPage',

@@ -283,9 +283,22 @@ export const WORLDS: Record<WorldId, World> = {
 
 /**
  * Get world by ID
+ *
+ * REALBUG-002 FIX (4 ก.ย. 2026): เดิมประกาศคืน `World` (non-nullable) แต่ return
+ * `WORLDS[id]` ตรง ๆ — id ที่ไม่มีใน WORLDS จะได้ `undefined` ทั้งที่ TypeScript
+ * ยืนยันว่าเป็น World จึงไม่มีใครถูกบังคับให้เช็ค id ที่มาจาก runtime
+ * (route param / คอลัมน์ DB / cached preference) จะพังเงียบตรงนี้แล้วไประเบิด
+ * ไกล ๆ ตอนแตะ `world.name`
+ *
+ * แก้ด้วยการ throw ให้ชัดตรงจุดที่ผิด แทนการคืน undefined เงียบ ๆ —
+ * ถ้าต้องการแบบไม่ throw ให้ใช้ `WORLDS[id as WorldId]` แล้วเช็ค null เอง
  */
 export function getWorld(id: WorldId): World {
-  return WORLDS[id];
+  const world = WORLDS[id];
+  if (!world) {
+    throw new Error(`Unknown world id: ${String(id)}`);
+  }
+  return world;
 }
 
 /**

@@ -257,16 +257,25 @@ export function buildTwinSystemPrompt(
   recentDecisions?: string,
   language: 'en' | 'th' = 'th'
 ): string {
+  // REALBUG-003 FIX (4 ก.ย. 2026): เดิมแทน {{ currentWorld }} ด้วย
+  // `currentWorld || 'SELF'` (บอกโมเดลว่าอยู่ใน SELF world) แต่บรรทัดที่ต่อ
+  // world block เข้าไปกลับ guard ด้วย `if (currentWorld && ...)` ซึ่งเป็น
+  // undefined → Twin ถูกบอกว่าอยู่ใน SELF แต่ **ไม่ได้รับคำสั่ง identity /
+  // authenticity ของ SELF เลย** เป็น path เดียวที่ world context หายไปเงียบ ๆ
+  // (ส่ง 'self' มาตรง ๆ ทำงานถูกอยู่แล้ว) ใช้ตัวแปรเดียวกันทั้งสองที่แทน
+  // TWIN_WORLD_PROMPTS เป็น Record<string, string> จึงใช้ string ตรง ๆ ไม่ต้อง cast
+  const world = currentWorld ?? 'self';
+
   let prompt = TWIN_BASE_PROMPT
     .replace(/{{ twinName }}/g, twinName)
     .replace(/{{ twinProfile }}/g, twinProfile)
-    .replace(/{{ currentWorld }}/g, currentWorld || 'SELF')
+    .replace(/{{ currentWorld }}/g, world)
     .replace(/{{ currentMood }}/g, currentMood || 'neutral')
     .replace(/{{ recentDecisions }}/g, recentDecisions || 'none tracked yet')
     .replace(/{{ languageInstruction }}/g, languageInstructionFor(language));
 
-  if (currentWorld && TWIN_WORLD_PROMPTS[currentWorld]) {
-    prompt += '\n\n' + getTwinWorldPrompt(currentWorld).replace(/{{ twinName }}/g, twinName);
+  if (TWIN_WORLD_PROMPTS[world]) {
+    prompt += '\n\n' + getTwinWorldPrompt(world).replace(/{{ twinName }}/g, twinName);
   }
 
   return prompt;

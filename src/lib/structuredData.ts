@@ -13,7 +13,8 @@
 
 const BASE_URL = 'https://selfprint.one';
 const ORGANIZATION_NAME = 'Selfprint';
-const ORGANIZATION_LOGO = `${BASE_URL}/logo.png`;
+// ASSET404-001 (4 ก.ย. 2026): ไฟล์นี้ไม่มีอยู่จริงใน public/ — ชี้ไปที่ไอคอนที่มีจริงแทน
+const ORGANIZATION_LOGO = `${BASE_URL}/icons/icon-512x512.png`;
 const ORGANIZATION_EMAIL = 'hello@selfprint.app';
 
 // Business contact information (from environment or defaults)

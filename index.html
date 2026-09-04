@@ -36,17 +36,8 @@
 
     <!-- Apple splash screens (portrait primary) -->
     <!-- iPhone 14 Pro Max -->
-    <link rel="apple-touch-startup-image"
-      media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)"
-      href="/icons/splash-1290x2796.png" />
     <!-- iPhone 14 / 13 / 12 -->
-    <link rel="apple-touch-startup-image"
-      media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)"
-      href="/icons/splash-1170x2532.png" />
     <!-- iPhone SE / 8 / 7 / 6s -->
-    <link rel="apple-touch-startup-image"
-      media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)"
-      href="/icons/splash-750x1334.png" />
 
     <!-- LIGHTHOUSE-001: trimmed from 6 preconnects to 1. Lighthouse flagged
          all 6 as "Unused preconnect" and this was correct, not a false
@@ -89,6 +80,9 @@
     <meta name="twitter:title" content="SELFPRINT | Living Personal Intelligence Platform" />
     <meta name="twitter:description" content="AI Twin ที่เรียนรู้จากคุณจริงๆ — 12 SICE Engines วิเคราะห์ชีวิต ไม่ใช่ดูดวง" />
     <meta name="twitter:image" content="https://selfprint.one/og-default-th.jpg" />
+    <!-- ASSET404-001 (4 ก.ย. 2026): ไฟล์นี้ไม่มีอยู่จริงใน public/ — ชี้ไปที่ไอคอนที่มีจริงแทน
+         ลบ <link rel="apple-touch-startup-image"> 3 อันที่ชี้ splash-*.png
+         ซึ่งไม่เคยมีไฟล์อยู่จริง iOS จะ fallback ไปใช้พื้นหลังของ manifest เอง -->
   </head>
   <body>
     <div id="root"></div>

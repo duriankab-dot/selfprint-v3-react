@@ -106,7 +106,8 @@ export function MetaTagManager({
             priceCurrency: 'USD',
           },
           url: baseUrl,
-          image: `${baseUrl}/og-image.png`,
+          // ASSET404-001 (4 ก.ย. 2026): ไฟล์นี้ไม่มีอยู่จริงใน public/ — ชี้ไปที่ไอคอนที่มีจริงแทน
+          image: `${baseUrl}/og-default-th.jpg`,
           author: {
             '@type': 'Organization',
             name: 'Selfprint',
