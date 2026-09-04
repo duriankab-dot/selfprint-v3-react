@@ -155,7 +155,7 @@ function buildArticleSchema(article: Article) {
     'publisher': {
       '@type': 'Organization',
       'name': 'SELFPRINT',
-      'logo': { '@type': 'ImageObject', 'url': 'https://selfprint.one/logo.png' },
+      'logo': { '@type': 'ImageObject', 'url': 'https://selfprint.one/icons/icon-512x512.png' },
     },
     'inLanguage': 'th',
     'speakable': {

@@ -83,7 +83,7 @@ describe('World Functions', () => {
     expect(world.name).toBe('Self');
   });
 
-  // REALBUG-002: getWorld() is declared `(id: WorldId): World`
+  // REALBUG-002 [แก้แล้ว 4 ก.ย. 2026 — เทสต์นี้ควรผ่าน]: getWorld() is declared `(id: WorldId): World`
   // (src/constants/worlds.ts:287) but its body is a bare `return WORLDS[id]`,
   // so for an id that is not in WORLDS it returns `undefined` while the type
   // system insists the caller received a World. Any id that reaches it from
@@ -94,7 +94,7 @@ describe('World Functions', () => {
   // `World | undefined` and make callers handle it), so the owner decides.
   // Note: getWorld() currently has ZERO callers outside this test, so deleting
   // it is also a legitimate resolution.
-  it.skip('should throw on invalid world ID', () => {
+  it('should throw on invalid world ID', () => {
     expect(() => {
       getWorld('invalid' as WorldId);
     }).toThrow();

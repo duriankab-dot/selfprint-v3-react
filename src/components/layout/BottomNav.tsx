@@ -115,7 +115,12 @@ export function BottomNav() {
     <>
       <style>{`
         .sp-bottomnav { display: none; }
-        @media (max-width: 760px) {
+        /* NAVGAP-001 FIX (4 ก.ย. 2026): BottomNav ตัดที่ 760px แต่ NavRail
+           เริ่มที่ 1024px → ช่วง 761–1023 px (แท็บเล็ตแนวตั้ง iPad 768,
+           iPad Air 820, Surface 912) **ไม่มี navigation เลยสักตัว**
+           ผู้ใช้ในช่วงนั้นไปไหนไม่ได้นอกจากกด back ของเบราว์เซอร์
+           ขยายขอบบนของ BottomNav ให้ชนกับขอบล่างของ NavRail พอดี */
+        @media (max-width: 1023px) {
           .sp-bottomnav { display: flex !important; }
           body { padding-bottom: 68px; }
         }

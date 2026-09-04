@@ -283,12 +283,36 @@ const EvolutionaryVisualSystem: React.FC<EvolutionaryVisualSystemProps> = ({
   };
 
   // Floating labels
+  //
+  // RAFLOOP-001 FIX (4 ก.ย. 2026) — loop นี้อยู่บน **หน้าแรก** และเดิมมีปัญหา 3 ข้อ:
+  //   1. รันตลอดเวลาไม่มีวันหยุด แม้ผู้ใช้สลับแท็บไปทำอย่างอื่น → กินแบตมือถือ
+  //   2. อ่าน `lbl.style.opacity` กลับจาก DOM ทุกเฟรม × 12 label = บังคับให้
+  //      เบราว์เซอร์คำนวณ style ใหม่ทุกครั้ง (layout thrash) เฟรมละ 12 รอบ
+  //   3. **ไม่เช็ค prefers-reduced-motion เลยระดับ JS** — ผู้ใช้ที่ตั้งค่าลด
+  //      การเคลื่อนไหวไว้ (เมาง่าย / vestibular disorder) ยังโดน motion เต็ม ๆ
+  //
+  // แก้รอบนี้: (1) ไม่สร้าง loop เลยถ้าผู้ใช้ขอลด motion  (2) หยุด loop เมื่อ
+  // แท็บถูกซ่อนแล้วกลับมาต่อเมื่อกลับมาดู  (3) อ่าน opacity จาก dataset.op ก่อน
+  // ถ้ามี (เผื่อจุดที่ set opacity เขียนค่าคู่มาให้)
+  //
+  // ⚠️ ข้อ 2 ของปัญหา (layout thrash จากการอ่าน style กลับจาก DOM) **ยังแก้ไม่หมด**
+  // เพราะยังไม่มีจุดไหนเขียน dataset.op — fallback จึงยังอ่าน style.opacity อยู่
+  // การแก้ให้จบต้องรื้อ updateAnimation ซึ่งเป็นงานของ Track C (ดู F-07)
   useEffect(() => {
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return; // ไม่ต้องสร้าง loop เลย
+
     let raf = 0;
+    let running = true;
+
     const floatLabels = () => {
+      if (!running) return;
       const now = Date.now();
       labelsRef.current.forEach((lbl, i) => {
-        const op = parseFloat(lbl.style.opacity) || 0;
+        // อ่านจาก dataset ที่ updateAnimation เขียนไว้ แทนการอ่าน style กลับจาก DOM
+        const op = parseFloat(lbl.dataset.op ?? lbl.style.opacity) || 0;
         if (op > 0.05) {
           const fy = Math.sin(now / 1300 + i * 0.72) * 2.8;
           lbl.style.transform = `translateY(${fy}px)`;
@@ -296,8 +320,25 @@ const EvolutionaryVisualSystem: React.FC<EvolutionaryVisualSystemProps> = ({
       });
       raf = requestAnimationFrame(floatLabels);
     };
+
+    const onVisibility = () => {
+      if (document.hidden) {
+        running = false;
+        cancelAnimationFrame(raf);
+      } else if (!running) {
+        running = true;
+        raf = requestAnimationFrame(floatLabels);
+      }
+    };
+
+    document.addEventListener('visibilitychange', onVisibility);
     raf = requestAnimationFrame(floatLabels);
-    return () => cancelAnimationFrame(raf);
+
+    return () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   }, []);
 
   // Scroll handling

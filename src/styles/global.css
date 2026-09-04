@@ -1,3 +1,21 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   TWFIX-001 (4 ก.ย. 2026) — เปิดใช้ Tailwind จริงเป็นครั้งแรก
+
+   ⚠️ ตั้งใจ **ไม่** import preflight (`@import "tailwindcss"` ตัวเต็ม)
+   เพราะโปรเจกต์นี้มี CSS เขียนมือ ~30 ไฟล์ที่พึ่ง margin/padding/font-size
+   ค่า default ของเบราว์เซอร์อยู่ ถ้าเปิด preflight ตอนนี้ทุกหน้าจะเพี้ยนพร้อมกัน
+   ก่อนที่ Track C จะได้ออกแบบใหม่
+
+   ผลตอนนี้: utility class ใน 37 ไฟล์เริ่มทำงานจริง โดยสไตล์เดิมไม่ถูกแตะ
+   เมื่อเริ่ม Track C แล้วค่อยเปลี่ยนบรรทัดล่างเป็น `@import "tailwindcss";`
+   ตัวเดียว (ได้ preflight ครบ) พร้อมกับที่ไล่ล้าง CSS เก่าออก
+   ══════════════════════════════════════════════════════════════════════════ */
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* map token เดิมของโปรเจกต์เข้า Tailwind (v4 อ่าน config เก่าผ่าน @config) */
+@config "../../tailwind.config.js";
+
 /* 🎨 GLOBAL STYLES */
 
 @import url('./tokens.css');

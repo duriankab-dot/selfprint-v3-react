@@ -5,9 +5,27 @@
  * ผ่าน Claude โดยใช้ข้อมูล personal_memory + behavioral_patterns + recent activity
  *
  * @route POST /functions/v1/daily-brief
- * Body: { userId, forceRefresh? }
+ * Body: { forceRefresh? }   ← userId ถูกตัดออก (ดู SEC-02)
+ *
+ * Auth required — JWT จาก Supabase Auth (`Authorization: Bearer <token>`)
  *
  * Response: { briefText, hubFocus, moodContext, cached }
+ *
+ * ── SEC-02 (แก้ 4 ก.ย. 2026) ────────────────────────────────────────────────
+ * ปัญหาเดิม: ใช้ service_role key (bypass RLS) แต่ไม่ verify JWT และอ่าน
+ * `userId` จาก request body → ใครก็ได้ยิง userId ของเหยื่อเข้ามาแล้วอ่าน
+ * personal_memory / behavioral_patterns / chat_messages / personal_profiles
+ * ของคนอื่นกลับมาใน response ได้ (ข้อมูลส่วนตัวรั่วเต็ม ๆ) และยัง overwrite
+ * แถว daily_briefs ของเหยื่อได้ด้วย
+ *
+ * แก้เป็น: บังคับ `Authorization: Bearer <token>` แล้ว verify ด้วย
+ * `auth.getUser()` ผ่าน anon client — ใช้ user id จาก token เท่านั้น
+ * ถ้า body ส่ง `userId` มาและไม่ตรงกับ token → 403
+ * (ยึด pattern เดียวกับ `data-export/index.ts` ในรีโปนี้)
+ *
+ * หมายเหตุ: ไม่เปิดช่องทาง cron/service-role เพราะตรวจแล้วไม่พบหลักฐานว่า
+ * ถูกเรียกจาก cron จริง (ไม่มี pg_cron/net.http_post ใน migrations
+ * และไม่มี call site ใน src/)
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -27,7 +45,11 @@ function json(data: unknown, status = 200): Response {
 }
 
 interface DailyBriefBody {
-  userId: string;
+  /**
+   * SEC-02: ไม่ใช้เป็นแหล่งความจริงอีกแล้ว — เก็บไว้เพื่อ backward-compat
+   * ถ้าส่งมาแล้วไม่ตรงกับ user ใน JWT จะถูกปฏิเสธด้วย 403
+   */
+  userId?: string;
   forceRefresh?: boolean;
 }
 
@@ -36,15 +58,38 @@ serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
 
-  if (!supabaseUrl || !serviceKey) return json({ error: 'Supabase not configured' }, 500);
+  if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
+    return json({ error: 'Supabase not configured' }, 500);
+  }
   if (!anthropicKey) return json({ error: 'Anthropic key not configured' }, 500);
+
+  // ─── SEC-02: บังคับ verify JWT ก่อนแตะ service_role client ────────────────
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const token = authHeader.slice(7);
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: { user }, error: authErr } = await userClient.auth.getUser();
+  if (authErr || !user) return json({ error: 'Invalid or expired token' }, 401);
+
+  // user id มาจาก token เท่านั้น — ห้ามเชื่อ body
+  const userId = user.id;
 
   try {
     const body = await req.json() as DailyBriefBody;
-    if (!body.userId) return json({ error: 'userId required' }, 400);
+
+    // SEC-02: ถ้า client ยังส่ง userId มา ต้องตรงกับเจ้าของ token เท่านั้น
+    if (body.userId && body.userId !== userId) {
+      return json({ error: 'Forbidden: userId does not match authenticated user' }, 403);
+    }
 
     const supabase = createClient(supabaseUrl, serviceKey);
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
@@ -54,7 +99,7 @@ serve(async (req) => {
       const { data: cached } = await supabase
         .from('daily_briefs')
         .select('brief_text, hub_focus, mood_context')
-        .eq('user_id', body.userId)
+        .eq('user_id', userId)
         .eq('brief_date', today)
         .maybeSingle();
 
@@ -79,19 +124,19 @@ serve(async (req) => {
       supabase
         .from('personal_memory')
         .select('memory_type, title, content, confidence')
-        .eq('user_id', body.userId)
+        .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(10),
       supabase
         .from('behavioral_patterns')
         .select('pattern_name, pattern_type, description, ai_insight, is_strength')
-        .eq('user_id', body.userId)
+        .eq('user_id', userId)
         .order('confidence', { ascending: false })
         .limit(5),
       supabase
         .from('chat_messages')
         .select('content, hub, mood, created_at')
-        .eq('user_id', body.userId)
+        .eq('user_id', userId)
         .eq('role', 'user')
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
         .order('created_at', { ascending: false })
@@ -99,7 +144,7 @@ serve(async (req) => {
       supabase
         .from('personal_profiles')
         .select('decision_style, strengths, primary_hub, current_state')
-        .eq('user_id', body.userId)
+        .eq('user_id', userId)
         .maybeSingle(),
     ]);
 
@@ -183,7 +228,7 @@ ${recentActivity}
     await supabase
       .from('daily_briefs')
       .upsert({
-        user_id: body.userId,
+        user_id: userId, // SEC-02: จาก token ไม่ใช่ body
         brief_date: today,
         brief_text: briefText,
         hub_focus: hubFocus,

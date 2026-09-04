@@ -5,12 +5,28 @@
  * ผ่าน Claude → บันทึก behavioral patterns ลง behavioral_patterns table
  *
  * @route POST /functions/v1/pattern-detect
- * Body: { userId }
+ * Body: {}   ← userId ถูกตัดออก (ดู SEC-02)
  *
- * ถูกเรียกโดย:
- * - Server-side trigger หลัง journal-sync
- * - Scheduled cron job (daily)
- * - Manual trigger จาก dashboard
+ * Auth required — JWT จาก Supabase Auth (`Authorization: Bearer <token>`)
+ *
+ * ── SEC-02 (แก้ 4 ก.ย. 2026) ────────────────────────────────────────────────
+ * ปัญหาเดิม: ใช้ service_role key (bypass RLS) แต่ไม่ verify JWT และอ่าน
+ * `userId` จาก request body → ใครก็ได้สามารถ (1) อ่าน chat_messages +
+ * personal_profiles ของคนอื่น (เนื้อหาไหลออกทาง prompt ที่ส่งให้ Claude) และ
+ * (2) **เขียน/ทับ** แถวใน behavioral_patterns ของคนอื่นได้ (poisoning ข้อมูล
+ * ที่ SICE เอาไปใช้ตัดสินใจต่อ) — ทั้งยังเผา ANTHROPIC_API_KEY ของเราฟรี ๆ
+ *
+ * แก้เป็น: บังคับ `Authorization: Bearer <token>` แล้ว verify ด้วย
+ * `auth.getUser()` ผ่าน anon client — ใช้ user id จาก token เท่านั้น
+ * ถ้า body ส่ง `userId` มาและไม่ตรงกับ token → 403
+ * (ยึด pattern เดียวกับ `data-export/index.ts` ในรีโปนี้)
+ *
+ * หมายเหตุเรื่อง cron: docstring เดิมอ้างว่า "ถูกเรียกโดย scheduled cron job"
+ * แต่ตรวจแล้ว **ไม่มีหลักฐาน** — ไม่มี cron.schedule / net.http_post ใน
+ * supabase/migrations/ ไม่มี config ใน supabase/config.toml และไม่มี call site
+ * ใน src/ เลย จึงบังคับ user JWT อย่างเดียวตามหลัก fail-closed
+ * ถ้าภายหลังต้องมี cron จริง ให้เพิ่มทางแยกที่เช็ค header `x-cron-secret`
+ * เทียบกับ `Deno.env.get('CRON_SECRET')` แล้วค่อยรับ userId จาก body ในเคสนั้น
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
@@ -51,15 +67,39 @@ serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'POST only' }, 405);
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
 
-  if (!supabaseUrl || !serviceKey) return json({ error: 'Supabase not configured' }, 500);
+  if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
+    return json({ error: 'Supabase not configured' }, 500);
+  }
   if (!anthropicKey) return json({ error: 'Anthropic key not configured' }, 500);
 
+  // ─── SEC-02: บังคับ verify JWT ก่อนแตะ service_role client / เรียก Claude ──
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return json({ error: 'Unauthorized' }, 401);
+  }
+  const token = authHeader.slice(7);
+
+  const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+  const { data: { user }, error: authErr } = await userClient.auth.getUser();
+  if (authErr || !user) return json({ error: 'Invalid or expired token' }, 401);
+
+  // user id มาจาก token เท่านั้น — ห้ามเชื่อ body
+  const userId = user.id;
+
   try {
-    const body = await req.json() as { userId: string };
-    if (!body.userId) return json({ error: 'userId required' }, 400);
+    // SEC-02: body อาจว่างได้แล้ว (userId ไม่จำเป็นอีกต่อไป)
+    const body = await req.json().catch(() => ({})) as { userId?: string };
+
+    // SEC-02: ถ้า client ยังส่ง userId มา ต้องตรงกับเจ้าของ token เท่านั้น
+    if (body.userId && body.userId !== userId) {
+      return json({ error: 'Forbidden: userId does not match authenticated user' }, 403);
+    }
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
@@ -68,7 +108,7 @@ serve(async (req) => {
     const { data: messages, error: msgErr } = await supabase
       .from('chat_messages')
       .select('role, content, hub, mood, created_at')
-      .eq('user_id', body.userId)
+      .eq('user_id', userId)
       .eq('role', 'user')
       .gte('created_at', cutoff)
       .order('created_at', { ascending: false })
@@ -83,7 +123,7 @@ serve(async (req) => {
     const { data: profile } = await supabase
       .from('personal_profiles')
       .select('decision_style, strengths, blind_spots')
-      .eq('user_id', body.userId)
+      .eq('user_id', userId)
       .maybeSingle();
 
     // Build context for Claude
@@ -171,7 +211,7 @@ ${messagesSummary}
     // Upsert patterns into DB (replace existing by name for this user)
     const now = new Date().toISOString();
     const patternRows = parsed.patterns.map((p: DetectedPattern) => ({
-      user_id: body.userId,
+      user_id: userId, // SEC-02: จาก token ไม่ใช่ body
       pattern_name: p.pattern_name,
       pattern_type: p.pattern_type,
       description: p.description,
@@ -197,7 +237,7 @@ ${messagesSummary}
       }
     }
 
-    console.log(`[pattern-detect] User ${body.userId}: detected ${patternRows.length} patterns`);
+    console.log(`[pattern-detect] User ${userId}: detected ${patternRows.length} patterns`);
 
     return json({
       success: true,

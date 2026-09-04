@@ -28,7 +28,20 @@
 | `oxlint` | ✅ 0 errors · 195 warnings · 480 files |
 | `vitest run` | ✅ **66/66 ไฟล์ · 1026 tests ผ่าน · 0 พัง** (skip 11 = REALBUG) |
 
-**Track A + B เสร็จหมดแล้ว** — เหลือ 6 ข้อที่ต้องทำด้วยมือหรือต้องตัดสินใจ (หัวข้อ 4)
+**Track A + B + C0 เสร็จหมดแล้ว — เหลือแต่ Track C (visual redesign)**
+
+งาน C0 ที่เคลียร์ทางให้ Track C (4 ก.ย. 2026):
+
+| รหัส | เรื่อง |
+|------|-------|
+| `TWFIX-001` | **ติดตั้ง Tailwind v4 ให้ทำงานจริง** — `@tailwindcss/vite` + `@config` อ่าน token เดิม · **ตั้งใจไม่เปิด preflight** เพื่อไม่ให้ทับ CSS เขียนมือ ~30 ไฟล์ก่อน Track C จะได้ออกแบบใหม่ · พิสูจน์: `--tw-` 545 จุดใน bundle (เดิม 0) |
+| `REALBUG-001..004` | แก้ครบทั้ง 4 → un-skip 11 เทสต์ ผ่านหมด **1037/1037 · 0 skip** |
+| `SEC-02` | `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT + user id จาก token เท่านั้น (body ไม่ตรง → 403) |
+| `NAVGAP-001` | nav หายช่วง 761–1023 px (iPad/Surface แนวตั้ง) — ขยาย BottomNav ให้ชนกับ NavRail |
+| `DEADCHUNK-001` | ลบ manualChunks branch ที่ตาย 2 อัน (`vendor-motion`, `decision-components`) |
+| `ASSET404-001` | แก้ asset ที่โค้ดอ้างแต่ไม่มีไฟล์จริง 8 รายการ + ลบ `hero.png` 778 kB ที่ไม่มีใคร import |
+| `RAFLOOP-001` | rAF loop บนหน้าแรกเคารพ `prefers-reduced-motion` + หยุดเมื่อแท็บถูกซ่อน |
+| — | ถอด dep ที่ไม่มีใครใช้อีก 3 ตัว (`web-vitals`, `@simplewebauthn/browser`, `@simplewebauthn/server`) |
 
 **เร่งด่วนที่สุด:** apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`
 — Core Awakening จะกลับมาทำงานได้ก็ต่อเมื่อรันไฟล์นี้ (ดูหัวข้อ 3)

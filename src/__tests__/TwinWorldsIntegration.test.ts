@@ -81,7 +81,7 @@ describe('Phase D: Twin World Integration', () => {
       expect(prompt).toContain('traveled');
     });
 
-    // REALBUG-003: buildTwinSystemPrompt(name, profile) with no `currentWorld`
+    // REALBUG-003 [แก้แล้ว 4 ก.ย. 2026 — เทสต์นี้ควรผ่าน]: buildTwinSystemPrompt(name, profile) with no `currentWorld`
     // substitutes 'SELF' into the {{ currentWorld }} placeholder
     // (src/config/twin-prompts.ts:265) — so the prompt tells the model "you are
     // in the SELF world" — but the block that appends the world's expertise is
@@ -93,7 +93,7 @@ describe('Phase D: Twin World Integration', () => {
     // fine. Fix is a one-line product change (default the variable itself, i.e.
     // `const world = currentWorld || 'SELF'`, and use it in both places), so it
     // is left for the owner.
-    it.skip('should default to SELF world if not specified', () => {
+    it('should default to SELF world if not specified', () => {
       const prompt = buildTwinSystemPrompt(
         testTwinName,
         testProfile,

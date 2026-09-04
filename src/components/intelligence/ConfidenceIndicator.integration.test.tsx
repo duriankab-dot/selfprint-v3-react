@@ -66,7 +66,7 @@ function makePattern(overrides: Partial<BehavioralPattern> = {}): BehavioralPatt
 
 describe('ConfidenceIndicator Integration Tests', () => {
   // ═════════════════════════════════════════════════════════════════════════
-  // REALBUG-004: ConfidenceIndicator.tsx:112 guards the BehavioralPattern
+  // REALBUG-004 [แก้แล้ว 4 ก.ย. 2026 — เทสต์นี้ควรผ่าน]: ConfidenceIndicator.tsx:112 guards the BehavioralPattern
   // extraction branch with `if ('confidencePoints' in source)`. There is no
   // `confidencePoints` field anywhere in this codebase (grep returns exactly
   // that one line) — BehavioralPattern's field is `evidencePoints`
@@ -84,7 +84,7 @@ describe('ConfidenceIndicator Integration Tests', () => {
   // Fix is one word ('confidencePoints' → 'evidencePoints'), but it is product
   // code, so it is left to the owner. Un-skip this block once it lands.
   // ═════════════════════════════════════════════════════════════════════════
-  describe.skip('Integration: Component displays real metrics from source objects (REALBUG-004)', () => {
+  describe('Integration: Component displays real metrics from source objects (REALBUG-004)', () => {
     it('should display high confidence from behavioral pattern with recent evidence', () => {
       render(<ConfidenceIndicator source={makePattern()} compact={false} />);
 

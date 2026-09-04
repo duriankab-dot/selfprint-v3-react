@@ -79,15 +79,30 @@ export async function getPendingImprovements(): Promise<ImprovementAction[]> {
   }
 
   try {
+    // REALBUG-001 FIX (4 ก.ย. 2026): เดิมใช้ .order('severity', { ascending: false })
+    // แต่คอลัมน์ severity เป็น **TEXT** ไม่ใช่ enum
+    // (migrations/001_feedback_tables.sql:46 — CHECK IN ('low','medium','high'))
+    // Postgres จึงเรียงตามตัวอักษรแบบ descending = medium > low > high
+    // → เรื่องที่ "รุนแรงที่สุด" ไปอยู่ท้ายสุด ตรงข้ามกับเจตนาของฟังก์ชันนี้ทั้งหมด
+    //
+    // แก้ที่ฝั่ง client แทนการเปลี่ยน schema (ตาราง improvement_actions อยู่ใน
+    // โฟลเดอร์ migrations/ ที่ CLI ไม่เคย apply — ดู DB-01 ในไฟล์ forensic
+    // ยังไม่ควรพึ่งว่ามีอยู่จริงบน production)
     const { data, error } = await supabase
       .from('improvement_actions')
       .select('*')
-      .eq('status', 'pending')
-      .order('severity', { ascending: false });
+      .eq('status', 'pending');
 
     if (error || !data) {
       return [];
     }
+
+    const SEVERITY_RANK: Record<string, number> = { high: 3, medium: 2, low: 1 };
+    data.sort(
+      (a, b) =>
+        (SEVERITY_RANK[String((b as { severity?: string }).severity)] ?? 0) -
+        (SEVERITY_RANK[String((a as { severity?: string }).severity)] ?? 0)
+    );
 
     return data.map(action => ({
       id: action.id,

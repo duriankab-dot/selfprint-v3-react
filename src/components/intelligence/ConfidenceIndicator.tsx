@@ -109,7 +109,15 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
     if (!source) return { confidence, evidenceCount, lastEvidenceDate, consistency: consistencyScore };
 
     // Extract from BehavioralPattern
-    if ('confidencePoints' in source) {
+    // REALBUG-004 FIX (4 ก.ย. 2026): เดิมเช็ค `'confidencePoints' in source`
+    // แต่ field ชื่อนั้น **ไม่มีอยู่ในโปรเจกต์เลยสักที่** (grep เจอบรรทัดนี้
+    // บรรทัดเดียว) ของจริงคือ `evidencePoints` — ดู src/lib/intelligence/types.ts:199
+    // ผลคือ branch นี้เป็น dead code, BehavioralPattern ตกไปถึง fallback
+    // ที่คืนค่า props → เมื่อ caller ส่งมาแต่ `source` ค่า confidence จะเป็น
+    // undefined → การ์ดขึ้น NaN% / จัดชั้นเป็น Very Low / พื้นหลังแดง เสมอ
+    // ไม่ว่า pattern จะมั่นใจแค่ไหน (ผู้ใช้เห็นจริงผ่าน IntelligencePanel
+    // และ ContextDisplay ที่ป้อน pattern เข้ามาแบบนี้)
+    if ('evidencePoints' in source) {
       const pattern = source as BehavioralPattern;
       return {
         confidence: pattern.confidence,

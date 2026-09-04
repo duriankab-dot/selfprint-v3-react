@@ -23,7 +23,7 @@ export const OrganizationSchema: FC = () => {
     '@type': 'Organization',
     name: 'Selfprint',
     url: 'https://selfprint.one',
-    logo: 'https://selfprint.one/logo.png',
+    logo: 'https://selfprint.one/icons/icon-512x512.png',
     description:
       'Selfprint — AI Twin that knows you deeply. Personalised life intelligence across 12 worlds.',
     sameAs: [
@@ -122,7 +122,7 @@ export const ArticleSchema: FC<ArticleSchemaProps> = ({
       name: 'Selfprint',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://selfprint.one/logo.png',
+        url: 'https://selfprint.one/icons/icon-512x512.png',
       },
     },
     inLanguage: ['th', 'en'],
