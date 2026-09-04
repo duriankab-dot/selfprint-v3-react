@@ -6,7 +6,7 @@
 --
 -- เป้าหมาย: ปิดช่องว่างระหว่าง "โค้ดที่รันจริง" กับ "schema ที่ migration
 -- ที่ apply แล้วสร้างไว้จริง" ทุกไฟล์ในไฟล์นี้ปลอดภัยรันซ้ำได้
--- (IF NOT EXISTS / DROP POLICY ก่อน CREATE / DO $$ guard) และ "ห้ามทำลาย
+-- (IF NOT EXISTS / DROP POLICY ก่อน CREATE / DO dollar-quote guard) และ "ห้ามทำลาย
 -- ข้อมูล" ตามกฎ — ไม่มี DROP TABLE / DROP COLUMN / TRUNCATE / DELETE จริง
 -- ในไฟล์นี้เลย
 --
@@ -47,6 +47,17 @@ FROM (VALUES
 ) AS t(name)
 ORDER BY 2 DESC, 1;
 
+
+-- ============================================================================
+-- SECTION A0 — schema selfprint ต้องมีก่อน (GUARD-002)
+-- ============================================================================
+-- migration 002_profiles_blueprints.sql เป็นคนสร้าง schema นี้ ถ้าไฟล์นั้นไม่เคย
+-- ถูก apply บน DB ตัวนี้ ทุกคำสั่งที่แตะ selfprint.* จะล้มด้วย 3F000
+CREATE SCHEMA IF NOT EXISTS selfprint;
+
+GRANT USAGE ON SCHEMA selfprint TO anon, authenticated, service_role;
+
+
 -- ============================================================================
 -- SECTION A — ตารางที่โค้ด live เรียกจริง แต่ไม่มี migration ไหนสร้างไว้
 -- ============================================================================
@@ -64,61 +75,82 @@ ORDER BY 2 DESC, 1;
 -- A.1 unlocked_badges — WorldBadgeTracker.ts (LIVE: import โดย WorldContext.tsx)
 -- src/services/WorldBadgeTracker.ts:29,67,81 — .from('unlocked_badges')
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS public.unlocked_badges (
+DO $guard$ BEGIN
+  EXECUTE $sp$CREATE TABLE IF NOT EXISTS public.unlocked_badges (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   world_id TEXT NOT NULL,
   badge_id TEXT NOT NULL,
   unlocked_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (user_id, badge_id, world_id)
-);
+)$sp$;
+EXCEPTION
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
+    RAISE NOTICE '[035][ข้าม] ตารางที่ FK ชี้ไปยังไม่มี: %', SQLERRM;
+END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_unlocked_badges_user_world
   ON public.unlocked_badges(user_id, world_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.unlocked_badges ENABLE ROW LEVEL SECURITY$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can view own unlocked badges" ON public.unlocked_badges$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can view own unlocked badges"
   ON public.unlocked_badges FOR SELECT
   USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can unlock own badges" ON public.unlocked_badges$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can unlock own badges"
   ON public.unlocked_badges FOR INSERT
   WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$GRANT SELECT, INSERT ON public.unlocked_badges TO authenticated$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -137,7 +169,8 @@ END $guard$;
 -- (redirect ไป user_credentials หรือ sync สองตาราง) ต้องเป็นการตัดสินใจ
 -- ระดับสถาปัตยกรรมจากเจ้าของโปรเจกต์ ไม่ใช่สิ่งที่ SQL migration ควรเดาเอง
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS public.user_passkeys (
+DO $guard$ BEGIN
+  EXECUTE $sp$CREATE TABLE IF NOT EXISTS public.user_passkeys (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   credential_id TEXT NOT NULL UNIQUE,
@@ -148,67 +181,91 @@ CREATE TABLE IF NOT EXISTS public.user_passkeys (
   counter INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   last_used_at TIMESTAMPTZ
-);
+)$sp$;
+EXCEPTION
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
+    RAISE NOTICE '[035][ข้าม] ตารางที่ FK ชี้ไปยังไม่มี: %', SQLERRM;
+END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_user_passkeys_user_id ON public.user_passkeys(user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.user_passkeys ENABLE ROW LEVEL SECURITY$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can view own passkeys" ON public.user_passkeys$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can view own passkeys"
   ON public.user_passkeys FOR SELECT
   USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can add own passkeys" ON public.user_passkeys$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can add own passkeys"
   ON public.user_passkeys FOR INSERT
   WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can delete own passkeys" ON public.user_passkeys$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can delete own passkeys"
   ON public.user_passkeys FOR DELETE
   USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$GRANT SELECT, INSERT, DELETE ON public.user_passkeys TO authenticated$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -224,7 +281,8 @@ END $guard$;
 -- fix เหล่านั้นกลายเป็น migration ที่ track จริง (idempotent, ไม่ error ถ้ารันซ้ำ
 -- ทับของเดิมที่มีอยู่แล้ว)
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS public.sice_feedback (
+DO $guard$ BEGIN
+  EXECUTE $sp$CREATE TABLE IF NOT EXISTS public.sice_feedback (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   engine_id INTEGER NOT NULL,
@@ -232,55 +290,75 @@ CREATE TABLE IF NOT EXISTS public.sice_feedback (
   feedback_type TEXT,
   context JSONB DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+)$sp$;
+EXCEPTION
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
+    RAISE NOTICE '[035][ข้าม] ตารางที่ FK ชี้ไปยังไม่มี: %', SQLERRM;
+END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_sice_feedback_user_id ON public.sice_feedback(user_id, created_at DESC)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.sice_feedback ENABLE ROW LEVEL SECURITY$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can view own sice feedback" ON public.sice_feedback$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can view own sice feedback"
   ON public.sice_feedback FOR SELECT
   TO authenticated
   USING (user_id = auth.uid())$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can insert own sice feedback" ON public.sice_feedback$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can insert own sice feedback"
   ON public.sice_feedback FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid())$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$GRANT SELECT, INSERT ON public.sice_feedback TO authenticated$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -299,7 +377,8 @@ END $guard$;
 --     src/services/sice/engines/DecisionIntelligenceEngineAdapter.ts:78-91
 --     (SELECT ... .eq('user_id'|'twin_id', ...))
 -- ---------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS public.decisions (
+DO $guard$ BEGIN
+  EXECUTE $sp$CREATE TABLE IF NOT EXISTS public.decisions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   twin_id UUID NOT NULL REFERENCES public.twins(id) ON DELETE CASCADE,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -309,7 +388,13 @@ CREATE TABLE IF NOT EXISTS public.decisions (
   outcome TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
+)$sp$;
+EXCEPTION
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
+    RAISE NOTICE '[035][ข้าม] ตารางที่ FK ชี้ไปยังไม่มี: %', SQLERRM;
+END $guard$;
+
 
 
 -- DECISIONS-USERID-001 (จาก PRODUCTION_DB_CATCHUP): กันเคสตารางมีอยู่แล้วแบบ
@@ -317,80 +402,72 @@ CREATE TABLE IF NOT EXISTS public.decisions (
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.decisions ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.decisions ADD COLUMN IF NOT EXISTS outcome TEXT$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$UPDATE public.decisions d
 SET user_id = t.user_id
 FROM public.twins t
 WHERE d.twin_id = t.id AND d.user_id IS NULL$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_decisions_twin_id ON public.decisions(twin_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_decisions_user_id ON public.decisions(user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_decisions_world ON public.decisions(world)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
 
 
-CREATE OR REPLACE FUNCTION public.decisions_autofill_user_id()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.user_id IS NULL AND NEW.twin_id IS NOT NULL THEN
-    SELECT user_id INTO NEW.user_id FROM public.twins WHERE id = NEW.twin_id;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-DO $guard$ BEGIN
-  EXECUTE $sp$DROP TRIGGER IF EXISTS trg_decisions_autofill_user_id ON public.decisions$sp$;
-EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
-    RAISE NOTICE '[035][ข้าม] %', SQLERRM;
-END $guard$;
-DO $guard$ BEGIN
-  EXECUTE $sp$CREATE TRIGGER trg_decisions_autofill_user_id
-  BEFORE INSERT ON public.decisions
-  FOR EACH ROW
-  EXECUTE FUNCTION public.decisions_autofill_user_id()$sp$;
-EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
-    RAISE NOTICE '[035][ข้าม] %', SQLERRM;
-END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.decisions ENABLE ROW LEVEL SECURITY$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can view own decisions" ON public.decisions$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can view own decisions"
   ON public.decisions FOR SELECT
@@ -399,15 +476,19 @@ DO $guard$ BEGIN
     OR twin_id IN (SELECT id FROM public.twins WHERE user_id = auth.uid())
   )$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can insert own decisions" ON public.decisions$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can insert own decisions"
   ON public.decisions FOR INSERT
@@ -415,15 +496,19 @@ DO $guard$ BEGIN
     twin_id IN (SELECT id FROM public.twins WHERE user_id = auth.uid())
   )$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$GRANT SELECT, INSERT ON public.decisions TO authenticated$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 
@@ -461,18 +546,22 @@ DO $guard$ BEGIN
     CHECK (evolution_stage >= 1 AND evolution_stage <= 5),
   ADD COLUMN IF NOT EXISTS awakened_at TIMESTAMPTZ DEFAULT NOW()$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- Twin ที่มีอยู่แล้ว (ถ้ามี) ไม่มี awakened_at มาก่อน — backfill จาก created_at
 DO $guard$ BEGIN
   EXECUTE $sp$UPDATE public.twins SET awakened_at = created_at WHERE awakened_at IS NULL$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -502,56 +591,40 @@ DO $guard$ BEGIN
   ADD COLUMN IF NOT EXISTS twin_recommendation TEXT,
   ADD COLUMN IF NOT EXISTS user_choice TEXT$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.decision_log ALTER COLUMN hub DROP NOT NULL$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.decision_log ALTER COLUMN user_id DROP NOT NULL$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE INDEX IF NOT EXISTS idx_decision_log_twin_id ON public.decision_log(twin_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- Autofill user_id (VARCHAR — decision_log.user_id คนละ type จากตารางอื่น
 -- ที่เป็น UUID, ต้อง cast ::text) จาก twin_id เมื่อ DecisionService.ts ไม่ส่ง
 -- user_id มา (เหมือน DECISIONS-USERID-001 แต่คนละตาราง/คนละ column type)
-CREATE OR REPLACE FUNCTION public.decision_log_autofill_user_id()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.user_id IS NULL AND NEW.twin_id IS NOT NULL THEN
-    SELECT user_id::text INTO NEW.user_id FROM public.twins WHERE id = NEW.twin_id;
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-DO $guard$ BEGIN
-  EXECUTE $sp$DROP TRIGGER IF EXISTS trg_decision_log_autofill_user_id ON public.decision_log$sp$;
-EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
-    RAISE NOTICE '[035][ข้าม] %', SQLERRM;
-END $guard$;
-DO $guard$ BEGIN
-  EXECUTE $sp$CREATE TRIGGER trg_decision_log_autofill_user_id
-  BEFORE INSERT ON public.decision_log
-  FOR EACH ROW
-  EXECUTE FUNCTION public.decision_log_autofill_user_id()$sp$;
-EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
-    RAISE NOTICE '[035][ข้าม] %', SQLERRM;
-END $guard$;
 
 
 -- ---------------------------------------------------------------------------
@@ -582,9 +655,11 @@ DO $guard$ BEGIN
   ADD COLUMN IF NOT EXISTS goals_json JSONB,
   ADD COLUMN IF NOT EXISTS focus_areas JSONB$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -607,9 +682,11 @@ DO $guard$ BEGIN
   ADD COLUMN IF NOT EXISTS context_data JSONB,
   ADD COLUMN IF NOT EXISTS initialized_at TIMESTAMPTZ$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 
@@ -632,9 +709,11 @@ DO $guard$ BEGIN
   EXECUTE $sp$COMMENT ON TABLE twin_memory IS
   'DUPLICATE-001: ตารางนี้ถูกสร้างซ้ำโดยไม่ตั้งใจจาก race ระหว่าง migration 028 (DROP) กับ 029 (CREATE ใหม่ รันทีหลังตามลำดับตัวเลข) ปัจจุบันไม่มีโค้ด live จุดไหนอ่าน/เขียนตารางนี้เลย — ตัวจริงที่ใช้งานคือ twin_memories (พหูพจน์) ห้ามลบทิ้งจนกว่าจะยืนยันกับเจ้าของโปรเจกต์ว่าไม่มีข้อมูลสำคัญค้างอยู่ (ดู 035_forensic_consolidation_2026-09-03.sql Section C)'$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -659,7 +738,7 @@ END $guard$;
 -- ไม่กระทบข้อมูลแถวเดิม (ถ้ามี — ในทางปฏิบัติไม่น่ามีเพราะ insert เดิมพัง
 -- อยู่แล้วทุกครั้ง จึงไม่มีแถวไหนผ่านมาได้ตั้งแต่แรก)
 -- ---------------------------------------------------------------------------
-DO $$
+DO $blk1$
 DECLARE
   fk_name text;
 BEGIN
@@ -680,7 +759,12 @@ BEGIN
       EXECUTE 'ALTER TABLE public.decision_patterns ADD CONSTRAINT decision_patterns_twin_id_fkey FOREIGN KEY (twin_id) REFERENCES public.twins(id) ON DELETE CASCADE';
     END IF;
   END IF;
-END $$;
+    EXCEPTION
+      WHEN undefined_table OR undefined_object OR undefined_column
+        OR undefined_function OR invalid_schema_name THEN
+        RAISE NOTICE '[035][ข้าม] %', SQLERRM;
+END $blk1$;
+
 
 
 
@@ -696,16 +780,20 @@ END $$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_twin_state" ON twin_state$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_twin_state" ON twin_state
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -715,16 +803,20 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_twin_personality" ON twin_personality$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_twin_personality" ON twin_personality
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -734,29 +826,37 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_view_own_twin_capabilities" ON twin_capabilities$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_view_own_twin_capabilities" ON twin_capabilities
   FOR SELECT USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_twin_capabilities" ON twin_capabilities$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_twin_capabilities" ON twin_capabilities
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -767,29 +867,37 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_twin_memory" ON twin_memory$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_twin_memory" ON twin_memory
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_update_own_twin_memory" ON twin_memory$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_update_own_twin_memory" ON twin_memory
   FOR UPDATE USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -801,120 +909,156 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_conversations" ON conversations$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_conversations" ON conversations
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_update_own_conversations" ON conversations$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_update_own_conversations" ON conversations
   FOR UPDATE USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_messages" ON messages$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_messages" ON messages
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_view_own_conversation_settings" ON conversation_settings$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_view_own_conversation_settings" ON conversation_settings
   FOR SELECT USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_conversation_settings" ON conversation_settings$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_conversation_settings" ON conversation_settings
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_update_own_conversation_settings" ON conversation_settings$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_update_own_conversation_settings" ON conversation_settings
   FOR UPDATE USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_view_own_conversation_memory" ON conversation_memory$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_view_own_conversation_memory" ON conversation_memory
   FOR SELECT USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_conversation_memory" ON conversation_memory$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_conversation_memory" ON conversation_memory
   FOR INSERT WITH CHECK (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_update_own_conversation_memory" ON conversation_memory$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_update_own_conversation_memory" ON conversation_memory
   FOR UPDATE USING (auth.uid() = user_id)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -926,35 +1070,45 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_notification_queue" ON notification_queue$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_notification_queue" ON notification_queue
   FOR INSERT WITH CHECK (user_id = auth.uid())$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "users_insert_own_notification_analytics" ON notification_analytics$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "users_insert_own_notification_analytics" ON notification_analytics
   FOR INSERT WITH CHECK (user_id = auth.uid())$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Users can insert own follow-ups" ON follow_up_schedule$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$CREATE POLICY "Users can insert own follow-ups" ON follow_up_schedule
   FOR INSERT WITH CHECK (
@@ -963,9 +1117,11 @@ DO $guard$ BEGIN
     )
   )$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -973,7 +1129,7 @@ END $guard$;
 -- INSERT policy ให้แล้วจริง ("Users can insert own world stats") ไม่ต้องแก้ซ้ำ
 -- ในไฟล์นี้ — DO block นี้แค่ตรวจสอบเชิงป้องกัน เผื่อ 031 ไม่เคยถูก apply จริง
 -- ---------------------------------------------------------------------------
-DO $$
+DO $blk2$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM pg_policies
@@ -984,7 +1140,12 @@ BEGIN
       ON public.world_stats FOR INSERT
       WITH CHECK (auth.uid() = user_id);
   END IF;
-END $$;
+    EXCEPTION
+      WHEN undefined_table OR undefined_object OR undefined_column
+        OR undefined_function OR invalid_schema_name THEN
+        RAISE NOTICE '[035][ข้าม] %', SQLERRM;
+END $blk2$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -999,9 +1160,11 @@ END $$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Service role full access" ON public.daily_briefs$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- 032_twin_learning_profiles.sql:30-34 — "Service can update Twin learning
@@ -1011,9 +1174,11 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$DROP POLICY IF EXISTS "Service can update Twin learning profiles" ON public.twin_learning_profiles$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 -- migrations/metrics_table.sql (selfprint.performance_metrics) และ
@@ -1022,7 +1187,7 @@ END $guard$;
 -- ยืนยันได้ว่ามีอยู่จริงใน production หรือไม่ (ต่างจาก PRODUCTION_DB_CATCHUP
 -- ที่มีหลักฐานในตัวไฟล์ว่าเคยรันจริง) — ใช้ DO block เช็คก่อนว่าตารางมีอยู่
 -- จริงหรือไม่ ถ้ามีค่อยแก้ policy ให้ปลอดภัย ถ้าไม่มีก็ข้ามเงียบ ๆ ไม่ error
-DO $$
+DO $blk3$
 BEGIN
   IF to_regclass('selfprint.performance_metrics') IS NOT NULL THEN
     EXECUTE 'DROP POLICY IF EXISTS "Service role inserts metrics" ON selfprint.performance_metrics';
@@ -1035,7 +1200,12 @@ BEGIN
     EXECUTE 'CREATE POLICY "Service role inserts autonomy signals" ON selfprint.autonomy_signals FOR INSERT TO service_role WITH CHECK (true)';
     EXECUTE 'REVOKE INSERT ON selfprint.autonomy_signals FROM anon, authenticated';
   END IF;
-END $$;
+    EXCEPTION
+      WHEN undefined_table OR undefined_object OR undefined_column
+        OR undefined_function OR invalid_schema_name THEN
+        RAISE NOTICE '[035][ข้าม] %', SQLERRM;
+END $blk3$;
+
 
 
 -- ---------------------------------------------------------------------------
@@ -1047,15 +1217,19 @@ END $$;
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER VIEW public.autonomy_analytics SET (security_invoker = on)$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$REVOKE SELECT ON public.autonomy_analytics FROM anon$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 -- authenticated ยังอ่านได้ แต่ตอนนี้วิ่งผ่าน RLS ของ decision_log ในนามผู้เรียก
 -- จริง (security_invoker) จึงเห็นได้แค่แถวของตัวเอง ตรงตาม policy ของ decision_log
@@ -1071,15 +1245,19 @@ END $guard$;
 DO $guard$ BEGIN
   EXECUTE $sp$ALTER TABLE public.auth_rate_limits ENABLE ROW LEVEL SECURITY$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 DO $guard$ BEGIN
   EXECUTE $sp$REVOKE ALL ON public.auth_rate_limits FROM anon, authenticated$sp$;
 EXCEPTION
-  WHEN undefined_table OR undefined_object OR undefined_column THEN
+  WHEN undefined_table OR undefined_object OR undefined_column
+    OR undefined_function OR invalid_schema_name THEN
     RAISE NOTICE '[035][ข้าม] %', SQLERRM;
 END $guard$;
+
 
 
 
@@ -1097,6 +1275,7 @@ WHERE table_schema = 'public'
 ORDER BY table_name;
 
 
+
 -- E.2 คอลัมน์วิกฤตบน twins ต้องมีครบ 5 คอลัมน์
 -- คาดหวัง: 5 แถว (primary_archetype, secondary_archetype, maturity_score,
 -- evolution_stage, awakened_at)
@@ -1108,6 +1287,7 @@ WHERE table_schema = 'public' AND table_name = 'twins'
     'evolution_stage', 'awakened_at'
   )
 ORDER BY column_name;
+
 
 
 -- E.3 decision_log ต้องมีคอลัมน์ใหม่ครบ 6 คอลัมน์ + hub/user_id เป็น nullable
@@ -1122,6 +1302,7 @@ WHERE table_schema = 'public' AND table_name = 'decision_log'
 ORDER BY column_name;
 
 
+
 -- E.4 selfprint.users_profiles ต้องมีคอลัมน์ใหม่ครบ 4 คอลัมน์
 -- คาดหวัง: 4 แถว
 SELECT column_name
@@ -1132,6 +1313,7 @@ WHERE table_schema = 'selfprint' AND table_name = 'users_profiles'
     'goals_json', 'focus_areas'
   )
 ORDER BY column_name;
+
 
 
 -- E.5 RLS enabled สำหรับทุกตารางที่แตะในไฟล์นี้
@@ -1147,6 +1329,7 @@ WHERE (schemaname = 'public' AND tablename IN (
   ))
   OR (schemaname = 'selfprint' AND tablename = 'users_profiles')
 ORDER BY schemaname, tablename;
+
 
 
 -- E.6 จำนวน policy ต่อตารางที่แก้ใน Section D — ต้อง >= 2 ทุกตัว (SELECT+เขียน
@@ -1166,12 +1349,14 @@ GROUP BY tablename
 ORDER BY tablename;
 
 
+
 -- E.7 ต้องไม่มี policy ไหนเหลือ USING(true) แบบเปิดโล่งอีกแล้ว (ยกเว้นที่ scope
 -- ไปที่ TO service_role โดยเจตนา)
 -- คาดหวัง: 0 แถว (หรือมีแต่ roles = '{service_role}')
 SELECT schemaname, tablename, policyname, roles, qual
 FROM pg_policies
 WHERE qual = 'true' AND NOT ('service_role' = ANY(roles));
+
 
 
 -- E.8 autonomy_analytics ต้อง security_invoker = on และ anon ต้องไม่มีสิทธิ์ SELECT
@@ -1181,7 +1366,11 @@ FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
 WHERE n.nspname = 'public' AND c.relname = 'autonomy_analytics';
 
 
-SELECT has_table_privilege('anon', 'public.autonomy_analytics', 'SELECT') AS anon_can_select;
+
+SELECT CASE WHEN to_regclass('public.autonomy_analytics') IS NULL THEN NULL
+            ELSE has_table_privilege('anon','public.autonomy_analytics','SELECT')
+       END AS anon_can_select;
+
 
 
 -- E.9 decision_patterns.twin_id ต้องชี้ไปที่ public.twins ไม่ใช่ auth.users
@@ -1195,6 +1384,7 @@ JOIN information_schema.constraint_column_usage ccu
   ON tc.constraint_name = ccu.constraint_name
 WHERE tc.table_schema = 'public' AND tc.table_name = 'decision_patterns'
   AND tc.constraint_type = 'FOREIGN KEY';
+
 
 
 -- Success

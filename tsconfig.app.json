@@ -23,6 +23,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* Type safety — QA-02 (4 ก.ย. 2026): เดิมไม่มีบรรทัดนี้เลย
+       เอกสารเก่าที่เขียนว่า "strict mode passes" จึงไม่จริงมาตลอด */
+    "strict": true,
+
     /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
