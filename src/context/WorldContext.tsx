@@ -4,7 +4,7 @@
  * 12 Worlds: self, mind, relationship, love, career, wealth, life, growth, decision, purpose, wellbeing, future
  */
 
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -372,7 +372,10 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     }
   }, [session?.user?.id]);
 
-  const value: WorldContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<WorldContextType>(() => ({
     currentWorld,
     favoriteWorlds,
     worldPreferences,
@@ -393,7 +396,7 @@ export function WorldProvider({ children }: { children: ReactNode }) {
     getWorldBadges,
     unlockBadge,
     getWorldMastery,
-  };
+  }), [currentWorld, favoriteWorlds, worldPreferences, worldStats, worldBadges, totalWorldPoints, isLoading, error, setCurrentWorld, toggleFavoriteWorld, recordWorldVisit, recordJournalEntry, recordDecision, recordInsight, getWorldStats, getTopWorlds, getWorldBadges, unlockBadge, getWorldMastery]);
 
   return (
     <WorldContext.Provider value={value}>

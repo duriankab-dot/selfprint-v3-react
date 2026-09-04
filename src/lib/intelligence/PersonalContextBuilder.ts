@@ -283,7 +283,12 @@ export class PersonalContextBuilder {
 
     // Save to database
     for (const entry of entries) {
-      await supabase.from('personal_contexts').insert({
+// DBTBL-001 FIX (3 ก.ย. 2026): ตารางชื่อ personal_context (เอกพจน์) ต่างหาก
+      // ที่มีคอลัมน์ context_type/title/description/inferred_from/confidence/
+      // ai_evidence (migration 010) ส่วน personal_contexts (พหูพจน์, migration 028)
+      // มีแค่ id/user_id/awakening_essence_id/timestamps — เขียนลงตัวพหูพจน์จึง
+      // ล้มเหลวทุกครั้งด้วย 42703 column does not exist
+      await supabase.from('personal_context').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,
@@ -423,7 +428,12 @@ export class PersonalContextBuilder {
         updatedAt: new Date(),
       };
 
-      await supabase.from('personal_contexts').insert({
+// DBTBL-001 FIX (3 ก.ย. 2026): ตารางชื่อ personal_context (เอกพจน์) ต่างหาก
+      // ที่มีคอลัมน์ context_type/title/description/inferred_from/confidence/
+      // ai_evidence (migration 010) ส่วน personal_contexts (พหูพจน์, migration 028)
+      // มีแค่ id/user_id/awakening_essence_id/timestamps — เขียนลงตัวพหูพจน์จึง
+      // ล้มเหลวทุกครั้งด้วย 42703 column does not exist
+      await supabase.from('personal_context').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,

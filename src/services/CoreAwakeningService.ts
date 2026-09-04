@@ -67,7 +67,9 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
     const { data: profile, error } = await supabase
       .schema('selfprint').from('users_profiles')
       .select('full_analysis_completed')
-      .eq('id', userId)
+      // DBKEY-001 FIX: selfprint.users_profiles.id เป็น surrogate key (gen_random_uuid)
+      // ไม่ใช่ auth uid — คอลัมน์ที่ผูกกับผู้ใช้คือ user_id (migration 002:36)
+      .eq('user_id', userId)
       .single();
 
     if (error || !profile?.full_analysis_completed) {

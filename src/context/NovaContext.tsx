@@ -9,7 +9,7 @@
  * Nova lifecycle: Acts 1-2 only, recedes after Core Awakening
  */
 
-import React, { createContext, useState, useCallback } from 'react';
+import React, { createContext, useState, useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 
 export type NovaPhase = 'landing' | 'onboarding' | 'data-collection' | 'insight-1' | 'finetuning' | 'analysis' | 'core-awakening' | 'complete';
@@ -75,14 +75,17 @@ export function NovaProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const value: NovaContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<NovaContextType>(() => ({
     state,
     setPhase,
     setUserData,
     addInsight,
     completeAnalysis,
     resetNova,
-  };
+  }), [state, setPhase, setUserData, addInsight, completeAnalysis, resetNova]);
 
   return <NovaContext.Provider value={value}>{children}</NovaContext.Provider>;
 }

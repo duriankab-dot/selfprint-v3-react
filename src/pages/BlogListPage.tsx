@@ -178,21 +178,32 @@ export default function BlogListPage() {
   const [dynamicArticles, setDynamicArticles] = useState<DynamicArticle[]>([]);
   const savedScrollY = React.useRef<number>(0);
 
+  // BLOGRACE-001: abort + guard เพื่อไม่ setState หลัง unmount
+  // (ผู้ใช้กดออกจากหน้า blog ก่อน index.json โหลดเสร็จ)
   useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+
     const loadArticles = async () => {
       try {
-        const response = await fetch('/blog/index.json');
+        const response = await fetch('/blog/index.json', { signal: controller.signal });
         if (response.ok) {
           const ct = response.headers.get('content-type') ?? '';
           if (!ct.includes('application/json')) return;
           const data = await response.json();
-          setDynamicArticles(data.articles || []);
+          if (!cancelled) setDynamicArticles(data.articles || []);
         }
       } catch (err) {
+        if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return;
         console.error('Error loading dynamic articles:', err);
       }
     };
     loadArticles();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
 
   const allArticles: Article[] = [

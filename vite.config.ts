@@ -14,10 +14,12 @@ export default defineConfig({
 
     // CHUNK-SPLIT-001: warn when any single chunk exceeds 500 KB (unminified).
     // Pages are already lazy-loaded via React.lazy() in App.tsx.
-    // vendor-three (Three.js ~350 KB) is the known large chunk — it is
-    // acceptable because it is isolated and only loads on WOW3/CoreAwakening
-    // pages (lazy). 300 KB would produce a noisy warning on every build for
-    // an unavoidable dep; 500 KB flags genuinely oversized chunks instead.
+    //
+    // DEADDEP-001 (3 ก.ย. 2026): คอมเมนต์เดิมตรงนี้อธิบาย vendor-three ว่าเป็น
+    // chunk ใหญ่สุด ~350 KB — แต่ตรวจแล้วไม่มีไฟล์ไหนใน src/ import 'three' เลย
+    // สักบรรทัด chunk นั้นจึงไม่เคยถูกสร้างขึ้นจริง (ยืนยันจาก build output)
+    // ลบทั้ง dependency, @types/three และ manualChunks branch ออกแล้ว
+    // chunk ที่ใหญ่จริงคือ chunk-intelligence (345 KB raw / 87 KB gzip)
     chunkSizeWarningLimit: 500,
 
     rollupOptions: {
@@ -28,15 +30,10 @@ export default defineConfig({
           // Order matters: more-specific patterns first.
           // ────────────────────────────────────────────────────────────────────
 
-          // 1. Three.js — heaviest single dep (~350 KB min).
-          //    Only used in WOW3 HologramBirth / TwinEvolutionScene pages
-          //    which are lazy-loaded, so this chunk never blocks the shell.
-          if (id.includes('node_modules/three')) return 'vendor-three';
-
-          // 2. Supabase auth + realtime client
+          // 1. Supabase auth + realtime client
           if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
 
-          // 3. React core — react + react-dom + scheduler must stay together
+          // 2. React core — react + react-dom + scheduler must stay together
           if (
             id.includes('node_modules/react/') ||
             id.includes('node_modules/react-dom/') ||

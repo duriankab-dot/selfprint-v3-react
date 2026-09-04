@@ -77,7 +77,16 @@ export default function BlogArticle() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // BLOGRACE-001 FIX (4 ก.ย. 2026): effect นี้ยิง fetch 2 ครั้งเรียงกัน
+  // (/blog/index.json แล้วตามด้วยไฟล์ .md) โดยไม่มี AbortController และไม่เช็ค
+  // ว่า effect ถูก cleanup ไปแล้วหรือยัง — เปลี่ยน slug เร็ว ๆ (กดลิงก์บทความ
+  // ถัดไประหว่างที่อันเดิมยังโหลดไม่เสร็จ) แล้วตัวที่ตอบช้ากว่าจะชนะ
+  // setArticle() → ผู้ใช้เห็น **บทความผิดตัว** ที่ URL ที่ถูกต้อง
+  // นอกจากนี้ setState หลัง unmount ยังทำให้ React 19 เตือนใน console ด้วย
   useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+
     const loadArticle = async () => {
       if (!slug) {
         setError('No article slug provided');
@@ -89,7 +98,7 @@ export default function BlogArticle() {
         setLoading(true);
         setError(null);
 
-        const indexRes = await fetch('/blog/index.json');
+        const indexRes = await fetch('/blog/index.json', { signal: controller.signal });
         if (!indexRes.ok) {
           throw new Error('Failed to load blog index');
         }
@@ -101,7 +110,7 @@ export default function BlogArticle() {
         }
 
         const resolvedPath = `/blog/${entry.world}/${entry.filePath}.md`;
-        const mdRes = await fetch(resolvedPath);
+        const mdRes = await fetch(resolvedPath, { signal: controller.signal });
         if (!mdRes.ok) {
           throw new Error(`Failed to load markdown file: ${resolvedPath}`);
         }
@@ -152,12 +161,14 @@ export default function BlogArticle() {
             }
           });
 
+          if (cancelled) return;
           setArticle({
             ...(metadata as ArticleMetadata),
             content: rawContent.trim(),
           });
         } else {
           console.warn(`Article ${slug} has no frontmatter — using index.json metadata`);
+          if (cancelled) return;
           setArticle({
             ...(metadata as ArticleMetadata),
             content: normalized.trim(),
@@ -165,15 +176,22 @@ export default function BlogArticle() {
         }
 
       } catch (err) {
+        // AbortError = ผู้ใช้เปลี่ยนหน้าไปแล้ว ไม่ใช่ความผิดพลาดจริง
+        if (cancelled || (err instanceof DOMException && err.name === 'AbortError')) return;
         console.error('Failed to load article:', err);
         setError(err instanceof Error ? err.message : 'Failed to load article');
         setArticle(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     loadArticle();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [slug]);
 
   if (loading) {

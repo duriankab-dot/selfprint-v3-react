@@ -386,7 +386,8 @@ export class PatternDetector {
 
     // 2. Collect from personal_context reflections (if linked)
     const { data: contexts } = await supabase
-      .from('personal_contexts')
+      // DBTBL-001 FIX: description/inferred_from อยู่บน personal_context (เอกพจน์)
+      .from('personal_context')
       .select('id, description, created_at, inferred_from')
       .eq('user_id', userId);
 

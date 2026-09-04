@@ -8,9 +8,32 @@
  * - Authenticated session utilities
  */
 
+/**
+ * E2EPW-001 FIX (3 ก.ย. 2026): รหัสผ่านของบัญชี staging จริงเคย hardcode อยู่ในไฟล์นี้
+ * และไฟล์นี้ถูก track ใน git ของ repo สาธารณะ — ใครก็ตามที่เห็น repo ล็อกอินเข้า
+ * staging ได้ทันที ตอนนี้อ่านจาก env แทน และไม่มีค่า default ที่เป็นรหัสจริง
+ *
+ * ตั้งค่าใน `.env.e2e.staging` (ไฟล์นี้ถูก .gitignore แล้ว) หรือใน CI secrets:
+ *   E2E_TEST_PASSWORD, E2E_TECHBUDDY_PASSWORD,
+ *   E2E_MINDFULLEADER_PASSWORD, E2E_CREATIVE_PASSWORD
+ *
+ * ⚠️ รหัสเดิมทั้ง 4 ตัวหลุดไปแล้วใน git history — ต้องเปลี่ยนรหัสบัญชี staging
+ *    ทั้งหมดด้วย ไม่ใช่แค่ย้ายมาไว้ใน env
+ */
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `[e2e] Missing required env var ${name}. ` +
+        `Set it in .env.e2e.staging or your CI secrets — see e2e/fixtures/test-user.ts`
+    );
+  }
+  return value;
+}
+
 export const TEST_USER = {
-  email: 'test-phase-b@selfprint.one',
-  password: 'Test@PhaseB123!',
+  email: process.env.E2E_TEST_EMAIL ?? 'test-phase-b@selfprint.one',
+  password: requireEnv('E2E_TEST_PASSWORD'),
   userId: 'test-user-phase-b-001',
   name: 'Test User Phase B',
 };
@@ -89,9 +112,9 @@ export const TEST_USER_STAGES = {
  * Test credentials for different user personas
  */
 export const TEST_USERS = {
-  techBuddy: { email: 'tech-buddy@selfprint.one', password: 'Test@TechBuddy123!' },
-  mindfulLeader: { email: 'mindful-leader@selfprint.one', password: 'Test@Leader123!' },
-  creative: { email: 'creative@selfprint.one', password: 'Test@Creative123!' },
+  techBuddy: { email: 'tech-buddy@selfprint.one', password: requireEnv('E2E_TECHBUDDY_PASSWORD') },
+  mindfulLeader: { email: 'mindful-leader@selfprint.one', password: requireEnv('E2E_MINDFULLEADER_PASSWORD') },
+  creative: { email: 'creative@selfprint.one', password: requireEnv('E2E_CREATIVE_PASSWORD') },
 };
 
 /**

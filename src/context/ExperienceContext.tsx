@@ -125,10 +125,13 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
     }
   }, [config, currentMood, hasCheckedIn, updateMood]);
 
-  const value: ExperienceContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<ExperienceContextType>(() => ({
     config,
     isAdaptive: config?.isAdaptive ?? false,
-  };
+  }), [config]);
 
   return (
     <ExperienceContext.Provider value={value}>

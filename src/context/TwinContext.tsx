@@ -8,7 +8,7 @@
  * - Twin: Personal expert (persistent, Acts 2-3+)
  */
 
-import React, { createContext, useState, useCallback, useContext } from 'react';
+import React, { createContext, useState, useCallback, useContext, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
@@ -359,7 +359,10 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     loadTwin();
   }, [authUserId]); // re-run when auth state changes (login/logout)
 
-  const value: TwinContextType = {
+  // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน
+  // App.tsx — object literal ตัวใหม่ทุก render บังคับให้ consumer ทุกตัวของ
+  // context นี้ re-render แม้ค่าข้างในจะเหมือนเดิมทุกประการ
+  const value = useMemo<TwinContextType>(() => ({
     twin,
     loading,
     error,
@@ -372,7 +375,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
     recommendWorld,
     saveDecision,
     resetTwin,
-  };
+  }), [twin, loading, error, currentWorld, createTwin, hydrateTwin, updateTwin, setMaturityScore, setCurrentWorld, recommendWorld, saveDecision, resetTwin]);
 
   return (
     <TwinContext.Provider value={value}>

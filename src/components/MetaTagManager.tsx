@@ -54,7 +54,24 @@ export function MetaTagManager({
       <meta property="og:description" content={description} />
       <meta property="og:type" content={ogType} />
       <meta property="og:url" content={fullUrl} />
-      {ogImage && <meta property="og:image" content={ogImage} />}
+      {/* OGABS-001 FIX: og:image ต้องเป็น absolute URL — Facebook / X / LINE
+          ไม่ resolve path แบบ root-relative ให้ ค่าที่ส่งเข้ามาเป็น '/og-xxx.jpg'
+          จึงถูกเติม origin ให้ตรงนี้ (ถ้าส่ง absolute มาแล้วก็ปล่อยผ่าน) */}
+      {ogImage && (
+        <meta
+          property="og:image"
+          content={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
+        />
+      )}
+      {ogImage && <meta property="og:image:width" content="1200" />}
+      {ogImage && <meta property="og:image:height" content="630" />}
+      {ogImage && (
+        <meta
+          name="twitter:image"
+          content={ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`}
+        />
+      )}
+      {ogImage && <meta name="twitter:card" content="summary_large_image" />}
 
       {/* Hreflang Tags (Multi-language) */}
       <link rel="alternate" hrefLang="en" href={`${baseUrl}/en${canonicalUrl?.replace(/^\/(en|th)/, '') || ''}`} />
