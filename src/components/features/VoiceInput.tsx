@@ -15,13 +15,15 @@ interface VoiceInputProps {
 
 const VoiceInput: React.FC<VoiceInputProps> = ({
   isListening,
-  onStart,
-  onStop,
-  onTranscript,
   language,
+  // STUB-001: onStart/onStop/onTranscript are intentionally unused — voice input
+  // is a stub now and only fires a "coming soon" alert. Prefix with _ to satisfy
+  // TS6133 until the feature is properly wired to a backend.
+  onStart: _onStart,
+  onStop: _onStop,
+  onTranscript: _onTranscript,
 }) => {
   const isTh = language === 'th';
-  const [transcript, setTranscript] = useState('');
   const [isBrowserSupported] = useState(
     'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
   );
@@ -32,23 +34,22 @@ const VoiceInput: React.FC<VoiceInputProps> = ({
       return;
     }
 
-    onStart();
-    setTranscript('');
-
-    // Mock speech recognition
-    const mockText = isTh ? 'สวัสดี ฉันต้องการพูดคุยกับ AI Twin' : 'Hello, I want to talk with my AI Twin';
-    setTimeout(() => {
-      setTranscript(mockText);
-      onTranscript(mockText);
-      onStop();
-    }, 3000);
+    // STUB-001 (5 ก.ย. 2026): Voice input disabled — STT backend not wired.
+    // Previously this fired a 3s setTimeout returning fake transcript text,
+    // which made the UI look like a working voice feature. Now it surfaces a
+    // honest "coming soon" alert instead.
+    alert(
+      isTh
+        ? '🎙️ การป้อนด้วยเสียงกำลังจะมาเร็วๆ นี้ — ขณะนี้ยังไม่มี backend'
+        : '🎙️ Voice input is coming soon — no STT backend is wired yet.'
+    );
   };
 
   return (
     <div className="voice-input">
       <div className="voice-input__display">
         <p className="voice-input__text">
-          {transcript || (isTh ? 'กดปุ่มไมโครโฟนและพูดได้เลย...' : 'Press the microphone button and speak...')}
+          {isTh ? 'กดปุ่มไมโครโฟนและพูดได้เลย...' : 'Press the microphone button and speak...'}
         </p>
       </div>
 

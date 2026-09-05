@@ -393,46 +393,10 @@ export default function CommunityPage() {
           />
         </Section>
 
-        {/* Coming soon */}
-        <Section title={isTh ? 'กำลังมาเร็วๆ นี้' : 'Coming soon'} emoji="🚀">
-          <div style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 16,
-            padding: 20,
-          }}>
-            {[
-              { emoji: '🏆', label: isTh ? 'กระดานผู้นำชุมชน' : 'Community leaderboard' },
-              { emoji: '🎯', label: isTh ? 'ความท้าทายชุมชนรายสัปดาห์' : 'Weekly community challenges' },
-              { emoji: '🤝', label: isTh ? 'จับคู่ Twin ที่คล้ายกัน' : 'Match with similar Twins' },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '10px 0',
-                  borderBottom: '1px solid var(--color-border)',
-                }}
-              >
-                <span style={{ fontSize: 20 }}>{item.emoji}</span>
-                <span style={{ fontSize: 14, color: 'var(--color-text-secondary)' }}>{item.label}</span>
-                <span style={{
-                  marginLeft: 'auto',
-                  fontSize: 11,
-                  color: 'var(--color-accent-primary)',
-                  fontWeight: 600,
-                  border: '1px solid var(--color-accent-primary)',
-                  borderRadius: 8,
-                  padding: '2px 8px',
-                }}>
-                  {isTh ? 'เร็วๆ นี้' : 'Soon'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Section>
+        {/* STUB-001 (5 ก.ย. 2026): "Coming soon" section removed — listed 3 features
+            (community leaderboard, weekly challenges, Twin matching) that had no
+            shipping plan and no follow-up tickets. Removing the placeholder so
+            the page only shows features that actually exist. */}
 
         {/* Login prompt */}
         {!isLoggedIn && (

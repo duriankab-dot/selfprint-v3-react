@@ -77,19 +77,19 @@ const VoiceChat: React.FC = () => {
 
     setMessages((prev) => [...prev, userMsg]);
 
-    // Simulate AI response (mock)
-    setTimeout(() => {
-      const assistantMsg: Message = {
-        id: `msg_${Date.now() + 1}`,
-        role: 'assistant',
-        text: isTh
-          ? `คุณพูดว่า: "${transcript}"\n\nนี่คือคำตอบจาก AI Twin... (ยังไม่มี backend)`
-          : `You said: "${transcript}"\n\nThis is a response from your AI Twin... (no backend yet)`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMsg]);
-      setIsSpeaking(false);
-    }, 1000);
+    // STUB-001 (5 ก.ย. 2026): removed mock AI response — no backend yet.
+    // Voice chat is not a production feature; show a "coming soon" notice instead
+    // so users are not misled by a fake AI reply.
+    const noticeMsg: Message = {
+      id: `msg_${Date.now() + 1}`,
+      role: 'assistant',
+      text: isTh
+        ? '🔇 ฟีเจอร์สนทนาด้วยเสียงกำลังจะมาเร็วๆ นี้ — ขณะนี้ยังไม่มี backend ประมวลผลเสียง'
+        : '🔇 Voice chat is coming soon — no audio backend is wired yet.',
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, noticeMsg]);
+    setIsSpeaking(false);
   };
 
   const handleClearHistory = () => {

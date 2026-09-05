@@ -20,7 +20,8 @@ interface VoiceOutputProps {
 const VoiceOutput: React.FC<VoiceOutputProps> = ({
   isSpeaking,
   message,
-  settings,
+  // STUB-001: settings intentionally unused — voice output is a stub.
+  settings: _settings,
 }) => {
   const { language } = useLanguage();
   const isTh = language === 'th';
@@ -31,11 +32,14 @@ const VoiceOutput: React.FC<VoiceOutputProps> = ({
       return;
     }
 
-    // Mock text-to-speech
+    // STUB-001 (5 ก.ย. 2026): Voice output disabled — TTS backend not wired.
+    // Previously the "Speak" button alerted a fake "Reading…" message which
+    // gave the impression that TTS was working. Now it honestly reports
+    // that the feature is coming soon.
     alert(
       isTh
-        ? `กำลังอ่าน (Tone: ${settings.tone}, Pace: ${settings.pace}, Volume: ${settings.volume}%)`
-        : `Speaking (Tone: ${settings.tone}, Pace: ${settings.pace}, Volume: ${settings.volume}%)`
+        ? '🔊 การอ่านออกเสียงกำลังจะมาเร็วๆ นี้ — ขณะนี้ยังไม่มี TTS backend'
+        : '🔊 Voice output is coming soon — no TTS backend is wired yet.'
     );
   };
 
