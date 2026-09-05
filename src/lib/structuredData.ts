@@ -17,10 +17,18 @@ const ORGANIZATION_NAME = 'Selfprint';
 const ORGANIZATION_LOGO = `${BASE_URL}/icons/icon-512x512.png`;
 const ORGANIZATION_EMAIL = 'hello@selfprint.app';
 
-// Business contact information (from environment or defaults)
-const BUSINESS_PHONE = import.meta.env.VITE_BUSINESS_PHONE || '+66-2-XXX-XXXX';
-const BUSINESS_ADDRESS_STREET = import.meta.env.VITE_BUSINESS_ADDRESS_STREET || 'Bangkok, Thailand';
-const BUSINESS_ADDRESS_POSTAL = import.meta.env.VITE_BUSINESS_ADDRESS_POSTAL || '10110';
+// Business contact information (X1: 5 ก.ย. 2026 — remove hardcoded fallbacks, env-only)
+function requireEnv(name: string): string {
+  const value = import.meta.env[name];
+  if (!value) {
+    throw new Error(`${name} not set — required by structuredData.ts`);
+  }
+  return value;
+}
+
+const BUSINESS_PHONE = requireEnv('VITE_BUSINESS_PHONE');
+const BUSINESS_ADDRESS_STREET = requireEnv('VITE_BUSINESS_ADDRESS_STREET');
+const BUSINESS_ADDRESS_POSTAL = requireEnv('VITE_BUSINESS_ADDRESS_POSTAL');
 
 /**
  * Organization Schema
