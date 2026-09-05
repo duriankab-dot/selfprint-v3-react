@@ -280,6 +280,9 @@ export class AdaptiveAudioEngine {
     if (profile.quality === 'silence') return null;
 
     // Map experience to CDN URLs (production would use real CDN)
+    // ASSET404-001 (5 ก.ย. 2026): MP3s under /audio/ are placeholders only — real files
+    // were never uploaded. The 'oscillator-*' / 'silence' fallbacks below handle missing
+    // files gracefully via Web Audio API synthesis. See public/audio/README.md.
     const audioMap: Record<MusicExperience, Record<string, string>> = {
       reflection: {
         'mp3-high': '/audio/reflection-high.mp3',

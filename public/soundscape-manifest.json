@@ -2,7 +2,7 @@
   "version": "1.0",
   "lastUpdated": "2026-08-11",
   "cdnProvider": "cloudinary",
-  "note": "Replace CLOUDINARY_URL with actual account URL. Format: https://res.cloudinary.com/[account]/video/upload/[folder]/[filename].mp3",
+  "note": "ASSET404-001 (5 ก.ย. 2026): URLs use /audio/ placeholder. Real MP3 files belong in public/audio/. See public/audio/README.md.",
   "soundscapes": {
     "morning-forest": {
       "id": "morning-forest",
@@ -12,7 +12,7 @@
       "fileSize": 4500000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/morning-forest.mp3",
+      "url": "/audio/morning-forest.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_morning-forest"
     },
@@ -24,7 +24,7 @@
       "fileSize": 4200000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/morning-focus.mp3",
+      "url": "/audio/morning-focus.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_morning-focus"
     },
@@ -36,7 +36,7 @@
       "fileSize": 3800000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/morning-gentle.mp3",
+      "url": "/audio/morning-gentle.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_morning-gentle"
     },
@@ -48,7 +48,7 @@
       "fileSize": 3500000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/deep-work.mp3",
+      "url": "/audio/deep-work.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_deep-work"
     },
@@ -60,7 +60,7 @@
       "fileSize": 4800000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/afternoon-creative.mp3",
+      "url": "/audio/afternoon-creative.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_afternoon-creative"
     },
@@ -72,7 +72,7 @@
       "fileSize": 4000000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/afternoon-calm.mp3",
+      "url": "/audio/afternoon-calm.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_afternoon-calm"
     },
@@ -84,7 +84,7 @@
       "fileSize": 4600000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/discovery-mode.mp3",
+      "url": "/audio/discovery-mode.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_discovery-mode"
     },
@@ -96,7 +96,7 @@
       "fileSize": 4200000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/evening-reflection.mp3",
+      "url": "/audio/evening-reflection.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_evening-reflection"
     },
@@ -108,7 +108,7 @@
       "fileSize": 4300000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/relationship-evening.mp3",
+      "url": "/audio/relationship-evening.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_relationship-evening"
     },
@@ -120,7 +120,7 @@
       "fileSize": 3600000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/evening-release.mp3",
+      "url": "/audio/evening-release.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_evening-release"
     },
@@ -132,7 +132,7 @@
       "fileSize": 3900000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/spiritual-evening.mp3",
+      "url": "/audio/spiritual-evening.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_spiritual-evening"
     },
@@ -144,7 +144,7 @@
       "fileSize": 3700000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/night-ambient.mp3",
+      "url": "/audio/night-ambient.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_night-ambient"
     },
@@ -156,7 +156,7 @@
       "fileSize": 3400000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/night-focus.mp3",
+      "url": "/audio/night-focus.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_night-focus"
     },
@@ -168,7 +168,7 @@
       "fileSize": 4100000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/night-identity.mp3",
+      "url": "/audio/night-identity.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_night-identity"
     },
@@ -180,7 +180,7 @@
       "fileSize": 3300000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/night-wind-down.mp3",
+      "url": "/audio/night-wind-down.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_night-wind-down"
     },
@@ -192,7 +192,7 @@
       "fileSize": 5200000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/celebration.mp3",
+      "url": "/audio/celebration.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_celebration"
     },
@@ -204,7 +204,7 @@
       "fileSize": 4700000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/health-nature.mp3",
+      "url": "/audio/health-nature.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_health-nature"
     },
@@ -216,7 +216,7 @@
       "fileSize": 3500000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/money-clarity.mp3",
+      "url": "/audio/money-clarity.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_money-clarity"
     },
@@ -228,7 +228,7 @@
       "fileSize": 4400000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/creativity-flow.mp3",
+      "url": "/audio/creativity-flow.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_creativity-flow"
     },
@@ -240,7 +240,7 @@
       "fileSize": 3800000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/ambient-minimal.mp3",
+      "url": "/audio/ambient-minimal.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_ambient-minimal"
     },
@@ -252,18 +252,18 @@
       "fileSize": 4000000,
       "format": "mp3",
       "bitrate": "192kbps",
-      "url": "CLOUDINARY_URL/soundscapes/deep-reflection-universal.mp3",
+      "url": "/audio/deep-reflection-universal.mp3",
       "fallbackUrl": null,
       "cacheKey": "soundscape_deep-reflection-universal"
     }
   },
   "setup": {
     "cloudinary": {
-      "step1": "Sign up at https://cloudinary.com (free tier: 25GB storage)",
-      "step2": "Create folder 'soundscapes' in Media Library",
-      "step3": "Upload all 20 MP3 files (or use script in /scripts/upload-soundscapes.js)",
-      "step4": "Replace CLOUDINARY_URL with your account: https://res.cloudinary.com/[your-cloud-name]/video/upload/v[version]/soundscapes",
-      "step5": "Set environment variable: VITE_SOUNDSCAPE_CDN_URL=https://res.cloudinary.com/[your-cloud-name]/video/upload/soundscapes",
+      "step1": "ASSET404-001 (5 ก.ย. 2026): Cloudinary account was never provisioned. Real MP3s need to be uploaded to public/audio/ instead.",
+      "step2": "Download CC0 audio from https://mixkit.co / https://pixabay.com / https://freesound.org matching each soundscape id",
+      "step3": "Drop the 20 MP3 files into public/audio/<id>.mp3 (same filename as cacheKey suffix)",
+      "step4": "Update the 'url' field above from '/audio/<id>.mp3' to the actual same-origin path",
+      "step5": "No env var needed — files are served by Vite/Cloudflare Pages from public/",
       "step6": "Test audio playback on staging"
     },
     "fallback": "If CDN unavailable, SoundscapePlayer falls back to Web Audio API synthesis (5-second generic tones per soundscape type)"
