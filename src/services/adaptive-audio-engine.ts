@@ -64,9 +64,8 @@ export class AdaptiveAudioEngine {
       return this.networkProfile;
     }
 
-    const connection = (navigator as any).connection ||
-                      (navigator as any).mozConnection ||
-                      (navigator as any).webkitConnection;
+    const connection: NetworkInformation | undefined =
+      navigator.connection ?? navigator.mozConnection ?? navigator.webkitConnection;
 
     if (!connection) {
       return {
@@ -78,13 +77,22 @@ export class AdaptiveAudioEngine {
       };
     }
 
-    const profile: NetworkProfile = {
-      type: connection.type || 'unknown',
-      effectiveType: connection.effectiveType || 'unknown',
-      downlink: connection.downlink || 1,
-      rtt: connection.rtt || 100,
-      saveData: connection.saveData || false,
-    };
+// A7-TS-strict: vendor Connection API exposes free-form strings; narrow to our
+// union type via runtime check.
+const NETWORK_TYPES = ['slow-2g', '2g', '3g', '4g', '5g', 'ethernet', 'wifi', 'unknown'] as const;
+function narrowNetworkType(t: string | undefined): NetworkProfile['type'] {
+  return NETWORK_TYPES.includes(t as NetworkProfile['type'])
+    ? (t as NetworkProfile['type'])
+    : 'unknown';
+}
+
+const profile: NetworkProfile = {
+  type: narrowNetworkType(connection.type),
+  effectiveType: connection.effectiveType || 'unknown',
+  downlink: connection.downlink || 1,
+  rtt: connection.rtt || 100,
+  saveData: connection.saveData || false,
+};
 
     this.networkProfile = profile;
 
@@ -125,7 +133,7 @@ export class AdaptiveAudioEngine {
    * Get available device memory (MB)
    */
   private getAvailableMemory(): number {
-    const perf = (performance as any);
+    const perf: Performance = performance;
     if (perf.memory) {
       return perf.memory.jsHeapSizeLimit / (1024 * 1024);
     }
@@ -256,9 +264,8 @@ export class AdaptiveAudioEngine {
    * Destroy: remove event listeners and clear state to prevent memory leaks
    */
   destroy(): void {
-    const connection = (navigator as any).connection ||
-                      (navigator as any).mozConnection ||
-                      (navigator as any).webkitConnection;
+    const connection: NetworkInformation | undefined =
+      navigator.connection ?? navigator.mozConnection ?? navigator.webkitConnection;
     if (connection && this._networkChangeHandler) {
       connection.removeEventListener('change', this._networkChangeHandler);
       this._networkChangeHandler = null;

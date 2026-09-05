@@ -42,6 +42,7 @@ declare global {
     getBattery?: () => Promise<BatteryManager>;
   }
 
+// A7-TS-strict: declare support types globally so call sites can reference them.
   interface Performance {
     /** Chrome-only: jsHeapSizeLimit / usedJSHeapSize / totalJSHeapSize (bytes). */
     memory?: {
@@ -50,45 +51,45 @@ declare global {
       totalJSHeapSize: number;
     };
   }
-}
 
-interface NetworkInformation {
-  type?: string;
-  downlink?: number;
-  rtt?: number;
-  saveData?: boolean;
-  effectiveType?: string;
-  addEventListener(type: string, listener: EventListener): void;
-  removeEventListener(type: string, listener: EventListener): void;
-}
+  interface NetworkInformation {
+    type?: string;
+    downlink?: number;
+    rtt?: number;
+    saveData?: boolean;
+    effectiveType?: string;
+    addEventListener(type: string, listener: EventListener): void;
+    removeEventListener(type: string, listener: EventListener): void;
+  }
 
-// A7-TS-strict: minimal Background Sync API shape (Chrome only).
-interface SyncManagerImpl {
-  register(tag: string): Promise<void>;
-}
+  // A7-TS-strict: minimal Background Sync API shape (Chrome only).
+  interface SyncManagerImpl {
+    register(tag: string): Promise<void>;
+  }
 
-interface BatteryManager {
-  charging: boolean;
-  chargingTime: number;
-  dischargingTime: number;
-  level: number;
-  addEventListener(type: string, listener: EventListener): void;
-  removeEventListener(type: string, listener: EventListener): void;
-}
+  interface BatteryManager {
+    charging: boolean;
+    chargingTime: number;
+    dischargingTime: number;
+    level: number;
+    addEventListener(type: string, listener: EventListener): void;
+    removeEventListener(type: string, listener: EventListener): void;
+  }
 
-// A7-TS-strict: minimal SpeechRecognition shape covering the fields used by
-// the codebase. The full Web Speech API surface is much larger; extend here
-// as needed.
-interface SpeechRecognitionInstance {
-  lang: string;
-  continuous: boolean;
-  interimResults: boolean;
-  maxAlternatives: number;
-  onstart: (() => void) | null;
-  onresult: ((event: { results: { transcript: string }[][] }) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start(): void;
-  stop(): void;
-  abort(): void;
+  // A7-TS-strict: minimal SpeechRecognition shape covering the fields used by
+  // the codebase. The full Web Speech API surface is much larger; extend here
+  // as needed.
+  interface SpeechRecognitionInstance {
+    lang: string;
+    continuous: boolean;
+    interimResults: boolean;
+    maxAlternatives: number;
+    onstart: (() => void) | null;
+    onresult: ((event: { results: { transcript: string }[][] }) => void) | null;
+    onerror: ((event: { error: string }) => void) | null;
+    onend: (() => void) | null;
+    start(): void;
+    stop(): void;
+    abort(): void;
+  }
 }
