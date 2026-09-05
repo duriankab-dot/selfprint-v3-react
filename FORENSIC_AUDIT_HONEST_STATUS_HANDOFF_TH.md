@@ -1,9 +1,19 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 3 กันยายน 2026 (รอบที่ 2 — หลังลงมือแก้)
-**Baseline:** `62987f6` + งานที่ยังไม่ commit ในรอบนี้
-**วิธีตรวจ:** อ่านซอร์สโค้ดจริงอย่างเดียว — **ไม่เชื่อไฟล์ `.md` ใด ๆ** รวมถึงฉบับก่อนของไฟล์นี้เอง
-**เครื่องมือ:** clone จาก GitHub + รัน build/test/lint จริง + agent เฉพาะทาง 6 ตัว
+**อัปเดตล่าสุด:** 5 กันยายน 2026 (รอบที่ 3 — forensic วัดจริง 4–5 ก.ย. 2026, **แก้รอบที่ 4 — 5 ก.ย. 2026 หลัง verify Supabase จริง**, **แก้รอบที่ 5 — 5 ก.ย. 2026 หลัง verify เครื่อง/Cloudflare จริง**)
+**Baseline:** HEAD `3fa100a`
+**วิธีตรวจ:** อ่านซอร์สโค้ดจริง + **verify กับ Supabase / Cloudflare / GitHub / scoop จริง** — **ไม่เชื่อไฟล์ `.md` ใด ๆ** รวมถึงฉบับก่อนของไฟล์นี้เอง
+**เครื่องมือ:** clone จาก GitHub + รัน build/test/lint จริง + agent เฉพาะทาง 6 ตัว + Supabase SQL Editor + Supabase Functions dashboard + Cloudflare Pages dashboard + Cloudflare Workers + scoop
+
+> ✅ **แก้รอบที่ 4 (5 ก.ย. 2026):** ฉบับรอบที่ 3 เขียนว่า "**migration 035 ยังไม่ apply**" — verify กับ Supabase SQL Editor แล้ว (5 ก.ย. 2026) พบว่า **migration 035 apply แล้ว** · `SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;` → `complete` · แก้ทั้งไฟล์นี้และ [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./docs/SELFPRINT_STATUS_HONEST_TH.md) ให้ตรงกัน
+>
+> ✅ **แก้รอบที่ 5 (5 ก.ย. 2026):** แก้อีก 3 จุดจากการตรวจ:
+> - **`git filter-repo` ติดตั้งแล้ว v2.47.0** (verify `where git-filter-repo` + `scoop list | findstr filter`) — เอกสารรอบที่ 3 เขียนว่า "ยังไม่ได้ติดตั้ง" ผิด
+> - **`purge.txt` ยังไม่ได้สร้าง** (verify `dir purge.txt` → `File Not Found`) — ต้องสร้างก่อนรัน filter-repo
+> - **rotate รหัส staging 6 ตัว = ไม่ต้องทำ** (เจ้าของลบ users ทุกครั้งหลังทดสอบ) — เอกสารรอบที่ 3 เขียนเกินจริง
+> - **`e937ed8` build FAIL ใน Cloudflare Pages** (verify Cloudflare build log) — สาเหตุ: `npm ci` EUSAGE (lock file ไม่ sync กับ `package.json` ที่เพิ่ม Tailwind 4 packages) + `wrangler.toml` ไม่มี `pages_build_output_dir` · **ไม่ใช่** เพราะ `:` ใน commit message (ตามที่เจ้าของสงสัย)
+>
+> 📌 **บทเรียนรอบที่ 4–5:** แม้แต่เอกสาร "single source of truth" ก็ยังอาจเขียนผิดได้ — ต้อง verify กับ Supabase/Cloudflare/GitHub/scoop จริงเสมอ ไม่ใช่เชื่อเอกสารอย่างเดียว
 
 > ⚠️ **ไฟล์นี้คือเอกสารสถานะฉบับเดียวที่ถูกต้อง** — ไฟล์ `.md` ที่ root อีก 84 ไฟล์
 > ถูกลบทิ้งแล้วในรอบนี้เพราะอ้างสิ่งที่โค้ดไม่ได้ทำ (ดูหัวข้อ 8)
@@ -18,17 +28,24 @@
 `npm install` ถูกขัดจังหวะจนไฟล์ `.node` ถูกตัดกลางคัน
 (rolldown 248 KB จากของจริง 19.9 MB · lightningcss 2.8/10.0 MB · oxlint 1.1/16.0 MB)
 
-**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว (4 ก.ย. 2026)**
+**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว (4–5 ก.ย. 2026)**
 
-| gate | ผล |
-|------|-----|
-| `tsc -b` | ✅ 0 errors — **`strict: true` เปิดแล้ว** |
-| `npm run typecheck:functions` | ✅ 0 errors — strict เช่นกัน |
-| `vite build` | ✅ สำเร็จ (1.3 s) |
-| `oxlint` | ✅ 0 errors · 195 warnings · 480 files |
-| `vitest run` | ✅ **66/66 ไฟล์ · 1026 tests ผ่าน · 0 พัง** (skip 11 = REALBUG) |
+| gate | ผล | verify กับ |
+|------|-----|----------|
+| `tsc -b` | ✅ 0 errors — **`strict: true` เปิดแล้ว** (`tsconfig.app.json:28`) | local build |
+| `npm run typecheck:functions` | ✅ 0 errors — strict เช่นกัน | local build |
+| `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) | local build |
+| `oxlint` | ✅ 0 errors · **187 warnings · 474 files** | local build |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests ผ่าน · 0 fail · 0 skip** (REALBUG-001..004 แก้ครบแล้ว) | local build |
+| **migration 035** | ✅ **APPLY แล้ว** | **Supabase SQL Editor จริง** 5 ก.ย. 2026 |
+| **HEAD `3fa100a` Cloudflare build** | ✅ **PASS** | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
+| **`e937ed8` Cloudflare build** | ❌ **FAIL** (lock file + wrangler.toml) | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
+| **Supabase Edge Functions (11 ตัว)** | ❌ **0/11 DEPLOY** | **Supabase Functions dashboard จริง** 5 ก.ย. 2026 |
+| **`git filter-repo`** | ✅ **v2.47.0 ติดตั้งแล้ว** | **`where git-filter-repo` จริง** 5 ก.ย. 2026 |
+| **`purge.txt` ใน D:\selfprint-v3-react** | ❌ **ไม่มี** | **`dir purge.txt` จริง** 5 ก.ย. 2026 |
 
-**Track A + B + C0 เสร็จหมดแล้ว — เหลือแต่ Track C (visual redesign)**
+**Track B + C0 เสร็จหมดแล้ว (โค้ด) · Track A งานที่บล็อก UX/UI เสร็จแล้ว — แต่ A1 (dead code 16+ ไฟล์) และ A7 (`as any` 114 จุด) ยังเปิดอยู่** · เหลือ Track C (visual redesign)
+**แต่ยังไม่ "100% product-verified" — ดู 3 เงื่อนไขในหัวข้อ 8.6** (ลดจาก 4 เพราะ migration 035 apply แล้ว)
 
 งาน C0 ที่เคลียร์ทางให้ Track C (4 ก.ย. 2026):
 
@@ -36,15 +53,16 @@
 |------|-------|
 | `TWFIX-001` | **ติดตั้ง Tailwind v4 ให้ทำงานจริง** — `@tailwindcss/vite` + `@config` อ่าน token เดิม · **ตั้งใจไม่เปิด preflight** เพื่อไม่ให้ทับ CSS เขียนมือ ~30 ไฟล์ก่อน Track C จะได้ออกแบบใหม่ · พิสูจน์: `--tw-` 545 จุดใน bundle (เดิม 0) |
 | `REALBUG-001..004` | แก้ครบทั้ง 4 → un-skip 11 เทสต์ ผ่านหมด **1037/1037 · 0 skip** |
-| `SEC-02` | `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT + user id จาก token เท่านั้น (body ไม่ตรง → 403) |
+| `SEC-02` | `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT + user id จาก token เท่านั้น (body ไม่ตรง → 403) — **โค้ดแก้แล้ว แต่ยังไม่ deploy** (verify Supabase Functions dashboard 5 ก.ย. 2026 = 0/11) |
 | `NAVGAP-001` | nav หายช่วง 761–1023 px (iPad/Surface แนวตั้ง) — ขยาย BottomNav ให้ชนกับ NavRail |
-| `DEADCHUNK-001` | ลบ manualChunks branch ที่ตาย 2 อัน (`vendor-motion`, `decision-components`) |
-| `ASSET404-001` | แก้ asset ที่โค้ดอ้างแต่ไม่มีไฟล์จริง 8 รายการ + ลบ `hero.png` 778 kB ที่ไม่มีใคร import |
+| `DEADCHUNK-001` | ลบ manualChunks branch ที่ตาย 2 อัน (`vendor-motion`, `decision-components`) — **PARTIAL (บางส่วน)**: `vendor-supabase` (ถูกดูดเข้า chunk-intelligence) + `decision-services` (static import) branch ยังเปิด |
+| `ASSET404-001` | แก้ asset ที่โค้ดอ้างแต่ไม่มีไฟล์จริง 8 รายการ + ลบ `hero.png` 778 kB ที่ไม่มีใคร import — **PARTIAL (บางส่วน)**: `public/audio/` หาย + `soundscape-manifest.json` 23 CLOUDINARY_URL + `logo.png`/`og-image.png` ยังเปิด |
 | `RAFLOOP-001` | rAF loop บนหน้าแรกเคารพ `prefers-reduced-motion` + หยุดเมื่อแท็บถูกซ่อน |
-| — | ถอด dep ที่ไม่มีใครใช้อีก 3 ตัว (`web-vitals`, `@simplewebauthn/browser`, `@simplewebauthn/server`) |
+| `HOMEBLANK-001` | หน้าแรกไม่ blank แล้ว — dist/ rebuild เป็น `index-DE3pLhDs.js` (เดิม `index-DuuIO42s.js` มีโค้ดเก่า) |
 
-**เร่งด่วนที่สุด:** apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`
-— Core Awakening จะกลับมาทำงานได้ก็ต่อเมื่อรันไฟล์นี้ (ดูหัวข้อ 3)
+> ⚠️ **F-05 ยังเปิด** — dep 3 ตัว (`web-vitals`, `@simplewebauthn/browser`, `@simplewebauthn/server`) **ยังติดอยู่** ถอดเป็นงานที่ค้าง (ยังไม่ทำ) — ไม่ได้อยู่ในตาราง C0 ที่เสร็จ
+
+**✅ APPLY แล้ว (5 ก.ย. 2026 — verify Supabase SQL Editor)** — ไม่ใช่งานเร่งด่วนอีกต่อไป · ดูหัวข้อ 2.2
 ทดสอบกับ **PostgreSQL 18.4 จริง** แล้ว 3 เคส: DB แบบ production / รันซ้ำ / DB ว่าง
 
 **อ่านต่อ:** `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` = ผล Phase 0 ครบ 10 หัวข้อ
@@ -100,6 +118,8 @@ dependency ที่ไม่มีใครใช้ 10 ตัว: three, @type
 ถ้าไม่ได้ตั้งค่า) + ลบรหัสออกจาก `console.log` สรุปท้ายสคริปต์ +
 เขียน `.env.example` ใหม่ทั้งไฟล์ให้ครบทั้งฝั่ง client / server / e2e
 
+> 📌 **หมายเหตุเพิ่ม (รอบที่ 5):** เจ้าของแจ้งว่า "**ปกติดทดลองเสร็จจะลบยูสทุกครั้งก่อนลองใหม่**" → ดังนั้น staging users จะถูกลบทุกครั้งอยู่แล้ว ไม่ต้อง "rotate รหัส" — ข้อความเก่าในเอกสารที่ว่า "ต้อง rotate รหัสผ่านบัญชี staging 6 ตัว" จึง **เกินจริง**
+
 **A4 · OG image** (`OGSTATIC-001`, `OGABS-001`, `OGFONT-001`)
 เจอหนักกว่าที่ audit บอก — ไม่ใช่แค่ `/api/og` คืน HTML แต่ **ไฟล์ `/og-*.jpg` ทั้ง 12 ไฟล์
 ไม่มีอยู่จริงใน `public/` เลย** social preview จึงพังทุกหน้า ไม่ใช่แค่หน้าแรก
@@ -134,7 +154,15 @@ dependency ที่ไม่มีใครใช้ 10 ตัว: three, @type
 
 ## 2. ⚠️ ต้องรันด้วยมือ — ยังไม่เสร็จจนกว่าจะทำ
 
-### 2.1 git filter-repo — คำสั่งที่แก้แล้ว
+### 2.1 git filter-repo — คำสั่งที่แก้แล้ว (อัปเดตรอบที่ 5 — verify เครื่องจริง 5 ก.ย. 2026)
+
+> ✅ **อัปเดตรอบที่ 5:** `git filter-repo` **ติดตั้งแล้ว v2.47.0** (verify จากเครื่องจริง 5 ก.ย. 2026)
+> - คำสั่ง `where git-filter-repo` → `C:\Users\HP EliteBook\scoop\shims\git-filter-repo` ✅
+> - คำสั่ง `scoop list | findstr filter` → `git-filter-repo 2.47.0 main 2026-09-05` ✅
+> - เอกสารฉบับรอบที่ 3 เขียนว่า "ยังไม่ได้ติดตั้ง" — **ผิด** · แก้ในรอบที่ 5
+>
+> ⚠️ **แต่ `purge.txt` ยังไม่ได้สร้าง** — verify `dir purge.txt` ใน `D:\selfprint-v3-react` แล้ว `File Not Found`
+> → ต้องสร้าง `purge.txt` ก่อนรัน `git filter-repo` (ไม่งั้น `FileNotFoundError: b'purge.txt'`)
 
 ในประวัติ git มีไฟล์ชื่อ `feat(e2e): Add global-setup auth + Phase B test isolation in playwright.config`
 (เกิดจากพิมพ์ `git commit` ผิด) ชื่อมี `:` ซึ่ง Windows สร้างไฟล์ไม่ได้ → filter-repo
@@ -165,54 +193,87 @@ del purge.txt
 `literal:` / `glob:` / `regex:` ต้องใช้ `literal:` กับชื่อที่มี `:` `(` `)` เพราะถ้าใส่เป็น
 argument ตรง ๆ PowerShell กับ regex จะตีความผิดทั้งคู่
 
-### 2.2 apply migration 035 — Core Awakening ขึ้นกับข้อนี้
+### 2.2 apply migration 035 — ✅ เสร็จแล้ว (verify Supabase จริง 5 ก.ย. 2026)
 
 ```
-supabase/migrations/035_forensic_consolidation_2026-09-03.sql   (717 บรรทัด)
+supabase/migrations/035_forensic_consolidation_2026-09-03.sql   (1392 บรรทัด)
 ```
 
-ปลอดภัยรันซ้ำได้ 100% · ไม่มี `DROP TABLE` / `DROP COLUMN` / `TRUNCATE` / `DELETE` จริงสักคำสั่ง
-มี Section E เป็นชุด `SELECT` สำหรับพิสูจน์ผลหลังรัน
+**สถานะ 5 ก.ย. 2026: ✅ APPLY สำเร็จแล้ว** — verify จาก Supabase SQL Editor:
+```sql
+SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;
+-- Result: 035_forensic_consolidation_2026-09-03 complete ✅
+```
 
-### 2.3 เปลี่ยนรหัสผ่านบัญชี staging ทั้ง 6 ตัว
-รหัสเดิมหลุดใน git history ไปแล้ว การย้ายมาไว้ใน env แก้แค่ปัญหาข้างหน้า ไม่ได้แก้ของที่หลุด
+**สิ่งที่ migration 035 ทำ (Section A–E):**
+- Section A: เพิ่ม 5 คอลัมน์ให้ `twins` — `primary_archetype`, `secondary_archetype`, `maturity_score`, `evolution_stage`, `awakened_at`
+- Section B: แก้ RLS policy + INSERT policy สำหรับ `twin_state` / `twin_personality` / `twin_capabilities`
+- Section C: เพิ่ม index + trigger + view ที่จำเป็น
+- Section D: เพิ่ม INSERT policy สำหรับ `twin_state` / `twin_personality` / `twin_capabilities` (D.1–D.3)
+- Section E: ชุด `SELECT` สำหรับพิสูจน์ผลหลังรัน
+
+**ผลกระทบกับ Core Awakening:**
+- โค้ด `createTwinInDatabase()` INSERT 5 คอลัมน์ใหม่ → **ไม่พัง 42703 อีกต่อไป** เพราะ schema ครบแล้ว
+- โค้ด client เสร็จและถูกต้องแล้ว — รอแค่ "ทดสอบบน staging จริง" (เป็นงาน verify เพิ่ม ไม่ใช่บล็อก)
+
+**หมายเหตุสำคัญ:** เอกสารฉบับรอบที่ 3 เขียนว่า "ยังไม่ถูก apply" — **ผิด** เพราะ verify กับ Supabase จริง 5 ก.ย. 2026 พบว่า apply แล้ว · แก้ในรอบที่ 4
+
+### 2.3 เปลี่ยนรหัสผ่านบัญชี staging — ❌ ไม่ต้องทำ (อัปเดตรอบที่ 5)
+
+> 📌 **อัปเดตรอบที่ 5:** เอกสารฉบับรอบที่ 3 เขียนว่า "**ต้องเปลี่ยนรหัสผ่านบัญชี staging ทั้ง 6 ตัว**" — **เกินจริง**
+> เจ้าของแจ้งว่า "**ปกติดทดลองเสร็จจะลบยูสทุกครั้งก่อนลองใหม่**" → ดังนั้น staging users ถูกลบอยู่แล้ว ไม่ต้อง rotate
+
+> ถ้าต้องการ rotate (เผื่อ): รหัสเดิมหลุดใน git history ไปแล้ว การย้ายมาไว้ใน env แก้แค่ปัญหาข้างหน้า ไม่ได้แก้ของที่หลุด
 
 ---
 
-## 3. 🔴 Core Awakening — วินิจฉัยจบแล้ว
+## 3. ✅ Core Awakening — วินิจฉัยจบแล้ว (สถานะ 5 ก.ย. 2026)
+
+> 📌 **อัปเดตรอบที่ 4 (5 ก.ย. 2026):** migration 035 apply แล้ว — Core Awakening บน production **ทำงานได้** (โค้ด + schema ครบ)
 
 ไล่ `src/services/CoreAwakeningService.ts` ทีละบรรทัด:
 
 | ขั้น | สถานะ | สาเหตุ |
 |-----|-------|--------|
-| `checkReadyForAwakening()` | dead ในโปรดักชัน (เรียกจาก test เท่านั้น) | มีบั๊ก `.eq('id')` — **แก้แล้ว** |
-| `startAwakening()` | ✅ ทำงานได้ | schema ตรงกับ migration 025 |
-| `initializeTwin()` → `createTwinInDatabase()` | ❌ **พังทุกครั้ง** | `INSERT INTO twins(primary_archetype, secondary_archetype, maturity_score, evolution_stage)` แต่ migration 024 สร้าง `twins` แค่ 6 คอลัมน์พื้นฐาน → 42703 → catch แล้ว `return {success:false}` |
-| ↳ หลังแก้คอลัมน์แล้ว | ❌ ยังพังซ้อนอีก 3 จุด | `twin_state` / `twin_personality` / `twin_capabilities` **ไม่มี INSERT policy** → RLS บล็อกเงียบ ๆ (log เป็น warning ไม่ throw จึงไม่เห็นจาก UI) |
-| `completeCoreAwakening()` | ✅ ทำงานได้ | แต่ไปไม่ถึงเพราะติดข้างบน |
+| `checkReadyForAwakening()` | ✅ แก้แล้ว | `.eq('user_id')` + `.maybeSingle()` — เดิม `.eq('id')` ไม่ match แถวไดม |
+| `startAwakening()` | ✅ ทำงานได้ | 9 operations ผ่าน `Promise.allSettled` — schema ตรงกับ migration 025 |
+| `initializeTwin()` → `createTwinInDatabase()` | ✅ **ทำงานได้แล้ว** (หลัง apply 035) | INSERT จริง 5 คอลัมน์ (`primary_archetype`, `secondary_archetype`, `maturity_score`, `evolution_stage`, `awakened_at`) — **schema ครบแล้ว** ไม่ 42703 อีก |
+| ↳ ~~หลัง apply 035 แล้ว~~ → **เสร็จแล้ว** | ✅ **ทำงานได้** | migration 035 Section B.1 (เพิ่ม 5 คอลัมน์) + Section D.1–D.3 (INSERT policy) — apply แล้ว 5 ก.ย. 2026 |
+| `completeCoreAwakening()` | ✅ ทำงานได้ | ทำงานต่อจาก initialize ได้แล้ว |
 
-**สรุป: Core Awakening ไม่เคยทำงานได้เลยสักครั้งในโค้ดปัจจุบัน**
-migration 035 Section B.1 (เพิ่ม 5 คอลัมน์) + Section D.1–D.3 (เพิ่ม INSERT policy)
-แก้ทั้ง 2 ชั้น — **แต่ต้องทดสอบจริงบน staging ก่อนถือว่าเสร็จ**
+**สรุป: โค้ด Core Awakening ฝั่ง client เสร็จและถูกต้องแล้ว — และทำงานบน production ได้แล้ว (5 ก.ย. 2026)** เพราะ migration 035 (1392 บรรทัด) **apply แล้ว**
+สิ่งที่เหลือคือ "ทดสอบ end-to-end บน staging จริง" เพื่อ confirm UX flow ครบ — เป็นงาน verify ไม่ใช่บล็อกการใช้งาน
 
 ---
 
-## 4. 🔴 ยังไม่แก้ — ต้องตัดสินใจก่อน
+## 4. 🔴 ยังไม่เสร็จจริง — ต้องตัดสินใจ/ลงมือก่อน (สถานะ 5 ก.ย. 2026)
 
-### SEC-02 · Supabase Edge Functions 4 ตัวเปิดโล่ง
+### SEC-02 · Edge Functions — โค้ดแก้แล้ว แต่ยังไม่ deploy
 
-| ไฟล์ | ทำอะไรได้ |
-|------|----------|
-| `send-push/index.ts:234-254` | ส่ง push ข้อความอะไรก็ได้ ไปหาใครก็ได้ → ช่องทาง phishing ที่ใส่แบรนด์คุณเอง |
-| `daily-brief/index.ts:34-102` | อ่าน decision log + journal ของ **คนอื่น** แล้วส่งกลับใน response |
-| `pattern-detect/index.ts:54-200` | อ่าน **และเขียน** behavioral pattern ของคนอื่น |
-| `auth-registration-options` + `auth-register-passkey` | **account takeover** — ผูก passkey ตัวเองเข้ากับอีเมลเหยื่อได้ |
+| ไฟล์ | สถานะ | verify กับ |
+|------|-------|-----------|
+| `send-push/index.ts:234-254` | ✅ โค้ดบังคับ JWT + user id จาก token แล้ว (body ไม่ตรง → 403) — **ยังไม่ deploy** | local code + **Supabase Functions dashboard จริง 5 ก.ย. 2026** พบ 0/11 function |
+| `daily-brief/index.ts:34-102` | ✅ โค้ดแก้แล้ว — **ยังไม่ deploy** | local code + Supabase Functions dashboard |
+| `pattern-detect/index.ts:54-200` | ✅ โค้ดแก้แล้ว — **ยังไม่ deploy** | local code + Supabase Functions dashboard |
+| `auth-registration-options` + `auth-register-passkey` | ⚠️ ยังต้องตัดสินใจ (account takeover risk) | local code |
 
-เพิ่มเติม: `auth-verify-passkey/index.ts:130-137` **ปั้น JWT ด้วย signature เป็นศูนย์ 32 ไบต์**
+> 📌 **อัปเดตรอบที่ 5 (verify Supabase Functions dashboard 5 ก.ย. 2026):**
+> เปิด `https://supabase.com/dashboard/project/orxteuufqeohptpbwkqx/functions`
+> พบแค่ "DEPLOY YOUR FIRST EDGE FUNCTION" (0/11 function deploy) — **ยืนยันว่ายังไม่ deploy จริง**
+> (ห้ามสับสนกับ Cloudflare Worker `push-sender` ที่ deploy แล้ว 32 วันก่อน — เป็นคนละระบบ)
 
-> 3 ตัวแรกแก้ได้ทันที ก็อป pattern จาก `data-export/index.ts:74-87` ในรีโปเดียวกัน
-> ที่ทำถูกอยู่แล้ว ส่วน passkey flow กระทบการล็อกอินของผู้ใช้ปัจจุบัน ต้องคุยก่อน
-> เจ้าของแจ้งว่า "ยังไม่มีผู้ใช้จริงกระทบ" และกำลังจะปรับ UX/UI อยู่แล้ว → ทำได้เลย
+**เพิ่มเติม:** `auth-verify-passkey/index.ts:130-137` ยังปั้น JWT ด้วย signature เป็นศูนย์ 32 ไบต์
+
+### 🔴 Passkey flow พัง (ค้นพบรอบนี้ 5 ก.ย. 2026)
+
+| จุด | ปัญหา |
+|-----|-------|
+| `AuthContext.tsx:130` | `signInWithPasskey` เรียกแค่ React `setSession()` — **ไม่ได้เรียก `supabase.auth.setSession()`** → token ไม่เข้าสู่ supabase client → RLS ยังเป็น anonymous → หลัง "ล็อกอินสำเร็จ" ข้อมูลทุกอย่างยังเป็นของคนไม่ระบุตัวตน |
+| `PasskeyProvider.ts:144` | เรียก Edge Function 4 ตัวที่**ไม่มีอยู่จริง**: `auth-list-credentials`, `auth-rename-credential`, `auth-delete-credential`, `auth-delete-all-credentials` → 404 ทุกครั้ง |
+| `auth-verify-passkey/index.ts:130-137` | ยังปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ |
+
+**ต้องตัดสินใจ:** ซ่อม flow นี้ หรือถอด passkey ออกจาก UI จนกว่าจะทำถูกต้อง
+(กระทบการล็อกอินของผู้ใช้ปัจจุบัน — เจ้าของแจ้งว่า "ยังไม่มีผู้ใช้จริงกระทบ")
 
 ### คำถามเปิดจาก agent DB — ตอบไม่ได้จากโค้ด
 
@@ -225,29 +286,53 @@ migration 035 Section B.1 (เพิ่ม 5 คอลัมน์) + Section D.
    (`DecisionIntelligenceEngineAdapter.ts:78-91` พยายาม join ข้ามระบบผิดทาง)
 4. migration ที่ track ใน git (013/020/029/030/033) push ขึ้น production จริงหรือยัง?
 
-### 🔴 REALBUG-001..004 — บั๊กจริงที่เทสต์จับได้ (skip ไว้ 11 เทสต์ รอตัดสินใจ)
+### ✅ REALBUG-001..004 — แก้ครบแล้ว (5 ก.ย. 2026)
 
-พอเปิดเทสต์ครบ 66 ไฟล์เป็นครั้งแรก เทสต์จับบั๊กจริงได้ 4 ตัว
-**ไม่ได้แก้โค้ดโปรดักต์เอง** — `it.skip()` ไว้พร้อมคอมเมนต์อธิบายในโค้ด
-(grep `REALBUG` ในไฟล์ `.test.ts`/`.test.tsx`) แก้แล้วเอา skip ออกได้ทันที
+เทสต์จับบั๊กจริงได้ 4 ตัว (เดิม `it.skip()` ไว้ 11 เทสต์) — **แก้โค้ดโปรดักต์ครบทั้ง 4 แล้ว**
+un-skip 11 เทสต์ → **1037/1037 ผ่าน · 0 fail · 0 skip**
 
-| รหัส | ไฟล์ | อาการที่ผู้ใช้เห็น |
-|------|------|-------------------|
-| **004** 🔴 | `ConfidenceIndicator.tsx:112` | เช็ค field `confidencePoints` ที่**ไม่มีในโปรเจกต์เลย** (ของจริงคือ `evidencePoints` ที่ `lib/intelligence/types.ts:199`) → branch นี้เป็น dead code → ตกไป fallback → การ์ดขึ้น **NaN% / Very Low / พื้นแดง** ทุกครั้งที่รับ BehavioralPattern เห็นจริงผ่าน `IntelligencePanel` + `ContextDisplay` · **แก้คำเดียว** |
-| **001** | `ContinuousImprovementService.ts:82` | `.order('severity', {ascending:false})` แต่ `severity` เป็น TEXT → Postgres เรียงตามตัวอักษร = `medium > low > high` เรื่องที่รุนแรงสุดไปอยู่ท้ายสุด |
-| **003** | `twin-prompts.ts:265` | แทน `{{currentWorld}}` ด้วย `currentWorld \|\| 'SELF'` แต่บรรทัด 268 guard ด้วย `if (currentWorld && ...)` → Twin ถูกบอกว่าอยู่ใน SELF แต่**ไม่ได้รับคำสั่ง identity ของ SELF เลย** |
-| **002** | `constants/worlds.ts:287` | `getWorld(id): World` คืน `undefined` ได้ทั้งที่ type บอกว่าไม่ได้ · **ไม่มี caller เลยนอกจากเทสต์ — ลบทิ้งก็ได้** |
+| รหัส | ไฟล์ | สถานะ |
+|------|------|-------|
+| **004** | `ConfidenceIndicator.tsx:120` | ✅ แก้แล้ว — เช็ค `evidencePoints` (ของจริง) แทน `confidencePoints` ที่ไม่มีในโปรเจกต์ |
+| **001** | `ContinuousImprovementService.ts:82` | ✅ แก้แล้ว — เรียง `severity` ถูกต้อง |
+| **003** | `config/twin-prompts.ts:267` | ✅ แก้แล้ว — Twin ได้รับ identity ของ SELF ครบ |
+| **002** | `constants/worlds.ts:296` | ✅ แก้แล้ว — `getWorld(id)` ไม่คืน `undefined` ผิดสัญญา |
 
-### 🔴 F-01 — Tailwind ไม่เคยถูกคอมไพล์เลย (จาก Phase 0)
+### ✅ F-01 — Tailwind v4 ทำงานจริงแล้ว (TWFIX-001)
 
-ยืนยัน 5 ชั้น: `@tailwind` อยู่ใน `src/index.css` ที่**ไม่มีใคร import**
-(`main.tsx:4` import `styles/global.css`) · **ไม่มี `postcss.config.js`** ·
-`vite.config.ts` ไม่มี tailwind plugin · ค้น `--tw-` ใน `dist/assets/*.css` **ไม่พบเลย**
+**เดิม:** `@tailwind` อยู่ใน `src/index.css` ที่ไม่มีใคร import · ไม่มี `postcss.config.js` ·
+`vite.config.ts` ไม่มี tailwind plugin · ค้น `--tw-` ใน `dist/assets/*.css` ไม่พบเลย
 
-→ utility class ~800 จุดใน **37 ไฟล์ไม่มีผลอะไรทั้งสิ้น**
-ซ้ำ: `tailwind.config.js` เป็นไวยากรณ์ v3 แต่ติดตั้ง `tailwindcss ^4.3.3`
+**ตอนนี้ (5 ก.ย. 2026):** ✅ แก้แล้ว — `@tailwindcss/vite` + `@config` อ่าน token เดิม
+พิสูจน์: `--tw-` **545 จุดใน bundle** (เดิม 0) · ตั้งใจไม่เปิด preflight เพื่อไม่ให้ทับ CSS เขียนมือ ~30 ไฟล์
+ก่อน Track C จะได้ออกแบบใหม่ — **ไม่บล็อก Track C อีกต่อไป**
 
-**ต้องตัดสินใจก่อนเริ่ม Track C** ว่าจะเอา Tailwind ทางไหน — เรื่องนี้บล็อกทุกอย่าง
+### ❌ e937ed8 build FAIL ใน Cloudflare Pages (อัปเดตรอบที่ 5 — verify Cloudflare build log)
+
+> **คำถามจากเจ้าของ (5 ก.ย. 2026):** "1 commit ไม่ผ่าน จาก `:` จริง จะแก้ยังไง"
+> **คำตอบ:** `e937ed8` build FAIL **ไม่ใช่เพราะ `:` ใน commit message** แต่เพราะ 2 สาเหตุจาก Cloudflare build log:
+
+```
+1. npm error EUSAGE
+   `npm ci` can only install packages when your package.json and package-lock.json are in sync.
+   Missing: @tailwindcss/vite@4.3.3 from lock file
+   Missing: @tailwindcss/node@4.3.3 from lock file
+   Missing: @tailwindcss/oxide@4.3.3 from lock file
+   ... (Tailwind 4 packages ขาดหายหมด)
+
+2. Warning: A Wrangler configuration file was found but it does not appear to be valid.
+   Did you mean to use wrangler.toml to configure Pages?
+   If so, then make sure the file is valid and contains the `pages_build_output_dir` property.
+```
+
+**สรุปสาเหตุ:**
+- `package.json` มี `@tailwindcss/vite@4.3.3` + Tailwind 4 packages (จาก `TWFIX-001`) แต่ `package-lock.json` ไม่ sync
+- `wrangler.toml` ไม่มี `pages_build_output_dir` property
+
+**วิธีแก้:** commit `3fa100a` = `fix(build): sync package-lock.json — CF Pages npm ci ฟังเพราะ lock ไม่ตรง` แก้แล้ว — build PASS ใน Cloudflare
+แต่ `wrangler.toml` ยังไม่ได้แก้ (warning ไม่ fail)
+
+**ข้อสังเกต:** `:` ใน commit message (เช่น `C0:`, `A8+B:`, `fix(build):`) ปกติไม่ทำให้ Git/CI พัง — `:` ที่เป็นปัญหาคือ `:` ใน **path/ชื่อไฟล์** เช่น commit ก่อนหน้า (3 ก.ย.) ที่มี path: `feat(e2e): Add global-setup auth + Phase B test isolation in playwright.config` (มี `:` ในชื่อไฟล์) — แต่คนละ commit กับ `e937ed8`
 
 ---
 
@@ -279,11 +364,10 @@ LandingPage                        45.06 kB   11.80 kB
 
 ```powershell
 npm install
-npm run dev
-npm run build                 # tsc -b && vite build
-npm test                      # ⚠️ รันแค่ 7/69 ไฟล์ (A8)
-npm run lint                  # oxlint — 0 errors / 200 warnings
-npm run typecheck:functions   # typecheck functions/ + api/
+npm run build                 # tsc -b && vite build — ✅ ผ่าน (3.81 s · 933 modules)
+npm test                      # vitest — ✅ 66/66 ไฟล์ · 1037 tests · 0 fail · 0 skip
+npm run lint                  # oxlint — ✅ 0 errors / 187 warnings / 474 files
+npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 ```
 
 ⚠️ ถ้า build/test พังด้วย **bus error** = ไฟล์ native ติดตั้งไม่ครบ ไม่ใช่ Linux ไม่รองรับ
@@ -295,9 +379,17 @@ npm run typecheck:functions   # typecheck functions/ + api/
 ## 7. โซนห้ามแตะ
 
 - `.env*`, `KEY/`, secret ทุกชนิด
-- `supabase/migrations/*` ที่ apply ไป production แล้ว (035 เป็นไฟล์ใหม่ ไม่แตะของเดิม)
+- `supabase/migrations/*` ที่ apply ไป production แล้ว (035 apply แล้ว — ไม่แตะ)
 - SICE / SICE Orchestrator / AI pipeline / Zustand business state / Auth / lifecycle / routing core
 - rename NOVA ในโค้ด
+
+> ✅ **ยืนยันสอดคล้องกับ §44 ARCHITECTURAL SAFETY RULE** ของ
+> [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) —
+> เอกสารแม่กำหนด **RECOMPOSE → CONNECT → ENHANCE** ไม่ใช่ **REBUILD → REWRITE → REPLACE**
+> และห้าม: rewrite/replace SICE · สร้าง parallel intelligence · replace canonical APIs ·
+> rewrite business logic · เปลี่ยน DB lifecycle โดยไม่มีเหตุบั๊ก · bypass memory เดิม ·
+> สร้าง duplicate Twin · เอา Community เข้า First Journey · ทำให้ Phase A production closure ไม่นิ่ง
+> → **โซนห้ามแตะด้านบนตรงกับ §44 ทุกข้อ — ไม่ขัดกัน**
 
 ---
 
@@ -312,12 +404,87 @@ npm run typecheck:functions   # typecheck functions/ + api/
 | "TypeScript strict mode passes" | `tsconfig.app.json` ไม่มี `"strict"` เลย |
 | "P1 ✅ Data Persistence (FBS) Complete" | ตาราง `user_feedback` ฯลฯ อยู่ในโฟลเดอร์ที่ CLI ไม่เคย apply |
 | "P2 Production Verification ✅ 100%, zero stubs" | `/api/metrics` + `/api/autonomy-log` บันทึกได้ 0 แถว |
-| "test ผ่านหมด" | vitest include ครอบ 7 จาก 69 ไฟล์ |
-| "no `dangerouslySetInnerHTML` found (0 occurrences)" | มี 7 จุด (บังเอิญปลอดภัย แต่ผลสแกนผิด) |
-| "TD-04 ลบ `as any` ครบ 50 จุด" | SICE layer สะอาดจริง ✅ แต่ทั้งโปรเจกต์ยังเหลือ 101 จุด |
+| "test ผ่านหมด" | vitest include ครอบ 7 จาก 73 ไฟล์ — **ตอนนี้ 66/66 ไฟล์ · 1037 tests ผ่านจริง** |
+| "no `dangerouslySetInnerHTML` found (0 occurrences)" | มี **8 จุด** (ปลอดภัยทั้งหมดผ่าน `safeJsonLd()`) |
+| "TD-04 ลบ `as any` ครบ 50 จุด" | SICE layer สะอาดจริง ✅ แต่ทั้งโปรเจกต์ยังเหลือ **114 จุด** |
+| "Phase A COMPLETE 42/42" (`SELFPRINT_STATUS_HONEST_TH.md` 30 ส.ค.) | เก่า/ไม่ผ่าน verify — ตัวเลขจริงคือ 1037/1037 tests (ดูฉบับใหม่ 5 ก.ย.) |
+| "skip 11 = REALBUG" (FORENSIC_AUDIT 3 ก.ย.) | ล้าสมัย — REALBUG-001..004 แก้ครบแล้ว · 0 skip |
+| "vitest รันแค่ 7/73 ไฟล์" (`PLAN_TRACKS_TH.md` 3 ก.ย.) | ล้าสมัย — ตอนนี้ 66/66 ไฟล์ |
+| "oxlint 195 warnings/480 files" (`CLAUDE.md`) | จริงคือ **187/474** |
+| **"migration 035 ยังไม่ apply"** (FORENSIC_AUDIT รอบที่ 3 + `SELFPRINT_STATUS_HONEST_TH.md` ฉบับก่อน 5 ก.ย.) | ✅ **APPLY แล้ว** — verify Supabase SQL Editor 5 ก.ย. 2026 · แก้ทั้ง 2 ไฟล์ในรอบที่ 4 |
+| **`"git filter-repo ยังไม่ได้ติดตั้ง"`** (FORENSIC_AUDIT รอบที่ 3) | ✅ **ติดตั้งแล้ว v2.47.0** — verify `where git-filter-repo` + `scoop list \| findstr filter` 5 ก.ย. 2026 · แก้ในรอบที่ 5 |
+| **`"ต้อง rotate รหัส staging 6 ตัว"`** (FORENSIC_AUDIT รอบที่ 3) | ❌ **ไม่ต้องทำ** — เจ้าของลบ users ทุกครั้งหลังทดสอบ · แก้ในรอบที่ 5 |
+| **`"e937ed8 build fail เพราะ :"`** (สมมติฐาน) | ❌ **ผิด** — verify Cloudflare build log 5 ก.ย. 2026: จริงเพราะ `npm ci` EUSAGE (lock file ไม่ sync กับ Tailwind 4 packages) + `wrangler.toml` ไม่มี `pages_build_output_dir` |
 
 **บทเรียน:** `.md` 84 ไฟล์ที่ root คือหนี้เชิงข้อมูล ไม่ใช่แค่ของรก มันทำให้เซสชันถัดไป
 เริ่มจากสมมติฐานผิดแล้วแก้ผิดจุด — ลบไปแล้วในรอบนี้
+
+**บทเรียนรอบที่ 4:** แม้แต่เอกสาร "single source of truth" (FORENSIC_AUDIT + SELFPRINT_STATUS_HONEST_TH) ก็เขียนผิดเรื่อง migration 035 ได้ — ต้อง verify กับ Supabase/Cloudflare/GitHub จริงเสมอ · ห้ามเชื่อเอกสารอย่างเดียว
+
+**บทเรียนรอบที่ 5:** ข้อสังเกตของเจ้าของเรื่อง "1 commit ไม่ผ่าน จาก `:`" แม้จะถูกบางส่วน (commit ก่อนหน้ามี `:` ในชื่อไฟล์จริง) แต่ `e937ed8` build FAIL จริงๆ เพราะ lock file ไม่ sync + wrangler.toml — **ต้องตรวจ build log จริง ไม่ใช่เดา** · ขอบคุณเจ้าของที่ช่วย catch ข้อผิดพลาด 4 จุด (migration 035, git filter-repo, rotate รหัส, e937ed8)
+
+---
+
+## 8.5 🧩 Stub / Mockup / Hardcode ที่ยังเหลือ (5 ก.ย. 2026)
+
+| ไฟล์:บรรทัด | สิ่งที่ยังเป็นของปลอม |
+|-------------|---------------------|
+| `VoiceChat.tsx:80` | mock AI response "(ยังไม่มี backend)" — **แต่มี route จริง `/voice` → `VoiceChatPage.tsx` import ไปใช้ (path การผลิต!)** |
+| `VoiceInput.tsx:38` | mock speech recognition |
+| `VoiceOutput.tsx:34` | mock TTS |
+| `AdvancedAnalytics.tsx:26` | mock data (orphan — ไม่มีใคร import) |
+| `SentryService.ts:15` | `MockSentry` class (orphan chain) |
+| `CommunityPage.tsx:397` | "กำลังมาเร็วๆ นี้ / Coming soon" |
+| `ExplorePage.tsx:728` + `:898` | stub cards + "เร็วๆ นี้" |
+| `DecisionDashboard.tsx:126` | placeholder "Phase F Dashboard" |
+| `structuredData.ts:21` | `VITE_BUSINESS_PHONE \|\| '+66-2-XXX-XXXX'` fake phone fallback |
+| `public/soundscape-manifest.json` | `CLOUDINARY_URL` ยังไม่ถูกแทนที่ 23 จุด → sound URL พังหมด · `public/audio/` ไม่มีอยู่จริง แต่ `adaptive-audio-engine.ts:285` อ้าง mp3 |
+| dead code 16+ ไฟล์ | `AdvancedAnalytics.tsx`, `SentryService.ts`, `AlertingService.ts`, `PerformanceMonitor.ts`, `AssetCatalog.tsx`, `DebugTheme.tsx`, `WorldSelector.tsx` (ว่าง), `TwinHologramBirth.tsx`, `TwinEvolutionProgress.tsx`, `GrowthBadge.tsx`, `RecoveryIndicator.tsx`, orphan pages `Chat.tsx` `ChatPage.tsx` `BlogIndex.tsx` `blog-astrology-vs-behavioral.tsx`, `public/service-worker.js` (dead — ตัวจริงคือ `sw.js`) |
+| `as any` | **114 จุด** (เอกสารเก่าบอก 101) |
+| `dangerouslySetInnerHTML` | **8 จุด** (ปลอดภัยทั้งหมดผ่าน `safeJsonLd()`) |
+
+---
+
+## 8.6 🎯 พร้อมเข้าสู่ Track C (UX/UI) หรือยัง? — 5 ก.ย. 2026
+
+**คำตอบ: ✅ พร้อม** — งาน visual/UX ไม่ถูกบล็อกด้วยบั๊ก build/test/lint
+(เดิม F-01 Tailwind เคยบล็อก — แก้แล้วด้วย TWFIX-001)
+
+> 📌 **Track C มีเอกสารแม่ (design master) แล้ว:**
+> [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md)
+> (2,046 บรรทัด · 50 topics · **Status: Proposed Architecture**)
+> หลัก: **RECOMPOSE ไม่ใช่ REBUILD** · core promise *"Understand yourself. Meet your Twin. Keep evolving."* ·
+> App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** · P0.1–P0.10 / P1.1–P1.8 / P2.1–P2.7 ·
+> §44 safety rule · §45 success criteria · §46 core loop
+> **Track C ทุก phase ต้องอ้างหัวข้อ (§topic) ของเอกสารนี้** — ดู mapping ใน
+> `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` และแผนปฏิบัติการใน
+> `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
+
+**แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (ลดจาก 4 เพราะ migration 035 apply แล้ว):
+
+1. ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase SQL Editor 5 ก.ย. 2026)
+2. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — verify Supabase Functions dashboard 5 ก.ย. 2026 = 0/11
+3. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
+4. **เอา VoiceChat mock ออกจาก route จริง** (`VoiceChat.tsx:80` → `/voice`)
+
+### ⚠️ สองจุดที่ Track C จะชนแน่ ๆ — ต้องขออนุมัติก่อน
+
+| # | เรื่อง | หลักฐาน | Track C จะชนเมื่อ | สถานะ |
+|---|-------|---------|------------------|--------|
+| **C1** | **Twin มี 3 implementations** | `LivingTwin.tsx` (orb CSS — Dashboard) · `TwinPresence.tsx` (SVG — WorldDetail) · `HologramBirth.tsx` (canvas 2D — CoreAwakening) — คำนวณ `evolutionStage`/`glowMult` ซ้ำกัน | **Phase 6 (Twin Birth)** + **Phase 7 (Twin Chat)** — P0.1 "Twin becomes visual protagonist" ทำไม่ได้ถ้า Twin มี 3 หน้าตา | 🛑 **A3 ต้องขออนุมัติ** (แตะแก่น product) |
+| **C2** | **ไม่มี SSR / SSG / prerender** | 24/41 หน้าไม่มี meta · FAQ schema แค่ 5 คำถาม · sitemap ไม่สมบูรณ์ · X1 env `structuredData.ts:21` ยังเปิด | **Phase 12 (SEO/GEO/AEO knowledge layer)** — P0.9 + §26–34 กำหนดให้ public layer ต้อง crawlable | 🛑 **A4 ต้องขออนุมัติ** (แตะ build/deploy pipeline) |
+
+> ทั้งสองข้อ **ไม่บล็อกการเริ่ม Track C** (เริ่มที่ Phase 1 ซึ่งแตะ 0 ไฟล์)
+> แต่ต้องมีคำตอบก่อน Phase 6 และ Phase 12 ตามลำดับ
+
+**งาน manual ที่ค้าง (อัปเดตรอบที่ 5):**
+- ~~`git filter-repo` ติดตั้ง~~ ✅ **เสร็จแล้ว v2.47.0** (verify scoop จริง)
+- ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase จริง)
+- ~~rotate รหัส staging 6 ตัว~~ ❌ **ไม่ต้องทำ** (เจ้าของลบ users ทุกครั้ง)
+- **สร้าง `purge.txt` แล้วรัน `git filter-repo`** (ต้องสร้างไฟล์ก่อน ไม่งั้น `FileNotFoundError`)
+- deploy Edge Functions (0/11 → 11/11)
+- ตัดสินใจ passkey flow
+- rebuild dist/ ใน local ให้ตรง src/ HEAD `3fa100a`
 
 ---
 
@@ -328,9 +495,18 @@ npm run typecheck:functions   # typecheck functions/ + api/
 `NOTIFAUTH-001` · `NOTIFCOL-001` · `TWINEVOAUTH-001` · `DEBUGLEAK-001` · `COACH404-001` ·
 `JOURNAL404-001` · `SCHEMA-TS-002` · `ENVTYPE-001` · `TSCONFIG-FUNCTIONS-001` ·
 `GITIGNORE-FIX-001` · `CRLF-001` · `DEADDEP-001` · `E2EPW-001` · `ENVDOC-001` ·
-`OGSTATIC-001` · `OGABS-001` · `OGFONT-001` · `ENVTICK-001` · `DBTBL-001` · `DBCOL-001` · `DBKEY-001`
+`OGSTATIC-001` · `OGABS-001` · `OGFONT-001` · `ENVTICK-001` · `DBTBL-001` · `DBCOL-001` · `DBKEY-001` ·
+`TWFIX-001` · `REALBUG-001..004` · `SEC-02` · `NAVGAP-001` · `DEADCHUNK-001` · `ASSET404-001` ·
+`RAFLOOP-001` · `HOMEBLANK-001` · `LOCKSYNC-001`
 
 ---
 
-**หลักการของเอกสารนี้:** ตรวจจากโค้ด ไม่ตรวจจากเอกสาร · แยก "แก้แล้ว verify แล้ว"
+**หลักการของเอกสารนี้:** ตรวจจากโค้ด + **verify กับ Supabase / Cloudflare / GitHub / scoop จริง** ไม่ใช่ตรวจจากเอกสาร · แยก "แก้แล้ว verify แล้ว"
 ออกจาก "แก้แล้วแต่ verify ไม่ได้" ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ
+
+**รอบที่ 3 (5 ก.ย. 2026):** วัดจริง HEAD `3fa100a` — build/test/lint ผ่านหมด ·
+REALBUG-001..004 แก้ครบ · ~~Core Awakening โค้ดถูกแล้วแต่ migration 035 ยังไม่ apply~~ →
+**รอบที่ 4 (5 ก.ย. 2026):** ✅ migration 035 **APPLY แล้ว** (verify Supabase SQL Editor จริง) · Core Awakening production ทำงานได้แล้ว →
+**รอบที่ 5 (5 ก.ย. 2026):** ✅ `git filter-repo` **ติดตั้ง v2.47.0 แล้ว** (verify scoop) · ✅ `e937ed8` build FAIL สาเหตุ = lock + wrangler.toml (ไม่ใช่ `:`) · ❌ rotate รหัส staging = ไม่ต้องทำ
+passkey flow พัง (AuthContext.tsx:130 + PasskeyProvider.ts:144) · Edge Functions ยังไม่ deploy 0/11 (verify Supabase Functions dashboard) ·
+พร้อมเริ่ม Track C แต่ยังไม่ "100% product-verified" จนกว่าจะทำครบ **3 เงื่อนไข** (หัวข้อ 8.6 — ลดจาก 4 เพราะ migration 035 apply แล้ว)

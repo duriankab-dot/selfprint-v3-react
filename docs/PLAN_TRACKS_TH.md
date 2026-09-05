@@ -1,6 +1,6 @@
 # SELFPRINT V3 — แผนงานรวม (Engineering Backlog + Visual Redesign)
 
-**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `62987f6` (ยังไม่ push)
+**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `3fa100a` (อัปเดต 5 ก.ย. 2026 — ตรงกับตาราง gate ท้ายเอกสาร)
 **ที่มา:** รวม 2 แหล่งเข้าด้วยกัน
 1. `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` — บั๊กค้างที่ตรวจเจอจากโค้ดจริง
 2. `New Ux_ui update talk.txt` — SELFPRINT Visual Engineering Contract (Phase 0 → N)
@@ -30,7 +30,7 @@ Contract ในไฟล์แนบสั่งชัดว่า **Phase 0 = f
 ```
 TRACK A — ENGINEERING BACKLOG      ← ทำตอนนี้ (บั๊กค้างจาก forensic audit)
       │
-TRACK B — PHASE 0 FORENSIC          ← ทำตอนนี้ (รายงานอย่างเดียว ไม่แตะโค้ด visual)
+TRACK B — PHASE 0 FORENSIC          ← ✅ ส่งรายงานแล้ว (4–5 ก.ย. 2026) · 🛑 STOP รอ approve
       │
       └── STOP → รอ approve
                     │
@@ -55,9 +55,9 @@ TRACK C — VISUAL REDESIGN           ← ยังไม่เริ่ม (Pha
 | **A4** | `/api/og` → jpg static | 🟢 ≤8 | API-02 |
 | **A5** | DB-01..03 รวม migration + ลบที่ไม่ใช้ | 🟠 dedicated phase | DB-01, DB-02, DB-03 |
 | **A6** | SEC-03 RLS policy | SQL อย่างเดียว | SEC-03 |
-| **A7** | เปิด TypeScript strict + `as any` 101 จุด | 🟠 dedicated phase | QA-02 |
-| **A8** | เปิด vitest ครบ 73 ไฟล์ | 🟠 dedicated phase | QA-01 |
-| **A9** | ลบ `.md` ที่ล้าสมัย 87 → เท่าที่จำเป็น | ลบอย่างเดียว | — |
+| **A7** | เปิด TypeScript strict + `as any` 114 จุด | 🟠 dedicated phase | QA-02 |
+| **A8** | เปิด vitest ครบ 66/66 ไฟล์ | 🟠 dedicated phase | QA-01 |
+| **A9** | ลบ `.md` ที่ล้าสมัย **84** → เท่าที่จำเป็น | ลบอย่างเดียว | — |
 
 ### เหตุผลของลำดับ
 
@@ -96,18 +96,42 @@ A9 ล้างเอกสาร
 ตาม contract ข้อ 0.20 + หัวข้อ "PHASE 0 VISUAL + PERFORMANCE FORENSIC"
 **ผลลัพธ์เป็นรายงาน ไม่ใช่โค้ด** และต้อง STOP ก่อน Phase 1
 
-| # | Deliverable | สถานะเริ่มต้น |
+> ✅ **ส่งมอบรายงานแล้ว — 4–5 ก.ย. 2026 · HEAD `3fa100a`:**
+> [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./PHASE0_VISUAL_PERF_FORENSIC_TH.md)
+>
+> 🛑 **สถานะปัจจุบันของ Track B: STOP รอ approve** — ห้ามเริ่ม Phase 1 จนกว่าเจ้าของจะอนุมัติ (contract ข้อ 0.20)
+
+| # | Deliverable | สถานะ (PHASE0 · 4–5 ก.ย. 2026) |
 |---|-------------|--------------|
-| B0.1 | Visual architecture (screen ไหน CSS / Canvas / WebGL / 3D / fallback) | ยังไม่ทำ |
-| B0.2 | Existing component audit + reuse map (KEEP/EXTEND/REPLACE) | มีข้อมูลบางส่วนแล้วจาก audit |
-| B0.3 | Bundle / chunk audit | ✅ วัดได้แล้ว — ดูด้านล่าง |
-| B0.4 | Dependency audit | ✅ เจอแล้วบางส่วน (`three` ไม่มีใคร import) |
-| B0.5 | Large-file audit (>800 / >1,500 / >2,500 บรรทัด) | ยังไม่ทำ |
-| B0.6 | Asset audit (png/jpg/webp/glb/font/audio) | ยังไม่ทำ |
-| B0.7 | 3D / WebGL feasibility | ยังไม่ทำ |
-| B0.8 | Mobile performance (360/390/412/768/1024/1440) | ยังไม่ทำ |
-| B0.9 | SEO / AEO / GEO baseline | มีข้อมูลบางส่วน (API-02) |
-| B0.10 | Refactor boundary | ยังไม่ทำ |
+| B0.1 | Visual architecture (screen ไหน CSS / Canvas / WebGL / 3D / fallback) | ✅ **PASS** |
+| B0.2 | Existing component audit + reuse map (KEEP/EXTEND/REPLACE) | ✅ **PASS** |
+| B0.3 | Bundle / chunk audit | ✅ **PASS** |
+| B0.4 | Dependency audit | ✅ **PASS** |
+| B0.5 | Large-file audit (>800 / >1,500 / >2,500 บรรทัด) | ✅ **PASS** |
+| B0.6 | Asset audit (png/jpg/webp/glb/font/audio) | 🟡 **PARTIAL** |
+| B0.7 | 3D / WebGL feasibility | 🟡 **PARTIAL** |
+| B0.8 | Mobile performance (360/390/412/768/1024/1440) | ✅ **PASS** |
+| B0.9 | SEO / AEO / GEO baseline | 🟡 **PARTIAL** |
+| B0.10 | Refactor boundary | ✅ **PASS** |
+
+> 📌 **ผลละเอียดทุกข้ออยู่ใน**
+> [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./PHASE0_VISUAL_PERF_FORENSIC_TH.md)
+> §"ตารางสรุป PASS / PARTIAL / BLOCKED"
+>
+> **สรุป 10 deliverable ของ Track B: PASS 7 · PARTIAL 3 · BLOCKED 0**
+> (รายงาน PHASE0 ฉบับเดียวกันยังมี 0.11 mock/stub = PARTIAL · 0.12 passkey = BLOCKED ·
+> 0.13 migration 035 = BLOCKED ซึ่งอยู่นอก 10 deliverable นี้ — สรุปรวมทั้งรายงาน: PASS 7 · PARTIAL 4 · BLOCKED 2)
+>
+> **เหตุผลของ 3 ข้อที่เป็น PARTIAL:**
+> - **B0.6** — splash/logo ที่อ้างใน `index.html:83` แก้แล้ว (ASSET404-001) · **แต่** `public/audio/` ยังหาย +
+>   `soundscape-manifest.json` ยังมี 23 CLOUDINARY_URL + `logo.png`/`og-image.png` ยังหาย
+> - **B0.7** — ตอบได้ว่ามีอะไรอยู่จริง (ไม่มี WebGL/THREE เลย) และลำดับที่ควรเริ่ม ·
+>   **แต่** ตอบไม่ได้ว่า HIGH ควรเป็น WebGL หรือ canvas — ต้องรอผล Lighthouse บนมือถือระดับกลาง
+>   ของ LandingPage/WorldDetail ซึ่งยังไม่เคยวัด (เป็นงานของ Phase 1)
+> - **B0.9** — ตรวจครบทุกไฟล์ที่ระบุ + ตอบ AEO ครบ 6 ข้อ · **แต่** ตอบไม่ได้ 2 เรื่อง —
+>   X1: ค่า env `VITE_BUSINESS_*` จริงบน CF Pages (อยู่ในโซนห้ามแตะ) · X2: Google Search Console coverage report จริง
+>
+> 🛑 **Track B ต้อง STOP และรอ approve ก่อนเริ่ม Phase 1** ตาม Visual Engineering Contract ข้อ 0.20
 
 ### B0.3 — Bundle baseline (วัดจริงแล้ว 3 ก.ย. 2026)
 
@@ -140,6 +164,8 @@ LandingPage                        45.06 kB   11.80 kB
 
 ### กฎที่ล็อกไว้จาก contract (ห้ามละเมิดใน Track C)
 
+ตรงกับ **§14 WORLD VISUAL SYSTEM** (ห้ามแก้ความดื่มดื่มด้วย heavy 3D โดย default — ใช้ CSS atmosphere / gradient / WebP/AVIF / lightweight SVG / subtle motion / lazy-loaded assets) และ **§25 PERFORMANCE ARCHITECTURE** (โหลดเฉพาะที่ route ต้องการ · Worlds lazy-load · Twin visuals lightweight · 3D = progressive enhancement เท่านั้น · animation ใช้ CSS ที่ทำได้ · heavy module = dynamic import)
+
 ```
 Landing / Onboarding / Analysis  →  ห้ามมี 3D หนัก
 Core Awakening                   →  lazy load 3D
@@ -151,21 +177,41 @@ Today                            →  lightweight representation
 - ห้าม import Three.js ที่ `App.tsx`
 - ห้ามใช้ `lazy()` ทุก component เป็นทางลัด — *"Performance improvement must not become perceived latency"*
 - ห้ามอ้างว่า optimize สำเร็จโดยไม่มีตัวเลข before/after
+- ระดับ L0–L3 ที่วัดใน `PHASE0_VISUAL_PERF_FORENSIC_TH.md` (0.1) คือ baseline ของ §14/§25 — งาน visual ทุกข้อต้องเทียบกับระดับ "ตอนนี้" ที่วัดไว้
 
 ---
 
 ## TRACK C — Visual Redesign (ยังไม่เริ่ม)
 
+> 📌 **Track C ถูกกำกับโดย master design document:**
+> [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) (2,046 บรรทัด · 50 หัวข้อ · **Status: Proposed Architecture**)
+> เป็น design/experience master ของ Track C — หลัก: **RECOMPOSE ไม่ใช่ REBUILD** ·
+> core promise: *"Understand yourself. Meet your Twin. Keep evolving."* ·
+> App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** ·
+> priority matrix **P0.1–P0.10 / P1.1–P1.8 / P2.1–P2.7** ·
+> §44 ARCHITECTURAL SAFETY RULE · §45 SUCCESS CRITERIA · §46 CORE LOOP
+> ทุก phase ใน Track C ต้องอ้างหัวข้อของเอกสารนี้ (ดู mapping ใน `PHASE0_VISUAL_PERF_FORENSIC_TH.md`)
+
 ```
-PHASE 1  Performance Foundation
-PHASE 2  Landing        → verify
-PHASE 3  Onboarding     → verify
-PHASE 4  Analysis       → verify
-PHASE 5  Core Awakening → verify
-PHASE 6  Twin Birth     → verify
-PHASE 7  Twin Chat      → verify
-PHASE 8  Today          → verify
+PHASE 1   Performance Foundation
+PHASE 2   Landing        → verify
+PHASE 3   Onboarding     → verify
+PHASE 4   Analysis       → verify
+PHASE 5   Core Awakening → verify
+PHASE 6   Twin Birth     → verify
+PHASE 7   Twin Chat      → verify
+PHASE 8   Today          → verify
+PHASE 9   Worlds         → verify   (NEW · P0.5 World = context)
+PHASE 10  Twin Modes     → verify   (NEW · P0.4 / P1.8)
+PHASE 11  Memory Experience → verify (NEW · P1.1 / P1.2)
+PHASE 12  SEO/GEO/AEO knowledge layer → verify (NEW · P0.9)
 ```
+
+**P0/P1/P2 mapping (จาก §41–43 ของ Experience Architecture v2):**
+- **P0 (Experience Recomposition):** P0.1 Twin protagonist · P0.2 Today living entry · P0.3 Twin Birth signature · P0.4 Chat = one mode · P0.5 World = context · P0.6 ลด card density · P0.7 onboarding narrative · P0.8 mobile-app patterns · P0.9 SEO/GEO/AEO · P0.10 performance-safe visual
+- **P1 (Relationship Intelligence):** P1.1 Visible Memory · P1.2 What Twin Knows · P1.3 Twin State · P1.4 Choice→Memory · P1.5 Choice→Pattern · P1.6 Evolution presentation · P1.7 Proactive insight · P1.8 Reflection/Decision/Pattern modes
+- **P2 (Living Intelligence Expansion):** P2.1–P2.7 (หลัง Phase A production closure)
+- **P1/P2 items ที่ Track C ยังมี:** JOURNEY (§15) · SMART ENTRY (§35) · Returning user (§36)
 
 **Change budget ต่อ phase** (guardrail ไม่ใช่ quota):
 `≤8 files` ปกติ · `9–15` ต้องมี change map + test · `16–30` ต้องเป็น dedicated phase ·
@@ -180,7 +226,11 @@ PHASE 8  Today          → verify
 
 ## สิ่งที่ห้ามแตะตลอดทั้ง 3 track
 
-จาก contract ข้อ 0.1 + ข้อ "ไม่แนะนำให้ refactor ตอนนี้":
+จาก contract ข้อ 0.1 + ข้อ "ไม่แนะนำให้ refactor ตอนนี้" — และตรงกับ
+**§44 ARCHITECTURAL SAFETY RULE** ของ `docs/Experience Architecture v2.md`
+(ห้าม: rewrite/replace SICE · สร้าง parallel intelligence · replace canonical APIs ·
+rewrite business logic · เปลี่ยน DB lifecycle โดยไม่มีเหตุบั๊ก · bypass memory เดิม ·
+สร้าง duplicate Twin · เอา Community เข้า First Journey · ทำให้ Phase A production closure ไม่นิ่ง)
 
 ```
 SICE / SICE Orchestrator      AI intelligence pipeline
@@ -190,19 +240,35 @@ Analysis calculation          routing core
 rename NOVA ใน code
 ```
 
+หลักของ §44: **RECOMPOSE → CONNECT → ENHANCE** ไม่ใช่ **REBUILD → REWRITE → REPLACE**
+
 **ข้อยกเว้นที่เจ้าของอนุมัติแล้ว:** DB schema + RLS (Track A5/A6) — แต่ส่งเป็นไฟล์ให้ตรวจก่อนรัน
 
 ---
 
-## สถานะ gate ปัจจุบัน (วัดจริง 3 ก.ย. 2026)
+## สถานะ gate ปัจจุบัน (วัดจริง 4–5 ก.ย. 2026 · HEAD `3fa100a`)
 
 | gate | ผล |
 |------|-----|
-| `tsc -b` | ✅ 0 errors |
+| `tsc -b` | ✅ 0 errors (strict) |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ สำเร็จ |
-| `oxlint` | ✅ 0 errors · 209 warnings · 550 files |
-| `vitest run` | ⚠️ 167 tests ผ่าน แต่รันแค่ **7 จาก 73 ไฟล์** (A8 จะแก้) |
+| `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) |
+| `oxlint` | ✅ 0 errors · **187 warnings · 474 files** |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests · 0 fail · 0 skip** (REALBUG-001..004 แก้ครบแล้ว) |
 
-⚠️ เทสต์ปัจจุบัน**ยิงเน็ตจริงไป Supabase** (`EAI_AGAIN orxteufqeohptpbwkqx.supabase.co`)
-แล้ว fail เงียบ ๆ — ต้องแก้ใน A8 ด้วย ไม่งั้นเทสต์ขึ้นกับเน็ตและ DB จริง
+> ⚠️ ตัวเลขนี้เป็น **ฉบับที่ถูกแก้แล้ว** — ฉบับก่อน (3 ก.ย. 2026) บอก "oxlint 209 warnings · 550 files"
+> และ "vitest 7 จาก 73 ไฟล์" ซึ่ง**ล้าสมัย** ตอนนี้ oxlint = 187/474 และ vitest = 66/66 ไฟล์ · 1037 tests
+
+---
+
+## 4 เงื่อนไขก่อนอ้าง "100% product-verified"
+
+แม้ gate ทุกตัวจะผ่าน — **ยังห้ามอ้าง "100% product-verified"** จนกว่าจะทำครบ 4 ข้อ
+(อ้างอิง `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` §8.6):
+
+1. **Apply migration 035** — `supabase/migrations/035_forensic_consolidation_2026-09-03.sql` (1,392 บรรทัด)
+   **ยังไม่ถูก apply** · Core Awakening บน production พังด้วย error `42703` จนกว่าจะรัน + ต้องทดสอบบน staging จริง
+2. **Deploy Edge Functions** — `send-push` · `daily-brief` · `pattern-detect` (SEC-02 แก้โค้ดแล้วแต่ยังไม่ deploy)
+3. **แก้/ตัดสินใจ passkey flow** — `AuthContext.tsx:130` ไม่เรียก `supabase.auth.setSession()` ·
+   `PasskeyProvider.ts:144` เรียก 4 Edge Functions ที่ไม่มีอยู่จริง · JWT zero-signature
+4. **ถอด VoiceChat mock ออกจาก route จริง** — `VoiceChat.tsx:80` เป็น mock แต่ถูกต่อเข้ากับ `/voice` (path การผลิต)
