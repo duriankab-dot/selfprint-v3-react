@@ -375,7 +375,7 @@ export async function synthesizeSoundscapeBuffer(
   const totalSec = durationSec + fadeSec;
 
   const OfflineCtor: typeof OfflineAudioContext =
-    (window as any).OfflineAudioContext || (window as any).webkitOfflineAudioContext;
+    window.OfflineAudioContext || window.webkitOfflineAudioContext!;
   const offlineCtx = new OfflineCtor(2, Math.ceil(totalSec * sampleRate), sampleRate);
 
   const master = offlineCtx.createGain();

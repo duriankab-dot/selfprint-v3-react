@@ -8,14 +8,8 @@
  * - User preferences (save data, low power mode)
  */
 
-// A7-TS-strict (5 ก.ย. 2026): declare non-standard WebKit-prefixed AudioContext
-// with proper types instead of `as any`. The standard `AudioContext` is on the
-// lib.dom.d.ts already; only the webkit-prefixed variant needs extension.
-declare global {
-  interface Window {
-    webkitAudioContext?: typeof AudioContext;
-  }
-}
+// A7-TS-strict (5 ก.ย. 2026): webkitAudioContext / webkitOfflineAudioContext /
+// connection / battery / memory types are declared in src/lib/global-webapi-types.d.ts
 
 import type { MusicExperience } from '@/context/AudioContext';
 

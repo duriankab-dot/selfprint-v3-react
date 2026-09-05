@@ -62,7 +62,7 @@ let volumeTransitionInterval: ReturnType<typeof setTimeout> | null = null;
  */
 export function initializeAudioPlayer(): AudioContext {
   if (!audioContext) {
-    audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    audioContext = new (window.AudioContext || window.webkitAudioContext!)();
     gainNode = audioContext.createGain();
     gainNode.connect(audioContext.destination);
     gainNode.gain.value = 0.3; // Default volume

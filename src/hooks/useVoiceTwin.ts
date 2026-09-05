@@ -120,10 +120,13 @@ export function useVoiceTwin(options?: {
     if (TTS_SUPPORTED) window.speechSynthesis.cancel();
 
     const SpeechRecognitionCtor =
-      (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+      window.SpeechRecognition ?? window.webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) {
+      setState((s) => ({ ...s, sttError: 'SpeechRecognition not supported', mode: 'idle' }));
+      return;
+    }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recognition: any = new SpeechRecognitionCtor();
+    const recognition = new SpeechRecognitionCtor();
     recognition.lang = language;
     recognition.continuous = false;
     recognition.interimResults = true;

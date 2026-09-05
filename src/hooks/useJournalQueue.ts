@@ -225,7 +225,7 @@ export function useJournalQueue(): UseJournalQueueReturn {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      await (registration as any).sync.register('journal-sync');
+      await registration.sync?.register('journal-sync');
       console.log('[useJournalQueue] Background sync registered');
     } catch (err) {
       console.warn('[useJournalQueue] Failed to register background sync:', err);

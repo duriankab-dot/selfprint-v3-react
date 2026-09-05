@@ -112,7 +112,7 @@ const ContextualPopup: React.FC<ContextualPopupProps> = ({ defaultDuration = 500
 const PopupSound: React.FC<{ popupType: string }> = ({ popupType }) => {
   React.useEffect(() => {
     // Create simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext || window.webkitAudioContext!)();
 
     // Different sound patterns for different popup types
     const frequencies: Record<string, number[]> = {
