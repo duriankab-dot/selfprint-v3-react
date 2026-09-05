@@ -8,6 +8,15 @@
  * - User preferences (save data, low power mode)
  */
 
+// A7-TS-strict (5 ก.ย. 2026): declare non-standard WebKit-prefixed AudioContext
+// with proper types instead of `as any`. The standard `AudioContext` is on the
+// lib.dom.d.ts already; only the webkit-prefixed variant needs extension.
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
+
 import type { MusicExperience } from '@/context/AudioContext';
 
 /**
@@ -343,7 +352,7 @@ export class AdaptiveAudioEngine {
     }
 
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext || window.webkitAudioContext!)();
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
