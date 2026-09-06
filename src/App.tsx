@@ -14,7 +14,9 @@ import { TwinProvider } from './context/TwinContext';
 import { WorldProvider } from './context/WorldContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
-import { ExperienceProvider } from './context/ExperienceContext';
+const ExperienceProvider = lazy(() =>
+  import('./context/ExperienceContext').then((m) => ({ default: m.ExperienceProvider }))
+);
 import { AudioProvider } from './context/AudioContext';
 import { PopupProvider } from './context/PopupContext';
 import { EvolutionProvider } from './context/EvolutionContext';
@@ -228,6 +230,21 @@ function RecoveryRouteHandler() {
   return null;
 }
 
+// A3-LAZY: ExperienceProvider pulls in PersonalContextBuilder +
+// TwinStateEngine + ExperienceEngine (~345 kB chunk). Since no production
+// component reads useExperience() (verified via grep at A3 commit time),
+// the provider itself is only useful AFTER login. ConditionalExperience
+// defers its render (and therefore its dynamic-import chunk) until a real
+// session exists. Pre-login visitors never fetch the intelligence chunk.
+function ConditionalExperience({ children }: { children: React.ReactNode }) {
+  const auth = useContext(AuthContext);
+  if (!auth?.session) return <>{children}</>;
+  return (
+    <Suspense fallback={<>{children}</>}>
+      <ExperienceProvider>{children}</ExperienceProvider>
+    </Suspense>
+  );
+}
 function App() {
   // Validate world personalities on app startup
   useEffect(() => {
@@ -259,7 +276,7 @@ function App() {
                   <TwinProvider>
                     <WorldProvider>
                       <SubscriptionProvider>
-                      <ExperienceProvider>
+                      <ConditionalExperience>
                         <AudioProvider>
                           <EnvironmentProvider>
                             <EvolutionProvider>
@@ -293,7 +310,7 @@ function App() {
                           </EvolutionProvider>
                         </EnvironmentProvider>
                       </AudioProvider>
-                    </ExperienceProvider>
+                    </ConditionalExperience>
                   </SubscriptionProvider>
                   </WorldProvider>
                 </TwinProvider>
