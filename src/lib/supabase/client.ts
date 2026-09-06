@@ -32,11 +32,14 @@ function readEnv(name: string): string | undefined {
 let _client: SupabaseClient | null = null;
 function getClient(): SupabaseClient {
   if (_client) return _client;
-  const supabaseUrl = readEnv('VITE_SUPABASE_URL');
+  // CF-CREDS-001 (6 Sep 2026): CF Pages env var was historically named
+  // VITE_SUPABASE_BASE_URL; code was later normalised to VITE_SUPABASE_URL.
+  // Read both so the client works regardless of which name is set in CF Pages.
+  const supabaseUrl = readEnv('VITE_SUPABASE_URL') || readEnv('VITE_SUPABASE_BASE_URL');
   const supabaseAnonKey = readEnv('VITE_SUPABASE_ANON_KEY');
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
-      'Missing Supabase credentials. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables'
+      'Missing Supabase credentials. Set VITE_SUPABASE_URL (or VITE_SUPABASE_BASE_URL) and VITE_SUPABASE_ANON_KEY environment variables'
     );
   }
   _client = createClient(supabaseUrl, supabaseAnonKey);

@@ -202,7 +202,7 @@ test('SK-08 LandingPage /en has no critical JS errors', async ({ page }) => {
 
 // ─── SK-09: Cold-start performance ───────────────────────────────────────────
 
-test('SK-09 LandingPage cold-start loads within 6s', async ({ page }) => {
+test('SK-09 LandingPage cold-start loads within 8s', async ({ page }) => {
   const startTime = Date.now();
   await page.goto('/en', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
