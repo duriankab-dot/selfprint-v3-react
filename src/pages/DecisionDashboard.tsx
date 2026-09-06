@@ -119,17 +119,6 @@ export default function DecisionDashboard() {
         </div>
       )}
 
-      {/* Pending Follow-ups Section — managed in DecisionCard per Phase F */}
-      <div className="dd-pending-section">
-        <h2>⏰ Pending Follow-ups</h2>
-        <div className="dd-pending-list">
-          {/* STUB-001 (5 ก.ย. 2026): Placeholder removed. Phase F follow-up
-              dashboard is on the roadmap but not yet shipped — show an honest
-              empty state instead of a fake "coming soon" message. */}
-          <p className="placeholder">No pending follow-ups yet. Phase F dashboard coming soon.</p>
-        </div>
-      </div>
-
       {/* Decisions List */}
       <div className="dd-decisions-section">
         <h2>📋 Your Decisions ({filteredDecisions.length})</h2>

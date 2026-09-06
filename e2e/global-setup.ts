@@ -26,22 +26,23 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const AUTH_STATE_PATH = path.join(__dirname, '.auth', 'user.json');
 
 export default async function globalSetup(_config: FullConfig): Promise<void> {
-  const supabaseUrl =
-    process.env.E2E_SUPABASE_URL ||
-    process.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey =
-    process.env.E2E_SUPABASE_ANON_KEY ||
-    process.env.VITE_SUPABASE_ANON_KEY;
+  // GLOBALSETUP-001 FIX (6 Sep 2026): Previously fell back to VITE_SUPABASE_URL /
+  // VITE_SUPABASE_ANON_KEY which ARE set in CI for the Vite build. This caused
+  // setup to proceed past the early-return guard, attempt signInWithPassword with
+  // an empty password (E2E_TEST_PASSWORD not set), log an error, then bail —
+  // adding unnecessary delay and causing chromium-staging tests to run without
+  // auth. Now only E2E_* vars enable Phase B setup; VITE_* are build-time only.
+  const supabaseUrl = process.env.E2E_SUPABASE_URL;
+  const supabaseAnonKey = process.env.E2E_SUPABASE_ANON_KEY;
   const baseURL =
     process.env.STAGING_URL ||
-    process.env.BASE_URL ||
     'https://staging.selfprint.one';
 
-  // Skip if env vars not configured (CI will have them; local dev may skip)
+  // Skip if E2E-specific vars not set (normal for Phase A CI — production smoke tests only)
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn(
+    console.log(
       '[global-setup] E2E_SUPABASE_URL / E2E_SUPABASE_ANON_KEY not set — ' +
-        'Phase B tests will run without auth (expect failures on authenticated routes)',
+        'Phase B (staging) tests will be skipped. Phase A smoke tests run normally.',
     );
     return;
   }

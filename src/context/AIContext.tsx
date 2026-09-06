@@ -9,7 +9,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { supabase } from '../services/supabase-service';
 
 export type ActiveAI = 'nova' | 'twin';
 
@@ -55,6 +54,10 @@ export function AIProvider({ children }: AIProviderProps) {
 
     (async () => {
       try {
+        // F-02 FIX (6 Sep 2026): lazy-import supabase so @supabase/supabase-js
+        // (345 kB) stays out of the initial chunk. The module loads only after
+        // a user session exists — never on the pre-login landing page.
+        const { supabase } = await import('../services/supabase-service');
         // Fetch Twin status from Supabase
         // TWINS406-001: .single() throws PGRST116 ("0 rows") for any user
         // who hasn't created a Twin yet — the normal case pre-Core-Awakening
