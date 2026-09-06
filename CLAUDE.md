@@ -105,26 +105,12 @@ A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 6
 
 ## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
 
-1. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**
-   → **Core Awakening ขึ้นกับข้อนี้ ไม่เคยทำงานได้เลยจนกว่าจะรัน**
-   ทดสอบกับ PostgreSQL 18.4 จริงแล้ว 3 เคส (production-like / รันซ้ำ / DB ว่าง)
-2. **deploy Edge Functions ที่แก้แล้ว**
-   `supabase functions deploy send-push daily-brief pattern-detect`
-   แล้วทดสอบ: ไม่มี header → 401 · token จริง + userId คนอื่นใน body → 403
-3. **Passkey flow ยังไม่แก้ — ต้องตัดสินใจ**
-   `auth-verify-passkey` ปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ และ
-   `auth-registration-options` ผูก passkey เข้าอีเมลใครก็ได้ (account takeover)
-   **แต่ passkey login ใช้งานจริงไม่ได้อยู่แล้ว** เพราะ `AuthContext.tsx:130` เรียกแค่
-   `setSession()` ของ React ไม่ได้เรียก `supabase.auth.setSession()` → token ปลอม
-   ไม่เคยเข้า supabase client → RLS ยังเป็น anonymous
-   → ทางที่ปลอดภัยสุดตอนนี้คือ **undeploy 3 ฟังก์ชันนั้น** (magic link / OAuth ไม่กระทบ)
-4. **git filter-repo** — ยังไม่ได้ลง (`pip install git-filter-repo`) คำสั่งอยู่ในไฟล์
-   forensic หัวข้อ 2.1 · ไม่เร่งด่วนแล้วเพราะ key revoke ไปแล้ว เหลือแค่ลดขนาด repo
-5. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว** (ของเดิมหลุดใน git history)
-6. **`PasskeyProvider.ts` เรียก Edge Function ที่ไม่มีอยู่จริง 4 ตัว**
-   `auth-list-credentials` (`:144`), `auth-rename-credential` (`:157`),
-   `auth-delete-credential` (`:170`), `auth-delete-all-credentials` (`:183`)
-   → พัง runtime ถ้ามีคนกดใช้
+~~1. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**~~ ✅ **apply แล้ว** (Supabase SQL Editor 5 ก.ย. 2026) — Core Awakening ทำงานบน production ได้แล้ว
+~~2. **deploy Edge Functions ที่แก้แล้ว**~~ ✅ **deploy แล้ว** (6 Sep 2026) — ทุก 12 functions deployed, ทุกตัวตอบ 401 (ไม่มี header) · SEC-02 live
+~~3. **Passkey flow ยังไม่แก้**~~ ✅ **ซ่อมแล้ว (b7bde64):** `AuthContext.tsx:130` เรียก `supabase.auth.setSession()` ถูกต้องแล้ว · `auth-verify-passkey` ใช้ HMAC-SHA256 จริง · PasskeyProvider management methods throw `NotImplemented` อย่างชัดเจน
+4. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรันคำสั่ง filter-repo · ไม่เร่งด่วนเพราะ key revoke ไปแล้ว
+~~5. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว**~~ ❌ ไม่ต้องทำ (เจ้าของลบ users ทุกครั้งหลังทดสอบ)
+~~6. **`PasskeyProvider.ts` เรียก Edge Function ที่ไม่มีอยู่จริง 4 ตัว**~~ ✅ **แก้แล้ว (b7bde64)** — management methods (`list/rename/delete/deleteAll`) throw `NotImplemented` อย่างชัดเจน ไม่พัง runtime แล้ว
 
 ## 🎯 Track C เริ่มได้แล้ว
 อ่าน `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` ก่อน — โดยเฉพาะ **F-02**:

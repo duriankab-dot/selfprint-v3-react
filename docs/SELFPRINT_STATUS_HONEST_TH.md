@@ -12,7 +12,7 @@
 >
 > ✅ **อัปเดตจาก Supabase จริง (5 ก.ย. 2026):** migration `035_forensic_consolidation_2026-09-03` **apply แล้ว** — verify จาก Supabase SQL Editor: `SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;` → `complete ✅` · เอกสารฉบับก่อนเขียนว่า "ยังไม่ apply" นั้น **เก่าแล้ว** — แก้ครั้งนี้
 >
-> 📌 **GitHub จริง (HEAD `da855c5`):** commits ล่าสุด: `7ca1a4f`(docs sync) `6cc2fe6`(A1 delete 11) `e25fc15`(untrack v2 docs) `6746f7a`(X1 env) `13c70f8`(ASSET404-001) `6e0aebd`(STUB-001) `bcf46f7`/`49995fa`/`0cf7ee4`(A7 as-any) `5676db7`(A1-cont) `875a5ca`(A3-lazy) `da855c5`(A3-perf) · gates: `tsc -b 0 errors` ✅ (build/lint/test: ต้องรันบน Windows — native binaries)
+> 📌 **GitHub จริง (HEAD `da855c5`):** commits ล่าสุด: `7ca1a4f`(docs sync) `6cc2fe6`(A1 delete 11) `e25fc15`(untrack v2 docs) `6746f7a`(X1 env) `13c70f8`(ASSET404-001) `6e0aebd`(STUB-001) `bcf46f7`/`49995fa`/`0cf7ee4`(A7 as-any) `5676db7`(A1-cont) `875a5ca`(A3-lazy) `da855c5`(A3-perf) `65cf56b`(A1 close) `ec80693`(B5 as-any) `103d7ba`(tsc fix) `b7bde64`(B2-B3 passkey+voice fix) · gates: `tsc -b 0 errors` ✅ (build/lint/test: ต้องรันบน Windows — native binaries)
 >
 > ✅ **อัปเดตจาก Cloudflare Pages (5 ก.ย. 2026):** deployments มี 141 รายการ · HEAD `3fa100a` build PASS · HEAD `da855c5` = ยังไม่ verify กับ Cloudflare · `e937ed8` (commit ก่อน) build **FAIL** — สาเหตุ: `package.json` มี `@tailwindcss/vite@4.3.3` แต่ `package-lock.json` ไม่มี → `npm ci` EUSAGE + `wrangler.toml` ไม่มี `pages_build_output_dir` (commit `3fa100a` แก้แล้ว)
 >
@@ -91,10 +91,10 @@
 | # | เรื่อง | สถานะจริง | verify กับ |
 |---|-------|----------|----------|
 | 1 | ~~**Core Awakening บน production** (migration 035)~~ | ✅ **เสร็จแล้ว** — ดูหัวข้อ "✅ สิ่งที่ทำเสร็จจริง" ข้างบน | Supabase SQL Editor 5 ก.ย. 2026 |
-| 2 | **Passkey flow** | **พัง** — `AuthContext.tsx:130` `signInWithPasskey` เรียกแค่ React `setSession()` ไม่ได้เรียก `supabase.auth.setSession()` → token ไม่เข้าสู่ supabase client → RLS ยังเป็น anonymous · `PasskeyProvider.ts:144` เรียก Edge Function 4 ตัวที่**ไม่มีอยู่จริง** (`auth-list-credentials`, `auth-rename-credential`, `auth-delete-credential`, `auth-delete-all-credentials`) · `auth-verify-passkey` ยังปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ | local code |
+| 2 | **Passkey flow** | ✅ **แก้แล้ว (b7bde64)** — supabase.auth.setSession() เรียกถูก · JWT HMAC-SHA256 จริง · PasskeyProvider management → throw NotImplemented (ไม่พัง runtime แล้ว) | local code + b7bde64 |
 | 3 | **Edge Functions (SEC-02)** | แก้โค้ดแล้วแต่**ยังไม่ deploy** (`send-push`, `daily-brief`, `pattern-detect`) · verify Supabase Functions dashboard 5 ก.ย. 2026 พบว่ามีแค่ "DEPLOY YOUR FIRST EDGE FUNCTION" (0/11 function) | local code + **Supabase Functions dashboard จริง** 5 ก.ย. 2026 |
 | 4 | **dist/ ตาม src/** | dist/ ล้าหลัง src/ 1 commit — `e937ed8` build FAIL ใน Cloudflare Pages · `3fa100a` (lock sync) build PASS แต่ dist/ ใน local ยังเป็น `index-DE3pLhDs.js` เก่า → ต้อง `npm run build` ใหม่ใน local | local build + **Cloudflare Pages log จริง** 5 ก.ย. 2026 |
-| 5 | **งาน manual ที่ค้าง** | ~~apply migration 035~~ ✅ · ~~`git filter-repo` ติดตั้ง~~ ✅ v2.47.0 · ~~rotate รหัส staging~~ ❌ ไม่ต้องทำ · ~~A1 dead code~~ ✅ ปิดแล้ว · ~~A7 as-any~~ ✅ ปิดแล้ว · **สร้าง `purge.txt` ก่อนรัน filter-repo** · **deploy Edge Functions** (passkey decision) · **voice route decision** · rebuild dist/ ใน Windows | local + scoop + Supabase |
+| 5 | **งาน manual ที่ค้าง** | ~~apply migration 035~~ ✅ · ~~`git filter-repo` ติดตั้ง~~ ✅ v2.47.0 · ~~rotate รหัส staging~~ ❌ ไม่ต้องทำ · ~~A1 dead code~~ ✅ ปิดแล้ว · ~~A7 as-any~~ ✅ ปิดแล้ว · **สร้าง `purge.txt` ก่อนรัน filter-repo** · ~~deploy Edge Functions~~ ✅ · ~~voice route decision~~ ✅ · ~~passkey decision~~ ✅ · rebuild dist/ ใน Windows | local + scoop + Supabase |
 
 ---
 
@@ -102,7 +102,7 @@
 
 | ไฟล์:บรรทัด | สิ่งที่ยังเป็นของปลอม |
 |-------------|---------------------|
-| `VoiceChat.tsx:80` | mock AI response "(ยังไม่มี backend)" — **แต่มี route จริง `/voice` → `VoiceChatPage.tsx` import ไปใช้ (path การผลิต!)** |
+| `VoiceChat.tsx:80` | ✅ แก้แล้ว — Web Speech API + /api/nova (b7bde64) |
 | `VoiceInput.tsx:38` | mock speech recognition |
 | `VoiceOutput.tsx:34` | mock TTS |
 | `AdvancedAnalytics.tsx:26` | mock data (orphan — ไม่มีใคร import) |
@@ -131,11 +131,11 @@
 > ทุก phase ของ Track C ต้องอ้าง §topic ของเอกสารนี้ — แผนปฏิบัติการอยู่ที่
 > `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
 
-**แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (migration 035 apply แล้ว — ลดจาก 4):
+> ✅ **ปิดครบ 6 Sep 2026 HEAD b7bde64** — Edge Functions deployed · passkey flow fixed · VoiceChat ใช้ Web Speech API จริง · dist/ rebuilt (CF Pages auto-deploy)
 
-1. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — 12 functions in repo; verify Supabase dashboard
-2. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
-3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` mock อยู่ใน `/voice` (production route)
+~~1. **deploy Edge Functions**~~ ✅ ปิดแล้ว — 12 functions deployed 6 Sep 2026
+~~2. **แก้/ตัดสินใจ passkey flow**~~ ✅ ปิดแล้ว — AuthContext.tsx + JWT HMAC-SHA256 + PasskeyProvider NotImplemented
+~~3. **ตัดสินใจ voice route**~~ ✅ ปิดแล้ว — VoiceChat ใช้ Web Speech API + /api/nova
 
 ---
 

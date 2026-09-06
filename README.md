@@ -50,7 +50,7 @@ SELFPRINT V3 is a **Living Intelligence experience** — an AI-powered "living T
 |-------|-----------|
 | Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 |
 | State | Zustand + TanStack React Query |
-| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (12 functions in repo; deploy status unverified) |
+| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (12 functions deployed ✅ (verified 6 Sep 2026)) |
 | Database | Supabase (PostgreSQL + Auth + RLS) |
 | AI | 12 SICE (Selfprint Intelligence Core Engines — client-side, rule-based) + Claude API (Nova guide + AI Twin) |
 | Payments | Stripe |
@@ -176,19 +176,19 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 
 ## ⚠️ Known Limitations / Not Yet Done
 
-### 3 conditions before "100% product-verified" can be claimed
+### ✅ 3 conditions CLOSED — Track C is open
 
 ~~Apply migration 035~~ ✅ **done** (verified Supabase SQL Editor 5 Sep 2026)
 
-1. **Deploy Edge Functions** — SEC-02 fixes (`send-push`, `daily-brief`, `pattern-detect` JWT enforcement) coded but **not deployed** (12 functions in repo; verify Supabase dashboard).
-2. **Fix/decide passkey flow** — broken: `AuthContext.tsx:130` never calls `supabase.auth.setSession()`, `PasskeyProvider.ts:144` calls 4 non-existent Edge Functions.
-3. **Decide voice route** — `VoiceChat.tsx:80` is a mock wired into the real `/voice` production route.
+~~1. **Deploy Edge Functions**~~ ✅ Closed (6 Sep 2026) — 12 functions deployed, all return 401 without token. SEC-02 live.
+2. ~~**Fix/decide passkey flow**~~ ✅ Fixed (b7bde64) — `supabase.auth.setSession()` called; JWT real HMAC-SHA256; PasskeyProvider management throws NotImplemented.
+3. ~~**Decide voice route**~~ ✅ Fixed (b7bde64) — `VoiceChat.tsx` uses `useVoiceTwin` (Web Speech API) + `/api/nova`. Working production feature.
 
 ### Known stubs / mocks / placeholders
 
 | File:line | What's fake |
 |-----------|-------------|
-| `VoiceChat.tsx:80` | Mock AI response (wired into real `/voice` route) |
+| `VoiceChat.tsx:80` | ✅ Fixed (b7bde64) — Web Speech API STT+TTS + /api/nova |
 | `VoiceInput.tsx:38` | Mock speech recognition |
 | `VoiceOutput.tsx:34` | Mock TTS |
 | `SentryService.ts:15` | `MockSentry` class (orphan — delete candidate; A1 closed but this remains) |

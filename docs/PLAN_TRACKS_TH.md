@@ -119,8 +119,8 @@ A9 ล้างเอกสาร
 > §"ตารางสรุป PASS / PARTIAL / BLOCKED"
 >
 > **สรุป 10 deliverable ของ Track B: PASS 7 · PARTIAL 3 · BLOCKED 0**
-> (รายงาน PHASE0 ฉบับเดียวกันยังมี 0.11 mock/stub = PARTIAL · 0.12 passkey = BLOCKED ·
-> 0.13 migration 035 = BLOCKED ซึ่งอยู่นอก 10 deliverable นี้ — สรุปรวมทั้งรายงาน: PASS 7 · PARTIAL 4 · BLOCKED 2)
+> (รายงาน PHASE0 ฉบับเดียวกันยังมี 0.11 mock/stub = PARTIAL · ~~0.12 passkey = BLOCKED~~ ✅ CLOSED (b7bde64) ·
+> ~~0.13 migration 035 = BLOCKED~~ ✅ CLOSED (Supabase 5 Sep 2026) — สรุปรวมทั้งรายงาน: PASS 7 · PARTIAL 4 · ~~BLOCKED 2~~ → 0)
 >
 > **เหตุผลของ 3 ข้อที่เป็น PARTIAL:**
 > - **B0.6** — splash/logo ที่อ้างใน `index.html:83` แก้แล้ว (ASSET404-001) · **แต่** `public/audio/` ยังหาย +
@@ -267,9 +267,8 @@ rename NOVA ใน code
 (อ้างอิง `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` §8.6):
 
 ~~**Apply migration 035**~~ ✅ **APPLIED** (verify Supabase SQL Editor 5 Sep 2026)
-1. **Deploy Edge Functions** — `send-push` · `daily-brief` · `pattern-detect` (SEC-02 แก้โค้ดแล้วแต่ยังไม่ deploy) · repo = 12 functions; verify Supabase dashboard
-2. **แก้/ตัดสินใจ passkey flow** — `AuthContext.tsx:130` ไม่เรียก `supabase.auth.setSession()` ·
-   `PasskeyProvider.ts:144` เรียก 4 Edge Functions ที่ไม่มีอยู่จริง · JWT zero-signature
-3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` เป็น mock แต่ถูกต่อเข้ากับ `/voice` (path การผลิต)
+~~1. **Deploy Edge Functions**~~ ✅ ปิดแล้ว — 12 functions deployed 6 Sep 2026, ทุกตัวตอบ 401
+~~2. **แก้/ตัดสินใจ passkey flow**~~ ✅ ปิดแล้ว — AuthContext.tsx + JWT HMAC-SHA256 + PasskeyProvider NotImplemented (b7bde64)
+~~3. **ตัดสินใจ voice route**~~ ✅ ปิดแล้ว — VoiceChat ใช้ Web Speech API + /api/nova (b7bde64)
 
-> 📌 **Track C Phase 1 ห้ามเริ่มจนกว่า 3 เงื่อนไขข้างบนจะปิด**
+> 📌 **Track C Phase 1 เริ่มได้แล้ว — 3 เงื่อนไขปิดครบ 6 Sep 2026 HEAD b7bde64**

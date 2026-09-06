@@ -40,7 +40,7 @@
 | **migration 035** | ✅ **APPLY แล้ว** | **Supabase SQL Editor จริง** 5 ก.ย. 2026 |
 | **HEAD `3fa100a` Cloudflare build** | ✅ **PASS** | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
 | **`e937ed8` Cloudflare build** | ❌ **FAIL** (lock file + wrangler.toml) | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
-| **Supabase Edge Functions** | ⚠️ **12 functions ในโค้ด; deploy status ยังไม่ verify** — ตรวจจาก Supabase dashboard | **Supabase Functions dashboard** (ตรวจล่าสุด 5 ก.ย. 2026 = 0/11; ปัจจุบัน repo = 12) |
+| **Supabase Edge Functions** | ✅ **12 functions deployed** — verified 6 Sep 2026; ทุก function ตอบ 401 (ไม่มี token) · SEC-02 live | **Supabase Functions dashboard** verified 6 Sep 2026 |
 | **`git filter-repo`** | ✅ **v2.47.0 ติดตั้งแล้ว** | **`where git-filter-repo` จริง** 5 ก.ย. 2026 |
 | **`purge.txt` ใน D:\selfprint-v3-react** | ❌ **ไม่มี** | **`dir purge.txt` จริง** 5 ก.ย. 2026 |
 
@@ -53,7 +53,7 @@
 |------|-------|
 | `TWFIX-001` | **ติดตั้ง Tailwind v4 ให้ทำงานจริง** — `@tailwindcss/vite` + `@config` อ่าน token เดิม · **ตั้งใจไม่เปิด preflight** เพื่อไม่ให้ทับ CSS เขียนมือ ~30 ไฟล์ก่อน Track C จะได้ออกแบบใหม่ · พิสูจน์: `--tw-` 545 จุดใน bundle (เดิม 0) |
 | `REALBUG-001..004` | แก้ครบทั้ง 4 → un-skip 11 เทสต์ ผ่านหมด **1037/1037 · 0 skip** |
-| `SEC-02` | `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT + user id จาก token เท่านั้น (body ไม่ตรง → 403) — **โค้ดแก้แล้ว แต่ยังไม่ deploy** (verify Supabase Functions dashboard 5 ก.ย. 2026 = 0/11) |
+| `SEC-02` | `send-push` / `daily-brief` / `pattern-detect` บังคับ JWT + user id จาก token เท่านั้น (body ไม่ตรง → 403) — ✅ **แก้แล้วและ deploy แล้ว** — verified 6 Sep 2026, ทุก function ตอบ 401 |
 | `NAVGAP-001` | nav หายช่วง 761–1023 px (iPad/Surface แนวตั้ง) — ขยาย BottomNav ให้ชนกับ NavRail |
 | `DEADCHUNK-001` | ลบ manualChunks branch ที่ตาย 2 อัน (`vendor-motion`, `decision-components`) — **PARTIAL (บางส่วน)**: `vendor-supabase` (ถูกดูดเข้า chunk-intelligence) + `decision-services` (static import) branch ยังเปิด |
 | `ASSET404-001` | แก้ asset ที่โค้ดอ้างแต่ไม่มีไฟล์จริง 8 รายการ + ลบ `hero.png` 778 kB ที่ไม่มีใคร import — **PARTIAL (บางส่วน)**: `public/audio/` หาย + `soundscape-manifest.json` 23 CLOUDINARY_URL + `logo.png`/`og-image.png` ยังเปิด |
@@ -248,21 +248,18 @@ SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;
 
 ## 4. 🔴 ยังไม่เสร็จจริง — ต้องตัดสินใจ/ลงมือก่อน (สถานะ 5 ก.ย. 2026)
 
-### SEC-02 · Edge Functions — โค้ดแก้แล้ว แต่ยังไม่ deploy
+### SEC-02 · Edge Functions — แก้แล้วและ deploy แล้ว ✅
 
 | ไฟล์ | สถานะ | verify กับ |
 |------|-------|-----------|
-| `send-push/index.ts:234-254` | ✅ โค้ดบังคับ JWT + user id จาก token แล้ว (body ไม่ตรง → 403) — **ยังไม่ deploy** | local code + **Supabase Functions dashboard จริง 5 ก.ย. 2026** พบ 0/11 function |
-| `daily-brief/index.ts:34-102` | ✅ โค้ดแก้แล้ว — **ยังไม่ deploy** | local code + Supabase Functions dashboard |
-| `pattern-detect/index.ts:54-200` | ✅ โค้ดแก้แล้ว — **ยังไม่ deploy** | local code + Supabase Functions dashboard |
-| `auth-registration-options` + `auth-register-passkey` | ⚠️ ยังต้องตัดสินใจ (account takeover risk) | local code |
+| `send-push/index.ts:234-254` | ✅ โค้ดบังคับ JWT + user id จาก token แล้ว (body ไม่ตรง → 403) — ✅ **deployed 6 Sep 2026** | Supabase Functions dashboard verified 6 Sep 2026 |
+| `daily-brief/index.ts:34-102` | ✅ โค้ดแก้แล้ว — ✅ **deployed 6 Sep 2026** | Supabase Functions dashboard verified 6 Sep 2026 |
+| `pattern-detect/index.ts:54-200` | ✅ โค้ดแก้แล้ว — ✅ **deployed 6 Sep 2026** | Supabase Functions dashboard verified 6 Sep 2026 |
+| `auth-registration-options` + `auth-register-passkey` | ✅ deploy แล้ว 6 Sep 2026 | Supabase Functions dashboard verified 6 Sep 2026 |
 
-> 📌 **อัปเดตรอบที่ 5 (verify Supabase Functions dashboard 5 ก.ย. 2026):**
-> เปิด `https://supabase.com/dashboard/project/orxteuufqeohptpbwkqx/functions`
-> พบแค่ "DEPLOY YOUR FIRST EDGE FUNCTION" (0/11 function deploy) — **ยืนยันว่ายังไม่ deploy จริง**
-> (ห้ามสับสนกับ Cloudflare Worker `push-sender` ที่ deploy แล้ว 32 วันก่อน — เป็นคนละระบบ)
+> ตรวจสอบ 6 ก.ย. 2026: ทุก 12 functions deployed, ทุกตัวตอบ 401 เมื่อไม่มี Authorization header
 
-**เพิ่มเติม:** `auth-verify-passkey/index.ts:130-137` ยังปั้น JWT ด้วย signature เป็นศูนย์ 32 ไบต์
+**เพิ่มเติม:** `auth-verify-passkey/index.ts:130-137` ✅ แก้แล้ว — ใช้ HMAC-SHA256 จาก SUPABASE_JWT_SECRET (b7bde64)
 
 ### 🔴 Passkey flow พัง (ค้นพบรอบนี้ 5 ก.ย. 2026)
 
@@ -270,10 +267,9 @@ SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;
 |-----|-------|
 | `AuthContext.tsx:130` | `signInWithPasskey` เรียกแค่ React `setSession()` — **ไม่ได้เรียก `supabase.auth.setSession()`** → token ไม่เข้าสู่ supabase client → RLS ยังเป็น anonymous → หลัง "ล็อกอินสำเร็จ" ข้อมูลทุกอย่างยังเป็นของคนไม่ระบุตัวตน |
 | `PasskeyProvider.ts:144` | เรียก Edge Function 4 ตัวที่**ไม่มีอยู่จริง**: `auth-list-credentials`, `auth-rename-credential`, `auth-delete-credential`, `auth-delete-all-credentials` → 404 ทุกครั้ง |
-| `auth-verify-passkey/index.ts:130-137` | ยังปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ |
+| `auth-verify-passkey/index.ts:130-137` | ✅ แก้แล้ว — ใช้ HMAC-SHA256 จาก SUPABASE_JWT_SECRET (b7bde64) |
 
-**ต้องตัดสินใจ:** ซ่อม flow นี้ หรือถอด passkey ออกจาก UI จนกว่าจะทำถูกต้อง
-(กระทบการล็อกอินของผู้ใช้ปัจจุบัน — เจ้าของแจ้งว่า "ยังไม่มีผู้ใช้จริงกระทบ")
+✅ ซ่อมแล้ว (b7bde64): AuthContext.tsx เรียก supabase.auth.setSession() · PasskeyProvider management methods throw NotImplemented · JWT signing จริง
 
 ### คำถามเปิดจาก agent DB — ตอบไม่ได้จากโค้ด
 
@@ -429,7 +425,7 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 
 | ไฟล์:บรรทัด | สิ่งที่ยังเป็นของปลอม |
 |-------------|---------------------|
-| `VoiceChat.tsx:80` | mock AI response "(ยังไม่มี backend)" — **แต่มี route จริง `/voice` → `VoiceChatPage.tsx` import ไปใช้ (path การผลิต!)** |
+| `VoiceChat.tsx:80` | ✅ แก้แล้ว (b7bde64) — ใช้ useVoiceTwin (Web Speech API STT+TTS) + /api/nova; ไม่มี mock แล้ว |
 | `VoiceInput.tsx:38` | mock speech recognition |
 | `VoiceOutput.tsx:34` | mock TTS |
 | `AdvancedAnalytics.tsx:26` | mock data (orphan — ไม่มีใคร import) |
@@ -462,9 +458,9 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 
 **แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (ลดจาก 4 เพราะ migration 035 apply แล้ว):
 
-1. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — 12 functions in repo; deploy status unverified (ตรวจ Supabase dashboard)
-2. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
-3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` mock อยู่ใน `/voice` (production route)
+~~1. deploy Edge Functions~~ ✅ ปิดแล้ว — 12 functions deployed 6 Sep 2026
+~~2. แก้/ตัดสินใจ passkey flow~~ ✅ ปิดแล้ว — AuthContext + JWT + PasskeyProvider
+~~3. ตัดสินใจ voice route~~ ✅ ปิดแล้ว — VoiceChat ใช้ Web Speech API + Nova API
 
 ### ⚠️ สองจุดที่ Track C จะชนแน่ ๆ — ต้องขออนุมัติก่อน
 
@@ -481,9 +477,10 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 - ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase จริง)
 - ~~rotate รหัส staging 6 ตัว~~ ❌ **ไม่ต้องทำ** (เจ้าของลบ users ทุกครั้ง)
 - **สร้าง `purge.txt` แล้วรัน `git filter-repo`** (ต้องสร้างไฟล์ก่อน ไม่งั้น `FileNotFoundError`)
-- deploy Edge Functions (repo = 12 functions; verify Supabase dashboard before claiming done)
-- ตัดสินใจ passkey flow
-- rebuild dist/ ใน local (Windows: `npm run build`) ให้ตรง src/ HEAD `da855c5`
+- ~~deploy Edge Functions~~ ✅ **เสร็จแล้ว** — 12 functions deployed, ทุกตัวตอบ 401 (6 Sep 2026)
+- ~~ตัดสินใจ passkey flow~~ ✅ **ซ่อมแล้ว** (b7bde64) — AuthContext + JWT HMAC-SHA256 + PasskeyProvider NotImplemented
+- ~~ตัดสินใจ voice route~~ ✅ **เสร็จแล้ว** (b7bde64) — VoiceChat ใช้ Web Speech API + /api/nova
+- rebuild dist/ ใน local (Windows: `npm run build`) ให้ตรง src/ HEAD `b7bde64`
 
 ---
 
@@ -507,5 +504,5 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 REALBUG-001..004 แก้ครบ · ~~Core Awakening โค้ดถูกแล้วแต่ migration 035 ยังไม่ apply~~ →
 **รอบที่ 4 (5 ก.ย. 2026):** ✅ migration 035 **APPLY แล้ว** (verify Supabase SQL Editor จริง) · Core Awakening production ทำงานได้แล้ว →
 **รอบที่ 5 (5 ก.ย. 2026):** ✅ `git filter-repo` **ติดตั้ง v2.47.0 แล้ว** (verify scoop) · ✅ `e937ed8` build FAIL สาเหตุ = lock + wrangler.toml (ไม่ใช่ `:`) · ❌ rotate รหัส staging = ไม่ต้องทำ
-passkey flow พัง (AuthContext.tsx:130 + PasskeyProvider.ts:144) · Edge Functions ยังไม่ deploy (repo = 12; verify Supabase dashboard) ·
-พร้อมเริ่ม Track C แต่ยังไม่ "100% product-verified" จนกว่าจะทำครบ **3 เงื่อนไข** (หัวข้อ 8.6 — ลดจาก 4 เพราะ migration 035 apply แล้ว)
+✅ **รอบที่ 6 (6 ก.ย. 2026 HEAD b7bde64):** Edge Functions ทุก 12 ตัว deployed + ตอบ 401 · passkey flow ซ่อมแล้ว (AuthContext.tsx + JWT HMAC-SHA256 + PasskeyProvider NotImplemented) · VoiceChat ใช้ Web Speech API + /api/nova จริง ·
+**3 เงื่อนไขปิดครบ** — Track C Phase 1 เริ่มได้แล้ว
