@@ -159,8 +159,8 @@ const profile: NetworkProfile = {
   private getBatteryPercent(): number {
     const nav = navigator as Navigator & { getBattery?: () => Promise<{ level: number }> };
     const battery = nav.getBattery?.() || null;
-    if (battery && battery.then) {
-      // getBattery returns a Promise — synchronous access not available here
+    if (battery) {
+      // getBattery returns a Promise — synchronous access not available; assume full
       return 100;
     }
     return 100; // Assume full if unknown

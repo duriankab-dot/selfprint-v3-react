@@ -159,7 +159,7 @@ export function TwinProvider({ children }: { children: ReactNode }) {
           primaryArchetype: (savedTwin as unknown as RawTwinRow).primary_archetype as Archetype | undefined,
           secondaryArchetype: (savedTwin as unknown as RawTwinRow).secondary_archetype as Archetype | undefined,
           maturityScore: calculateMaturityScore({
-            userUnderstanding: (savedTwin as unknown as RawTwinRow).maturity_score,
+            userUnderstanding: (savedTwin as unknown as RawTwinRow).maturity_score ?? undefined,
           }),
           createdAt: new Date((savedTwin as unknown as RawTwinRow).awakened_at).getTime(),
           updatedAt: Date.now(),
