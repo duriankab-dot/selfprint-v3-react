@@ -62,7 +62,6 @@ const NovaChat = lazy(() => import('./pages/NovaChat'));
 const TwinChat = lazy(() => import('./pages/TwinChat'));
 const TwinSettingsPage = lazy(() => import('./pages/TwinSettingsPage'));
 const TwinPersonalityPage = lazy(() => import('./pages/TwinPersonalityPage'));
-const ComponentShowcase = lazy(() => import('./pages/ComponentShowcase'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage'));
 const BadgePage = lazy(() => import('./pages/BadgePage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
@@ -177,7 +176,6 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/faq', element: <FAQPage /> },
     { path: '/vs-astrology', element: <VsAstrologyPage /> },
     { path: '/menu', element: <FeatureMenu /> },
-    { path: '/components', element: <ComponentShowcase /> },
     // Phase B: new activity + community pages
     { path: '/tarot', element: <TarotPage /> },
     { path: '/palmistry', element: <PalmistryPage /> },
