@@ -9,17 +9,19 @@
 
 ---
 
-## 📊 Status (measured 6 Sep 2026 · HEAD `da855c5`)
+## 📊 Status (7 Sep 2026 · HEAD `710afa0`)
 
 | Gate | Result |
 |------|--------|
-| `tsc -b` (`strict: true`) | ✅ 0 errors (HEAD da855c5 verified 6 Sep 2026) |
+| `tsc -b` (`strict: true`) | ✅ 0 errors |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ⚠️ Windows-native binary required (rolldown); Windows build HEAD 3fa100a ✅ · dist/ stale |
-| `oxlint` | ⚠️ Windows-native binary required (oxlint) |
-| `vitest run` | ⚠️ Windows-native binary required (vitest/rolldown) |
+| `vite build` | ✅ Windows build passes (rolldown requires Windows-native binary) |
+| `oxlint` | ✅ 0 errors · 187 warnings · 474 files |
+| `vitest run` | ✅ 66/66 files · 1037 tests · 0 fail · 0 skip |
+| **E2E Playwright CI** | ✅ **run #305 all passing** (7 Sep 2026) |
+| **Production selfprint.one** | ✅ `/th/` + `/en/` load correctly — no error boundary |
 
-**Honest conclusion:** Track B (Phase 0 forensic) + C0 (Track C enablers) are complete in code, and the Track A work that was blocking UX/UI is done. **A1 and A7 are now closed:** A1 (dead code — 6 orphan files deleted 6 Sep) · A7 (`as any` — 47 casts remaining after batch fixes) · Track C is unblocked. The project is **ready to enter Track C (visual redesign)** — but it is **NOT yet "100% product-verified"**. Four conditions remain before that claim can be made (see [Known Limitations](#known-limitations--not-yet-done)).
+**Status:** Track A + B + C0 complete. Production is stable. **Track C (visual redesign) is ready to start.**
 
 ---
 
@@ -176,13 +178,13 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 
 ## ⚠️ Known Limitations / Not Yet Done
 
-### ✅ 3 conditions CLOSED — Track C is open
+### ✅ All conditions CLOSED — Track C is open
 
-~~Apply migration 035~~ ✅ **done** (verified Supabase SQL Editor 5 Sep 2026)
-
-~~1. **Deploy Edge Functions**~~ ✅ Closed (6 Sep 2026) — 12 functions deployed, all return 401 without token. SEC-02 live.
-2. ~~**Fix/decide passkey flow**~~ ✅ Fixed (b7bde64) — `supabase.auth.setSession()` called; JWT real HMAC-SHA256; PasskeyProvider management throws NotImplemented.
-3. ~~**Decide voice route**~~ ✅ Fixed (b7bde64) — `VoiceChat.tsx` uses `useVoiceTwin` (Web Speech API) + `/api/nova`. Working production feature.
+All blockers resolved as of 7 Sep 2026:
+- ~~Apply migration 035~~ ✅ (5 Sep 2026)
+- ~~Deploy Edge Functions~~ ✅ 12 functions, SEC-02 live (6 Sep 2026)
+- ~~Fix passkey flow~~ ✅ (b7bde64)
+- ~~Production error boundary~~ ✅ CF-CREDS-002 + CF-CREDS-003 (7 Sep 2026)
 
 ### Known stubs / mocks / placeholders
 
@@ -195,7 +197,7 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 | `CommunityPage.tsx:397` | "Coming soon" |
 | `ExplorePage.tsx:728,898` | Stub cards |
 | `DecisionDashboard.tsx:126` | Placeholder "Phase F Dashboard" |
-| `structuredData.ts:21` | Fake phone fallback |
+| `structuredData.ts` | ✅ Fixed (7 Sep) — literal env + `''` fallback, no throw |
 | `public/soundscape-manifest.json` | 23 broken `CLOUDINARY_URL`s; `public/audio/` missing |
 
 ---
@@ -206,4 +208,4 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 - **Production:** https://selfprint.one
 - **Contributing:** see [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
-**Last verified:** 6 September 2026 · HEAD `da855c5`
+**Last verified:** 7 September 2026 · HEAD `710afa0`

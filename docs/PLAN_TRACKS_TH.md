@@ -1,6 +1,6 @@
 # SELFPRINT V3 — แผนงานรวม (Engineering Backlog + Visual Redesign)
 
-**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `da855c5` (อัปเดต 6 ก.ย. 2026 — A1 ปิด · A7 ปิด · migration 035 APPLIED)
+**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `da855c5` · **อัปเดต:** 7 ก.ย. 2026 HEAD `710afa0` — A1·A7·A4(og)·A8 ปิด · E2E CI ✅ · Production ✅
 **ที่มา:** รวม 2 แหล่งเข้าด้วยกัน
 1. `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` — บั๊กค้างที่ตรวจเจอจากโค้ดจริง
 2. `New Ux_ui update talk.txt` — SELFPRINT Visual Engineering Contract (Phase 0 → N)
@@ -52,11 +52,11 @@ TRACK C — VISUAL REDESIGN           ← ยังไม่เริ่ม (Pha
 | **A1** | ล้าง Vercel + dead code | ✅ **ปิดแล้ว** (6 Sep 2026 — 6 orphan files deleted) | REPO-01, CODE-01 |
 | **A2** | `.env.example` + รหัสผ่าน e2e | 🟢 ≤8 | SEC-01 (ส่วนที่เหลือ) |
 | **A3** | FE-01a..g แก้บั๊ก frontend 7 จุด | 🟡 9–15 | FE-01 |
-| **A4** | `/api/og` → jpg static | 🟢 ≤8 | API-02 |
+| **A4** | `/api/og` CF Pages Function | ✅ **ปิดแล้ว** (7 Sep 2026 — `functions/api/og.ts` สร้างแล้ว · SK-05 ผ่าน) | API-02 |
 | **A5** | DB-01..03 รวม migration + ลบที่ไม่ใช้ | 🟠 dedicated phase | DB-01, DB-02, DB-03 |
 | **A6** | SEC-03 RLS policy | SQL อย่างเดียว | SEC-03 |
 | **A7** | เปิด TypeScript strict + `as any` | ✅ **ปิดแล้ว** (47 จุด วัด 6 Sep 2026 — batch fixes) | QA-02 |
-| **A8** | เปิด vitest ครบ 66/66 ไฟล์ | 🟠 dedicated phase | QA-01 |
+| **A8** | เปิด vitest ครบ 66/66 ไฟล์ | ✅ **ปิดแล้ว** (66/66 · 1037 tests · 0 skip) | QA-01 |
 | **A9** | ลบ `.md` ที่ล้าสมัย **84** → เท่าที่จำเป็น | ลบอย่างเดียว | — |
 
 ### เหตุผลของลำดับ
@@ -246,29 +246,24 @@ rename NOVA ใน code
 
 ---
 
-## สถานะ gate ปัจจุบัน (วัดจริง 4–5 ก.ย. 2026 · HEAD `da855c5`)
+## สถานะ gate ปัจจุบัน (7 ก.ย. 2026 · HEAD `710afa0`)
 
 | gate | ผล |
 |------|-----|
-| `tsc -b` | ✅ 0 errors (strict) — HEAD da855c5 verified 6 Sep 2026 |
+| `tsc -b` (strict) | ✅ 0 errors |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ⚠️ Windows native binary (rolldown) — Windows build HEAD 3fa100a ✅ · dist/ stale |
-| `oxlint` | ⚠️ Windows native binary (oxlint) |
-| `vitest run` | ⚠️ Windows native binary (vitest/rolldown) |
-
-> ⚠️ ตัวเลขนี้เป็น **ฉบับที่ถูกแก้แล้ว** — ฉบับก่อน (3 ก.ย. 2026) บอก "oxlint 209 warnings · 550 files"
-> และ "vitest 7 จาก 73 ไฟล์" ซึ่ง**ล้าสมัย** ตอนนี้ oxlint = 187/474 และ vitest = 66/66 ไฟล์ · 1037 tests
+| `vite build` | ✅ (Windows-native binary required) |
+| `oxlint` | ✅ 0 errors · 187 warnings · 474 files |
+| `vitest run` | ✅ 66/66 files · 1037 tests · 0 fail · 0 skip |
+| **E2E Playwright CI** | ✅ run #305 ผ่านหมด (7 ก.ย. 2026) |
+| **Production** | ✅ selfprint.one/th/ + /en/ โหลดได้ปกติ |
 
 ---
 
-## 4 เงื่อนไขก่อนอ้าง "100% product-verified"
+## ✅ ทุกเงื่อนไขปิดครบ — Track C Phase 1 เริ่มได้เลย
 
-แม้ gate ทุกตัวจะผ่าน — **ยังห้ามอ้าง "100% product-verified"** จนกว่าจะทำครบ 4 ข้อ
-(อ้างอิง `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` §8.6):
-
-~~**Apply migration 035**~~ ✅ **APPLIED** (verify Supabase SQL Editor 5 Sep 2026)
-~~1. **Deploy Edge Functions**~~ ✅ ปิดแล้ว — 12 functions deployed 6 Sep 2026, ทุกตัวตอบ 401
-~~2. **แก้/ตัดสินใจ passkey flow**~~ ✅ ปิดแล้ว — AuthContext.tsx + JWT HMAC-SHA256 + PasskeyProvider NotImplemented (b7bde64)
-~~3. **ตัดสินใจ voice route**~~ ✅ ปิดแล้ว — VoiceChat ใช้ Web Speech API + /api/nova (b7bde64)
-
-> 📌 **Track C Phase 1 เริ่มได้แล้ว — 3 เงื่อนไขปิดครบ 6 Sep 2026 HEAD b7bde64**
+- ~~migration 035~~ ✅ (5 Sep 2026)
+- ~~Edge Functions 12 ตัว~~ ✅ SEC-02 live (6 Sep 2026)
+- ~~Passkey flow~~ ✅ (b7bde64)
+- ~~Production error boundary~~ ✅ CF-CREDS-002 + CF-CREDS-003 (7 Sep 2026 · HEAD 710afa0)
+- ~~E2E CI~~ ✅ run #305 ผ่านหมด (7 Sep 2026)

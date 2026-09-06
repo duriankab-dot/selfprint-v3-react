@@ -66,15 +66,16 @@ DB: Supabase — migration กระจาย 3 โฟลเดอร์ CLI app
 
 ---
 
-## สถานะ gate (วัดจริง 3 ก.ย. 2026)
+## สถานะ gate (อัพเดท 7 ก.ย. 2026 · HEAD `710afa0`)
 
 | gate | ผล |
 |------|-----|
 | `tsc -b` | ✅ 0 errors (**strict: true** เปิดแล้ว) |
 | `npm run typecheck:functions` | ✅ 0 errors (strict เช่นกัน) |
 | `vite build` | ✅ สำเร็จ |
-| `oxlint` | ✅ 0 errors · 195 warnings · 480 files |
-| `vitest run` | ✅ **66/66 ไฟล์ · 1026 tests ผ่าน · 0 พัง** (skip 11 = REALBUG รอตัดสินใจ) |
+| `oxlint` | ✅ 0 errors · 187 warnings · 474 files |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests ผ่าน · 0 พัง · 0 skip** |
+| **E2E Playwright CI** | ✅ **run #305 ผ่านหมด** (7 ก.ย. 2026) · `selfprint.one/th/` + `/en/` โหลดได้จริง |
 
 ## Commands
 ```powershell
@@ -105,12 +106,34 @@ A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 6
 
 ## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
 
-~~1. **apply `supabase/migrations/035_forensic_consolidation_2026-09-03.sql`**~~ ✅ **apply แล้ว** (Supabase SQL Editor 5 ก.ย. 2026) — Core Awakening ทำงานบน production ได้แล้ว
-~~2. **deploy Edge Functions ที่แก้แล้ว**~~ ✅ **deploy แล้ว** (6 Sep 2026) — ทุก 12 functions deployed, ทุกตัวตอบ 401 (ไม่มี header) · SEC-02 live
-~~3. **Passkey flow ยังไม่แก้**~~ ✅ **ซ่อมแล้ว (b7bde64):** `AuthContext.tsx:130` เรียก `supabase.auth.setSession()` ถูกต้องแล้ว · `auth-verify-passkey` ใช้ HMAC-SHA256 จริง · PasskeyProvider management methods throw `NotImplemented` อย่างชัดเจน
-4. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรันคำสั่ง filter-repo · ไม่เร่งด่วนเพราะ key revoke ไปแล้ว
-~~5. **เปลี่ยนรหัสผ่านบัญชี staging 6 ตัว**~~ ❌ ไม่ต้องทำ (เจ้าของลบ users ทุกครั้งหลังทดสอบ)
-~~6. **`PasskeyProvider.ts` เรียก Edge Function ที่ไม่มีอยู่จริง 4 ตัว**~~ ✅ **แก้แล้ว (b7bde64)** — management methods (`list/rename/delete/deleteAll`) throw `NotImplemented` อย่างชัดเจน ไม่พัง runtime แล้ว
+**งานที่เหลือจริง ๆ:**
+1. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรัน · ไม่เร่งด่วน key revoke แล้ว
+2. **Track C Phase 1** — พร้อมเริ่ม (ดู `docs/PLAN_TRACKS_TH.md`)
+
+**ปิดแล้วทั้งหมด:**
+- migration 035 ✅ apply แล้ว (5 ก.ย. 2026)
+- Edge Functions ✅ 12 functions deployed, SEC-02 live (6 ก.ย. 2026)
+- Passkey flow ✅ ซ่อมแล้ว (b7bde64)
+- CF-CREDS-002 ✅ Supabase client literal env access (2b56169)
+- CF-CREDS-003 ✅ structuredData.ts literal env + fallback `''` ไม่ throw (7 ก.ย. 2026)
+- `/api/og` ✅ CF Pages Function สร้างแล้ว (7 ก.ย. 2026)
+- E2E CI ✅ run #305 ผ่านหมด (7 ก.ย. 2026)
+
+## ✅ Production Status (7 ก.ย. 2026)
+
+`selfprint.one/th/` และ `/en/` **โหลดได้ปกติ** — error boundary หายหมดแล้ว
+
+| fix | commit | สาเหตุที่แก้ |
+|-----|--------|------------|
+| CF-CREDS-002 | `2b56169` | `supabase/client.ts` dynamic `import.meta.env[name]` → literal |
+| CF-CREDS-003 | `710afa0` | `structuredData.ts` `requireEnv()` throw → literal + `''` fallback |
+| `/api/og` | `b8011a7` | สร้าง `functions/api/og.ts` CF Pages Function ใหม่ |
+| E2E webkit | `b8011a7` | CI workflow ติดตั้ง webkit ด้วย |
+| SK-01 mobile | `710afa0` | locator `.hero-cta button` แทน regex copy เก่า |
+
+**บทเรียน Vite env:** `import.meta.env[name]` (dynamic) **ไม่ถูก inline** — ต้องใช้ literal `import.meta.env.VITE_FOO` เท่านั้น
+
+---
 
 ## 🎯 Track C เริ่มได้แล้ว
 อ่าน `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` ก่อน — โดยเฉพาะ **F-02**:

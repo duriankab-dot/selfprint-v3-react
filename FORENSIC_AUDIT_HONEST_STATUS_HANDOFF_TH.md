@@ -1,7 +1,7 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 6 กันยายน 2026 (รอบที่ 3 — forensic วัดจริง 4–5 ก.ย. 2026, **แก้รอบที่ 4 — 5 ก.ย. 2026 หลัง verify Supabase จริง**, **แก้รอบที่ 5 — 5 ก.ย. 2026 หลัง verify เครื่อง/Cloudflare จริง**, **อัปเดตรอบที่ 6 — 6 ก.ย. 2026 HEAD da855c5 (B4 delete 6 orphan + B5 as-any 47 → 0 + Phase A story docs)**)
-**Baseline:** HEAD `da855c5`
+**อัปเดตล่าสุด:** 7 กันยายน 2026 · รอบที่ 7 · HEAD `710afa0`
+**Baseline เดิม:** HEAD `da855c5` (6 ก.ย. 2026)
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริง + **verify กับ Supabase / Cloudflare / GitHub / scoop จริง** — **ไม่เชื่อไฟล์ `.md` ใด ๆ** รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เครื่องมือ:** clone จาก GitHub + รัน build/test/lint จริง + agent เฉพาะทาง 6 ตัว + Supabase SQL Editor + Supabase Functions dashboard + Cloudflare Pages dashboard + Cloudflare Workers + scoop
 
@@ -28,24 +28,22 @@
 `npm install` ถูกขัดจังหวะจนไฟล์ `.node` ถูกตัดกลางคัน
 (rolldown 248 KB จากของจริง 19.9 MB · lightningcss 2.8/10.0 MB · oxlint 1.1/16.0 MB)
 
-**สถานะ gate ปัจจุบัน — วัดจริงทุกตัว (4–5 ก.ย. 2026)**
+**สถานะ gate ปัจจุบัน — HEAD `710afa0` · 7 ก.ย. 2026**
 
 | gate | ผล | verify กับ |
 |------|-----|----------|
-| `tsc -b` | ✅ 0 errors — **`strict: true` เปิดแล้ว** (`tsconfig.app.json:28`) | local build |
-| `npm run typecheck:functions` | ✅ 0 errors — strict เช่นกัน | local build |
+| `tsc -b` (strict) | ✅ 0 errors | local build |
+| `npm run typecheck:functions` | ✅ 0 errors | local build |
 | `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) | local build |
-| `oxlint` | ✅ 0 errors · **187 warnings · 474 files** | local build |
-| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests ผ่าน · 0 fail · 0 skip** (REALBUG-001..004 แก้ครบแล้ว) | local build |
-| **migration 035** | ✅ **APPLY แล้ว** | **Supabase SQL Editor จริง** 5 ก.ย. 2026 |
-| **HEAD `3fa100a` Cloudflare build** | ✅ **PASS** | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
-| **`e937ed8` Cloudflare build** | ❌ **FAIL** (lock file + wrangler.toml) | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
-| **Supabase Edge Functions** | ✅ **12 functions deployed** — verified 6 Sep 2026; ทุก function ตอบ 401 (ไม่มี token) · SEC-02 live | **Supabase Functions dashboard** verified 6 Sep 2026 |
-| **`git filter-repo`** | ✅ **v2.47.0 ติดตั้งแล้ว** | **`where git-filter-repo` จริง** 5 ก.ย. 2026 |
-| **`purge.txt` ใน D:\selfprint-v3-react** | ❌ **ไม่มี** | **`dir purge.txt` จริง** 5 ก.ย. 2026 |
+| `oxlint` | ✅ 0 errors · 187 warnings · 474 files | local build |
+| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests · 0 fail · 0 skip** | local build |
+| **E2E Playwright CI** | ✅ **run #305 ผ่านหมด** — 7 ก.ย. 2026 | **GitHub Actions จริง** |
+| **Production `selfprint.one`** | ✅ `/th/` + `/en/` โหลดได้ปกติ ไม่มี error boundary | **Chrome DevTools จริง** 7 ก.ย. 2026 |
+| **Supabase migration 035** | ✅ apply แล้ว | Supabase SQL Editor 5 ก.ย. 2026 |
+| **Supabase Edge Functions** | ✅ 12 functions deployed · ทุกตัวตอบ 401 · SEC-02 live | Supabase Functions dashboard 6 ก.ย. 2026 |
+| **`git filter-repo`** | ✅ v2.47.0 ติดตั้งแล้ว · `purge.txt` ยังต้องสร้าง | scoop 5 ก.ย. 2026 |
 
-**Track B + C0 เสร็จหมดแล้ว (โค้ด) · Track A งานที่บล็อก UX/UI เสร็จแล้ว — A1 (dead code) ปิดแล้ว (6 Sep 2026) · A7 (`as any` 47 จุด วัด 6 Sep 2026) ปิดแล้ว** · เหลือ Track C (visual redesign)
-**แต่ยังไม่ "100% product-verified" — ดู 3 เงื่อนไขในหัวข้อ 8.6** (ลดจาก 4 เพราะ migration 035 apply แล้ว)
+**✅ Track A + B + C0 เสร็จหมดแล้ว · Production ทำงานได้ · E2E CI ผ่าน · เหลือแต่ Track C (visual redesign)**
 
 งาน C0 ที่เคลียร์ทางให้ Track C (4 ก.ย. 2026):
 
@@ -152,9 +150,9 @@ dependency ที่ไม่มีใครใช้ 10 ตัว: three, @type
 
 ---
 
-## 2. ⚠️ ต้องรันด้วยมือ — ยังไม่เสร็จจนกว่าจะทำ
+## 2. งานที่ยังค้าง (ไม่เร่งด่วน)
 
-### 2.1 git filter-repo — คำสั่งที่แก้แล้ว (อัปเดตรอบที่ 5 — verify เครื่องจริง 5 ก.ย. 2026)
+### 2.1 git filter-repo (ไม่เร่งด่วน — key revoke แล้ว)
 
 > ✅ **อัปเดตรอบที่ 5:** `git filter-repo` **ติดตั้งแล้ว v2.47.0** (verify จากเครื่องจริง 5 ก.ย. 2026)
 > - คำสั่ง `where git-filter-repo` → `C:\Users\HP EliteBook\scoop\shims\git-filter-repo` ✅
@@ -192,38 +190,6 @@ del purge.txt
 ยืนยัน syntax จาก `git-filter-repo --help` แล้ว — `--paths-from-file` รองรับ prefix
 `literal:` / `glob:` / `regex:` ต้องใช้ `literal:` กับชื่อที่มี `:` `(` `)` เพราะถ้าใส่เป็น
 argument ตรง ๆ PowerShell กับ regex จะตีความผิดทั้งคู่
-
-### 2.2 apply migration 035 — ✅ เสร็จแล้ว (verify Supabase จริง 5 ก.ย. 2026)
-
-```
-supabase/migrations/035_forensic_consolidation_2026-09-03.sql   (1392 บรรทัด)
-```
-
-**สถานะ 5 ก.ย. 2026: ✅ APPLY สำเร็จแล้ว** — verify จาก Supabase SQL Editor:
-```sql
-SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;
--- Result: 035_forensic_consolidation_2026-09-03 complete ✅
-```
-
-**สิ่งที่ migration 035 ทำ (Section A–E):**
-- Section A: เพิ่ม 5 คอลัมน์ให้ `twins` — `primary_archetype`, `secondary_archetype`, `maturity_score`, `evolution_stage`, `awakened_at`
-- Section B: แก้ RLS policy + INSERT policy สำหรับ `twin_state` / `twin_personality` / `twin_capabilities`
-- Section C: เพิ่ม index + trigger + view ที่จำเป็น
-- Section D: เพิ่ม INSERT policy สำหรับ `twin_state` / `twin_personality` / `twin_capabilities` (D.1–D.3)
-- Section E: ชุด `SELECT` สำหรับพิสูจน์ผลหลังรัน
-
-**ผลกระทบกับ Core Awakening:**
-- โค้ด `createTwinInDatabase()` INSERT 5 คอลัมน์ใหม่ → **ไม่พัง 42703 อีกต่อไป** เพราะ schema ครบแล้ว
-- โค้ด client เสร็จและถูกต้องแล้ว — รอแค่ "ทดสอบบน staging จริง" (เป็นงาน verify เพิ่ม ไม่ใช่บล็อก)
-
-**หมายเหตุสำคัญ:** เอกสารฉบับรอบที่ 3 เขียนว่า "ยังไม่ถูก apply" — **ผิด** เพราะ verify กับ Supabase จริง 5 ก.ย. 2026 พบว่า apply แล้ว · แก้ในรอบที่ 4
-
-### 2.3 เปลี่ยนรหัสผ่านบัญชี staging — ❌ ไม่ต้องทำ (อัปเดตรอบที่ 5)
-
-> 📌 **อัปเดตรอบที่ 5:** เอกสารฉบับรอบที่ 3 เขียนว่า "**ต้องเปลี่ยนรหัสผ่านบัญชี staging ทั้ง 6 ตัว**" — **เกินจริง**
-> เจ้าของแจ้งว่า "**ปกติดทดลองเสร็จจะลบยูสทุกครั้งก่อนลองใหม่**" → ดังนั้น staging users ถูกลบอยู่แล้ว ไม่ต้อง rotate
-
-> ถ้าต้องการ rotate (เผื่อ): รหัสเดิมหลุดใน git history ไปแล้ว การย้ายมาไว้ใน env แก้แค่ปัญหาข้างหน้า ไม่ได้แก้ของที่หลุด
 
 ---
 
@@ -500,9 +466,14 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 **หลักการของเอกสารนี้:** ตรวจจากโค้ด + **verify กับ Supabase / Cloudflare / GitHub / scoop จริง** ไม่ใช่ตรวจจากเอกสาร · แยก "แก้แล้ว verify แล้ว"
 ออกจาก "แก้แล้วแต่ verify ไม่ได้" ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ
 
-**รอบที่ 3 (5 ก.ย. 2026):** วัดจริง HEAD `3fa100a` — build/test/lint ผ่านหมด ·
-REALBUG-001..004 แก้ครบ · ~~Core Awakening โค้ดถูกแล้วแต่ migration 035 ยังไม่ apply~~ →
-**รอบที่ 4 (5 ก.ย. 2026):** ✅ migration 035 **APPLY แล้ว** (verify Supabase SQL Editor จริง) · Core Awakening production ทำงานได้แล้ว →
-**รอบที่ 5 (5 ก.ย. 2026):** ✅ `git filter-repo` **ติดตั้ง v2.47.0 แล้ว** (verify scoop) · ✅ `e937ed8` build FAIL สาเหตุ = lock + wrangler.toml (ไม่ใช่ `:`) · ❌ rotate รหัส staging = ไม่ต้องทำ
-✅ **รอบที่ 6 (6 ก.ย. 2026 HEAD b7bde64):** Edge Functions ทุก 12 ตัว deployed + ตอบ 401 · passkey flow ซ่อมแล้ว (AuthContext.tsx + JWT HMAC-SHA256 + PasskeyProvider NotImplemented) · VoiceChat ใช้ Web Speech API + /api/nova จริง ·
-**3 เงื่อนไขปิดครบ** — Track C Phase 1 เริ่มได้แล้ว
+**รอบที่ 3–6 (5–6 ก.ย. 2026):** migration 035 apply · git filter-repo ติดตั้ง · Edge Functions 12 ตัว deploy · Passkey fix · VoiceChat ใช้ Web Speech API จริง
+
+✅ **รอบที่ 7 (7 ก.ย. 2026 · HEAD `710afa0`):**
+- **CF-CREDS-002** (`2b56169`): `supabase/client.ts` — dynamic `import.meta.env[name]` → literal access · หยุด "Missing Supabase credentials" error boundary
+- **CF-CREDS-003** (`710afa0`): `structuredData.ts` — `requireEnv()` throw → literal access + `''` fallback · หยุด "VITE_BUSINESS_ADDRESS_STREET not set" error boundary
+- **`functions/api/og.ts`** (`b8011a7`): สร้าง CF Pages Function ใหม่ · SK-05 ผ่าน
+- **CI webkit** (`b8011a7`): `.github/workflows/testing.yml` ติดตั้ง webkit · Mobile Safari tests ไม่ crash
+- **SK-01 locator** (`710afa0`): `e2e/smoke.spec.ts` ใช้ `.hero-cta button` แทน regex copy เก่า
+- **E2E CI run #305 ✅ ผ่านหมด** — `selfprint.one/th/` + `/en/` โหลดได้จริง ไม่มี error boundary
+
+**บทเรียน Vite env (สำคัญมาก):** `import.meta.env[name]` (dynamic) **ไม่ถูก Vite inline ที่ build time** → ได้ `undefined` ตลอด ต้องใช้ literal `import.meta.env.VITE_FOO` เท่านั้น — pattern นี้พังทั้ง Supabase credentials และ structuredData สองรอบซ้อน
