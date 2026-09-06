@@ -70,7 +70,8 @@ function useSoundscapeAudio(): {
   const initAudio = useCallback(() => {
     if (isInitialized) return;
 
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx!();
 
     // Main volume control
     const mainGain = ctx.createGain();
@@ -189,7 +190,8 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
   // Audio context for the soundscape synth loader
   const audioContext = useMemo(() => {
     if (typeof window === 'undefined') return null;
-    return new (window.AudioContext || (window as any).webkitAudioContext)();
+    const AudioCtx2 = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    return new AudioCtx2!();
   }, []);
 
   // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader synthesizes the ambient

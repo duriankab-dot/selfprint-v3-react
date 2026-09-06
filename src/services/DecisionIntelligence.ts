@@ -92,7 +92,8 @@ export async function analyzeDecisionPatterns(userId: string): Promise<{
     }
 
     // Calculate success rate
-    const outcomes_data = outcomes as any[];
+    type OutcomeRow = { id: string; decision_text: string; outcome: string; recorded_at: string; follow_up_day: number | null };
+    const outcomes_data = outcomes as OutcomeRow[];
     const positive = outcomes_data.filter((o) => o.outcome === 'positive').length;
     const total = outcomes_data.length;
 

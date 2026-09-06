@@ -289,8 +289,8 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
           (err.message.includes('JWT') ||
             err.message.includes('401') ||
             err.message.toLowerCase().includes('auth'))) ||
-        (typeof (err as any)?.status === 'number' && (err as any).status === 401) ||
-        (typeof (err as any)?.code === 'string' && (err as any).code === '401');
+        (typeof (err as Record<string, unknown>)?.['status'] === 'number' && (err as Record<string, unknown>)['status'] === 401) ||
+        (typeof (err as Record<string, unknown>)?.['code'] === 'string' && (err as Record<string, unknown>)['code'] === '401');
 
       if (isAuthError && supabase) {
         try {

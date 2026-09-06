@@ -8,6 +8,10 @@ export {};
 declare global {
   interface Window {
     /**
+     * Debug flag for Nova prompt logging. Set in browser console to enable.
+     */
+    __DEBUG_NOVA?: boolean;
+    /**
      * WebKit-prefixed AudioContext constructor (older Safari).
      * @see https://developer.mozilla.org/en-US/docs/Web/API/AudioContext
      */

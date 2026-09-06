@@ -188,7 +188,7 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
     }
 
     // Update follow-up schedule status for audit trail
-    const dayKey = `day${nextDay}_sent_at` as any;
+    const dayKey: string = `day${nextDay}_sent_at`;
     try {
       await supabase
         .from('follow_up_schedule')

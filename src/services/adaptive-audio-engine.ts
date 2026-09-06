@@ -157,9 +157,11 @@ const profile: NetworkProfile = {
    * Get battery level (%)
    */
   private getBatteryPercent(): number {
-    const battery = (navigator as any).getBattery?.() || null;
-    if (battery && battery.level !== undefined) {
-      return Math.round(battery.level * 100);
+    const nav = navigator as Navigator & { getBattery?: () => Promise<{ level: number }> };
+    const battery = nav.getBattery?.() || null;
+    if (battery && battery.then) {
+      // getBattery returns a Promise — synchronous access not available here
+      return 100;
     }
     return 100; // Assume full if unknown
   }
@@ -168,8 +170,10 @@ const profile: NetworkProfile = {
    * Check if device is in low power mode
    */
   private isLowPowerMode(): boolean {
-    const battery = (navigator as any).getBattery?.() || null;
-    return battery?.level !== undefined && battery.level < 0.2;
+    const nav = navigator as Navigator & { getBattery?: () => Promise<{ level: number }> };
+    // getBattery() is async — synchronous check not possible; return false (safe default)
+    void nav.getBattery;
+    return false;
   }
 
   /**

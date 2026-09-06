@@ -38,7 +38,8 @@ import { WORLDS } from '@/constants/worlds';
 import { generateAnalysisNarrative } from '@/lib/intelligence/AnalysisNarrativeBuilder';
 import { t } from '@/constants/translations';
 import type { WorldId } from '@/constants/worlds';
-import type { SICEOutput, OrchestratorResult } from '@/types/sice';
+import type { SICEOutput, OrchestratorResult, CrossEngineSynthesis, PersonalIntelligence } from '@/types/sice';
+import type { FullAnalysisOutput } from '@/lib/intelligence/InsightEngine';
 import '../styles/analysis.css';
 
 // ============================================================================
@@ -224,7 +225,7 @@ const AnalysisPage: React.FC = () => {
       return {
         // FullAnalysisOutput-compatible fields (used by existing 9 sections)
         selfOverview: [pi.recommendedAction, ...allInsights].filter(Boolean).join(' '),
-        behavioralPatterns: [] as any[],
+        behavioralPatterns: [] as FullAnalysisOutput['behavioralPatterns'],
         strengths: (synth.themes ?? []).map((t: string, i: number) => ({
           name: t,
           description: allInsights[i] ?? allInsights[i % Math.max(allInsights.length, 1)] ?? t,
@@ -234,7 +235,7 @@ const AnalysisPage: React.FC = () => {
         blindSpots: (pi.warningsOrCautions ?? []).map((w: string) => ({
           title: w, description: w, sensitivity: 'medium', confidence: 0.65,
         })),
-        trends: [] as any[],
+        trends: [] as FullAnalysisOutput['trends'],
         journey: {
           currentStage: 'awakening',
           description: pi.recommendedAction ?? '',
@@ -267,7 +268,7 @@ const AnalysisPage: React.FC = () => {
   // if the user navigated away and came back.
   useEffect(() => {
     if (displayAnalysis) {
-      setAnalysis(displayAnalysis as any);
+      setAnalysis(displayAnalysis as unknown as FullAnalysisOutput);
     }
   }, [displayAnalysis, setAnalysis]);
 
@@ -288,7 +289,7 @@ const AnalysisPage: React.FC = () => {
         synthesis: {
           ...(essenceAnalysis._synth || {}),
           conflicts: [],
-        } as any,
+        } as CrossEngineSynthesis,
         personalIntelligence: {
           userUnderstanding: essenceAnalysis._pi?.userUnderstanding ?? 0,
           recommendedAction: essenceAnalysis._pi?.recommendedAction ?? '',
@@ -296,7 +297,7 @@ const AnalysisPage: React.FC = () => {
           insights: essenceAnalysis._pi?.insights ?? [],
           nextStepsSuggested: essenceAnalysis._pi?.nextStepsSuggested ?? [],
           warningsOrCautions: essenceAnalysis._pi?.warningsOrCautions ?? [],
-        } as any,
+        } as PersonalIntelligence,
         totalExecutionTime: 0,
       } as OrchestratorResult);
     } catch (err) {
@@ -371,7 +372,7 @@ const AnalysisPage: React.FC = () => {
   const handleAwakeTwin = async () => {
     if (displayAnalysis && userId) {
       // Save analysis to store for CoreAwakening to use
-      setAnalysis(displayAnalysis as any);
+      setAnalysis(displayAnalysis as unknown as FullAnalysisOutput);
       // P0 FIX: Advance lifecycle ANALYSIS → AWAKENING (Twin birth ceremony)
       await transitionTo(userId, 'AWAKENING');
       // Navigate to Twin birth ceremony

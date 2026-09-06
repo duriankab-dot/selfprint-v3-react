@@ -32,7 +32,7 @@ export async function scheduleDecisionFollowUps(
     if (!decisionId || !supabase) return false;
 
     const now = new Date();
-    const followUps = (Object.entries(FOLLOW_UP_DAYS) as any[]).map(
+    const followUps = Object.entries(FOLLOW_UP_DAYS).map(
       ([type, days]) => ({
         decision_id: decisionId,
         follow_up_type: type,

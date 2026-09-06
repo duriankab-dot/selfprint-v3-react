@@ -28,6 +28,22 @@ import {
 } from '../services/TwinSupabaseService';
 import type { Twin } from '../services/TwinSupabaseService';
 
+/**
+ * Shape of a raw Supabase row from the 'twins' table.
+ * The DB uses snake_case columns; TwinProfile (and Twin) use camelCase.
+ * Cast `savedTwin` / `fetchedTwin` to this when reading snake_case fields.
+ */
+interface RawTwinRow {
+  id: string;
+  name: string;
+  user_id: string;
+  primary_archetype: string | null;
+  secondary_archetype: string | null;
+  maturity_score: number | null;
+  awakened_at: string;
+  full_analysis: unknown | null;
+}
+
 // 18 Archetypes (12 base + 6 hybrid)
 export const ARCHETYPES = [
   // Base 12
@@ -140,14 +156,14 @@ export function TwinProvider({ children }: { children: ReactNode }) {
           id: savedTwin.id,
           userId: profile.userId,
           name: savedTwin.name,
-          primaryArchetype: (savedTwin as any).primary_archetype as any,
-          secondaryArchetype: (savedTwin as any).secondary_archetype as any,
+          primaryArchetype: (savedTwin as unknown as RawTwinRow).primary_archetype as Archetype | undefined,
+          secondaryArchetype: (savedTwin as unknown as RawTwinRow).secondary_archetype as Archetype | undefined,
           maturityScore: calculateMaturityScore({
-            userUnderstanding: (savedTwin as any).maturity_score,
+            userUnderstanding: (savedTwin as unknown as RawTwinRow).maturity_score,
           }),
-          createdAt: new Date((savedTwin as any).awakened_at).getTime(),
+          createdAt: new Date((savedTwin as unknown as RawTwinRow).awakened_at).getTime(),
           updatedAt: Date.now(),
-          fullAnalysis: (savedTwin as any).full_analysis ?? null,
+          fullAnalysis: ((savedTwin as unknown as RawTwinRow).full_analysis as FullAnalysisOutput | null) ?? null,
         };
 
         setTwin(newTwin);
@@ -171,12 +187,12 @@ export function TwinProvider({ children }: { children: ReactNode }) {
       id: savedTwin.id,
       userId,
       name: savedTwin.name,
-      primaryArchetype: (savedTwin as any).primary_archetype,
-      secondaryArchetype: (savedTwin as any).secondary_archetype,
-      maturityScore: Math.max(0, Math.min(100, (savedTwin as any).maturity_score || 30)),
-      createdAt: new Date((savedTwin as any).awakened_at).getTime(),
+      primaryArchetype: (savedTwin as unknown as RawTwinRow).primary_archetype as Archetype | undefined,
+      secondaryArchetype: (savedTwin as unknown as RawTwinRow).secondary_archetype as Archetype | undefined,
+      maturityScore: Math.max(0, Math.min(100, (savedTwin as unknown as RawTwinRow).maturity_score || 30)),
+      createdAt: new Date((savedTwin as unknown as RawTwinRow).awakened_at).getTime(),
       updatedAt: Date.now(),
-      fullAnalysis: (savedTwin as any).full_analysis ?? null,
+      fullAnalysis: ((savedTwin as unknown as RawTwinRow).full_analysis as FullAnalysisOutput | null) ?? null,
     };
     setTwin(newTwin);
     setError(null);
@@ -312,12 +328,12 @@ export function TwinProvider({ children }: { children: ReactNode }) {
           id: fetchedTwin.id,
           userId: authUserId,
           name: fetchedTwin.name,
-          primaryArchetype: (fetchedTwin as any).primary_archetype,
-          secondaryArchetype: (fetchedTwin as any).secondary_archetype,
-          maturityScore: Math.max(0, Math.min(100, (fetchedTwin as any).maturity_score ?? 30)),
+          primaryArchetype: (fetchedTwin as unknown as RawTwinRow).primary_archetype as Archetype | undefined,
+          secondaryArchetype: (fetchedTwin as unknown as RawTwinRow).secondary_archetype as Archetype | undefined,
+          maturityScore: Math.max(0, Math.min(100, (fetchedTwin as unknown as RawTwinRow).maturity_score ?? 30)),
           createdAt: new Date(fetchedTwin.awakened_at).getTime(),
           updatedAt: Date.now(),
-          fullAnalysis: (fetchedTwin as any).full_analysis ?? null,
+          fullAnalysis: ((fetchedTwin as unknown as RawTwinRow).full_analysis as FullAnalysisOutput | null) ?? null,
         });
         setError(null);
       } catch (err) {

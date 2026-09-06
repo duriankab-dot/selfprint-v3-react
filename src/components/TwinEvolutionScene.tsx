@@ -77,7 +77,8 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
 
   const playCelebrationSound = () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      const audioContext = new AudioCtx!();
 
       // Ascending notes: C5, E5, G5, C6 (celebratory chord progression)
       const frequencies = [523, 659, 784, 1046];
@@ -142,7 +143,7 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
                 <div key={i} className="particle" style={{
                   '--delay': `${i * 0.1}s`,
                   '--angle': `${(i / 20) * 360}deg`,
-                } as any} />
+                } as unknown as React.CSSProperties} />
               ))}
             </div>
           </div>

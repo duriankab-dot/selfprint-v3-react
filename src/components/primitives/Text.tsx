@@ -20,7 +20,7 @@ export const Text = React.forwardRef<HTMLElement, TextProps>(
       caption: { fontSize: 'var(--font-size-caption)', fontWeight: 'var(--font-weight-normal)', lineHeight: 'var(--line-height-tight)' },
     };
 
-    const Element = as as any;
+    const Element = as as React.ElementType;
 
     return (
       <Element

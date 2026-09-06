@@ -13,7 +13,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  */
 function readEnv(name: string): string | undefined {
   return (
-    (typeof import.meta !== 'undefined' && (import.meta as any).env?.[name]) ||
+    (typeof import.meta !== 'undefined' && 'env' in import.meta && (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env?.[name]) ||
     (typeof process !== 'undefined' && process.env?.[name])
   );
 }
@@ -50,7 +50,7 @@ function getClient(): SupabaseClient {
 export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
   get(_target, prop, _receiver) {
     const client = getClient();
-    const value = (client as any)[prop];
+    const value = (client as unknown as Record<string | symbol, unknown>)[prop];
     return typeof value === 'function' ? value.bind(client) : value;
   },
 });
@@ -116,7 +116,7 @@ export const db = {
   async insert<T>(table: string, data: Omit<T, 'id' | 'created_at' | 'updated_at'>) {
     const { data: result, error } = await supabase
       .from(table)
-      .insert([data as any])
+      .insert([data as unknown as Record<string, unknown>])
       .select()
       .single();
     if (error) throw error;
@@ -129,7 +129,7 @@ export const db = {
   async insertMany<T>(table: string, data: Array<Omit<T, 'id' | 'created_at' | 'updated_at'>>) {
     const { data: result, error } = await supabase
       .from(table)
-      .insert(data as any)
+      .insert(data as unknown as Record<string, unknown>[])
       .select();
     if (error) throw error;
     return result as T[];
@@ -155,7 +155,7 @@ export const db = {
     let query = supabase.from(table).select('*');
     if (filter) {
       Object.entries(filter).forEach(([key, value]) => {
-        query = query.eq(key, value) as any;
+        query = query.eq(key, value) as unknown as typeof query;
       });
     }
     const { data, error } = await query;
@@ -169,7 +169,7 @@ export const db = {
   async update<T>(table: string, id: string, data: Partial<T>) {
     const { data: result, error } = await supabase
       .from(table)
-      .update(data as any)
+      .update(data as unknown as Record<string, unknown>)
       .eq('id', id)
       .select()
       .single();

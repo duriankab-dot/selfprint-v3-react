@@ -8,7 +8,7 @@
  */
 
 import { PersonalContextBuilder } from './PersonalContextBuilder';
-import type { PersonalContext, Value, Goal, BlindSpot } from './types';
+import type { PersonalContext, Value, Goal, BlindSpot, DecisionStyle } from './types';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 import type { Mood } from '@/context/EmotionContext';
 
@@ -76,7 +76,7 @@ export async function initializeContextFromOnboarding(
 
   // Add decision style from analysis
   context.decisionStyle = {
-    type: data.analysisResponse.decisionStyle as any,
+    type: data.analysisResponse.decisionStyle as DecisionStyle['type'],
     description: data.analysisResponse.decisionStyle,
     confidence: data.analysisResponse.confidence * 0.9,
     evidence: data.analysisResponse.insights.slice(0, 2),
