@@ -55,11 +55,11 @@ test('SK-01 LandingPage /en loads and shows primary CTA', async ({ page }) => {
   const h1 = page.locator('h1').first();
   await expect(h1).toBeVisible({ timeout: 10000 });
 
-  // Any CTA button must be visible — story mode has NavBar "Start Free"
-  // or hero "Discover Myself" or screen-3 "Build My SELFPRINT"
-  const anyCtaButton = page.locator('button').filter({
-    hasText: /Discover Myself|Start Free|Build My SELFPRINT|Log in/,
-  }).first();
+  // Primary CTA in hero section — visible on all viewports including mobile.
+  // NavBar buttons (Start Free / Log in) are hidden on mobile via CSS,
+  // so we target the hero-cta button which is always in the DOM.
+  // Copy: EN = "Give Birth to My AI Twin →", TH = "ให้กำเนิด AI Twin ของฉัน →"
+  const anyCtaButton = page.locator('.hero-cta button').first();
   await expect(anyCtaButton).toBeVisible({ timeout: 8000 });
 
   console.log(`SK-01 ✓  H1: "${await h1.textContent()}"`);
