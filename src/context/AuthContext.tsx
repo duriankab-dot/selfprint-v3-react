@@ -125,8 +125,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Authenticate with Passkey (includes biometric prompt if available)
       const result = await passkeyProvider.authenticatePasskey(email);
 
-      // Update session
+      // Update session — must call supabase.auth.setSession so the Supabase
+      // client has a valid access_token for RLS; setSession() alone only
+      // updates React state and leaves the supabase client as anonymous.
       if (result.session) {
+        if (supabase) {
+          await supabase.auth.setSession({
+            access_token: result.session.access_token,
+            refresh_token: result.session.refresh_token ?? '',
+          });
+        }
         setSession(result.session);
       }
 

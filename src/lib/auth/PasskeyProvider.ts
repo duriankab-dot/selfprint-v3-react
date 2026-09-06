@@ -133,6 +133,11 @@ export class PasskeyProvider {
   /**
    * List user's registered Passkeys
    */
+  /**
+   * List registered Passkeys
+   * NOTE: auth-list-credentials Edge Function not yet deployed.
+   * Credential management UI should check this before rendering.
+   */
   async listCredentials(): Promise<
     Array<{
       id: string;
@@ -141,50 +146,31 @@ export class PasskeyProvider {
       lastUsed?: string;
     }>
   > {
-    const { data, error } = await supabase.functions.invoke('auth-list-credentials');
-
-    if (error) {
-      throw new Error(`Failed to list credentials: ${error.message}`);
-    }
-
-    return data;
+    throw new Error(
+      'Passkey credential management is not yet available. ' +
+      'Core login/registration flow works. Management (list/rename/delete) coming soon.'
+    );
   }
 
   /**
-   * Rename a Passkey
+   * Rename a Passkey — not yet implemented (Edge Function not deployed)
    */
-  async renameCredential(credentialId: string, name: string): Promise<void> {
-    const { error } = await supabase.functions.invoke('auth-rename-credential', {
-      body: { credentialId, name },
-    });
-
-    if (error) {
-      throw new Error(`Failed to rename credential: ${error.message}`);
-    }
+  async renameCredential(_credentialId: string, _name: string): Promise<void> {
+    throw new Error('Passkey rename is not yet available.');
   }
 
   /**
-   * Delete a Passkey
+   * Delete a specific Passkey — not yet implemented (Edge Function not deployed)
    */
-  async deleteCredential(credentialId: string): Promise<void> {
-    const { error } = await supabase.functions.invoke('auth-delete-credential', {
-      body: { credentialId },
-    });
-
-    if (error) {
-      throw new Error(`Failed to delete credential: ${error.message}`);
-    }
+  async deleteCredential(_credentialId: string): Promise<void> {
+    throw new Error('Passkey delete is not yet available.');
   }
 
   /**
-   * Delete all Passkeys (for account deletion)
+   * Delete all Passkeys — not yet implemented (Edge Function not deployed)
    */
   async deleteAllCredentials(): Promise<void> {
-    const { error } = await supabase.functions.invoke('auth-delete-all-credentials');
-
-    if (error) {
-      throw new Error(`Failed to delete all credentials: ${error.message}`);
-    }
+    throw new Error('Passkey delete-all is not yet available.');
   }
 }
 

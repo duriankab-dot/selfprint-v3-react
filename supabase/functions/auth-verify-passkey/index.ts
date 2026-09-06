@@ -129,9 +129,21 @@ async function createJWT(
     new TextEncoder().encode(JSON.stringify(payload))
   );
 
-  // For MVP, skip signature verification
-  // In production: HMAC-SHA256 with Supabase JWT secret
-  const signature = uint8ArrayToBase64Url(new Uint8Array(32)); // dummy
+  // Sign with HMAC-SHA256 using SUPABASE_JWT_SECRET
+  const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET');
+  if (!jwtSecret) {
+    throw new Error('SUPABASE_JWT_SECRET environment variable is not set');
+  }
+  const signingInput = `${headerB64}.${payloadB64}`;
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(jwtSecret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const sigBytes = await crypto.subtle.sign('HMAC', keyMaterial, new TextEncoder().encode(signingInput));
+  const signature = uint8ArrayToBase64Url(new Uint8Array(sigBytes));
 
   return `${headerB64}.${payloadB64}.${signature}`;
 }
