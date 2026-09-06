@@ -25,8 +25,8 @@ test.describe('Authentication — Login Page', () => {
     const emailInput = page.locator('input[type="email"], input[placeholder="อีเมลของคุณ"]').first();
     await expect(emailInput).toBeVisible({ timeout: 10000 });
 
-    // Magic link submit button present
-    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("ส่ง")').first();
+    // Magic link submit button — actual text: "Send Magic Link" / "ส่ง Magic Link" (AUTH-FIX-002)
+    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("ส่ง"), button[type="submit"]').first();
     await expect(submitBtn).toBeVisible({ timeout: 5000 });
   });
 
@@ -38,8 +38,8 @@ test.describe('Authentication — Login Page', () => {
     const emailInput = page.locator('input[type="email"], input[placeholder="อีเมลของคุณ"]').first();
     await emailInput.fill('test-e2e@selfprint.one');
 
-    // Submit
-    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("ส่ง")').first();
+    // Submit — actual button text: "Send Magic Link" / "ส่ง Magic Link" (AUTH-FIX-002)
+    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("ส่ง"), button[type="submit"]').first();
     await submitBtn.click();
 
     // Confirmation: "ส่งลิงก์เข้าสู่ระบบ" OR generic "Check your email"
@@ -71,8 +71,14 @@ test.describe('Authentication — Landing & Entry', () => {
   test('AUTH-05 landing page has start CTA button', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
-    // CTA: "Start Free" or "เริ่มฟรี"
-    const cta = page.locator('button:has-text("Start Free"), button:has-text("เริ่มฟรี"), a:has-text("Start Free"), a:has-text("เริ่มฟรี")').first();
+    // CTA: "Start Free" or "เริ่มฟรี" or "Log in" (AUTH-FIX-001)
+    // NavBar always has "Log in" visible on initial load; "Start Free" is also
+    // present in NavBar but may be obscured by viewport/rendering order.
+    const cta = page.locator(
+      'button:has-text("Start Free"), button:has-text("เริ่มฟรี"), ' +
+      'a:has-text("Start Free"), a:has-text("เริ่มฟรี"), ' +
+      'button:has-text("Log in"), button:has-text("เข้าสู่ระบบ")'
+    ).first();
     await expect(cta).toBeVisible({ timeout: 10000 });
   });
 

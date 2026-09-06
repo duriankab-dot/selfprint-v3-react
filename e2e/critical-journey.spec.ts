@@ -25,9 +25,10 @@ test.describe('Critical Journey — Landing to Auth', () => {
     const h1 = page.locator('h1').first();
     await expect(h1).toBeVisible({ timeout: 10000 });
 
-    // Any CTA button
+    // Any CTA button — include "Log in" because on initial load the NavBar
+    // "Log in" button is always visible; hero CTAs may be below fold (CJ-FIX-001)
     const cta = page.locator('button').filter({
-      hasText: /Discover Myself|Start Free|Build My SELFPRINT/,
+      hasText: /Discover Myself|Start Free|Build My SELFPRINT|Log in|เข้าสู่ระบบ|เริ่มฟรี/,
     }).first();
     await expect(cta).toBeVisible({ timeout: 8000 });
 
@@ -37,8 +38,8 @@ test.describe('Critical Journey — Landing to Auth', () => {
   test('CJ-02 NavBar Brand + Navigation visible', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Logo/Brand
-    const brand = page.locator('img[alt="SelfPrint"], span:has-text("SelfPrint")').first();
+    // Logo/Brand — use same pattern as SK-11 (text=/SELFPRINT/i) (CJ-FIX-002)
+    const brand = page.locator('text=/SELFPRINT/i').first();
     await expect(brand).toBeVisible({ timeout: 5000 });
 
     // At least one nav link (Dashboard, Chat, or Menu)
@@ -87,7 +88,7 @@ test.describe('Critical Journey — Landing to Auth', () => {
     expect(filledValue).toBe('test-journey@example.com');
 
     // Submit button should be visible + clickable
-    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("Send"), button:has-text("ส่ง")').first();
+    const submitBtn = page.locator('button:has-text("Magic Link"), button:has-text("Send"), button:has-text("ส่ง"), button[type="submit"]').first();
     await expect(submitBtn).toBeEnabled({ timeout: 5000 });
 
     console.log('CJ-04 ✓ Auth form responsive');
