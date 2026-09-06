@@ -11,11 +11,11 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
  * Uses environment variables VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
  * Vite provides env via import.meta.env; process.env used in Node.js environments
  */
-function readEnv(name: string): string | undefined {
-  return (
-    (typeof import.meta !== 'undefined' && 'env' in import.meta && (import.meta as ImportMeta & { env: Record<string, string | undefined> }).env?.[name]) ||
-    (typeof process !== 'undefined' && process.env?.[name])
-  );
+// CF-CREDS-002 (6 Sep 2026): process.env fallback kept for the CF Pages
+// Functions worker (Node-like runtime). Dynamic bracket access is intentionally
+// NOT used for import.meta.env — see getClient() below for why.
+function readProcessEnv(name: string): string | undefined {
+  return typeof process !== 'undefined' ? process.env?.[name] : undefined;
 }
 
 // CF-PAGES-MIGRATION-001: this used to construct the client (and throw if
@@ -32,11 +32,20 @@ function readEnv(name: string): string | undefined {
 let _client: SupabaseClient | null = null;
 function getClient(): SupabaseClient {
   if (_client) return _client;
-  // CF-CREDS-001 (6 Sep 2026): CF Pages env var was historically named
-  // VITE_SUPABASE_BASE_URL; code was later normalised to VITE_SUPABASE_URL.
-  // Read both so the client works regardless of which name is set in CF Pages.
-  const supabaseUrl = readEnv('VITE_SUPABASE_URL') || readEnv('VITE_SUPABASE_BASE_URL');
-  const supabaseAnonKey = readEnv('VITE_SUPABASE_ANON_KEY');
+  // CF-CREDS-002 (6 Sep 2026): MUST use literal property access so Vite
+  // statically inlines the value at build time. Dynamic bracket access like
+  // import.meta.env?.[name] is NOT replaced by Vite's transform → undefined
+  // at runtime. Covers both current name (VITE_SUPABASE_URL) and legacy CF
+  // Pages name (VITE_SUPABASE_BASE_URL), plus process.env for the Functions
+  // worker runtime which uses process.env (not import.meta.env).
+  const supabaseUrl =
+    import.meta.env.VITE_SUPABASE_URL ||
+    import.meta.env.VITE_SUPABASE_BASE_URL ||
+    readProcessEnv('VITE_SUPABASE_URL') ||
+    readProcessEnv('VITE_SUPABASE_BASE_URL');
+  const supabaseAnonKey =
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    readProcessEnv('VITE_SUPABASE_ANON_KEY');
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(
       'Missing Supabase credentials. Set VITE_SUPABASE_URL (or VITE_SUPABASE_BASE_URL) and VITE_SUPABASE_ANON_KEY environment variables'
