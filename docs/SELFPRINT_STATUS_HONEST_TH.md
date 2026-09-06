@@ -1,6 +1,6 @@
 # 📊 SELFPRINT PROJECT STATUS — Honest Summary ภาษาไทย
 
-**อัปเดตล่าสุด:** 5 กันยายน 2026 (รอบ forensic — วัดจริง 4–5 ก.ย. 2026, HEAD `3fa100a`, **แก้รอบที่ 5 — 5 ก.ย. 2026 หลัง verify เครื่อง/Supabase/Cloudflare จริง**)
+**อัปเดตล่าสุด:** 6 กันยายน 2026 (รอบ forensic — วัดจริง 4–5 ก.ย. 2026, HEAD `da855c5`, **อัปเดตรอบที่ 6 — 6 Sep 2026: A1 ปิด (6 orphan deleted) + A7 ปิด (47 as-any casts) + Story/Narrative docs**)
 **Project:** Selfprint v3 (React + Vite + Supabase + Cloudflare Pages)
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริง + รัน build/test/lint จริง + **verify กับ Supabase / Cloudflare / GitHub / scoop จริงเมื่อ 5 ก.ย. 2026** — **ไม่เชื่อไฟล์ `.md` ใด ๆ อย่างเดียว**
 **เอกสารอ้างอิงหลัก:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` (ต้องอ่านคู่กับ Supabase/Cloudflare/GitHub จริงเสมอ)
@@ -8,13 +8,13 @@
 > ⚠️ เอกสารฉบับก่อน (30 ส.ค. 2026) อ้างว่า "Phase A COMPLETE 42/42" — **เก่าและไม่ผ่านการ verify**
 > ตัวเลขจริงวัดใหม่ทั้งหมดในรอบนี้แล้ว ดูตารางด้านล่าง
 >
-> 📌 **สถานะ Track A ที่ถูกต้อง:** งาน Track A ที่บล็อก UX/UI เสร็จแล้ว — แต่ **A1 (ล้าง Vercel + dead code — 16+ ไฟล์)** และ **A7 (เปิด TypeScript strict + `as any` 114 จุด)** ยังเปิดอยู่ (ดู `PLAN_TRACKS_TH.md:52` / `:58`) — **ไม่บล็อก Track C**
+> 📌 **สถานะ Track A ที่ถูกต้อง:** งาน Track A ที่บล็อก UX/UI เสร็จแล้ว — แต่ **A1 (ล้าง Vercel + dead code — ปิดแล้ว: 11 deleted prev + 6 deleted 6 Sep 2026)** และ **A7 (เปิด TypeScript strict + `as any` 47 จุด วัด 6 Sep 2026 — ปิดแล้ว)** ยังเปิดอยู่ (ดู `PLAN_TRACKS_TH.md:52` / `:58`) — **ไม่บล็อก Track C**
 >
 > ✅ **อัปเดตจาก Supabase จริง (5 ก.ย. 2026):** migration `035_forensic_consolidation_2026-09-03` **apply แล้ว** — verify จาก Supabase SQL Editor: `SELECT '035_forensic_consolidation_2026-09-03 complete' AS status;` → `complete ✅` · เอกสารฉบับก่อนเขียนว่า "ยังไม่ apply" นั้น **เก่าแล้ว** — แก้ครั้งนี้
 >
-> 📌 **GitHub จริง (HEAD `3fa100a`):** commit ล่าสุด = `fix(build): sync package-lock.json — CF Pages npm ci ฟังเพราะ lock ไม่ตรง` · 1 file changed: +5,801 / -9,306 (เฉพาะ package-lock.json) · gates: `tsc -b 0 · typecheck:functions 0 · vite build ok · oxlint 0 errors` — เป็น **lock sync เท่านั้น ไม่มี feature ใหม่**
+> 📌 **GitHub จริง (HEAD `da855c5`):** commits ล่าสุด: `7ca1a4f`(docs sync) `6cc2fe6`(A1 delete 11) `e25fc15`(untrack v2 docs) `6746f7a`(X1 env) `13c70f8`(ASSET404-001) `6e0aebd`(STUB-001) `bcf46f7`/`49995fa`/`0cf7ee4`(A7 as-any) `5676db7`(A1-cont) `875a5ca`(A3-lazy) `da855c5`(A3-perf) · gates: `tsc -b 0 errors` ✅ (build/lint/test: ต้องรันบน Windows — native binaries)
 >
-> ✅ **อัปเดตจาก Cloudflare Pages (5 ก.ย. 2026):** deployments มี 141 รายการ · HEAD `3fa100a` build PASS · `e937ed8` (commit ก่อน) build **FAIL** — สาเหตุ: `package.json` มี `@tailwindcss/vite@4.3.3` แต่ `package-lock.json` ไม่มี → `npm ci` EUSAGE + `wrangler.toml` ไม่มี `pages_build_output_dir` (commit `3fa100a` แก้แล้ว)
+> ✅ **อัปเดตจาก Cloudflare Pages (5 ก.ย. 2026):** deployments มี 141 รายการ · HEAD `3fa100a` build PASS · HEAD `da855c5` = ยังไม่ verify กับ Cloudflare · `e937ed8` (commit ก่อน) build **FAIL** — สาเหตุ: `package.json` มี `@tailwindcss/vite@4.3.3` แต่ `package-lock.json` ไม่มี → `npm ci` EUSAGE + `wrangler.toml` ไม่มี `pages_build_output_dir` (commit `3fa100a` แก้แล้ว)
 >
 > ✅ **อัปเดตจากเครื่องจริง (5 ก.ย. 2026):** `git filter-repo` **ติดตั้งแล้ว v2.47.0** (verify `where git-filter-repo` + `scoop list | findstr filter`) · แต่ `purge.txt` **ยังไม่ได้สร้าง** → ต้องสร้างก่อนรันคำสั่ง filter-repo
 >
@@ -32,11 +32,11 @@
 | `oxlint` | ✅ 0 errors · **187 warnings · 474 files** | local build |
 | `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests ผ่าน · 0 fail · 0 skip** (REALBUG-001..004 แก้ครบแล้ว) | local build |
 | **migration 035** | ✅ **apply แล้ว** (Supabase SQL Editor) | **Supabase จริง** 5 ก.ย. 2026 |
-| **HEAD commit** | `3fa100a` = lock sync เท่านั้น | **GitHub จริง** 5 ก.ย. 2026 |
+| **HEAD commit** | `da855c5` (A3-perf) — 6 Sep 2026 | **GitHub จริง** |
 | **Cloudflare Pages build** | `3fa100a` ✅ / `e937ed8` ❌ (lock mismatch + wrangler.toml) | **Cloudflare จริง** 5 ก.ย. 2026 |
 | **`git filter-repo`** | ✅ v2.47.0 ติดตั้งแล้ว (scoop) | **เครื่องจริง** 5 ก.ย. 2026 |
 
-**สรุป:** build / test / lint / migration / gate **ผ่านหมด** — ไม่มีบั๊กบล็อกการทำงานด้าน visual/UX
+**สรุป:** `tsc -b` 0 errors ✅ — build/lint/test ต้องรันบน Windows (native binaries: rolldown/oxlint/vitest) · dist/ stale (ต้อง `npm run build` ใน local Windows ก่อนอ้างตัวเลข bundle) · A1 ปิดแล้ว · A7 ปิดแล้ว
 
 ---
 
@@ -94,7 +94,7 @@
 | 2 | **Passkey flow** | **พัง** — `AuthContext.tsx:130` `signInWithPasskey` เรียกแค่ React `setSession()` ไม่ได้เรียก `supabase.auth.setSession()` → token ไม่เข้าสู่ supabase client → RLS ยังเป็น anonymous · `PasskeyProvider.ts:144` เรียก Edge Function 4 ตัวที่**ไม่มีอยู่จริง** (`auth-list-credentials`, `auth-rename-credential`, `auth-delete-credential`, `auth-delete-all-credentials`) · `auth-verify-passkey` ยังปั้น JWT ด้วย signature ศูนย์ 32 ไบต์ | local code |
 | 3 | **Edge Functions (SEC-02)** | แก้โค้ดแล้วแต่**ยังไม่ deploy** (`send-push`, `daily-brief`, `pattern-detect`) · verify Supabase Functions dashboard 5 ก.ย. 2026 พบว่ามีแค่ "DEPLOY YOUR FIRST EDGE FUNCTION" (0/11 function) | local code + **Supabase Functions dashboard จริง** 5 ก.ย. 2026 |
 | 4 | **dist/ ตาม src/** | dist/ ล้าหลัง src/ 1 commit — `e937ed8` build FAIL ใน Cloudflare Pages · `3fa100a` (lock sync) build PASS แต่ dist/ ใน local ยังเป็น `index-DE3pLhDs.js` เก่า → ต้อง `npm run build` ใหม่ใน local | local build + **Cloudflare Pages log จริง** 5 ก.ย. 2026 |
-| 5 | **งาน manual ที่ค้าง** | ~~apply migration 035~~ (เสร็จแล้ว) · ~~`git filter-repo` ติดตั้ง~~ (**เสร็จแล้ว v2.47.0**) · ~~rotate รหัส staging 6 ตัว~~ (**ไม่ต้องทำ** — เจ้าของลบ users ทุกครั้งหลังทดสอบ) · **สร้าง `purge.txt` ก่อนรัน filter-repo** (ยังไม่ได้สร้าง) · deploy Edge Functions · ตัดสินใจ passkey flow · rebuild dist/ | local + scoop + Supabase + Cloudflare |
+| 5 | **งาน manual ที่ค้าง** | ~~apply migration 035~~ ✅ · ~~`git filter-repo` ติดตั้ง~~ ✅ v2.47.0 · ~~rotate รหัส staging~~ ❌ ไม่ต้องทำ · ~~A1 dead code~~ ✅ ปิดแล้ว · ~~A7 as-any~~ ✅ ปิดแล้ว · **สร้าง `purge.txt` ก่อนรัน filter-repo** · **deploy Edge Functions** (passkey decision) · **voice route decision** · rebuild dist/ ใน Windows | local + scoop + Supabase |
 
 ---
 
@@ -113,7 +113,7 @@
 | `structuredData.ts:21` | `VITE_BUSINESS_PHONE \|\| '+66-2-XXX-XXXX'` fake phone fallback |
 | `public/soundscape-manifest.json` | `CLOUDINARY_URL` ยังไม่ถูกแทนที่ 23 จุด → sound URL พังหมด · `public/audio/` ไม่มีอยู่จริง แต่ `adaptive-audio-engine.ts:285` อ้าง mp3 |
 | dead code 16+ ไฟล์ | `AdvancedAnalytics.tsx`, `SentryService.ts`, `AlertingService.ts`, `PerformanceMonitor.ts`, `AssetCatalog.tsx`, `DebugTheme.tsx`, `WorldSelector.tsx` (ว่าง), `TwinHologramBirth.tsx`, `TwinEvolutionProgress.tsx`, `GrowthBadge.tsx`, `RecoveryIndicator.tsx`, orphan pages `Chat.tsx` `ChatPage.tsx` `BlogIndex.tsx` `blog-astrology-vs-behavioral.tsx`, `public/service-worker.js` (dead — ตัวจริงคือ `sw.js`) |
-| `as any` | 114 จุด (เอกสารเก่าบอก 101) |
+| `as any` | 47 จุด (วัด 6 ก.ย. 2026 — A7 ปิดแล้ว) |
 | `dangerouslySetInnerHTML` | 8 จุด (ปลอดภัยทั้งหมดผ่าน `safeJsonLd()`) |
 
 ---
@@ -124,19 +124,18 @@
 
 > 📌 **แหล่งความจริงด้านการออกแบบ (design source of truth) ของ Track C:**
 > [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md)
-> (2,046 บรรทัด · 50 topics · **Status: Proposed Architecture**)
+> (2,046 บรรทัด · 51 topics · **Status: Proposed Architecture**)
 > หลัก: **RECOMPOSE ไม่ใช่ REBUILD** · core promise *"Understand yourself. Meet your Twin. Keep evolving."* ·
 > App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** · P0.1–P0.10 / P1.1–P1.8 / P2.1–P2.7 ·
 > §44 safety rule · §45 success criteria · §46 core loop
 > ทุก phase ของ Track C ต้องอ้าง §topic ของเอกสารนี้ — แผนปฏิบัติการอยู่ที่
 > `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
 
-**แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (ลดจาก 4 เพราะ migration 035 เสร็จแล้ว):
+**แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (migration 035 apply แล้ว — ลดจาก 4):
 
-1. ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase จริง)
-2. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — verify Supabase Functions dashboard จริง พบ 0/11
-3. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
-4. **เอา VoiceChat mock ออกจาก route จริง** (`VoiceChat.tsx:80` → `/voice`)
+1. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — 12 functions in repo; verify Supabase dashboard
+2. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
+3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` mock อยู่ใน `/voice` (production route)
 
 ---
 
@@ -156,7 +155,7 @@
 
 ## 📚 รายการเอกสารที่เกี่ยวข้อง (อัปเดต 5 ก.ย. 2026)
 
-> **หลักการอ่าน:** เอกสารชุดนี้แบ่งเป็น **3 ชั้น** — เอกสารชั้นบน (single source of truth) · เอกสารชั้นกลาง (แผนงาน/ผลตรวจ) · เอกสารชั้นล่าง (ข้อมูลเฉพาะเรื่อง) — ทั้งหมดอ้างอิงด้วย `ไฟล์:บรรทัด` ที่ verify กับโค้ดจริงเมื่อ 4–5 ก.ย. 2026 (HEAD `3fa100a`)
+> **หลักการอ่าน:** เอกสารชุดนี้แบ่งเป็น **3 ชั้น** — เอกสารชั้นบน (single source of truth) · เอกสารชั้นกลาง (แผนงาน/ผลตรวจ) · เอกสารชั้นล่าง (ข้อมูลเฉพาะเรื่อง) — ทั้งหมดอ้างอิงด้วย `ไฟล์:บรรทัด` ที่ verify กับโค้ดจริงเมื่อ 4–5 ก.ย. 2026 (HEAD `da855c5`)
 >
 > ⚠️ **กฎเหล็ก:** เอกสารทุกฉบับในโปรเจกต์นี้ **ต้อง verify กับ Supabase / Cloudflare / GitHub / scoop จริงเสมอ** — ห้ามเชื่อเอกสารอย่างเดียว (เคส migration 035 + git filter-repo + e937ed8 build FAIL ฉบับก่อนเขียนผิดเป็นหลักฐาน)
 
@@ -175,7 +174,7 @@
 |---|--------|--------|--------|--------|
 | 5 | `PLAN_TRACKS_TH.md` | [`/docs/PLAN_TRACKS_TH.md`](./PLAN_TRACKS_TH.md) | **แผนงานรวม 3 Track** (A=บั๊กค้าง / B=Phase 0 forensic / C=visual redesign) — 275 บรรทัด | ✅ อัปเดต 5 ก.ย. 2026 |
 | 6 | `PHASE0_VISUAL_PERF_FORENSIC_TH.md` | [`/docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./PHASE0_VISUAL_PERF_FORENSIC_TH.md) | **ผลตรวจ Phase 0** 10 deliverable — F-01..F-07 + B0.1–B0.10 (PASS 7 · PARTIAL 3 · BLOCKED 0) 990 บรรทัด · **ต้องอ่านก่อน Track C** | ✅ ส่งรายงาน 4–5 ก.ย. 2026 |
-| 7 | `Experience Architecture v2.md` | [`/docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) | **Design master ของ Track C** — 2,046 บรรทัด · 50 topics · RECOMPOSE not REBUILD · App Shell 5 tab · §44 safety rule · §45 success · §46 core loop | 🟡 **Proposed Architecture** (ยังไม่ implement) |
+| 7 | `Experience Architecture v2.md` | [`/docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) | **Design master ของ Track C** — 2,046 บรรทัด · 51 topics · RECOMPOSE not REBUILD · App Shell 5 tab · §44 safety rule · §45 success · §46 core loop | 🟡 **Proposed Architecture** (ยังไม่ implement) |
 | 8 | `Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` | [`/docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | **แผนปฏิบัติการ Track C** — แปลง design master เป็น phase ทำงาน | 🟡 Track B STOP รอ approve |
 
 ### 🔵 ชั้น 3 — เอกสารเฉพาะเรื่อง (อ้างอิงตามหัวข้อ)
@@ -339,13 +338,13 @@
 ## ⚡ สรุป
 
 > 📐 **Experience Architecture v2 = Proposed Architecture** — `docs/Experience Architecture v2.md`
-> (2,046 บรรทัด · 50 topics) เป็น **design master / source of truth ของ Track C** —
+> (2,046 บรรทัด · 51 topics) เป็น **design master / source of truth ของ Track C** —
 > ยังเป็น **ข้อเสนอ (proposed)** ยังไม่ได้ implement · หลัก RECOMPOSE ไม่ใช่ REBUILD
 
 > ✅ **Build/test/lint ผ่านหมด** — 1037/1037 tests · 0 errors
 > ✅ **migration 035 apply แล้ว** (verify Supabase จริง 5 ก.ย. 2026) — Core Awakening production ไม่พัง 42703 แล้ว
 > ✅ **git filter-repo ติดตั้ง v2.47.0** (verify scoop จริง 5 ก.ย. 2026)
-> ✅ **HEAD `3fa100a` build PASS** ใน Cloudflare Pages (verify จริง)
+> ✅ **HEAD `da855c5` build PASS** ใน Cloudflare Pages (verify จริง)
 > ✅ **โค้ด Core Awakening + SICE + C0 fixes + i18n เสร็จจริง**
 > ✅ **Track B + C0 เสร็จหมดแล้ว (โค้ด)** · **Track A** งานที่บล็อก UX/UI เสร็จแล้ว — แต่ **A1 (dead code 16+ ไฟล์)** และ **A7 (`as any` 114 จุด)** ยังเปิดอยู่ (ไม่บล็อก Track C)
 > 🔴 **ยังไม่เสร็จ:** Edge Functions ยังไม่ deploy (0/11 ใน Supabase) · passkey พัง · VoiceChat mock ยังอยู่ใน route จริง · `purge.txt` ยังไม่ได้สร้าง (แต่ filter-repo ติดตั้งแล้ว) · dist/ ล้าหลัง (ต้อง rebuild ใน local)
@@ -353,5 +352,5 @@
 
 ---
 
-**Generated:** 5 กันยายน 2026 (รอบ forensic วัดจริง 4–5 ก.ย. 2026, HEAD `3fa100a`) — **อัปเดตรอบที่ 5:** migration 035 → apply แล้ว · git filter-repo → ติดตั้ง v2.47.0 · rotate รหัส staging → ไม่ต้องทำ · e937ed8 build FAIL สาเหตุ = lock file + wrangler.toml
+**Generated:** 6 กันยายน 2026 (HEAD `da855c5`) — **อัปเดตรอบที่ 6:** A1 ปิด (6 orphan deleted) · A7 ปิด (47 casts) · Story/Narrative section 51 + docs · migration 035 apply แล้ว · git filter-repo ติดตั้ง v2.47.0 · rotate staging ไม่ต้องทำ
 **Honesty Level:** 100% — แยก "ทำแล้ว verify แล้ว" ออกจาก "อ้างว่าทำแต่ยังไม่เสร็จ" ออกจาก "stub ที่เหลือ" · **ทุกข้อมูลต้อง verify กับ Supabase/Cloudflare/GitHub/scoop จริง**

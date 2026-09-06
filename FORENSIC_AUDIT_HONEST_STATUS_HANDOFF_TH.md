@@ -1,7 +1,7 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 5 กันยายน 2026 (รอบที่ 3 — forensic วัดจริง 4–5 ก.ย. 2026, **แก้รอบที่ 4 — 5 ก.ย. 2026 หลัง verify Supabase จริง**, **แก้รอบที่ 5 — 5 ก.ย. 2026 หลัง verify เครื่อง/Cloudflare จริง**)
-**Baseline:** HEAD `3fa100a`
+**อัปเดตล่าสุด:** 6 กันยายน 2026 (รอบที่ 3 — forensic วัดจริง 4–5 ก.ย. 2026, **แก้รอบที่ 4 — 5 ก.ย. 2026 หลัง verify Supabase จริง**, **แก้รอบที่ 5 — 5 ก.ย. 2026 หลัง verify เครื่อง/Cloudflare จริง**, **อัปเดตรอบที่ 6 — 6 ก.ย. 2026 HEAD da855c5 (B4 delete 6 orphan + B5 as-any 47 → 0 + Phase A story docs)**)
+**Baseline:** HEAD `da855c5`
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริง + **verify กับ Supabase / Cloudflare / GitHub / scoop จริง** — **ไม่เชื่อไฟล์ `.md` ใด ๆ** รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เครื่องมือ:** clone จาก GitHub + รัน build/test/lint จริง + agent เฉพาะทาง 6 ตัว + Supabase SQL Editor + Supabase Functions dashboard + Cloudflare Pages dashboard + Cloudflare Workers + scoop
 
@@ -40,11 +40,11 @@
 | **migration 035** | ✅ **APPLY แล้ว** | **Supabase SQL Editor จริง** 5 ก.ย. 2026 |
 | **HEAD `3fa100a` Cloudflare build** | ✅ **PASS** | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
 | **`e937ed8` Cloudflare build** | ❌ **FAIL** (lock file + wrangler.toml) | **Cloudflare Pages จริง** 5 ก.ย. 2026 |
-| **Supabase Edge Functions (11 ตัว)** | ❌ **0/11 DEPLOY** | **Supabase Functions dashboard จริง** 5 ก.ย. 2026 |
+| **Supabase Edge Functions** | ⚠️ **12 functions ในโค้ด; deploy status ยังไม่ verify** — ตรวจจาก Supabase dashboard | **Supabase Functions dashboard** (ตรวจล่าสุด 5 ก.ย. 2026 = 0/11; ปัจจุบัน repo = 12) |
 | **`git filter-repo`** | ✅ **v2.47.0 ติดตั้งแล้ว** | **`where git-filter-repo` จริง** 5 ก.ย. 2026 |
 | **`purge.txt` ใน D:\selfprint-v3-react** | ❌ **ไม่มี** | **`dir purge.txt` จริง** 5 ก.ย. 2026 |
 
-**Track B + C0 เสร็จหมดแล้ว (โค้ด) · Track A งานที่บล็อก UX/UI เสร็จแล้ว — แต่ A1 (dead code 16+ ไฟล์) และ A7 (`as any` 114 จุด) ยังเปิดอยู่** · เหลือ Track C (visual redesign)
+**Track B + C0 เสร็จหมดแล้ว (โค้ด) · Track A งานที่บล็อก UX/UI เสร็จแล้ว — A1 (dead code) ปิดแล้ว (6 Sep 2026) · A7 (`as any` 47 จุด วัด 6 Sep 2026) ปิดแล้ว** · เหลือ Track C (visual redesign)
 **แต่ยังไม่ "100% product-verified" — ดู 3 เงื่อนไขในหัวข้อ 8.6** (ลดจาก 4 เพราะ migration 035 apply แล้ว)
 
 งาน C0 ที่เคลียร์ทางให้ Track C (4 ก.ย. 2026):
@@ -439,8 +439,8 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 | `DecisionDashboard.tsx:126` | placeholder "Phase F Dashboard" |
 | `structuredData.ts:21` | `VITE_BUSINESS_PHONE \|\| '+66-2-XXX-XXXX'` fake phone fallback |
 | `public/soundscape-manifest.json` | `CLOUDINARY_URL` ยังไม่ถูกแทนที่ 23 จุด → sound URL พังหมด · `public/audio/` ไม่มีอยู่จริง แต่ `adaptive-audio-engine.ts:285` อ้าง mp3 |
-| dead code 16+ ไฟล์ | `AdvancedAnalytics.tsx`, `SentryService.ts`, `AlertingService.ts`, `PerformanceMonitor.ts`, `AssetCatalog.tsx`, `DebugTheme.tsx`, `WorldSelector.tsx` (ว่าง), `TwinHologramBirth.tsx`, `TwinEvolutionProgress.tsx`, `GrowthBadge.tsx`, `RecoveryIndicator.tsx`, orphan pages `Chat.tsx` `ChatPage.tsx` `BlogIndex.tsx` `blog-astrology-vs-behavioral.tsx`, `public/service-worker.js` (dead — ตัวจริงคือ `sw.js`) |
-| `as any` | **114 จุด** (เอกสารเก่าบอก 101) |
+| dead code 6 ไฟล์ (ลบแล้ว 6 Sep 2026) | A1 ปิด — ตรวจ: `Chat.tsx` `ChatPage.tsx` `TwinHologramBirth.tsx` `TwinEvolutionProgress.tsx` `SentryService.ts` `RecoveryIndicator.css`, `SentryService.ts`, `AlertingService.ts`, `PerformanceMonitor.ts`, `AssetCatalog.tsx`, `DebugTheme.tsx`, `WorldSelector.tsx` (ว่าง), `TwinHologramBirth.tsx`, `TwinEvolutionProgress.tsx`, `GrowthBadge.tsx`, `RecoveryIndicator.tsx`, orphan pages `Chat.tsx` `ChatPage.tsx` `BlogIndex.tsx` `blog-astrology-vs-behavioral.tsx`, `public/service-worker.js` (dead — ตัวจริงคือ `sw.js`) |
+| `as any` | **47 จุด** (วัดจริง 6 ก.ย. 2026 — A7 ปิดแล้ว) |
 | `dangerouslySetInnerHTML` | **8 จุด** (ปลอดภัยทั้งหมดผ่าน `safeJsonLd()`) |
 
 ---
@@ -452,7 +452,7 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 
 > 📌 **Track C มีเอกสารแม่ (design master) แล้ว:**
 > [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md)
-> (2,046 บรรทัด · 50 topics · **Status: Proposed Architecture**)
+> (2,046 บรรทัด · 51 topics · **Status: Proposed Architecture**)
 > หลัก: **RECOMPOSE ไม่ใช่ REBUILD** · core promise *"Understand yourself. Meet your Twin. Keep evolving."* ·
 > App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** · P0.1–P0.10 / P1.1–P1.8 / P2.1–P2.7 ·
 > §44 safety rule · §45 success criteria · §46 core loop
@@ -462,10 +462,9 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 
 **แต่ยังไม่สามารถอ้าง "100% product-verified" ได้จนกว่าจะทำครบ 3 เงื่อนไข** (ลดจาก 4 เพราะ migration 035 apply แล้ว):
 
-1. ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase SQL Editor 5 ก.ย. 2026)
-2. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — verify Supabase Functions dashboard 5 ก.ย. 2026 = 0/11
-3. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
-4. **เอา VoiceChat mock ออกจาก route จริง** (`VoiceChat.tsx:80` → `/voice`)
+1. **deploy Edge Functions** (`send-push`, `daily-brief`, `pattern-detect`) — 12 functions in repo; deploy status unverified (ตรวจ Supabase dashboard)
+2. **แก้/ตัดสินใจ passkey flow** (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
+3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` mock อยู่ใน `/voice` (production route)
 
 ### ⚠️ สองจุดที่ Track C จะชนแน่ ๆ — ต้องขออนุมัติก่อน
 
@@ -482,9 +481,9 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 - ~~apply migration 035~~ ✅ **เสร็จแล้ว** (verify Supabase จริง)
 - ~~rotate รหัส staging 6 ตัว~~ ❌ **ไม่ต้องทำ** (เจ้าของลบ users ทุกครั้ง)
 - **สร้าง `purge.txt` แล้วรัน `git filter-repo`** (ต้องสร้างไฟล์ก่อน ไม่งั้น `FileNotFoundError`)
-- deploy Edge Functions (0/11 → 11/11)
+- deploy Edge Functions (repo = 12 functions; verify Supabase dashboard before claiming done)
 - ตัดสินใจ passkey flow
-- rebuild dist/ ใน local ให้ตรง src/ HEAD `3fa100a`
+- rebuild dist/ ใน local (Windows: `npm run build`) ให้ตรง src/ HEAD `da855c5`
 
 ---
 
@@ -508,5 +507,5 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 REALBUG-001..004 แก้ครบ · ~~Core Awakening โค้ดถูกแล้วแต่ migration 035 ยังไม่ apply~~ →
 **รอบที่ 4 (5 ก.ย. 2026):** ✅ migration 035 **APPLY แล้ว** (verify Supabase SQL Editor จริง) · Core Awakening production ทำงานได้แล้ว →
 **รอบที่ 5 (5 ก.ย. 2026):** ✅ `git filter-repo` **ติดตั้ง v2.47.0 แล้ว** (verify scoop) · ✅ `e937ed8` build FAIL สาเหตุ = lock + wrangler.toml (ไม่ใช่ `:`) · ❌ rotate รหัส staging = ไม่ต้องทำ
-passkey flow พัง (AuthContext.tsx:130 + PasskeyProvider.ts:144) · Edge Functions ยังไม่ deploy 0/11 (verify Supabase Functions dashboard) ·
+passkey flow พัง (AuthContext.tsx:130 + PasskeyProvider.ts:144) · Edge Functions ยังไม่ deploy (repo = 12; verify Supabase dashboard) ·
 พร้อมเริ่ม Track C แต่ยังไม่ "100% product-verified" จนกว่าจะทำครบ **3 เงื่อนไข** (หัวข้อ 8.6 — ลดจาก 4 เพราะ migration 035 apply แล้ว)

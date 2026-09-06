@@ -1,7 +1,7 @@
 # PHASE 0 — SELFPRINT VISUAL + PERFORMANCE FORENSIC
 
 > **สถานะเอกสาร:** ตรวจและวางแผนเท่านั้น — **ไม่มีการแก้โค้ดแม้แต่บรรทัดเดียว**
-> **วันที่ตรวจ:** 4–5 ก.ย. 2026 · **HEAD:** `3fa100a`
+> **วันที่ตรวจ:** 4–5 ก.ย. 2026 · **HEAD:** `da855c5`
 > **วิธีตรวจ:** อ่านซอร์สจริงใน `src/`, `public/`, `dist/`, `vite.config.ts`, `index.html` + วัด build/test จริง
 > ทุกข้ออ้าง file:line · **ไม่เชื่อ `.md` ใด ๆ** รวมถึง `CLAUDE.md`
 > **หมายเหตุการวัด:** ตัวเลข bundle เป็นบิลด์สดของ HEAD (ไม่ใช่ `dist/` เก่า) — `chunk-intelligence` 345.77 kB raw / 87.31 kB gzip
@@ -13,29 +13,29 @@
 | # | เรื่อง | ความรุนแรง | สถานะ |
 |---|-------|-----------|--------|
 | **F-01** | **Tailwind CSS ไม่ถูกคอมไพล์เลย** — utility class ~800 จุดใน 37 ไฟล์ไม่มีผลใด ๆ | 🔴 P0 | ✅ **FIXED** (TWFIX-001) |
-| **F-02** | `chunk-intelligence` 345 kB **ไม่ใช่** `lib/intelligence` — มันคือ `@supabase/supabase-js` ทั้งก้อนที่ถูกดูดเข้ามา | 🔴 P0 | 🟡 ยังเปิด (ดู 0.3) |
+| **F-02** | `chunk-intelligence` 345 kB **ไม่ใช่** `lib/intelligence` — มันคือ `@supabase/supabase-js` ทั้งก้อนที่ถูกดูดเข้ามา | 🔴 P0 | 🟡 **PARTIAL** (A3-lazy: ExperienceProvider ทำ lazy + conditional แล้วใน `ConditionalExperience` `App.tsx:239` — ดีขึ้นสำหรับ pre-login landing; ยังเปิดสำหรับ logged-in initial load) |
 | **F-03** | ช่วงจอ **761–1023 px ไม่มี nav เลย** — BottomNav ตัดที่ 760, NavRail เริ่มที่ 1024 | 🟠 P1 | ✅ **FIXED** (NAVGAP-001) |
 | **F-04** | `manualChunks` ใน `vite.config.ts` มี 4 branch ที่ชี้ไปโฟลเดอร์ที่ **ถูกลบไปแล้ว** | 🟡 P2 | 🟡 **PARTIAL** (DEADCHUNK-001) |
 | **F-05** | dep ไม่มีใครใช้: `web-vitals`, `@simplewebauthn/browser`, `@simplewebauthn/server` — และ **`litellm` ไม่มีอยู่ใน `package.json` ตั้งแต่แรก** | 🟡 P2 | 🟡 ยังเปิด |
 | **F-06** | asset ตายและ asset หาย: `src/assets/hero.png` 778 kB ไม่มีใคร import · `/icons/splash-*.png` 3 ไฟล์ที่ `index.html` อ้างไม่มีอยู่จริง · `/logo.png` ที่ JSON-LD อ้างไม่มีอยู่จริง | 🟠 P1 | 🟡 **PARTIAL** (ASSET404-001) |
 | **F-07** | `EvolutionaryVisualSystem` รัน `requestAnimationFrame` loop **ตลอดเวลา ไม่หยุด ไม่เช็ค reduced-motion** บนหน้าแรก | 🟠 P1 | ✅ **FIXED** (RAFLOOP-001) |
 
-### Gate status (วัดจริง 4–5 ก.ย. 2026, HEAD `3fa100a`)
+### Gate status (วัดจริง 4–5 ก.ย. 2026, HEAD `3fa100a` → อัปเดต tsc 6 Sep 2026 HEAD `da855c5`)
 
 | Gate | ผล |
 |------|-----|
-| `tsc -b` (strict: true ที่ `tsconfig.app.json:28`) | ✅ 0 errors |
+| `tsc -b` (strict: true ที่ `tsconfig.app.json:28`) | ✅ 0 errors (HEAD da855c5 — verified 6 Sep 2026) |
 | `typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ 3.81s / 933 modules |
-| `oxlint` | ✅ 0 errors / 187 warnings / 474 files |
-| `vitest` | ✅ 66/66 files / 1037 tests / 0 fail / 0 skip |
+| `vite build` | ⚠️ N/A on Linux runner (Windows native binaries required); Windows build HEAD 3fa100a ✅ |
+| `oxlint` | ⚠️ N/A on Linux runner |
+| `vitest` | ⚠️ N/A on Linux runner · dist/ stale — rebuild needed on Windows |
 
 ---
 
 ## 🗺️ Architecture topic mapping — เชื่อมกับ Experience Architecture v2
 
 > **เอกสารแม่ (design master) ของ Track C:** [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md)
-> (2,046 บรรทัด · 50 topics · **Status: Proposed Architecture**)
+> (2,046 บรรทัด · 51 topics · **Status: Proposed Architecture**)
 > หลัก: **RECOMPOSE ไม่ใช่ REBUILD** · core promise *"Understand yourself. Meet your Twin. Keep evolving."* ·
 > App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** · §44 ARCHITECTURAL SAFETY RULE · §45 SUCCESS CRITERIA · §46 CORE LOOP
 > เอกสารนี้ (PHASE0) = **ฐานข้อมูลที่วัดจริง** · เอกสารแม่ = **ทิศทาง** — ต้องอ่านคู่กัน
@@ -828,7 +828,7 @@ const BUSINESS_ADDRESS_POSTAL = ... || '10110';
 > [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md)
 > (363 บรรทัด · Phase → §topic mapping · success criteria ตาม §45 · change budget §9 · do-not-touch zones §10)
 > **ตารางด้านล่างเป็นดัชนีสรุปเท่านั้น** — ถ้าเนื้อหาขัดกัน ให้ยึดเอกสาร Track C เป็นหลัก
-> เอกสารแม่ (design contract) = [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) (2,046 บรรทัด · 50 topics)
+> เอกสารแม่ (design contract) = [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) (2,046 บรรทัด · 51 topics)
 
 > หลักการเรียง: **แก้สิ่งที่ทำให้ "มองเห็นความจริง" ก่อน → แล้วค่อยแก้สิ่งที่ผู้ใช้เจ็บ → แล้วค่อยทำสวย**
 > ห้ามทำ redesign บนฐานที่ยังวัดผลไม่ได้

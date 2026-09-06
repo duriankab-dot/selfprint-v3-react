@@ -9,17 +9,17 @@
 
 ---
 
-## 📊 Status (measured 4–5 Sep 2026 · HEAD `3fa100a`)
+## 📊 Status (measured 6 Sep 2026 · HEAD `da855c5`)
 
 | Gate | Result |
 |------|--------|
-| `tsc -b` (`strict: true`) | ✅ 0 errors |
+| `tsc -b` (`strict: true`) | ✅ 0 errors (HEAD da855c5 verified 6 Sep 2026) |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ 3.81 s · 933 modules |
-| `oxlint` | ✅ 0 errors · 187 warnings · 474 files |
-| `vitest run` | ✅ 66/66 files · 1037 tests · 0 fail · 0 skip |
+| `vite build` | ⚠️ Windows-native binary required (rolldown); Windows build HEAD 3fa100a ✅ · dist/ stale |
+| `oxlint` | ⚠️ Windows-native binary required (oxlint) |
+| `vitest run` | ⚠️ Windows-native binary required (vitest/rolldown) |
 
-**Honest conclusion:** Track B (Phase 0 forensic) + C0 (Track C enablers) are complete in code, and the Track A work that was blocking UX/UI is done. **Two Track A items remain open:** A1 (dead code — 16+ files) and A7 (`as any` — 114 sites) — neither blocks Track C. The project is **ready to enter Track C (visual redesign)** — but it is **NOT yet "100% product-verified"**. Four conditions remain before that claim can be made (see [Known Limitations](#known-limitations--not-yet-done)).
+**Honest conclusion:** Track B (Phase 0 forensic) + C0 (Track C enablers) are complete in code, and the Track A work that was blocking UX/UI is done. **A1 and A7 are now closed:** A1 (dead code — 6 orphan files deleted 6 Sep) · A7 (`as any` — 47 casts remaining after batch fixes) · Track C is unblocked. The project is **ready to enter Track C (visual redesign)** — but it is **NOT yet "100% product-verified"**. Four conditions remain before that claim can be made (see [Known Limitations](#known-limitations--not-yet-done)).
 
 ---
 
@@ -50,7 +50,7 @@ SELFPRINT V3 is a **Living Intelligence experience** — an AI-powered "living T
 |-------|-----------|
 | Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 |
 | State | Zustand + TanStack React Query |
-| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (13 functions) |
+| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (12 functions in repo; deploy status unverified) |
 | Database | Supabase (PostgreSQL + Auth + RLS) |
 | AI | 12 SICE (Selfprint Intelligence Core Engines — client-side, rule-based) + Claude API (Nova guide + AI Twin) |
 | Payments | Stripe |
@@ -117,7 +117,7 @@ functions/                # Cloudflare Pages Functions — THE ONLY DEPLOYED FOL
 
 supabase/
 ├── migrations/           # Database migrations (incl. 035_forensic_consolidation_2026-09-03.sql)
-└── functions/            # 13 Supabase Edge Functions
+└── functions/            # 12 Supabase Edge Functions
 
 docs/                     # Documentation
 ├── Experience Architecture v2.md  # Design/experience master for Track C (RECOMPOSE not REBUILD)
@@ -176,12 +176,13 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 
 ## ⚠️ Known Limitations / Not Yet Done
 
-### 4 conditions before "100% product-verified" can be claimed
+### 3 conditions before "100% product-verified" can be claimed
 
-1. **Apply migration 035** — `supabase/migrations/035_forensic_consolidation_2026-09-03.sql` (1392 lines) is **NOT yet applied**. Core Awakening fails with error `42703` on production until it is.
-2. **Deploy Edge Functions** — SEC-02 fixes (`send-push`, `daily-brief`, `pattern-detect` JWT enforcement) are coded but **not deployed**.
-3. **Fix/decide passkey flow** — currently broken: `AuthContext.tsx:130` never calls `supabase.auth.setSession()`, and `PasskeyProvider.ts:144` calls 4 non-existent Edge Functions.
-4. **Remove VoiceChat mock from the real `/voice` route** — `VoiceChat.tsx:80` is a mock but is wired into the production route.
+~~Apply migration 035~~ ✅ **done** (verified Supabase SQL Editor 5 Sep 2026)
+
+1. **Deploy Edge Functions** — SEC-02 fixes (`send-push`, `daily-brief`, `pattern-detect` JWT enforcement) coded but **not deployed** (12 functions in repo; verify Supabase dashboard).
+2. **Fix/decide passkey flow** — broken: `AuthContext.tsx:130` never calls `supabase.auth.setSession()`, `PasskeyProvider.ts:144` calls 4 non-existent Edge Functions.
+3. **Decide voice route** — `VoiceChat.tsx:80` is a mock wired into the real `/voice` production route.
 
 ### Known stubs / mocks / placeholders
 
@@ -190,8 +191,7 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 | `VoiceChat.tsx:80` | Mock AI response (wired into real `/voice` route) |
 | `VoiceInput.tsx:38` | Mock speech recognition |
 | `VoiceOutput.tsx:34` | Mock TTS |
-| `AdvancedAnalytics.tsx:26` | Mock data (orphan — no importer) |
-| `SentryService.ts:15` | `MockSentry` class (orphan chain) |
+| `SentryService.ts:15` | `MockSentry` class (orphan — delete candidate; A1 closed but this remains) |
 | `CommunityPage.tsx:397` | "Coming soon" |
 | `ExplorePage.tsx:728,898` | Stub cards |
 | `DecisionDashboard.tsx:126` | Placeholder "Phase F Dashboard" |
@@ -206,4 +206,4 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 - **Production:** https://selfprint.one
 - **Contributing:** see [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
-**Last verified:** 5 September 2026 · HEAD `3fa100a`
+**Last verified:** 6 September 2026 · HEAD `da855c5`

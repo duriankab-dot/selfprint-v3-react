@@ -1,6 +1,6 @@
 # 🤝 SELFPRINT V3 — คู่มือการมีส่วนร่วม (CONTRIBUTING GUIDE)
 
-**อัปเดตล่าสุด:** 5 กันยายน 2026 · HEAD `3fa100a`
+**อัปเดตล่าสุด:** 6 กันยายน 2026 · HEAD `da855c5`
 **เอกสารสถานะฉบับเดียวที่ถูกต้อง:** [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](./FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md)
 
 ---
@@ -173,12 +173,9 @@ git commit -m "LANDING VERIFICATION: vitest + build + lint pass"
 ## 🔴 สถานะปัจจุบันที่ต้องรู้ก่อนเริ่ม (5 ก.ย. 2026)
 
 - ✅ Track B + C0 เสร็จหมดแล้ว (โค้ด) · Track A งานที่บล็อก UX/UI เสร็จแล้ว — เหลือ Track C (visual redesign)
-- ⚠️ Track A ยังเปิด 2 ข้อ (ไม่บล็อก Track C): A1 ล้าง dead code 16+ ไฟล์ · A7 `as any` 114 จุด
+- ⚠️ Track A ยังเปิด 2 ข้อ (ไม่บล็อก Track C): A1 ล้าง dead code — ปิดแล้ว (6 Sep 2026: 6 orphan files deleted) · A7 `as any` — ปิดแล้ว (47 จุด วัด 6 Sep 2026)
 - ⚠️ ยังไม่ "100% product-verified" — 4 เงื่อนไขค้าง:
-  1. apply migration `035_forensic_consolidation_2026-09-03.sql` (Core Awakening พัง 42703 จนกว่าจะรัน)
-  2. deploy Edge Functions (`send-push`, `daily-brief`, `pattern-detect`)
-  3. แก้/ตัดสินใจ passkey flow (`AuthContext.tsx:130` + `PasskeyProvider.ts:144`)
-  4. เอา VoiceChat mock ออกจาก route จริง (`VoiceChat.tsx:80` → `/voice`)
+  ~~apply migration 035~~ ✅ done · 1. deploy Edge Functions (12 functions; verify Supabase dashboard) · 2. แก้/ตัดสินใจ passkey flow · 3. ตัดสินใจ voice route
 - ⚠️ มี stub/mock ค้าง: VoiceChat, VoiceInput, VoiceOutput, AdvancedAnalytics, SentryService, CommunityPage, ExplorePage, DecisionDashboard, structuredData, soundscape-manifest — ดู forensic หัวข้อ 8.5
 
 **อ่านก่อนเริ่มทุกครั้ง:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` → `docs/PLAN_TRACKS_TH.md` → `CLAUDE.md` → `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` (ก่อน Track C)

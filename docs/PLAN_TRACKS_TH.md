@@ -1,6 +1,6 @@
 # SELFPRINT V3 — แผนงานรวม (Engineering Backlog + Visual Redesign)
 
-**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `3fa100a` (อัปเดต 5 ก.ย. 2026 — ตรงกับตาราง gate ท้ายเอกสาร)
+**สร้าง:** 3 ก.ย. 2026 · **ฐาน:** `da855c5` (อัปเดต 6 ก.ย. 2026 — A1 ปิด · A7 ปิด · migration 035 APPLIED)
 **ที่มา:** รวม 2 แหล่งเข้าด้วยกัน
 1. `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` — บั๊กค้างที่ตรวจเจอจากโค้ดจริง
 2. `New Ux_ui update talk.txt` — SELFPRINT Visual Engineering Contract (Phase 0 → N)
@@ -49,13 +49,13 @@ TRACK C — VISUAL REDESIGN           ← ยังไม่เริ่ม (Pha
 
 | # | หัวข้อ | ขนาด | ปิดข้อไหนใน forensic |
 |---|--------|------|---------------------|
-| **A1** | ล้าง Vercel + dead code | 🟠 16–30 files (ลบเป็นหลัก) | REPO-01, CODE-01 |
+| **A1** | ล้าง Vercel + dead code | ✅ **ปิดแล้ว** (6 Sep 2026 — 6 orphan files deleted) | REPO-01, CODE-01 |
 | **A2** | `.env.example` + รหัสผ่าน e2e | 🟢 ≤8 | SEC-01 (ส่วนที่เหลือ) |
 | **A3** | FE-01a..g แก้บั๊ก frontend 7 จุด | 🟡 9–15 | FE-01 |
 | **A4** | `/api/og` → jpg static | 🟢 ≤8 | API-02 |
 | **A5** | DB-01..03 รวม migration + ลบที่ไม่ใช้ | 🟠 dedicated phase | DB-01, DB-02, DB-03 |
 | **A6** | SEC-03 RLS policy | SQL อย่างเดียว | SEC-03 |
-| **A7** | เปิด TypeScript strict + `as any` 114 จุด | 🟠 dedicated phase | QA-02 |
+| **A7** | เปิด TypeScript strict + `as any` | ✅ **ปิดแล้ว** (47 จุด วัด 6 Sep 2026 — batch fixes) | QA-02 |
 | **A8** | เปิด vitest ครบ 66/66 ไฟล์ | 🟠 dedicated phase | QA-01 |
 | **A9** | ลบ `.md` ที่ล้าสมัย **84** → เท่าที่จำเป็น | ลบอย่างเดียว | — |
 
@@ -96,7 +96,7 @@ A9 ล้างเอกสาร
 ตาม contract ข้อ 0.20 + หัวข้อ "PHASE 0 VISUAL + PERFORMANCE FORENSIC"
 **ผลลัพธ์เป็นรายงาน ไม่ใช่โค้ด** และต้อง STOP ก่อน Phase 1
 
-> ✅ **ส่งมอบรายงานแล้ว — 4–5 ก.ย. 2026 · HEAD `3fa100a`:**
+> ✅ **ส่งมอบรายงานแล้ว — 4–5 ก.ย. 2026 · HEAD `da855c5`:**
 > [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./PHASE0_VISUAL_PERF_FORENSIC_TH.md)
 >
 > 🛑 **สถานะปัจจุบันของ Track B: STOP รอ approve** — ห้ามเริ่ม Phase 1 จนกว่าเจ้าของจะอนุมัติ (contract ข้อ 0.20)
@@ -184,7 +184,7 @@ Today                            →  lightweight representation
 ## TRACK C — Visual Redesign (ยังไม่เริ่ม)
 
 > 📌 **Track C ถูกกำกับโดย master design document:**
-> [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) (2,046 บรรทัด · 50 หัวข้อ · **Status: Proposed Architecture**)
+> [`docs/Experience Architecture v2.md`](./Experience%20Architecture%20v2.md) (2,046 บรรทัด · 51 หัวข้อ · **Status: Proposed Architecture**)
 > เป็น design/experience master ของ Track C — หลัก: **RECOMPOSE ไม่ใช่ REBUILD** ·
 > core promise: *"Understand yourself. Meet your Twin. Keep evolving."* ·
 > App Shell = **TODAY · WORLDS · TWIN · EXPLORE · ME** ·
@@ -246,15 +246,15 @@ rename NOVA ใน code
 
 ---
 
-## สถานะ gate ปัจจุบัน (วัดจริง 4–5 ก.ย. 2026 · HEAD `3fa100a`)
+## สถานะ gate ปัจจุบัน (วัดจริง 4–5 ก.ย. 2026 · HEAD `da855c5`)
 
 | gate | ผล |
 |------|-----|
-| `tsc -b` | ✅ 0 errors (strict) |
+| `tsc -b` | ✅ 0 errors (strict) — HEAD da855c5 verified 6 Sep 2026 |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) |
-| `oxlint` | ✅ 0 errors · **187 warnings · 474 files** |
-| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests · 0 fail · 0 skip** (REALBUG-001..004 แก้ครบแล้ว) |
+| `vite build` | ⚠️ Windows native binary (rolldown) — Windows build HEAD 3fa100a ✅ · dist/ stale |
+| `oxlint` | ⚠️ Windows native binary (oxlint) |
+| `vitest run` | ⚠️ Windows native binary (vitest/rolldown) |
 
 > ⚠️ ตัวเลขนี้เป็น **ฉบับที่ถูกแก้แล้ว** — ฉบับก่อน (3 ก.ย. 2026) บอก "oxlint 209 warnings · 550 files"
 > และ "vitest 7 จาก 73 ไฟล์" ซึ่ง**ล้าสมัย** ตอนนี้ oxlint = 187/474 และ vitest = 66/66 ไฟล์ · 1037 tests
@@ -266,9 +266,10 @@ rename NOVA ใน code
 แม้ gate ทุกตัวจะผ่าน — **ยังห้ามอ้าง "100% product-verified"** จนกว่าจะทำครบ 4 ข้อ
 (อ้างอิง `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` §8.6):
 
-1. **Apply migration 035** — `supabase/migrations/035_forensic_consolidation_2026-09-03.sql` (1,392 บรรทัด)
-   **ยังไม่ถูก apply** · Core Awakening บน production พังด้วย error `42703` จนกว่าจะรัน + ต้องทดสอบบน staging จริง
-2. **Deploy Edge Functions** — `send-push` · `daily-brief` · `pattern-detect` (SEC-02 แก้โค้ดแล้วแต่ยังไม่ deploy)
-3. **แก้/ตัดสินใจ passkey flow** — `AuthContext.tsx:130` ไม่เรียก `supabase.auth.setSession()` ·
+~~**Apply migration 035**~~ ✅ **APPLIED** (verify Supabase SQL Editor 5 Sep 2026)
+1. **Deploy Edge Functions** — `send-push` · `daily-brief` · `pattern-detect` (SEC-02 แก้โค้ดแล้วแต่ยังไม่ deploy) · repo = 12 functions; verify Supabase dashboard
+2. **แก้/ตัดสินใจ passkey flow** — `AuthContext.tsx:130` ไม่เรียก `supabase.auth.setSession()` ·
    `PasskeyProvider.ts:144` เรียก 4 Edge Functions ที่ไม่มีอยู่จริง · JWT zero-signature
-4. **ถอด VoiceChat mock ออกจาก route จริง** — `VoiceChat.tsx:80` เป็น mock แต่ถูกต่อเข้ากับ `/voice` (path การผลิต)
+3. **ตัดสินใจ voice route** — `VoiceChat.tsx:80` เป็น mock แต่ถูกต่อเข้ากับ `/voice` (path การผลิต)
+
+> 📌 **Track C Phase 1 ห้ามเริ่มจนกว่า 3 เงื่อนไขข้างบนจะปิด**
