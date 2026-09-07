@@ -295,9 +295,16 @@ function getTodayLocalized(isTh: boolean): string {
 
 interface TodaySectionProps {
   hasHistory?: boolean; // true ถ้า user มี decision logs / chat history
+  /** TODAY-HIERARCHY-001 (7 ก.ย. 2026, §6 TODAY): Dashboard.tsx now needs the
+   *  greeting ("what matters now") and the action-card grid ("your day",
+   *  §6's secondary layer) as two separately-positioned blocks — the
+   *  greeting near the top, the cards after the primary insight + CTA —
+   *  instead of one fused block. Default 'full' keeps every existing
+   *  caller's behavior byte-for-byte unchanged. */
+  variant?: 'full' | 'header' | 'actions';
 }
 
-export function TodaySection({ hasHistory = false }: TodaySectionProps) {
+export function TodaySection({ hasHistory = false, variant = 'full' }: TodaySectionProps) {
   const { session } = useAuth();
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -336,34 +343,31 @@ export function TodaySection({ hasHistory = false }: TodaySectionProps) {
     night: 'Night',
   };
 
-  return (
-    <div style={{
-      maxWidth: 680,
-      margin: '0 auto',
-      padding: '20px 16px 0',
-    }}>
-      {/* Greeting */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{
-          fontSize: 12,
-          color: 'var(--color-text-secondary)',
-          marginBottom: 4,
-          textTransform: 'uppercase',
-          letterSpacing: '0.06em',
-        }}>
-          {todayStr} · {slotLabels[timeSlot]}
-        </div>
-        <h1 style={{
-          fontSize: 24,
-          fontWeight: 700,
-          color: 'var(--color-text-primary)',
-          margin: 0,
-          lineHeight: 1.3,
-        }}>
-          {greeting}
-        </h1>
+  const headerBlock = (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{
+        fontSize: 12,
+        color: 'var(--color-text-secondary)',
+        marginBottom: 4,
+        textTransform: 'uppercase',
+        letterSpacing: '0.06em',
+      }}>
+        {todayStr} · {slotLabels[timeSlot]}
       </div>
+      <h1 style={{
+        fontSize: 24,
+        fontWeight: 700,
+        color: 'var(--color-text-primary)',
+        margin: 0,
+        lineHeight: 1.3,
+      }}>
+        {greeting}
+      </h1>
+    </div>
+  );
 
+  const actionsBlock = (
+    <>
       {/* Section Cards — AI Orchestrator output */}
       <div style={{
         display: 'grid',
@@ -395,6 +399,17 @@ export function TodaySection({ hasHistory = false }: TodaySectionProps) {
         </span>
         <div style={{ flex: 1, height: 1, background: 'var(--color-border)' }} />
       </div>
+    </>
+  );
+
+  return (
+    <div style={{
+      maxWidth: 680,
+      margin: '0 auto',
+      padding: '20px 16px 0',
+    }}>
+      {variant !== 'actions' && headerBlock}
+      {variant !== 'header' && actionsBlock}
     </div>
   );
 }
