@@ -13,6 +13,16 @@ interface Env {
   [key: string]: unknown;
 }
 
+// TSFN-OG-001 (8 ก.ย. 2026): match the PagesContext pattern every other
+// functions/api/*.ts file already uses (nova.ts, twin.ts, metrics.ts,
+// autonomy-log.ts) instead of the `PagesFunction<Env>` global type, which
+// requires @cloudflare/workers-types — not installed, and not to be added
+// without asking first (AI_WORKING_DISCIPLINE_RULES.md).
+interface PagesContext {
+  request: Request;
+  env: Env;
+}
+
 const COPY: Record<string, { title: string; desc: string }> = {
   th: {
     title: 'SELFPRINT — สร้าง AI Twin ภาษาไทยของคุณ',
@@ -24,7 +34,7 @@ const COPY: Record<string, { title: string; desc: string }> = {
   },
 };
 
-export const onRequestGet: PagesFunction<Env> = async ({ request }) => {
+export async function onRequestGet({ request }: PagesContext): Promise<Response> {
   const url = new URL(request.url);
   const lang = (url.searchParams.get('lang') ?? 'en') as 'th' | 'en';
   const copy = COPY[lang] ?? COPY['en'];

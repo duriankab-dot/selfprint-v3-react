@@ -36,7 +36,15 @@
     "lib": ["ES2023", "DOM"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "types": ["node"],
+    // TSFN-ENV-001 (8 ก.ย. 2026): PushScheduler.ts / DecisionFollowUpNotifier.ts /
+    // NotificationAnalytics.ts (imported transitively via api/unified-handler.ts)
+    // import src/lib/supabase/client.ts, which reads `import.meta.env` — not
+    // declared under "types": ["node"] alone, so tsc reported "Property 'env'
+    // does not exist on type 'ImportMeta'" for a file this program doesn't even
+    // own the runtime semantics of. Adding "vite/client" (vite is already a
+    // project dependency — not a new lib) supplies that ambient type without
+    // changing anything at runtime.
+    "types": ["node", "vite/client"],
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "noEmit": true,
