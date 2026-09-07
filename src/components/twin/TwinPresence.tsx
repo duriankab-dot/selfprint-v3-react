@@ -26,12 +26,13 @@
  * rule WorldEnvironment.tsx follows (directive §18).
  */
 
-import { useMemo, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
 import type { Archetype } from '@/context/TwinContext';
 import type { WorldId } from '@/constants/worlds';
-import { getTwinVisualDNA, type TwinCoreShape } from '@/lib/twin/twinVisualDNA';
-import { getUniqueTwinTraits, shiftHue, type TwinUniqueTraits } from '@/lib/twin/twinUniqueness';
-import { getTwinWorldContext, type TwinAccessoryKind } from '@/lib/twin/twinWorldContext';
+import type { TwinCoreShape } from '@/lib/twin/twinVisualDNA';
+import type { TwinUniqueTraits } from '@/lib/twin/twinUniqueness';
+import type { TwinAccessoryKind } from '@/lib/twin/twinWorldContext';
+import { useTwinIdentity } from '@/hooks/useTwinIdentity';
 
 interface TwinPresenceProps {
   primaryArchetype?: Archetype;
@@ -317,42 +318,19 @@ function ExpressionGlint({ color, warmth, pulseMs, animId }: { color: string; wa
 }
 
 export function TwinPresence({ primaryArchetype, secondaryArchetype, worldColor, seedKey, worldId, contained, maturityScore = 30 }: TwinPresenceProps) {
-  // TWIN-VISUAL-001: map 0-100 score → 4 evolution stages that drive
-  // glow intensity and outer ring visibility. Deliberately wide bands so
-  // transitions feel earned, not arbitrary.
-  //   1 nascent  0-25   : subtle glow, single ring
-  //   2 growing  25-50  : moderate glow, single ring
-  //   3 active   50-75  : strong glow, inner + outer ring
-  //   4 evolved  75-100 : maximum glow, full outer halo ring
-  const evolutionStage = useMemo(() => {
-    const s = Math.max(0, Math.min(100, maturityScore));
-    if (s >= 75) return 4;
-    if (s >= 50) return 3;
-    if (s >= 25) return 2;
-    return 1;
-  }, [maturityScore]);
-
-  // Glow intensity multiplier per stage (applied to boxShadow radii)
-  const glowMult = useMemo(() => [0, 0.7, 0.9, 1.15, 1.45][evolutionStage], [evolutionStage]);
-
-  const dna = useMemo(
-    () => getTwinVisualDNA(primaryArchetype, secondaryArchetype),
-    [primaryArchetype, secondaryArchetype]
-  );
-
-  // TWINPRESENCE-005: per-user variation layered on the archetype's shared
-  // base DNA — same archetype, never the same Twin. See twinUniqueness.ts.
-  const traits = useMemo(
-    () => getUniqueTwinTraits(seedKey ?? primaryArchetype ?? 'default-twin'),
-    [seedKey, primaryArchetype]
-  );
-  const uniqueCoreColor = useMemo(() => shiftHue(dna.coreColor, traits.hueShiftDeg), [dna.coreColor, traits.hueShiftDeg]);
-  const uniqueAuraColor = useMemo(() => shiftHue(dna.auraColor, traits.hueShiftDeg), [dna.auraColor, traits.hueShiftDeg]);
-
-  // P0-H: contextual posture/accessory/expression layer for the active
-  // World — never touches core identity (color/shape) above. See
-  // twinWorldContext.ts for why each World's values are what they are.
-  const worldCtx = useMemo(() => getTwinWorldContext(worldId), [worldId]);
+  // PHASE0-TWIN-FACADE-001: evolutionStage/glowMult/dna/traits/colors/
+  // worldCtx used to be computed here word-for-word identically to
+  // LivingTwin.tsx (both comments admitted "same as [the other file]") —
+  // now sourced from the one shared hook the <Twin /> facade also uses.
+  // See useTwinIdentity.ts for the exact stage bands / glow table (both
+  // unchanged from before this refactor).
+  const { evolutionStage, glowMult, dna, traits, uniqueCoreColor, uniqueAuraColor, worldCtx } = useTwinIdentity({
+    primaryArchetype,
+    secondaryArchetype,
+    seedKey,
+    maturityScore,
+    worldId,
+  });
 
   // TWINPRESENCE-004: previous gradient faded all the way to `transparent`,
   // which read as "see-through to the World background" instead of a solid

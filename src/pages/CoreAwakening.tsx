@@ -18,13 +18,12 @@ import { useAnalysisStore } from '../store/analysisStore';
 import { useLanguage } from '../context/LanguageContext';
 import { useAudio } from '../context/AudioContext';
 import { t } from '../constants/translations';
-import { HologramBirth } from '../components/twin/HologramBirth';
+import { Twin } from '../components/twin/Twin';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
 import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
-import { getTwinVisualDNA } from '../lib/twin/twinVisualDNA';
 import { speakTwinGreeting, stopTwinVoice, buildTwinGreeting } from '../lib/twin/twinVoice';
 import { primeCelebrationAudio, playCelebrationSound, stopCelebrationSound } from '../lib/twin/twinCelebrationSound';
 
@@ -117,8 +116,10 @@ export default function CoreAwakening() {
       hexagramNumber: disciplines.hexagramNumber,
     }).primary;
   }, [birthDate]);
-  const birthColor = useMemo(() => getTwinVisualDNA(birthArchetype).coreColor, [birthArchetype]);
-  const birthShape = useMemo(() => getTwinVisualDNA(birthArchetype).coreShape, [birthArchetype]);
+  // PHASE0-TWIN-FACADE-001: color/shape used to be resolved here via
+  // getTwinVisualDNA() and passed down as raw props — the <Twin variant=
+  // "birth" /> facade now resolves DNA from primaryArchetype itself
+  // (Twin.tsx), so this file only needs to hand it the archetype.
 
   // GUARD: Redirect if not authenticated
   useEffect(() => {
@@ -419,10 +420,10 @@ export default function CoreAwakening() {
       {/* BIRTH PHASE */}
       {phase === 'birth' && (
         <div className="flex-1 flex items-center justify-center">
-          <HologramBirth
+          <Twin
+            variant="birth"
             onComplete={handleBirthComplete}
-            color={birthColor}
-            shape={birthShape}
+            primaryArchetype={birthArchetype}
             seedKey={session.user.id}
           />
         </div>

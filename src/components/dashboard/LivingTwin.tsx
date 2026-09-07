@@ -26,7 +26,8 @@ import { useTwin } from '@/context/TwinContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState } from '@/lib/intelligence/TwinStateEngine';
-import { TwinPresence } from '@/components/twin/TwinPresence';
+import { Twin } from '@/components/twin/Twin';
+import { useTwinIdentity } from '@/hooks/useTwinIdentity';
 import { ShareButton } from '@/components/viral/ShareButton';
 import '../../styles/living-twin.css';
 
@@ -118,27 +119,17 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
     [context, engine]
   );
 
-  // TWIN-VISUAL-001: map maturityScore to evolution stage for glow scaling
-  // Same logic as TwinPresence — 4 stages: nascent (0-25), growing (25-50),
-  // active (50-75), evolved (75-100)
-  const evolutionStage = useMemo(() => {
-    if (!maturityScore) return 1; // default to nascent if not provided
-    const s = Math.max(0, Math.min(100, maturityScore));
-    if (s >= 75) return 4;
-    if (s >= 50) return 3;
-    if (s >= 25) return 2;
-    return 1;
-  }, [maturityScore]);
-
-  // Glow intensity multiplier per stage — same as TwinPresence
-  const glowMult = useMemo(() => [0, 0.7, 0.9, 1.15, 1.45][evolutionStage], [evolutionStage]);
-
-  // HOOKS-RULE: glowOpacity must be declared before any early returns so React
-  // always calls Hooks in the same order. Previously this was after `if (isLoading)`.
-  const glowOpacity = useMemo(
-    () => 0.35 + (glowMult - 0.7) * 0.2,
-    [glowMult]
-  );
+  // PHASE0-TWIN-FACADE-001: evolutionStage/glowMult/glowOpacity used to be
+  // computed here word-for-word identically to TwinPresence.tsx (both
+  // comments admitted "same as [the other file]") — now sourced from the
+  // one shared hook the <Twin /> facade also uses. HOOKS-RULE: must stay
+  // before any early returns so React always calls Hooks in the same order.
+  const { glowMult, glowOpacity } = useTwinIdentity({
+    primaryArchetype: twin?.primaryArchetype,
+    secondaryArchetype: twin?.secondaryArchetype,
+    seedKey: userId,
+    maturityScore,
+  });
 
   // Auth guard
   if (!userId) {
@@ -209,7 +200,8 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
           sphere" and never matched the Twin shown in Worlds — same root
           component now, so both are guaranteed to render identically. */}
       <div className="living-twin__orb-wrap living-twin__orb-wrap--presence">
-        <TwinPresence
+        <Twin
+          variant="presence"
           contained
           primaryArchetype={twin?.primaryArchetype}
           secondaryArchetype={twin?.secondaryArchetype}

@@ -19,7 +19,7 @@ import { useWorld } from '../context/WorldContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { WorldEnvironment } from '../components/world/WorldEnvironment';
-import { TwinPresence } from '../components/twin/TwinPresence';
+import { Twin } from '../components/twin/Twin';
 import { useWorldAmbientTone } from '../hooks/useWorldAmbientTone';
 import { useEnvironment } from '../context/EnvironmentContext';
 import { useTwin } from '../context/TwinContext';
@@ -104,7 +104,8 @@ export default function WorldDetail() {
       <WorldEnvironment worldId={world.id} />
       {/* TWIN-PRESENCE-001: Twin appears in the world (directive §23/§35/§36)
           — composited above the environment, below the text/UI column. */}
-      <TwinPresence
+      <Twin
+        variant="presence"
         primaryArchetype={twin?.primaryArchetype}
         secondaryArchetype={twin?.secondaryArchetype}
         worldColor={world.color}
