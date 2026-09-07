@@ -110,22 +110,22 @@ const Dashboard: React.FC = () => {
         </div>
       )}
 
-      {/* §5.2 Dynamic วันนี้ Home — AI Orchestrator เลือก sections ตามเวลาและบริบท */}
-      <TodaySection hasHistory={logs.length > 0} />
+      {/* ══════════════════════════════════════════════════════════════════
+          TODAY-HIERARCHY-001 (7 ก.ย. 2026, Phase 5.1 §6 TODAY):
+          "TODAY = what matters to me now" — one hierarchy, not competing
+          cards: Twin presence → what matters now → one primary insight →
+          recommended action → your day → recent evolution. Previously the
+          action-card grid (§6's "your day", a secondary/supporting layer)
+          rendered ABOVE the Twin and the primary insight, and Twin presence
+          (LivingTwin) sat below both — the reverse of the spec order.
+          Surgical reorder only — no section was removed, ExecutiveSummary's
+          own multi-line insight content is unchanged (that's Track C content
+          work, out of scope here), just repositioned. */}
 
-      {/* §46 Ambient + Soundscape — compact strip.
-          DASHBOARD-POLISH-001: was bare padding with no bottom margin, so
-          it visually ran straight into ExecutiveSummary's card below —
-          exactly the "ข้อมูลไหลปนกันมั่ว" the redesign asked to avoid. */}
-      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 4px', marginBottom: 'var(--space-xl, 24px)', flexWrap: 'wrap', alignItems: 'center' }}>
-        <AmbientBadge showSoundscape compact />
-        <SoundscapePlayer compact />
-      </div>
+      {/* "What matters now" — greeting only, cards moved below (§6 secondary layer) */}
+      <TodaySection hasHistory={logs.length > 0} variant="header" />
 
-      {/* Executive Summary — Phase 3: human-language AI Twin overview (§8-9) */}
-      <ExecutiveSummary />
-
-      {/* Living AI Twin — §3 states, §4 cosmic visual, §5 processing states */}
+      {/* Twin presence — §3 states, §4 cosmic visual, §5 processing states */}
       {/* TWIN-VISUAL-001: pass maturityScore to enable evolution */}
       {/* DASHBOARD-TWIN-GHOST-001: previously rendered unconditionally with
           maturityScore defaulted to 30, so a spinning Twin appeared even
@@ -136,9 +136,26 @@ const Dashboard: React.FC = () => {
           Twin is loaded. */}
       {twin && <LivingTwin maturityScore={twin.maturityScore ?? 30} />}
 
-      {/* P0 #7 — Explore Worlds quick action (Recommended Worlds) */}
-      <ExplorWorldsCard />
+      {/* One primary insight — Phase 3: human-language AI Twin overview (§8-9) */}
+      <ExecutiveSummary />
 
+      {/* Recommended action — §6's explicit CTA layer ("Explore with Twin"),
+          distinct from LivingTwin's own action buttons above (those are
+          Twin-card chrome; this is the Today-hierarchy's own next-step). */}
+      <div className="dashboard-recommended-action">
+        <button
+          className="dashboard-recommended-action__cta"
+          onClick={() => navigate('/chat/twin')}
+        >
+          💬 {isTh ? 'สำรวจต่อกับทวิน →' : 'Explore with Twin →'}
+        </button>
+      </div>
+
+      {/* Your day — §6 secondary layer: check-in / reflection / decision /
+          activity / tomorrow, as supporting actions after the primary insight. */}
+      <TodaySection hasHistory={logs.length > 0} variant="actions" />
+
+      {/* Recent evolution — most recent decision-log activity */}
       {/* APPSHELL-002 FIX: Command Center shows only a 3-item decision
           preview + a link to the full Intelligence hub — Insights, Trend,
           Patterns, full Decision Log + Export, Growth Space, Ask Coach,
@@ -160,6 +177,16 @@ const Dashboard: React.FC = () => {
           </ul>
         </div>
       )}
+
+      {/* §46 Ambient + Soundscape — compact strip. Below the core Today
+          hierarchy now (was between the card grid and ExecutiveSummary). */}
+      <div style={{ display: 'flex', gap: '0.75rem', padding: '0 4px', marginBottom: 'var(--space-xl, 24px)', flexWrap: 'wrap', alignItems: 'center' }}>
+        <AmbientBadge showSoundscape compact />
+        <SoundscapePlayer compact />
+      </div>
+
+      {/* P0 #7 — Explore Worlds quick action (Recommended Worlds) */}
+      <ExplorWorldsCard />
 
       <div className="command-center-link">
         <button

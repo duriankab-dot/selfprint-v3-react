@@ -57,6 +57,30 @@
   box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-primary) 45%, transparent);
 }
 
+/* TODAY-HIERARCHY-001 (7 ก.ย. 2026, §6 TODAY "Recommended action") */
+.dashboard-recommended-action {
+  text-align: center;
+  margin: 0 0 var(--space-xl, 24px);
+}
+
+.dashboard-recommended-action__cta {
+  border: none;
+  border-radius: var(--radius-full, 999px);
+  padding: 12px 28px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: white;
+  background: var(--color-accent-primary);
+  box-shadow: 0 2px 10px color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  cursor: pointer;
+  transition: transform 150ms, box-shadow 150ms;
+}
+
+.dashboard-recommended-action__cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-accent-primary) 45%, transparent);
+}
+
 .dashboard-header h1 {
   font-size: 2.5rem;
   color: #212529;
