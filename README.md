@@ -1,7 +1,10 @@
-# 🌟 SELFPRINT V3 — Personal Intelligence Platform
+# 🌟 SELFPRINT — Living Intelligence Platform
 
 **AI-powered "living Twin awakening" system** สำหรับการเข้าใจตัวเอง เรียนรู้ และเติบโต
 *(A system for self-understanding, learning, and growth.)*
+
+> **Core promise:** *"Understand yourself. Meet your Twin. Keep evolving."*
+> *(ตรงกับ §1–2 ของ `docs/Experience Architecture v2.md` — SELFPRINT ไม่ใช่ AI chatbot / ไม่ใช่ astrology app / ไม่ใช่ dashboard แต่เป็น Living Intelligence experience)*
 
 > ⚠️ **สถานะจริง (honest status):** Build / test / lint ผ่านทั้งหมด — พร้อมเข้าสู่ **Track C (UX/UI improvement)**
 > แต่ **ยังไม่ใช่ "100% product-verified"** — ดู [Known Limitations / Not Yet Done](#known-limitations--not-yet-done)
@@ -9,13 +12,13 @@
 
 ---
 
-## 📊 Status (7 Sep 2026 · HEAD `710afa0`)
+## 📊 Status (7 Sep 2026 · HEAD `710afa0` · latest `4ed4762`)
 
 | Gate | Result |
 |------|--------|
 | `tsc -b` (`strict: true`) | ✅ 0 errors |
 | `npm run typecheck:functions` | ✅ 0 errors |
-| `vite build` | ✅ Windows build passes (rolldown requires Windows-native binary) |
+| `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) |
 | `oxlint` | ✅ 0 errors · 187 warnings · 474 files |
 | `vitest run` | ✅ 66/66 files · 1037 tests · 0 fail · 0 skip |
 | **E2E Playwright CI** | ✅ **run #305 all passing** (7 Sep 2026) |
@@ -25,14 +28,18 @@
 
 ---
 
-## 🧠 What is SELFPRINT V3?
+## 🧠 What is SELFPRINT?
 
-SELFPRINT V3 is a **Living Intelligence experience** — an AI-powered "living Twin awakening" system that helps users understand themselves, learn, and grow. The AI Twin is born through the **Core Awakening** flow and grows with the user through 5 growth stages.
+SELFPRINT is a **Living Intelligence experience** — an AI-powered "living Twin awakening" system that helps users understand themselves, learn, and grow. The AI Twin is born through the **Core Awakening** flow and grows with the user through 5 growth stages.
 
-> **Core promise:** *"Understand yourself. Meet your Twin. Keep evolving."*
-> *(ตรงกับ §1–2 ของ `docs/Experience Architecture v2.md` — SELFPRINT ไม่ใช่ AI chatbot / ไม่ใช่ astrology app / ไม่ใช่ dashboard แต่เป็น Living Intelligence experience)*
+**Experience flow** *(verified from routes in `src/App.tsx`):*
 
-**5-tab navigation** *(verified from `BottomNav.tsx:89-93` + `NavRail.tsx:73-77`):*
+```
+Nova (guide) → 12 dimensions / SICE analysis → Blueprint → Core Awakening
+→ Twin Birth → Twin + memory/evolution → Today (living entry)
+```
+
+**5-tab navigation** *(verified from `BottomNav.tsx:89-93` + `NavRail.tsx`):*
 
 | # | Tab | Route | Purpose |
 |---|-----|-------|---------|
@@ -42,7 +49,7 @@ SELFPRINT V3 is a **Living Intelligence experience** — an AI-powered "living T
 | 4 | สำรวจ (Explore) | `/explore` | Discover yourself |
 | 5 | ฉัน (Me) | `/me` | Personal control |
 
-> **Note:** **Worlds IS a top-level tab** (per `BottomNav.tsx:6` comment "รวมกิจกรรมเดิม"). **Activities is NOT a tab** — the `/activities` route still exists (`App.tsx:170`) but is orphaned from navigation; **Activities is now a section of Explore**.
+> **Note:** **Worlds IS a top-level tab** (per `BottomNav.tsx:6` comment "รวมกิจกรรมเดิม"). **Activities is NOT a tab** — the `/activities` route still exists (`App.tsx:171`) but is orphaned from navigation; **Activities is now a section of Explore**.
 
 ---
 
@@ -52,7 +59,7 @@ SELFPRINT V3 is a **Living Intelligence experience** — an AI-powered "living T
 |-------|-----------|
 | Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 |
 | State | Zustand + TanStack React Query |
-| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (12 functions deployed ✅ (verified 6 Sep 2026)) |
+| Serverless | Cloudflare Pages Functions (`functions/` — the **only** deployed folder) + Supabase Edge Functions (12 functions deployed ✅ verified 6 Sep 2026) |
 | Database | Supabase (PostgreSQL + Auth + RLS) |
 | AI | 12 SICE (Selfprint Intelligence Core Engines — client-side, rule-based) + Claude API (Nova guide + AI Twin) |
 | Payments | Stripe |
@@ -141,11 +148,11 @@ FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md  # THE single source of truth for sta
 
 `notifications` · `twin-evolution` · `sice` · `stripe` · `profile` · `blueprint` · `share`
 
-Anything else returns a JSON 404 (no fallback to `index.html`).
+Anything else returns a JSON 404 (no fallback to `index.html`). Note `twin.ts` and `nova.ts` have their own dedicated functions.
 
 ### SICE — 12 Selfprint Intelligence Core Engines
 
-Client-side, rule-based intelligence engines (PersonalContextBuilder, PatternDetector, InsightEngine, TwinStateEngine, MemoryManager, DecisionIntelligenceEngine, ...), orchestrated by `SICEOrchestrator`.
+Client-side, rule-based intelligence engines (PersonalContextBuilder, PatternDetector, InsightEngine, TwinStateEngine, MemoryManagerEngine, DecisionIntelligenceEngineAdapter, ...), orchestrated by `SICEOrchestrator`.
 
 ### ⚠️ Two live SICE forks — do NOT delete either
 
@@ -168,11 +175,11 @@ Only these documents are trustworthy. The 84 root `.md` files that lied were del
 
 | Document | Purpose |
 |----------|---------|
-| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](./FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **Single source of truth** — real project status (round 3, 5 Sep 2026) |
-| [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) | **Design/experience master document for Track C** — RECOMPOSE not REBUILD · core promise · App Shell · P0/P1/P2 matrix · §44 safety rule |
+| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](./FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **Single source of truth** — real project status (round 7, 7 Sep 2026) |
+| [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) | **Design/experience master document for Track C** — RECOMPOSE not REBUILD · core promise · App Shell · P0/P1/P2 matrix · §44 safety rule · §51 story layer |
 | [`docs/PLAN_TRACKS_TH.md`](./docs/PLAN_TRACKS_TH.md) | Master plan: Track A (engineering backlog) / B (Phase 0 forensic) / C (visual redesign) |
-| [`CLAUDE.md`](./CLAUDE.md) | Permanent context + gotchas before touching code |
 | [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md) | Phase 0 visual + performance forensic results — **must read before Track C** |
+| [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./docs/Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | **Track C working doc** — 12 phase plan + gaps G1–G8 |
 
 ---
 
@@ -200,6 +207,14 @@ All blockers resolved as of 7 Sep 2026:
 | `structuredData.ts` | ✅ Fixed (7 Sep) — literal env + `''` fallback, no throw |
 | `public/soundscape-manifest.json` | 23 broken `CLOUDINARY_URL`s; `public/audio/` missing |
 
+### Still open (not blockers, but must know)
+
+- **C1 — Twin has 3 implementations** (`LivingTwin.tsx` orb CSS / `TwinPresence.tsx` SVG / `HologramBirth.tsx` canvas 2D) — needs **A3 approval** to unify
+- **C2 — No SSR / SSG / prerender** — 24/41 pages lack meta · FAQ schema only 5 questions · sitemap incomplete — needs **A4 approval** (touches build/deploy pipeline)
+- **Tailwind preflight intentionally off** (TWFIX-001) — so hand-written CSS (~30 files) isn't clobbered before Track C
+- **`chunk-intelligence` 345 kB** — largest chunk; mostly the swallowed Supabase SDK (verify in Phase 0)
+- **X1 env** — `structuredData.ts:21` fake phone fallback `'+66-2-XXX-XXXX'` → GEO spam signal
+
 ---
 
 ## 📞 Links
@@ -208,4 +223,4 @@ All blockers resolved as of 7 Sep 2026:
 - **Production:** https://selfprint.one
 - **Contributing:** see [`CONTRIBUTING.md`](./CONTRIBUTING.md)
 
-**Last verified:** 7 September 2026 · HEAD `710afa0`
+**Last verified:** 7 September 2026 · HEAD `710afa0` · latest `4ed4762`

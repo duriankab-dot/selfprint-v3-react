@@ -402,3 +402,100 @@ Track C พร้อมเข้าสู่ UX/UI improvement — **แต่�
 ✓ Story primitives ทั้ง 7 map กับ data ที่มีอยู่แล้ว (ดู §51 สำหรับ mapping table)
 ✓ ถามก่อน code: "ข้อมูลนี้มาจาก SICE จริงไหม?" ถ้าไม่ใช่ → ไม่ทำ
 ```
+
+---
+
+## Consultation Addendum — 7 Sep 2026
+
+> **สถานะ:** เป็น **ข้อเสนอ** จาก consultation session — **ยังไม่ใช่ commit ที่ implement แล้ว**
+> **วัน:** 7 ก.ย. 2026 · **HEAD:** `710afa0` (ล่าสุด `4ed4762`)
+> **หลักการ:** ไม่แก้เนื้อหาเดิมของเอกสารนี้ (append เท่านั้น) · ทุกข้อเสนอต้องผ่าน **§44 safety rule**
+> (RECOMPOSE ไม่ใช่ REBUILD) · **ห้ามแตะ do-not-touch zones** (§10 ของเอกสารนี้)
+> จุดร่วมของ addendum นี้: เพิ่ม **deliverable ใหม่** ใน phase ที่มีอยู่ + เสนอ micro-phase —
+> ไม่เปลี่ยนขอบเขต/ลำดับ 12 phase เดิม
+
+### A. Bilingual Typography System (ภาษาไทย)
+
+**ปัญหา:** ไทยไม่มีช่องว่างระหว่างคำ + คำไทยยาวกว่า EN โดยเฉลี่ย → บรรทัด/layout ที่ออกแบบเพื่อ EN
+จะ break / ตัดคำ / baseline เพี้ยนเมื่อเป็น TH
+
+**ข้อเสนอ:** เพิ่ม deliverable ใหม่ใน 2 phase (ไม่ใช่ phase ใหม่):
+- **Phase 2 (Landing)** — font stack ไทย (Noto Sans Thai / IBM Plex Sans Thai) + line-height + truncation
+- **Phase 8 (Today)** — line-height / truncation สำหรับ insight card ภาษาไทย
+
+| ประเด็น | สิ่งที่ต้องทำ |
+|---------|-------------|
+| **Font stack** | เพิ่ม Thai fallback (`Noto Sans Thai` / `IBM Plex Sans Thai`) ใน design token — ไม่ทับตัวอักษร EN |
+| **Line-height** | ไทยต้อง line-height สูงกว่า EN (มีตัวสูง-ต่ำ + สระบน/ล่าง) |
+| **Truncation** | คำไทยยาว → ต้องมี `line-clamp` / ellipsis ที่ไม่ตัดคำกลาง |
+| **Mixed-font baseline** | บรรทัดที่ผสม TH+EN ต้อง baseline ตรงกัน (หลีกเลี่ยงตัวลอย/จม) |
+
+> **อ้างอิง:** §23 VISUAL LANGUAGE · §6 TODAY (Phase 8) · §2 BRAND POSITIONING (Phase 2)
+
+### B. Bridge pages restyle (TarotPage / PalmistryPage / VsAstrologyPage)
+
+**ปัญหา:** หน้า bridge (Trojan funnel) 3 หน้า อยู่นอก 12 phase เดิม — จะถูกข้ามไปทั้งที่มันคือ
+"ประตูรับ" จากตลาดดูดวง
+
+**ข้อเสนอ:** **micro-phase** — ใส่เป็น **Phase 2a** หรือ **รวมใน Phase 4** (Analysis):
+- Restyle ด้วย **CSS atmosphere** ตาม §14 (ไม่ใช่ heavy 3D)
+- เน้น "psychological framing" copy ที่มีอยู่แล้ว (`TarotPage.tsx:33` / `PalmistryPage.tsx:6`)
+- **รักษา Trojan funnel** — อย่าทำให้หน้าดูเป็น "แอปดูดวง" แต่ก็อย่าเปลี่ยน copy จนเสียภาษาที่ผู้ใช้คุ้นเคย
+
+> **อ้างอิง:** §14 WORLD VISUAL SYSTEM · §2 BRAND POSITIONING · §35 SMART ENTRY
+> **หมายเหตุ:** งานนี้เล็ก (3 หน้า) — อยู่ใน change budget ≤8 ไฟล์ (ปกติ) · **ต้องไม่แตะ SICE / API / DB**
+
+### C. Twin unification (C1) — ลำดับก่อน visual
+
+**ปัญหา:** C1 (Twin มี 3 implementations) เป็น **A3 ที่ต้องขออนุมัติ** — จะชน Phase 6/7/8/9
+
+**ข้อเสนอ:** ทำ `useTwinIdentity()` **facade ก่อน** visual ของ Phase 7/8/9:
+- Twin 3 หน้าตา: `LivingTwin.tsx` (orb CSS) · `TwinPresence.tsx` (SVG) · `HologramBirth.tsx` (canvas 2D)
+- สร้าง facade กลางที่อ่าน `evolutionStage` / `glowMult` จากที่เดียว → phase หลังใช้ facade ไม่ใช่ 3 ตัวแยก
+- **ลำดับ:** facade (ใช้ได้ตั้งแต่ Phase 6) → แล้วค่อยทำ visual ใน Phase 7/8/9
+
+> **อ้างอิง:** §4.1 Identity · C1 (§7 ของเอกสารนี้) · §10 TWIN BIRTH (Phase 6)
+> **⚠️ ยังต้องขออนุมัติ A3** (แตะแก่น product) — ข้อเสนอแค่เรียงลำดับ ไม่ได้ขอข้ามการอนุมัติ
+
+### D. Story payoff = highest leverage (NO FAKE STORY)
+
+**ปัญหา:** ผู้ใช้รู้สึกว่า "ได้อะไร" จาก SELFPRINT ที่จุด "Twin Birth" — ถ้า first message generic
+(= "Hi! Nice to meet you") จะพังความน่าเชื่อถือทันที
+
+**ข้อเสนอ (2 อย่าง):**
+1. **First message ต้องมาจาก real analysis (G6)** — ตรงกับ §51 RHYTHM TABLE
+   (Twin Birth → First Reveal: ต้อง reference real analysis)
+2. **เพิ่ม Story Provenance Strip** — แสดง **source of truth** ของ insight ที่แสดง
+   เช่น "จาก 3 pattern ใน 2 สัปดาห์" → enforce "NO FAKE STORY" (§51 guardrail ข้อ 1)
+   เพราะถ้า insight อ้างที่มาได้ ผู้ใช้จะ trust · ถ้าแสดงที่มาไม่ได้ = ไม่ควรแสดง
+
+> **อ้างอิง:** §51 STORYTELLING ARCHITECTURE · G6 (§3 ของเอกสารนี้) · §10 TWIN BIRTH (Phase 6)
+
+### E. Today Micro Story (Phase 8)
+
+**ปัญหา:** §6 TODAY กำหนด "one primary insight" — แต่ UI เดิมมีแนวโน้มเป็นหลาย cards แข่งกัน
+
+**ข้อเสนอ:** Phase 8 ทำ header "Twin มองว่าวันนี้อะไรสำคัญ" — แสดง **หนึ่ง insight เด่น** เท่านั้น
+(ไม่ใช่หลาย cards แข่งกัน) · ตรงกับ §51 Layer 3 MICRO STORY
+
+> **อ้างอิง:** §6 TODAY · §51 Layer 3 MICRO STORY · §45 emotional progression
+> ("My Twin understands something about me")
+
+### F. Performance note (chunk-intelligence)
+
+**ปัญหา:** `chunk-intelligence` 345 kB (87.31 kB gzip) เป็น chunk ใหญ่สุด (B0.3) — ส่วนใหญ่คือ
+Supabase SDK ถูกกลืนเข้าไป
+
+**ข้อเสนอ:**
+- **verify ใน Phase 0** (Performance Foundation) ก่อน decorate — ถ้า Supabase SDK ถูกกลืนจริง
+  ต้อง **split ก่อน** ที่จะไปเพิ่ม visual decoration ลงในหน้าที่ใช้ chunk นี้
+- **3D = canvas 2D เท่านั้น** (ย้ำ C5) — ไม่สร้าง WebGL ใหม่ · ใช้ `HologramBirth.tsx` (canvas 2D) ที่มีอยู่แล้ว
+
+> **อ้างอิง:** B0.3 (bundle baseline) · §25 PERFORMANCE ARCHITECTURE · C5 (§7 ของเอกสารนี้)
+
+---
+
+> **สรุป addendum:** เพิ่ม deliverable ใน Phase 2/8 (typography) · เสนอ micro-phase 2a/4 (bridge pages) ·
+> เรียงลำดับ C1 facade ก่อน visual · เพิ่ม Story Provenance Strip (enforce NO FAKE STORY) ·
+> Today = one micro story · split chunk-intelligence ก่อน decorate
+> **ทั้งหมดเป็นข้อเสนอ ไม่ใช่ commit — ต้องผ่าน §44 + do-not-touch zones ก่อน implement
