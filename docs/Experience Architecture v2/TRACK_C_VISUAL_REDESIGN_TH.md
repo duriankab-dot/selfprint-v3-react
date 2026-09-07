@@ -499,3 +499,105 @@ Supabase SDK ถูกกลืนเข้าไป
 > เรียงลำดับ C1 facade ก่อน visual · เพิ่ม Story Provenance Strip (enforce NO FAKE STORY) ·
 > Today = one micro story · split chunk-intelligence ก่อน decorate
 > **ทั้งหมดเป็นข้อเสนอ ไม่ใช่ commit — ต้องผ่าน §44 + do-not-touch zones ก่อน implement
+
+---
+
+## Consultation Addendum — Visual Storytelling + PWA (7 Sep 2026)
+
+> **สถานะ:** เป็น **ข้อเสนอ** จาก consultation session (visual + PWA) — **ยังไม่ใช่ commit ที่ implement แล้ว**
+> **วัน:** 7 ก.ย. 2026 · **HEAD:** `710afa0` (ล่าสุด `4ed4762`)
+> **หลักการ:** append (ไม่แก้เนื้อหาเดิม) · ผ่าน **§44 safety rule** (RECOMPOSE ไม่ใช่ REBUILD) ·
+> **ห้ามแตะ do-not-touch zones** (§10 ของเอกสารนี้)
+> **โจทย์:** ทำให้ Track C **เป็น PWA มากกว่าเดิม** + **เล่าเรื่องด้วยวิชวลให้เหมาะขึ้น** + **UX/UI ดีขึ้น**
+
+### A. PWA — จาก "installable" ไปสู่ "first-class PWA"
+
+#### สถานะปัจจุบัน (ตรวจจากโค้ดจริง)
+
+| สิ่ง | หลักฐาน | สถานะ |
+|-----|---------|-------|
+| **manifest.json** | `public/manifest.json` | ✅ มี — display standalone · icons 192/512 + maskable · 2 shortcuts |
+| **Service worker** | `public/sw.js` v6 · register ที่ `src/main.tsx:39` | ✅ มี |
+| **Install prompt** | `src/components/PWAInstallPrompt.tsx` | ✅ มี — `beforeinstallprompt` + iOS banner |
+| **Icons** | `public/icons/icon-192x192.png` / `icon-512x512.png` + maskable | ✅ มี |
+
+#### ช่องว่างที่ยังไม่เป็น "PWA เต็ม" (gap ที่ต้องปิด)
+
+| # | ปัญหา | หลักฐาน | ผล |
+|---|-------|---------|-----|
+| **P1** | **SW precache เฉพาะ 3 ไฟล์** (`/`, `/index.html`, `/manifest.json`) — ไม่ precache app shell (hashed JS/CSS chunks) | `sw.js:17-21` | **offline จริง ๆ จะพัง** เพราะ asset อื่นไม่ได้ precache (network-first + cache fallback เท่านั้น) |
+| **P2** | **Push icon/badge ชี้ `/logo.png`** ซึ่งไม่มีไฟล์จริง | `sw.js:187-188` | notification ไม่มี icon/badge |
+| **P3** | **`screenshots: []` ว่าง** | `manifest.json:56` | install UI / store listing ไม่มีภาพ |
+| **P4** | **`theme_color` ไม่ตรงกัน** — manifest `#5B5CEB` vs `index.html:24` `#4f46e5` | `manifest.json:10` / `index.html:24` | browser chrome เปลี่ยนสีไม่สม่ำเสมอ |
+| **P5** | **`background_color: #FFFFFF`** สวนกับธีม dark navy (`data-mode="dark"` · navy `#0F1F3F`) | `manifest.json:9` / `index.html:9` | splash flash ขาวตอนเปิดแอป |
+| **P6** | **ไม่มี `id`** ใน manifest | `manifest.json` | บาง install scenario ต้องการ |
+| **P7** | **`start_url: /th/`** กำหนด TH เป็นค่าเริ่มต้น | `manifest.json:5` | EN user เปิดเข้า TH |
+| **P8** | **Offline UI ไม่เป็นแบรนด์** — SW fallback คืน `/index.html` (อาจ blank) | `sw.js:100,113,141` | offline แล้วเห็นหน้า blank ไม่ใช่ "คุณออฟไลน์" |
+
+#### ข้อเสนอ PWA (เพิ่มเข้า Track C)
+
+| งาน | ลง phase ไหน | หมายเหตุ |
+|-----|--------------|----------|
+| **PWA audit baseline** (Lighthouse installability + offline test) | **Phase 1** (Performance Foundation) | วัดก่อน/หลัง · ตรงกับ "no numbers = no redesign" |
+| **App shell precache** — precache hashed JS/CSS + static assets (vite-plugin-pwa / Workbox) | Phase 1 | **แตะ build pipeline → ต้องขออนุมัติ** (คล้าย A4 / C2) |
+| **Fix push icon/badge** → ใช้ `icons/icon-192x192.png` จริง | Phase 1 | งานเล็ก |
+| **Offline shell** — หน้า "คุณออฟไลน์" ที่เป็นแบรนด์ + ปุ่ม retry (แทน blank) | Phase 1/2 | งานเล็ก |
+| **Manifest polish** — เพิ่ม `id` + `screenshots` + align `theme_color`/`background_color` กับแบรนด์ (navy/accent) | Phase 1/2 | งานเล็ก |
+| **Install UX** — ปรับ `PWAInstallPrompt` ให้เข้ากับ bottom nav / safe-area + แสดงเฉพาะเมื่อ installable จริง | Phase 2 | งานเล็ก |
+| **Standalone-aware UI** — detect `display-mode: standalone` → ปรับ chrome (ซ่อน install banner · safe-area inset) | Phase 2/8 | งานเล็ก |
+
+> **อ้างอิง:** §25 PERFORMANCE ARCHITECTURE (load เฉพาะ route) · §14 (CSS atmosphere) ·
+> Phase 1 (Performance Foundation) · Master Direction §35 (PWA)
+> **⚠️ App shell precache แตะ build/deploy pipeline — ต้องขออนุมัติ** (ไม่ใช่แค่ CSS/UI)
+
+### B. Visual storytelling — เล่าเรื่องด้วยวิชวล (ไม่ใช่ text)
+
+§51 story layer มี **7 story primitives** — วิชวลต้องทำให้เรื่อง "มองเห็นได้" ไม่ใช่แค่ข้อความ
+
+| Story primitive | วิชวลที่ควรใช้ | §topic |
+|-----------------|----------------|--------|
+| **Chapter** | atmosphere / gradient เปลี่ยนตาม chapter (World) | §14, §24 |
+| **Story Beat** | micro-card เด่นหนึ่งใบ (Today) + provenance strip | §6, §51 |
+| **Narrative Hook** | Twin visual + คำถามเปิด (ไม่ใช่ CTA การตลาด) | §7, §51 |
+| **Reveal** | insight เผยแบบ reveal/skeleton (ไม่เด้ง) | §24, §35 |
+| **Choice / Consequence** | fork-point visual + "since then" delta | §18, §51 |
+| **Evolution** | gradual transformation visual (ไม่ใช่ badge ปลอม) | §17, §24 |
+
+#### ข้อเสนอ visual storytelling
+
+1. **Unify Twin visual (C1)** — ทำ `useTwinIdentity()` facade ก่อน (addendum ก่อนหน้า C) → Twin ตัวเดียว
+   (orb/SVG/canvas 2D) ทุกหน้าตรงกัน · วิชวล Twin = "ตัวเอก" ของเรื่อง (§7)
+2. **Atmosphere ตาม narrative beat (§14)** — CSS gradient/atmosphere เปลี่ยนตาม chapter/world ·
+   **ไม่ใช้ heavy 3D** (C5)
+3. **Motion มีความหมาย (§24)** — Awakening = slow emergence · Twin Birth = identity formation ·
+   Insight = subtle emphasis · World = atmospheric shift · Evolution = gradual transformation ·
+   **อย่า animate ทุกอย่าง**
+4. **Provenance strip** — visual indicator ของ "ที่มา insight" (เช่น "จาก 3 pattern ใน 2 สัปดาห์") →
+   trust + enforce NO FAKE STORY (§51 guardrail ข้อ 1)
+5. **Today = one micro story** — หนึ่ง insight เด่น + visual emphasis (ไม่ใช่ cards แข่ง) (§6)
+6. **Typography ไทย** — baseline/line-height/truncation สำหรับเรื่องเล่า (เชื่อม addendum ก่อนหน้า A)
+
+### C. UX/UI improvements
+
+| งาน | หลักการ | phase |
+|-----|---------|-------|
+| **ลด card density** (P0.6) | Today/Twin hub เป็น hierarchy เดียว ไม่ใช่ grid | Phase 8, 10 |
+| **Micro-interaction สื่อ state** | hover/active/breathe ของ Twin สื่อ state (§24) | Phase 7, 9 |
+| **Bilingual typography** | ไทย line-height/truncation (addendum A) | Phase 2, 8 |
+| **Accessibility** | reduced-motion (RAFLOOP-001 มีแล้ว) + contrast + aria สำหรับ Twin visual | ทุก phase |
+| **Loading/offline state** | skeleton แทน blank · offline shell (PWA A) | Phase 1, 2 |
+| **App-like touch** | safe-area inset · swipe/gesture · standalone-mode UX | Phase 2, 8 |
+
+> **อ้างอิง:** §23 VISUAL LANGUAGE (ultra-clean semi-realistic futuristic · cream/white neutral ·
+> restrained accent · หลีกเลี่ยง overuse purple / heavy 3D) · §24 MOTION · §45 SUCCESS CRITERIA ·
+> §46 CORE LOOP
+
+---
+
+> **สรุป addendum นี้:** PWA จาก "installable" → "first-class" (precache app shell · offline shell ·
+> fix push icon · manifest polish · install UX) · visual storytelling ผ่าน 7 primitives (unify Twin ·
+> atmosphere · motion มีความหมาย · provenance strip · one micro story) · UX/UI (ลด card density ·
+> micro-interaction · accessibility · offline state · app-like touch)
+> **ทั้งหมดเป็นข้อเสนอ ไม่ใช่ commit — ต้องผ่าน §44 + do-not-touch zones ก่อน implement**
+> **⚠️ App shell precache แตะ build/deploy pipeline → ต้องขออนุมัติ** (คล้าย A4 / C2) ·
+> **Twin unification (C1) ยังเป็น A3 ที่ต้องขออนุมัติ**

@@ -1,82 +1,168 @@
-# Plan — อัปเดทเอกสารตาม Consultation Session (7 Sep 2026)
+# Plan — Selfprint V3: Documentation + Track C Enhancement (PWA + Visual Storytelling + UX/UI)
+
+**สร้าง:** 7 ก.ย. 2026 · **HEAD:** `710afa0` (latest `4ed4762`)  
+**แหล่งข้อมูล:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` · `docs/Experience Architecture v2.md` · `TRACK_C_VISUAL_REDESIGN_TH.md`  
+**หลักการ:** RECOMPOSE ไม่ใช่ REBUILD (§44) · ตรวจสอบจากโค้ดจริง · ไม่แตะ do-not-touch zones
+
+---
 
 ## Goal
-บันทึกผลการปรึกษา (visual/story Track C + สรุปโปรเจค + วิเคราะห์ตลาดไทย) ลงในเอกสาร 4 ไฟล์
-ตามที่เจ้าของเลือกขอบเขต: **ครบ 4 แบบเต็ม** (SUMMARY TH + README ใหม่ + MARKET ANALYSIS + Track C addendum)
-ไม่แตะ memory/glossary ฯลฯ (ขอบเขตยืนยันแล้ว)
 
-## หลักการ (ยึดตามโปรเจค)
-- เนื้อหาต้อง**ตรวจจากโค้ดจริง** ไม่ใช่เชื่อ `.md` เก่า (ตรงกับ forensic principle)
-- `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` ยังเป็น **single source of truth** — ไฟล์ใหม่ต้องอ้าง ไม่แย่งบทบาท
-- ภาษาไทยสำหรับไฟล์ `_TH` / README ภาษาไทยเป็นหลัก (technical term เป็น EN)
-- ห้ามอวย / ห้ามอ้าง "100% product-verified" — ระบุ limitations จริง (stubs, soundscape, SEO gaps, C1 Twin 3 หน้าตา, C2 no SSR)
-- ไม่แก้โค้ด — งานนี้เป็นเอกสารล้วน
+1. บันทึกผลการปรึกษาเป็นเอกสาร 4 ไฟล์ (สรุปโปรเจค + README ใหม่ + ตลาดไทย + Track C addendum)
+2. ปรับปรุง Track C ให้เป็น **PWA มากกว่าเดิม** + **เล่าเรื่องด้วยวิชวลให้เหมาะขึ้น** + **UX/UI ดีขึ้น**
 
-## ไฟล์ที่ทำ
+---
 
-### 1. NEW — `docs/SELFPRINT_PROJECT_SUMMARY_TH.md`
-สรุปโปรเจคฉบับภาษาไทย (จากเนื้อหาที่ปรึกษาเมื่อ session นี้) โครงสร้าง:
-- `# SELFPRINT — PROJECT SUMMARY (ภาษาไทย)`
-- สถานะเอกสาร: อ้างอิง `FORENSIC_...` เป็นหลัก · ไม่แทนที่
-- **0. เรื่องของโปรเจค** — Living Intelligence Experience · core promise "Understand yourself. Meet your Twin. Keep evolving." · ไม่ใช่ chatbot/ดูดวง/dashboard
-- **1. สถานะจริง (7 ก.ย. 2026 HEAD `710afa0` + ล่าสุด `4ed4762`)** — ตาราง gate (tsc/vite/oxlint/vitest 1037/E2E run #305/production) + Track A+B+C0 ปิด · Track C พร้อมเริ่ม
-- **2. สถาปัตยกรรมจริง** — React 19/Tailwind 4/Vite · CF Pages Functions (โฟลเดอร์เดียวที่ deploy) · Supabase Edge 12 ตัว · SICE 12 engines (2 forks + SICEBridge) · 7 API modules
-- **3. จุดแข็งโดยจริง** — honesty culture (forensic), Story layer §51 + anti-fake guardrails, dual language, lifecycle ครบ
-- **4. ความเสี่ยง / สิ่งที่ยังค้าง (honest)** — stubs/mocks, preflight ปิดอยู่, soundscape พัง, Twin 3 implementation (C1), no SSR (C2), SEO meta 24/41 หน้า
-- **5. แผนงาน Track A/B/C** — สรุป + 12 phases + G1–G8
-- **6. เอกสารอ้างอิงหลัก** — 4 trusted docs
+## สถานะงานที่เสร็จแล้ว (Documentation — ไม่ต้องทำซ้ำ)
 
-### 2. REWRITE — `README.md` (root)
-แทนที่ README เดิมด้วยฉบับใหม่ เนื้อหา:
-- Header "SELFPRINT — Living Intelligence Platform" + core promise
-- สถานะเร็ว (gate table 7 ก.ย. 2026) + ลิงก์ไป `FORENSIC_...` ว่าเป็นฉบับเดียวที่ถูกต้อง
-- **Experience** — Nova → 12 มิติ/SICE → Blueprint → Core Awakening → Twin Birth → Twin + memory/evolution → Today
-- **5-tab nav** (TODAY/WORLDS/TWIN/EXPLORE/ME) + หมายเหตุ Worlds เป็น top-level tab (ไม่ใช่ Activities)
-- **Tech stack** (React 19, Tailwind 4, Zustand, CF Pages Functions, Supabase, SICE ×12, Claude, Stripe, Passkeys, Sentry) — **ไม่เอา Express/Vercel กลับเข้ามา**
-- **Quick start** (npm ci / .env / dev / test / lint / build)
-- **Project structure** (src/, functions/, supabase/, docs/) + gotchas (2 forks อย่าลบ, personal_context ≠ personal_contexts, users_profiles.id เป็น surrogate)
-- **Trusted documentation** ตาราง (4 ไฟล์ + Track C working docs)
-- **Known limitations** — ตาม README เดิมที่ถูกต้อง (stubs, soundscape, no SSR)
-- **Links** (GitHub / selfprint.one)
-- หมายเหตุ: อัปเดทจาก README เดิมที่อ้าง HEAD เก่า `da855c5` → HEAD ปัจจุบัน
+| # | ไฟล์ | สถานะ |
+|---|------|-------|
+| ✅ 1 | `docs/SELFPRINT_PROJECT_SUMMARY_TH.md` (ใหม่) | เขียนแล้ว — สรุปโปรเจคภาษาไทย ครบ 7 section |
+| ✅ 2 | `README.md` (ทับเดิม) | เขียนแล้ว — Living Intelligence Platform + gate table + tech stack + known limitations |
+| ✅ 3 | `docs/MARKET_ANALYSIS_THAILAND_TH.md` (ใหม่) | เขียนแล้ว — บทวิเคราะห์ตลาดไทย honest + dual-funnel recommendation |
+| ✅ 4 | `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` (append) | ต่อท้าย 2 addendum แล้ว (Consultation Addendum 7 Sep + Visual Storytelling + PWA) |
 
-### 3. NEW — `docs/MARKET_ANALYSIS_THAILAND_TH.md`
-บทวิเคราะห์ตลาดไทย (เนื้อหาจาก consultation) — **honest, ไม่อวย** โครงสร้าง:
-- สถานะเอกสาร: บทวิเคราะห์เชิงกลยุทธ์ ไม่อ้างตัวเลขภายนอกที่ไม่ได้ verify
-- **บริบท: สิ่งที่ SELFPRINT มีจริงจากโค้ด** — Trojan-horse content (VsAstrology, Tarot, Palmistry, blog awareness, `astrology.ts` birth-chart bridge) → behavioral science
-- **ตลาดดูดวงไทย** — กลุ่มใหญ่ / ตอบโจทย์ความแน่นอน+ritual / decision reassurance / emotional contract
-- **โจทย์จริง** — ตารางเปรียบเทียบ: ดูดวงให้ "ความแน่นอน+closure" vs SELFPRINT ให้ "insight ที่ต้องเรียนรู้" — ข้อได้เปรียบ (real behavior, personalize) และข้อจำกัด (user อาจไม่ closure ภายใน first minute)
-- **สองกลุ่มเป้าหมาย** — skeptic จากตลาดดูดวง (active search "AI ดูดวง") + self-development ที่อยากได้ science-based
-- **ข้อควรระวัง** — อย่าไปแข่งตรงๆ กับความเร็ว/closure ของดูดวง · subscription WTP ไทยต่ำ · อย่า fake story
-- **Verdict (honest)** — ✅ asset: trojan funnel + "not astrology แต่ตรงกว่า" + self-discovery measured · ⛔ ความเสี่ยง: first-punch insight ต้องไม่ generic, pricing, คู่แข่ง self-help ราคาถูก
-- **คำแนะนำ Dual-funnel** — Funnel A ดูดวง→premium insight (short-term) · Funnel B self-development→relationship/evolution (long-term) · metric: first-visit→first-named-Twin rate + Day-7 retention
-- **อ้าง Track C** — Phase 2/4/6/8/11 + Tarot/Palmistry restyle ที่เสนอ
+---
 
-### 4. APPEND — `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
-ต่อท้าย section ใหม่ "Consultation Addendum — 7 Sep 2026" (ไม่แก้เนื้อหาเดิม) ประกอบด้วยข้อแนะนำที่ปรึกษา:
-- **A. Bilingual Typography System** — ไทยไม่มีช่องว่าง/คำยาวกว่า → เพิ่ม deliverable ใน Phase 2 (Landing) + Phase 8 (Today): font stack (Noto Sans Thai / IBM Plex Sans Thai), line-height, truncation, mixed-font baseline
-- **B. Bridge pages restyle** (TarotPage/PalmistryPage/VsAstrologyPage) — อยู่นอก 12 phase เดิม → เสนอ micro-phase (Phase 2a หรือรวม Phase 4): restyle ด้วย CSS atmosphere §14 + เน้น "psychological framing" copy ที่มีอยู่แล้ว — รักษา Trojan funnel
-- **C. Twin unification (C1) ลำดับ** — ทำ `useTwinIdentity()` facade ก่อน visual ของ Phase 7/8/9 (Twin 3 หน้าตา: LivingTwin orb / TwinPresence SVG / HologramBirth canvas)
-- **D. Story payoff = highest leverage** — Twin Birth first message ต้องจาก real analysis (G6) + **Story Provenance Strip** (แสดง source of truth ของ insight เช่น "จาก 3 pattern ใน 2 สัปดาห์") เพื่อ enforce "NO FAKE STORY"
-- **E. Today Micro Story** — Phase 8: header "Twin มองว่าวันนี้อะไรสำคัญ" (หนึ่ง insight เด่น) ไม่ใช่หลาย cards แข่งกัน (§6)
-- **F. Performance note** — `chunk-intelligence` 345 kB ส่วนใหญ่คือ Supabase SDK ถูกกลืน (verify Phase 0) → split ก่อน decorate; 3D = canvas 2D เท่านั้น (C5)
-- ระบุชัดว่า: ยังเป็น**ข้อเสนอ** ไม่ใช่ commit ที่ implement แล้ว · ห้ามแตะ §44 zones
+## Dependencies & Approvals สำหรับ Phase Implementation
 
-## ขั้นตอนการลงมือ (สำหรับ implementation agent)
-1. อ่าน `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` + `docs/PLAN_TRACKS_TH.md` (verify ตัวเลข/สถานะล่าสุดก่อนเขียน)
-2. เขียน `docs/SELFPRINT_PROJECT_SUMMARY_TH.md` (ใหม่)
-3. เขียน `README.md` ทับ (ใหม่ทั้งหมด)
-4. เขียน `docs/MARKET_ANALYSIS_THAILAND_TH.md` (ใหม่)
-5. ต่อท้าย addendum ใน `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
-6. **ไม่**แก้โค้ด / ไม่รัน build/test (งานเอกสารล้วน)
+| งาน | ต้องอนุมัติก่อน? | Notes |
+|-----|------------------|-------|
+| App shell precache (`vite-plugin-pwa`) + data API caching | ✅ **A4-like approval** | แตะ build pipeline (`vite.config.ts`, `sw.js`) |
+| Twin unification facade (C1) — `<Twin />` + `useTwinIdentity()` | ✅ **A3 approval** | แตะแก่น product — รวมแกน Twin · **ต้องคง context-driven variation (user + world) ตามด้านบน** |
+| ส่วนที่เหลือ (UI/CSS/manifest/config) | ❌ ไม่ต้อง | เปลี่ยน UI/CSS/manifest/config อย่างเดียว |
 
-## Validation
-- `grep` ยืนยัน 4 ไฟล์มีเนื้อหาครบ section หลัก
-- ตัวเลข gate ในเอกสารตรงกับ `FORENSIC_...` ฉบับ 7 ก.ย. 2026 (HEAD `710afa0`)
-- ไม่มีคำอ้างเกินจริง ("100% product-verified" ห้าม) · ทุกจุดที่อ้าง "ยังค้าง" ตรงกับ known limitations จริง
-- เนื้อหาไม่ขัด §44 (RECOMPOSE ไม่ใช่ REBUILD) · ไม่แตะ do-not-touch zones
+> **ตัดสินใจแล้ว (อัปเดต 7 ก.ย.):** **ทำ Twin unification facade (C1)** — รวมแกน Twin เป็น facade เดียว (`<Twin />` + `useTwinIdentity()`) แต่ **presentation ต้องแตกต่างกันตาม context ของผู้ใช้และโลก**:
+> - **User context** → evolution stage ต่อ maturity (glow/rings) · TwinState (8 states) · archetype Visual DNA (`twinVisualDNA.ts`) · device fidelity + reduced-motion (static fallback เมื่อเครื่องอ่อน)
+> - **World context** → `twinWorldContext.ts` (bob/breathe/tilt/accessory/expression ต่อ world) + world aura tint — **core identity ไม่เปลี่ยนตาม world** (§34)
+> - **ห้ามกลายเป็น "Twin เหมือนกันเป๊ะทุกหน้า"** — แกนเดียว แต่หน้าตา/จังหวะเปลี่ยนตาม context เสมอ
+>
+> สถานะโค้ดจริง: Dashboard ใช้ `TwinPresence` แล้ว (TWIN-CONSISTENCY-001) — gap ที่เหลือคือ logic ซ้ำ (`evolutionStage`/`glowMult` ใน `LivingTwin.tsx:124-134` กับ `TwinPresence.tsx:327-336`), ยังไม่มี facade กลาง, `HologramBirth` อยู่นอก facade
 
-## หมายเหตุ / Open
-- ไฟล์ใหม่ 3 ไฟล์ + แก้ 1 ไฟล์ (append) = งานเอกสารล้วน ไม่แตะโค้ด
-- commit แยกตามที่เจ้าของต้องการ (เล่า/ไม่เล่า) — ตามปกติโปรเจคนี้ commit แยกชัดเจน (docs: ...)
-- README เดิมถูกเขียนทับ — หากอยากเก็บประวัติ ให้ดูใน git history (เนื้อหามีอยู่ใน commit เก่า)
+---
+
+## Task List — Phase Implementation (เรียงตาม dependency)
+
+### Phase 1 — Foundation (PWA audit + quick fixes)
+
+**เป้าหมาย:** วัด baseline PWA + แก้ไขด่วนที่ไม่ต้องอนุมัติ
+
+| # | งาน | ไฟล์ที่กระทบ | รายละเอียด |
+|---|-----|-------------|-----------|
+| **1.1** | **PWA audit baseline** | ไม่มี (report only) | รัน Lighthouse PWA audit → บันทึกตัวเลข installability / offline / best-practices เป็น baseline ก่อน/หลัง |
+| **1.2** | **Fix push icon/badge** | `public/sw.js:187-188` | เปลี่ยน `badge: '/logo.png'` และ `icon: '/logo.png'` → `/icons/icon-192x192.png` (ไฟล์นี้มีจริง) |
+| **1.3** | **Align theme_color** | `index.html:24` และ `public/manifest.json:10` | ตั้งทั้งสองที่ให้เป็น `#5B5CEB` (accent brand color เดิม) |
+| **1.4** | **Fix background_color** | `public/manifest.json:9` | เปลี่ยน `#FFFFFF` → `#0F1F3F` (navy brand matching `data-mode="dark"`) |
+| **1.5** | **Add manifest `id` + `start_url` polish** | `public/manifest.json` | เพิ่ม `"id": "https://selfprint.one/"` ; ปรับ `start_url` เป็น `/` แทน `/th/` เพื่อให้ browser ใช้ language preference |
+| **1.6** | **Capture real screenshots + ใส่ manifest** | `public/screenshots/` (โฟลเดอร์ใหม่) + `public/manifest.json:56` | Capture screenshot จริงจากแอป (desktop/mobile) 3–4 รูป → ใส่ใน `screenshots[]` ของ manifest |
+| **1.7** | **Create Skeleton component** | `src/components/ui/Skeleton.tsx` (ใหม่) | Component skeleton loading ทั่วไปสำหรับทุกหน้า (แทน blank/loading spinner) |
+| **1.8** | **Create OfflineBanner component** | `src/components/pwa/OfflineBanner.tsx` (ใหม่) | Banner แสดงเมื่อ `navigator.onLine === false` — ใช้ style tokens เดิม |
+
+**Change budget:** ≤8 ไฟล์ → ปกติ (ไม่ต้อง change map)
+
+---
+
+### Phase 2 — App Shell + Data API Precache (requires approval)
+
+**เป้าหมาย:** SW precache hashed JS/CSS chunks + cache twin_memories/decision_logs → offline ได้จริงทั้ง app และ data
+
+| # | งาน | ไฟล์ที่กระทบ | รายละเอียด |
+|---|-----|-------------|-----------|
+| **2.1** | **เพิ่ม vite-plugin-pwa** | `package.json` (devDeps) + `vite.config.ts` | ติดตั้ง `vite-plugin-pwa` → configure precache runtime cache strategies สำหรับ JS/CSS/assets |
+| **2.2** | **Configure plugin — app shell** | `vite.config.ts` | ตั้ง `workbox` options: `globPatterns: ['**/*.{js,css,html,svg,png,ico,json}']` สำหรับ precache assets ทั้งหมด |
+| **2.3** | **Configure plugin — data API caching** | `vite.config.ts` | เพิ่ม `runtimeCaching` rules: cache twin_memories / decision_logs / daily_briefs (cache-first, stale-while-revalidate) — เก็บข้อมูลผู้ใช้ไว้ offline |
+| **2.4** | **Remove manual sw.js** | `public/sw.js` (ลบหรือ replace) | `vite-plugin-pwa` จะ generate SW อัตโนมัติ → ลบ manual `sw.js` หรือ keep เป็น fallback |
+| **2.5** | **Register generated SW** | `src/main.tsx:36-67` | ปรับ registration ให้ใช้ generated SW path (`/sw.js` จาก plugin) + update notification hook |
+| **2.6** | **Create branded offline page** | `public/offline.html` (ใหม่) | หน้า "คุณออฟไลน์" ที่เป็นแบรนด์ SELFPRINT — มีปุ่ม retry / แสดง cached content (twin_memories ที่ cache ไว้) |
+| **2.7** | **Verify PWA post-change** | ไม่มี (test) | รัน Lighthouse PWA ใหม่ → เปรียบเทียบกับ baseline (1.1) |
+
+**Change budget:** ~7 ไฟล์ → ปกติ (แต่แตะ build pipeline → ต้องขออนุมัติ)
+
+---
+
+### Phase 3 — Twin Unification Facade C1 (🛑 requires A3 approval)
+
+**เป้าหมาย:** Facade เดียว (`<Twin />`) — แกน identity/evolution/state รวมเป็นที่เดียว แต่ **presentation แตกต่างกันตาม user context และ world context** (ทำก่อน visual phases ตาม TRACK_C addendum §C "ลำดับก่อน visual")
+
+| # | งาน | ไฟล์ที่กระทบ | รายละเอียด |
+|---|-----|-------------|-----------|
+| **3.1** | **Extract `useTwinIdentity()` hook** | `src/hooks/useTwinIdentity.ts` (ใหม่) | แหล่งเดียวของ `evolutionStage` + `glowMult` (ปัจจุบันซ้ำคำต่อคำ: `LivingTwin.tsx:124-134` กับ `TwinPresence.tsx:327-336`) + archetype Visual DNA + TwinState |
+| **3.2** | **สร้าง `<Twin />` facade** | `src/components/twin/Twin.tsx` (ใหม่) | Facade กลาง รับ context props (`worldId`, `variant: 'presence' \| 'birth'`) → resolve renderer ตาม context |
+| **3.3** | **World-context variation ผ่าน facade** | `src/components/twin/TwinPresence.tsx` (ปรับ) | คง SVG per-archetype + อ่าน `twinWorldContext.ts` ต่อ worldId (bob/breathe/tilt/accessory/expression) — core color/shape ไม่เปลี่ยนตาม world (§34) |
+| **3.4** | **User-context variation ผ่าน facade** | `TwinPresence.tsx` + `useTwinIdentity` | evolutionStage ต่อ maturityScore (glow/rings ต่างกัน nascent→evolved) + reduced-motion → static + device fidelity tier (FALLBACK/LOW สำหรับเครื่องอ่อน ตาม PHASE0 L1/L2) |
+| **3.5** | **Birth renderer เข้า facade** | `src/components/twin/HologramBirth.tsx` (คง canvas 2D, C5) + `src/pages/CoreAwakening.tsx` | พิธีกำเนิดคง canvas เดิม — เรียกผ่าน `<Twin variant="birth" />` + เพิ่ม reduced-motion check (ปัจจุบันไม่มี) |
+| **3.6** | **Migrate callers** | `src/pages/Dashboard.tsx` · `src/pages/WorldDetail.tsx` · `src/components/dashboard/LivingTwin.tsx` | เรียก Twin ผ่าน facade — LivingTwin คง chrome (ladder/progress/actions) แต่ลบ logic ซ้ำ ใช้ identity จาก hook |
+
+**Change budget:** ~7 ไฟล์ → ปกติ แต่แตะแก่น product → 🛑 **A3 ต้องอนุมัติ**
+
+---
+
+### Phase 4 — Visual Storytelling (atmosphere + motion)
+
+**เป้าหมาย:** วิชวลสื่อสารเรื่องเล่าผ่าน atmosphere + motion (§14 + §24)
+
+| # | งาน | ไฟล์ที่กระทบ | รายละเอียด |
+|---|-----|-------------|-----------|
+| **4.1** | **Add CSS atmosphere tokens** | `src/styles/global.css` หรือ token file | เพิ่ม CSS custom properties สำหรับ atmosphere per chapter/world: `--atmosphere-gradient-*`, `--atmosphere-overlay-*` |
+| **4.2** | **Motion categories** | `src/styles/global.css` หรือ token file | กำหนด motion classes ตาม §24: `.motion-emergence` (slow), `.motion-insight` (subtle), `.motion-shift` (atmospheric) |
+| **4.3** | **ProvenanceStrip component** | `src/components/story/ProvenanceStrip.tsx` (ใหม่) | Component แสดง source of truth ของ insight — เช่น "จาก 3 pattern ใน 2 สัปดาห์" — ใช้ style tokens เดิม |
+| **4.4** | **Apply atmosphere to WorldDetail** | `src/pages/WorldDetail.tsx` | ใส่ CSS atmosphere gradient/background ตาม world archetype (ใช้ §14 CSS atmosphere ไม่ใช้ 3D) |
+| **4.5** | **Apply provenance strip to Today insights** | `src/pages/Dashboard.tsx` (Today section) | เพิ่ม ProvenanceStrip ด้านล่าง primary insight |
+
+**Change budget:** ≤8 ไฟล์ → ปกติ
+
+---
+
+### Phase 5 — UX/UI Polish
+
+**เป้าหมาย:** ลด card density, micro-interaction, accessibility, app-like touch
+
+| # | งาน | ไฟล์ที่กระทบ | รายละเอียด |
+|---|-----|-------------|-----------|
+| **5.1** | **Refactor Today layout** | `src/pages/Dashboard.tsx` | เปลี่ยนจากหลาย cards แข่งกัน → hierarchy เดียว: Twin presence → one primary insight → recommended action → your day → recent evolution (ตาม §6) |
+| **5.2** | **Micro-interaction CSS** | `src/styles/global.css` | เพิ่ม hover/active/breathe animations สำหรับ Twin visual และ interactive elements (§24) |
+| **5.3** | **Thai typography fix** | `src/styles/global.css` + font import | เพิ่ม font import (Noto Sans Thai / IBM Plex Sans Thai), line-height สูงกว่า EN สำหรับภาษาไทย, truncation สำหรับคำยาว |
+| **5.4** | **Accessibility: aria labels** | ทุกหน้าที่มี Twin visual | เพิ่ม `aria-label` สำหรับ Twin visual, animation controls, reduced-motion support |
+| **5.5** | **Safe-area + standalone-aware layout** | `src/components/layout/BottomNav.tsx` และ `PWAInstallPrompt.tsx` | ปรับ padding ด้วย `env(safe-area-inset-bottom)` — BottomNav มีแล้ว แต่ต้องตรวจสอบทุก footer/nav; ปรับ PWAInstallPrompt ให้ซ่อนเมื่อ `display-mode: standalone` |
+
+**Change budget:** ≤8 ไฟล์ → ปกติ
+
+---
+
+## Validation Checklist
+
+- [ ] Lighthouse PWA score ≥ 90 (ก่อน ≈ ?, หลัง ≥ ?)
+- [ ] `tsc -b` ผ่าน 0 errors
+- [ ] `vitest run` ผ่านครบ 1037 tests
+- [ ] `oxlint` 0 errors
+- [ ] Offline test: เปิด airplane mode → แอปแสดง branded offline page ไม่ใช่ blank
+- [ ] Offline test: ข้อมูล twin_memories ที่ cache ไว้ยังแสดงผลได้ตอน offline
+- [ ] Install test: Chrome Android → สามารถติดตั้งได้ → เปิดจาก home screen → standalone mode ทำงาน
+- [ ] Push notification: ส่ง push → แสดง icon จริงไม่ใช่ broken image
+- [ ] Theme color ใน browser chrome ตรงกับ brand (`#5B5CEB`)
+- [ ] Splash/background สี navy (`#0F1F3F`) ไม่ใช่ขาวตอนเปิดแอป
+- [ ] Twin render ผ่าน `<Twin />` facade เดียว — `evolutionStage`/`glowMult` ซ้ำระหว่าง `LivingTwin`/`TwinPresence` ถูกลบแล้ว (grep ไม่เจอ duplicate)
+- [ ] Twin ต่างกันตาม user context: maturity ต่าง → glow/rings ต่าง · reduced-motion → static · เครื่องอ่อน → fidelity ลด
+- [ ] Twin ต่างกันตาม world context: worldId เปลี่ยน → bob/breathe/tilt/accessory/expression เปลี่ยน (twinWorldContext) · แต่ core color/shape คงเดิมทุก world (§34)
+- [ ] พิธีกำเนิด (CoreAwakening) ยังเป็น canvas 2D birth animation — เรียกผ่าน facade และมี reduced-motion check
+- [ ] No new `as any` points (วัดแล้ว 47 จุด — ห้ามเพิ่ม)
+- [ ] ไม่แตะ SICE core / API / DB / Auth / Lifecycle
+
+---
+
+## Rollout Strategy
+
+1. **Phase 1** ทำได้เลย (ไม่ต้องอนุมัติ) — แก้ไขด่วน + baseline + capture screenshots
+2. **Phase 2** ขอ approval ออกจากเจ้าของ (แตะ build pipeline + data caching)
+3. **Phase 3 (C1 facade)** ขอ **A3 approval** แยกต่างหาก (แตะแก่น product) — ทำก่อน Phase 4-5 ตามลำดับ "facade ก่อน visual"
+4. **Phase 4-5** ทำต่อได้หลัง 1-3 เสร็จ (เปลี่ยน UI/CSS อย่างเดียว)
+
+---
+
+## Open Questions
+
+1. ✅ **Font:** ยอมรับ Noto Sans Thai / IBM Plex Sans Thai (Open Font License)
+2. ✅ **Screenshots:** ใช้ screenshot จริงจากแอป (capture ก่อนใส่ manifest)
+3. ✅ **Offline scope:** Cache ทั้ง app shell + data API (twin_memories/decision_logs/daily_briefs)
+4. ✅ **Twin Unification (อัปเดต 7 ก.ย.):** **ทำ C1 facade** — แกนเดียว (`<Twin />` + `useTwinIdentity()`) แต่ presentation เปลี่ยนตาม context: ผู้ใช้ (maturity/state/fidelity/reduced-motion) และโลก (worldId → twinWorldContext) · core identity คงที่ (§34) · ต้อง A3 approval
+5. **Push notification backend:** Edge Function `send-push` มีอยู่แล้ว แต่ badge/icon ยังชี้ไฟล์ที่ไม่มี — แก้ sw.js แล้วจะทำงานถูกต้อง

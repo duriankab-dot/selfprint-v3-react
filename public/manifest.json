@@ -2,11 +2,12 @@
   "name": "SELFPRINT — Living AI Twin",
   "short_name": "SELFPRINT",
   "description": "AI Twin ที่เรียนรู้จากคุณ — วิเคราะห์ตัวตน ค้นพบศักยภาพ ตัดสินใจอย่างชาญฉลาด",
-  "start_url": "/th/",
+  "id": "https://selfprint.one/",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#FFFFFF",
+  "background_color": "#0F1F3F",
   "theme_color": "#5B5CEB",
   "lang": "th-TH",
   "dir": "ltr",
@@ -53,6 +54,21 @@
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],
-  "screenshots": [],
+  "screenshots": [
+    {
+      "src": "/screenshots/desktop-1.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SELFPRINT บนเดสก์ท็อป"
+    },
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "SELFPRINT บนมือถือ"
+    }
+  ],
   "prefer_related_applications": false
 }

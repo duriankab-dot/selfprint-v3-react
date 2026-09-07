@@ -6,10 +6,39 @@ import react from '@vitejs/plugin-react'
 // ใน 37 ไฟล์ไม่มีผลอะไรเลย (ยืนยันจาก dist: ไม่มี --tw- สักตัว)
 // Tailwind v4 ใช้ plugin ของ vite โดยตรง ไม่ผ่าน postcss แล้ว
 import tailwindcss from '@tailwindcss/vite'
+import { VitePWA } from 'vite-plugin-pwa'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    // PWA-PHASE2-001 (7 ก.ย. 2026): injectManifest (NOT generateSW) — keeps
+    // our hand-written src/sw.js (push notifications §26-27, journal
+    // background sync, notification click routing) fully intact. The
+    // plugin only injects the hashed build-asset manifest into
+    // `self.__WB_MANIFEST` inside that file; it does not generate or
+    // replace the service worker logic itself.
+    VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
+      // main.tsx already registers '/sw.js' manually (with its own
+      // updatefound listener) — don't let the plugin inject a second,
+      // competing registration script into index.html.
+      injectRegister: false,
+      // public/manifest.json is hand-maintained (id/start_url/theme/
+      // background/icons/screenshots — see Phase 1) — don't generate/
+      // overwrite it.
+      manifest: false,
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,json,ico,png,svg,woff2}'],
+      },
+      devOptions: {
+        enabled: false,
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(import.meta.dirname, './src'),

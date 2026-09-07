@@ -1,17 +1,58 @@
 /**
- * Service Worker — § 37 Offline Journal Queue
- * - Cache static assets (network-first strategy)
- * - Background sync for journal queue
- * - Offline shell support
- * - Robust cache versioning & lifecycle management
+ * Service Worker source — src/sw.js
+ * Built by vite-plugin-pwa (strategies: 'injectManifest') → dist/sw.js
+ *
+ * PWA-PHASE2-001 (7 ก.ย. 2026): moved from public/sw.js (copied verbatim,
+ * unprocessed) to this injectManifest source so hashed build assets
+ * (JS/CSS chunks, icons, manifest.json, etc.) get real precaching —
+ * `self.__WB_MANIFEST` below is replaced with the real asset list at
+ * build time. Every existing handler (push §26-27, journal background
+ * sync, notification click routing, cache versioning) is preserved
+ * unchanged from the old public/sw.js — nothing was removed, only the
+ * precache + Supabase data-cache pieces were added.
+ *
+ * Design note: workbox's precache/data-cache lookups are done via
+ * `matchPrecache()` / `strategy.handle()` called manually *inside* the
+ * single existing 'fetch' listener below, instead of using
+ * `precacheAndRoute()` / `registerRoute()` (which each register their own
+ * independent 'fetch' listener). Two independent listeners racing to call
+ * `event.respondWith()` on the same event throws in the second one — this
+ * keeps everything in one listener so there's exactly one respondWith()
+ * per request, same as before.
  */
+
+import { precache, matchPrecache, cleanupOutdatedCaches } from 'workbox-precaching';
+import { StaleWhileRevalidate } from 'workbox-strategies';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+
+// Populate the hashed build-asset precache on install, and let workbox
+// clean up its own stale precache versions on activate. This does NOT
+// register a 'fetch' listener (that's what "AndRoute" would do) — matching
+// requests are served via matchPrecache() inside the fetch handler below.
+precache(self.__WB_MANIFEST || []);
+cleanupOutdatedCaches();
+
+// Supabase data API cache: twin_memories / decision_logs / daily_briefs
+// (Master Direction Phase 2 — offline access to already-seen data).
+// Stale-while-revalidate: serve the cached row set instantly, refresh in
+// the background. Bounded + auto-expiring so it can't grow unbounded.
+const dataCacheStrategy = new StaleWhileRevalidate({
+  cacheName: 'selfprint-data-v1',
+  plugins: [
+    new CacheableResponsePlugin({ statuses: [0, 200] }),
+    new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 7 * 24 * 60 * 60 }),
+  ],
+});
+const DATA_CACHE_TABLES_RE = /\/rest\/v1\/(twin_memories|decision_logs|daily_briefs)\b/;
 
 // CACHE_VERSION: bump this on every deploy to force SW cleanup and re-cache
 // CACHE_NAME: constructed from version for auto-invalidation across deploys
 // v1→v3: fix 503 stale chunks (Session 4)
 // v4→v5: aggressive cache-busting, network-first HTML, proper activate cleanup (Session 7 fix)
 // v5→v6: SW-503-FIX — fallback to cache on non-2xx network response (503/502)
-const CACHE_VERSION = 6;
+// v6→v7: PWA-PHASE2-001 — workbox precache + Supabase data cache added
+const CACHE_VERSION = 7;
 const CACHE_NAME = `selfprint-v${CACHE_VERSION}`;
 const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
@@ -41,13 +82,17 @@ self.addEventListener('install', (event) => {
 });
 
 // Activate: aggressively delete old cache versions + claim all clients
+// PWA-PHASE2-001: keep workbox's own precache cache and the new
+// selfprint-data-v1 cache — the old blanket "anything not CACHE_NAME"
+// cleanup would otherwise wipe both of those out on every single activate.
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating (v' + CACHE_VERSION + ')...');
   event.waitUntil(
     (async () => {
       const cacheNames = await caches.keys();
+      const KEEP_EXACT = new Set([CACHE_NAME, 'selfprint-data-v1']);
       const deleteOld = cacheNames
-        .filter((name) => name !== CACHE_NAME)
+        .filter((name) => !KEEP_EXACT.has(name) && !name.startsWith('workbox-precache'))
         .map((oldName) => {
           console.log('[SW] Deleting stale cache: ' + oldName);
           return caches.delete(oldName);
@@ -74,6 +119,14 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(request.url);
+
+  // PWA-PHASE2-001: Supabase data API — stale-while-revalidate
+  if (DATA_CACHE_TABLES_RE.test(url.pathname)) {
+    event.respondWith(dataCacheStrategy.handle({ event, request }));
+    return;
+  }
+
   // Document requests (HTML): network-first with aggressive timeout
   if (request.destination === 'document') {
     event.respondWith(
@@ -96,53 +149,54 @@ self.addEventListener('fetch', (event) => {
               console.log('[SW] Serving cached document:', request.url);
               return cached;
             }
-            console.log('[SW] No cache, serving offline shell');
-            return caches.match('/index.html');
+            console.log('[SW] No cache — serving branded offline page');
+            return caches.match('/offline.html').then((offline) => offline || caches.match('/index.html'));
           });
         })
         .catch((err) => {
-          // Network failed or timeout — try cache, else offline shell
+          // Network failed or timeout — try cache, else branded offline page
           console.warn('[SW] Network failed for', request.url, '— checking cache');
           return caches.match(request).then((cached) => {
             if (cached) {
               console.log('[SW] Serving cached document:', request.url);
               return cached;
             }
-            // Fallback to cached index.html
-            console.log('[SW] No cache, serving offline shell');
-            return caches.match('/index.html');
+            console.log('[SW] No cache — serving branded offline page');
+            return caches.match('/offline.html').then((offline) => offline || caches.match('/index.html'));
           });
         })
     );
     return;
   }
 
-  // Other assets: network-first with cache fallback
+  // Other assets: workbox precache first (hashed build assets), then
+  // fall back to the existing network-first-with-cache-fallback strategy.
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Cache successful responses
-        if (response.ok) {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, cloned);
+    matchPrecache(request).then((precached) => {
+      if (precached) {
+        return precached;
+      }
+      return fetch(request)
+        .then((response) => {
+          // Cache successful responses
+          if (response.ok) {
+            const cloned = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, cloned);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache
+          return caches.match(request).then((cached) => {
+            if (cached) {
+              return cached;
+            }
+            return new Response('Offline', { status: 503 });
           });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Fallback to cache
-        return caches.match(request).then((cached) => {
-          if (cached) {
-            return cached;
-          }
-          // Return offline shell for documents
-          if (request.destination === 'document') {
-            return caches.match('/index.html');
-          }
-          return new Response('Offline', { status: 503 });
         });
-      })
+    })
   );
 });
 
@@ -184,8 +238,8 @@ self.addEventListener('push', (event) => {
 
   let title = 'Selfprint';
   let options = {
-    badge: '/logo.png',
-    icon: '/logo.png',
+    badge: '/icons/icon-192x192.png',
+    icon: '/icons/icon-192x192.png',
     tag: 'selfprint-notification',
     requireInteraction: false,
   };

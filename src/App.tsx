@@ -30,6 +30,7 @@ import { EnvironmentProvider } from './context/EnvironmentContext';
 import { NovaProvider } from './context/NovaContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { OfflineBanner } from './components/pwa/OfflineBanner';
 import { TwinEvolution } from './components/twin/TwinEvolution';
 import ContextualPopup from './components/ContextualPopup';
 import { FloatingSelfprintChat } from './components/chat/FloatingSelfprintChat';
@@ -289,6 +290,7 @@ function App() {
                                   LanguageProvider now wraps this whole sibling group instead of just
                                   <Routes>, with no change to any other provider's nesting order. */}
                               <LanguageProvider>
+                              <OfflineBanner />
                               <TwinEvolution />
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />

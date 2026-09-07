@@ -1,0 +1,117 @@
+<!doctype html>
+<!--
+  offline.html — PWA-PHASE2-001 (7 ก.ย. 2026)
+  Branded fallback shown by src/sw.js when a document request fails both
+  the network and the cache (see the "document" branch in the fetch
+  handler). This is a standalone static file served directly by the SW —
+  it has no access to the app's React bundle or CSS custom properties
+  (src/styles/tokens.css), so brand colors are inlined here on purpose
+  (--color-navy-900 / --color-accent-primary values, kept in sync with
+  tokens.css by hand since this file can't @import it).
+-->
+<html lang="th" data-mode="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#5B5CEB" />
+    <title>ออฟไลน์ — SELFPRINT</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      :root {
+        --color-bg-primary: #0F1F3F;
+        --color-accent-primary: #5B5CEB;
+        --color-text-primary: #F9FAFB;
+        --color-text-secondary: #D6DEEA;
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100dvh;
+        padding: 24px;
+        padding-top: calc(24px + env(safe-area-inset-top));
+        padding-bottom: calc(24px + env(safe-area-inset-bottom));
+        background: var(--color-bg-primary);
+        color: var(--color-text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", "IBM Plex Sans Thai", sans-serif;
+        text-align: center;
+      }
+      .icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        margin-bottom: 24px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0 0 8px;
+      }
+      p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--color-text-secondary);
+        max-width: 360px;
+        margin: 0 0 28px;
+      }
+      button {
+        appearance: none;
+        border: none;
+        border-radius: 10px;
+        background: var(--color-accent-primary);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 12px 24px;
+        cursor: pointer;
+      }
+      button:active {
+        opacity: 0.85;
+      }
+      .lang-en {
+        display: none;
+      }
+      html[lang="en"] .lang-th { display: none; }
+      html[lang="en"] .lang-en { display: block; }
+    </style>
+  </head>
+  <body>
+    <img class="icon" src="/icons/icon-192x192.png" alt="SELFPRINT" width="72" height="72" />
+
+    <div class="lang-th">
+      <h1>คุณกำลังออฟไลน์</h1>
+      <p>
+        เชื่อมต่ออินเทอร์เน็ตไม่ได้ตอนนี้ — ข้อมูลที่เคยเปิดดูไว้ (Twin, ความทรงจำ, บทสรุปประจำวัน)
+        ยังใช้งานได้จากที่แคชไว้ กด "ลองอีกครั้ง" เมื่อกลับมาออนไลน์
+      </p>
+    </div>
+    <div class="lang-en">
+      <h1>You're offline</h1>
+      <p>
+        Can't reach the network right now — data you've already viewed (Twin, memories, daily briefs)
+        still works from cache. Tap "Try again" once you're back online.
+      </p>
+    </div>
+
+    <button id="retry" class="lang-th">ลองอีกครั้ง</button>
+
+    <script>
+      // Best-effort language match — this page has no access to the app's
+      // LanguageContext (it's a standalone SW fallback), so it falls back
+      // to browser language.
+      if (!navigator.language || !navigator.language.startsWith('th')) {
+        document.documentElement.lang = 'en';
+        document.getElementById('retry').textContent = 'Try again';
+      }
+      document.getElementById('retry').addEventListener('click', () => {
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>
