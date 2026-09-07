@@ -10,17 +10,24 @@
    เมื่อเริ่ม Track C แล้วค่อยเปลี่ยนบรรทัดล่างเป็น `@import "tailwindcss";`
    ตัวเดียว (ได้ preflight ครบ) พร้อมกับที่ไล่ล้าง CSS เก่าออก
    ══════════════════════════════════════════════════════════════════════════ */
+/* CSSIMPORT-FIX-001 (ก.ย. 2026): @import ต้องอยู่ก่อนกฎอื่นทุกชนิดในสไตล์ชีต
+   (ยกเว้น @charset/@layer statement) — เดิม @config คั่นอยู่ก่อน @import
+   ตัวถัดไป ทำให้ Lightning CSS (ที่ Tailwind v4 ใช้) มองว่า @import tokens.css /
+   hub-themes.css / mood-themes.css ทั้งสาม invalid แล้วตัดทิ้งเงียบ ๆ ตอน build
+   — ผลคือ tokens.css ทั้งไฟล์ (นิยามตัวแปรสีทั้งหมดของโปรเจกต์) หายจาก
+   production bundle 100% ทำให้ var(--color-...) ทุกจุด resolve เป็นค่าว่าง
+   (ปุ่ม/ข้อความ/พื้นหลังโปร่งใสมองไม่เห็นทั้งเว็บ) ย้าย @import ทั้งหมดมา
+   ต่อกันก่อน @config เพื่อให้ import placement ถูกต้องตาม spec */
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import url('./tokens.css');
+@import url('./hub-themes.css');
+@import url('./mood-themes.css');
 
 /* map token เดิมของโปรเจกต์เข้า Tailwind (v4 อ่าน config เก่าผ่าน @config) */
 @config "../../tailwind.config.js";
 
 /* 🎨 GLOBAL STYLES */
-
-@import url('./tokens.css');
-@import url('./hub-themes.css');
-@import url('./mood-themes.css');
 
 * {
   margin: 0;
