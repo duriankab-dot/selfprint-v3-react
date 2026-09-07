@@ -514,7 +514,12 @@ export default function TwinChat() {
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
           <h1
             style={{
-              fontSize: '1.75rem',
+              // NAVGAP-003 (7 ก.ย. 2026): fixed 1.75rem wrapped this 18-char
+              // Thai heading into 5+ lines at narrow viewports (confirmed
+              // at 400px). clamp() scales it down continuously below ~350px
+              // instead of a hard breakpoint, since this component styles
+              // inline rather than via Tailwind classes.
+              fontSize: 'clamp(1.25rem, 6vw, 1.75rem)',
               fontWeight: 800,
               color: 'var(--color-text-primary)',
               margin: '0 0 12px',

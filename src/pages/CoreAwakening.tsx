@@ -364,7 +364,16 @@ export default function CoreAwakening() {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-hidden">
+    // NAVGAP-003 (7 ก.ย. 2026): overflow-hidden on a fixed h-screen root
+    // clipped the page with zero way to scroll whenever content grew
+    // taller than the viewport (confirmed at 400px width — the intro
+    // heading below wraps to 5+ lines there, pushing the CTA button off
+    // screen entirely). overflow-y-auto keeps the same look on screens
+    // where content fits, and lets it scroll on ones where it doesn't —
+    // position:fixed elements (HologramBirth canvas, confetti) aren't
+    // affected either way since this div has no transform/filter/
+    // will-change to make it a containing block for them.
+    <div className="flex flex-col h-screen w-full bg-gradient-to-b from-slate-900 via-blue-900 to-slate-900 overflow-y-auto">
       {/* Error Alert */}
       {error && (
         <div className="absolute top-4 left-4 right-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
@@ -400,7 +409,11 @@ export default function CoreAwakening() {
             {isTh ? 'ไปหน้าหลักก่อน →' : 'Go to dashboard first →'}
           </button>
           <div className="text-center max-w-lg">
-            <h1 className="text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ฝาแฝดของคุณกำลังตื่น' : 'Your intelligence is awakening'}</h1>
+            {/* NAVGAP-003: text-4xl (36px) at every width wrapped this
+                13-character Thai heading (no spaces to break on cheaply)
+                into 5+ lines at narrow viewports — text-2xl on mobile,
+                growing back to the original text-4xl from sm: up. */}
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 text-white">⚡ {isTh ? 'ฝาแฝดของคุณกำลังตื่น' : 'Your intelligence is awakening'}</h1>
             <p className="text-lg text-gray-200 mb-4">{isTh ? 'SELFPRINT พาคุณมาถึงแล้ว' : 'SELFPRINT has brought you to this moment'}</p>
             <p className="text-gray-300 mb-8">
               {isTh
