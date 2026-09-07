@@ -10,19 +10,20 @@
    เมื่อเริ่ม Track C แล้วค่อยเปลี่ยนบรรทัดล่างเป็น `@import "tailwindcss";`
    ตัวเดียว (ได้ preflight ครบ) พร้อมกับที่ไล่ล้าง CSS เก่าออก
    ══════════════════════════════════════════════════════════════════════════ */
-/* CSSIMPORT-FIX-001 (ก.ย. 2026): @import ต้องอยู่ก่อนกฎอื่นทุกชนิดในสไตล์ชีต
-   (ยกเว้น @charset/@layer statement) — เดิม @config คั่นอยู่ก่อน @import
-   ตัวถัดไป ทำให้ Lightning CSS (ที่ Tailwind v4 ใช้) มองว่า @import tokens.css /
-   hub-themes.css / mood-themes.css ทั้งสาม invalid แล้วตัดทิ้งเงียบ ๆ ตอน build
-   — ผลคือ tokens.css ทั้งไฟล์ (นิยามตัวแปรสีทั้งหมดของโปรเจกต์) หายจาก
-   production bundle 100% ทำให้ var(--color-...) ทุกจุด resolve เป็นค่าว่าง
-   (ปุ่ม/ข้อความ/พื้นหลังโปร่งใสมองไม่เห็นทั้งเว็บ) ย้าย @import ทั้งหมดมา
-   ต่อกันก่อน @config เพื่อให้ import placement ถูกต้องตาม spec */
+/* CSSIMPORT-FIX-002 (ก.ย. 2026, verify แล้วด้วย build จริง): สาเหตุจริงไม่ใช่
+   ตำแหน่ง @import (CSSIMPORT-FIX-001 ย้ายตำแหน่งแล้วไม่ช่วย — พิสูจน์แล้วด้วย
+   `vite build` จริงว่า bundle ยังไม่มี tokens.css เลย) แต่คือ **syntax**:
+   Tailwind v4 ใช้ Rust engine (oxide) ประมวลผลไฟล์นี้ทั้งไฟล์เพราะมี
+   @import "tailwindcss/..." อยู่ — oxide ไม่รองรับ @import url('...') แบบมี
+   url() ครอบสำหรับไฟล์ local แล้วตัดทิ้งเงียบ ๆ (ไม่ error ตอน build) ต้องเขียน
+   เป็น @import '...'; (bare string ไม่มี url()) เท่านั้นถึงจะถูกรวมเข้า bundle
+   จริง verify แล้ว: เปลี่ยนเป็น bare string → --color-accent-primary ปรากฏใน
+   dist output จริง (ก่อนหน้านี้ไม่มีเลยทั้งไฟล์) */
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
-@import url('./tokens.css');
-@import url('./hub-themes.css');
-@import url('./mood-themes.css');
+@import './tokens.css';
+@import './hub-themes.css';
+@import './mood-themes.css';
 
 /* map token เดิมของโปรเจกต์เข้า Tailwind (v4 อ่าน config เก่าผ่าน @config) */
 @config "../../tailwind.config.js";
