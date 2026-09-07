@@ -8,20 +8,24 @@
  * colors) — both comments admitted "same as [the other file]". Now one
  * hook both consume via the <Twin /> facade (Twin.tsx).
  *
- * Scope note: TwinState (the 8-step awakening→mastery ladder shown on
- * Dashboard) stays inside LivingTwin.tsx — it needs userId + a React Query
- * fetch + TwinStateEngine and is Dashboard-specific UI (state badge,
- * progress %, ladder, next-milestone text), not part of the Twin's
- * cross-page *visual* identity this hook owns. Pulling it in here would
- * force every facade caller (WorldDetail, CoreAwakening) to pay for a
- * personalContext fetch they don't use.
+ * TWIN-STATE-MERGE-001 (7 ก.ย. 2026): TwinState (the 8-step awakening→
+ * mastery ladder) is now also sourced from here, gated behind the optional
+ * `userId` arg — LivingTwin.tsx is the only caller that passes it, so
+ * WorldDetail/CoreAwakening/TwinPresence's internal call (none of which
+ * pass userId) don't pay for a query they don't use. The query key stays
+ * exactly `['personalContext', userId]` — the same key IntelligencePanel/
+ * ExecutiveSummary already use — so this shares their React Query cache
+ * entry instead of creating a second, competing one for the same data.
  */
 import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import type { Archetype } from '@/context/TwinContext';
 import type { WorldId } from '@/constants/worlds';
 import { getTwinVisualDNA, type TwinVisualDNA } from '@/lib/twin/twinVisualDNA';
 import { getUniqueTwinTraits, shiftHue, type TwinUniqueTraits } from '@/lib/twin/twinUniqueness';
 import { getTwinWorldContext, type TwinWorldContext } from '@/lib/twin/twinWorldContext';
+import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { TwinStateEngine, type TwinStateResult } from '@/lib/intelligence/TwinStateEngine';
 
 export type TwinEvolutionStage = 1 | 2 | 3 | 4;
 
@@ -36,6 +40,13 @@ export interface TwinIdentity {
   uniqueCoreColor: string;
   uniqueAuraColor: string;
   worldCtx: TwinWorldContext;
+  /** TWIN-STATE-MERGE-001: populated only when `userId` is passed to the
+   *  hook — null while loading, or when no userId was given at all. */
+  twinState: TwinStateResult | null;
+  isTwinStateLoading: boolean;
+  /** Exposed so callers (LivingTwin's <Ladder/>) can still use
+   *  engine.getAllStates()/stateIndex() without instantiating their own. */
+  twinStateEngine: TwinStateEngine;
 }
 
 export interface UseTwinIdentityArgs {
@@ -48,6 +59,10 @@ export interface UseTwinIdentityArgs {
    *  original call sites' defaults. */
   maturityScore?: number;
   worldId?: WorldId;
+  /** TWIN-STATE-MERGE-001: opt in to fetching TwinState (8-step ladder).
+   *  Omit for callers that only need the Twin's *visual* identity — the
+   *  facade's WorldDetail/CoreAwakening renderers never pass this. */
+  userId?: string;
 }
 
 // TWIN-VISUAL-001: index 0 unused (evolutionStage is 1-4) — kept so the
@@ -60,6 +75,7 @@ export function useTwinIdentity({
   seedKey,
   maturityScore = 30,
   worldId,
+  userId,
 }: UseTwinIdentityArgs): TwinIdentity {
   const evolutionStage = useMemo((): TwinEvolutionStage => {
     const s = Math.max(0, Math.min(100, maturityScore));
@@ -97,6 +113,25 @@ export function useTwinIdentity({
   // World — never touches core identity (color/shape) above (§34).
   const worldCtx = useMemo(() => getTwinWorldContext(worldId), [worldId]);
 
+  // TWIN-STATE-MERGE-001: same 'personalContext' query key IntelligencePanel
+  // / ExecutiveSummary / (previously) LivingTwin itself already use — React
+  // Query dedupes/shares the cache entry across all of them, so this never
+  // triggers a second fetch for a userId another component already loaded.
+  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
+  const twinStateEngine = useMemo(() => new TwinStateEngine(), []);
+
+  const { data: personalContext, isLoading: isTwinStateLoading } = useQuery({
+    queryKey: ['personalContext', userId],
+    queryFn: () => contextBuilder.getContext(userId as string),
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
+
+  const twinState = useMemo(
+    () => (userId ? twinStateEngine.computeState(personalContext ?? null) : null),
+    [userId, personalContext, twinStateEngine]
+  );
+
   return {
     evolutionStage,
     glowMult,
@@ -106,5 +141,8 @@ export function useTwinIdentity({
     uniqueCoreColor,
     uniqueAuraColor,
     worldCtx,
+    twinState,
+    isTwinStateLoading: !!userId && isTwinStateLoading,
+    twinStateEngine,
   };
 }

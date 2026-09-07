@@ -17,15 +17,12 @@
  * No mocks. No hardcoding.
  */
 
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTwin } from '@/context/TwinContext';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
-import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
-import type { TwinState } from '@/lib/intelligence/TwinStateEngine';
+import type { TwinState, TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import { Twin } from '@/components/twin/Twin';
 import { useTwinIdentity } from '@/hooks/useTwinIdentity';
 import { ShareButton } from '@/components/viral/ShareButton';
@@ -103,32 +100,20 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   // WorldDetail.tsx reads for TwinPresence — see below.
   const { twin } = useTwin();
 
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
-  const engine = useMemo(() => new TwinStateEngine(), []);
-
-  // Shared cache key with IntelligencePanel / ExecutiveSummary
-  const { data: context, isLoading } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
-    staleTime: 60_000,
-  });
-
-  const twinResult = useMemo(
-    () => engine.computeState(context ?? null),
-    [context, engine]
-  );
-
   // PHASE0-TWIN-FACADE-001: evolutionStage/glowMult/glowOpacity used to be
   // computed here word-for-word identically to TwinPresence.tsx (both
-  // comments admitted "same as [the other file]") — now sourced from the
-  // one shared hook the <Twin /> facade also uses. HOOKS-RULE: must stay
-  // before any early returns so React always calls Hooks in the same order.
-  const { glowMult, glowOpacity } = useTwinIdentity({
+  // comments admitted "same as [the other file]"). TWIN-STATE-MERGE-001:
+  // TwinState (PersonalContextBuilder + TwinStateEngine, shared
+  // 'personalContext' query key with IntelligencePanel/ExecutiveSummary)
+  // is now sourced from the same hook too — passing userId opts in.
+  // HOOKS-RULE: must stay before any early returns so React always calls
+  // Hooks in the same order.
+  const { glowMult, glowOpacity, twinState, isTwinStateLoading, twinStateEngine } = useTwinIdentity({
     primaryArchetype: twin?.primaryArchetype,
     secondaryArchetype: twin?.secondaryArchetype,
     seedKey: userId,
     maturityScore,
+    userId,
   });
 
   // Auth guard
@@ -149,7 +134,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   }
 
   // Processing state while loading (§5)
-  if (isLoading) {
+  if (isTwinStateLoading) {
     return (
       <div className="living-twin">
         <div
@@ -172,6 +157,8 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
     );
   }
 
+  // isTwinStateLoading already false above, so twinState is populated —
+  // the fallback only matters for TypeScript's static null check.
   const {
     state,
     labelEn,
@@ -180,7 +167,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
     progress,
     nextMilestone,
     glowColor,
-  } = twinResult;
+  } = twinState ?? twinStateEngine.computeState(null);
 
   return (
     <div
@@ -238,7 +225,7 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
       </div>
 
       {/* State ladder */}
-      <Ladder current={state} engine={engine} />
+      <Ladder current={state} engine={twinStateEngine} />
 
       {/* Next milestone */}
       <div className="living-twin__next">
