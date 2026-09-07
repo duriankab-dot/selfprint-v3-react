@@ -10,7 +10,8 @@
 // CACHE_NAME: constructed from version for auto-invalidation across deploys
 // v1→v3: fix 503 stale chunks (Session 4)
 // v4→v5: aggressive cache-busting, network-first HTML, proper activate cleanup (Session 7 fix)
-const CACHE_VERSION = 5;
+// v5→v6: SW-503-FIX — fallback to cache on non-2xx network response (503/502)
+const CACHE_VERSION = 6;
 const CACHE_NAME = `selfprint-v${CACHE_VERSION}`;
 const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
@@ -78,14 +79,26 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request, { signal: AbortSignal.timeout(5000) })
         .then((response) => {
-          // Cache successful responses
           if (response.ok) {
+            // Cache successful responses
             const cloned = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(request, cloned);
             });
+            return response;
           }
-          return response;
+          // SW-503-FIX: non-2xx from server (503, 502, etc.) — do NOT pass
+          // the error response to the page. Fall back to cache so the user
+          // sees a working page instead of a blank/error screen.
+          console.warn('[SW] Network returned', response.status, 'for', request.url, '— checking cache');
+          return caches.match(request).then((cached) => {
+            if (cached) {
+              console.log('[SW] Serving cached document:', request.url);
+              return cached;
+            }
+            console.log('[SW] No cache, serving offline shell');
+            return caches.match('/index.html');
+          });
         })
         .catch((err) => {
           // Network failed or timeout — try cache, else offline shell

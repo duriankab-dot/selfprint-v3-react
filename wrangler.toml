@@ -1,15 +1,12 @@
 name = "selfprint-v3-react"
 compatibility_date = "2024-12-01"
 
-# KV Namespace Bindings for Rate Limiting
-# Rate limiter persists state in CF KV across all edge locations
-# Setup: Create a KV namespace named "RATE_LIMIT_KV" in CF Dashboard,
-# then bind it via: Settings -> Functions -> KV namespace bindings
-# -> Add binding: Variable name = RATE_LIMIT_KV, Namespace ID = <your-ns-id>
-[[kv_namespaces]]
-binding = "RATE_LIMIT_KV"
-id = "rate-limit-kv-production"
-preview_id = "rate-limit-kv-preview"
+# KV-REMOVED-001: [[kv_namespaces]] block removed (ก.ย. 2026).
+# RATE_LIMIT_KV was never used — rate-limit.ts runs entirely in-memory.
+# The placeholder IDs ("rate-limit-kv-production" / "rate-limit-kv-preview")
+# are not valid Cloudflare KV namespace IDs (must be 32-char hex strings),
+# so CF Pages was failing to bind the namespace and returning 503 on every
+# request routed through the Functions worker.
 
 # CF-PAGES-MIGRATION-001: pages_build_output_dir was added here briefly,
 # but that key is exactly what switches a CF Pages project onto the

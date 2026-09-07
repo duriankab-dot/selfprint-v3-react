@@ -121,6 +121,20 @@
   --color-border: #E5E7EB;
   --color-border-dark: #D1D5DB;
 
+  /* TOKEN-ALIAS-001 (ก.ย. 2026): shorthand tokens used by pricing.css,
+     badge-gallery.css, daily-brief.css, voice-twin.css — they were
+     previously UNDEFINED so every component fell through to hardcoded
+     dark-mode fallback values regardless of the active theme.
+     Aliased here to the canonical token names so dark/light mode switching
+     works correctly without touching any component CSS files. */
+  --color-bg: var(--color-bg-primary);
+  --color-text: var(--color-text-primary);
+  --color-text-muted: var(--color-text-tertiary);
+  --color-accent: var(--color-accent-primary);
+  --color-surface: var(--color-bg-secondary);
+  --color-surface-raised: var(--color-bg-tertiary);
+  --color-surface-elevated: var(--color-bg-tertiary);
+
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
