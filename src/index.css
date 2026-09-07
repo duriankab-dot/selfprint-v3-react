@@ -35,6 +35,12 @@
 
 body {
   margin: 0;
+  /* DARKNAVY-001: body background must follow the active theme so areas
+     outside #root (overscroll, pull-to-refresh gap, etc.) match the page
+     instead of showing the browser's default white. Default is navy blue
+     (data-mode="dark" set on <html> in index.html). */
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }
 
 h1,

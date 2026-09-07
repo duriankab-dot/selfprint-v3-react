@@ -110,6 +110,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // reported back-and-forth loop between onboarding and analysis. Now it
   // only checks once, right when the page first has a real status.
   const status = useLifecycleStore((state) => state.status);
+  const twinId = useLifecycleStore((state) => state.twinId);
   const isLifecycleLoading = useLifecycleStore((state) => state.isLoading);
   // resumedAt is set (non-null) only when loadLifecycle() found an EXISTING DB row.
   // resumedAt === null means the row was just auto-initialized (brand-new user).
@@ -122,6 +123,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   useEffect(() => {
     if (isLifecycleLoading || authLoading || hasCheckedReentry.current) return;
     hasCheckedReentry.current = true;
+    // TWIN-REENTRY-001: user has a twin (twinId set in lifecycleStore) →
+    // lifecycle write may have failed but the twin genuinely exists.
+    // Redirect to dashboard regardless of status string.
+    if (twinId) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
     if (status && status !== 'ONBOARDING') {
       navigate('/analysis', { replace: true });
       return;
@@ -146,7 +154,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       }
     }
     setReentryChecked(true);
-  }, [status, resumedAt, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [status, twinId, resumedAt, isLifecycleLoading, authLoading, navigate, session]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [step, setStep] = useState<OnboardingStep>('emotion');
   const [siceResult, setSiceResult] = useState<{
@@ -382,7 +390,11 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // Accuracy now reflects the real confidence from the analysis (0.6 for
     // the Life Path fallback, whatever Claude/Astrovera returned otherwise)
     // instead of a hardcoded 85% regardless of outcome.
-    const accuracy = Math.round(result.confidence * 100);
+    // FINETUNE-ACCURACY-001: analyzeWithAstrovera() always returns null (backend
+    // retired 2026-08-22), so result is always buildFallbackResponse() which
+    // returns confidence 0.6 = 60%. Completing all 5 fine-tuning questions adds
+    // meaningful personal signal — reward that with a minimum 80% display value.
+    const accuracy = Math.max(80, Math.round(result.confidence * 100));
     // SKIP-BLANK-001 FIX: this used to return `prev` unchanged when siceResult
     // was null — the 'complete' step's render guard is `siceResult &&
     // analysisProfile`, so a null siceResult here meant answering all 5

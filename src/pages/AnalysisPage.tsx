@@ -132,6 +132,7 @@ const AnalysisPage: React.FC = () => {
   const isTh = language === 'th';
   const setAnalysis = useAnalysisStore((state) => state.setAnalysis);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
+  const twinId = useLifecycleStore((state) => state.twinId);
 
   // APPSHELL-003 FIX: progressive disclosure — only "01 Self Overview" (the
   // quick-insight section) opens by default; the rest expand on tap instead
@@ -266,11 +267,34 @@ const AnalysisPage: React.FC = () => {
   // Write to analysisStore on page load so Twin (CoreAwakening) always has data —
   // previously only happened on "Awaken" button click, leaving the store empty
   // if the user navigated away and came back.
+  // TWIN-ANALYSIS-SYNC-001: also patch the twins table's full_analysis column
+  // when the user already has a twin (twinId set) but full_analysis is null —
+  // this can happen when CoreAwakening ran before AnalysisPage had data
+  // (cold start, race condition, or user navigated directly to /core-awakening).
+  // Fire-and-forget: a failed write is non-critical; the store is the source of
+  // truth for the active session and TwinContext falls back to it already.
   useEffect(() => {
-    if (displayAnalysis) {
-      setAnalysis(displayAnalysis as unknown as FullAnalysisOutput);
+    if (!displayAnalysis) return;
+    setAnalysis(displayAnalysis as unknown as FullAnalysisOutput);
+    if (twinId && supabase) {
+      supabase
+        .from('twins')
+        .select('full_analysis')
+        .eq('id', twinId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data && data.full_analysis == null) {
+            supabase!
+              .from('twins')
+              .update({ full_analysis: displayAnalysis, updated_at: new Date().toISOString() })
+              .eq('id', twinId)
+              .then(({ error }) => {
+                if (error) console.warn('[AnalysisPage] full_analysis sync failed:', error.message);
+              });
+          }
+        });
     }
-  }, [displayAnalysis, setAnalysis]);
+  }, [displayAnalysis, setAnalysis, twinId]);
 
   const isLoading = ctxLoading || patLoading;
 
@@ -703,7 +727,7 @@ const AnalysisPage: React.FC = () => {
 
             {/* 04 — ข้อควรระวัง */}
             <section className={`analysis__section${expandedSections.has('04') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-04">
-              <SectionHeader number="04" title="Blind Spots" icon="🔍" isOpen={expandedSections.has('04')} onToggle={() => toggleSection('04')} />
+              <SectionHeader number="04" title={isTh ? 'ข้อควรระวัง' : 'Blind Spots'} icon="🔍" isOpen={expandedSections.has('04')} onToggle={() => toggleSection('04')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
@@ -751,7 +775,7 @@ const AnalysisPage: React.FC = () => {
 
             {/* 06 — เส้นทางชีวิต */}
             <section className={`analysis__section${expandedSections.has('06') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-06">
-              <SectionHeader number="06" title="Journey" icon="🗺" isOpen={expandedSections.has('06')} onToggle={() => toggleSection('06')} />
+              <SectionHeader number="06" title={isTh ? 'เส้นทางชีวิต' : 'Journey'} icon="🗺" isOpen={expandedSections.has('06')} onToggle={() => toggleSection('06')} />
               <div className="analysis__section-body">
                 {(() => {
                   const e3 = essenceAnalysis?._siceResults.find(r => r.engineId === 3);
@@ -795,7 +819,7 @@ const AnalysisPage: React.FC = () => {
 
             {/* 08 — ข้อแนะนำส่วนบุคคล */}
             <section className={`analysis__section${expandedSections.has('08') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-08">
-              <SectionHeader number="08" title="Personal Guidance" icon="🧭" isOpen={expandedSections.has('08')} onToggle={() => toggleSection('08')} />
+              <SectionHeader number="08" title={isTh ? 'ข้อแนะนำส่วนบุคคล' : 'Personal Guidance'} icon="🧭" isOpen={expandedSections.has('08')} onToggle={() => toggleSection('08')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
                   {isTh
@@ -823,7 +847,7 @@ const AnalysisPage: React.FC = () => {
 
             {/* 09 — แผนพัฒนา */}
             <section className={`analysis__section analysis__section--last${expandedSections.has('09') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-09">
-              <SectionHeader number="09" title="Next Step" icon="🚀" isOpen={expandedSections.has('09')} onToggle={() => toggleSection('09')} />
+              <SectionHeader number="09" title={isTh ? 'แผนพัฒนา' : 'Next Step'} icon="🚀" isOpen={expandedSections.has('09')} onToggle={() => toggleSection('09')} />
               <div className="analysis__section-body">
                 {(() => {
                   const e12 = essenceAnalysis?._siceResults.find(r => r.engineId === 12);
