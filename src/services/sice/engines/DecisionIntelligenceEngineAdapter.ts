@@ -268,8 +268,8 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
       mostCommonType: 'unknown',
       bestPerformingArea: 'unknown',
       areas: [],
-      insights: ['No decision data yet - start logging decisions to build intelligence'],
-      nextStepGuidance: 'Begin making and tracking intentional decisions',
+      insights: ['ยังไม่มีข้อมูลการตัดสินใจ — เริ่มบันทึกการตัดสินใจเพื่อสร้างปัญญาประดิษฐ์ส่วนตัว'],
+      nextStepGuidance: 'เริ่มบันทึกและติดตามการตัดสินใจที่มีเจตนาชัดเจน',
     };
   }
 }

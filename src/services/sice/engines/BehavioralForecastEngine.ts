@@ -408,8 +408,8 @@ export class BehavioralForecastEngine extends SICEBase {
       nextMood: 'balanced',
       predictedFocus: 'observation',
       risks: [message],
-      opportunities: ['Build behavior history for better predictions'],
-      summary: `Cannot forecast: ${message}. Confidence: low.`,
+      opportunities: ['บันทึกพฤติกรรมเพิ่มเติมเพื่อการพยากรณ์ที่แม่นยำขึ้น'],
+      summary: `ยังไม่มีข้อมูลพฤติกรรมเพียงพอสำหรับการพยากรณ์`,
       confidence: 20,
     };
   }

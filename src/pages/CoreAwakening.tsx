@@ -338,12 +338,13 @@ export default function CoreAwakening() {
       // initializeTwin() (see TWINVOICE-001 FIX above) — this stage just
       // continues into the celebration UI.
 
-      // PHASE-B: Redirect to Identity World (self) first — user enters their
-      // world immediately after birth, not the selector grid. From /worlds/self
-      // they can exit to /worlds hub or /dashboard at any time.
+      // PHASE-B: After Twin birth, take the user to the daily hub (/dashboard).
+      // Previously went to /worlds/self but the user's primary landing after
+      // ceremony should be the main dashboard so they can see their Twin and
+      // start using the app immediately.
       setTimeout(() => {
         setPhase('complete');
-        navigate('/worlds/self', { replace: true });
+        navigate('/brief', { replace: true });
       }, 4000);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Failed to awaken Twin';
@@ -375,7 +376,7 @@ export default function CoreAwakening() {
         <div className="flex-1 flex flex-col items-center justify-center px-6 relative">
           {/* Exit — subtle, top-right */}
           <button
-            onClick={() => navigate('/dashboard', { replace: true })}
+            onClick={() => navigate('/brief', { replace: true })}
             style={{
               position: 'absolute',
               top: '20px',

@@ -63,23 +63,38 @@ const ENGINE_TO_WORLD: Record<number, WorldId> = {
 
 /** UUID pattern — used to skip IDs that leaked into result objects. */
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Detects a UUID embedded anywhere in a longer string (e.g. "Cannot forecast: <uuid>"). */
+const CONTAINS_UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+/** Returns true for strings that are engine-internal error/fallback messages
+ *  that should never be surfaced as user-facing content. */
+function isInternalErrorString(s: string): boolean {
+  // Strings beginning with "Cannot" are BehavioralForecastEngine fallback errors.
+  // Strings that contain a raw UUID are data leaks (e.g. "Cannot forecast: <userId>").
+  // Pure ASCII with no Thai characters and > 60 chars often indicates an
+  // internal English placeholder not yet translated.
+  if (s.startsWith('Cannot ')) return true;
+  if (CONTAINS_UUID_RE.test(s)) return true;
+  return false;
+}
 
 /** Extract a human-readable string from a SICEOutput result (unknown shape). */
 function extractResultText(result: unknown): string {
   if (!result) return '';
   if (typeof result === 'string') {
-    return UUID_RE.test(result) ? '' : result;
+    if (UUID_RE.test(result) || isInternalErrorString(result)) return '';
+    return result;
   }
   if (typeof result === 'object') {
     const r = result as Record<string, unknown>;
     // Priority: well-known keys first so we never accidentally return a userId
     for (const key of ['description', 'summary', 'text', 'insight', 'content', 'message', 'output', 'analysis']) {
       const v = r[key];
-      if (typeof v === 'string' && v && !UUID_RE.test(v)) return v;
+      if (typeof v === 'string' && v && !UUID_RE.test(v) && !isInternalErrorString(v)) return v;
     }
     // Fallback: first string value that is human-readable (not UUID, not too short)
     for (const val of Object.values(r)) {
-      if (typeof val === 'string' && val.length > 10 && !UUID_RE.test(val)) return val;
+      if (typeof val === 'string' && val.length > 10 && !UUID_RE.test(val) && !isInternalErrorString(val)) return val;
     }
   }
   return '';

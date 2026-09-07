@@ -340,8 +340,9 @@ export function TwinProvider({ children }: { children: ReactNode }) {
         // FIX 2: Handle specific error types from fetchUserTwin()
         if (err instanceof TwinNotFoundError) {
           // No Twin exists yet — user hasn't completed Twin Birth
-          // This is a valid state, not an error
-          console.info('No Twin found for user — ready for Twin Birth', err.message);
+          // This is a valid state, not an error. Only log in dev to avoid
+          // confusing console noise for users on the dashboard at early stages.
+          if (import.meta.env.DEV) console.info('[TwinContext] No Twin yet — ready for Twin Birth', err.message);
           setTwin(null);
           setError(null);
         } else if (err instanceof TwinPermissionError) {
