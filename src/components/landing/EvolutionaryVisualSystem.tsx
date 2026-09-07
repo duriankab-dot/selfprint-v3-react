@@ -359,13 +359,33 @@ const EvolutionaryVisualSystem: React.FC<EvolutionaryVisualSystemProps> = ({
       updateAnimation(p);
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll);
-    handleScroll(); // init
+    // SCROLLTHROTTLE-001 (8 ก.ย. 2026, PHASE0 0.10 EXTEND — "handleScroll
+    // เรียก getBoundingClientRect() ทุก scroll event ไม่ throttle ไม่
+    // rAF-batch"): scroll can fire far more than once per animation frame,
+    // and getBoundingClientRect() forces a synchronous layout read right
+    // after updateAnimation()'s SVG-attribute writes from the *previous*
+    // call — a forced-reflow loop confirmed by Lighthouse (253 ms attributed
+    // to this file + vendor-react on LandingPage, "Forced reflow" insight).
+    // rAF-batching collapses any number of scroll events per frame into
+    // exactly one read+write, same frequency the browser would paint at
+    // anyway.
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        handleScroll();
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    handleScroll(); // init — synchronous is fine, no prior scroll event to coalesce with
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollProgress, containerRef]);

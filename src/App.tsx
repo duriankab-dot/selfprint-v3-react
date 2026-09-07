@@ -31,7 +31,25 @@ import { NovaProvider } from './context/NovaContext';
 import { PendingOnboardingSaver } from './components/PendingOnboardingSaver';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import { OfflineBanner } from './components/pwa/OfflineBanner';
-import { TwinEvolution } from './components/twin/TwinEvolution';
+// A2-LAZY (8 ก.ย. 2026): TwinEvolution.tsx statically imports
+// PersonalContextBuilder + TwinStateEngine (+ supabase-service directly,
+// line 31) — same @supabase/supabase-js dependency chain as F-02's
+// ExperienceContext, but this component was mounted unconditionally for
+// EVERY route (App.tsx render tree below, no session gate), including the
+// pre-login LandingPage. AIContext's own supabase import was already fixed
+// (F-02 FIX, 6 Sep) by moving it inside a `if (!userId) return` effect, and
+// ExperienceProvider was already made conditional — this was the one
+// remaining static/unconditional path pulling chunk-intelligence into the
+// Landing page's critical path, confirmed 8 Sep 2026: Lighthouse measured
+// 74.5 KiB transferred / 57.2 KiB unused for chunk-intelligence on `/th/`.
+// TwinEvolution itself is a complete no-op for a logged-out visitor — its
+// query is `enabled: !!userId` (component body confirms), so gating its
+// *mount* on session (same pattern as ConditionalExperience below) changes
+// nothing about what a logged-in user sees; it only stops the pre-login
+// bundle from paying for it.
+const TwinEvolution = lazy(() =>
+  import('./components/twin/TwinEvolution').then((m) => ({ default: m.TwinEvolution }))
+);
 import ContextualPopup from './components/ContextualPopup';
 import { FloatingSelfprintChat } from './components/chat/FloatingSelfprintChat';
 // CHUNK-SPLIT: TwinEvolutionSceneWrapper is a celebration overlay that fires
@@ -246,6 +264,19 @@ function ConditionalExperience({ children }: { children: React.ReactNode }) {
     </Suspense>
   );
 }
+
+// A2-LAZY: see the import comment above — same gating pattern as
+// ConditionalExperience. No session → render nothing (TwinEvolution has no
+// visible output for a logged-out user anyway) and never request its chunk.
+function ConditionalTwinEvolution() {
+  const auth = useContext(AuthContext);
+  if (!auth?.session) return null;
+  return (
+    <Suspense fallback={null}>
+      <TwinEvolution />
+    </Suspense>
+  );
+}
 function App() {
   // Validate world personalities on app startup
   useEffect(() => {
@@ -291,7 +322,7 @@ function App() {
                                   <Routes>, with no change to any other provider's nesting order. */}
                               <LanguageProvider>
                               <OfflineBanner />
-                              <TwinEvolution />
+                              <ConditionalTwinEvolution />
                               <ContextualPopup />
                               <TwinEvolutionSceneWrapper />
                               <PWAInstallPrompt />
