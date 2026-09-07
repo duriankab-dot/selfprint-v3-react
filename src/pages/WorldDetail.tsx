@@ -113,6 +113,35 @@ export default function WorldDetail() {
         worldId={world.id}
         maturityScore={twin?.maturityScore}
       />
+      {/* A11Y-TWIN-001 (7 ก.ย. 2026, Phase 5.4): the Twin visual itself is
+          correctly aria-hidden the whole way down (Twin.tsx/TwinPresence.tsx
+          — pure decorative SVG glow, nothing a screen reader could usefully
+          parse), but unlike LivingTwin.tsx/CoreAwakening.tsx (which both
+          already have adjacent visible text describing the Twin), this page
+          had no text equivalent at all — a screen-reader user got zero
+          indication a Twin is present here.
+          Standard visually-hidden-but-announced pattern via inline style
+          rather than a `sr-only` utility class — TWFIX-001/MAXWIDTH-
+          COLLISION-001 already proved this project's Tailwind utilities
+          can't be assumed correct without checking the compiled CSS, and
+          `sr-only` isn't used (or verified) anywhere else in the codebase. */}
+      <span
+        style={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          padding: 0,
+          margin: -1,
+          overflow: 'hidden',
+          clip: 'rect(0, 0, 0, 0)',
+          whiteSpace: 'nowrap',
+          border: 0,
+        }}
+      >
+        {isTh
+          ? `AI ฝาแฝดของคุณอยู่กับคุณในโลก${world.nameTh}นี้ด้วย`
+          : `Your AI Twin is here with you in the ${world.name} world`}
+      </span>
       {/* APPSHELL-006 FIX: user explicitly asked for the desktop nav rail
           here too, overriding the earlier "full-immersion, no chrome"
           decision. */}

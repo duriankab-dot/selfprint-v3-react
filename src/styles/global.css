@@ -54,6 +54,23 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   filter: saturate(var(--saturation, 100%)) brightness(var(--brightness, 100%));
   opacity: var(--opacity-bg, 1);
+  /* THAITYPE-001 (7 ก.ย. 2026, Phase 5.3): long-word safety net — a single
+     unbroken run (long URL, email, compound token) that doesn't fit its
+     container now wraps instead of overflowing/clipping it. Does not
+     affect normal Thai text: the browser's own Thai line-breaking already
+     finds syllable-cluster boundaries well before this rule would ever
+     need to fire mid-word. */
+  overflow-wrap: break-word;
+}
+
+/* THAITYPE-001: Thai script carries tone marks and vowels above/below the
+   consonant line — the same line-height that reads fine for Latin text
+   feels visually cramped (glyphs from adjacent lines nearly touching) for
+   Thai. Scoped to :lang(th) (now kept in sync with the active UI language
+   by LanguageContext.tsx — see LANGATTR-001) so English content is
+   unaffected. */
+:lang(th) {
+  line-height: var(--line-height-relaxed);
 }
 
 /* Headings */

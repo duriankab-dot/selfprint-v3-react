@@ -122,7 +122,12 @@ export function BottomNav() {
            ขยายขอบบนของ BottomNav ให้ชนกับขอบล่างของ NavRail พอดี */
         @media (max-width: 1023px) {
           .sp-bottomnav { display: flex !important; }
-          body { padding-bottom: 68px; }
+          /* SAFEAREA-001 (7 ก.ย. 2026, Phase 5.5): the nav bar's own padding
+             already adds env(safe-area-inset-bottom) (see the nav's inline
+             style below), but this fixed 68px never did — on a device with
+             a home-indicator inset, page content could still sit a few px
+             behind the nav's real (taller) height. */
+          body { padding-bottom: calc(68px + env(safe-area-inset-bottom)); }
         }
         .sp-bn-tab:active { transform: scale(0.91); }
       `}</style>

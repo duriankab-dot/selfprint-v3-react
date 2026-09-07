@@ -38,6 +38,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const pathLang = location.pathname.split('/')[1];
     if (pathLang === 'th' || pathLang === 'en') {
       setLanguage(pathLang as Language);
+      // LANGATTR-001 (7 ก.ย. 2026, Phase 5.3): index.html sets
+      // <html lang="th"> once, statically, at first paint — nothing ever
+      // updated it afterwards, so it stayed "th" forever even in English
+      // mode. That's a real (separate) a11y/SEO gap on its own, and it also
+      // means a CSS `:lang(th)` selector — the correct, standard way to
+      // scope Thai-only typography rules (line-height) — could never work
+      // reliably. Kept as a plain DOM write (not React state) since this
+      // mirrors the host document, not this app's own render tree.
+      document.documentElement.lang = pathLang;
     }
   }, [location.pathname]);
 

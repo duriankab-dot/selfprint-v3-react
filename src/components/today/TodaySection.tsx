@@ -368,6 +368,14 @@ export function TodaySection({ hasHistory = false, variant = 'full' }: TodaySect
 
   const actionsBlock = (
     <>
+      {/* MICROINTERACTION-001 (7 ก.ย. 2026, Phase 5.2, §24): SectionCardView
+          is a <button> styled entirely with inline styles (no :hover/:active
+          without CSS) — one shared scoped stylesheet for the whole grid,
+          not per-card (a <style> tag isn't valid inside a <button>). */}
+      <style>{`
+        .sp-today-card:hover { box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08)); }
+        .sp-today-card:active { transform: scale(0.97); }
+      `}</style>
       {/* Section Cards — AI Orchestrator output */}
       <div style={{
         display: 'grid',
@@ -429,6 +437,13 @@ function SectionCardView({ section, featured, isTh, onClick }: SectionCardViewPr
   return (
     <button
       onClick={onClick}
+      // MICROINTERACTION-001 (7 ก.ย. 2026, Phase 5.2, §24): `transition`
+      // was already declared below but nothing ever changed on hover/press
+      // — inline styles can't express :hover/:active. className + the
+      // scoped <style> block at the bottom of this file supplies those
+      // (same pattern BottomNav.tsx already uses for its own inline-styled
+      // interactive elements).
+      className="sp-today-card"
       style={{
         display: 'flex',
         flexDirection: 'column',

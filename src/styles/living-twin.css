@@ -387,6 +387,14 @@
   background: var(--accent-secondary, #4338ca);
 }
 
+/* MICROINTERACTION-001 (7 ก.ย. 2026, Phase 5.2, §24): hover existed, press
+   feedback didn't — same scale-down already used for BottomNav's tabs
+   (BottomNav.tsx's .sp-bn-tab:active), applied here for consistency. */
+.living-twin__btn--primary:active,
+.living-twin__btn--outline:active {
+  transform: scale(0.96);
+}
+
 .living-twin__btn--outline {
   background: none;
   border: 1px solid var(--color-border, #e9ecef);

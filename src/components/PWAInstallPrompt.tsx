@@ -86,7 +86,11 @@ export function PWAInstallPrompt() {
       aria-label={isTh ? 'ติดตั้ง SELFPRINT บนหน้าจอหลัก' : 'Install SELFPRINT to home screen'}
       style={{
         position: 'fixed',
-        bottom: 72, // above BottomNav (56px) + gap
+        // SAFEAREA-001 (7 ก.ย. 2026, Phase 5.5): fixed 72px (above BottomNav
+        // + gap) never accounted for env(safe-area-inset-bottom) — on a
+        // device with a home-indicator inset this banner could sit closer
+        // to BottomNav than intended.
+        bottom: 'calc(72px + env(safe-area-inset-bottom))', // above BottomNav (56px) + gap
         left: 12,
         right: 12,
         zIndex: 9999,
