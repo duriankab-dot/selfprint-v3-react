@@ -452,7 +452,10 @@ export default function CoreAwakening() {
       {/* CELEBRATION PHASE */}
       {phase === 'celebration' && (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-          <h2 className="text-5xl font-bold mb-6 text-white animate-pulse">🎉 {t('twinAwakening', language)}!</h2>
+          {/* NAVGAP-003 (7 ก.ย. 2026): same non-responsive-heading pattern
+              already fixed on the intro phase above — missed this phase
+              (celebration) the first pass. */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white animate-pulse">🎉 {t('twinAwakening', language)}!</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">

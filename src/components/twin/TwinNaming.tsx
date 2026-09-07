@@ -60,7 +60,12 @@ export const TwinNaming: React.FC<TwinNamingProps> = ({
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6">
       <div className="text-center mb-8 max-w-lg">
-        <h2 className="text-3xl font-bold mb-3 text-white">
+        {/* NAVGAP-003 (7 ก.ย. 2026): same non-responsive-heading pattern
+            already fixed on CoreAwakening.tsx's intro phase — missed this
+            one (naming phase, same ceremony) the first pass. text-3xl fixed
+            at every width wrapped this heading into 3+ lines at ~400px,
+            pushing the name input + submit button further down the page. */}
+        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 text-white">
           ✨ {isTh ? 'ทวินของคุณกำลังตื่นขึ้น' : 'Your Twin Awakens'}
         </h2>
         <p className="text-gray-200 mb-2">

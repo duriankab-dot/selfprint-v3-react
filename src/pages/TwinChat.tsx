@@ -507,7 +507,13 @@ export default function TwinChat() {
   // do).
   if (!twin) {
     return (
-      <div className="flex flex-col h-screen">
+      // NAVGAP-003 (7 ก.ย. 2026): fixed the heading's fontSize (clamp())
+      // earlier but missed that this root div had no overflow-y-auto —
+      // same clipping pattern as CoreAwakening.tsx's root: h-screen with no
+      // scroll means content taller than the viewport (icon + heading +
+      // paragraph + button, at narrow widths) still gets cut off with no
+      // way to reach the button underneath.
+      <div className="flex flex-col h-screen overflow-y-auto">
         <NavRail />
         <BottomNav />
         <div className="twin-container flex flex-col flex-1 items-center justify-center text-center max-w-2xl mx-auto p-6">
