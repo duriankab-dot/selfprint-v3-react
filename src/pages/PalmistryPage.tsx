@@ -309,6 +309,7 @@ export default function PalmistryPage() {
       <MetaTagManager
         title={isTh ? 'อ่านลักษณะมือ — SELFPRINT' : 'Palm Reading — SELFPRINT'}
         description={isTh ? 'วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ' : 'Explore how your hand shape relates to personality'}
+        canonicalUrl={isTh ? '/th/palmistry' : '/en/palmistry'}
       />
       <NavBar />
 

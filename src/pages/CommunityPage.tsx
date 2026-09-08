@@ -144,6 +144,7 @@ export default function CommunityPage() {
       <MetaTagManager
         title={isTh ? 'ชุมชน — SELFPRINT' : 'Community — SELFPRINT'}
         description={isTh ? 'เชื่อมต่อกับชุมชน SELFPRINT' : 'Connect with the SELFPRINT community'}
+        canonicalUrl={isTh ? '/th/community' : '/en/community'}
       />
       <NavBar />
 

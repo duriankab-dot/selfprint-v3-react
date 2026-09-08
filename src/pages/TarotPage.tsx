@@ -394,6 +394,7 @@ export default function TarotPage() {
       <MetaTagManager
         title={isTh ? 'การอ่านสัญลักษณ์ — SELFPRINT' : 'Symbol Reading — SELFPRINT'}
         description={isTh ? 'สะท้อนความคิดผ่านสัญลักษณ์ทางจิตวิทยา' : 'Reflect on yourself through psychological symbols'}
+        canonicalUrl={isTh ? '/th/tarot' : '/en/tarot'}
       />
       <NavBar />
 
