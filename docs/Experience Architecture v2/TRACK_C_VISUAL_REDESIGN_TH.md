@@ -1,7 +1,12 @@
 # Track C — Visual Redesign Plan (เชื่อมกับ Experience Architecture v2)
 
-> **สถานะเอกสาร:** วางแผนเท่านั้น — **ไม่มีการแก้โค้ดแม้แต่บรรทัดเดียว**
-> **วันที่:** 6 ก.ย. 2026 · **HEAD:** `da855c5` (อัปเดต: migration 035 APPLIED · Edge = 12 functions · passkey ยังพัง · voice ยัง mock)
+> ✅ **ปิดครบทั้ง 12 phase แล้ว (8 ก.ย. 2026)** — เอกสารนี้คือแผน+หลักฐานการปิดแต่ละ phase เก็บไว้เป็น reference
+> ว่าทำอะไรไปบ้างและอ้างอิง §topic ไหนของ Experience Architecture v2 สถานะปัจจุบันจริงของทั้งโปรเจกต์ดูที่
+> `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` เสมอ (ไฟล์นี้ไม่ sync สถานะย้อนหลัง)
+>
+> **สถานะเอกสาร (เดิม ณ วันที่วางแผน):** วางแผนเท่านั้น — ไม่มีการแก้โค้ดแม้แต่บรรทัดเดียว
+> **วันที่วางแผน:** 6 ก.ย. 2026 · **HEAD ตอนวางแผน:** `da855c5` (migration 035 APPLIED · Edge = 12 functions ·
+> passkey/voice ที่ตอนนั้นยังพัง/mock ถูกซ่อมไปแล้วระหว่าง Track A — ดู FORENSIC_AUDIT)
 > **ฐานข้อมูล:** `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` (ตรวจจริง 4–5 ก.ย. 2026)
 > **ภาษา:** ไทย (ตรงกับโฟลเดอร์นี้)
 > ทุกข้ออ้าง file:line · **ไม่เชื่อ `.md` ใด ๆ** รวมถึง `CLAUDE.md`
