@@ -256,7 +256,7 @@ export default function BlogListPage() {
         <MetaTagManager
           title={`${active.title} — SELFPRINT Blog`}
           description={active.excerpt}
-          canonicalUrl={`/th/blog/${active.slug}`}
+          canonicalUrl={`/blog/${active.slug}`}
         />
         {/* JSON-LD Article schema for GEO/AEO */}
         <script
@@ -395,7 +395,7 @@ export default function BlogListPage() {
       'headline': a.title,
       'description': a.excerpt,
       'datePublished': a.publishedAt || '2026-08-27',
-      'url': `https://selfprint.one/th/blog/${a.slug}`,
+      'url': `https://selfprint.one/blog/${a.slug}`,
       'keywords': (a.keywords || []).join(', '),
     })),
   };

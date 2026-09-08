@@ -538,3 +538,93 @@ ProvenanceStrip wiring · Phase 7+10 Twin hub + mode selector · Phase 8 timeSlo
 **บทเรียนรอบที่ 8:** เอกสารสถานะที่เขียนไว้ถูกในวันที่เขียน (6-7 ก.ย.) กลายเป็นล้าสมัยได้ภายใน 1-2 วัน
 เมื่อมีงานทำต่อโดยไม่อัปเดตเอกสาร (C1/PWA เสร็จจริงแล้วแต่ 2 เอกสารยังบอกว่า "รอ A3 อนุมัติ") — ต้อง
 verify โค้ดจริงทุกครั้งก่อนเชื่อสถานะใดๆ แม้จะมาจากเอกสาร "source of truth" เอง
+
+---
+
+## 11. รอบที่ 9 (8 ก.ย. 2026 · baseline HEAD `42ccf22`) — ปิดงานค้าง 5 ข้อจากหัวข้อ "🔴 ค้างอยู่" ใน CLAUDE.md
+
+> ตรวจจากโค้ดจริงทุกข้อก่อนแก้ ไม่เดา ไม่เชื่อสถานะเดิมในเอกสารนี้เอง
+
+### ✅ Gate verify สดใหม่ก่อนแตะอะไร
+
+`tsc -b` 0 errors · `typecheck:functions` 0 errors · `vite build` สำเร็จ · `oxlint` 0 errors/174 warnings/467 files ·
+`vitest` **ไม่ได้รันเองในรอบนี้** (sandbox จำกัดคำสั่งละ ~178 วิ รันไม่จบ) — เจ้าของรันเองใน PowerShell แล้ว
+ยืนยัน **1042/1042 tests ผ่าน (67 ไฟล์)** ก่อนเริ่มงานรอบนี้ (screenshot จริง)
+
+### ✅ canonicalUrl gap (ค้างอยู่ #4) — ปิดแล้ว จริง (คอมมิต `42ccf22` โดยเจ้าของ)
+
+เพิ่ม `canonicalUrl` ให้ `TarotPage.tsx` / `PalmistryPage.tsx` / `CommunityPage.tsx` ตาม pattern เดิม
+(`isTh ? '/th/xxx' : '/en/xxx'`) — deploy ขึ้น production แล้ว (Cloudflare Pages `42ccf22`)
+
+### ✅ Twin-naming audit (ค้างอยู่ #2) — ตรวจครบทั้ง ~30 ไฟล์ที่เหลือแล้ว
+
+ไล่ไฟล์ที่มีคำว่า Twin/ทวินครบ (config prompts, pages, components, services, sice engines) เทียบกับ
+2 บั๊กที่แก้แล้วรอบที่ 8 (`ExecutiveSummary.tsx`, `config/twin-prompts.ts`) —
+
+| พบ | รายละเอียด | การจัดการ |
+|----|-----------|-----------|
+| `src/config/twin-prompts-th.ts` | orphan (0 importer ที่ไหนเลย) มีบั๊กแบบเดียวกับที่แก้ใน `twin-prompts.ts` รอบที่ 8 แต่ไม่เคยได้รับการแก้ — `{{twinName}}` ใช้แทนที่ "ผู้ใช้" ผิดความหมายทุกจุด | **ลบทิ้ง** — ระบบจริงใช้ `twin-prompts.ts` + `{{languageInstruction}}` (บอก AI ให้ตอบภาษาไทยเอง) ไม่ได้ใช้ template แยกภาษาแบบนี้แล้ว |
+| `src/config/prompts.ts` | self-documented `@deprecated` ใน header (P0-E, 23 ส.ค. 2026) "dead code — no callers import it" · verify ซ้ำ 0 caller จริง | **ลบทิ้ง** ตามคำแนะนำในไฟล์เอง |
+| ไฟล์ UI อื่นที่เหลือ (IntelligencePanel/LivingTwin/GrowthSpace/TwinPersonalityPage/TwinSettingsPage/WorldsHub/TwinProfile/TwinSynthesis/ChatWindow ฯลฯ) | ไม่มี `twin.name` อยู่ใน scope ของจุดที่ใช้ label generic "Twin ของคุณ" (ต่างจากเคส `ExecutiveSummary.tsx` เดิมที่มีชื่อจริงอยู่แล้วแต่ไม่ใช้) — label generic ที่เหลือเป็น section header/eyebrow/notification copy ที่ตั้งใจให้ generic ไม่ใช่บั๊ก | ไม่แตะ |
+| `TwinChat.tsx:697` vs `:699` | ตรวจแล้วถูกต้อง — บรรทัด 697 เป็น eyebrow label เหนือ heading, บรรทัด 699 แสดงชื่อจริง `twin.name \|\| fallback` | ไม่แตะ |
+
+**สรุป:** audit ครบ 100% แล้ว (0 ไฟล์ค้าง) — บั๊กจริงมี 1 จุดใหม่ (ไฟล์ orphan ที่ลบไปแล้วข้างต้น) ไม่มีบั๊กใน production code ที่ live
+
+### ✅ `as any` นอก SICE (32 จุด) — ตรวจครบ ไม่ใช่ทุกจุดต้อง "แก้"
+
+| ไฟล์ | สถานะ | เหตุผล |
+|------|-------|--------|
+| `src/services/SelfPrintOrchestrator.ts` (407 บรรทัด, 6 จุด `as any`) | **ลบทิ้ง** | orphan จริง — 0 importer ในทั้ง repo · เป็น orchestrator รุ่นเก่าที่ถูกแทนที่ด้วย `SICEOrchestrator.ts` + `CoreAwakeningService.ts` + `AICreationSequence.tsx` ไปนานแล้ว |
+| `api/unified-handler.ts` (~18 จุด `as any`) | **ไม่แตะ** | ไฟล์นี้มี `@ts-nocheck` ทั้งไฟล์ตั้งแต่บรรทัด 5 พร้อม comment อธิบายเหตุผล ("Supabase types don't match schema—runtime works correctly") — แก้ `as any` ในไฟล์ที่ปิด type-check ทั้งไฟล์ไม่ได้ประโยชน์อะไรด้าน type safety แต่เพิ่มความเสี่ยงเปล่าๆ ในโค้ด Stripe webhook/payment ที่ production ใช้จริง — เป็นการตัดสินใจที่ตั้งใจแล้ว ไม่ใช่ของค้าง |
+| `src/test/setup.ts` (test infra) | ไม่แตะ | ไม่ใช่ production code |
+| `src/context/TwinContext.tsx:184` | ไม่แตะ | เป็นแค่ comment อ้างถึง `as any` ที่เคยมี ไม่มี cast จริงในไฟล์แล้ว (comment ล้าสมัยเล็กน้อย ไม่กระทบอะไร) |
+
+### ✅ Blog article sitemap enumeration (ค้างอยู่ #5) — ปิดแล้ว
+
+Enumerate บทความทั้ง 86 บทความจาก `public/blog/index.json` (ที่มาจริงเดียวที่ใช้ได้ — ไม่เดา) เข้า
+`public/sitemap.xml` + `public/sitemap-th.xml` (31 → 117 URL ต่อไฟล์, XML valid ยืนยันด้วย `xml.etree.ElementTree`)
+ใช้ URL เดียว `/blog/{slug}` (ไม่มี lang prefix) ใน**ทั้งสองไฟล์** เพราะ route จริงมีแค่ตัวเดียว (ดูหัวข้อถัดไป)
+
+**🔴 บั๊กจริงที่เจอระหว่างทำ (ไม่ได้อยู่ใน scope เดิม แต่ยืนยันจากโค้ดแล้วแก้):**
+`App.tsx:221-225` กำหนด route บทความไว้ตั้งใจว่า `/blog/:slug` **ไม่มี** lang prefix
+("ไม่มี language prefix เพื่อให้ URL สั้นและ SEO Friendly" — comment ในไฟล์เอง) แต่ 3 จุดที่ generate
+canonical/URL ของบทความกลับใส่ prefix ผิดจนชี้ไปยัง URL ที่ไม่มี route รองรับจริง (404/redirect):
+
+| ไฟล์:บรรทัด | เดิม | แก้เป็น |
+|-------------|------|--------|
+| `BlogArticle.tsx:237` (หน้า `/blog/:slug` ตัวจริงที่ route ไปหา) | `canonicalUrl={\`${langPrefix}/blog/${article.slug}\`}` | `canonicalUrl={\`/blog/${article.slug}\`}` |
+| `BlogListPage.tsx:259` (inline article view ในหน้า list) | `canonicalUrl={\`/th/blog/${active.slug}\`}` (hardcode `/th` แม้ภาษา EN) | `canonicalUrl={\`/blog/${active.slug}\`}` |
+| `BlogListPage.tsx:398` (JSON-LD `BlogPosting.url` ของ 10 บทความล่าสุดในหน้า list) | `` `https://selfprint.one/th/blog/${a.slug}` `` | `` `https://selfprint.one/blog/${a.slug}` `` |
+
+ผลคือทุกบทความทั้ง 86 บทความเคยส่ง canonical tag ที่ชี้ไปหน้าที่ไม่มีจริง (search engine เห็นแล้วสับสนว่า
+หน้าไหนคือตัวจริง) — ตอนนี้ทุกจุดชี้ไปที่ URL จริงตรงกันแล้ว · verify: `tsc -b` / `vite build` / `oxlint` ผ่านหมด
+
+### ✅ Orphan/mock ใน FORENSIC_AUDIT §8.5 — พบว่าล้าสมัยไปแล้ว 5 จาก 8 จุด
+
+| จุดในเอกสารเดิม | สถานะจริงที่ verify รอบนี้ |
+|-----------------|---------------------------|
+| `AdvancedAnalytics.tsx` | ไฟล์ไม่มีอยู่แล้ว (ถูกลบไปในรอบก่อนหน้า ไม่เคยอัปเดตเอกสาร) |
+| `SentryService.ts` | ไฟล์ไม่มีอยู่แล้ว (เช่นกัน) |
+| `VoiceInput.tsx:38` "mock speech recognition" | ล้าสมัย — เป็น presentational component ล้วนๆ แล้ว (`isListening/transcript/onStart/onStop` มาจาก parent) comment ในไฟล์ยืนยันว่า `useVoiceTwin` (Web Speech API จริง) เป็นคนจัดการ logic ทั้งหมด ไม่มี mock เหลือ |
+| `VoiceOutput.tsx:34` "mock TTS" | ล้าสมัยเช่นกัน — presentational ล้วนๆ, `useVoiceTwin` จัดการ `SpeechSynthesis` จริง |
+| `CommunityPage.tsx:397` "coming soon" | ล้าสมัย — ไม่มีข้อความ "coming soon"/"เร็วๆ นี้" เหลืออยู่เลย เป็นฟีเจอร์ feed จริง (`getFeed`/`shareInsight`/`toggleLike`) |
+| `ExplorePage.tsx:728,898` | **ยังจริง** — มี "เร็วๆ นี้"/"Coming soon" การ์ด stub อยู่จริงที่ :898 (ตั้งใจ ไม่ใช่บั๊ก) |
+| `DecisionDashboard.tsx:126` "placeholder Phase F" | **ยังจริง** — caption ชี้ไปฟีเจอร์ที่ยังไม่สร้าง (ตั้งใจ ไม่ใช่บั๊ก) |
+| `soundscape-manifest.json` 23 CLOUDINARY_URL | **ยังจริง** — ต้องการไฟล์เสียงจริง/บัญชี Cloudinary จากเจ้าของ ไม่สามารถแก้จากโค้ดอย่างเดียวได้ |
+
+### 🔴 ยังค้างจริง — ต้องตัดสินใจ ไม่ได้แตะในรอบนี้ (ตามกติกา "ถามก่อนถ้าไม่มั่นใจ")
+
+| # | เรื่อง | เหตุผลที่ไม่แตะ |
+|---|-------|-----------------|
+| 1 | `git filter-repo` + สร้าง `purge.txt` + force push | สคริปต์พร้อมแล้วในหัวข้อ 2 ของไฟล์นี้ แต่**ไม่รันจาก sandbox นี้** เพราะเจ้าของเปิด PowerShell/VS Code ทำงานกับ repo เดียวกันพร้อมกันอยู่ (เห็นจาก screenshot) — filter-repo rewrite ประวัติ + force push แล้วมี 2 session เขียน `.git` พร้อมกันเสี่ยง corrupt สูง แนะนำให้เจ้าของรันเองจาก PowerShell ที่เปิดอยู่ตามสคริปต์ในหัวข้อ 2 |
+| 2 | `ExplorePage.tsx` stub cards / `DecisionDashboard.tsx` placeholder / Voice ฟีเจอร์เพิ่มเติม | เป็น**ฟีเจอร์ที่ยังไม่สร้าง** ไม่ใช่บั๊ก — สร้างให้ = งานนอก scope "แก้บั๊ก" ตรงๆ ตามกติกา "ทำเท่าที่โจทย์ขอ ไม่เพิ่ม feature ที่ไม่ได้สั่ง" ใน CLAUDE.md เอง |
+| 3 | soundscape 23 URL + `public/audio/` | ต้องการ asset จริง (ไฟล์เสียง/บัญชี Cloudinary) จากเจ้าของ — เขียนโค้ดอย่างเดียวแก้ไม่ได้ |
+| 4 | Story Narrative Layer Phase 9/10 | ตาม `TRACK_C_VISUAL_REDESIGN_TH.md` §9 เอง: งาน >8 ไฟล์ต้องมี change-budget แยกก่อนเริ่ม ไม่ใช่แค่ "อนุมัติทำต่อ" แบบรวมๆ |
+
+### เอกสารที่แก้ในรอบนี้
+
+ไฟล์นี้ · `CLAUDE.md`
+
+**บทเรียนรอบที่ 9:** ของค้างหลายจุดที่เอกสารบอกว่า "ยังไม่แก้" จริงๆ แล้ว**เคยแก้ไปแล้วในรอบก่อนหน้าแต่ไม่ได้
+อัปเดตเอกสาร** (VoiceInput/VoiceOutput/CommunityPage/AdvancedAnalytics/SentryService) — ต้อง verify จากโค้ดจริง
+เสมอก่อนเริ่มงาน ไม่ใช่เชื่อ checklist เก่าตรงๆ แม้จะมาจากไฟล์ "source of truth" เอง ตรงกับบทเรียนรอบที่ 4 และ 8

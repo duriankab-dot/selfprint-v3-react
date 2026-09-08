@@ -114,12 +114,11 @@ Phase 9 (World=scene 4 ส่วน) และ Phase 10 (Choice→Consequence) *
 
 ## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
 
-**งานที่เหลือจริง ๆ:**
-1. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรัน · ไม่เร่งด่วน key revoke แล้ว
-2. **Twin-naming audit ไม่ครบ** — grep เจอ ~31 ไฟล์เกี่ยวกับชื่อทวิน ตรวจแล้ว ~7 (พบบั๊ก 2 จุด แก้แล้ว: `ExecutiveSummary.tsx` + `config/twin-prompts.ts`) เหลือ **~24 ไฟล์ยังไม่ตรวจ** — งานแยก ยังไม่มี timeline
-3. **Story Narrative Layer Phase 9/10** — ยังไม่ implement ต้องขอ change-budget แยก (>8 ไฟล์ ตาม §9 ของ `TRACK_C_VISUAL_REDESIGN_TH.md`)
-4. **canonicalUrl gaps** — TarotPage/PalmistryPage/CommunityPage ยังไม่มี canonicalUrl ครบ (พบระหว่างงาน sitemap รอบ 8 ก.ย.)
-5. **Blog article sitemap enumeration** — blog posts แต่ละบทความยังไม่ enumerate ลง sitemap รายบทความ
+**งานที่เหลือจริง ๆ (อัปเดตรอบที่ 9, 8 ก.ย. 2026):**
+1. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรัน · ไม่เร่งด่วน key revoke แล้ว · **ต้องรันจาก PowerShell ของเจ้าของเอง** (สคริปต์พร้อมใน FORENSIC_AUDIT §2) — ไม่รันจาก AI sandbox เพราะเสี่ยง `.git` corrupt ถ้ามี session อื่นเปิด repo เดียวกันพร้อมกัน
+2. **ExplorePage.tsx stub cards / DecisionDashboard.tsx placeholder** — ฟีเจอร์ที่ยังไม่สร้าง ไม่ใช่บั๊ก ตั้งใจเลื่อน
+3. **soundscape 23 CLOUDINARY_URL + `public/audio/` หาย** — ต้องการไฟล์เสียงจริง/บัญชี Cloudinary จากเจ้าของ
+4. **Story Narrative Layer Phase 9/10** — ยังไม่ implement ต้องขอ change-budget แยก (>8 ไฟล์ ตาม §9 ของ `TRACK_C_VISUAL_REDESIGN_TH.md`)
 
 **ปิดแล้วทั้งหมด:**
 - migration 035 ✅ apply แล้ว (5 ก.ย. 2026)
@@ -131,6 +130,10 @@ Phase 9 (World=scene 4 ส่วน) และ Phase 10 (Choice→Consequence) *
 - E2E CI ✅ run #305 ผ่านหมด (7 ก.ย. 2026)
 - Track C Phase 1-12 ✅ ปิดครบ (8 ก.ย. 2026)
 - Twin-naming bug × 2 ✅ แก้แล้ว + verify 91/91 tests (8 ก.ย. 2026)
+- **canonicalUrl gaps** ✅ Tarot/Palmistry/Community แก้แล้ว deploy แล้ว (`42ccf22`, 8 ก.ย. 2026)
+- **Twin-naming audit** ✅ ครบ 100% แล้ว (รอบที่ 9) — เหลือ 1 บั๊กใหม่ที่เจอ: `config/twin-prompts-th.ts` (orphan, มีบั๊กแบบเดียวกับที่แก้ใน `twin-prompts.ts` แต่ไม่เคยถูกแก้) → ลบทิ้งพร้อม `config/prompts.ts` (orphan อีกตัว, self-documented dead code) — ดู FORENSIC_AUDIT §11
+- **Blog article sitemap enumeration** ✅ 86 บทความ enumerate ลง sitemap.xml/sitemap-th.xml แล้ว (รอบที่ 9) — ระหว่างทางเจอ+แก้บั๊กจริง: canonical URL ของทุกบทความ (86 บท) ใส่ lang prefix ผิดจนชี้ไป URL ที่ไม่มี route จริง (`BlogArticle.tsx:237`, `BlogListPage.tsx:259,398`) ดู FORENSIC_AUDIT §11
+- **`as any` นอก SICE** — ตรวจครบ 32 จุด: 6 จุดอยู่ใน `SelfPrintOrchestrator.ts` (orphan, ลบทิ้งแล้ว) · ~18 จุดใน `api/unified-handler.ts` ไม่แตะ (ไฟล์มี `@ts-nocheck` ทั้งไฟล์โดยตั้งใจ แก้ `as any` ไม่ได้ประโยชน์ด้าน type safety) · ที่เหลือเป็น test infra — ดู FORENSIC_AUDIT §11
 
 ## ✅ Production Status (7 ก.ย. 2026)
 

@@ -234,7 +234,7 @@ export default function BlogArticle() {
         description={article.excerpt || article.title}
         keywords={article.keywords.join(', ')}
         ogType="article"
-        canonicalUrl={`${langPrefix}/blog/${article.slug}`}
+        canonicalUrl={`/blog/${article.slug}`}
         schema={articleSchema}
       />
 
