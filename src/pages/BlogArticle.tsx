@@ -17,10 +17,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/context/LanguageContext';
-
-/** Serialize an object as JSON-LD, escaping `</` to prevent `</script>` injection. */
-const safeJsonLd = (obj: unknown): string =>
-  JSON.stringify(obj).replace(/<\//g, '<\\/');
+import { MetaTagManager } from '@/components/MetaTagManager';
 
 interface ArticleMetadata {
   id: string;
@@ -224,9 +221,21 @@ export default function BlogArticle() {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: safeJsonLd(articleSchema) }}
+      {/* SEOGAP-BLOG-001 (8 ก.ย. 2026, Track C Phase 12/G7): every article used
+          to render under the site-wide default <title>/description — search
+          engines and AI systems saw the same generic tag on all 25+ posts.
+          MetaTagManager gives each article its own title/description/
+          canonical/hreflang, matching §27 SEO + §29 AEO (canonical explanation
+          per public concept) — and replaces the old raw dangerouslySetInnerHTML
+          <script> with the same Article schema, passed through the shared
+          `schema` prop like every other page already does. */}
+      <MetaTagManager
+        title={article.title}
+        description={article.excerpt || article.title}
+        keywords={article.keywords.join(', ')}
+        ogType="article"
+        canonicalUrl={`${langPrefix}/blog/${article.slug}`}
+        schema={articleSchema}
       />
 
       <main className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-24 pb-16">
