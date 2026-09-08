@@ -19,17 +19,40 @@
  * @module features/TwinProfile
  */
 
-import React, { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTwin } from '@/context/TwinContext';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { MemoryManager } from '@/lib/intelligence/MemoryManager';
+import { getRecentlyLearned, forgetMemory, type LearnedMemory } from '@/lib/memory/getTwinKnowledge';
+import { getUserDecisions, getDecisionOutcomesBatch } from '@/services/DecisionService';
+import { WORLDS, type WorldId } from '@/constants/worlds';
 import { AccuracyBadgeFromMetrics } from '@/components/intelligence/AccuracyBadge';
 import { TwinEvolutionChart } from './TwinEvolutionChart';
 import { TwinStatsCard } from './TwinStatsCard';
 import './TwinProfile.css';
+
+/** Humanize a snake_case archetype key without inventing a translation
+ *  table that doesn't exist elsewhere in the codebase — e.g.
+ *  "strategic_warrior" → "Strategic Warrior". */
+function humanizeArchetype(key: string): string {
+  return key
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
+/** Look up a world's display name safely — worldId comes from a free-text
+ *  DB column (schema comment: "'self', 'mind', 'relationship', etc.") so it
+ *  isn't guaranteed to be a valid WorldId key. */
+function worldLabel(worldId: string | null, isTh: boolean): string | null {
+  if (!worldId || !(worldId in WORLDS)) return null;
+  const w = WORLDS[worldId as WorldId];
+  return isTh ? w.nameTh : w.name;
+}
 
 // ============================================================================
 // Component
@@ -40,6 +63,9 @@ export const TwinProfile: React.FC = () => {
   const userId = session?.user?.id ?? '';
   const { language } = useLanguage();
   const isTh = language === 'th';
+  const { twin } = useTwin();
+  const twinId = twin?.id ?? '';
+  const queryClient = useQueryClient();
 
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
@@ -80,6 +106,67 @@ export const TwinProfile: React.FC = () => {
     staleTime: 60_000,
     retry: 2,
   });
+
+  // MEMORY-KNOWS-001 (Track C Phase 11, §16 MEMORY EXPERIENCE): "What Twin
+  // Knows" — real data only, never fake precision (§17). recentlyLearned
+  // reads role='user' rows from twin_memories (what the user actually said,
+  // not Twin's own replies) — distinct from loadRecentMemories.ts, which
+  // serves prompt-injection and intentionally includes every role.
+  const { data: recentlyLearned = [], isLoading: learnedLoading } = useQuery({
+    queryKey: ['twinRecentlyLearned', twinId],
+    queryFn: () => getRecentlyLearned(twinId, 8),
+    enabled: !!twinId,
+    staleTime: 30_000,
+  });
+
+  const { data: knownDecisions = [], isLoading: decisionsKnowLoading } = useQuery({
+    queryKey: ['twinDecisionsKnows', twinId],
+    queryFn: () => getUserDecisions(twinId),
+    enabled: !!twinId,
+    staleTime: 60_000,
+  });
+
+  const decisionIds = useMemo(() => knownDecisions.map((d) => d.id), [knownDecisions]);
+
+  const { data: outcomesByDecision } = useQuery({
+    queryKey: ['twinDecisionOutcomesBatch', decisionIds.join(',')],
+    queryFn: () => getDecisionOutcomesBatch(decisionIds),
+    enabled: decisionIds.length > 0,
+    staleTime: 60_000,
+  });
+
+  // Questions Twin is still waiting on: real decisions with zero recorded
+  // outcomes yet — never a fabricated prompt (§17 NO FAKE STORY).
+  const openQuestions = useMemo(() => {
+    if (!outcomesByDecision) return [];
+    return knownDecisions
+      .filter((d) => (outcomesByDecision.get(d.id) ?? []).length === 0)
+      .slice(0, 5);
+  }, [knownDecisions, outcomesByDecision]);
+
+  const aboutYouText = useMemo(() => {
+    if (!twin?.primaryArchetype) return null;
+    const parts = [humanizeArchetype(twin.primaryArchetype)];
+    if (twin.secondaryArchetype) parts.push(humanizeArchetype(twin.secondaryArchetype));
+    return parts.join(isTh ? ' + ' : ' + ');
+  }, [twin, isTh]);
+
+  const selfOverview = twin?.fullAnalysis?.selfOverview ?? null;
+
+  const handleForget = useCallback(async (memoryId: string) => {
+    if (!twinId) return;
+    const ok = window.confirm(
+      isTh ? 'ลืมความจำนี้อย่างถาวร?' : 'Permanently forget this memory?'
+    );
+    if (!ok) return;
+    const success = await forgetMemory(memoryId, twinId);
+    if (success) {
+      queryClient.setQueryData<LearnedMemory[]>(
+        ['twinRecentlyLearned', twinId],
+        (prev) => (prev ?? []).filter((m) => m.id !== memoryId)
+      );
+    }
+  }, [twinId, isTh, queryClient]);
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -135,6 +222,136 @@ export const TwinProfile: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* MEMORY-KNOWS-001 (Track C Phase 11, §16): "What Twin Knows" —
+          About you / Recently learned / Patterns / Decisions / Questions.
+          Every subsection self-guards to an honest empty state instead of
+          fabricating content when real data isn't there yet (§17). */}
+      <section className="twin-profile__knows-section">
+        <h2 className="section-title">🧠 {isTh ? 'สิ่งที่ทวินรู้จักคุณ' : 'What Twin Knows'}</h2>
+
+        <div className="knows-grid">
+          {/* About you */}
+          <div className="knows-card">
+            <h3 className="knows-card__title">{isTh ? 'เกี่ยวกับคุณ' : 'About you'}</h3>
+            {aboutYouText ? (
+              <>
+                <p className="knows-card__body">
+                  {isTh ? `ทวินมองว่าคุณเป็น ${aboutYouText}` : `Your Twin sees you as ${aboutYouText}`}
+                </p>
+                {selfOverview && <p className="knows-card__body knows-card__body--muted">{selfOverview}</p>}
+              </>
+            ) : (
+              <p className="knows-empty">
+                {isTh ? 'ทวินยังไม่รู้จักคุณดีพอที่จะพูดเรื่องนี้' : "I don't know you well enough here yet."}
+              </p>
+            )}
+          </div>
+
+          {/* Recently learned */}
+          <div className="knows-card">
+            <h3 className="knows-card__title">{isTh ? 'เพิ่งเรียนรู้' : 'Recently learned'}</h3>
+            {learnedLoading ? (
+              <div className="twin-profile__loading"><span className="spinner" /></div>
+            ) : recentlyLearned.length === 0 ? (
+              <p className="knows-empty">
+                {isTh ? 'ทวินยังไม่รู้จักคุณดีพอที่จะพูดเรื่องนี้' : "I don't know you well enough here yet."}
+              </p>
+            ) : (
+              <ul className="learned-list">
+                {recentlyLearned.map((m) => (
+                  <li key={m.id} className="learned-item">
+                    <div className="learned-item__body">
+                      <p className="learned-item__content">{m.content}</p>
+                      <span className="learned-item__meta">
+                        {worldLabel(m.worldId, isTh)}
+                        {m.createdAt ? ` · ${formatDate(new Date(m.createdAt), isTh)}` : ''}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="forget-btn"
+                      onClick={() => handleForget(m.id)}
+                      aria-label={isTh ? 'ลืมความจำนี้' : 'Forget this memory'}
+                      title={isTh ? 'ลืม' : 'Forget'}
+                    >
+                      🗑
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Patterns */}
+          <div className="knows-card">
+            <h3 className="knows-card__title">{isTh ? 'รูปแบบที่พบ' : 'Patterns'}</h3>
+            {patternsLoading ? (
+              <div className="twin-profile__loading"><span className="spinner" /></div>
+            ) : patterns.length === 0 ? (
+              <p className="knows-empty">
+                {isTh ? 'ทวินยังไม่รู้จักคุณดีพอที่จะพูดเรื่องนี้' : "I don't know you well enough here yet."}
+              </p>
+            ) : (
+              <ul className="pattern-list">
+                {patterns.slice(0, 5).map((p) => (
+                  <li key={p.id} className="pattern-item">
+                    <span className="pattern-item__name">{p.description || p.patternName}</span>
+                    <span className="pattern-item__meta">
+                      {p.frequency} · {Math.round(p.confidence * 100)}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Decisions */}
+          <div className="knows-card">
+            <h3 className="knows-card__title">{isTh ? 'การตัดสินใจ' : 'Decisions'}</h3>
+            {decisionsKnowLoading ? (
+              <div className="twin-profile__loading"><span className="spinner" /></div>
+            ) : knownDecisions.length === 0 ? (
+              <p className="knows-empty">
+                {isTh ? 'ทวินยังไม่รู้จักคุณดีพอที่จะพูดเรื่องนี้' : "I don't know you well enough here yet."}
+              </p>
+            ) : (
+              <ul className="decision-list">
+                {knownDecisions.slice(0, 5).map((d) => (
+                  <li key={d.id} className="decision-item">
+                    <span className="decision-item__question">{d.question}</span>
+                    <span className="decision-item__meta">
+                      {d.userChoice} · {formatDate(new Date(d.createdAt), isTh)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Questions */}
+          <div className="knows-card">
+            <h3 className="knows-card__title">{isTh ? 'คำถามที่ยังค้างอยู่' : 'Questions'}</h3>
+            {decisionsKnowLoading ? (
+              <div className="twin-profile__loading"><span className="spinner" /></div>
+            ) : openQuestions.length === 0 ? (
+              <p className="knows-empty">
+                {isTh ? 'ไม่มีคำถามค้างอยู่ตอนนี้' : 'Nothing pending right now.'}
+              </p>
+            ) : (
+              <ul className="question-list">
+                {openQuestions.map((d) => (
+                  <li key={d.id} className="question-item">
+                    {isTh
+                      ? `ทวินยังอยากรู้ว่า "${d.userChoice}" เป็นยังไงบ้าง — จากคำถาม: ${d.question}`
+                      : `Your Twin still wants to know how "${d.userChoice}" turned out — from: ${d.question}`}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </section>
 
       {/* Main metrics */}
       <section className="twin-profile__metrics-section">

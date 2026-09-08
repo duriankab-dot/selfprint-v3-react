@@ -10,6 +10,15 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- Onboarding -->
+  <url>
+    <loc>https://selfprint.one/en/onboarding</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/onboarding" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Main Pages -->
   <url>
     <loc>https://selfprint.one/en/pricing</loc>
@@ -45,83 +54,209 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- SITEMAP-COMPLETE-001 (Track C Phase 12, §31 IA / C2): these public,
+       real, MetaTagManager-backed content pages existed in the app but were
+       missing from this sitemap entirely — added here, mirrored in
+       sitemap-th.xml, so both languages promote the same real page set. -->
+  <url>
+    <loc>https://selfprint.one/en/about</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/about" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/science</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/science" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/contact</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/contact" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/terms</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/terms" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/blog</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/blog" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/tarot</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/tarot" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/palmistry</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/palmistry" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/community</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/community" />
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Chat Pages -->
+  <url>
+    <loc>https://selfprint.one/en/chat/nova</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/nova" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/en/chat/twin</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/twin" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Core Awakening -->
+  <url>
+    <loc>https://selfprint.one/en/core-awakening</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/core-awakening" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Explore -->
+  <url>
+    <loc>https://selfprint.one/en/explore</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/explore" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- Activities -->
+  <url>
+    <loc>https://selfprint.one/en/activities</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/activities" />
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
   <!-- Worlds (12 pages) -->
   <url>
     <loc>https://selfprint.one/en/worlds/self</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/self" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/mind</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/mind" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/relationship</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/relationship" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/love</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/love" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/career</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/career" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/wealth</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/wealth" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/life</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/life" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/growth</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/growth" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/decision</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/decision" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/purpose</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/purpose" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/wellbeing</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/wellbeing" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
     <loc>https://selfprint.one/en/worlds/future</loc>
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds/future" />
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
-  <!-- Blog pages — reserved for future implementation
-       Commented out until blog pages are built:
-       - /en/blog/career/career-goals-setting
-       - /en/blog/relationships/relationship-decisions-guide
-  -->
+  <!-- Blog pages: only the list page is enumerated here — individual
+       article URLs are dynamic (BlogListPage.tsx merges STATIC_ARTICLES with
+       markdown-sourced dynamicArticles at runtime) and are discoverable via
+       the blog list's own internal links (§30 internal linking). Enumerating
+       article slugs into this static file without reading them from their
+       real source would risk listing URLs that don't exist — left as a
+       follow-up recommendation, not guessed here. -->
 </urlset>

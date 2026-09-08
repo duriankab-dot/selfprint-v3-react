@@ -112,6 +112,148 @@
 }
 
 /* ============================================================================
+   WHAT TWIN KNOWS (Track C Phase 11, §16 MEMORY EXPERIENCE) — §MEMORY-KNOWS-001
+   ============================================================================ */
+
+.twin-profile__knows-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.knows-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.knows-card {
+  padding: 16px;
+  background: var(--color-bg-secondary, #f5f5f5);
+  border: 1px solid var(--color-border, #e0e0e0);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 96px;
+}
+
+.knows-card__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary, #000);
+}
+
+.knows-card__body {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-primary, #000);
+}
+
+.knows-card__body--muted {
+  color: var(--color-text-secondary, #999);
+}
+
+.knows-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-secondary, #999);
+  font-style: italic;
+}
+
+.learned-list,
+.pattern-list,
+.decision-list,
+.question-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.learned-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--color-bg-primary, #fff);
+  border-radius: 8px;
+}
+
+.learned-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.learned-item__content {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-primary, #000);
+  line-height: 1.4;
+}
+
+.learned-item__meta {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
+}
+
+.forget-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.5;
+  padding: 2px 4px;
+  border-radius: 6px;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.forget-btn:hover {
+  opacity: 1;
+  background: var(--color-bg-secondary, #f5f5f5);
+}
+
+.pattern-item,
+.decision-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  background: var(--color-bg-primary, #fff);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.pattern-item__name,
+.decision-item__question {
+  color: var(--color-text-primary, #000);
+  font-weight: 500;
+}
+
+.pattern-item__meta,
+.decision-item__meta {
+  font-size: 11px;
+  color: var(--color-text-secondary, #999);
+}
+
+.question-item {
+  padding: 8px 10px;
+  background: var(--color-bg-primary, #fff);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-primary, #000);
+}
+
+/* ============================================================================
    METRICS CONTAINER
    ============================================================================ */
 
@@ -271,6 +413,10 @@
 
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .knows-grid {
+    grid-template-columns: 1fr;
   }
 }
 

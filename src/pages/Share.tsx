@@ -6,6 +6,7 @@ import { NavBar } from '@/components/layout/NavBar';
 import { Footer } from '@/components/layout/Footer';
 import { BottomNav } from '@/components/layout/BottomNav';
 import { NavRail } from '@/components/layout/NavRail';
+import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 
 export default function SharePage() {
@@ -14,6 +15,20 @@ export default function SharePage() {
   const isTh = language === 'th';
   const [data, setData] = useState<PairPreview | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // SHAREOG-001 (Track C Phase 12, §32): this page's entire purpose is to be
+  // pasted into LINE/Messenger/etc by a real user (robots.txt already
+  // explicitly `Allow: /share/`) — but it had no MetaTagManager at all, so
+  // every shared link previewed with the generic site-wide OG card instead
+  // of the actual pair being shared. Uses only real data already fetched
+  // above (decisionStyle/accuracyLevel when found) — never a fabricated
+  // per-code stat (§32 — no fake precision).
+  const shareTitle = data?.found
+    ? (isTh ? `${data.decisionStyle || 'AI Twin'} เพื่อนของคุณ ชวนคุณมาค้นพบ AI Twin ของตัวเอง` : `${data.decisionStyle || 'Their AI Twin'} — a friend invited you to discover your own`)
+    : (isTh ? 'เพื่อนของคุณชวนให้มาค้นพบ AI Twin ของตัวเอง' : 'Your friend invited you to discover your own AI Twin');
+  const shareDescription = data?.found && typeof data.accuracyLevel === 'number'
+    ? (isTh ? `ความแม่นยำของทวิน ${data.accuracyLevel}% — มาสร้าง AI Twin ของคุณเองฟรี` : `${data.accuracyLevel}% Twin accuracy — create your own AI Twin free`)
+    : (isTh ? 'AI ที่เรียนรู้และเข้าใจตัวคุณ — สร้างฟรี' : 'AI that learns and understands you — free to create');
 
   useEffect(() => {
     if (!code) {
@@ -28,6 +43,13 @@ export default function SharePage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <MetaTagManager
+        title={shareTitle}
+        description={shareDescription}
+        ogType="website"
+        ogImage="/og-default-th.jpg"
+        canonicalUrl={code ? `/${language}/share/${code}` : `/${language}/share`}
+      />
       <NavBar />
       <div
         style={{

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:hreflang="http://www.w3.org/1999/xhtml">
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <!-- Home -->
   <url>
     <loc>https://selfprint.one/th/</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/" />
-    <hreflang:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/" />
   </url>
 
   <!-- Onboarding -->
@@ -18,8 +18,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/onboarding" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/onboarding" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/onboarding" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/onboarding" />
   </url>
 
   <!-- Pricing -->
@@ -28,8 +28,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/pricing" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/pricing" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/pricing" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/pricing" />
   </url>
 
   <!-- FAQ -->
@@ -38,8 +38,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/faq" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/faq" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/faq" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/faq" />
   </url>
 
   <!-- Bridge content: ดูดวง AI → behavioral science (high-traffic Thai segment) -->
@@ -48,9 +48,9 @@
     <lastmod>2026-08-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/vs-astrology" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/vs-astrology" />
-    <hreflang:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/vs-astrology" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/vs-astrology" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/vs-astrology" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://selfprint.one/en/vs-astrology" />
   </url>
 
   <!-- Privacy -->
@@ -59,18 +59,173 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/privacy" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/privacy" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/privacy" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/privacy" />
   </url>
 
-  <!-- Worlds (Protected but publicly discoverable) -->
+  <!-- SITEMAP-COMPLETE-001 (Track C Phase 12, §31 IA / C2): these public,
+       real, MetaTagManager-backed content pages existed in the app but were
+       missing from this sitemap entirely — mirrored from sitemap.xml so
+       both languages promote the same real page set. -->
   <url>
-    <loc>https://selfprint.one/th/worlds</loc>
+    <loc>https://selfprint.one/th/about</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/about" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/about" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/science</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/science" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/science" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/contact</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/contact" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/contact" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/terms</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/terms" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/terms" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/blog</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/blog" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/blog" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/tarot</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/tarot" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/tarot" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/palmistry</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/palmistry" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/palmistry" />
+  </url>
+
+  <url>
+    <loc>https://selfprint.one/th/community</loc>
+    <lastmod>2026-09-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/community" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/community" />
+  </url>
+
+  <!-- Worlds (12 pages) — WORLDS-SITEMAP-001: previously a single bare
+       /worlds entry while sitemap.xml (en) already listed each of the 12
+       world pages individually. Expanded to match — both files now list
+       the same 12 real world pages instead of two different structures. -->
+  <url>
+    <loc>https://selfprint.one/th/worlds/self</loc>
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/worlds" />
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/self" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/mind</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/mind" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/relationship</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/relationship" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/love</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/love" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/career</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/career" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/wealth</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/wealth" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/life</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/life" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/growth</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/growth" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/decision</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/decision" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/purpose</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/purpose" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/wellbeing</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/wellbeing" />
+  </url>
+  <url>
+    <loc>https://selfprint.one/th/worlds/future</loc>
+    <lastmod>2026-08-17</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/worlds/future" />
   </url>
 
   <!-- Chat Pages -->
@@ -79,8 +234,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/chat/nova" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/nova" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/chat/nova" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/nova" />
   </url>
 
   <url>
@@ -88,8 +243,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/chat/twin" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/twin" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/chat/twin" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/chat/twin" />
   </url>
 
   <!-- Core Awakening -->
@@ -98,8 +253,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/core-awakening" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/core-awakening" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/core-awakening" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/core-awakening" />
   </url>
 
   <!-- Explore -->
@@ -108,8 +263,8 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.75</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/explore" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/explore" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/explore" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/explore" />
   </url>
 
   <!-- Activities -->
@@ -118,7 +273,7 @@
     <lastmod>2026-08-17</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
-    <hreflang:link rel="alternate" hreflang="en" href="https://selfprint.one/en/activities" />
-    <hreflang:link rel="alternate" hreflang="th" href="https://selfprint.one/th/activities" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://selfprint.one/en/activities" />
+    <xhtml:link rel="alternate" hreflang="th" href="https://selfprint.one/th/activities" />
   </url>
 </urlset>
