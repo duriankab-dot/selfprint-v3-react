@@ -141,15 +141,19 @@ describe('Onboarding Flow', () => {
       });
     });
 
-    it('ถามวันเกิดต่อจากคำทักทาย', async () => {
+    it('ถามวันเกิดต่อจากคำทักทาย (dropdown)', async () => {
       await renderOnboarding();
       const user = userEvent.setup();
 
       await user.click(screen.getByRole('button', { name: /พร้อม/ }));
 
+      // e12af81: free-text input replaced with DobSelect dropdowns — verify
+      // the day/month/year <select> elements appear (aria-labels areThai).
       await waitFor(
         () => {
-          expect(screen.getByPlaceholderText('เช่น 1990-01-15')).toBeInTheDocument();
+          expect(screen.getByLabelText(/วัน/)).toBeInTheDocument();
+          expect(screen.getByLabelText(/เดือน/)).toBeInTheDocument();
+          expect(screen.getByLabelText(/ปี/)).toBeInTheDocument();
         },
         { timeout: 3000 }
       );
