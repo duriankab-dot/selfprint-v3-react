@@ -94,8 +94,8 @@ npm run typecheck:functions   # typecheck functions/ + api/
 - **`selfprint.users_profiles.id` เป็น surrogate key** ไม่ใช่ auth uid — ต้อง query ด้วย `.eq('user_id', userId)` เสมอ
 - **บทความบล็อก (`/blog/:slug`) ไม่มี lang prefix โดยตั้งใจ** (URL สั้น + SEO) ต่างจากหน้า public อื่นที่มีทั้ง `/en/x` และ `/th/x`
   — อย่าใส่ `langPrefix` เวลาสร้าง canonical/URL ของบทความ
-- **`translations.ts` มี 161 key ใช้จริงส่วนน้อย** — i18n จริงทำด้วย `isTh ? ... : ...` inline ~40 คอมโพเนนต์
-  ตอนนี้มี 2 ระบบซ้อนกัน (ยังไม่ตัดสินใจเลือกทางเดียว)
+- **`translations.ts` (166 key × 2 ภาษา) ใช้จริงแค่ 7 ไฟล์** — i18n หลักทำด้วย `isTh ? ... : ...` inline 98 ไฟล์
+  (verify นับไฟล์จริง 8 ก.ย. 2026 — เดิมเขียนไว้ "~40" คลาดเคลื่อน) ตอนนี้มี 2 ระบบซ้อนกัน (ยังไม่ตัดสินใจเลือกทางเดียว)
 - **duplicate component**: ตัวจริงอยู่ในโฟลเดอร์ย่อยเสมอ แต่ `components/features/DecisionList.tsx`
   ยังใช้งานจริง (`DecisionLogger.tsx`) — อย่าลบเพราะดูเหมือนซ้ำกับตัวที่ root
 - **`import.meta.env[name]` (dynamic bracket access) ไม่ถูก Vite inline ตอน build** — ต้องใช้ literal

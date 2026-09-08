@@ -711,3 +711,59 @@ scope ของ Track C Phase 1-12 ที่อนุมัติไปแล้
 `MePage.tsx:132` (หัวข้อ section — ไม่ใช่บั๊ก), `TwinNaming.tsx` (หน้าตั้งชื่อเอง — ก่อนมีชื่อ ถูกต้องอยู่แล้ว
 ที่เป็น generic), `ExecutiveSummary.tsx` และ `twin-prompts.ts` (2 gap ข้างบน) — **ที่เหลืออีก ~25 ไฟล์
 ยังไม่ได้ไล่ตรวจทีละจุด** ต้องเป็นงานแยกถ้าต้องการความครบถ้วน 100%
+
+---
+
+## Change-map เสนอ — Story Narrative Layer Phase 9-10 (8 ก.ย. 2026, verify รอบที่ 10)
+
+> **สถานะ: ข้อเสนอ change-map เท่านั้น — ยังไม่มีการแก้โค้ดแม้แต่บรรทัดเดียว**
+> ตาม §9 ของเอกสารนี้ (>8 ไฟล์ ต้องมี change-map ก่อนแตะ) — เอกสารนี้คือ change-map นั้น
+> **ต้องได้รับอนุมัติจากเจ้าของก่อนเริ่ม implement**
+> อ้างอิงเป้าหมายจาก §51 STORYTELLING ARCHITECTURE + หัวข้อ "STORY / NARRATIVE LAYER" ด้านบนของไฟล์นี้
+
+### ขอบเขต
+
+- **Phase 9 (World = scene 4 ส่วน):** ต่อยอด Phase 9 เดิม (Worlds hub) ที่ปิดแล้ว — เพิ่ม 4 ส่วนต่อ World
+  (Story / Pattern / Reflection / Decision) ใน `WorldDetail.tsx`
+- **Phase 10 (Choice → Consequence):** เมื่อมี follow-up data → Twin แสดง "Since [choice], here's what changed"
+  ใน `TwinChat.tsx` (Twin hub)
+
+### Data source ที่ต้อง verify ก่อนเริ่ม (ยังไม่ได้ verify ครบ — งานถัดไปก่อนขออนุมัติจริง)
+
+| Story primitive | ตารางที่คาดว่าจะใช้ (verify เบื้องต้นจาก `DecisionService.ts`) | สถานะ verify |
+|---|---|---|
+| Decision (Phase 9) / Choice→Consequence (Phase 10) | `decision_log` · `decision_outcomes` · `follow_up_schedule` (ชื่อจริง ไม่ใช่ `decision_logs` ที่บางเอกสารเก่าเขียนผิด) | ✅ verify ชื่อตารางแล้ว จาก `DecisionService.ts` |
+| Pattern (Phase 9) | คาดว่าเป็น output จาก SICE `PatternDetector.ts` — **ยังไม่ verify ว่า WorldDetail ควรอ่านจากที่ไหน** (SICE core ห้ามแตะตรง ต้องผ่าน bridge/hook ที่มีอยู่แล้วเท่านั้น) | ❌ ยังไม่ verify |
+| Reflection (Phase 9) | คาดว่าเป็นคำถามจาก Twin ต่อ world นั้น — **ยังไม่มี field/table ชัดเจนที่ verify แล้ว** | ❌ ยังไม่ verify |
+| Memory / About you | `twin_memories` (ตามที่ Phase 11 อ้างอิงไปแล้ว) | ✅ ใช้ตารางเดิม ไม่สร้างใหม่ |
+
+### ไฟล์โดยประมาณที่ต้องแตะ (ประเมินเบื้องต้น — เกิน 8 ไฟล์แน่นอน)
+
+| ไฟล์ | งาน | ใหม่/แก้ |
+|------|-----|----------|
+| `src/pages/WorldDetail.tsx` (295 บรรทัด) | เพิ่ม 4 ส่วน Story/Pattern/Reflection/Decision ต่อ world | แก้ |
+| `src/pages/TwinChat.tsx` (897 บรรทัด) | เพิ่ม Choice→Consequence surfacing ใน mode selector ที่มีอยู่ (Phase 10 P0 shell เดิม) | แก้ |
+| `src/components/world/WorldStoryPanel.tsx` (ชื่อชั่วคราว) | component ใหม่ — แสดง 4 ส่วนต่อ world | ใหม่ |
+| `src/components/twin/ChoiceConsequence.tsx` (ชื่อชั่วคราว) | component ใหม่ — การ์ด "Since [choice]..." | ใหม่ |
+| `src/services/WorldStoryService.ts` (ชื่อชั่วคราว) | ดึง pattern/reflection/decision ต่อ world จาก service ที่มีอยู่แล้ว (ไม่สร้าง engine ใหม่) | ใหม่ |
+| `src/lib/intelligence/PatternDetector.ts` หรือ bridge ที่เกี่ยวข้อง | **อ่านอย่างเดียว** ไม่แก้ logic (SICE core ห้ามแตะ) | อ่านเพื่อ integrate เท่านั้น |
+| test ใหม่ 2-4 ไฟล์ | คู่กับ component/service ใหม่ | ใหม่ |
+
+**รวมประมาณ 8-10 ไฟล์ใหม่/แก้ + อ่าน SICE เพิ่ม 1-2 จุด** — เข้าเกณฑ์ §9 "9-15 ไฟล์ ต้องมี change map"
+(เอกสารนี้ทำหน้าที่นั้น) ไม่ถึงระดับ "16-30 dedicated phase"
+
+### Guardrails ที่ต้องคุมเข้มระหว่าง implement (ทวนจาก §51 ด้านบนของไฟล์นี้)
+
+```
+✗ ห้ามแสดง Reflection/Pattern ถ้าไม่มีข้อมูลจริงจาก SICE รองรับ
+✗ ห้ามสร้าง memory/decision table ใหม่ — อ่านจาก decision_log/decision_outcomes/twin_memories เท่านั้น
+✗ ห้ามแก้ src/services/sice/** หรือ src/lib/intelligence/** — อ่านผ่าน bridge ที่มีอยู่เท่านั้น
+✓ ถ้า world ไหนยังไม่มี pattern/decision จริง → ไม่แสดงส่วนนั้น (เหมือนหลักการ "What Twin Knows" ใน Phase 11)
+```
+
+### ก่อนขออนุมัติจริง ต้องทำต่อ (ยังไม่ทำ)
+
+1. Verify จริงว่า `PatternDetector.ts` หรือ SICE bridge ตัวไหนคือทางเข้าที่ถูกต้องสำหรับอ่าน pattern ต่อ world
+2. Verify ว่า Reflection มาจากไหนจริง (อาจต้องเป็น P1 แยกถ้าไม่มี data ณ ตอนนี้ — เหมือนที่ P1.4/P1.5
+   ใน `PLAN_TRACKS_TH.md` ระบุไว้ว่าต้องมี "decision loop" ก่อน)
+3. เมื่อ verify 2 ข้อบนครบ → เสนอไฟล์สุดท้าย + ขออนุมัติเป็นลายลักษณ์อักษรก่อนแตะโค้ดจริง

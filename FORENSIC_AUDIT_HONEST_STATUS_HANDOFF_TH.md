@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 8 กันยายน 2026 · รอบที่ 9 (consolidation) · verify กับ Supabase / Cloudflare / GitHub จริง
+**อัปเดตล่าสุด:** 8 กันยายน 2026 · รอบที่ 10 (verification เพิ่มเติมของหัวข้อ 3) · verify กับ Supabase / Cloudflare / GitHub จริง
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริงเสมอ ไม่เชื่อไฟล์ `.md` ใดๆ รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เขียนโดย:** jb_DEV + Claude
 
@@ -79,13 +79,14 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 
 ## 3. งานที่ยังเปิดจริง (ไม่บล็อก production)
 
-| # | เรื่อง | ทำไมยังไม่แก้ |
-|---|-------|---------------|
-| 1 | `ExplorePage.tsx` stub cards ("เร็วๆ นี้") / `DecisionDashboard.tsx` placeholder caption | ฟีเจอร์ที่ตั้งใจยังไม่สร้าง ไม่ใช่บั๊ก — สร้างให้ = เพิ่ม scope ที่ไม่ได้ขอ |
-| 2 | `soundscape-manifest.json` 23 จุดยังเป็น `CLOUDINARY_URL` placeholder + `public/audio/` ไม่มีไฟล์จริง | ต้องการไฟล์เสียงจริง/บัญชี Cloudinary จากเจ้าของ แก้จากโค้ดอย่างเดียวไม่ได้ |
-| 3 | Story Narrative Layer Phase 9 (World=scene 4 ส่วน) + Phase 10 (Choice→Consequence) | ตาม `TRACK_C_VISUAL_REDESIGN_TH.md` §9: งาน >8 ไฟล์ต้องมี change-budget อนุมัติแยกก่อนเริ่ม |
-| 4 | Stripe checkout production timing | ตัดสินใจธุรกิจ ไม่ใช่บั๊กทางเทคนิค — โค้ด wired พร้อมแล้ว |
-| 5 | `translations.ts` มี 161 key ใช้จริงส่วนน้อย — ระบบ i18n จริงทำด้วย `isTh ? ... : ...` inline ~40 คอมโพเนนต์ (2 ระบบซ้อนกัน) | ต้องเลือกทางเดียว เป็นงาน refactor ไม่ใช่บั๊ก |
+> **verify รอบที่ 10 (8 ก.ย. 2026):** ข้อ 1 เดิม (ExplorePage/DecisionDashboard) ตรวจจากซอร์สจริงแล้ว **ไม่ใช่ปัญหา** — ตัดออกจากตารางนี้ ดูหัวข้อ 4 "ไม่ใช่บั๊ก" · ตัวเลขข้อ 2 และ 5 แก้ให้ตรงกับซอร์สจริง (ของเดิมคลาดเคลื่อน)
+
+| # | เรื่อง | สถานะจริง | ทำไมยังไม่แก้ |
+|---|-------|-----------|---------------|
+| 2 | `soundscape-manifest.json` — URL แก้เป็น mixkit/pixabay (CC0 ฟรี) แล้วจริง (ไม่ใช่ Cloudinary ค้างแล้ว) แต่ `public/audio/` ยังไม่มีไฟล์ mp3 จริง (มีแค่ `.gitkeep` + `README.md`) | app มี fallback เป็น oscillator synthesis เมื่อไฟล์เสียงหาย — **ไม่ crash ไม่บล็อก production** | ต้องดาวน์โหลดไฟล์ CC0 จริงมา commit ตาม migration plan ใน `public/audio/README.md` — เป็นการดาวน์โหลดไฟล์ภายนอก ต้องขออนุญาตเจ้าของก่อนทุกครั้ง (ไม่ใช่ต้องรอบัญชี Cloudinary อีกต่อไป) |
+| 3 | Story Narrative Layer Phase 9 (World=scene 4 ส่วน) + Phase 10 (Choice→Consequence) | ยังไม่มีโค้ดส่วนนี้เลย (verify แล้ว) | ตาม `TRACK_C_VISUAL_REDESIGN_TH.md` §9: งาน >8 ไฟล์ต้องมี change-map/change-budget อนุมัติแยกก่อนเริ่ม |
+| 4 | Stripe checkout production timing | `stripeService.ts` wired สมบูรณ์ ไม่มี flag ค้าง ไม่มีจุดพังทางเทคนิค (verify แล้ว) | ตัดสินใจธุรกิจล้วนๆ ไม่ใช่บั๊กทางเทคนิค |
+| ~~5~~ ✅ **ปิดแล้ว (8 ก.ย. 2026)** | i18n สองระบบซ้อนกัน | ย้าย 7 ไฟล์ที่เคยใช้ `t()`/`TRANSLATIONS` (`LandingPage.tsx` `AnalysisPage.tsx` `BirthdateInput.tsx` `TwinChat.tsx` `CoreAwakening.tsx` `Dashboard.tsx` `AICreationSequence.tsx`) เข้า `isTh ? ... : ...` แล้ว (byte-identical กับข้อความเดิม) · `src/constants/translations.ts` เหลือ 0 importer — เขียนเป็น deprecation stub (`export {}`) เพราะ sandbox นี้ลบไฟล์บนโฟลเดอร์ที่เชื่อมมาไม่ได้ (bash `rm` ถูกบล็อก) **เจ้าของต้อง `git rm src/constants/translations.ts` เองอีกที** · verify: `tsc -b` 0 errors · `vite build` สำเร็จ · `oxlint` 0 errors/174 warnings/464 files (เท่าเดิม ไม่ regression) · `vitest` **ยังไม่ verify ในรอบนี้** (sandbox timeout ที่ ~175s ต่อ 1 คำสั่ง รันชุดเทสต์เต็มไม่ทัน — ตามธรรมเนียมเดิมของไฟล์นี้ที่ระบุ "เจ้าของรันเอง (PowerShell)" ขอให้รัน `npm test` ยืนยันอีกที |
 
 ---
 
@@ -104,6 +105,8 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 - `personal_context` (เอกพจน์) กับ `personal_contexts` (พหูพจน์) เป็นตารางจริง 2 ตารางแยกกัน ไม่ใช่บั๊กตั้งชื่อผิด — migration 035 เพิ่มคอลัมน์ `context_data`/`initialized_at` ให้ตัวพหูพจน์ไปแล้ว
 - `VoiceInput.tsx` / `VoiceOutput.tsx` — ไม่มี mock เหลือแล้ว เป็น presentational component ล้วนๆ, `useVoiceTwin` (Web Speech API จริง) จัดการ logic ทั้งหมด
 - `CommunityPage.tsx` — ไม่มี "coming soon" เหลือแล้ว เป็นฟีเจอร์ feed จริง
+- `ExplorePage.tsx` stub cards — **verify รอบที่ 10:** comment `EXPLOREACT-001 FIX` ที่บรรทัด 727 ยืนยันว่า stub card 2 ใบ ("สำรวจลายนิ้วมือ"/"สำรวจลายมือ" ซ้ำ) ถูกลบไปแล้วจริง prop `comingSoon` บน `ExploreCard` เหลืออยู่ในโค้ดแต่ไม่มี caller ไหนส่ง `true` เข้ามาเลย (dead prop เฉยๆ ไม่กระทบผู้ใช้)
+- `DecisionDashboard.tsx:126` — **verify รอบที่ 10:** เป็น empty state ปกติ ("No decisions yet. Start logging decisions...") ทำงานถูกต้องตามดีไซน์ ไม่ใช่ placeholder ที่ต้องแก้
 
 ---
 

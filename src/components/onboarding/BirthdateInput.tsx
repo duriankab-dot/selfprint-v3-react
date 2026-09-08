@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useLanguage } from '@/context/LanguageContext';
-import { t } from '@/constants/translations';
 
 interface BirthdateInputProps {
   onSubmit: (data: { dob: string; time?: string; place?: string }) => void;
@@ -16,7 +15,7 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!dob) {
-      alert(t('birthDataRequired', language));
+      alert(isTh ? 'ต้องการข้อมูลเกิด' : 'Birth data required');
       return;
     }
     onSubmit({ dob, time, place });
@@ -24,7 +23,7 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-2">{t('birthDataRequired', language)}</h2>
+      <h2 className="text-2xl font-bold mb-2">{isTh ? 'ต้องการข้อมูลเกิด' : 'Birth data required'}</h2>
       {/* STORYBEAT-BIRTHDATE-001 (Track C Story Layer, §51): this step was a
           bare form with zero narrative framing — the one clear "form, not a
           story" gap flagged by STORY_NARRATIVE_LAYER_TH.md's own Phase-2
@@ -38,7 +37,7 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
       </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">{t('enterBirthday', language)}</label>
+          <label className="block text-sm font-medium mb-1">{isTh ? 'ระบุวันเกิด' : 'Enter your birthday'}</label>
           <input
             type="date"
             value={dob}

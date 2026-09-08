@@ -17,7 +17,6 @@ import { useUserStore } from '../store/userStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { useLanguage } from '../context/LanguageContext';
 import { useAudio } from '../context/AudioContext';
-import { t } from '../constants/translations';
 import { Twin } from '../components/twin/Twin';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { ProvenanceStrip } from '../components/story/ProvenanceStrip';
@@ -463,7 +462,7 @@ export default function CoreAwakening() {
           {/* NAVGAP-003 (7 ก.ย. 2026): same non-responsive-heading pattern
               already fixed on the intro phase above — missed this phase
               (celebration) the first pass. */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white animate-pulse">🎉 {t('twinAwakening', language)}!</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6 text-white animate-pulse">🎉 {isTh ? 'ตื่นรู้ของ Twin' : 'Twin Awakening'}!</h2>
           {/* P0-C Gap #4: show the actual grounded insight when we have one —
               falls back to the generic line only when essence had none */}
           <p className="text-xl text-gray-200 mb-4">
@@ -481,14 +480,14 @@ export default function CoreAwakening() {
           {firstInsight && (
             <ProvenanceStrip patternCount={firstInsightPatternCount} className="text-center" />
           )}
-          <p className="text-gray-400">{t('twinGenesis', language)}...</p>
+          <p className="text-gray-400">{isTh ? 'กำเนิด Twin' : 'Twin Genesis'}...</p>
         </div>
       )}
 
       {/* COMPLETE PHASE */}
       {phase === 'complete' && (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-white">{t('loadingPersonality', language)}...</p>
+          <p className="text-white">{isTh ? 'กำลังโหลด​บุคลิก' : 'Loading personality'}...</p>
         </div>
       )}
     </div>

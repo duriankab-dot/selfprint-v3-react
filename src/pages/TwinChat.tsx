@@ -15,7 +15,6 @@ import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useWorld } from '../context/WorldContext';
 import { useLanguage } from '../context/LanguageContext';
-import { t } from '../constants/translations';
 import { useUserStore } from '../store/userStore';
 import { useAnalysisStore } from '../store/analysisStore';
 import { WORLDS, type WorldId } from '../constants/worlds';
@@ -553,7 +552,7 @@ export default function TwinChat() {
               lineHeight: 1.3,
             }}
           >
-            {t('twinHasntAwakened', language)}
+            {isTh ? 'Twin ของคุณยังไม่ตื่น' : "Your Twin hasn't awakened yet"}
           </h1>
           <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 28px', fontSize: '1rem' }}>
             {isTh
@@ -573,7 +572,7 @@ export default function TwinChat() {
               cursor: 'pointer',
             }}
           >
-            {`✨ ${t('coreAwakeningTitle', language)}`}
+            {`✨ ${isTh ? 'ตื่นรู้ตัวตน' : 'Core Awakening'}`}
           </button>
         </div>
       </div>
@@ -871,7 +870,7 @@ export default function TwinChat() {
           placeholder={
             currentWorld
               ? `${language === 'th' ? 'ถามทวินเรื่อง' : 'Ask your Twin about'} ${WORLDS[currentWorld]?.nameTh || WORLDS[currentWorld]?.name}...`
-              : t('typeMessage', language)
+              : (isTh ? 'พิมพ์ข้อความ...' : 'Type a message...')
           }
           disabled={isSending}
           className="p-4 rounded-xl focus:outline-none focus:ring-2 disabled:opacity-50 text-base"
