@@ -26,6 +26,10 @@ import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
 import { BackButton } from '../components/common/BackButton';
 import { NavRail } from '../components/layout/NavRail';
+import { WorldStoryPanel } from '../components/world/WorldStoryPanel';
+import { getRecentlyLearned, type LearnedMemory } from '../lib/memory/getTwinKnowledge';
+import { getUserDecisions } from '../services/DecisionService';
+import type { Decision } from '../types/decision';
 import '../styles/worlds-hub.css';
 
 function isValidWorldId(id: string | undefined): id is WorldId {
@@ -88,6 +92,27 @@ export default function WorldDetail() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [worldId, valid]);
+
+  // STORY-P9-001 (Track C Story Narrative Layer, Phase 9, change-map verified
+  // 8 ก.ย. 2026): Story + Decision sections only — real data, world-scoped,
+  // both verified to exist (twin_memories.world_id, decision_log.world).
+  // Pattern/Reflection intentionally omitted — no world column exists on
+  // that data (see TRACK_C_VISUAL_REDESIGN_TH.md change-map for why).
+  const [worldMemories, setWorldMemories] = useState<LearnedMemory[]>([]);
+  const [worldDecisions, setWorldDecisions] = useState<Decision[]>([]);
+
+  useEffect(() => {
+    if (!valid || !twin?.id) return;
+    const wId = worldId as WorldId;
+
+    getRecentlyLearned(twin.id, 30)
+      .then((all) => setWorldMemories(all.filter((m) => m.worldId === wId)))
+      .catch(() => setWorldMemories([]));
+
+    getUserDecisions(twin.id, wId)
+      .then(setWorldDecisions)
+      .catch(() => setWorldDecisions([]));
+  }, [valid, worldId, twin?.id]);
 
   if (!world) return null;
 
@@ -277,6 +302,14 @@ export default function WorldDetail() {
             </div>
           </div>
         )}
+
+        <WorldStoryPanel
+          isTh={isTh}
+          worldNameTh={world.nameTh}
+          worldName={world.name}
+          memories={worldMemories}
+          decisions={worldDecisions}
+        />
 
         <div className="wh-twin-guidance">
           <h3>💡 {isTh ? 'คำแนะนำจากทวิน' : "Twin's Guidance"}</h3>

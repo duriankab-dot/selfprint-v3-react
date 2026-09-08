@@ -88,7 +88,7 @@ const Dashboard: React.FC = () => {
           continuation point instead of repeating a completed journey */}
       {lifecycleStatus === 'TWIN_ALIVE' && (
         <div className="dashboard-resume-banner">
-          <p className="dashboard-resume-banner__text">✨ {isTh ? '✨ Twin ของคุณพร้อมแล้ว' : '✨ Your Twin is ready'}</p>
+          <p className="dashboard-resume-banner__text">✨ {isTh ? 'Twin ของคุณพร้อมแล้ว' : 'Your Twin is ready'}</p>
           <button
             className="dashboard-resume-banner__cta"
             onClick={() => navigate('/chat/twin')}
@@ -192,7 +192,7 @@ const Dashboard: React.FC = () => {
           className="command-center-link__cta"
           onClick={() => navigate('/intelligence')}
         >
-          🧬 {isTh ? '🧬 ดูรายละเอียดปัญญาเชิงลึก →' : '🧬 View Deep Intelligence →'}
+          🧬 {isTh ? 'ดูรายละเอียดปัญญาเชิงลึก →' : 'View Deep Intelligence →'}
         </button>
       </div>
       </div>

@@ -728,14 +728,23 @@ scope ของ Track C Phase 1-12 ที่อนุมัติไปแล้
 - **Phase 10 (Choice → Consequence):** เมื่อมี follow-up data → Twin แสดง "Since [choice], here's what changed"
   ใน `TwinChat.tsx` (Twin hub)
 
-### Data source ที่ต้อง verify ก่อนเริ่ม (ยังไม่ได้ verify ครบ — งานถัดไปก่อนขออนุมัติจริง)
+### Data source — verify ครบแล้ว (8 ก.ย. 2026, รอบที่ 11) — **ผลลัพธ์เปลี่ยน scope**
 
-| Story primitive | ตารางที่คาดว่าจะใช้ (verify เบื้องต้นจาก `DecisionService.ts`) | สถานะ verify |
-|---|---|---|
-| Decision (Phase 9) / Choice→Consequence (Phase 10) | `decision_log` · `decision_outcomes` · `follow_up_schedule` (ชื่อจริง ไม่ใช่ `decision_logs` ที่บางเอกสารเก่าเขียนผิด) | ✅ verify ชื่อตารางแล้ว จาก `DecisionService.ts` |
-| Pattern (Phase 9) | คาดว่าเป็น output จาก SICE `PatternDetector.ts` — **ยังไม่ verify ว่า WorldDetail ควรอ่านจากที่ไหน** (SICE core ห้ามแตะตรง ต้องผ่าน bridge/hook ที่มีอยู่แล้วเท่านั้น) | ❌ ยังไม่ verify |
-| Reflection (Phase 9) | คาดว่าเป็นคำถามจาก Twin ต่อ world นั้น — **ยังไม่มี field/table ชัดเจนที่ verify แล้ว** | ❌ ยังไม่ verify |
-| Memory / About you | `twin_memories` (ตามที่ Phase 11 อ้างอิงไปแล้ว) | ✅ ใช้ตารางเดิม ไม่สร้างใหม่ |
+| Story primitive | ตารางจริง (verify แล้วจาก source) | สถานะ | world-scoped จริงไหม |
+|---|---|---|---|
+| **Story** (memory ต่อ world) | `twin_memories.world_id` ผ่าน `getRecentlyLearned()` (`src/lib/memory/getTwinKnowledge.ts:36`) | ✅ verify แล้ว มี `world_id` column จริง | ✅ ใช่ |
+| **Decision** (Phase 9) | `decision_log.world` ผ่าน `getUserDecisions(twinId, world)` (`DecisionService.ts:114-126`) | ✅ verify แล้ว มี `.eq('world', world)` จริง | ✅ ใช่ |
+| **Choice→Consequence** (Phase 10) | `decision_outcomes` + `follow_up_schedule` (`DecisionService.ts:181,157`) ผูกกับ `decision_id` เดิม | ✅ verify แล้ว ตารางมีจริง เชื่อมกับ decision ที่มี `world` อยู่แล้ว | ✅ ใช่ (ผ่าน decision) |
+| **Pattern** (Phase 9) | `BehavioralPattern`/`EvidencePoint` (`src/lib/intelligence/types.ts:170,192`) — ตรวจ field ครบแล้ว **ไม่มี `world`/`world_id` เลย** — pattern เป็นข้อมูลข้ามทุก world ของผู้ใช้ ไม่ผูกกับ world เดียว | ❌ **verify แล้วว่าไม่มีจริง** | ❌ ไม่มีทางเชื่อมได้ตรงๆ โดยไม่เดา |
+| **Reflection** (Phase 9) | ไม่มีตาราง `reflections` แยก — เป็น evidence source type ที่ดึงจาก `personal_context.inferred_from.sources[]` (`PatternDetector.ts:390-400`) — ตรวจ query แล้ว **ไม่มี `world`/`world_id` column** | ❌ **verify แล้วว่าไม่มีจริง** | ❌ ไม่มีทางเชื่อมได้ตรงๆ โดยไม่เดา |
+
+**สรุปผล verify:** Story + Decision + Choice→Consequence มีข้อมูลจริงผูกกับ world ✅ ทำได้ตอนนี้
+Pattern + Reflection **ไม่มี column ผูกกับ world ในสคีมาจริง** — ถ้าทำตอนนี้จะต้องเดา/fabricate ความเชื่อมโยง
+ซึ่งขัด "NO FAKE STORY" guardrail (§51) ตรงๆ **จึงตัดสินใจ: ไม่ทำ 2 ส่วนนี้ในรอบนี้ — เหลือ Story + Decision
+เป็น scene 2 ส่วน (ไม่ใช่ 4 ส่วนตามแผนเดิม)** ตรงกับที่ `PLAN_TRACKS_TH.md` P1.4/P1.5 บันทึกไว้แล้วว่า
+"Choice → Pattern ต้องมี decision loop/data สะสมก่อน" — Pattern/Reflection ต่อ world ยังเป็น P1 item
+ที่ต้องมี schema เพิ่ม (เพิ่ม `world_id` ลง `personal_context`/pattern storage) ซึ่งเป็นการแก้ DB migration
+→ **โซนห้ามแตะ ต้องขออนุมัติแยกอีกรอบถ้าจะทำจริง**
 
 ### ไฟล์โดยประมาณที่ต้องแตะ (ประเมินเบื้องต้น — เกิน 8 ไฟล์แน่นอน)
 
@@ -761,9 +770,17 @@ scope ของ Track C Phase 1-12 ที่อนุมัติไปแล้
 ✓ ถ้า world ไหนยังไม่มี pattern/decision จริง → ไม่แสดงส่วนนั้น (เหมือนหลักการ "What Twin Knows" ใน Phase 11)
 ```
 
-### ก่อนขออนุมัติจริง ต้องทำต่อ (ยังไม่ทำ)
+### ✅ Implement แล้ว (8 ก.ย. 2026, รอบที่ 11 — อนุมัติแล้วหลัง verify 2 จุดข้างบน)
 
-1. Verify จริงว่า `PatternDetector.ts` หรือ SICE bridge ตัวไหนคือทางเข้าที่ถูกต้องสำหรับอ่าน pattern ต่อ world
-2. Verify ว่า Reflection มาจากไหนจริง (อาจต้องเป็น P1 แยกถ้าไม่มี data ณ ตอนนี้ — เหมือนที่ P1.4/P1.5
-   ใน `PLAN_TRACKS_TH.md` ระบุไว้ว่าต้องมี "decision loop" ก่อน)
-3. เมื่อ verify 2 ข้อบนครบ → เสนอไฟล์สุดท้าย + ขออนุมัติเป็นลายลักษณ์อักษรก่อนแตะโค้ดจริง
+| ไฟล์ | สถานะ |
+|------|-------|
+| `src/components/world/WorldStoryPanel.tsx` | ✅ ใหม่ — Story (twin_memories ต่อ world) + Decision (decision_log ต่อ world) |
+| `src/components/twin/ChoiceConsequence.tsx` | ✅ ใหม่ — "Since [choice]..." จาก decision_outcomes จริง |
+| `src/pages/WorldDetail.tsx` | ✅ แก้ — เพิ่ม fetch + render `WorldStoryPanel` |
+| `src/pages/TwinChat.tsx` | ✅ แก้ — เพิ่ม fetch + render `ChoiceConsequence` (batch outcome lookup) |
+
+**Scope จริงที่ ship:** Story + Decision (Phase 9, 2 ใน 4 ส่วนเดิม) + Choice→Consequence (Phase 10)
+**ไม่ทำ:** Pattern + Reflection ต่อ world — ยืนยันแล้วว่าไม่มี `world`/`world_id` column ในสคีมาจริง
+(ดูตาราง verify ด้านบน) ยังเป็น P1 item ที่ต้องเพิ่ม schema ก่อน (ต้องขออนุมัติ DB migration แยก)
+**Verify:** `tsc -b` 0 errors · `vite build` สำเร็จ (1320 precache entries) · `oxlint` 0 errors/174 warnings/466 files
+(ไฟล์เพิ่ม 2 ไฟล์ใหม่ ไม่มี warning ใหม่) · `vitest` ต้องให้เจ้าของรันยืนยันอีกรอบ (sandbox รันชุดเต็มไม่ทัน)

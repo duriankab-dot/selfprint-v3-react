@@ -29,6 +29,8 @@ import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
 import { recordWorldInteraction } from '../services/WorldExpertiseService';
 import * as DecisionService from '../services/DecisionService';
+import { ChoiceConsequence } from '../components/twin/ChoiceConsequence';
+import type { Decision, DecisionOutcome } from '../types/decision';
 
 interface Message {
   role: 'user' | 'twin';
@@ -481,6 +483,48 @@ export default function TwinChat() {
     return a.guidance?.[0] || a.focusAreas?.[0] || a.selfOverview || null;
   }, [currentAnalysis, twin?.fullAnalysis]);
 
+  // STORY-P10-001 (Track C Story Narrative Layer, Phase 10, change-map
+  // verified 8 ก.ย. 2026): "Since [choice], here's what changed" — surfaces
+  // the most recent REAL decision_outcomes row for a past decision (this
+  // world if one is selected, otherwise across all worlds). Renders nothing
+  // if the user has no decision with a recorded outcome yet (§51 NO FAKE
+  // STORY — never invent a consequence).
+  const [choiceConsequence, setChoiceConsequence] = useState<{
+    decision: Decision;
+    outcome: DecisionOutcome;
+  } | null>(null);
+
+  useEffect(() => {
+    if (!twin?.id) return;
+    let cancelled = false;
+
+    DecisionService.getUserDecisions(twin.id, currentWorld ?? undefined)
+      .then(async (decisions) => {
+        if (cancelled || decisions.length === 0) return;
+        const recent = decisions.slice(0, 10);
+        const outcomesByDecision = await DecisionService.getDecisionOutcomesBatch(
+          recent.map((d) => d.id)
+        );
+        for (const decision of recent) {
+          const outcomes = outcomesByDecision.get(decision.id) ?? [];
+          if (outcomes.length > 0 && !cancelled) {
+            // Most recently recorded outcome for this decision
+            const latest = outcomes[outcomes.length - 1];
+            setChoiceConsequence({ decision, outcome: latest });
+            return;
+          }
+        }
+        if (!cancelled) setChoiceConsequence(null);
+      })
+      .catch(() => {
+        if (!cancelled) setChoiceConsequence(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [twin?.id, currentWorld]);
+
   // BIRTHDATE-RECOVER-001: userStore no longer persists birthDate to localStorage
   // (G1-LOCALSTORAGE-POLICY). Recover it from selfprint.users_profiles so twinProfile
   // always includes birth data context.
@@ -703,6 +747,14 @@ export default function TwinChat() {
           </p>
         )}
       </div>
+
+      {choiceConsequence && (
+        <ChoiceConsequence
+          isTh={isTh}
+          decision={choiceConsequence.decision}
+          outcome={choiceConsequence.outcome}
+        />
+      )}
 
       {/* TWINMODES-001 (Track C Phase 10, §8 TWIN MODES, P1.8): UI shell
           only -- Reflect/Decide need decision-log/pattern data behind them
