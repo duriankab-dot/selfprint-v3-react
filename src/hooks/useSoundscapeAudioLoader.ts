@@ -5,20 +5,17 @@
  * Sub-feature: Ambient Soundscape Audio
  *
  * Responsibilities:
- *   1. Synthesize a soundscape's ambient drone live via the Web Audio API
- *      (see src/lib/audio/synthesizeAmbientDrone.ts)
- *   2. Cache the rendered buffer in IndexedDB so repeat plays don't re-render
- *   3. Provide loading state
- *   4. Handle errors gracefully (fallback to silence)
+ *   1. Load real MP3 files from public/audio/{category}/ (priority)
+ *   2. Fallback to Web Audio API synthesis if MP3 unavailable
+ *   3. Cache the rendered buffer in IndexedDB so repeat plays don't re-fetch
+ *   4. Provide loading state
+ *   5. Handle errors gracefully (fallback to silence)
  *
- * SOUNDSCAPE-SYNTH-001 (2026-08-30): this used to fetch MP3s from a
- * Cloudinary CDN (`res.cloudinary.com/selfprint/video/upload/soundscapes`).
- * That folder was never actually populated with real audio — confirmed
- * live, every track 404s, including the ones previously assumed "known
- * working" — public/soundscape-manifest.json is a setup template that says
- * outright "Replace CLOUDINARY_URL...", "Upload all 20 MP3 files", which
- * never happened. Per product decision, this no longer depends on any CDN
- * at all: every soundscape is generated procedurally in the browser instead.
+ * SOUNDSCAPE-SYNTH-001 (8 ก.ย. 2026): Previously synthesized all audio via
+ * Web Audio API because CDN files never existed. Now loads real CC0 MP3s from
+ * public/audio/soundscapes/ and public/audio/environment/ first, falling back
+ * to synthesis only when no file is found. The soundscape-manifest.json has
+ * been rewritten to match the actual 79 CC0 MP3 files downloaded by the user.
  *
  * Usage:
  *   const { buffer, isLoading, error } = useSoundscapeAudioLoader('morning-forest', audioContext);
@@ -163,15 +160,65 @@ async function saveCachedAudio(soundscapeId: string, buffer: AudioBuffer): Promi
 
 // ─── Audio Generation ──────────────────────────────────────────────────────────
 
+/** Map soundscape IDs to real MP3 files in public/audio/soundscapes/ */
+const SOUNDSCAPE_TO_MP3: Record<string, string[]> = {
+  'morning-forest': ['/audio/environment/mixkit-morning-birds-2472.mp3', '/audio/environment/mixkit-morning-sound-in-a-garden-2464.mp3'],
+  'morning-focus': ['/audio/soundscapes/mixkit-futuristic-sci-fi-computer-ambience-2507.mp3', '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3'],
+  'morning-gentle': ['/audio/environment/mixkit-calm-park-with-people-and-children-367.mp3', '/audio/ui/mixkit-fairy-glitter-867.mp3'],
+  'deep-work': ['/audio/soundscapes/mixkit-bass-rumble-hum-2297.mp3', '/audio/soundscapes/mixkit-wind-blowing-ambience-2658.mp3'],
+  'afternoon-creative': ['/audio/soundscapes/mixkit-space-soundscape-653.mp3', '/audio/soundscapes/mixkit-cinematic-mystery-heartbeat-transition-492.mp3'],
+  'afternoon-calm': ['/audio/soundscapes/mixkit-slow-heartbeat-494.mp3', '/audio/environment/mixkit-whistling-stadium-crowd-436.mp3'],
+  'discovery-mode': ['/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3', '/audio/soundscapes/mixkit-space-soundscape-653.mp3'],
+  'evening-reflection': ['/audio/ui/mixkit-little-piano-game-over-1944.mp3', '/audio/ui/mixkit-piano-falling-effect-408.mp3'],
+  'relationship-evening': ['/audio/ui/mixkit-magic-notification-ring-2344.mp3', '/audio/ui/mixkit-magic-wand-sparkle-3062.mp3'],
+  'evening-release': ['/audio/soundscapes/mixkit-human-single-heart-beat-490.mp3', '/audio/soundscapes/mixkit-heartbeat-medium-speed-495.mp3'],
+  'spiritual-evening': ['/audio/soundscapes/mixkit-wind-blowing-ambience-2658.mp3', '/audio/environment/mixkit-morning-sound-in-a-garden-2464.mp3'],
+  'night-ambient': ['/audio/soundscapes/mixkit-slow-heartbeat-494.mp3', '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3'],
+  'night-focus': ['/audio/soundscapes/mixkit-futuristic-sci-fi-computer-ambience-2507.mp3', '/audio/soundscapes/mixkit-bass-rumble-hum-2297.mp3'],
+  'night-identity': ['/audio/soundscapes/mixkit-space-soundscape-653.mp3', '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3'],
+  'night-wind-down': ['/audio/soundscapes/mixkit-slow-heartbeat-494.mp3', '/audio/soundscapes/mixkit-human-single-heart-beat-490.mp3'],
+  'celebration': ['/audio/ui/mixkit-game-level-completed-2059.mp3', '/audio/ui/mixkit-magic-notification-ring-2344.mp3'],
+  'health-nature': ['/audio/environment/mixkit-morning-birds-2472.mp3', '/audio/environment/mixkit-morning-sound-in-a-garden-2464.mp3'],
+  'money-clarity': ['/audio/soundscapes/mixkit-futuristic-sci-fi-computer-ambience-2507.mp3', '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3'],
+  'creativity-flow': ['/audio/soundscapes/mixkit-space-soundscape-653.mp3', '/audio/soundscapes/mixkit-cinematic-mystery-heartbeat-transition-492.mp3'],
+  'ambient-minimal': ['/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3'],
+  'deep-reflection-universal': ['/audio/soundscapes/mixkit-wind-blowing-ambience-2658.mp3', '/audio/soundscapes/mixkit-slow-heartbeat-494.mp3'],
+};
+
+async function loadAudioFromMP3(url: string, audioContext: AudioContext): Promise<AudioBuffer | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const arrayBuffer = await response.arrayBuffer();
+    return await audioContext.decodeAudioData(arrayBuffer);
+  } catch {
+    return null;
+  }
+}
+
 async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext): Promise<AudioBuffer> {
-  // Try cache first — synthesis is cheap but not free, no reason to redo it
+  // Try cache first — loading from disk is cheap but not free, no reason to redo it
   // every play.
   const cached = await getCachedAudio(soundscapeId, audioContext);
   if (cached) {
-    console.log(`[useSoundscapeAudioLoader] Using cached synthesized audio: ${soundscapeId}`);
+    console.log(`[useSoundscapeAudioLoader] Using cached audio: ${soundscapeId}`);
     return cached.buffer;
   }
 
+  // Priority 1: Load real MP3 file from public/audio/
+  const mp3Urls = SOUNDSCAPE_TO_MP3[soundscapeId];
+  if (mp3Urls && mp3Urls.length > 0) {
+    for (const url of mp3Urls) {
+      const buffer = await loadAudioFromMP3(url, audioContext);
+      if (buffer) {
+        console.log(`[useSoundscapeAudioLoader] Loaded MP3: ${url}`);
+        await saveCachedAudio(soundscapeId, buffer);
+        return buffer;
+      }
+    }
+  }
+
+  // Fallback: synthesize ambient drone via Web Audio API
   console.log(`[useSoundscapeAudioLoader] Synthesizing ambient drone: ${soundscapeId}`);
   const buffer = await synthesizeSoundscapeBuffer(soundscapeId, audioContext);
   await saveCachedAudio(soundscapeId, buffer);

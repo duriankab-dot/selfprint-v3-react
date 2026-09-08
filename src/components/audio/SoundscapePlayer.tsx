@@ -194,9 +194,9 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     return new AudioCtx2!();
   }, []);
 
-  // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader synthesizes the ambient
-  // drone live via Web Audio (no CDN involved any more — see that hook's
-  // header for why), so this buffer is the only source now.
+  // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader now loads real CC0 MP3s from
+  // public/audio/{category}/ first (priority), falling back to Web Audio API
+  // synthesis if no file is found. This buffer is the only source now.
   const soundscapeId = environment?.soundscape.id || null;
   const { buffer: soundscapeBuffer, isLoading: isSynthesizing, error: synthError, progress } = useSoundscapeAudioLoader(
     soundscapeId,
@@ -232,13 +232,9 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
   }, [audio.state.isDucking, isInitialized, isPlaying, startDucking, stopDucking]);
 
   // ─── Handle soundscape transitions ─────────────────────────────────────────
-  // SOUNDSCAPE-SYNTH-001: previously tried a CDN buffer first and fell back
-  // to a crude 4-category oscillator sketch (keyed by exact soundscape.id
-  // against just 'cosmic'/'ambient'/'energetic'/'minimal', which no real id
-  // ever matched — it silently always played the same 3 sine tones for
-  // every soundscape). useSoundscapeAudioLoader now synthesizes a properly
-  // distinct drone per soundscape id itself, so this just plays whatever it
-  // produces once ready.
+  // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader now loads real CC0 MP3 files
+  // from public/audio/ first, falling back to Web Audio API synthesis. This
+  // just plays whatever buffer is produced once ready.
 
   useEffect(() => {
     if (!environment || !isPlaying || !soundscapeBuffer) return;

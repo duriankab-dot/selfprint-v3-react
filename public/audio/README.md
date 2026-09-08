@@ -1,7 +1,6 @@
 # public/audio — Audio Asset Library
 
-**สถานะ (8 ก.ย. 2026):** มีไฟล์เสียงจริงแล้ว 79 ไฟล์ (CC0 จาก mixkit/freesound ที่เจ้าของโหลดเอง)
-จัดเก็บแยกโฟลเดอร์ตามประเภท — **แต่ยังไม่มีโค้ดในระบบเรียกใช้ไฟล์เหล่านี้** (ดูหัวข้อ "ยังไม่ได้ทำ" ด้านล่าง)
+**สถานะ (8 ก.ย. 2026):** ไฟล์เสียงจริง 79 ตัว + rewrite soundscape-manifest.json + wire เข้าโค้ดแล้ว — **ระบบ Soundscape เล่น MP3 จริงได้แล้ว**
 
 ## โครงสร้างโฟลเดอร์ + bitrate policy
 
@@ -22,16 +21,26 @@
 - **UI / Twin SFX** ยาว 1–3 วินาที ไม่จำเป็นต้องแบก bitrate สูง → 64–128 kbps (ใช้ 96 kbps ให้ยังคมชัด)
 - ไม่บังคับทุกไฟล์เป็น 192 kbps เดียวกันทั้งหมด ตามหลัก "ใช้เท่าที่จำเป็น ไม่ preload เกินจำเป็น" ของ `selfprint-senior-dev` skill
 
-## ยังไม่ได้ทำ (ต้องตัดสินใจ scope ก่อน)
-1. **ไม่มี manifest/loader เรียกใช้ไฟล์เหล่านี้** — `src/services/adaptive-audio-engine.ts` อ้างถึง
-   `/audio/reflection-high.mp3` ฯลฯ (5 experience x 2 quality) และ `public/soundscape-manifest.json`
-   อ้างถึง 20 track id คนละชื่อ (เช่น `/audio/morning-forest.mp3`, 1800 วินาที/192kbps) — **ทั้งสองระบบนี้ยังไม่ตรงกับไฟล์ 79 ไฟล์ที่จัดเก็บไว้**
-   ไฟล์ที่มีตอนนี้เป็น SFX/ambience สั้น (มิกซ์คิทเทค คลิปเสียงเดี่ยว) ไม่ใช่แทร็กเพลงยาว 30 นาที 20 แทร็กตาม manifest เดิม
-2. **lazy-load ตาม route/state** — ยังไม่มี hook/component เรียกใช้ `public/audio/{category}/*.mp3`
-   ต้องออกแบบใหม่ (เช่น `useTwinSFX()`, `useTransitionSFX()`) และตัดสินใจว่าจะผูกกับ event ไหนบ้าง (Twin awakening, page transition, ปุ่มกด ฯลฯ)
-3. **soundscape-manifest.json 20 แทร็กเดิม** ยังเป็น placeholder อยู่ — ไม่ได้แก้ในรอบนี้ เพราะไฟล์ที่มีไม่ตรง spec (ต้องหา/ตัดต่อเพลงยาว 30 นาทีจริงถ้าจะปิดงานนี้)
+## Integration (8 ก.ย. 2026)
 
-## Migration ที่ทำไปแล้ว (8 ก.ย. 2026)
-- โหลดไฟล์ CC0 จาก mixkit จริงแล้ว (เจ้าของโหลดเองนอก sandbox เพราะ network allowlist บล็อก mixkit.co)
-- Dedupe ไฟล์ซ้ำ + แปลง WAV → MP3 ตาม bitrate policy ข้างบน + จัดเข้าโฟลเดอร์ตามประเภท
-- **ยังไม่ wire เข้าโค้ด** — รอตัดสินใจ scope ของงาน integration (ดูหัวข้อ "ยังไม่ได้ทำ")
+### ✅ ทำเสร็จแล้ว:
+1. **rewrite `soundscape-manifest.json`** — 21 soundscapes ตรงกับ SOUNDSCAPE_LIBRARY ใน `SoundscapeEngine.ts` map กับไฟล์ MP3 จริงใน `public/audio/{category}/`
+2. **แก้ `useSoundscapeAudioLoader.ts`** — โหลด MP3 จากไฟล์จริงเป็น priority แรก (fallback เป็น Web Audio API synthesis เหมือนเดิม)
+3. **แก้ `adaptive-audio-engine.ts`** — `getAudioUrl()` map MusicExperience (reflection/focus/discovery/deep_reflection/celebration/idle) กับไฟล์ MP3 จริงแทน placeholder URLs ที่ไม่มี
+4. **แก้ `SoundscapePlayer.tsx`** — comment อัพเดทให้ตรงกับ implementation ใหม่
+
+### การทำงาน:
+```
+SoundscapePlayer.tsx
+  ↓ useSoundscapeAudioLoader('morning-forest', audioContext)
+    ↓ Priority 1: fetch('/audio/environment/mixkit-morning-birds-2472.mp3')
+    ↓ Fallback: synthesizeSoundscapeBuffer() (Web Audio API)
+    ↓ Cache in IndexedDB (selfprint-audio-cache/soundscapes)
+  ↓ decodeAudioData() → AudioBuffer
+  ↓ play() → loop (source.loop = true)
+```
+
+### ยังไม่ได้ทำ (เลือกทำถ้าต้องการ):
+- **Twin SFX hooks** (`useTwinSFX()`, `useTransitionSFX()`) — สำหรับ twin awakening, page transitions, button clicks
+- **UI SFX integration** — ปุ่มกด, notification sounds จาก `public/audio/ui/`
+- **High-quality assets** — ถ้าต้องการเพลงยาว 30 นาทีจริงๆ แทน CC0 clips สั้นๆ

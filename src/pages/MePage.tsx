@@ -17,6 +17,7 @@ import { NavRail } from '../components/layout/NavRail';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../context/LanguageContext';
+import { BigStory } from '../components/story/BigStory'; // §51 Layer 1
 
 // label ต่อ tier
 const TIER_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
@@ -277,6 +278,9 @@ export default function MePage() {
             </div>
           </div>
         </div>
+
+        {/* §51 Layer 1: BIG STORY — entire journey narrative */}
+        {user && <BigStory />}
 
         {/* Not logged in state */}
         {!user && (

@@ -293,49 +293,47 @@ const profile: NetworkProfile = {
   getAudioUrl(experience: MusicExperience, profile: AudioProfile): string | null {
     if (profile.quality === 'silence') return null;
 
-    // Map experience to CDN URLs (production would use real CDN)
-    // ASSET404-001 (5 ก.ย. 2026): MP3s under /audio/ are placeholders only — real files
-    // were never uploaded. The 'oscillator-*' / 'silence' fallbacks below handle missing
-    // files gracefully via Web Audio API synthesis. See public/audio/README.md.
+    // Map experience to real MP3 files in public/audio/soundscapes/
+    // Updated 8 ก.ย. 2026: replaced ASSET404 placeholders with real CC0 MP3s
     const audioMap: Record<MusicExperience, Record<string, string>> = {
       reflection: {
-        'mp3-high': '/audio/reflection-high.mp3',
-        'mp3-low': '/audio/reflection-low.mp3',
-        'oscillator-full': '', // Will use oscillators
+        'mp3-high': '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3',
+        'mp3-low': '/audio/soundscapes/mixkit-slow-heartbeat-494.mp3',
+        'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',
       },
       focus: {
-        'mp3-high': '/audio/focus-high.mp3',
-        'mp3-low': '/audio/focus-low.mp3',
+        'mp3-high': '/audio/soundscapes/mixkit-futuristic-sci-fi-computer-ambience-2507.mp3',
+        'mp3-low': '/audio/soundscapes/mixkit-bass-rumble-hum-2297.mp3',
         'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',
       },
       discovery: {
-        'mp3-high': '/audio/discovery-high.mp3',
-        'mp3-low': '/audio/discovery-low.mp3',
+        'mp3-high': '/audio/soundscapes/mixkit-space-soundscape-653.mp3',
+        'mp3-low': '/audio/soundscapes/mixkit-cinematic-mystery-heartbeat-transition-492.mp3',
         'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',
       },
       deep_reflection: {
-        'mp3-high': '/audio/deep-reflection-high.mp3',
-        'mp3-low': '/audio/deep-reflection-low.mp3',
+        'mp3-high': '/audio/soundscapes/mixkit-wind-blowing-ambience-2658.mp3',
+        'mp3-low': '/audio/soundscapes/mixkit-human-single-heart-beat-490.mp3',
         'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',
       },
       celebration: {
-        'mp3-high': '/audio/celebration-high.mp3',
-        'mp3-low': '/audio/celebration-low.mp3',
+        'mp3-high': '/audio/ui/mixkit-game-level-completed-2059.mp3',
+        'mp3-low': '/audio/ui/mixkit-magic-notification-ring-2344.mp3',
         'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',
       },
       idle: {
-        'mp3-high': '',
-        'mp3-low': '',
+        'mp3-high': '/audio/soundscapes/mixkit-space-void-ambiance-2006.mp3',
+        'mp3-low': '/audio/soundscapes/mixkit-slow-heartbeat-494.mp3',
         'oscillator-full': '',
         'oscillator-simple': '',
         'silence': '',

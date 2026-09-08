@@ -31,6 +31,7 @@ import { recordWorldInteraction } from '../services/WorldExpertiseService';
 import * as DecisionService from '../services/DecisionService';
 import { ChoiceConsequence } from '../components/twin/ChoiceConsequence';
 import type { Decision, DecisionOutcome } from '../types/decision';
+import { StoryModeSelector } from '../components/story/StoryModeSelector'; // §51
 
 interface Message {
   role: 'user' | 'twin';
@@ -755,6 +756,9 @@ export default function TwinChat() {
           outcome={choiceConsequence.outcome}
         />
       )}
+
+      {/* §51 Story Modes — REVEAL/EXPLORE/CHOICE/CONSEQUENCE/EVOLUTION from real data */}
+      <StoryModeSelector />
 
       {/* TWINMODES-001 (Track C Phase 10, §8 TWIN MODES, P1.8): UI shell
           only -- Reflect/Decide need decision-log/pattern data behind them

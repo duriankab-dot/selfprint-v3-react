@@ -19,6 +19,8 @@ import { AmbientBadge } from '../components/experience/AmbientBadge'; // §46
 import { SoundscapePlayer } from '../components/audio'; // §46
 import { TwinEvolution } from '../components/twin/TwinEvolution'; // §30
 import { TodaySection } from '../components/today/TodaySection'; // §5.2 Dynamic Home
+import { NarrativeHook } from '../components/story/NarrativeHook'; // §51 Layer 3
+import { CurrentChapter } from '../components/story/CurrentChapter'; // §51 Layer 2
 import '../styles/dashboard.css';
 
 interface DecisionLog {
@@ -135,8 +137,14 @@ const Dashboard: React.FC = () => {
           Twin is loaded. */}
       {twin && <LivingTwin maturityScore={twin.maturityScore ?? 30} />}
 
+      {/* Layer 3: MICRO STORY — today's single most important beat (§51) */}
+      <NarrativeHook />
+
       {/* One primary insight — Phase 3: human-language AI Twin overview (§8-9) */}
       <ExecutiveSummary />
+
+      {/* Layer 2: CURRENT CHAPTER — dominant patterns for this period (§51) */}
+      <CurrentChapter />
 
       {/* Recommended action — §6's explicit CTA layer ("Explore with Twin"),
           distinct from LivingTwin's own action buttons above (those are

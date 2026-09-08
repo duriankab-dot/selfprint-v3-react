@@ -85,6 +85,90 @@ type OnboardingStep =
   | 'complete'
   | 'claim-account';
 
+// §51 STORYBEAT-ONBOARDING: "Twin is learning from you" narrative thread
+interface StoryBeatIndicatorProps {
+  currentStep: string;
+  totalSteps: number;
+  isTh: boolean;
+}
+
+const STEP_LABELS_TH = [
+  'เช็คอินอารมณ์',
+  'รู้จักกัน',
+  'สร้างตัวตน',
+  'วันเกิด',
+  'วิเคราะห์',
+  'ปรับแต่ง',
+  'พร้อมแล้ว',
+  'เริ่มต้น',
+];
+
+const STEP_LABELS_EN = [
+  'Mood check-in',
+  'Getting to know you',
+  'Creating your Twin',
+  'Birth data',
+  'Analysis',
+  'Fine-tuning',
+  'Ready',
+  'Begin',
+];
+
+function StoryBeatIndicator({ currentStep, totalSteps, isTh }: StoryBeatIndicatorProps) {
+  const storySteps = ['emotion', 'nova-conversation', 'ai-creation', 'birthdate', 'sice-result', 'fine-tune', 'complete', 'claim-account'];
+  const currentIndex = storySteps.indexOf(currentStep);
+  if (currentIndex < 0) return null;
+  const progressPercent = Math.round(((currentIndex + 1) / totalSteps) * 100);
+  const stepLabel = isTh ? STEP_LABELS_TH[currentIndex] ?? '' : STEP_LABELS_EN[currentIndex] ?? '';
+
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 250,
+        padding: '8px 16px',
+        background: 'var(--color-bg-primary)',
+        borderBottom: '1px solid var(--color-border)',
+      }}
+    >
+      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+          <span style={{ fontSize: '11px', color: 'var(--color-text-secondary)' }}>
+            {isTh ? '🧠 Twin กำลังเรียนรู้จากคุณ' : '🧠 Twin is learning from you'}
+          </span>
+          <span style={{ fontSize: '11px', fontWeight: 600, color: 'var(--color-accent-primary)' }}>
+            {progressPercent}%
+          </span>
+        </div>
+        <div
+          style={{
+            height: '3px',
+            borderRadius: '2px',
+            background: 'var(--color-border)',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              height: '100%',
+              width: `${progressPercent}%`,
+              borderRadius: '2px',
+              background: 'var(--color-accent-primary)',
+              transition: 'width 0.3s ease',
+            }}
+          />
+        </div>
+        <div style={{ fontSize: '10px', color: 'var(--color-text-tertiary)', marginTop: '2px', textAlign: 'right' }}>
+          {stepLabel}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface OnboardingProps {
   onComplete?: () => void;
 }
@@ -567,6 +651,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     );
   }
 
+  // §51 Story Beat indicator — shows "Twin is learning from you" with progress
+  void step; // used by StoryBeatIndicator below
+
   return (
     <div
       style={{
@@ -603,6 +690,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         <img src="/favicon.svg" alt="" width={16} height={16} style={{ display: 'block' }} />
         SelfPrint
       </a>
+
+      {/* §51 STORYBEAT-ONBOARDING-001: Narrative thread — "Twin is learning from you" */}
+      <StoryBeatIndicator currentStep={step} totalSteps={8} isTh={isTh} />
 
       {/* STEP 1: Emotion Selector */}
       {step === 'emotion' && (

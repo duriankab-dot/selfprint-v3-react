@@ -27,6 +27,7 @@ import { useAuth } from '../context/AuthContext';
 import { BackButton } from '../components/common/BackButton';
 import { NavRail } from '../components/layout/NavRail';
 import { WorldStoryPanel } from '../components/world/WorldStoryPanel';
+import { CurrentChapter } from '../components/story/CurrentChapter'; // §51 Layer 2
 import { getRecentlyLearned, type LearnedMemory } from '../lib/memory/getTwinKnowledge';
 import { getUserDecisions } from '../services/DecisionService';
 import type { Decision } from '../types/decision';
@@ -302,6 +303,9 @@ export default function WorldDetail() {
             </div>
           </div>
         )}
+
+        {/* §51 Layer 2: CURRENT CHAPTER — world connected to dominant patterns */}
+        <CurrentChapter />
 
         <WorldStoryPanel
           isTh={isTh}
