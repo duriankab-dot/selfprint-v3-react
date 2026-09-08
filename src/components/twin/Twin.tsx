@@ -83,6 +83,7 @@ interface TwinBirthVariantProps {
   variant: 'birth';
   onComplete: () => void;
   primaryArchetype?: Archetype;
+  secondaryArchetype?: Archetype;
   seedKey?: string;
 }
 
@@ -207,7 +208,8 @@ export function Twin(props: TwinProps) {
       <HologramBirth
         onComplete={props.onComplete}
         color={dna.coreColor}
-        shape={dna.coreShape}
+        primaryArchetype={props.primaryArchetype}
+        secondaryArchetype={props.secondaryArchetype}
         seedKey={props.seedKey}
       />
     );

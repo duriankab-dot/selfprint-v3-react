@@ -1,39 +1,50 @@
 /**
  * HologramBirth.tsx
- * Twin hologram birth animation
+ * Twin Birth Animation — "Particle → Asymmetric Living Seed → Twin Emerges"
  *
- * VISUAL: Particles forming shape → light pulsing → Twin emerges
- * AUDIO: Ambient sound building → sacred tone
- * TIMING: 3-4 seconds of pure WOW
+ * VISUAL DNA:
+ *   Particles scatter in void → attract toward asymmetric density cluster →
+ *   organic living seed forms → silhouette stabilizes with breathing/wobble →
+ *   Twin emerges as a living presence.
  *
- * TWINPRESENCE-005: previously always converged into a plain circle
- * regardless of archetype (only `color` varied) — every user's Twin was
- * born looking identical. Now draws the Twin's actual archetype shape
- * (sphere/crystal/ring/diamond/bloom/wave) plus this Twin's own unique
- * traits (hue shift, facet "constellation", polygon jitter, spin
- * direction) — the same seed/traits TwinPresence.tsx uses in the World,
- * so the Twin being born here is visibly the same one the user meets
- * afterward, not a generic placeholder.
+ * NO predefined shapes (sphere/crystal/ring/diamond/bloom/wave).
+ * Instead: form grows from the Twin's own deterministic traits:
+ *   - asymmetric silhouette (from archetype shapeJitterSeed + facetCount)
+ *   - particle density variation (densityCenter biased by growth direction)
+ *   - growth direction bias (per-user from seeded PRNG)
+ *   - facet/detail density (traits.facetCount + facetRadiusRatio)
+ *   - motion signature / breathing rhythm (traits.pulseSpeedFactor)
+ *   - hue from per-user trait (coreColor from Visual DNA)
+ *
+ * DETERMINISTIC: Same seedKey + archetype → same visual birth every time.
+ * Progressive enhancement: canvas 2D only, no new 3D/WebGL (C5 compliant).
+ *
+ * TIMING: ~4 seconds total
+ *   Phase 1 (0–30%): Particles scattered in void
+ *   Phase 2 (30–60%): Attraction — particles gravitate asymmetrically
+ *   Phase 3 (60–80%): Living seed forms — organic shape emerges
+ *   Phase 4 (80–95%): Twin silhouette stabilizes — breathing/wobble begins
+ *   Phase 5 (95–100%): Reveal — "Meet your Twin."
  */
 
 import React, { useEffect, useRef } from 'react';
-import type { TwinCoreShape } from '../../lib/twin/twinVisualDNA';
-import { getUniqueTwinTraits, shiftHue } from '../../lib/twin/twinUniqueness';
+import type { Archetype } from '@/context/TwinContext';
+import { getTwinVisualDNA } from '@/lib/twin/twinVisualDNA';
+import { getUniqueTwinTraits } from '@/lib/twin/twinUniqueness';
 
 interface HologramBirthProps {
   onComplete: () => void;
   color?: string;
-  /** Twin's archetype core shape — defaults to 'sphere' if not yet known. */
-  shape?: TwinCoreShape;
-  /** Stable per-user seed (session.user.id is used pre-birth, before a
-   *  Twin row/id exists) — drives this Twin's unique traits. */
+  primaryArchetype?: Archetype;
+  secondaryArchetype?: Archetype;
   seedKey?: string;
 }
 
 export const HologramBirth: React.FC<HologramBirthProps> = ({
   onComplete,
   color = '#3b82f6',
-  shape = 'sphere',
+  primaryArchetype,
+  secondaryArchetype,
   seedKey,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -51,203 +62,292 @@ export const HologramBirth: React.FC<HologramBirthProps> = ({
 
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
-    const maxRadius = Math.min(canvas.width, canvas.height) / 3;
+    const maxRadius = Math.min(canvas.width, canvas.height) / 3.5;
 
-    const traits = getUniqueTwinTraits(seedKey ?? shape ?? 'default-twin');
-    const uniqueColor = shiftHue(color, traits.hueShiftDeg);
+    // Resolve Twin's Visual DNA (deterministic from archetype)
+    const visualDNA = getTwinVisualDNA(primaryArchetype, secondaryArchetype);
+    const coreColor = color || visualDNA.coreColor;
+    const traits = getUniqueTwinTraits(seedKey ?? primaryArchetype ?? 'default-twin');
 
-    // Particle system for hologram birth
+    // ─── Seeded PRNG (deterministic from seedKey) ──────────────────────
+    function seededRandom(seed: number): () => number {
+      let s = seed;
+      return () => {
+        s = (s * 1664525 + 1013904223) & 0xffffffff;
+        return (s >>> 0) / 0xffffffff;
+      };
+    }
+
+    const rng = seededRandom(
+      traits.shapeJitterSeed * 1000 + traits.hueShiftDeg * 10 + traits.facetCount,
+    );
+
+    // ─── Asymmetric Growth Parameters (from Twin traits) ──────────────
+    const growthBiasX = (rng() - 0.5) * 0.6; // -0.3 to +0.3
+    const growthBiasY = (rng() - 0.5) * 0.6;
+    const densityCenterX = 0.5 + growthBiasX * 0.3; // normalized 0–1
+    const densityCenterY = 0.5 + growthBiasY * 0.3;
+    const breathingSpeed = 0.015 * traits.pulseSpeedFactor;
+    const wobbleAmplitude = 0.04 + traits.shapeJitterSeed * 0.02;
+
+    // ─── Particle System ──────────────────────────────────────────────
     interface Particle {
       x: number;
       y: number;
+      targetX: number;
+      targetY: number;
       vx: number;
       vy: number;
-      life: number;
       size: number;
+      brightness: number;
+      phase: number; // for individual oscillation
     }
 
+    const particleCount = 200;
     const particles: Particle[] = [];
-    let animationProgress = 0;
-    const totalDuration = 3000; // 3 seconds
-    let animationId: number;
 
-    // Create particles
-    const particleCount = 150;
+    // Generate target positions using asymmetric organic distribution
+    // (not a circle — a clustered organic shape)
+    function generateTargetPosition(idx: number, total: number): [number, number] {
+      const t = idx / total;
+      const angle = t * Math.PI * 2 + traits.rotationOffsetDeg * (Math.PI / 180);
+
+      // Asymmetric radius — varies by angle based on seed
+      const asymmetryFreq = 3 + Math.floor(traits.facetCount / 2);
+      const asymmetryAmp = 0.15 + traits.shapeJitterSeed * 0.1;
+      const radiusVariation = 1 + asymmetryAmp * Math.sin(angle * asymmetryFreq + traits.shapeJitterSeed * 5);
+
+      // Density clustering — not uniform around center
+      const densityAngle = Math.atan2(densityCenterY - 0.5, densityCenterX - 0.5);
+      const densityPull = Math.exp(-Math.pow((angle - densityAngle) % (Math.PI * 2), 2) / 2) * 0.3;
+      const finalRadius = maxRadius * (0.4 + radiusVariation * 0.6 + densityPull);
+
+      return [
+        centerX + Math.cos(angle) * finalRadius,
+        centerY + Math.sin(angle) * finalRadius,
+      ];
+    }
+
     for (let i = 0; i < particleCount; i++) {
-      const angle = (i / particleCount) * Math.PI * 2;
-      const distance = maxRadius * 1.2;
+      const [targetX, targetY] = generateTargetPosition(i, particleCount);
+      // Start scattered far away
+      const startAngle = rng() * Math.PI * 2;
+      const startDistance = maxRadius * (1.5 + rng() * 1.5);
+
       particles.push({
-        x: centerX + Math.cos(angle) * distance,
-        y: centerY + Math.sin(angle) * distance,
-        vx: Math.cos(angle) * 2,
-        vy: Math.sin(angle) * 2,
-        life: 1,
-        size: Math.random() * 3 + 1,
+        x: centerX + Math.cos(startAngle) * startDistance,
+        y: centerY + Math.sin(startAngle) * startDistance,
+        targetX,
+        targetY,
+        vx: 0,
+        vy: 0,
+        size: rng() * 2.5 + 0.5,
+        brightness: rng() * 0.5 + 0.5,
+        phase: rng() * Math.PI * 2,
       });
     }
 
-    /** Vertex points for a jittered regular polygon — same math as the
-     *  SVG version in TwinPresence.tsx (jitteredPolygonPoints) so the
-     *  crystal/diamond silhouette born here matches what appears in the
-     *  World afterward. */
-    const polygonPoints = (vertexCount: number, radius: number, startAngleDeg: number): Array<[number, number]> => {
-      const pts: Array<[number, number]> = [];
-      for (let i = 0; i < vertexCount; i++) {
-        const angle = ((startAngleDeg + (360 / vertexCount) * i) * Math.PI) / 180;
-        const wobble = 1 + 0.14 * Math.sin(traits.shapeJitterSeed * 100 + i * 2.4);
-        const r = radius * wobble;
-        pts.push([centerX + r * Math.cos(angle), centerY + r * Math.sin(angle)]);
-      }
-      return pts;
-    };
+    // ─── Organic Silhouette Points ────────────────────────────────────
+    // Generate an asymmetric closed curve (the "living seed" outline)
+    const silhouettePoints = 60;
+    const silhouetteData: Array<{ x: number; y: number; baseR: number }> = [];
 
-    const tracePolygon = (pts: Array<[number, number]>) => {
-      ctx.beginPath();
-      pts.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
-      ctx.closePath();
-    };
+    for (let i = 0; i < silhouettePoints; i++) {
+      const angle = (i / silhouettePoints) * Math.PI * 2;
+      // Asymmetric radius with multiple frequency components
+      let r = maxRadius * 0.5;
+      r += maxRadius * 0.15 * Math.sin(angle * 3 + traits.shapeJitterSeed * 3);
+      r += maxRadius * 0.1 * Math.sin(angle * 5 + traits.shapeJitterSeed * 7);
+      r += maxRadius * 0.08 * Math.cos(angle * 2 + traits.rotationOffsetDeg * 0.01);
+      // Density bias
+      const biasAngle = Math.atan2(growthBiasY, growthBiasX);
+      r += maxRadius * 0.06 * Math.cos(angle - biasAngle);
 
-    const alphaHex = (a: number) => Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0');
+      silhouetteData.push({ x: angle, y: 0, baseR: r });
+    }
+
+    // ─── Animation Phases ─────────────────────────────────────────────
+    const totalDuration = 4000; // 4 seconds
+    let animationId: number;
+    let startTime: number | null = null;
+
+    /** Alpha to hex string */
+    const alphaHex = (a: number): string =>
+      Math.round(Math.max(0, Math.min(1, a)) * 255).toString(16).padStart(2, '0');
 
     const animate = (timestamp: number) => {
-      const elapsed = Math.min(timestamp, totalDuration);
-      animationProgress = elapsed / totalDuration;
+      if (!startTime) startTime = timestamp;
+      const elapsed = Math.min(timestamp - startTime, totalDuration);
+      const progress = elapsed / totalDuration;
 
-      // Clear canvas
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      // Clear with fade trail
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.15)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Draw particles moving toward center
-      ctx.fillStyle = `${uniqueColor}80`;
-      ctx.shadowColor = uniqueColor;
-      ctx.shadowBlur = 20;
+      // Breathing offset (phase 4+)
+      const breathe = Math.sin(elapsed * breathingSpeed) * wobbleAmplitude * maxRadius;
+      const wobbleX = Math.sin(elapsed * breathingSpeed * 0.7) * wobbleAmplitude * maxRadius * 0.5;
+      const wobbleY = Math.cos(elapsed * breathingSpeed * 0.9) * wobbleAmplitude * maxRadius * 0.3;
 
-      particles.forEach((particle) => {
-        const progress = animationProgress;
+      // ─── Phase 1 (0–30%): Scattered Particles ─────────────────────
 
-        // Particles move toward center
-        const targetX = centerX;
-        const targetY = centerY;
-        particle.x += (targetX - particle.x) * progress * 0.05;
-        particle.y += (targetY - particle.y) * progress * 0.05;
+      ctx.shadowColor = coreColor;
+      ctx.shadowBlur = 15;
 
-        // Fade out at end
-        particle.life = 1 - progress * 0.3;
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        const individualPhase = (elapsed * 0.002 + p.phase) % (Math.PI * 2);
+        const twinkle = 0.5 + 0.5 * Math.sin(individualPhase);
 
-        ctx.globalAlpha = particle.life;
+        // Move toward target based on progress
+        const attractionStrength = progress > 0.3 ? Math.min(1, (progress - 0.3) / 0.4) : 0;
+        const currentX = p.x + (p.targetX - p.x) * attractionStrength * 0.8 + wobbleX * 0.1;
+        const currentY = p.y + (p.targetY - p.y) * attractionStrength * 0.8 + wobbleY * 0.1;
+
+        const opacity = (0.3 + twinkle * 0.5) * (1 - attractionStrength * 0.5);
+        ctx.globalAlpha = opacity * p.brightness;
+        ctx.fillStyle = coreColor;
         ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.arc(currentX, currentY, p.size * (1 - attractionStrength * 0.3), 0, Math.PI * 2);
         ctx.fill();
-      });
+      }
 
-      ctx.globalAlpha = 1;
-      ctx.shadowBlur = 0;
+      // ─── Phase 2 (30–60%): Attraction + Density Formation ───────────
+      const phase2Progress = progress > 0.3 ? Math.min(1, (progress - 0.3) / 0.3) : 0;
 
-      // Draw emerging hologram shape — the Twin's real archetype shape,
-      // not always a circle.
-      if (animationProgress > 0.3) {
-        const formProgress = (animationProgress - 0.3) / 0.7;
-        const radius = maxRadius * formProgress;
-        const opacity = Math.min(1, formProgress * 2);
-
-        ctx.save();
-        ctx.strokeStyle = `${uniqueColor}${alphaHex(opacity)}`;
-        ctx.lineWidth = 3;
-        ctx.shadowColor = uniqueColor;
-        ctx.shadowBlur = 30;
-
-        switch (shape) {
-          case 'crystal':
-            tracePolygon(polygonPoints(4, radius, -90 + traits.rotationOffsetDeg));
-            ctx.stroke();
-            break;
-          case 'diamond':
-            tracePolygon(polygonPoints(4, radius * 0.9, traits.rotationOffsetDeg));
-            ctx.stroke();
-            break;
-          case 'ring':
-            ctx.lineWidth = 9;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.stroke();
-            break;
-          case 'bloom':
-            for (let p = 0; p < 6; p++) {
-              const petalAngle = ((p * 60 + traits.rotationOffsetDeg) * Math.PI) / 180;
-              const px = centerX + Math.cos(petalAngle) * radius * 0.5;
-              const py = centerY + Math.sin(petalAngle) * radius * 0.5;
-              ctx.beginPath();
-              ctx.ellipse(px, py, radius * 0.28, radius * 0.5, petalAngle, 0, Math.PI * 2);
-              ctx.stroke();
-            }
-            break;
-          case 'wave': {
-            ctx.beginPath();
-            for (let a = 0; a <= 360; a += 10) {
-              const rad = (a * Math.PI) / 180;
-              const wob = radius * (0.85 + 0.15 * Math.sin(rad * 3 + traits.shapeJitterSeed * 10));
-              const x = centerX + Math.cos(rad) * wob;
-              const y = centerY + Math.sin(rad) * wob;
-              if (a === 0) ctx.moveTo(x, y);
-              else ctx.lineTo(x, y);
-            }
-            ctx.closePath();
-            ctx.stroke();
-            break;
-          }
-          case 'sphere':
-          default:
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-
-        // Inner glow (all shapes)
-        ctx.strokeStyle = `${uniqueColor}${alphaHex(opacity * 0.6)}`;
-        ctx.lineWidth = 1;
+      // Draw density glow at asymmetric center
+      if (phase2Progress > 0) {
+        const glowRadius = maxRadius * (0.2 + phase2Progress * 0.3);
+        const gradient = ctx.createRadialGradient(
+          centerX + growthBiasX * maxRadius * phase2Progress,
+          centerY + growthBiasY * maxRadius * phase2Progress,
+          0,
+          centerX + growthBiasX * maxRadius * phase2Progress,
+          centerY + growthBiasY * maxRadius * phase2Progress,
+          glowRadius,
+        );
+        gradient.addColorStop(0, `${coreColor}${alphaHex(phase2Progress * 0.6)}`);
+        gradient.addColorStop(0.5, `${coreColor}${alphaHex(phase2Progress * 0.2)}`);
+        gradient.addColorStop(1, `${coreColor}00`);
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius * 0.7, 0, Math.PI * 2);
+        ctx.arc(
+          centerX + growthBiasX * maxRadius * phase2Progress,
+          centerY + growthBiasY * maxRadius * phase2Progress,
+          glowRadius,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+
+      // ─── Phase 3 (60–80%): Living Seed Forms ────────────────────────
+      const phase3Progress = progress > 0.6 ? Math.min(1, (progress - 0.6) / 0.2) : 0;
+      const phase3Ease = phase3Progress * phase3Progress; // ease-in quadratic
+
+      if (phase3Progress > 0) {
+        ctx.globalAlpha = phase3Progress;
+        ctx.strokeStyle = `${coreColor}${alphaHex(phase3Progress * 0.8)}`;
+        ctx.lineWidth = 2;
+        ctx.shadowBlur = 25;
+
+        ctx.beginPath();
+        for (let i = 0; i <= silhouettePoints; i++) {
+          const idx = i % silhouettePoints;
+          const pt = silhouetteData[idx];
+          const r = pt.baseR * (0.3 + phase3Ease * 0.7) + breathe * phase3Ease;
+          const px = centerX + Math.cos(pt.x) * r + wobbleX * phase3Ease;
+          const py = centerY + Math.sin(pt.x) * r + wobbleY * phase3Ease;
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
         ctx.stroke();
 
-        // Pulsing core — speed varies per Twin (traits.pulseSpeedFactor)
-        const coreSize = radius * 0.3 * (0.8 + Math.sin(timestamp * 0.01 * traits.pulseSpeedFactor) * 0.2);
-        ctx.fillStyle = `${uniqueColor}${alphaHex(opacity * 0.78)}`;
-        ctx.shadowColor = uniqueColor;
-        ctx.shadowBlur = 15;
+        // Inner fill (subtle)
+        ctx.fillStyle = `${coreColor}${alphaHex(phase3Progress * 0.15)}`;
+        ctx.fill();
+      }
+
+      // ─── Phase 4 (80–95%): Twin Silhouette Stabilizes ───────────────
+      const phase4Progress = progress > 0.8 ? Math.min(1, (progress - 0.8) / 0.15) : 0;
+
+      if (phase4Progress > 0) {
+        // Full silhouette with breathing
+        ctx.globalAlpha = phase4Progress;
+        ctx.strokeStyle = `${coreColor}${alphaHex(phase4Progress)}`;
+        ctx.lineWidth = 2.5;
+        ctx.shadowBlur = 35;
+
         ctx.beginPath();
-        ctx.arc(centerX, centerY, coreSize, 0, Math.PI * 2);
+        for (let i = 0; i <= silhouettePoints; i++) {
+          const idx = i % silhouettePoints;
+          const pt = silhouetteData[idx];
+          // Breathing wobble per-point
+          const pointBreath = Math.sin(elapsed * breathingSpeed + pt.x * 2) * breathe;
+          const r = pt.baseR + pointBreath + wobbleX * 0.3;
+          const px = centerX + Math.cos(pt.x) * r + wobbleX;
+          const py = centerY + Math.sin(pt.x) * r + wobbleY;
+
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner glow gradient
+        const innerGrad = ctx.createRadialGradient(
+          centerX + wobbleX * 0.5,
+          centerY + wobbleY * 0.5,
+          0,
+          centerX + wobbleX * 0.5,
+          centerY + wobbleY * 0.5,
+          maxRadius * 0.5,
+        );
+        innerGrad.addColorStop(0, `${coreColor}${alphaHex(phase4Progress * 0.3)}`);
+        innerGrad.addColorStop(0.6, `${coreColor}${alphaHex(phase4Progress * 0.1)}`);
+        innerGrad.addColorStop(1, `${coreColor}00`);
+        ctx.fillStyle = innerGrad;
         ctx.fill();
 
-        // TWINPRESENCE-005: orbiting facets — this Twin's own
-        // "constellation" (count/radius/spin from its unique traits),
-        // fading in once the core has mostly formed, matching the ongoing
-        // World presence's OrbitFacets.
-        if (formProgress > 0.5) {
-          const facetOpacity = Math.min(1, (formProgress - 0.5) * 2) * opacity;
-          const facetRadius = radius * (0.55 + traits.facetRadiusRatio * 0.4) + 14;
-          const spinDeg = (timestamp * 0.02 * traits.orbitDirection * traits.pulseSpeedFactor) % 360;
-          ctx.fillStyle = `${uniqueColor}${alphaHex(facetOpacity * 0.8)}`;
+        // Core pulse
+        const corePulse = maxRadius * 0.12 * (0.8 + Math.sin(elapsed * breathingSpeed * 1.5) * 0.2);
+        ctx.fillStyle = `${coreColor}${alphaHex(phase4Progress * 0.7)}`;
+        ctx.shadowBlur = 20;
+        ctx.beginPath();
+        ctx.arc(centerX + wobbleX * 0.5, centerY + wobbleY * 0.5, corePulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orbiting facets (like TwinPresence)
+        if (phase4Progress > 0.5) {
+          const facetOpacity = (phase4Progress - 0.5) * 2;
+          const facetRadius = maxRadius * (0.45 + traits.facetRadiusRatio * 0.25);
+          const spinDeg = (elapsed * 0.015 * traits.orbitDirection * traits.pulseSpeedFactor) % 360;
+          ctx.fillStyle = `${coreColor}${alphaHex(facetOpacity * 0.6)}`;
           ctx.shadowBlur = 8;
           for (let i = 0; i < traits.facetCount; i++) {
-            const angle = ((360 / traits.facetCount) * i + traits.rotationOffsetDeg + spinDeg) * (Math.PI / 180);
-            const fx = centerX + Math.cos(angle) * facetRadius;
-            const fy = centerY + Math.sin(angle) * facetRadius;
+            const angle =
+              ((360 / traits.facetCount) * i + traits.rotationOffsetDeg + spinDeg) * (Math.PI / 180);
+            const fx = centerX + Math.cos(angle) * facetRadius + wobbleX;
+            const fy = centerY + Math.sin(angle) * facetRadius + wobbleY;
             ctx.beginPath();
-            ctx.arc(fx, fy, 2.2 * traits.facetSizeRatio, 0, Math.PI * 2);
+            ctx.arc(fx, fy, 2 * traits.facetSizeRatio, 0, Math.PI * 2);
             ctx.fill();
           }
         }
-
-        ctx.restore();
       }
 
-      if (elapsed < totalDuration) {
-        animationId = requestAnimationFrame(animate);
-      } else {
-        // Animation complete
+      // ─── Fade out and complete ──────────────────────────────────────
+      if (elapsed >= totalDuration) {
+        ctx.globalAlpha = 1;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         onComplete();
+        return;
       }
+
+      animationId = requestAnimationFrame(animate);
     };
 
     animationId = requestAnimationFrame(animate);
@@ -255,7 +355,7 @@ export const HologramBirth: React.FC<HologramBirthProps> = ({
     return () => {
       cancelAnimationFrame(animationId);
     };
-  }, [onComplete, color, shape, seedKey]);
+  }, [onComplete, color, primaryArchetype, secondaryArchetype, seedKey]);
 
   return (
     <div className="flex items-center justify-center w-full h-full">
@@ -267,3 +367,5 @@ export const HologramBirth: React.FC<HologramBirthProps> = ({
     </div>
   );
 };
+
+export default HologramBirth;
