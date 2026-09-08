@@ -24,7 +24,18 @@ export function BirthdateInput({ onSubmit }: BirthdateInputProps) {
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
-      <h2 className="text-2xl font-bold mb-4">{t('birthDataRequired', language)}</h2>
+      <h2 className="text-2xl font-bold mb-2">{t('birthDataRequired', language)}</h2>
+      {/* STORYBEAT-BIRTHDATE-001 (Track C Story Layer, §51): this step was a
+          bare form with zero narrative framing — the one clear "form, not a
+          story" gap flagged by STORY_NARRATIVE_LAYER_TH.md's own Phase-2
+          audit. One honest line connecting this input to what Twin actually
+          does with it (real: seeds the initial-disciplines/archetype
+          calculation used in the next step), not a fabricated claim. */}
+      <p className="text-sm text-gray-500 mb-4">
+        {isTh
+          ? 'จุดเริ่มต้นของทวินคุณ — ข้อมูลนี้ใช้คำนวณ pattern เบื้องต้นที่ทวินจะต่อยอดในขั้นถัดไป'
+          : "Your Twin's starting point — this seeds the initial pattern it will build on in the next step"}
+      </p>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">{t('enterBirthday', language)}</label>

@@ -432,8 +432,8 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 
 | # | เรื่อง | หลักฐาน | Track C จะชนเมื่อ | สถานะ |
 |---|-------|---------|------------------|--------|
-| **C1** | **Twin มี 3 implementations** | `LivingTwin.tsx` (orb CSS — Dashboard) · `TwinPresence.tsx` (SVG — WorldDetail) · `HologramBirth.tsx` (canvas 2D — CoreAwakening) — คำนวณ `evolutionStage`/`glowMult` ซ้ำกัน | **Phase 6 (Twin Birth)** + **Phase 7 (Twin Chat)** — P0.1 "Twin becomes visual protagonist" ทำไม่ได้ถ้า Twin มี 3 หน้าตา | 🛑 **A3 ต้องขออนุมัติ** (แตะแก่น product) |
-| **C2** | **ไม่มี SSR / SSG / prerender** | 24/41 หน้าไม่มี meta · FAQ schema แค่ 5 คำถาม · sitemap ไม่สมบูรณ์ · X1 env `structuredData.ts:21` ยังเปิด | **Phase 12 (SEO/GEO/AEO knowledge layer)** — P0.9 + §26–34 กำหนดให้ public layer ต้อง crawlable | 🛑 **A4 ต้องขออนุมัติ** (แตะ build/deploy pipeline) |
+| **C1** | ~~Twin มี 3 implementations~~ **✅ แก้แล้ว (verify 8 ก.ย. 2026)** | `useTwinIdentity.ts` เป็น single source ของ `evolutionStage`/`glowMult`/dna/traits แล้ว · `Twin.tsx` facade + `LivingTwin.tsx`/`TwinPresence.tsx` เรียก hook เดียวกันทั้งคู่ (ไม่มี logic ซ้ำเหลือ) · `HologramBirth` เข้า facade ผ่าน `variant="birth"` | Phase 6/7 — **ไม่บล็อกแล้ว** | ✅ **ปิดแล้ว จริง — ไม่ต้องขอ A3 อีก** |
+| **C2** | ~~ไม่มี SSR / SSG / prerender~~ **🟡 บางส่วนแก้แล้ว (8 ก.ย. 2026)** | X1 env ปิดแล้ว (CF-CREDS-003) · FAQ schema ตรวจแล้วถูกต้องจริง (5 คำถามจริง ไม่ปลอม) · sitemap.xml/sitemap-th.xml แก้ให้ตรงกัน + เพิ่ม 8 หน้าที่หายไป (about/science/contact/terms/blog/tarot/palmistry/community) · `Share.tsx` เพิ่ม OG tags จริง | Phase 12 — งานหลักปิดแล้ว | 🟡 **เหลือ**: SSR/SSG จริงยังไม่ทำ (ไม่จำเป็นสำหรับ gap ที่เจอ) · TarotPage/PalmistryPage/CommunityPage ยังไม่มี `canonicalUrl` · บทความ blog รายตัวไม่อยู่ใน sitemap (dynamic slug) |
 
 > ทั้งสองข้อ **ไม่บล็อกการเริ่ม Track C** (เริ่มที่ Phase 1 ซึ่งแตะ 0 ไฟล์)
 > แต่ต้องมีคำตอบก่อน Phase 6 และ Phase 12 ตามลำดับ
@@ -477,3 +477,64 @@ npm run typecheck:functions   # typecheck functions/ + api/ — ✅ 0 errors
 - **E2E CI run #305 ✅ ผ่านหมด** — `selfprint.one/th/` + `/en/` โหลดได้จริง ไม่มี error boundary
 
 **บทเรียน Vite env (สำคัญมาก):** `import.meta.env[name]` (dynamic) **ไม่ถูก Vite inline ที่ build time** → ได้ `undefined` ตลอด ต้องใช้ literal `import.meta.env.VITE_FOO` เท่านั้น — pattern นี้พังทั้ง Supabase credentials และ structuredData สองรอบซ้อน
+
+---
+
+## 10. รอบที่ 8 (8 ก.ย. 2026 · HEAD ล่าสุดในเซสชันนี้) — Track C Phase 1-12 ปิดครบ + แก้บั๊กชื่อทวิน + เจอเอกสารล้าสมัย 2 จุด
+
+> ตรวจจากโค้ดจริงทุกข้อ ไม่เชื่อสถานะเดิมในเอกสารใดๆ รวมถึงไฟล์นี้เอง ตาม "Current repo state = source of truth"
+
+### ✅ Track C Phase 1-12 (visual/UX redesign) — ปิดครบตามแผน `docs/PLAN_TRACKS_TH.md`
+
+Phase 1-4 audit-only (ไม่มี gap เชิงโครงสร้าง) · Phase 5 confetti reduced-motion guard · Phase 6
+ProvenanceStrip wiring · Phase 7+10 Twin hub + mode selector · Phase 8 timeSlot/h2/real confidence
+· Phase 9 WorldsHub Twin visual · Phase 11 Memory Experience "What Twin Knows" section ใหม่
+(`getTwinKnowledge.ts` + forget action จริง) · Phase 12 sitemap/Share.tsx/FAQ schema audit —
+รายละเอียดเต็ม + file:line evidence + ผล tsc/oxlint/vitest ทุกจุดอยู่ใน
+`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` ส่วน "ตรวจสถานะจริงซ้ำเทียบโค๊ดปัจจุบัน"
+
+### ✅ พบเอกสารล้าสมัย 2 จุด — แก้ทั้ง 3 ไฟล์ที่เกี่ยวข้องแล้ว
+
+1. **C1 Twin Facade** — `TRACK_C_VISUAL_REDESIGN_TH.md` + kilo plan (`.kilo/plans/1788755171904-docs-consultation-update.md`) เขียนว่า "ยังไม่ implement ต้องขอ A3" — ตรวจโค้ดแล้ว **ทำเสร็จจริง** (`useTwinIdentity.ts` + `Twin.tsx` facade + `LivingTwin`/`TwinPresence` เรียก hook เดียวกันไม่มีโค้ดซ้ำ) — แก้ทั้ง 2 ไฟล์แล้ว + แก้ตารางในไฟล์นี้ (หัวข้อ 8.6 ด้านบน)
+2. **PWA Phase 1-2** (kilo plan) — checklist ยังไม่ติ๊กแต่โค้ดทำครบจริงแล้ว (manifest polish, workbox precache, push icon, offline.html) — แก้ checklist ในไฟล์ kilo plan แล้ว
+
+### 🔴 บั๊กจริงที่เจอจากคำถามเจ้าของ "ชื่อทวินต้องเปลี่ยนทุกจุดที่ผู้ใช้เห็น" — แก้แล้วทั้ง 2 จุด
+
+| จุด | ปัญหา | แก้ยังไง | verify |
+|-----|-------|---------|--------|
+| `ExecutiveSummary.tsx:136` | empty-state โชว์ "Twin ของคุณ" generic ทั้งที่มีชื่อจริงแล้ว | เพิ่ม `useTwin()` ใช้ `twin.name` จริง | tsc -b 0 errors |
+| `config/twin-prompts.ts` | **สำคัญกว่า** — system prompt จริงที่ส่งให้ AI ใช้ `{{twinName}}` (= ชื่อทวินเอง) แทนที่ข้อความที่ควรเป็นชื่อ**ผู้ใช้** เช่น "COMPLETE behavioral analysis of {{twinName}}" → AI สับสนว่าใครคือใครทุกครั้งที่แชท | แก้ทั้ง `TWIN_BASE_PROMPT` + 12 `TWIN_WORLD_PROMPTS` ให้ `{{twinName}}` หมายถึงชื่อทวินเองอย่างเดียว ("Your name is {{twinName}}...") ส่วนที่เหลือใช้ "the user" | tsc -b 0 errors · `TwinWorldsIntegration.test.ts` 14/14 + `worldsVerification.test.ts` 77/77 ผ่านหมด (91/91) |
+
+**ฐานข้อมูล 12 SICE ก่อนตั้งชื่อ — ตรวจแล้วถูกต้องอยู่แล้ว ไม่ต้องแก้**: `startAwakening()` รัน
+`SICEOrchestrator` (12 engine จริง) ก่อนที่ `initializeTwin()` (ขั้นตั้งชื่อ) จะทำงานเสมอ
+
+**ยังไม่ตรวจครบ:** grep เจอ ~31 ไฟล์ที่มีคำว่า "Twin"/"ทวิน" ในรูปแบบที่อาจเกี่ยวข้อง — ตรวจแล้วแค่
+7 ไฟล์ (NavRail/BottomNav/MePage เป็น nav label ไม่ใช่บั๊ก, TwinNaming ถูกต้องอยู่แล้ว, ExecutiveSummary
++ twin-prompts.ts แก้แล้ว) **เหลืออีก ~24 ไฟล์ยังไม่ได้ไล่ทีละจุด** — งานแยกถ้าต้องการครบ 100%
+
+### 🟡 Story/Narrative Layer (§51) — เพิ่มจุดที่ขาดจริง 3 จุด (ไม่ใช่ระบบเต็ม)
+
+`STORY_NARRATIVE_LAYER_TH.md` ถูก cross-check กับโค้ดจริงทีละ phase (ดูส่วน "ตรวจสถานะจริงซ้ำเทียบโค๊ด"
+ในไฟล์นั้น) — สรุป: **ไม่เคย implement เป็นระบบ** (ไม่มี 3 Narrative Layers/Rhythm Table/5 Story Modes
+จริง) เพิ่มแค่จุดที่พิสูจน์ได้ว่าขาดจริงในรอบนี้:
+
+| ไฟล์ | สิ่งที่เพิ่ม |
+|------|-------------|
+| `LandingPage.tsx` (`story.s3.next`) | ประโยค bridge ก่อน CTA บอกว่าขั้นตอนถัดไปคืออะไร (เช็คอินอารมณ์ → คุย SELFPRINT → ทวินเริ่มเป็นรูปเป็นร่าง) — ของจริงตรงกับ step order ใน `Onboarding.tsx` |
+| `BirthdateInput.tsx` | เพิ่ม 1 บรรทัดอธิบายว่าข้อมูลนี้ใช้ทำอะไรจริง (เดิมเป็น form เปล่าไม่มี narrative เลย) |
+| `analysis.css` + `AnalysisPage.tsx` | staggered fade-in ต่อ section (index-based delay, กัน `prefers-reduced-motion`) แก้ "reveal ทุกอย่างพร้อมกัน" — CSS/presentation ล้วนๆ ไม่แตะข้อมูล |
+
+**ยังไม่ทำ (นอก scope รอบนี้):** Phase 9 (World = scene พร้อม Story/Pattern/Reflection/Decision แยก 4
+ส่วนชัดเจน) · Phase 10 (Choice→Consequence surfacing — ต้องมี P1.8 data หนุนก่อน) — ทั้งสองต้องเปิดเป็น
+งานแยกที่มี change budget ของตัวเอง
+
+### เอกสารที่แก้ในรอบนี้
+
+`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` ·
+`docs/Experience Architecture v2/STORY_NARRATIVE_LAYER_TH.md` ·
+`.kilo/plans/1788755171904-docs-consultation-update.md` · ไฟล์นี้ ·
+`docs/SELFPRINT_STATUS_HONEST_TH.md` · `CLAUDE.md`
+
+**บทเรียนรอบที่ 8:** เอกสารสถานะที่เขียนไว้ถูกในวันที่เขียน (6-7 ก.ย.) กลายเป็นล้าสมัยได้ภายใน 1-2 วัน
+เมื่อมีงานทำต่อโดยไม่อัปเดตเอกสาร (C1/PWA เสร็จจริงแล้วแต่ 2 เอกสารยังบอกว่า "รอ A3 อนุมัติ") — ต้อง
+verify โค้ดจริงทุกครั้งก่อนเชื่อสถานะใดๆ แม้จะมาจากเอกสาร "source of truth" เอง

@@ -643,7 +643,7 @@ const AnalysisPage: React.FC = () => {
             </div>
 
             {/* 01 — ภาพรวมตัวตน */}
-            <section className={`analysis__section${expandedSections.has('01') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-01">
+            <section className={`analysis__section${expandedSections.has('01') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-01" style={{ '--reveal-index': 0 } as React.CSSProperties}>
               <SectionHeader number="01" title={isTh ? 'ภาพรวมตัวตน' : 'Self Overview'} icon="🪞" isOpen={expandedSections.has('01')} onToggle={() => toggleSection('01')} />
               <div className="analysis__section-body">
                 <p className="analysis__overview-text">
@@ -679,7 +679,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 02 — รูปแบบพฤติกรรม */}
-            <section className={`analysis__section${expandedSections.has('02') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-02">
+            <section className={`analysis__section${expandedSections.has('02') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-02" style={{ '--reveal-index': 1 } as React.CSSProperties}>
               <SectionHeader number="02" title={isTh ? 'รูปแบบพฤติกรรม' : 'Behavioral Patterns'} icon="📊" isOpen={expandedSections.has('02')} onToggle={() => toggleSection('02')} />
               <div className="analysis__section-body">
                 {(() => {
@@ -710,7 +710,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 03 — จุดแข็ง */}
-            <section className={`analysis__section${expandedSections.has('03') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-03">
+            <section className={`analysis__section${expandedSections.has('03') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-03" style={{ '--reveal-index': 2 } as React.CSSProperties}>
               <SectionHeader number="03" title={isTh ? 'จุดแข็ง' : 'Strengths'} icon="💪" isOpen={expandedSections.has('03')} onToggle={() => toggleSection('03')} />
               <div className="analysis__section-body">
                 {(() => {
@@ -741,7 +741,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 04 — ข้อควรระวัง */}
-            <section className={`analysis__section${expandedSections.has('04') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-04">
+            <section className={`analysis__section${expandedSections.has('04') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-04" style={{ '--reveal-index': 3 } as React.CSSProperties}>
               <SectionHeader number="04" title={isTh ? 'ข้อควรระวัง' : 'Blind Spots'} icon="🔍" isOpen={expandedSections.has('04')} onToggle={() => toggleSection('04')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
@@ -772,7 +772,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 05 — แนวโน้ม */}
-            <section className={`analysis__section${expandedSections.has('05') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-05">
+            <section className={`analysis__section${expandedSections.has('05') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-05" style={{ '--reveal-index': 4 } as React.CSSProperties}>
               <SectionHeader number="05" title={isTh ? 'แนวโน้ม' : 'Trends'} icon="📈" isOpen={expandedSections.has('05')} onToggle={() => toggleSection('05')} />
               <div className="analysis__section-body">
                 {(() => {
@@ -789,7 +789,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 06 — เส้นทางชีวิต */}
-            <section className={`analysis__section${expandedSections.has('06') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-06">
+            <section className={`analysis__section${expandedSections.has('06') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-06" style={{ '--reveal-index': 5 } as React.CSSProperties}>
               <SectionHeader number="06" title={isTh ? 'เส้นทางชีวิต' : 'Journey'} icon="🗺" isOpen={expandedSections.has('06')} onToggle={() => toggleSection('06')} />
               <div className="analysis__section-body">
                 {(() => {
@@ -816,7 +816,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 07 — สิ่งที่ควรสนใจ */}
-            <section className={`analysis__section${expandedSections.has('07') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-07">
+            <section className={`analysis__section${expandedSections.has('07') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-07" style={{ '--reveal-index': 6 } as React.CSSProperties}>
               <SectionHeader number="07" title={isTh ? 'สิ่งที่ควรให้ความสนใจ' : 'Focus Areas'} icon="🎯" isOpen={expandedSections.has('07')} onToggle={() => toggleSection('07')} />
               <div className="analysis__section-body">
                 {(() => {
@@ -833,7 +833,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 08 — ข้อแนะนำส่วนบุคคล */}
-            <section className={`analysis__section${expandedSections.has('08') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-08">
+            <section className={`analysis__section${expandedSections.has('08') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-08" style={{ '--reveal-index': 7 } as React.CSSProperties}>
               <SectionHeader number="08" title={isTh ? 'ข้อแนะนำส่วนบุคคล' : 'Personal Guidance'} icon="🧭" isOpen={expandedSections.has('08')} onToggle={() => toggleSection('08')} />
               <div className="analysis__section-body">
                 <p className="analysis__section-note">
@@ -861,7 +861,7 @@ const AnalysisPage: React.FC = () => {
             </section>
 
             {/* 09 — แผนพัฒนา */}
-            <section className={`analysis__section analysis__section--last${expandedSections.has('09') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-09">
+            <section className={`analysis__section analysis__section--last${expandedSections.has('09') ? '' : ' analysis__section--collapsed'}`} aria-labelledby="section-09" style={{ '--reveal-index': 8 } as React.CSSProperties}>
               <SectionHeader number="09" title={isTh ? 'แผนพัฒนา' : 'Next Step'} icon="🚀" isOpen={expandedSections.has('09')} onToggle={() => toggleSection('09')} />
               <div className="analysis__section-body">
                 {(() => {

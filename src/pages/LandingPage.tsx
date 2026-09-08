@@ -66,6 +66,12 @@ const STORY = {
         'AI Twin ที่รู้จักคุณดีกว่าตัวเอง — และเติบโตไปพร้อมคุณ',
       ],
       cta: 'ให้กำเนิด AI Twin ของฉัน →',
+      // STORYBEAT-LANDING-001 (Track C Story Layer, §51): STORY_NARRATIVE_LAYER_TH.md
+      // flagged Landing→Onboarding as a hard cut with no continuity — user
+      // clicks the CTA with no idea what happens next. This previews the
+      // real next 3 steps (matches Onboarding.tsx's actual step order:
+      // emotion → nova-conversation → ai-creation), never a fabricated promise.
+      next: 'ต่อไป: เช็คอินอารมณ์สั้นๆ → คุยกับ SELFPRINT → ทวินของคุณเริ่มเป็นรูปเป็นร่าง',
       trust: 'ฟรี · ไม่ต้องใส่บัตรเครดิต · ใช้เวลาไม่ถึง 2 นาที',
       login: 'มีบัญชีแล้ว? เข้าสู่ระบบ',
     },
@@ -103,6 +109,7 @@ const STORY = {
         'AI Twin that knows you better than you do',
       ],
       cta: 'Build My SELFPRINT →',
+      next: "Next: a quick mood check-in → talk with SELFPRINT → your Twin starts taking shape",
       trust: 'Free · No credit card · Under 2 minutes',
       login: 'Already have an account? Log in',
     },
@@ -856,6 +863,12 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             >
               {story.s3.cta}
             </button>
+
+            {/* STORYBEAT-LANDING-001: narrative bridge into Onboarding — see
+                copy definition above for why this line exists. */}
+            <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '10px', opacity: 0.7 }}>
+              {story.s3.next}
+            </p>
 
             {/* Trust line */}
             <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', marginBottom: '24px', opacity: 0.75 }}>

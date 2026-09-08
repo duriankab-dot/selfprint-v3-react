@@ -89,7 +89,7 @@ npm run typecheck:functions   # typecheck functions/ + api/
 
 ---
 
-## ✅ Track A + B + C0 เสร็จหมดแล้ว (4 ก.ย. 2026) — เหลือแต่ Track C
+## ✅ Track A + B + C0 + Track C Phase 1-12 เสร็จหมดแล้ว (อัปเดต 8 ก.ย. 2026)
 
 **Track A** A1 ลบ Vercel+dead code · A2 env+รหัสผ่าน e2e · A3 FE bugs · A4 OG image ·
 A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 66 ไฟล์ · A9 ลบ .md 84 ไฟล์
@@ -104,11 +104,22 @@ A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 6
 - `ASSET404-001` แก้ asset ที่อ้างแต่ไม่มีจริง 8 รายการ · ลบ `hero.png` 778 kB ที่ไม่มีใครใช้
 - `RAFLOOP-001` rAF loop บนหน้าแรก เคารพ `prefers-reduced-motion` + หยุดเมื่อแท็บถูกซ่อน
 
+**Track C Phase 1-12 (`docs/PLAN_TRACKS_TH.md`) — ปิดครบแล้ว 8 ก.ย. 2026**
+รวม Twin Facade C1 (`useTwinIdentity.ts` + `Twin.tsx`), PWA precache (`sw.js`/`vite-plugin-pwa`),
+Executive Summary Twin knowledge section, Share meta tags, sitemap TH/EN sync — หลักฐานเต็มใน
+`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
+**Story Narrative Layer (§51)** — ทำแค่ patch เชื่อมความรู้สึกใน Phase 2/3/4 (Landing bridge line /
+BirthdateInput narrative line / Analysis staggered reveal) — **ไม่ใช่ full system ตาม §51**
+Phase 9 (World=scene 4 ส่วน) และ Phase 10 (Choice→Consequence) **ยังไม่ทำ** ดู `STORY_NARRATIVE_LAYER_TH.md`
+
 ## 🔴 ค้างอยู่ — ต้องทำด้วยมือ / ต้องตัดสินใจ
 
 **งานที่เหลือจริง ๆ:**
 1. **git filter-repo** — ✅ ติดตั้งแล้ว v2.47.0 (scoop) · ยังต้องสร้าง `purge.txt` ก่อนรัน · ไม่เร่งด่วน key revoke แล้ว
-2. **Track C Phase 1** — พร้อมเริ่ม (ดู `docs/PLAN_TRACKS_TH.md`)
+2. **Twin-naming audit ไม่ครบ** — grep เจอ ~31 ไฟล์เกี่ยวกับชื่อทวิน ตรวจแล้ว ~7 (พบบั๊ก 2 จุด แก้แล้ว: `ExecutiveSummary.tsx` + `config/twin-prompts.ts`) เหลือ **~24 ไฟล์ยังไม่ตรวจ** — งานแยก ยังไม่มี timeline
+3. **Story Narrative Layer Phase 9/10** — ยังไม่ implement ต้องขอ change-budget แยก (>8 ไฟล์ ตาม §9 ของ `TRACK_C_VISUAL_REDESIGN_TH.md`)
+4. **canonicalUrl gaps** — TarotPage/PalmistryPage/CommunityPage ยังไม่มี canonicalUrl ครบ (พบระหว่างงาน sitemap รอบ 8 ก.ย.)
+5. **Blog article sitemap enumeration** — blog posts แต่ละบทความยังไม่ enumerate ลง sitemap รายบทความ
 
 **ปิดแล้วทั้งหมด:**
 - migration 035 ✅ apply แล้ว (5 ก.ย. 2026)
@@ -118,6 +129,8 @@ A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 6
 - CF-CREDS-003 ✅ structuredData.ts literal env + fallback `''` ไม่ throw (7 ก.ย. 2026)
 - `/api/og` ✅ CF Pages Function สร้างแล้ว (7 ก.ย. 2026)
 - E2E CI ✅ run #305 ผ่านหมด (7 ก.ย. 2026)
+- Track C Phase 1-12 ✅ ปิดครบ (8 ก.ย. 2026)
+- Twin-naming bug × 2 ✅ แก้แล้ว + verify 91/91 tests (8 ก.ย. 2026)
 
 ## ✅ Production Status (7 ก.ย. 2026)
 
@@ -135,11 +148,10 @@ A5 DB migration 035 · A6 RLS · A7 strict mode · A8 เทสต์ครบ 6
 
 ---
 
-## 🎯 Track C เริ่มได้แล้ว
-อ่าน `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` ก่อน — โดยเฉพาะ **F-02**:
-`chunk-intelligence` 345 kB ไม่ใช่ `lib/intelligence` แต่คือ `@supabase/supabase-js`
-ทั้งก้อนที่ถูกดูดเข้ามาผ่าน static import chain ของ `AIContext` → โหลดทุกหน้ารวมหน้าแรก
-ตัด chain นี้ = งานแรกของ Phase 1
+## ✅ Track C Phase 1-12 ปิดครบแล้ว (8 ก.ย. 2026)
+รายละเอียด/หลักฐานเต็ม: `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`
+งานที่เหลือ (ไม่ใช่ Track C แล้ว แต่เกี่ยวเนื่อง) ดูหัวข้อ "🔴 ค้างอยู่" ข้างบน — หลัก ๆ คือ
+naming audit ~24 ไฟล์ + Story Narrative Layer Phase 9/10
 
 ---
 

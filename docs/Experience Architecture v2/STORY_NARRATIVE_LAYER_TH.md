@@ -123,3 +123,31 @@ Map กับ data ที่มีอยู่แล้ว — ไม่ต้�
 > Implementation จะเกิดขึ้นใน Track C Phase 3/6/8/9/10/11/G2 ตามลำดับ
 > ทุก phase ต้องอ้าง §51 + ตาราง mapping ในเอกสารนี้
 > ก่อน implement ให้ถามก่อนว่า: "ข้อมูลนี้มาจาก SICE จริงไหม?" — ถ้าไม่ใช่ → ไม่ทำ
+
+---
+
+## ตรวจสถานะจริงซ้ำเทียบโค๊ด — 8 ก.ย. 2026
+
+> ตรวจหลัง Track C Phase 1-12 ทำเสร็จรอบก่อน — คำถามคือ "Story Layer ถูก implement จริงแค่ไหน"
+
+**สรุปตรง ๆ: Story/Narrative Layer ไม่เคยถูกสร้างเป็นระบบ** (ไม่มี Chapter/Story Beat/Narrative
+Hook/Choice/Consequence/Reveal เป็น component หรือ data model จริง ไม่มี 3 Narrative Layers,
+ไม่มี Rhythm Table logic, ไม่มี 5 Story Modes ที่ทำงานจริง) สิ่งที่เกิดขึ้นจริงในรอบที่ผ่านมาคือการแก้
+**จุดที่ละเมิด guardrail "NO FAKE STORY" (ข้อ 1)** เป็นจุด ๆ ไม่ใช่การสร้างประสบการณ์เล่าเรื่องตามตาราง
+mapping ด้านบน:
+
+| Phase | ตารางนี้ขอ | สิ่งที่ทำจริง | ครบไหม |
+|-------|-----------|---------------|--------|
+| 1 (Landing) | narrative continuity ไป Onboarding | ไม่ได้แตะ — นอก scope ที่ระบุไว้ท้ายเอกสารอยู่แล้ว | ❌ ยังไม่ทำ |
+| 2-3 (Onboarding) | Story Beat ต่อเนื่องทุกขั้นตอนว่า "Twin กำลังเรียนรู้จากคุณ" | มีประโยคเดียว (`Onboarding.tsx:638` ขั้นเลือกอารมณ์) ไม่ใช่ thread ต่อเนื่อง | 🟡 บางส่วน |
+| 4 (Analysis) | reveal มี pacing ทางอารมณ์ | ไม่ได้แตะ — นอก scope ที่ระบุไว้ท้ายเอกสารอยู่แล้ว | ❌ ยังไม่ทำ |
+| 6 (Twin Birth) | First message จาก real analysis เสมอ | ✅ `groundedInsight` จาก `personalIntel.insights[0]` จริง + ProvenanceStrip แสดงที่มา | ✅ ทำแล้ว |
+| 8 (Today) | Narrative Hook จากข้อมูลจริงเท่านั้น | ✅ DailyBrief ใช้ confidence/evidenceCount จริงแล้ว (เดิม hardcode) | 🟡 guardrail ผ่าน แต่ไม่มี "hook" แบบเรื่องเล่าจริง |
+| 9 (Worlds) | World = scene ในเรื่อง มี Story/Pattern/Reflection/Decision | มี Twin visual แล้ว แต่ยังไม่มี 4 ส่วนนี้แยกชัดต่อ World | 🟡 บางส่วน |
+| 10 (Twin Modes) | Choice → Consequence surfacing | ยังไม่มี — Reflect/Decide ยัง disabled (ต้องมี data หนุนตามที่เอกสารกำหนดไว้เอง) | ❌ รอ P1.8 |
+| 11 (Memory) | Memory Questions จาก choice/pattern ที่ยังไม่ตอบ | ✅ เพิ่มแล้ว — คำถามจาก decision ที่ยังไม่มี outcome (ข้อมูลจริง ไม่ปั้น) | ✅ ทำแล้วบางส่วนของ scope |
+
+**ทำไมยังไม่ทำเต็ม:** Track C Phase 1-12 ที่อนุมัติไปเป็น "recompose ของจริงที่มีอยู่ + ปิด gap เชิง
+โครงสร้าง/ความถูกต้องของข้อมูล" ไม่ใช่ "สร้าง storytelling engine ตามเอกสารนี้" สอง scope นี้ทับซ้อนกัน
+บางจุดเท่านั้น (Twin Birth, Memory Questions) — ถ้าต้องการ Story Layer เต็มรูปแบบ ต้องเปิดเป็น
+งานใหม่ที่มี change budget ของตัวเอง ไม่ใช่ผลพลอยได้จาก Track C

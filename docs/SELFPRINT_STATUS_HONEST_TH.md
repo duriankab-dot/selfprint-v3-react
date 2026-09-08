@@ -1,6 +1,6 @@
 # 📊 SELFPRINT PROJECT STATUS — Honest Summary ภาษาไทย
 
-**อัปเดตล่าสุด:** 6 กันยายน 2026 (รอบ forensic — วัดจริง 4–5 ก.ย. 2026, HEAD `da855c5`, **อัปเดตรอบที่ 6 — 6 Sep 2026: A1 ปิด (6 orphan deleted) + A7 ปิด (47 as-any casts) + Story/Narrative docs**)
+**อัปเดตล่าสุด:** 8 กันยายน 2026 (รอบ forensic — วัดจริง 4–5 ก.ย. 2026, HEAD `da855c5`, **อัปเดตรอบที่ 6 — 6 Sep 2026: A1 ปิด (6 orphan deleted) + A7 ปิด (47 as-any casts) + Story/Narrative docs** · **อัปเดตรอบที่ 7 — 8 Sep 2026: Track C Phase 1-12 ปิดครบ + แก้บั๊กชื่อทวิน 2 จุด + Story Layer Phase 2-4 ทำจริง — ดูหัวข้อ 12 ด้านล่าง**)
 **Project:** Selfprint v3 (React + Vite + Supabase + Cloudflare Pages)
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริง + รัน build/test/lint จริง + **verify กับ Supabase / Cloudflare / GitHub / scoop จริงเมื่อ 5 ก.ย. 2026** — **ไม่เชื่อไฟล์ `.md` ใด ๆ อย่างเดียว**
 **เอกสารอ้างอิงหลัก:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` (ต้องอ่านคู่กับ Supabase/Cloudflare/GitHub จริงเสมอ)
@@ -335,6 +335,54 @@
 
 ---
 
+## 🆕 รอบที่ 7 (8 ก.ย. 2026) — Track C Phase 1-12 ปิดครบ + แก้บั๊กชื่อทวิน + Story Layer Phase 2-4 ทำจริง
+
+> ตรวจสถานะจริงเทียบโค้ดปัจจุบันตามคำขอ (อ่าน `STORY_NARRATIVE_LAYER_TH.md` + `TRACK_C_VISUAL_REDESIGN_TH.md` + `.kilo/plans/...` ให้ละเอียด) แล้วแก้ของจริงต่อ ไม่ใช่แค่รายงาน
+
+### ✅ Facts — ยืนยันแล้วด้วยโค้ดจริง
+
+1. **Track C Phase 1-12 (`docs/PLAN_TRACKS_TH.md`) ปิดครบทั้ง 12 phase** — รายละเอียด/หลักฐานอยู่ใน `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` (หัวข้อ "ตรวจสถานะจริงซ้ำเทียบโค๊ดปัจจุบัน — 8 ก.ย. 2026")
+2. **เอกสาร 2 ฉบับมีข้อมูลล้าสมัย (เขียนว่า "ยังไม่ implement" ทั้งที่โค้ดทำแล้ว) — แก้แล้วทั้งคู่:**
+   - `TRACK_C_VISUAL_REDESIGN_TH.md` §C1 (Twin Facade) — เขียนว่า "รอ approve" แต่ `src/hooks/useTwinIdentity.ts` (`PHASE0-TWIN-FACADE-001`) + `src/components/twin/Twin.tsx` facade **มีจริงและทำงานอยู่แล้ว**
+   - `.kilo/plans/1788755171904-docs-consultation-update.md` — PWA precache (`vite-plugin-pwa` + `src/sw.js` + `public/manifest.json`/`offline.html`) เขียนว่า "pending" แต่ **implement ครบแล้ว**
+3. **บั๊กชื่อทวิน 2 จุด พบจริง แก้จริง แยกเป็นงานเฉพาะ (ตามที่ขอ):**
+
+| # | ไฟล์ | บั๊ก | แก้แล้วเป็น |
+|---|------|-----|------------|
+| 1 | `src/components/dashboard/ExecutiveSummary.tsx` | empty-state UI ข้อความ hardcode "Twin ของคุณ" / "Your Twin" แม้มีชื่อทวินจริงอยู่แล้ว | ดึง `twin?.name` จริงผ่าน `useTwin()` — fallback เป็น "ทวิน"/"Twin" เมื่อยังไม่มีชื่อ |
+| 2 | `src/config/twin-prompts.ts` (สำคัญกว่า — กระทบ AI chat จริง) | `TWIN_BASE_PROMPT` + 12 `TWIN_WORLD_PROMPTS` ใช้ `{{ twinName }}` ผิดที่ — บางบรรทัดควรหมายถึง "ผู้ใช้" แต่ดันใส่ชื่อทวินเอง (เช่น "studied {{twinName}}'s patterns" ที่จริงต้องหมายถึงลาย pattern ของผู้ใช้) | แก้ทุก template ให้ `{{ twinName }}` หมายถึงชื่อทวินเท่านั้น (ใช้ตอนแนะนำตัว "Your name is {{twinName}}") ส่วนที่พูดถึงข้อมูลผู้ใช้ไม่ใช้ placeholder นี้แล้ว |
+
+**Verify บั๊กชื่อทวิน:** `npx tsc -b` → 0 errors · `npx oxlint` → 187/0 ไม่เปลี่ยน · `npx vitest run src/__tests__/TwinWorldsIntegration.test.ts src/lib/worlds/__tests__/worldsVerification.test.ts` → **91/91 ผ่าน** (14+77)
+
+4. **สาเหตุที่ "Phase 2-4 รู้สึกไม่เปลี่ยน" (คำถามของเจ้าของโปรเจกต์) — มี 2 สาเหตุ:**
+   - `STORY_NARRATIVE_LAYER_TH.md` เขียน scope ตัวเองไว้ชัดว่าครอบคลุมแค่ Phase 3/6/8/9/10/11/G2 — **ไม่รวม Phase 1 (Landing) และ Phase 4 (Analysis)** ตั้งแต่แรก จึงไม่มีอะไรถูกแก้ในสองหน้านั้นตาม design เดิม
+   - Phase 3 (Onboarding) มี narrative จริงอยู่แล้วในบางคอมโพเนนต์ลูก (`NovaConversation.tsx`, `AICreationSequence.tsx` ฯลฯ) แต่ `BirthdateInput.tsx` เป็นฟอร์มเปล่าไม่มี framing เลย — เป็นช่องโหว่จริงจุดเดียว
+
+### 🔧 สิ่งที่ทำเพิ่มจริงในรอบนี้ (ไม่ใช่แค่รายงาน — implement ตามที่เจ้าของโปรเจกต์ขอ)
+
+| Phase | ไฟล์ที่แก้ | สิ่งที่เพิ่ม |
+|-------|-----------|------------|
+| Phase 2 (Landing) | `src/pages/LandingPage.tsx` | เพิ่ม `next:` bridge line ใน Screen 3 CTA (TH+EN) เชื่อมจาก mood check-in → คุยกับ SELFPRINT → ทวินเริ่มเป็นรูปเป็นร่าง (`STORYBEAT-LANDING-001`) |
+| Phase 3 (Onboarding) | `src/components/onboarding/BirthdateInput.tsx` | เพิ่ม 1 บรรทัดเชื่อมว่าข้อมูลวันเกิดนี้ทวินใช้คำนวณ pattern เบื้องต้นจริง ไม่ใช่แค่ฟอร์มเปล่า (`STORYBEAT-BIRTHDATE-001`) |
+| Phase 4 (Analysis) | `src/styles/analysis.css` + `src/pages/AnalysisPage.tsx` | เพิ่ม staggered reveal animation ทั้ง 9 section (เคารพ `prefers-reduced-motion` ตาม pattern เดิมของ `RAFLOOP-001`) ให้หน้า Analysis รู้สึกเหมือนเปิดเผยเรื่องราวทีละส่วน ไม่ใช่โชว์ทุกอย่างพร้อมกัน (`STORYBEAT-ANALYSIS-001`) |
+
+**Verify Story Layer fixes:** `npx tsc -b` → 0 errors · `npx oxlint` → 187/0 ไม่เปลี่ยน (ไม่มี regression)
+
+### 🟡 Gaps — ยังไม่เสร็จ (บอกตรง ๆ ไม่ปิดบัง)
+
+- **Naming audit ไม่ครบ** — grep คำที่เกี่ยวกับชื่อทวินเจอ ~31 ไฟล์ ตรวจจริงแค่ ~7 ไฟล์ (2 บั๊กที่พบ) เหลือ **~24 ไฟล์ยังไม่ตรวจ** — งานแยกที่ต้องทำต่อ ยังไม่มี timeline
+- **Story Layer Phase 9** (World = scene 4 ส่วน Story/Pattern/Reflection/Decision) — ยังไม่ทำ ต้อง change-budget แยก (เกิน 8 ไฟล์)
+- **Story Layer Phase 10** (Choice→Consequence surfacing) — ยังไม่ทำ ติด prerequisite ข้อมูล P1.8 ที่ยังไม่มี
+- **Story Layer Phase 1 (Landing) และ Phase 4 (Analysis)** ตอนนี้มีแค่ "การเชื่อม/reveal เพิ่ม" ไม่ใช่ full narrative system ตาม §51 — เป็นแค่ patch เล็กแก้ความรู้สึก "ไม่เปลี่ยน" ไม่ใช่การ implement ทั้งระบบ Story Primitives/Layers/Modes
+
+### 💡 Recommendations
+
+- ทำ naming audit ที่เหลือ ~24 ไฟล์เป็นงานแยกที่มี checklist ชัด (ไฟล์ไหนเป็น UI copy vs AI prompt vs comment — ความเสี่ยงต่างกัน)
+- ถ้าจะทำ Story Layer Phase 9/10 ให้เต็มระบบ ต้องขอ approve แยกตาม §9 change-budget guardrail ของ `TRACK_C_VISUAL_REDESIGN_TH.md` (>8 ไฟล์)
+- Commit การแก้ไขทั้งหมดของรอบนี้ด้วยมือผ่าน git client ของเจ้าของโปรเจกต์เอง — git ใน sandbox นี้ hang ใช้งานไม่ได้
+
+---
+
 ## ⚡ สรุป
 
 > 📐 **Experience Architecture v2 = Proposed Architecture** — `docs/Experience Architecture v2.md`
@@ -349,8 +397,10 @@
 > ✅ **Track B + C0 เสร็จหมดแล้ว (โค้ด)** · **Track A** งานที่บล็อก UX/UI เสร็จแล้ว — แต่ **A1 (dead code 16+ ไฟล์)** และ **A7 (`as any` 114 จุด)** ยังเปิดอยู่ (ไม่บล็อก Track C)
 > 🔴 **ยังไม่เสร็จ:** Edge Functions ยังไม่ deploy (0/11 ใน Supabase) · passkey พัง · VoiceChat mock ยังอยู่ใน route จริง · `purge.txt` ยังไม่ได้สร้าง (แต่ filter-repo ติดตั้งแล้ว) · dist/ ล้าหลัง (ต้อง rebuild ใน local)
 > 🎯 **พร้อมเริ่ม Track C (UX/UI)** — แต่ห้ามอ้าง "100% product-verified" จนกว่าจะทำครบ 3 เงื่อนไข (ลดจาก 4 เพราะ migration 035 เสร็จแล้ว)
+> ✅ **8 ก.ย. 2026 (รอบที่ 7):** Track C Phase 1-12 ปิดครบแล้ว (ดูหัวข้อ "🆕 รอบที่ 7" ข้างบน) · แก้บั๊กชื่อทวิน 2 จุด (UI + AI prompt) verify แล้ว 91/91 tests · Story Layer Phase 2-4 เพิ่ม bridge/narrative/reveal จริง 3 จุด · 🟡 ยังเหลือ: naming audit ~24 ไฟล์ยังไม่ตรวจ + Story Layer Phase 9/10 ยังไม่ทำ
 
 ---
 
-**Generated:** 6 กันยายน 2026 (HEAD `da855c5`) — **อัปเดตรอบที่ 6:** A1 ปิด (6 orphan deleted) · A7 ปิด (47 casts) · Story/Narrative section 51 + docs · migration 035 apply แล้ว · git filter-repo ติดตั้ง v2.47.0 · rotate staging ไม่ต้องทำ
+**Generated:** 8 กันยายน 2026 (HEAD `da855c5`) — **อัปเดตรอบที่ 7:** Track C Phase 1-12 ปิดครบ · แก้บั๊กชื่อทวิน (ExecutiveSummary.tsx + twin-prompts.ts) · Story Layer Phase 2/3/4 patch จริง (Landing/BirthdateInput/Analysis) · 2 เอกสารล้าสมัยแก้แล้ว (TRACK_C C1 + kilo plan PWA) · ดูรายละเอียดเต็มใน `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` §10
+**อัปเดตรอบที่ 6 (6 ก.ย. 2026):** A1 ปิด (6 orphan deleted) · A7 ปิด (47 casts) · Story/Narrative section 51 + docs · migration 035 apply แล้ว · git filter-repo ติดตั้ง v2.47.0 · rotate staging ไม่ต้องทำ
 **Honesty Level:** 100% — แยก "ทำแล้ว verify แล้ว" ออกจาก "อ้างว่าทำแต่ยังไม่เสร็จ" ออกจาก "stub ที่เหลือ" · **ทุกข้อมูลต้อง verify กับ Supabase/Cloudflare/GitHub/scoop จริง**

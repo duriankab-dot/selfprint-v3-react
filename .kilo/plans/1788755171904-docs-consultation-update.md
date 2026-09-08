@@ -166,3 +166,20 @@
 3. ✅ **Offline scope:** Cache ทั้ง app shell + data API (twin_memories/decision_logs/daily_briefs)
 4. ✅ **Twin Unification (อัปเดต 7 ก.ย.):** **ทำ C1 facade** — แกนเดียว (`<Twin />` + `useTwinIdentity()`) แต่ presentation เปลี่ยนตาม context: ผู้ใช้ (maturity/state/fidelity/reduced-motion) และโลก (worldId → twinWorldContext) · core identity คงที่ (§34) · ต้อง A3 approval
 5. **Push notification backend:** Edge Function `send-push` มีอยู่แล้ว แต่ badge/icon ยังชี้ไฟล์ที่ไม่มี — แก้ sw.js แล้วจะทำงานถูกต้อง
+
+---
+
+## ตรวจสถานะจริงซ้ำเทียบโค๊ด — 8 ก.ย. 2026
+
+> **Phase 1, 2, 3 (PWA foundation + App Shell precache + Twin Facade C1) ทำเสร็จแล้วทั้งหมดจริง**
+> checklist ในไฟล์นี้ (ที่ยังไม่ติ๊ก ✅) ล้าสมัย — ตรวจจากโค้ดจริงยืนยัน:
+> - `useTwinIdentity.ts` + `Twin.tsx` facade มีจริง · `LivingTwin.tsx`/`TwinPresence.tsx` เรียก hook นี้แล้วทั้งคู่ ไม่มี logic ซ้ำเหลือ (3.1-3.6 ครบ)
+> - `manifest.json`: id/start_url="/"/theme_color #5B5CEB/background_color #0F1F3F/screenshots ครบ (1.3-1.6)
+> - `src/sw.js`: workbox precache(`self.__WB_MANIFEST`) + Supabase data cache stale-while-revalidate + push icon ชี้ `/icons/icon-192x192.png` จริง (2.1-2.5)
+> - `public/offline.html` มีจริง (2.6)
+> - `package.json` มี `vite-plugin-pwa` + `workbox-*` · `vite.config.ts` มี `VitePWA({strategies:'injectManifest'})`
+>
+> **ยังไม่ตรวจ:** Phase 4 (Visual Storytelling atmosphere tokens/motion categories) และ Phase 5
+> (UX/UI polish — Thai typography/safe-area) — ต้องตรวจแยกถ้าต้องการสถานะที่แน่ใจ
+> รายละเอียดเต็มอยู่ใน `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` ส่วน
+> "ตรวจสถานะจริงซ้ำเทียบโค๊ดปัจจุบัน — 8 ก.ย. 2026"

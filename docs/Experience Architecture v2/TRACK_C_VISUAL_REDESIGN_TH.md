@@ -601,3 +601,108 @@ Supabase SDK ถูกกลืนเข้าไป
 > **ทั้งหมดเป็นข้อเสนอ ไม่ใช่ commit — ต้องผ่าน §44 + do-not-touch zones ก่อน implement**
 > **⚠️ App shell precache แตะ build/deploy pipeline → ต้องขออนุมัติ** (คล้าย A4 / C2) ·
 > **Twin unification (C1) ยังเป็น A3 ที่ต้องขออนุมัติ**
+
+---
+
+## ตรวจสถานะจริงซ้ำเทียบโค๊ดปัจจุบัน — 8 ก.ย. 2026
+
+> **บริบท:** ผู้ใช้ขอให้ตรวจเอกสารนี้ + `STORY_NARRATIVE_LAYER_TH.md` +
+> `.kilo/plans/1788755171904-docs-consultation-update.md` ซ้ำอีกรอบ เทียบกับโค๊ดจริง ณ วันนี้
+> (หลัง Track C Phase 1-12 ทำเสร็จแล้วรอบก่อน) — ตามหลัก "Current repo state = source of truth"
+> ทุกข้อด้านล่างตรวจจากไฟล์จริง ไม่เชื่อสถานะเดิมในเอกสารนี้หรือ kilo plan
+
+### ✅ ข้อ 1 — C1 Twin Unification Facade: **ทำเสร็จแล้วจริง** (เอกสารเดิม + kilo plan ล้าสมัย)
+
+ทั้งเอกสารนี้ (ส่วน C1 ด้านบน) และ kilo plan ยังเขียนว่า C1 เป็น "ข้อเสนอ ยังไม่ implement ต้องขอ A3" —
+**ไม่จริงแล้ว ณ วันนี้**:
+
+| ไฟล์ | หลักฐาน |
+|------|---------|
+| `src/hooks/useTwinIdentity.ts` | มีจริง — comment ในไฟล์เองระบุชัดว่า dedup `LivingTwin.tsx:124-134` + `TwinPresence.tsx:327-336` (tag `PHASE0-TWIN-FACADE-001`) รวม evolutionStage/glowMult/dna/traits/twinState ไว้ที่เดียว |
+| `src/components/twin/Twin.tsx` | facade จริง — resolve FALLBACK/LOW/MEDIUM/HIGH ผ่าน `useTwinFidelity()` แล้วเรียก `useTwinIdentity()` |
+| `LivingTwin.tsx` (grep บรรทัด 27, 111) | เรียก `useTwinIdentity()` แล้ว — ไม่มี logic ซ้ำเหลือ |
+| `TwinPresence.tsx` (grep บรรทัด 35, 327) | เรียก `useTwinIdentity()` แล้วเช่นกัน — comment `PHASE0-TWIN-FACADE-001` ยืนยัน |
+| `HologramBirth.tsx` | เข้า facade ผ่าน `<Twin variant="birth">` แล้ว มี FALLBACK reduced-motion path (`TwinBirthFallback`) |
+
+**สรุป:** C1 ปิดแล้วจริง งาน 3.1-3.6 ของ kilo plan Phase 3 ทำครบ — **ไม่ต้องขอ A3 อีก เพราะทำไปแล้ว**
+เอกสารทั้งสองฉบับต้องแก้ส่วน C1 ให้ตรงกับความจริงนี้
+
+### ✅ ข้อ 2 — PWA Phase 1-2 (kilo plan): **ทำเสร็จแล้วจริง** ทั้งหมด
+
+| Gap เดิม (kilo plan) | สถานะจริงวันนี้ |
+|----------------------|-----------------|
+| P1 SW precache 3 ไฟล์เท่านั้น | ✅ แก้แล้ว — `src/sw.js` ใช้ `workbox-precaching` + `self.__WB_MANIFEST` (comment `PWA-PHASE2-001`) + cache Supabase data (`twin_memories`/`decision_logs`/`daily_briefs`) แบบ stale-while-revalidate |
+| P2 push icon ชี้ `/logo.png` ที่ไม่มีจริง | ✅ แก้แล้ว — `src/sw.js:241-242` ชี้ `/icons/icon-192x192.png` |
+| P3 screenshots ว่าง | ✅ แก้แล้ว — `manifest.json` มี 2 screenshots จริง |
+| P4 theme_color ไม่ตรงกัน | ✅ แก้แล้ว — ทั้ง `manifest.json` และ `index.html` เป็น `#5B5CEB` |
+| P5 background_color ขาวสวนธีม | ✅ แก้แล้ว — `manifest.json:10` เป็น `#0F1F3F` |
+| P6 ไม่มี manifest `id` | ✅ แก้แล้ว — `manifest.json:5` มี `id` |
+| P7 `start_url: /th/` บังคับ TH | ✅ แก้แล้ว — เป็น `/` แล้ว |
+| P8 offline UI ไม่เป็นแบรนด์ | ✅ แก้แล้ว — `public/offline.html` มีจริง + `sw.js` fallback ไปที่ไฟล์นี้ |
+| vite-plugin-pwa ยังไม่ติดตั้ง | ✅ ติดตั้งแล้ว — `package.json` มี `vite-plugin-pwa` + `workbox-*` 4 แพ็กเกจ · `vite.config.ts` มี `VitePWA({ strategies: 'injectManifest' })` |
+
+**สรุป:** kilo plan Phase 1-2 ทำครบ 100% แล้ว — checklist ในไฟล์ kilo plan (ที่ยังไม่ติ๊ก) ล้าสมัย ไม่ตรงกับโค้ด
+
+### 🟡 ข้อ 3 — Story/Narrative Layer เทียบ Phase 2-4: เหตุผลที่ "รู้สึกไม่เปลี่ยน"
+
+ผู้ใช้ตั้งข้อสังเกตว่า Phase 2-4 (Landing/Onboarding/Analysis) "ความรู้สึกไม่เปลี่ยนเลย" —
+ตรวจซ้ำแล้วพบสาเหตุจริง: **`STORY_NARRATIVE_LAYER_TH.md` ของมันเองระบุไว้ท้ายเอกสารว่า
+implementation จะเกิดใน "Track C Phase 3/6/8/9/10/11/G2" เท่านั้น** — **Phase 2 (Landing) และ
+Phase 4 (Analysis) ไม่เคยอยู่ใน scope ของ Story Layer ตั้งแต่แรก** ส่วนที่ Track C Phase 1-12
+รอบที่แล้วตรวจ "compliant" สำหรับ Phase 2/4 คือตรวจตาม **checklist โครงสร้าง** ของเอกสารนี้ (3D usage,
+progressive disclosure, SICE invisible, crawlability) — ซึ่งผ่านจริง — **แต่ไม่ใช่ lens การเล่าเรื่องของ
+Story Layer** ดังนั้นทั้งสองข้อสรุปถูกทั้งคู่ในขอบเขตของตัวเอง แต่ Story-layer gap ที่ระบุไว้สำหรับ
+Phase 2/4 (Landing ไม่มี narrative continuity ไปเฟสถัดไป · Analysis reveal ทุกอย่างพร้อมกันไม่มี pacing
+ทางอารมณ์) **ยังเปิดอยู่จริง ไม่เคยถูกกำหนดให้แก้ และไม่เคยถูกแก้**
+
+สำหรับ **Phase 3 (Onboarding)** ที่ Story Layer สั่งไว้ตรง ๆ — ตรวจซ้ำพบว่า **compliant บางส่วน**
+ไม่ใช่เต็มรูปแบบตามที่เคยสรุป: มีประโยค "Twin เข้าใจคุณดีขึ้น" อยู่จริงแค่ **จุดเดียว**
+(`Onboarding.tsx:638` เฉพาะขั้นตอนเลือกอารมณ์) ไม่ใช่ thread ต่อเนื่อง "Twin กำลังเรียนรู้จากคุณ"
+ทุกขั้นตอนตามที่เอกสาร Story Layer ต้องการ (Story Beat ต่อเนื่อง)
+
+**Phase 6/8/9/10/11** ที่ทำรอบก่อนได้ story-primitive บางส่วนจริง (ProvenanceStrip ใช้ข้อมูลจริงเท่านั้น,
+DailyBrief confidence จริง, WorldsHub/TwinChat มี Twin visual + topInsight, Memory Experience มี
+Questions จากดีซิชันที่ยังไม่มี outcome) — **แต่ไม่ใช่ระบบ 3 Narrative Layers / Rhythm Table / 5 Story
+Modes เต็มรูปแบบตามเอกสาร** เป็นแค่ fix จุดที่ตรงกับ guardrail "NO FAKE STORY" ของแต่ละ phase เท่านั้น
+
+**สรุปตรง ๆ:** Story/Narrative Layer **ไม่เคยถูก implement เป็นระบบ** ในรอบที่ผ่านมา — สิ่งที่ทำคือ
+"เอา insight/data จริงมาแสดงแทนของปลอม" ในบาง phase ไม่ใช่ "สร้างประสบการณ์เล่าเรื่องตาม §51"
+ถ้าต้องการให้ Phase 2-4 (และที่เหลือ) รู้สึกเปลี่ยนจริง ต้องเปิดเป็นงานใหม่แยกต่างหาก — ไม่ได้อยู่ใน
+scope ของ Track C Phase 1-12 ที่อนุมัติไปแล้ว
+
+### 🔴 ข้อ 4 — Twin naming propagation: พบบั๊กจริง ยังไม่แก้ (รอการตัดสินใจ)
+
+ผู้ใช้ถามว่าหลังตั้งชื่อทวินแล้ว ทุกจุดที่ผู้ใช้เห็น (เว็บ + AI) ต้องเปลี่ยนเป็นชื่อที่ตั้งเองไหม — ตรวจแล้ว:
+
+**ฐานข้อมูลก่อนตั้งชื่อ (ถูกต้องแล้ว):** `CoreAwakeningService.startAwakening()` รัน
+`SICEOrchestrator` ซึ่ง register engine จริงครบ 12 ตัว (`PersonalContextBuilder` ... 
+`DecisionIntelligenceEngineAdapter`) **ก่อน** ที่ผู้ใช้จะตั้งชื่อ (`initializeTwin()`) — ชื่อทวินถูกตั้ง
+*หลังจาก* มีข้อมูลจริงจาก 12 SICE แล้วเสมอ ไม่ใช่ตั้งชื่อก่อนแล้วค่อยมีข้อมูล — **ถูกต้องตามที่ควรเป็น**
+
+**Gap ที่ยืนยันแล้ว 2 จุด:**
+
+1. **`src/components/dashboard/ExecutiveSummary.tsx:136`** — ข้อความ "Twin ของคุณเพิ่งเริ่มต้น" /
+   "Your Twin has just started" เป็น generic ทั้งที่ `twin.name` มีค่าจริงแล้ว (ใช้ถูกที่อื่น เช่น
+   `TwinChat.tsx:246` `twin.name || 'Twin'`) — งานเล็ก แก้ได้ทันทีถ้าอนุมัติ
+
+2. **`src/config/twin-prompts.ts` (สำคัญกว่า)** — `TWIN_BASE_PROMPT` และ `TWIN_WORLD_PROMPTS`
+   ทั้ง 12 โลก ใช้ `{{ twinName }}` แทนที่ด้วย **ชื่อของทวินเอง** (ยืนยันจาก `TwinChat.tsx:246`
+   `callTwinAPI(apiMessages, twin.name || 'Twin', ...)`) แต่ข้อความ template เขียนแบบที่ควรจะเป็น
+   **ชื่อของผู้ใช้** แทน:
+   - `"You are {{ twinName }}'s AI Twin"` → กลายเป็น "คุณคือทวินของ [ชื่อทวินเอง]" ทั้งที่ควรเป็น
+     "คุณคือทวินของผู้ใช้ ชื่อของคุณ (ทวิน) คือ [ชื่อทวิน]"
+   - `"COMPLETE behavioral analysis of {{ twinName }}"` → บอก AI ว่าวิเคราะห์พฤติกรรม "ของตัวเอง"
+     ทั้งที่ analysis คือของผู้ใช้
+   - `"you've studied {{ twinName }}'s patterns deeply"` → เช่นเดียวกัน
+   
+   ผลคือ system prompt ที่ส่งให้ AI จริงตอนแชท **สับสนว่าใครคือใคร** — AI อาจอ้างถึงผู้ใช้ผิดเป็นชื่อทวิน
+   หรือเข้าใจผิดว่ากำลังวิเคราะห์ตัวเอง **นี่คือบั๊กจริงที่กระทบ AI ทุกครั้งที่แชทกับทวินที่ตั้งชื่อแล้ว**
+
+   **ยังไม่แก้** — ไฟล์นี้กระทบพฤติกรรม AI ที่ใช้งานจริงอยู่ (ใกล้เคียงโซน "AI pipeline" ที่ต้องขออนุมัติ
+   ก่อนแตะ) จึงรอคำสั่งชัดเจนก่อนแก้ ไม่แก้เงียบ ๆ
+
+**ยังตรวจไม่ครบ:** grep เจอ 31 ไฟล์ที่มีคำว่า "Twin"/"AI Twin"/"ทวิน" ในรูปแบบที่อาจเกี่ยวข้อง —
+ตรวจแล้วเฉพาะ `NavRail.tsx`/`BottomNav.tsx` (แท็บเมนู "AI Twin" — เป็นชื่อหมวดหมู่ ไม่ใช่บั๊ก),
+`MePage.tsx:132` (หัวข้อ section — ไม่ใช่บั๊ก), `TwinNaming.tsx` (หน้าตั้งชื่อเอง — ก่อนมีชื่อ ถูกต้องอยู่แล้ว
+ที่เป็น generic), `ExecutiveSummary.tsx` และ `twin-prompts.ts` (2 gap ข้างบน) — **ที่เหลืออีก ~25 ไฟล์
+ยังไม่ได้ไล่ตรวจทีละจุด** ต้องเป็นงานแยกถ้าต้องการความครบถ้วน 100%

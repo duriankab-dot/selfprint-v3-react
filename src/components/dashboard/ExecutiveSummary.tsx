@@ -22,6 +22,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { useTwin } from '@/context/TwinContext';
 import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
@@ -61,6 +62,12 @@ export const ExecutiveSummary: React.FC = () => {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isTh = language === 'th';
+  const { twin } = useTwin();
+  // TWINNAME-EXECSUMMARY-001: the empty-state heading used to say generic
+  // "Your Twin" even after the Twin already has a real given name (twin.name
+  // is set right after naming, well before there's enough data for a full
+  // summary) — fall back to the generic phrase only when truly unnamed yet.
+  const twinLabel = twin?.name || (isTh ? 'ทวิน' : 'Twin');
   const KNOWLEDGE_LABEL = isTh ? KNOWLEDGE_LABEL_TH : KNOWLEDGE_LABEL_EN;
 
   // Stable instances (same pattern as IntelligencePanel — React Query dedupes calls)
@@ -133,12 +140,12 @@ export const ExecutiveSummary: React.FC = () => {
       <div className="exec-summary exec-summary--empty">
         <div className="exec-summary__empty-icon">🌱</div>
         <h2 className="exec-summary__empty-title">
-          {isTh ? 'Twin ของคุณเพิ่งเริ่มต้น' : 'Your Twin has just started'}
+          {isTh ? `${twinLabel} เพิ่งเริ่มต้น` : `${twinLabel} has just started`}
         </h2>
         <p className="exec-summary__empty-body">
           {isTh
-            ? 'บันทึกความทรงจำหรือทำ reflection สัก 2–3 ครั้ง เพื่อให้ AI Twin เริ่มเรียนรู้และเข้าใจตัวคุณ'
-            : 'Log a memory or do a few reflections so your AI Twin can start learning and understanding you'}
+            ? `บันทึกความทรงจำหรือทำ reflection สัก 2–3 ครั้ง เพื่อให้ ${twinLabel} เริ่มเรียนรู้และเข้าใจตัวคุณ`
+            : `Log a memory or do a few reflections so ${twinLabel} can start learning and understanding you`}
         </p>
       </div>
     );

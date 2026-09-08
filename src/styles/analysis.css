@@ -154,6 +154,31 @@
   border-bottom: 1px solid var(--color-border, #e9ecef);
 }
 
+/* STORYBEAT-ANALYSIS-001 (Track C Story Layer, §51): STORY_NARRATIVE_LAYER_TH.md
+   flagged Analysis as "reveal เร็วเกินไป — ผลวิเคราะห์โผล่มาทั้งหมดพร้อมกัน" — the
+   accordion already collapses sections 02-09 (APPSHELL-003 above), but every
+   header still rendered in the DOM instantly with no sense of "being
+   revealed". A short staggered fade-in per section (index-based delay) gives
+   the page a moment of discovery on first paint without touching any data —
+   purely presentational, and skipped entirely for prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .analysis__section {
+    animation: analysis-section-reveal 0.5s ease-out both;
+    animation-delay: calc(var(--reveal-index, 0) * 70ms);
+  }
+}
+
+@keyframes analysis-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .analysis__section--last {
   border-bottom: none;
 }
