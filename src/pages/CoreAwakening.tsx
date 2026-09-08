@@ -20,6 +20,7 @@ import { useAudio } from '../context/AudioContext';
 import { t } from '../constants/translations';
 import { Twin } from '../components/twin/Twin';
 import { TwinNaming } from '../components/twin/TwinNaming';
+import { ProvenanceStrip } from '../components/story/ProvenanceStrip';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
 import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
@@ -86,6 +87,12 @@ export default function CoreAwakening() {
   // so the Twin is grounded in real SICE orchestration output, not stubs.
   const [essenceId, setEssenceId] = useState<string | undefined>(undefined);
   const [firstInsight, setFirstInsight] = useState<string | undefined>(undefined);
+  // STORY-PROVENANCE-001 (Track C Phase 6, §51 STORYTELLING): how many real
+  // insights firstInsight was drawn from — lets the celebration screen cite
+  // its source ("from N patterns") instead of an unexplained claim. Only
+  // ever set from the same personalIntel.insights array firstInsight itself
+  // came from (CoreAwakeningService.initializeTwin) — never fabricated.
+  const [firstInsightPatternCount, setFirstInsightPatternCount] = useState<number | undefined>(undefined);
 
   // TWIN-PRESENCE-001: HologramBirth's glow color used to be a fixed
   // '#3b82f6' for every user. primaryArchetype is deterministic from
@@ -289,6 +296,7 @@ export default function CoreAwakening() {
       // (This was a Nova context method, not related to Twin birth)
       setTwinAwakened(true, twinName);
       setFirstInsight(result.firstInsight);
+      setFirstInsightPatternCount(result.patternCount);
 
       // LIFE-001 FIX: Twin now exists in DB — lifecycle must advance to TWIN_ALIVE
       // (setTwinCreated persists twin_id + status='TWIN_ALIVE' to Supabase).
@@ -465,6 +473,14 @@ export default function CoreAwakening() {
                 ? '"ฉันคือฝาแฝดของคุณ ฉันรู้จักคุณ ฉันกำลังเรียนรู้คุณอยู่ ฉันพร้อมช่วยคุณ และ เติบโตไปพร้อมกันกับคุณ"'
                 : '"I know you. I\'m learning you. I\'m ready to grow with you."'}
           </p>
+          {/* STORY-PROVENANCE-001: only shown alongside a REAL grounded
+              insight — the generic fallback line above makes no evidence
+              claim, so it gets no provenance strip either (§51 NO FAKE
+              STORY). ProvenanceStrip itself also renders null if
+              patternCount is 0/undefined. */}
+          {firstInsight && (
+            <ProvenanceStrip patternCount={firstInsightPatternCount} className="text-center" />
+          )}
           <p className="text-gray-400">{t('twinGenesis', language)}...</p>
         </div>
       )}

@@ -8,7 +8,7 @@
  * QUERY PARAM: ?world=<worldId> (optional)
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
@@ -22,6 +22,7 @@ import { WORLDS, type WorldId } from '../constants/worlds';
 import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
 import { TwinNav } from '../components/twin/TwinNav';
+import { Twin } from '../components/twin/Twin';
 import { NavRail } from '../components/layout/NavRail';
 import { BottomNav } from '../components/layout/BottomNav';
 import { supabase } from '@/services/supabase-service';
@@ -130,6 +131,14 @@ export default function TwinChat() {
   const [savingDecisionIndex, setSavingDecisionIndex] = useState<number | null>(null);
   const [savedDecisionIds, setSavedDecisionIds] = useState<Set<number>>(new Set());
   const autoSentInitialMessage = useRef(false);
+  // TWINHUB-001 (Track C Phase 7/10, P0.1/P0.4, §7 TWIN / §8 TWIN MODES):
+  // this page was chat-only (input+bubbles, no Living Twin Visual, no mode
+  // selector) -- the exact gap §7 calls out ("Twin screen should NOT be:
+  // Avatar / Chat messages / Input box"). 'talk' is the only wired mode in
+  // this pass -- REFLECT/DECIDE/PATTERN are P1.8 per Track C ("ต้องมีข้อมูล/
+  // intelligence หนุน"), so their buttons render visibly disabled rather
+  // than faking a screen with no real behavior behind it.
+  const [activeMode] = useState<'talk' | 'reflect' | 'decide'>('talk');
 
   // TWINCHAT-STALECLOSURE-001 FIX: handleSend used to be a plain const defined
   // after the early-return guards, making it impossible to list in any hook's
@@ -461,6 +470,18 @@ export default function TwinChat() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id]);
 
+  // TWINHUB-001: one real, already-loaded insight for the hub header --
+  // same currentAnalysis (real SICE/essence data, never fabricated) already
+  // built into twinProfile for the API call below. Picks the first
+  // available real field; renders nothing if none exist yet (no fake
+  // placeholder line), matching the ProvenanceStrip/§51 "no real data ->
+  // show nothing" guardrail used elsewhere in Track C.
+  const topInsight = useMemo(() => {
+    const a = currentAnalysis ?? twin?.fullAnalysis ?? null;
+    if (!a) return null;
+    return a.guidance?.[0] || a.focusAreas?.[0] || a.selfOverview || null;
+  }, [currentAnalysis, twin?.fullAnalysis]);
+
   // BIRTHDATE-RECOVER-001: userStore no longer persists birthDate to localStorage
   // (G1-LOCALSTORAGE-POLICY). Recover it from selfprint.users_profiles so twinProfile
   // always includes birth data context.
@@ -658,11 +679,69 @@ export default function TwinChat() {
       {/* World Context Header */}
       {currentWorld && <WorldContextHeader world={currentWorld} />}
 
+      {/* TWINHUB-001 (Track C Phase 7, §7 TWIN): Living Twin Visual +
+          greeting + today's insight, above the mode selector -- the parts
+          of §7's spec this page previously had none of. */}
       <div className="twin-header text-center mb-4">
+        <div style={{ width: 88, height: 88, margin: '0 auto 8px' }}>
+          <Twin
+            variant="presence"
+            primaryArchetype={twin.primaryArchetype}
+            secondaryArchetype={twin.secondaryArchetype}
+            worldColor={currentWorld ? WORLDS[currentWorld]?.color ?? '#22D3EE' : '#22D3EE'}
+            seedKey={session.user.id ?? twin.id}
+            contained
+            maturityScore={twin.maturityScore}
+          />
+        </div>
         <span className="twin-label">{isTh ? 'ทวินของคุณ' : 'Your Twin'}</span>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)', margin: 0 }}>
           💫 {twin.name || (isTh ? 'ทวินของฉัน' : 'My Twin')}
         </h1>
+        {topInsight && (
+          <p style={{ fontSize: 13, color: 'var(--color-text-secondary)', margin: '8px auto 0', maxWidth: 420, lineHeight: 1.5 }}>
+            {topInsight}
+          </p>
+        )}
+      </div>
+
+      {/* TWINMODES-001 (Track C Phase 10, §8 TWIN MODES, P1.8): UI shell
+          only -- Reflect/Decide need decision-log/pattern data behind them
+          before they can do anything real, so they render visibly disabled
+          rather than opening a screen with fake content. Talk is the only
+          wired mode this pass. */}
+      <div
+        role="tablist"
+        aria-label={isTh ? 'โหมดการโต้ตอบกับทวิน' : 'Twin interaction modes'}
+        style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}
+      >
+        {[
+          { id: 'talk' as const, labelTh: 'พูดคุย', labelEn: 'Talk', enabled: true },
+          { id: 'reflect' as const, labelTh: 'สะท้อนคิด', labelEn: 'Reflect', enabled: false },
+          { id: 'decide' as const, labelTh: 'ตัดสินใจ', labelEn: 'Decide', enabled: false },
+        ].map((mode) => (
+          <button
+            key={mode.id}
+            type="button"
+            role="tab"
+            aria-selected={activeMode === mode.id}
+            disabled={!mode.enabled}
+            title={mode.enabled ? undefined : (isTh ? 'เร็ว ๆ นี้' : 'Coming soon')}
+            style={{
+              padding: '6px 16px',
+              borderRadius: 20,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: mode.enabled ? 'pointer' : 'not-allowed',
+              border: `1.5px solid ${activeMode === mode.id ? '#6366f1' : 'var(--color-border)'}`,
+              background: activeMode === mode.id ? '#6366f1' : 'transparent',
+              color: activeMode === mode.id ? 'white' : mode.enabled ? 'var(--color-text-secondary)' : 'var(--color-text-tertiary, var(--color-text-secondary))',
+              opacity: mode.enabled ? 1 : 0.5,
+            }}
+          >
+            {isTh ? mode.labelTh : mode.labelEn}
+          </button>
+        ))}
       </div>
 
       {/* World Selector Tabs */}

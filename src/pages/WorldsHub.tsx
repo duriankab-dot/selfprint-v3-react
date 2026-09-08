@@ -9,12 +9,15 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { getAllWorlds, getWorldArticles } from '../constants/worlds';
+import { getAllWorlds, getWorldArticles, WORLDS } from '../constants/worlds';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { getSeoMetadata } from '../constants/seoMetadata';
 import { NavRail } from '../components/layout/NavRail';
 import { BottomNav } from '../components/layout/BottomNav';
+import { Twin } from '../components/twin/Twin';
+import { useTwin } from '../context/TwinContext';
+import { useAuth } from '../context/AuthContext';
 import '../styles/worlds-hub.css';
 
 /**
@@ -41,6 +44,8 @@ export default function WorldsHub() {
   const { language } = useLanguage();
   const isTh = language === 'th';
   const seoData = getSeoMetadata('worlds', language);
+  const { twin } = useTwin();
+  const { session } = useAuth();
 
   return (
     <>
@@ -69,6 +74,25 @@ export default function WorldsHub() {
       <div className="worlds-hub" data-testid="worlds-container">
         {/* Header */}
         <div className="wh-header">
+          {/* TWINGUIDE-001 (Track C Phase 9, G1 / §4.5 / §13): the subtitle
+              below already claimed "Twin as your guide", but no Twin was
+              actually visible anywhere on this page -- WorldsHub was a bare
+              grid, exactly the "directory" pattern §13 calls out. Reusing
+              the same Twin facade WorldDetail.tsx already renders per-world
+              (contained, small, decorative) makes the guide real instead of
+              just a line of copy. Self world's own color (#22D3EE) is used
+              as the aura tint since no single world is selected yet here. */}
+          <div style={{ width: 72, height: 72, margin: '0 auto 12px' }}>
+            <Twin
+              variant="presence"
+              primaryArchetype={twin?.primaryArchetype}
+              secondaryArchetype={twin?.secondaryArchetype}
+              worldColor={WORLDS.self.color}
+              seedKey={session?.user?.id ?? twin?.id}
+              contained
+              maturityScore={twin?.maturityScore}
+            />
+          </div>
           <h1>✨ {isTh ? '12 โลกแห่งชีวิต' : 'The 12 Worlds'}</h1>
           <p className="wh-subtitle">
             {isTh

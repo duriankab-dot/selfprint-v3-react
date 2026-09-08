@@ -24,6 +24,12 @@ export interface AwakeningResult {
   twin?: Twin;
   /** P0-C Gap #4: one grounded insight, for the UI to show instead of a generic line */
   firstInsight?: string;
+  /** Track C Phase 6 (§51 STORYTELLING — Story Provenance Strip): number of
+   *  real insights behind firstInsight, so the UI can cite its source
+   *  ("from N patterns") instead of showing an unexplained claim. Same
+   *  personalIntel.insights array firstInsight[0] came from — never a
+   *  separate/fabricated count. */
+  patternCount?: number;
 }
 
 /**
@@ -582,6 +588,7 @@ export async function initializeTwin(
       twinId: newTwin.id,
       twin: newTwin,
       firstInsight: groundedInsight,
+      patternCount: personalIntel?.insights?.length,
     };
   } catch (error) {
     console.error('ข้อผิดพลาดในการ initialize Twin:', error);
@@ -604,6 +611,18 @@ export async function initializeTwin(
  */
 export function celebrateTwinAwakening(): void {
   try {
+    // CONFETTI-RAF-001 (Track C Phase 5, §24 MOTION): this 100-particle rAF
+    // canvas loop had zero prefers-reduced-motion check — the exact RAFLOOP-001
+    // gap already fixed on EvolutionaryVisualSystem.tsx (landing page), just
+    // never applied here. The Twin birth moment itself is unaffected (the
+    // Twin facade's own FALLBACK tier already handles that per Twin.tsx) —
+    // this only skips the decorative confetti overlay for users who asked
+    // for less motion (vestibular disorders, motion sensitivity).
+    const reduceMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
     // Confetti effect
     const canvas = document.createElement('canvas');
     canvas.style.position = 'fixed';

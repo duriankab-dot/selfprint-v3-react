@@ -248,8 +248,12 @@ export function DailyBrief() {
               id: obs.id,
               text: obs.detail,
               category: obs.category,
-              confidence: 0.7, // Can be passed from observations if available
-              evidenceCount: 3, // Can be calculated if available
+              // STUBFIX-BRIEF-001 (Track C Phase 8): obs.confidence/evidenceCount
+              // were already computed real values (rendered correctly a few
+              // lines up in ObservationCard) but this second consumer had
+              // hardcoded placeholders (0.7 / 3) instead of reading them.
+              confidence: obs.confidence,
+              evidenceCount: obs.evidenceCount,
             }))}
             onFeedbackUpdate={() => {
               // Invalidate accuracy metrics เมื่อ user ให้ feedback

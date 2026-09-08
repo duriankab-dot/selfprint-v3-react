@@ -11,7 +11,7 @@
  * วางที่ด้านบนของ Dashboard แทน header เดิม
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -311,7 +311,22 @@ export function TodaySection({ hasHistory = false, variant = 'full' }: TodaySect
   const isTh = language === 'th';
   const SECTION_LIBRARY = isTh ? SECTION_LIBRARY_TH : SECTION_LIBRARY_EN;
 
-  const [timeSlot] = useState<TimeSlot>(getTimeSlot);
+  // TIMESLOT-STALE-001 (Track C Phase 8): timeSlot used to be computed once
+  // via useState's lazy initializer and never touched again -- a user who
+  // kept Dashboard open across an hour boundary (e.g. 11:59 -> 12:01) kept
+  // seeing "Good morning" and morning-priority cards until a full remount.
+  // Re-checks every minute (cheap: one Date + hour comparison) and only
+  // triggers a re-render when the slot actually changes.
+  const [timeSlot, setTimeSlot] = useState<TimeSlot>(getTimeSlot);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeSlot((prev) => {
+        const next = getTimeSlot();
+        return next === prev ? prev : next;
+      });
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, []);
   const todayStr = getTodayLocalized(isTh);
 
   const name = session?.user?.user_metadata?.full_name
@@ -354,7 +369,13 @@ export function TodaySection({ hasHistory = false, variant = 'full' }: TodaySect
       }}>
         {todayStr} · {slotLabels[timeSlot]}
       </div>
-      <h1 style={{
+      {/* H1FIX-TODAY-001 (Track C Phase 8): this greeting is a section header
+          inside Dashboard.tsx (Twin presence sits above it, ExecutiveSummary
+          below), not the page's own title -- an <h1> here meant the page had
+          no single, unique top-level heading. h2 matches the pattern already
+          used for every other section header on this page and elsewhere
+          (AnalysisPage.tsx, LandingPage.tsx section 2). */}
+      <h2 style={{
         fontSize: 24,
         fontWeight: 700,
         color: 'var(--color-text-primary)',
@@ -362,7 +383,7 @@ export function TodaySection({ hasHistory = false, variant = 'full' }: TodaySect
         lineHeight: 1.3,
       }}>
         {greeting}
-      </h1>
+      </h2>
     </div>
   );
 
