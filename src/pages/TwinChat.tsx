@@ -32,6 +32,8 @@ import * as DecisionService from '../services/DecisionService';
 import { ChoiceConsequence } from '../components/twin/ChoiceConsequence';
 import type { Decision, DecisionOutcome } from '../types/decision';
 import { StoryModeSelector } from '../components/story/StoryModeSelector'; // §51
+import { Helmet } from 'react-helmet-async';
+import { getSeoMetadata } from '../constants/seoMetadata';
 
 interface Message {
   role: 'user' | 'twin';
@@ -116,6 +118,7 @@ export default function TwinChat() {
   // — it rendered with raw gray/blue Tailwind utilities instead. Both fixed
   // below: isTh gates every UI string, and the JSX now uses the Twin theme.
   const isTh = language === 'th';
+  const seoData = getSeoMetadata('twin', language);
   // TWIN-MEMORY-001: pull onboarding data that Nova collected so Twin is
   // "intelligent from birth" — knows the user before the first message.
   const userProfile = useUserStore(s => s.profile);
@@ -703,7 +706,17 @@ export default function TwinChat() {
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <>
+      {seoData && (
+        <Helmet>
+          <title>{seoData.title}</title>
+          <meta name="description" content={seoData.description} />
+          {seoData.keywords && <meta name="keywords" content={seoData.keywords.join(', ')} />}
+          {seoData.ogImage && <meta property="og:image" content={seoData.ogImage} />}
+          <link rel="canonical" href={`/${language}/chat/twin`} />
+        </Helmet>
+      )}
+      <div className="flex flex-col h-screen">
       <NavRail />
       {/* TWINCHAT-EXIT-001 FIX: this page only ever rendered NavRail
           (desktop-only, hidden below 1024px) and TwinNav's own BackButton
@@ -950,5 +963,6 @@ export default function TwinChat() {
       </div>
       </div>
     </div>
+    </>
   );
 }

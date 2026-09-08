@@ -23,6 +23,8 @@ import { useEmotion } from '@/context/EmotionContext';
 import type { Mood } from '@/context/EmotionContext';
 import { useUserStore } from '@/store/userStore';
 import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology';
+import { MetaTagManager } from '@/components/MetaTagManager';
+import { getSeoMetadata } from '@/constants/seoMetadata';
 import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
 import { supabase } from '@/services/supabase-service';
@@ -177,6 +179,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   const navigate = useNavigate();
   const { language } = useLanguage();
   const isTh = language === 'th';
+  const seoData = getSeoMetadata('onboarding', language);
   const { mood, hasCheckedIn } = useEmotion();
   const { updateProfile, profile } = useUserStore();
   const { session, loading: authLoading } = useAuth();
@@ -655,8 +658,18 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   void step; // used by StoryBeatIndicator below
 
   return (
-    <div
-      style={{
+    <div style={{ display: 'contents' }}>
+      {seoData && (
+        <MetaTagManager
+          title={seoData.title}
+          description={seoData.description}
+          keywords={seoData.keywords?.join(', ')}
+          ogImage={seoData.ogImage}
+          canonicalUrl={`/${language}/onboarding`}
+        />
+      )}
+      <div
+        style={{
         minHeight: '100vh',
         backgroundColor: 'var(--color-bg-primary)',
         color: 'var(--color-text-primary)',
@@ -865,6 +878,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       {step === 'claim-account' && (
         <ClaimAccount data={pendingOnboardingData} onDone={handleComplete} />
       )}
+    </div>
     </div>
   );
 }

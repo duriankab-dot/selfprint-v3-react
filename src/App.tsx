@@ -22,6 +22,7 @@ import { PopupProvider } from './context/PopupContext';
 import { EvolutionProvider } from './context/EvolutionContext';
 import { SubscriptionProvider } from './context/SubscriptionContext';
 import { EnvironmentProvider } from './context/EnvironmentContext';
+import { SFXProvider } from './components/audio/SFXProvider';
 // NOVAPROV-001 FIX: NovaChat.tsx:23 calls useNova() unconditionally, but
 // NovaProvider was never mounted anywhere in the app — every visit to
 // /chat/nova (and /chat, which redirects there) threw "useNova must be used
@@ -310,7 +311,8 @@ function App() {
                       <SubscriptionProvider>
                       <ConditionalExperience>
                         <AudioProvider>
-                          <EnvironmentProvider>
+                          <SFXProvider>
+                            <EnvironmentProvider>
                             <EvolutionProvider>
                               <PopupProvider>
                               {/* LANG-PROVIDER-001 FIX: TwinEvolution and PWAInstallPrompt both
@@ -342,7 +344,8 @@ function App() {
                             </PopupProvider>
                           </EvolutionProvider>
                         </EnvironmentProvider>
-                      </AudioProvider>
+                          </SFXProvider>
+                        </AudioProvider>
                     </ConditionalExperience>
                   </SubscriptionProvider>
                   </WorldProvider>
