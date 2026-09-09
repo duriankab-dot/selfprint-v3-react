@@ -117,6 +117,39 @@ export const SEO_METADATA: Record<string, PageMetadata> = {
     },
   },
 
+  // Onboarding — the post-signup wizard (SEO: mostly noindex in practice,
+  // still needs meta for share + social preview of the flow)
+  onboarding: {
+    en: {
+      title: 'Create Your AI Twin — SelfPrint Onboarding',
+      description: 'Answer a few questions and SelfPrint’s 12 SICE Core Engines build your personal AI Twin in real time. No signup friction — start your journey.',
+      keywords: ['onboarding', 'create AI twin', 'personal intelligence', 'SELFPRINT', 'quick setup'],
+      ogImage: '/og-default-en.jpg',
+    },
+    th: {
+      title: 'สร้าง AI Twin — เริ่มสร้าง SELFPRINT',
+      description: 'ตอบคำถามไม่กี่ข้อ แล้ว 12 Core Engine ของ SELFPRINT สร้าง AI Twin ส่วนบุคคลของคุณแบบเรียลไทม์ เริ่มการเดินทางของคุณ',
+      keywords: ['สร้าง AI Twin', 'เริ่มต้น', 'SELFPRINT', 'ติดตั้งรวดเร็ว', 'วิเคราะห์ชีวิต'],
+      ogImage: '/og-default-th.jpg',
+    },
+  },
+
+  // Twin Chat — the persistent personal-expert conversation page
+  twin: {
+    en: {
+      title: 'Chat with Your AI Twin | SelfPrint',
+      description: 'Talk to your personal AI Twin — an intelligence built from your values, patterns and decisions. Get perspectives that actually match who you are.',
+      keywords: ['AI twin', 'chat', 'personal assistant', 'SELFPRINT', 'conversation'],
+      ogImage: '/og-default-en.jpg',
+    },
+    th: {
+      title: 'คุยกับ AI Twin ของคุณ | SelfPrint',
+      description: 'คุยกับ AI Twin ส่วนบุคคลของคุณ — ความฉลาดที่สร้างจากค่านิยม แบบแผน และการตัดสินใจของคุณ รับมุมมองที่ตรงกับคุณจริงๆ',
+      keywords: ['AI Twin', 'แชท', 'ผู้ช่วยส่วนบุคคล', 'SELFPRINT', 'สนทนา'],
+      ogImage: '/og-default-th.jpg',
+    },
+  },
+
   // Dashboard (Protected - no indexing, still has meta for share)
   dashboard: {
     en: {

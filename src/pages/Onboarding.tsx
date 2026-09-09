@@ -28,7 +28,12 @@ import { MetaTagManager } from '@/components/MetaTagManager';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
-import { supabase } from '@/services/supabase-service';
+// ONBLAZY-001 (9 ก.ย. 2026): this page used to `import { supabase }` for a
+// single fire-and-forget checkpoint write — that put the vendor-supabase
+// chunk into the /onboarding route graph, the main Lighthouse target path
+// (new users auto-initialize here). The write is now served by the lazy
+// client below.
+import { getSupabaseClient } from '@/lib/supabase/client-lazy';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 // GAP-2: Quick Analysis → Full Journey data continuity
 import { useAnalysisStore } from '@/store/analysisStore';
@@ -568,28 +573,32 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       // server-side resume can confirm the user truly finished onboarding
       // (complements lifecycleStore status + resumedAt checks). Fire-and-
       // forget — a checkpoint write failure must never block navigation.
-      if (supabase) {
-        supabase
-          .from('onboarding_checkpoints')
-          .upsert(
-            {
-              user_id: session.user.id,
-              current_step: 'complete',
-              data: {
-                completedAt: new Date().toISOString(),
-                accuracy: pendingOnboardingData.blueprint.accuracyLevel,
-                prototypeCore: pendingOnboardingData.blueprint.prototypeCore,
+      void getSupabaseClient()
+        .then((supabase) =>
+          supabase
+            .from('onboarding_checkpoints')
+            .upsert(
+              {
+                user_id: session.user.id,
+                current_step: 'complete',
+                data: {
+                  completedAt: new Date().toISOString(),
+                  accuracy: pendingOnboardingData.blueprint.accuracyLevel,
+                  prototypeCore: pendingOnboardingData.blueprint.prototypeCore,
+                },
+                saved_at: new Date().toISOString(),
               },
-              saved_at: new Date().toISOString(),
-            },
-            { onConflict: 'user_id' }
-          )
-          .then(({ error }) => {
-            if (error) {
-              console.warn('onboarding_checkpoints upsert failed (non-blocking):', error.message);
-            }
-          });
-      }
+              { onConflict: 'user_id' }
+            )
+        )
+        .then(({ error }) => {
+          if (error) {
+            console.warn('onboarding_checkpoints upsert failed (non-blocking):', error.message);
+          }
+        })
+        .catch(() => {
+          // Non-critical: SDK unavailable
+        });
     }
 
     if (onComplete) {

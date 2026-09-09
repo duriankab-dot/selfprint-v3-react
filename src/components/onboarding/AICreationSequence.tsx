@@ -16,7 +16,7 @@ import {
   initializeContextFromOnboarding,
   validateOnboardingData,
 } from '@/lib/intelligence/PersonalContextInitializer';
-import { supabase } from '@/services/supabase-service';
+import { getSupabaseClient } from '@/lib/supabase/client-lazy';
 import { useLanguage } from '@/context/LanguageContext';
 import type { AnalysisResponse } from '@/lib/types/astrovera';
 import type { Mood } from '@/context/EmotionContext';
@@ -90,36 +90,29 @@ export const AICreationSequence: React.FC<AICreationSequenceProps> = ({
           const context = await initializeContextFromOnboarding(onboardingData);
 
           // P0 #1 FIX: Save to Supabase instead of sessionStorage
-          if (supabase) {
-            try {
-              const { error } = await supabase
-                .from('personal_contexts')
-                .insert({
-                  user_id: onboardingData.userId,
-                  context_data: context,
-                  initialized_at: new Date().toISOString(),
-                })
-                .select('id')
-                .single();
+          try {
+            const supabase = await getSupabaseClient();
+            const { error } = await supabase
+              .from('personal_contexts')
+              .insert({
+                user_id: onboardingData.userId,
+                context_data: context,
+                initialized_at: new Date().toISOString(),
+              })
+              .select('id')
+              .single();
 
-              if (error) {
-                console.warn('Failed to save PersonalContext to Supabase:', error);
-                // Fallback: still use sessionStorage if Supabase fails
-                sessionStorage.setItem(
-                  'initialPersonalContext',
-                  JSON.stringify(context)
-                );
-              }
-            } catch (supabaseError) {
-              console.warn('Error saving to Supabase, falling back to sessionStorage:', supabaseError);
-              // Fallback to sessionStorage
+            if (error) {
+              console.warn('Failed to save PersonalContext to Supabase:', error);
+              // Fallback: still use sessionStorage if Supabase fails
               sessionStorage.setItem(
                 'initialPersonalContext',
                 JSON.stringify(context)
               );
             }
-          } else {
-            // Supabase unavailable, fallback to sessionStorage
+          } catch (supabaseError) {
+            console.warn('Error saving to Supabase, falling back to sessionStorage:', supabaseError);
+            // Supabase unavailable (or failed) — sessionStorage fallback
             sessionStorage.setItem(
               'initialPersonalContext',
               JSON.stringify(context)

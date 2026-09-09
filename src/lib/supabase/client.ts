@@ -5,6 +5,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { registerClient, getRegisteredClient } from './client-registry';
 
 /**
  * Initialize Supabase client with project URL and anon key
@@ -32,6 +33,15 @@ function readProcessEnv(name: string): string | undefined {
 let _client: SupabaseClient | null = null;
 function getClient(): SupabaseClient {
   if (_client) return _client;
+  // LAZYSHARED-001: reuse a client already built by client-lazy.ts
+  // (getSupabaseClient) instead of constructing a second SupabaseClient —
+  // two gotrue singletons on one page load would double the realtime
+  // connections and warn "GotrueClient multiple instances".
+  const shared = getRegisteredClient() as SupabaseClient | null;
+  if (shared) {
+    _client = shared;
+    return shared;
+  }
   // CF-CREDS-002 (6 Sep 2026): MUST use literal property access so Vite
   // statically inlines the value at build time. Dynamic bracket access like
   // import.meta.env?.[name] is NOT replaced by Vite's transform → undefined
@@ -52,6 +62,9 @@ function getClient(): SupabaseClient {
     );
   }
   _client = createClient(supabaseUrl, supabaseAnonKey);
+  // LAZYSHARED-001: publish to the shared registry so client-lazy.ts's
+  // getSupabaseClient() reuses this instance.
+  registerClient(_client);
   return _client;
 }
 

@@ -4,7 +4,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { classifyEntryPath, ENTRY_PATH_ROUTES } from '@/lib/entry/entryResolver';
 import type { EntryPath } from '@/lib/entry/entryResolver';
-import { supabase } from '@/services/supabase-service';
+// RECOVERYLAZY-001 (9 ก.ย. 2026): this hook mounts for EVERY visitor
+// (App.tsx RecoveryRouteHandler) — static supabase was in the entry closure.
+import { getSupabaseClient } from '@/lib/supabase/client-lazy';
 
 /**
  * useRecoveryRoute (enhanced as Entry Resolver — §ENTRY-RESOLVER-001)
@@ -136,8 +138,8 @@ export async function persistEntryPath(
   userId: string,
   entryPath: EntryPath
 ): Promise<void> {
-  if (!supabase) return;
   try {
+    const supabase = await getSupabaseClient();
     await supabase
       .from('user_lifecycle')
       .update({ entry_path: entryPath })

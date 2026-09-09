@@ -10,7 +10,11 @@
  */
 
 import { create } from 'zustand';
-import { supabase } from '../services/supabase-service';
+// LIFECYCLELAZY-001 (9 ก.ย. 2026): static supabase import pulled the SDK into
+// the entry closure — this store is imported by AuthContext/PendingOnboarding-
+// Saver/useRecoveryRoute, all mounted for EVERY visitor. getSupabaseClient()
+// resolves on first real DB use (post-paint).
+import { getSupabaseClient } from '../lib/supabase/client-lazy';
 import type { EntryPath } from '../lib/entry/entryResolver';
 
 export type LifecycleStatus =
@@ -70,9 +74,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
+      const supabase = await getSupabaseClient();
 
       // Upsert lifecycle status in database
       // If row exists → update; if not → insert with default values
@@ -112,9 +114,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
+      const supabase = await getSupabaseClient();
 
       const now = new Date();
 
@@ -155,7 +155,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
    */
   markActivity: async (userId: string) => {
     try {
-      if (!supabase) return;
+      const supabase = await getSupabaseClient();
 
       const now = new Date();
 
@@ -182,9 +182,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      if (!supabase) {
-        throw new Error('Supabase client not initialized');
-      }
+      const supabase = await getSupabaseClient();
 
       // LIFECYCLE406-001 FIX: .single() sent a real 406 over the network for
       // every brand-new user (0 rows — normal pre-onboarding state), even
@@ -292,11 +290,12 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
         (typeof (err as Record<string, unknown>)?.['status'] === 'number' && (err as Record<string, unknown>)['status'] === 401) ||
         (typeof (err as Record<string, unknown>)?.['code'] === 'string' && (err as Record<string, unknown>)['code'] === '401');
 
-      if (isAuthError && supabase) {
+      if (isAuthError) {
         try {
-          await supabase.auth.refreshSession();
+          const retrySupabase = await getSupabaseClient();
+          await retrySupabase.auth.refreshSession();
           // LIFECYCLE406-001 FIX: see note above.
-          const { data: retryData, error: retryError } = await supabase
+          const { data: retryData, error: retryError } = await retrySupabase
             .from('user_lifecycle')
             .select('*')
             .eq('user_id', userId)
@@ -340,15 +339,19 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
   setEntryPath: (userId: string, path: EntryPath) => {
     set({ entryPath: path });
     // Fire-and-forget: non-critical, don't block routing on this
-    if (supabase) {
-      void supabase
-        .from('user_lifecycle')
-        .update({ entry_path: path })
-        .eq('user_id', userId)
-        .then(({ error }) => {
-          if (error) console.warn('[Lifecycle] Failed to persist entry_path:', error.message);
-        });
-    }
+    void getSupabaseClient()
+      .then((supabase) =>
+        supabase
+          .from('user_lifecycle')
+          .update({ entry_path: path })
+          .eq('user_id', userId)
+      )
+      .then(({ error }) => {
+        if (error) console.warn('[Lifecycle] Failed to persist entry_path:', error.message);
+      })
+      .catch(() => {
+        // Non-critical: SDK unavailable
+      });
   },
 
   /**

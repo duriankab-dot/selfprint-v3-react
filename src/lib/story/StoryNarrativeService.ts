@@ -52,6 +52,21 @@ const STAGE_LABELS_TH: Record<string, string> = {
   aligned: 'สอดคล้องสมบูรณ์',
 };
 
+// EVOLUTION404-001 FIX (9 ก.ย. 2026): the twins/twin_evolution_history schema
+// stores stages as INT 1-5 (see migrations/035: `evolution_stage INTEGER` and
+// twin_evolution_history.new_stage INT) — NOT the string labels above. The old
+// code queried a table named `evolution_log` that has never existed (every call
+// was a PostgREST 404) — and getCurrentStage read `evolution_stage` as a string,
+// so even when it succeeded the STAGE_LABELS_TH lookup by "1"/"2" fell through
+// and journey summaries showed raw numbers. Map INT → the story-layer key here.
+const STAGE_KEY_BY_INT: Record<number, string> = {
+  1: 'awakening',
+  2: 'aware',
+  3: 'connected',
+  4: 'reflective',
+  5: 'insightful',
+};
+
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
 // TWINS406-STORM-002 (9 ก.ย. 2026): two problems in one —
@@ -102,17 +117,23 @@ function getTwinId(userId: string): Promise<string | null> {
 async function getEvolutionHistory(twinId: string): Promise<EvolutionStageEntry[]> {
   if (!supabase || !twinId) return [];
   try {
+    // EVOLUTION404-001: real table is `twin_evolution_history` (INT stages +
+    // `evolved_at`), not the never-created `evolution_log` that returned 404
+    // on every story-surface mount.
     const { data, error } = await supabase
-      .from('evolution_log')
-      .select('stage, labeled_at')
+      .from('twin_evolution_history')
+      .select('new_stage, evolved_at')
       .eq('twin_id', twinId)
-      .order('labeled_at', { ascending: true });
+      .order('evolved_at', { ascending: true });
     if (error || !data) return [];
-    return data.map((row: any) => ({
-      stage: row.stage,
-      labeledAt: row.labeled_at,
-      labelThai: STAGE_LABELS_TH[row.stage] ?? row.stage,
-    }));
+    return data.map((row: any) => {
+      const stageKey = STAGE_KEY_BY_INT[Number(row.new_stage)] ?? 'awakening';
+      return {
+        stage: stageKey,
+        labeledAt: row.evolved_at,
+        labelThai: STAGE_LABELS_TH[stageKey],
+      };
+    });
   } catch {
     return [];
   }
@@ -121,13 +142,17 @@ async function getEvolutionHistory(twinId: string): Promise<EvolutionStageEntry[
 async function getCurrentStage(twinId: string): Promise<string | null> {
   if (!supabase || !twinId) return null;
   try {
+    // EVOLUTION404-001: twins.evolution_stage is INTEGER 1-5 (migration 035).
+    // .maybeSingle() — same pattern as TWINS406-STORM-001: .single() emits a
+    // 406 over the network for a missing row; we handle "0 rows" as a normal
+    // pre-awakening state instead.
     const { data, error } = await supabase
       .from('twins')
       .select('evolution_stage')
       .eq('id', twinId)
-      .single();
+      .maybeSingle();
     if (error || !data) return null;
-    return data.evolution_stage as string;
+    return STAGE_KEY_BY_INT[Number(data.evolution_stage)] ?? null;
   } catch {
     return null;
   }

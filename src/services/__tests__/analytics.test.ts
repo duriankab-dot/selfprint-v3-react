@@ -6,8 +6,12 @@ const eqMock = vi.fn(() => ({ order: orderMock }));
 const selectMock = vi.fn(() => ({ eq: eqMock }));
 const fromMock = vi.fn(() => ({ insert: insertMock, select: selectMock }));
 
-vi.mock('../supabase-service', () => ({
-  supabase: { from: (...args: unknown[]) => fromMock(...args) },
+// ANALYTICSLAZY-001: analytics no longer imports `supabase` statically — it
+// resolves the SDK lazily through getSupabaseClient(). Mock that seam instead
+// of supabase-service.
+vi.mock('../../lib/supabase/client-lazy', () => ({
+  getSupabaseClient: () =>
+    Promise.resolve({ from: (...args: unknown[]) => fromMock(...args) }),
 }));
 
 import { logEvent, getAnalyticsSummary } from '../analytics';

@@ -12,7 +12,10 @@
 
 import { getNovaPrompt, AVAILABLE_HUBS, AVAILABLE_MOODS, AVAILABLE_ARCHETYPES } from '../lib/nova-prompts/getNovaPrompt';
 // AUTHHDR-001 FIX: /api/nova returns 401 without a Bearer token.
-import { getAuthHeaders } from '../lib/supabase/client';
+// NOVAAPI-LAZY-001 (9 ก.ย. 2026): FloatingSelfprintChat mounts for EVERY
+// visitor and imports this service — a static getAuthHeaders import pulled
+// the SDK into the entry closure; getAuthHeadersLazy loads it post-paint.
+import { getAuthHeadersLazy } from '../lib/supabase/client-lazy';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -80,7 +83,7 @@ export async function callNovaAPI(
 
     const response = await fetch('/api/nova', {
       method: 'POST',
-      headers: await getAuthHeaders(), // AUTHHDR-001
+      headers: await getAuthHeadersLazy(), // AUTHHDR-001
       body: JSON.stringify({
         system: systemPrompt,
         messages: messages.map(m => ({
@@ -191,7 +194,7 @@ If a question turns deep, personal, emotional, or needs individual guidance, war
   try {
     const response = await fetch('/api/nova', {
       method: 'POST',
-      headers: await getAuthHeaders(), // AUTHHDR-001
+      headers: await getAuthHeadersLazy(), // AUTHHDR-001
       body: JSON.stringify({
         system: systemPrompt,
         messages: messages.map(m => ({ role: m.role, content: m.content })),

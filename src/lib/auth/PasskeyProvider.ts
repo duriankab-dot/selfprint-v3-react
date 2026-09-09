@@ -4,7 +4,10 @@
  * @module auth/PasskeyProvider
  */
 
-import { supabase } from '@/lib/supabase/client';
+// PASSKEY-LAZY-001 (9 ก.ย. 2026): AuthProvider dynamic-imports this module on
+// mount for EVERY visitor — a static supabase import here re-pulled the SDK.
+// getSupabaseClient() loads it only when a passkey flow actually starts.
+import { getSupabaseClient } from '@/lib/supabase/client-lazy';
 import type {
   RegistrationOptions,
   AuthenticationOptions,
@@ -49,6 +52,7 @@ export class PasskeyProvider {
    * Step 1: Server generates challenge
    */
   async getRegistrationOptions(email: string): Promise<RegistrationOptions> {
+    const supabase = await getSupabaseClient();
     const { data, error } = await supabase.functions.invoke('auth-registration-options', {
       body: { email },
     });
@@ -73,6 +77,7 @@ export class PasskeyProvider {
     const credential = await createPasskeyCredential(options);
 
     // Verify on server
+    const supabase = await getSupabaseClient();
     const { data, error } = await supabase.functions.invoke('auth-register-passkey', {
       body: {
         email,
@@ -93,6 +98,7 @@ export class PasskeyProvider {
    * Step 1: Server generates challenge
    */
   async getAuthenticationOptions(email?: string): Promise<AuthenticationOptions> {
+    const supabase = await getSupabaseClient();
     const { data, error } = await supabase.functions.invoke('auth-authentication-options', {
       body: { email },
     });
@@ -116,6 +122,7 @@ export class PasskeyProvider {
     const assertion = await authenticateWithPasskey(options);
 
     // Verify on server and get session
+    const supabase = await getSupabaseClient();
     const { data, error } = await supabase.functions.invoke('auth-verify-passkey', {
       body: {
         email,

@@ -7,22 +7,50 @@ import { useRecoveryRoute } from './hooks/useRecoveryRoute';
 import { AuthContext } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { AIProvider } from './context/AIContext';
+// PRVLAZY-001 (9 ก.ย. 2026): the authenticated provider stack (AI, Hub, World,
+// Subscription, Audio, SFX, Environment, Evolution, Popup) was STATICALLY
+// imported here — so all 9 provider modules + their Supabase/intelligence
+// dependency chains shipped in the entry for EVERY visitor, even though
+// ConditionalPrivateProviders already skips mounting them on logged-out
+// marketing routes. Converting them to React.lazy moves the whole stack into
+// one on-demand chunk (loaded on first authenticated/app-route visit), which
+// removes @supabase/* from the pre-login critical path. Copied the Conditional
+// Experience pattern (A3-LAZY) — safe because these providers are only ever
+// *read* by app routes, never by marketing pages.
+const AIProvider = lazy(() =>
+  import('./context/AIContext').then((m) => ({ default: m.AIProvider }))
+);
 import { EmotionProvider } from './context/EmotionContext';
-import { HubProvider } from './context/HubContext';
+const HubProvider = lazy(() =>
+  import('./context/HubContext').then((m) => ({ default: m.HubProvider }))
+);
 import { TwinProvider } from './context/TwinContext';
-import { WorldProvider } from './context/WorldContext';
+const WorldProvider = lazy(() =>
+  import('./context/WorldContext').then((m) => ({ default: m.WorldProvider }))
+);
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
 const ExperienceProvider = lazy(() =>
   import('./context/ExperienceContext').then((m) => ({ default: m.ExperienceProvider }))
 );
-import { AudioProvider } from './context/AudioContext';
-import { PopupProvider } from './context/PopupContext';
-import { EvolutionProvider } from './context/EvolutionContext';
-import { SubscriptionProvider } from './context/SubscriptionContext';
-import { EnvironmentProvider } from './context/EnvironmentContext';
-import { SFXProvider } from './components/audio/SFXProvider';
+const AudioProvider = lazy(() =>
+  import('./context/AudioContext').then((m) => ({ default: m.AudioProvider }))
+);
+const PopupProvider = lazy(() =>
+  import('./context/PopupContext').then((m) => ({ default: m.PopupProvider }))
+);
+const EvolutionProvider = lazy(() =>
+  import('./context/EvolutionContext').then((m) => ({ default: m.EvolutionProvider }))
+);
+const SubscriptionProvider = lazy(() =>
+  import('./context/SubscriptionContext').then((m) => ({ default: m.SubscriptionProvider }))
+);
+const EnvironmentProvider = lazy(() =>
+  import('./context/EnvironmentContext').then((m) => ({ default: m.EnvironmentProvider }))
+);
+const SFXProvider = lazy(() =>
+  import('./components/audio/SFXProvider').then((m) => ({ default: m.SFXProvider }))
+);
 // NOVAPROV-001 FIX: NovaChat.tsx:23 calls useNova() unconditionally, but
 // NovaProvider was never mounted anywhere in the app — every visit to
 // /chat/nova (and /chat, which redirects there) threw "useNova must be used
@@ -51,7 +79,9 @@ import { OfflineBanner } from './components/pwa/OfflineBanner';
 const TwinEvolution = lazy(() =>
   import('./components/twin/TwinEvolution').then((m) => ({ default: m.TwinEvolution }))
 );
-import ContextualPopup from './components/ContextualPopup';
+// PRVLAZY-001: ContextualPopup renders inside the now-lazy provider stack —
+// same React.lazy treatment for the same entry-closure reason.
+const ContextualPopup = lazy(() => import('./components/ContextualPopup'));
 import { FloatingSelfprintChat } from './components/chat/FloatingSelfprintChat';
 // CHUNK-SPLIT: TwinEvolutionSceneWrapper is a celebration overlay that fires
 // only at the milestone-30 Twin Evolution event — no reason to ship it in the
@@ -311,29 +341,36 @@ function ConditionalPrivateProviders({ children }: { children: React.ReactNode }
     return <>{children}</>;
   }
   return (
-    <AIProvider>
-      <HubProvider>
-        <WorldProvider>
-        <SubscriptionProvider>
-        <ConditionalExperience>
-          <AudioProvider>
-            <SFXProvider>
-              <EnvironmentProvider>
-              <EvolutionProvider>
-                <PopupProvider>
-                  <ContextualPopup />
-                  <TwinEvolutionSceneWrapper />
-                  {children}
-                </PopupProvider>
-              </EvolutionProvider>
-            </EnvironmentProvider>
-          </SFXProvider>
-        </AudioProvider>
-        </ConditionalExperience>
-        </SubscriptionProvider>
-      </WorldProvider>
-    </HubProvider>
-    </AIProvider>
+    // PRVLAZY-001: providers are now React.lazy — Suspense with fallback=null.
+    // A null fallback (NOT `children`) is right here: hooks like useAI()/
+    // useWorld() throw without their provider mounted, so showing the page
+    // before the stack resolves would crash on app routes. The chunk is tiny
+    // and cached; the light gap only happens on the first app-route visit.
+    <Suspense fallback={null}>
+      <AIProvider>
+        <HubProvider>
+          <WorldProvider>
+          <SubscriptionProvider>
+          <ConditionalExperience>
+            <AudioProvider>
+              <SFXProvider>
+                <EnvironmentProvider>
+                <EvolutionProvider>
+                  <PopupProvider>
+                    <ContextualPopup />
+                    <TwinEvolutionSceneWrapper />
+                    {children}
+                  </PopupProvider>
+                </EvolutionProvider>
+              </EnvironmentProvider>
+            </SFXProvider>
+          </AudioProvider>
+          </ConditionalExperience>
+          </SubscriptionProvider>
+        </WorldProvider>
+      </HubProvider>
+      </AIProvider>
+    </Suspense>
   );
 }
 

@@ -3,7 +3,10 @@
  * Supabase operations for Twin persistence
  */
 
-import { supabase } from './supabase-service';
+// TWINLAZY-001 (9 ก.ย. 2026): static supabase import put the SDK in the entry
+// closure — TwinProvider mounts for EVERY visitor (marketing pages read
+// useTwin()). getSupabaseClient() resolves the SDK on first real Twin I/O.
+import { getSupabaseClient } from '../lib/supabase/client-lazy';
 import type { TwinProfile } from '../context/TwinContext';
 
 /**
@@ -56,9 +59,11 @@ export interface Twin extends TwinProfile {
  */
 export async function fetchUserTwin(userId: string): Promise<Twin> {
   try {
-    if (!userId || !supabase) {
+    if (!userId) {
       throw new TwinServiceError('Invalid userId or Supabase unavailable', null);
     }
+
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
       .from('twins')
@@ -123,9 +128,11 @@ export async function createTwinInDatabase(
   twinData: Omit<TwinProfile, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<Twin | null> {
   try {
-    if (!userId || !supabase) {
+    if (!userId) {
       throw new Error('Invalid userId or Supabase unavailable');
     }
+
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
       .from('twins')
@@ -163,9 +170,11 @@ export async function updateTwinInDatabase(
   updates: Partial<Twin>
 ): Promise<Twin | null> {
   try {
-    if (!twinId || !supabase) {
+    if (!twinId) {
       throw new Error('Invalid twinId or Supabase unavailable');
     }
+
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
       .from('twins')
@@ -201,7 +210,9 @@ export async function saveTwinMemory(
   worldId?: string
 ): Promise<boolean> {
   try {
-    if (!twinId || !supabase) return false;
+    if (!twinId) return false;
+
+    const supabase = await getSupabaseClient();
 
     const { error } = await supabase
       .from('twin_memories')
@@ -233,7 +244,9 @@ export async function fetchTwinMemories(
   limit: number = 50
 ): Promise<any[]> {
   try {
-    if (!twinId || !supabase) return [];
+    if (!twinId) return [];
+
+    const supabase = await getSupabaseClient();
 
     let query = supabase
       .from('twin_memories')
@@ -266,7 +279,9 @@ export async function updateSICEScore(
   score: number
 ): Promise<boolean> {
   try {
-    if (!twinId || !siceName || !supabase) return false;
+    if (!twinId || !siceName) return false;
+
+    const supabase = await getSupabaseClient();
 
     const { error } = await supabase
       .from('twin_sice_scores')
@@ -300,7 +315,9 @@ export async function deleteTwinFromDatabase(
   userId: string
 ): Promise<boolean> {
   try {
-    if (!twinId || !userId || !supabase) return false;
+    if (!twinId || !userId) return false;
+
+    const supabase = await getSupabaseClient();
 
     // 1. Delete twin_memories (FK → twin_id)
     const { error: memoriesErr } = await supabase
@@ -338,7 +355,9 @@ export async function deleteTwinFromDatabase(
  */
 export async function fetchTwinSICEScores(twinId: string): Promise<Record<string, number>> {
   try {
-    if (!twinId || !supabase) return {};
+    if (!twinId) return {};
+
+    const supabase = await getSupabaseClient();
 
     const { data, error } = await supabase
       .from('twin_sice_scores')

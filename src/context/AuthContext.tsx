@@ -1,7 +1,11 @@
 import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { supabase } from '@/services/supabase-service';
+// AUTHLAZY-002 (9 ก.ย. 2026): static `import { supabase }` here put the whole
+// ~202 kB @supabase/supabase-js SDK into the ENTRY static closure for every
+// visitor (it was also dead until the post-paint auth check — see AUTH-LAZY-001
+// below). getSupabaseClient() loads the SDK on first real use instead.
+import { getSupabaseClient } from '@/lib/supabase/client-lazy';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 
 interface AuthContextType {
@@ -67,52 +71,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Phase 1: Set loading = false immediately (no auth check)
     setLoading(false);
 
-    // Phase 2: Register auth state listener immediately (non-blocking)
-    // This captures real-time auth changes (login/logout) without delay
-    if (supabase) {
-      const { data: listener } = supabase.auth.onAuthStateChange(
-        (_event: string, newSession: Session | null) => {
-          setSession(newSession);
+    // AUTHLAZY-002: the listener + initial session check both resolve the
+    // SDK lazily; first paint is never blocked on the ~202 kB client parse.
+    let disposed = false;
+    const unsubscribeFns: Array<() => void> = [];
 
-          // NEW: Reload lifecycle when auth state changes
-          if (newSession?.user?.id) {
-            const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
-            loadLifecycle(newSession.user.id).catch(err =>
-              console.error('Failed to load lifecycle:', err)
-            );
+    // Phase 2: Register auth state listener as soon as the (lazily loaded)
+    // client exists — real-time login/logout changes stay captured.
+    void (async () => {
+      try {
+        const supabase = await getSupabaseClient();
+        if (disposed) return;
+        const { data: listener } = supabase.auth.onAuthStateChange(
+          (_event: string, newSession: Session | null) => {
+            setSession(newSession);
+
+            // NEW: Reload lifecycle when auth state changes
+            if (newSession?.user?.id) {
+              const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
+              loadLifecycle(newSession.user.id).catch(err =>
+                console.error('Failed to load lifecycle:', err)
+              );
+            }
           }
+        );
+        unsubscribeFns.push(() => listener.subscription.unsubscribe());
+      } catch (error) {
+        console.error('Failed to init supabase auth listener:', error);
+      }
+    })();
+
+    // Phase 3: Get initial session after first paint (non-blocking)
+    // 100ms delay ensures this doesn't block the first meaningful paint
+    const timeout = setTimeout(async () => {
+      try {
+        const supabase = await getSupabaseClient();
+        const { data } = await supabase.auth.getSession();
+        if (disposed) return;
+        setSession(data.session);
+
+        // Load lifecycle if user is authenticated
+        if (data.session?.user?.id) {
+          const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
+          loadLifecycle(data.session.user.id).catch(err =>
+            console.error('Failed to load lifecycle:', err)
+          );
         }
-      );
+      } catch (error) {
+        console.error('Failed to get initial session:', error);
+      }
+    }, 100);
 
-      // Phase 3: Get initial session after first paint (non-blocking)
-      // 100ms delay ensures this doesn't block the first meaningful paint
-      const timeout = setTimeout(async () => {
-        if (!supabase) return;
-
-        try {
-          const { data } = await supabase.auth.getSession();
-          setSession(data.session);
-
-          // Load lifecycle if user is authenticated
-          if (data.session?.user?.id) {
-            const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
-            loadLifecycle(data.session.user.id).catch(err =>
-              console.error('Failed to load lifecycle:', err)
-            );
-          }
-        } catch (error) {
-          console.error('Failed to get initial session:', error);
-        }
-      }, 100);
-
-      return () => {
-        listener.subscription.unsubscribe();
-        clearTimeout(timeout);
-      };
-    } else {
-      // No supabase client — set loading = false and return
-      return () => {};
-    }
+    return () => {
+      disposed = true;
+      clearTimeout(timeout);
+      unsubscribeFns.forEach((fn) => fn());
+    };
   }, []);
 
   const registerPasskey = useCallback(async (email: string, displayName?: string) => {
@@ -121,7 +135,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: 'Passkey ไม่ได้รับการรองรับบนอุปกรณ์นี้' };
       }
 
-      if (!supabase) {
+      let supabase;
+      try {
+        supabase = await getSupabaseClient();
+      } catch {
         return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
       }
 
@@ -160,12 +177,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // client has a valid access_token for RLS; setSession() alone only
       // updates React state and leaves the supabase client as anonymous.
       if (result.session) {
-        if (supabase) {
-          await supabase.auth.setSession({
-            access_token: result.session.access_token,
-            refresh_token: result.session.refresh_token ?? '',
-          });
-        }
+        const supabase = await getSupabaseClient();
+        await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token ?? '',
+        });
         setSession(result.session);
       }
 
@@ -176,7 +192,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [isPasskeyAvailable]);
 
   const signInWithMagicLink = useCallback(async (email: string) => {
-    if (!supabase) {
+    let supabase;
+    try {
+      supabase = await getSupabaseClient();
+    } catch {
       return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
     }
 
@@ -203,7 +222,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInWithOAuth = useCallback(async (provider: 'google' | 'apple') => {
-    if (!supabase) {
+    let supabase;
+    try {
+      supabase = await getSupabaseClient();
+    } catch {
       return { error: 'Supabase ยังไม่ได้ตั้งค่า' };
     }
     // ROUTELOOP-002 FIX: bare "/dashboard" isn't a real route (every route
@@ -221,8 +243,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (!supabase) return;
-    await supabase.auth.signOut();
+    try {
+      const supabase = await getSupabaseClient();
+      await supabase.auth.signOut();
+    } catch {
+      // No client — nothing to sign out from
+    }
   }, []);
 
   // CTXMEMO-001 FIX (4 ก.ย. 2026): provider นี้อยู่ในสแตกที่ซ้อนกัน 13 ชั้นใน

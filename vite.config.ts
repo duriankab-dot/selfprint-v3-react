@@ -95,6 +95,19 @@ export default defineConfig({
               test: /[\\/]src[\\/](lib[\\/]supabase[\\/]|services[\\/]supabase-service\.ts)/,
               priority: 110,
             },
+            // LAZYSPLIT-001 (9 ก.ย. 2026): client-lazy.ts + client-registry.ts
+            // must NOT share a chunk with client.ts/supabase-service.ts. The
+            // entry imports getSupabaseClient() from client-lazy — if the two
+            // lived in the same chunk, that import would statically drag
+            // client.ts AND its `createClient` SDK import → vendor-supabase —
+            // back into the entry closure, undoing the whole POSITIVE LAZY
+            // refactor. Higher priority than chunk-supabase-client so they
+            // split out of it.
+            {
+              name: 'chunk-supabase-lazy',
+              test: /[\\/]src[\\/]lib[\\/]supabase[\\/](client-lazy|client-registry)\.ts/,
+              priority: 115,
+            },
             // 1. Supabase auth + realtime client
             {
               name: 'vendor-supabase',

@@ -13,7 +13,11 @@
  * docs/HANDOFF_2026-08-09_PHASE5_UNIFIED.md หัวข้อ userId ผี)
  */
 
-import { supabase } from './supabase-service';
+// ANALYTICSLAZY-001 (9 ก.ย. 2026): static supabase import here put the SDK in
+// the entry closure — EmotionContext/HubContext/PendingOnboardingSaver all
+// import logEvent and all mount for every visitor. getSupabaseClient() resolves
+// on the first actual analytics write (post-paint).
+import { getSupabaseClient } from '../lib/supabase/client-lazy';
 
 export type AnalyticsEventType =
   | 'hub_transition'
@@ -26,9 +30,10 @@ export async function logEvent(
   eventType: AnalyticsEventType,
   eventData: Record<string, unknown> = {}
 ): Promise<boolean> {
-  if (!supabase || !userId) return false;
+  if (!userId) return false;
 
   try {
+    const supabase = await getSupabaseClient();
     const { error } = await supabase.from('analytics_events').insert({
       user_id: userId,
       event_type: eventType,
@@ -81,9 +86,10 @@ const EMPTY_SUMMARY: AnalyticsSummary = {
 export async function getAnalyticsSummary(
   userId: string | null | undefined
 ): Promise<AnalyticsSummary | null> {
-  if (!supabase || !userId) return null;
+  if (!userId) return null;
 
   try {
+    const supabase = await getSupabaseClient();
     const { data, error } = await supabase
       .from('analytics_events')
       .select('event_type, event_data, created_at')
