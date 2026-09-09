@@ -170,77 +170,95 @@
      were defined only for light mode. In dark mode, light accent colors
      (e.g. #EDE7F6 for reflective) create terrible contrast when used as
      card backgrounds with white text. Override with dark-compatible shades
-     that maintain WCAG AA contrast (>4.5:1) against dark surfaces. */
-  [data-mood="reflective"] {
-    --accent-primary: #A78BFA;
-    --accent-secondary: #8B5CF6;
-    --accent-light: #1E1B4B; /* Dark indigo — contrast-safe on navy */
-    --accent-dark: #C4B5FD;
-    --mood-bg-secondary: #1E1B4B;
-  }
-  [data-mood="ready"] {
-    --accent-primary: #34D399;
-    --accent-secondary: #10B981;
-    --accent-light: #064E3B; /* Dark emerald */
-    --accent-dark: #6EE7B7;
-    --mood-bg-secondary: #064E3B;
-  }
-  [data-mood="calm"] {
-    --accent-primary: #60A5FA;
-    --accent-secondary: #3B82F6;
-    --accent-light: #1E3A5F; /* Dark blue */
-    --accent-dark: #93C5FD;
-    --mood-bg-secondary: #1E3A5F;
-  }
-  [data-mood="focused"] {
-    --accent-primary: #C084FC;
-    --accent-secondary: #A855F7;
-    --accent-light: #3B0764; /* Dark purple */
-    --accent-dark: #E879F9;
-    --mood-bg-secondary: #3B0764;
-  }
-  [data-mood="energetic"] {
-    --accent-primary: #FB923C;
-    --accent-secondary: #F97316;
-    --accent-light: #7C2D12; /* Dark orange */
-    --accent-dark: #FDBA74;
-    --mood-bg-secondary: #7C2D12;
-  }
-  [data-mood="curious"] {
-    --accent-primary: #22D3EE;
-    --accent-secondary: #06B6D4;
-    --accent-light: #083344; /* Dark cyan */
-    --accent-dark: #67E8F9;
-    --mood-bg-secondary: #083344;
-  }
-  [data-mood="stressed"] {
-    --accent-primary: #F87171;
-    --accent-secondary: #EF4444;
-    --accent-light: #450A0A; /* Dark red */
-    --accent-dark: #FCA5A5;
-    --mood-bg-secondary: #450A0A;
-  }
-  [data-mood="confused"] {
-    --accent-primary: #9CA3AF;
-    --accent-secondary: #6B7280;
-    --accent-light: #1F2937; /* Dark gray */
-    --accent-dark: #D1D5DB;
-    --mood-bg-secondary: #1F2937;
-  }
-  [data-mood="confident"] {
-    --accent-primary: #2DD4BF;
-    --accent-secondary: #14B8A6;
-    --accent-light: #042F2E; /* Dark teal */
-    --accent-dark: #5EEAD4;
-    --mood-bg-secondary: #042F2E;
-  }
-  [data-mood="drained"] {
-    --accent-primary: #94A3B8;
-    --accent-secondary: #64748B;
-    --accent-light: #1E293B; /* Dark slate */
-    --accent-dark: #CBD5E1;
-    --mood-bg-secondary: #1E293B;
-  }
+     that maintain WCAG AA contrast (>4.5:1) against dark surfaces.
+     
+     ⚠️ IMPORTANT: Use FLAT selectors (NOT CSS nesting) for browser compatibility:
+     - [data-mode="dark"][data-mood="reflective"] works in ALL browsers
+     - [data-mode="dark"] { [data-mood="reflective"] { } } requires Chrome 117+
+     
+     Using flat selectors ensures dark mode mood overrides work everywhere. */
+}
+
+/* Dark mode + Mood theme overrides — flat selectors for maximum compatibility */
+/* These override the light mode defaults from [data-mood="..."] blocks above */
+[data-mode="dark"][data-mood="reflective"] {
+  --accent-primary: #A78BFA;
+  --accent-secondary: #8B5CF6;
+  --accent-light: #1E1B4B; /* Dark indigo — contrast-safe on navy */
+  --accent-dark: #C4B5FD;
+  --mood-bg-secondary: #1E1B4B;
+}
+
+[data-mode="dark"][data-mood="ready"] {
+  --accent-primary: #34D399;
+  --accent-secondary: #10B981;
+  --accent-light: #064E3B; /* Dark emerald */
+  --accent-dark: #6EE7B7;
+  --mood-bg-secondary: #064E3B;
+}
+
+[data-mode="dark"][data-mood="calm"] {
+  --accent-primary: #60A5FA;
+  --accent-secondary: #3B82F6;
+  --accent-light: #1E3A5F; /* Dark blue */
+  --accent-dark: #93C5FD;
+  --mood-bg-secondary: #1E3A5F;
+}
+
+[data-mode="dark"][data-mood="focused"] {
+  --accent-primary: #C084FC;
+  --accent-secondary: #A855F7;
+  --accent-light: #3B0764; /* Dark purple */
+  --accent-dark: #E879F9;
+  --mood-bg-secondary: #3B0764;
+}
+
+[data-mode="dark"][data-mood="energetic"] {
+  --accent-primary: #FB923C;
+  --accent-secondary: #F97316;
+  --accent-light: #7C2D12; /* Dark orange */
+  --accent-dark: #FDBA74;
+  --mood-bg-secondary: #7C2D12;
+}
+
+[data-mode="dark"][data-mood="curious"] {
+  --accent-primary: #22D3EE;
+  --accent-secondary: #06B6D4;
+  --accent-light: #083344; /* Dark cyan */
+  --accent-dark: #67E8F9;
+  --mood-bg-secondary: #083344;
+}
+
+[data-mode="dark"][data-mood="stressed"] {
+  --accent-primary: #F87171;
+  --accent-secondary: #EF4444;
+  --accent-light: #450A0A; /* Dark red */
+  --accent-dark: #FCA5A5;
+  --mood-bg-secondary: #450A0A;
+}
+
+[data-mode="dark"][data-mood="confused"] {
+  --accent-primary: #9CA3AF;
+  --accent-secondary: #6B7280;
+  --accent-light: #1F2937; /* Dark gray */
+  --accent-dark: #D1D5DB;
+  --mood-bg-secondary: #1F2937;
+}
+
+[data-mode="dark"][data-mood="confident"] {
+  --accent-primary: #2DD4BF;
+  --accent-secondary: #14B8A6;
+  --accent-light: #042F2E; /* Dark teal */
+  --accent-dark: #5EEAD4;
+  --mood-bg-secondary: #042F2E;
+}
+
+[data-mode="dark"][data-mood="drained"] {
+  --accent-primary: #94A3B8;
+  --accent-secondary: #64748B;
+  --accent-light: #1E293B; /* Dark slate */
+  --accent-dark: #CBD5E1;
+  --mood-bg-secondary: #1E293B;
 }
 
 /* ========== BORDER RADIUS ========== */
