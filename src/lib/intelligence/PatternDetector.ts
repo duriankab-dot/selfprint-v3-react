@@ -290,15 +290,20 @@ export class PatternDetector {
     }
 
     try {
+      // PATTERN406-001 (9 ก.ย. 2026): getPattern() is a lookup that very
+      // commonly finds nothing (first sighting of a pattern) — `.single()`
+      // replies 406 for 0 rows, which Chrome logs as a console error every
+      // time pattern detection runs, even though `if (error) return null`
+      // handles it. `.limit(1)` + array read returns 200 `[]` instead.
       const { data, error } = await supabase
         .from('behavioral_patterns')
         .select('*')
         .eq('user_id', userId)
         .eq('pattern_name', patternName)
-        .single();
+        .limit(1);
 
-      if (error) return null;
-      return this.mapFromDB(data);
+      if (error || !data || data.length === 0) return null;
+      return this.mapFromDB(data[0]);
     } catch (error) {
       throw new IntelligenceError(
         `Failed to get pattern: ${error}`,

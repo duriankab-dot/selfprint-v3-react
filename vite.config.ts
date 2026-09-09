@@ -59,113 +59,117 @@ export default defineConfig({
 
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // ────────────────────────────────────────────────────────────────────
-          // VENDOR CHUNKS — each major library in its own cacheable file.
-          // Order matters: more-specific patterns first.
-          // ────────────────────────────────────────────────────────────────────
-
-          // 1. Supabase auth + realtime client
-          if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
-
-          // 2. React core — react + react-dom + scheduler must stay together
-          if (
-            id.includes('node_modules/react/') ||
-            id.includes('node_modules/react-dom/') ||
-            id.includes('node_modules/scheduler/')
-          ) return 'vendor-react';
-
-          // 4. Routing — react-router-dom + @remix-run/*
-          if (
-            id.includes('node_modules/react-router') ||
-            id.includes('node_modules/@remix-run')
-          ) return 'vendor-router';
-
-          // 5. Data fetching — @tanstack/react-query
-          if (id.includes('node_modules/@tanstack')) return 'vendor-query';
-
-          // 6. State management — zustand
-          if (id.includes('node_modules/zustand')) return 'vendor-state';
-
-          // 8. SEO — react-helmet-async
-          if (
-            id.includes('node_modules/react-helmet-async') ||
-            id.includes('node_modules/invariant')
-          ) return 'vendor-helmet';
-
-          // 8.5. Markdown rendering stack (react-markdown + its full remark/
-          // micromark/unified/mdast/hast/unist/vfile dependency tree — 55
-          // packages total per package-lock.json, confirmed 8 ก.ย. 2026).
-          // The ONLY consumer is BlogArticle.tsx (`lazy(() => import(...))`
-          // in App.tsx) — but without this bucket, all 55 packages fell into
-          // the single catch-all 'vendor-misc' chunk below alongside small
-          // utilities LandingPage's eager code *does* need, so Rollup shipped
-          // one physical vendor-misc file everywhere. Lighthouse (8 ก.ย. 2026,
-          // mobile, LandingPage) measured 82.1 KiB transferred / 50.8 KiB
-          // "unused JavaScript" for vendor-misc — this is that 50.8 KiB.
-          // Splitting it into its own chunk lets it load only when
-          // BlogArticle's dynamic import actually requests it.
-          // VENDORMD-001 (8 ก.ย. 2026): the trailing `\/` this pattern had at
-          // first draft required prefix entries (mdast-util-, unist-util-,
-          // hast-util-, rehype-) to be the package's *entire* name — so
-          // `mdast-util-to-hast/…` never matched and 51 of these 59 packages
-          // would have silently fallen through to vendor-misc anyway,
-          // defeating the split. Verified against all 393 top-level
-          // node_modules packages in package-lock.json: this pattern (no
-          // trailing slash) matches exactly react-markdown's 59-package
-          // dependency tree and nothing else.
-          if (
-            /node_modules\/(react-markdown|remark-parse|remark-rehype|rehype-|micromark|mdast-util-|unist-util-|hast-util-|unified|vfile|bail|trough|property-information|space-separated-tokens|comma-separated-tokens|zwitch|ccount|stringify-entities|character-entities|decode-named-character-reference|devlop|is-plain-obj|longest-streak|estree-util-is-identifier-name|trim-lines)/.test(id)
-          ) return 'vendor-markdown';
-
-          // 9. All remaining node_modules → one shared vendor-misc chunk
-          //    (lodash, date-fns, tiny utilities, etc.)
-          if (id.includes('node_modules/')) return 'vendor-misc';
-
-          // ────────────────────────────────────────────────────────────────────
-          // APP FEATURE CHUNKS — heavy src modules shared across lazy routes.
-          // ────────────────────────────────────────────────────────────────────
-
-          // SUPABASE-CLNT-001 (9 ก.ย. 2026): the supabase client must never be
-          // absorbed into chunk-intelligence. @supabase/supabase-js is reachable
-          // through lib/supabase/client + services/supabase-service, and those
-          // two source modules are imported by BOTH the entry graph
-          // (AuthContext/AIContext/WorldContext…) AND chunk-intelligence
-          // (PersonalContextBuilder/TwinStateEngine, Onboarding's
-          // AICreationSequence). Rolldown assigns a shared module to exactly one
-          // chunk — it kept choosing chunk-intelligence, so the ENTRY itself was
-          // statically importing the 345 kB intelligence+supabase chunk on
-          // EVERY page (Lighthouse 9 ก.ย. 2026: /th/onboarding transferred
-          // 87 KiB of it, 86 % unused). This dedicated chunk lets the entry/landing
-          // graph load only the small client; chunk-intelligence becomes
-          // reachable only through lazy routes, not the pre-login critical path.
-          if (
-            id.includes('/src/lib/supabase') ||
-            id.includes('/src/services/supabase-service')
-          ) return 'chunk-supabase-client';
-
-          // Personality intelligence engine (dashboard widgets)
-          // NOTE: chunk-astrology and chunk-sice were removed — supabase-service.ts
-          // is statically imported by AIContext (a core provider in App.tsx), so
-          // any module that imports supabase-service cannot be moved to a separate
-          // chunk; Rollup would inline it into the main bundle anyway.
-          // DEADCHUNK-001 (4 ก.ย. 2026): ลบ branch ที่ตายไปแล้ว 2 อัน —
-          // vendor-motion (ไม่มี framer-motion ใน dependencies) และ
-          // decision-components (ชี้ src/components/decision/ ที่ถูกลบทั้งโฟลเดอร์)
-          //
-          // ⚠️ chunk-intelligence 345 kB ที่เห็นใน build **ไม่ใช่** โค้ดใน
-          // lib/intelligence — Rollup กลืน @supabase/supabase-js เข้ามาทั้งก้อน
-          // เพราะ supabase-service.ts ถูก static import จาก AIContext ซึ่งเป็น
-          // provider หลักใน App.tsx → chunk นี้ถูกโหลดทุกหน้ารวมหน้าแรก
-          // (ดู F-02 ใน docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md)
-          // การแก้ต้องตัด static import chain ก่อน = งานของ Track C Phase 1
-          if (id.includes('/src/lib/intelligence')) return 'chunk-intelligence';
-
-          if (
-            id.includes('/src/services/DecisionService') ||
-            id.includes('/src/services/DecisionLearningService') ||
-            id.includes('/src/services/FollowUpScheduler')
-          ) return 'decision-services';
+        // CHUNK-GROUPS-001 (9 ก.ย. 2026): replaced the `manualChunks` function
+        // with Rolldown's native `codeSplitting.groups`.
+        //
+        // WHY: Vite 8 builds on Rolldown, and its `manualChunks` emulation is
+        // advisory only in one important case — proven by the 9 ก.ย. debug
+        // build: the function returned 'chunk-supabase-client' for
+        // src/lib/supabase/client.ts (logged it), yet Rolldown still placed
+        // the module in chunk-intelligence. Result: the ENTRY statically
+        // imported chunk-intelligence (87 KiB gz) for `supabase` +
+        // `getAuthHeaders`, react/jsx-runtime got co-located into
+        // vendor-markdown (35 KiB), and the __vitePreload helper landed in
+        // decision-services — so /th/ downloaded ~108 KiB of "unused
+        // JavaScript" (Lighthouse 9 ก.ย.) before the hero could paint.
+        // `codeSplitting.groups` with explicit priorities is the documented,
+        // deterministic mechanism (manualChunks/advancedChunks are deprecated).
+        //
+        // includeDependenciesRecursively:false keeps a group to exactly the
+        // modules its `test` matches — no silent absorption of shared deps.
+        codeSplitting: {
+          includeDependenciesRecursively: false,
+          groups: [
+            // Vite's dynamic-import preload helper (virtual module) — keep it
+            // out of feature chunks so the entry never pulls one of them.
+            {
+              name: 'vite-preload',
+              test: /vite[\\/].*preload|preload[\\/]helper/,
+              priority: 120,
+            },
+            // The supabase client pair — highest src priority so
+            // chunk-intelligence can never swallow client.ts again
+            // (SUPABASE-CLNT-001 history: entry → 345 kB intelligence chunk).
+            {
+              name: 'chunk-supabase-client',
+              test: /[\\/]src[\\/](lib[\\/]supabase[\\/]|services[\\/]supabase-service\.ts)/,
+              priority: 110,
+            },
+            // 1. Supabase auth + realtime client
+            {
+              name: 'vendor-supabase',
+              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
+              priority: 105,
+            },
+            // 2. React core — react + react-dom + scheduler must stay together
+            {
+              name: 'vendor-react',
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|use-sync-external-store)[\\/]/,
+              priority: 100,
+            },
+            // 4. Routing — react-router-dom + @remix-run/*
+            {
+              name: 'vendor-router',
+              test: /[\\/]node_modules[\\/](react-router|react-router-dom|@remix-run)[\\/]/,
+              priority: 100,
+            },
+            // 5. Data fetching — @tanstack/react-query
+            {
+              name: 'vendor-query',
+              test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
+              priority: 100,
+            },
+            // 6. State management — zustand
+            {
+              name: 'vendor-state',
+              test: /[\\/]node_modules[\\/]zustand[\\/]/,
+              priority: 100,
+            },
+            // 8. SEO — react-helmet-async
+            {
+              name: 'vendor-helmet',
+              test: /[\\/]node_modules[\\/](react-helmet-async|invariant)[\\/]/,
+              priority: 100,
+            },
+            // 8.5. Markdown rendering stack (react-markdown + its full remark/
+            // micromark/unified/mdast/hast/unist/vfile dependency tree — 59
+            // packages verified 8 ก.ย. 2026 against package-lock.json). Only
+            // consumer is BlogArticle.tsx (lazy route) — it must never sit on
+            // the landing critical path.
+            // VENDORMD-001 RE-STATED (9 ก.ย. 2026): the alternation MUST stay
+            // prefix-matching — no trailing separator. `micromark`,
+            // `mdast-util-`, `unist-util-`, `hast-util-`, `vfile`, `rehype-`
+            // are prefixes of real package names (micromark-util-chunked,
+            // mdast-util-to-hast, unist-util-position, vfile-message, …). The
+            // first groups port dropped `[\\/]` to the end of the pattern by
+            // mistake and all 30+ prefix packages fell through to vendor-misc,
+            // which react-helmet-async's deps then dragged into the ENTRY's
+            // static closure again — the exact regression this split exists to
+            // prevent. Verified against the 9 ก.ย. build maps.
+            {
+              name: 'vendor-markdown',
+              test: /[\\/]node_modules[\\/](react-markdown|remark-parse|remark-rehype|rehype-|micromark|mdast-util-|unist-util-|hast-util-|unified|vfile|bail|trough|property-information|space-separated-tokens|comma-separated-tokens|zwitch|ccount|stringify-entities|character-entities|decode-named-character-reference|devlop|is-plain-obj|longest-streak|estree-util-is-identifier-name|trim-lines)/,
+              priority: 95,
+            },
+            // Personality intelligence engines (dashboard/brief/story widgets)
+            {
+              name: 'chunk-intelligence',
+              test: /[\\/]src[\\/]lib[\\/]intelligence[\\/]/,
+              priority: 90,
+            },
+            {
+              name: 'decision-services',
+              test: /[\\/]src[\\/]services[\\/](DecisionService|DecisionLearningService|FollowUpScheduler)\.ts/,
+              priority: 90,
+            },
+            // 9. All remaining node_modules → one shared vendor-misc chunk
+            //    (lodash, date-fns, tiny utilities, etc.)
+            {
+              name: 'vendor-misc',
+              test: /[\\/]node_modules[\\/]/,
+              priority: 50,
+            },
+          ],
         },
       },
     },

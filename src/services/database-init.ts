@@ -81,14 +81,19 @@ export async function ensureUserProfile(userId: string): Promise<boolean> {
     // ผู้ใช้จริงคือ `user_id UUID NOT NULL` (supabase/migrations/002:36)
     // การ .eq('id', userId) จึงไม่เคย match แถวไหนเลย → ฟังก์ชันนี้คิดว่ายังไม่มี
     // profile ทุกครั้งแล้วพยายาม insert ใหม่ซ้ำ ๆ
-    const { data: existing, error: checkError } = await supabase
+    // PROFILE406-001 (9 ก.ย. 2026): "no profile yet" is the expected answer
+    // for a brand-new user (that's the whole point of this check), but
+    // `.single()` replies 406 for 0 rows — a red console error on the first
+    // run of every new account. PGRST116 is handled below, yet Chrome still
+    // logs the failed response. `.limit(1)` + array read returns 200 `[]`.
+    const { data: existingRows, error: checkError } = await supabase
       .schema('selfprint').from('users_profiles')
       .select('id')
       .eq('user_id', userId)
-      .single();
+      .limit(1);
+    const existing = existingRows?.[0] ?? null;
 
-    if (checkError && checkError.code !== 'PGRST116') {
-      // PGRST116 means no rows found, which is expected if profile doesn't exist yet
+    if (checkError) {
       console.error('Error checking profile:', checkError);
       return false;
     }

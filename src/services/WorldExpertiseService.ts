@@ -41,12 +41,18 @@ export async function recordWorldInteraction(
   if (!supabase) return;
 
   try {
-    const { data: existing } = await supabase
+    // EXPERTISE406-001 (9 ก.ย. 2026): "no expertise row yet" is the NORMAL
+    // state for a fresh twin×world pair, but `.single()` asks PostgREST for
+    // `application/vnd.pgrst.object+json`, which answers 406 on 0 rows —
+    // Chrome logs that as a red console error on every chat message even
+    // though the code handles it. `.limit(1)` + array read returns 200 `[]`.
+    const { data: existingRows } = await supabase
       .from('twin_world_expertise')
       .select('interaction_count, expertise_score')
       .eq('twin_id', twinId)
       .eq('world', world)
-      .single();
+      .limit(1);
+    const existing = existingRows?.[0] ?? null;
 
     const nextInteractionCount = (existing?.interaction_count || 0) + 1;
     const nextExpertiseScore = Math.min(100, (existing?.expertise_score ?? 0) + expertiseGain);
@@ -117,14 +123,16 @@ export async function getWorldExpertiseScore(
   if (!supabase) return 50; // Default neutral score
 
   try {
-    const { data, error } = await supabase
+    // EXPERTISE406-001: see note above — 0 rows is normal (fresh twin),
+    // `.single()` turns that into a 406 console error. Use `.limit(1)`.
+    const { data: rows } = await supabase
       .from('twin_world_expertise')
       .select('expertise_score')
       .eq('twin_id', twinId)
       .eq('world', world)
-      .single();
-
-    if (error || !data) return 50; // Default if not found
+      .limit(1);
+    const data = rows?.[0];
+    if (!data) return 50; // Default if not found
     return data.expertise_score || 50;
   } catch (err) {
     console.error('Error getting expertise score:', err);

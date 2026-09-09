@@ -54,19 +54,49 @@ const STAGE_LABELS_TH: Record<string, string> = {
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
-async function getTwinId(userId: string): Promise<string | null> {
-  if (!supabase || !userId) return null;
-  try {
-    const { data, error } = await supabase
-      .from('twins')
-      .select('id')
-      .eq('user_id', userId)
-      .single();
-    if (error || !data) return null;
-    return data.id as string;
-  } catch {
-    return null;
-  }
+// TWINS406-STORM-002 (9 ก.ย. 2026): two problems in one —
+//
+// 1. `.single()` sends `Accept: application/vnd.pgrst.object+json`; when the
+//    user has no twins row yet PostgREST answers 406 and Chrome logs a red
+//    console error on EVERY failed response, even though the code catches it.
+//    (TWINS406-001 fixed the supabase-service copy of this query; this was
+//    the remaining one.) `.limit(1)` + array read returns 200 `[]` instead —
+//    identical semantics, zero console noise.
+//
+// 2. useStoryNarrative fires buildMicroStory/buildCurrentChapter/buildBigStory/
+//    buildStoryModeState in parallel, and it is mounted as an INDEPENDENT hook
+//    instance per component (Dashboard mounts NarrativeHook + CurrentChapter) —
+//    so one page load issued 4×N identical twins lookups. A module-level
+//    in-flight cache collapses them to one request per user.
+const twinIdCache = new Map<string, Promise<string | null>>();
+
+function getTwinId(userId: string): Promise<string | null> {
+  if (!supabase || !userId) return Promise.resolve(null);
+  const cached = twinIdCache.get(userId);
+  if (cached) return cached;
+  const pending = (async () => {
+    try {
+      const { data, error } = await supabase!
+        .from('twins')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1);
+      if (error || !data || data.length === 0) return null;
+      return data[0].id as string;
+    } catch {
+      return null;
+    }
+  })();
+  twinIdCache.set(userId, pending);
+  // Only memoize a FOUND twin. A null here usually means "not awakened yet"
+  // — the CoreAwakening flow can create the twin later in the same session,
+  // and a permanently cached null would freeze every story surface at
+  // "no narrative". Evict on null so the next call re-queries (the in-flight
+  // entry above still collapses the current 4×N parallel burst).
+  void pending.then((id) => {
+    if (id === null && twinIdCache.get(userId) === pending) twinIdCache.delete(userId);
+  });
+  return pending;
 }
 
 async function getEvolutionHistory(twinId: string): Promise<EvolutionStageEntry[]> {

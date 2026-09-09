@@ -91,11 +91,16 @@ export async function analyzeDecisionOutcome(decision: Decision): Promise<Decisi
     const insights = await getDecisionInsights(decision.twinId);
 
     // Calculate consistency from follow-up completions
-    const { data: followUp } = await supabase
+    // FOLLOWUP406-001 (9 ก.ย. 2026): a decision with no follow-up schedule
+    // row yet is normal — `.single()` answers 406 for that, which Chrome logs
+    // as a console error even though the code treats it as "0 completed".
+    // `.limit(1)` + array read returns 200 `[]`.
+    const { data: followUpRows } = await supabase
       .from('follow_up_schedule')
       .select('day30_completed, day90_completed, day180_completed, day365_completed')
       .eq('decision_id', decision.id)
-      .single();
+      .limit(1);
+    const followUp = followUpRows?.[0] ?? null;
 
     const completedFollowUps = followUp
       ? [

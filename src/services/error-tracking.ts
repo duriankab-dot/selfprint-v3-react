@@ -8,10 +8,20 @@
  * Env: VITE_SENTRY_DSN
  */
 
-import * as Sentry from '@sentry/react';
+// SENTRY-LAZY-001 (9 ก.ย. 2026): `import * as Sentry from '@sentry/react'`
+// was a STATIC import reached from main.tsx, so the whole Sentry browser SDK
+// (browserTracing included) landed in the entry's vendor chunk and was
+// downloaded + parsed on EVERY page — including the logged-out /th/ landing
+// page that Lighthouse scored, even when VITE_SENTRY_DSN isn't set and
+// initializeSentry() bails on line 1. The SDK is now imported dynamically
+// only when a DSN exists; all capture* helpers queue onto that promise.
+// Behaviour is unchanged for callers (fire-and-forget telemetry).
 import type { Scope } from '@sentry/types';
 
+type SentryModule = typeof import('@sentry/react');
+
 let initialized = false;
+let sentryModule: Promise<SentryModule> | null = null;
 
 /**
  * Initialize Sentry for error tracking
@@ -25,15 +35,18 @@ export function initializeSentry() {
   }
   if (initialized) return;
 
-  Sentry.init({
-    dsn,
-    environment: import.meta.env.MODE || 'development',
-    tracesSampleRate: import.meta.env.MODE === 'production' ? 0.2 : 1.0,
-    replaysSessionSampleRate: 0.05,
-    replaysOnErrorSampleRate: 1.0,
-    integrations: [
-      Sentry.browserTracingIntegration(),
-    ],
+  sentryModule = import('@sentry/react');
+  void sentryModule.then((Sentry) => {
+    Sentry.init({
+      dsn,
+      environment: import.meta.env.MODE || 'development',
+      tracesSampleRate: import.meta.env.MODE === 'production' ? 0.2 : 1.0,
+      replaysSessionSampleRate: 0.05,
+      replaysOnErrorSampleRate: 1.0,
+      integrations: [
+        Sentry.browserTracingIntegration(),
+      ],
+    });
   });
 
   initialized = true;
@@ -53,13 +66,15 @@ export function captureException(
   error: Error | string | unknown,
   context?: Record<string, unknown>
 ) {
-  if (!initialized) {
+  if (!initialized || !sentryModule) {
     console.error('[ErrorTracking]', error, context);
     return;
   }
-  Sentry.withScope((scope: Scope) => {
-    if (context) scope.setContext('custom', context);
-    Sentry.captureException(error);
+  void sentryModule.then((Sentry) => {
+    Sentry.withScope((scope: Scope) => {
+      if (context) scope.setContext('custom', context);
+      Sentry.captureException(error);
+    });
   });
 }
 
@@ -71,13 +86,15 @@ export function captureMessage(
   level: 'info' | 'warning' | 'error' = 'info',
   data?: Record<string, unknown>
 ) {
-  if (!initialized) {
+  if (!initialized || !sentryModule) {
     console.log(`[ErrorTracking:${level}] ${message}`, data);
     return;
   }
-  Sentry.withScope((scope: Scope) => {
-    if (data) scope.setContext('data', data);
-    Sentry.captureMessage(message, level);
+  void sentryModule.then((Sentry) => {
+    Sentry.withScope((scope: Scope) => {
+      if (data) scope.setContext('data', data);
+      Sentry.captureMessage(message, level);
+    });
   });
 }
 
@@ -89,12 +106,14 @@ export function trackMetric(
   value: number,
   tags?: Record<string, string | number>
 ) {
-  if (!initialized) return;
-  Sentry.addBreadcrumb({
-    category: 'metric',
-    message: `${name} = ${value}`,
-    data: { value, ...tags },
-    level: 'info',
+  if (!initialized || !sentryModule) return;
+  void sentryModule.then((Sentry) => {
+    Sentry.addBreadcrumb({
+      category: 'metric',
+      message: `${name} = ${value}`,
+      data: { value, ...tags },
+      level: 'info',
+    });
   });
 }
 
@@ -102,14 +121,26 @@ export function trackMetric(
  * Start performance span tracking
  */
 export function startPerformanceTracking(operationName: string) {
-  if (!initialized) {
+  if (!initialized || !sentryModule) {
     return { transaction: null, finish: () => {} };
   }
-  const activeSpan = Sentry.getActiveSpan();
+  // Active-span lookups need the SDK loaded; resolve it asynchronously and
+  // keep the returned handle stable for callers that finish() early.
+  // (No caller in src today — kept API-compatible with the static-import era.)
+  let activeSpan: unknown = null;
+  void sentryModule.then((Sentry) => {
+    activeSpan = Sentry.getActiveSpan();
+  });
   return {
-    transaction: activeSpan ?? null,
+    get transaction() {
+      return activeSpan ?? null;
+    },
     finish: () => {
-      if (activeSpan) Sentry.getRootSpan(activeSpan)?.end?.();
+      const span = activeSpan;
+      if (!span) return;
+      void sentryModule?.then((Sentry) => {
+        Sentry.getRootSpan(span as Parameters<typeof Sentry.getRootSpan>[0])?.end?.();
+      });
     },
     operationName,
   };
@@ -119,16 +150,20 @@ export function startPerformanceTracking(operationName: string) {
  * Set user context for error reports
  */
 export function setUserContext(userId: string, email?: string) {
-  if (!initialized) return;
-  Sentry.setUser({ id: userId, email });
+  if (!initialized || !sentryModule) return;
+  void sentryModule.then((Sentry) => {
+    Sentry.setUser({ id: userId, email });
+  });
 }
 
 /**
  * Clear user context (call on logout)
  */
 export function clearUserContext() {
-  if (!initialized) return;
-  Sentry.setUser(null);
+  if (!initialized || !sentryModule) return;
+  void sentryModule.then((Sentry) => {
+    Sentry.setUser(null);
+  });
 }
 
 /**
@@ -139,6 +174,8 @@ export function addBreadcrumb(
   data?: Record<string, unknown>,
   category: string = 'action'
 ) {
-  if (!initialized) return;
-  Sentry.addBreadcrumb({ message, data, category, level: 'info' });
+  if (!initialized || !sentryModule) return;
+  void sentryModule.then((Sentry) => {
+    Sentry.addBreadcrumb({ message, data, category, level: 'info' });
+  });
 }

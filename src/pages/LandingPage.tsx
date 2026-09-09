@@ -310,9 +310,32 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const [s2Visible, setS2Visible] = useState(false);
   const [s3Visible, setS3Visible] = useState(false);
   const [readingStep, setReadingStep] = useState(0);
+  // EVISUAL-IDLE-001 (9 ก.ย. 2026): the EvolutionaryVisualSystem SVG builds
+  // ~60 DOM nodes and registers a scroll/rAF loop the moment LandingPage
+  // mounts — even though its zone sits a full viewport below the fold. On
+  // throttled mobile that work landed squarely inside the LCP window
+  // (Lighthouse: 3.8 s main-thread work, 6 long tasks, Style & Layout 1.1 s).
+  // Mount it only when the zone is ~1 viewport away from entering.
+  const [visualNear, setVisualNear] = useState(false);
   const s2Ref = useRef<HTMLElement>(null);
   const s3Ref = useRef<HTMLElement>(null);
   const s2VisualRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = s2VisualRef.current;
+    if (!el || visualNear) return;
+    const nearObs = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setVisualNear(true);
+          nearObs.disconnect();
+        }
+      },
+      { rootMargin: '100% 0px' },
+    );
+    nearObs.observe(el);
+    return () => nearObs.disconnect();
+  }, [visualNear]);
 
   const goFull = () => {
     setLandingContext({ mood });
@@ -408,11 +431,18 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
 
       <style>{`
         @keyframes hero-enter{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+        /* LCP-RENDER-001 (9 ก.ย. 2026): the hero H1 IS the LCP element, but
+           hero-enter started it at opacity:0 — Chrome excludes opacity-0 text
+           from LCP candidates entirely, so the LCP clock kept running for the
+           full .15s delay + .8s fade (and every re-paint during it). The h1
+           now rises with a transform-only animation: visible from the first
+           painted frame, same visual motion, LCP measured at paint time. */
+        @keyframes hero-rise{from{transform:translateY(22px)}to{transform:translateY(0)}}
         @keyframes sp-bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(7px)}}
         @keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
         @keyframes fade-up{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
         .hero-badge{animation:hero-enter .7s .05s both}
-        .hero-title{animation:hero-enter .8s .15s both}
+        .hero-title{animation:hero-rise .8s .15s both}
         .hero-sub{animation:hero-enter .8s .3s both}
         .hero-cta{animation:hero-enter .7s .45s both}
         .hero-scroll{animation:sp-bounce 2.2s ease-in-out infinite}
@@ -615,7 +645,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
               }}
             >
               <div style={{ width: '100%', maxWidth: '480px' }}>
-                <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
+                {visualNear && (
+                  <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
+                )}
               </div>
             </div>
           </div>

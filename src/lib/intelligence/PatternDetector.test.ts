@@ -16,6 +16,11 @@ vi.mock('@/lib/supabase/client', () => ({
       update: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: {}, error: null }),
       insert: vi.fn().mockReturnThis(),
+      // PATTERN406-001 (9 ก.ย. 2026): getPattern() now ends with .limit(1)
+      // instead of .single() (a 0-row lookup is normal there and .single()
+      // made PostgREST answer 406 — a red console error per pattern check).
+      // The chain must stay awaitable: .limit resolves the array response.
+      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
     })),
   },
 }));

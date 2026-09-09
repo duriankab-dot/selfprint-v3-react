@@ -455,14 +455,19 @@ export class EvidenceAnalyzer {
   private async verifyEvidenceExists(userId: string, point: EvidencePoint): Promise<boolean> {
     try {
       const table = this.getTableForSource(point.source);
+      // EVIDENCE406-001 (9 ก.ย. 2026): this is an existence check — "not
+      // found" is a legitimate answer, but `.single()` makes PostgREST reply
+      // 406 (Not Acceptable) for 0 rows, which Chrome prints as a console
+      // error on every stale evidence point during pattern detection.
+      // `.limit(1)` + array read returns 200 `[]` instead.
       const { data } = await supabase
         .from(table)
         .select('id')
         .eq('user_id', userId)
         .eq('id', point.sourceId)
-        .single();
+        .limit(1);
 
-      return !!data;
+      return !!data && data.length > 0;
     } catch {
       return false;
     }

@@ -6,6 +6,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { SICEBridge } from './SICEBridge';
 import type { OrchestratorResult, DetectedPattern } from '@/types/sice';
+import { supabase } from '@/lib/supabase/client';
 
 describe('SICEBridge', () => {
   let bridge: SICEBridge;
@@ -49,6 +50,24 @@ describe('SICEBridge', () => {
         },
         totalExecutionTime: 500,
       };
+
+      // PATTERN406-001 follow-up (9 ก.ย. 2026): getPattern() now ends with
+      // .limit(1), and the global mock's array path applies eq() filters for
+      // real (unlike the old .single(), which returned fixture data
+      // regardless of filters — masking what production does: a 0-row lookup
+      // is a miss). Seed the row updatePattern() is expected to find.
+      await supabase
+        .from('behavioral_patterns')
+        .insert({
+          user_id: 'test-user-1',
+          pattern_name: 'decision_hesitation',
+          pattern_type: 'repeating',
+          frequency: '4',
+          confidence: 70,
+          evidence_points: '[]',
+        })
+        .select()
+        .single();
 
       const result = await bridge.bridgePatternResults(orchestratorResult);
 
