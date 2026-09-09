@@ -1,3 +1,4 @@
+import '../../styles/twin-evolution.css';
 /**
  * AskCoach.tsx
  *

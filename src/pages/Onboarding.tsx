@@ -1,3 +1,4 @@
+import '../styles/core-awakening.css';
 /**
  * Onboarding.tsx
  *
@@ -658,7 +659,11 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   void step; // used by StoryBeatIndicator below
 
   return (
-    <div style={{ display: 'contents' }}>
+    // LANDMARK-001 (9 ก.ย. 2026): Lighthouse a11y flagged Onboarding as
+    // "Document does not have a main landmark" (other pages render <main>,
+    // this one didn't). Wrapping the whole flow in <main> gives assistive
+    // tech a single skip target and repairs the audit.
+    <main style={{ display: 'contents' }}>
       {seoData && (
         <MetaTagManager
           title={seoData.title}
@@ -879,6 +884,6 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
         <ClaimAccount data={pendingOnboardingData} onDone={handleComplete} />
       )}
     </div>
-    </div>
+    </main>
   );
 }

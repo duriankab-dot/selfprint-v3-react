@@ -69,12 +69,12 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+  const openRouterKey = Deno.env.get('OPENROUTER_API_KEY');
 
   if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
     return json({ error: 'Supabase not configured' }, 500);
   }
-  if (!anthropicKey) return json({ error: 'Anthropic key not configured' }, 500);
+  if (!openRouterKey) return json({ error: 'OpenRouter key not configured' }, 500);
 
   // ─── SEC-02: บังคับ verify JWT ก่อนแตะ service_role client / เรียก Claude ──
   const authHeader = req.headers.get('Authorization');
@@ -173,28 +173,32 @@ ${messagesSummary}
 
 ตรวจพบ 3-7 รูปแบบที่มีนัยสำคัญ ไม่ใช่ทุกอย่างที่เห็น`;
 
-    // Call Claude
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+    // Call OpenRouter (OpenAI-compatible chat completions)
+    const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
+        Authorization: `Bearer ${openRouterKey}`,
+        'HTTP-Referer': 'https://selfprint.app',
+        'X-Title': 'SelfPrint',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'anthropic/claude-3.5-sonnet',
         max_tokens: 2000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        temperature: 0.7,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
       }),
     });
 
-    if (!claudeRes.ok) {
-      throw new Error(`Claude API error: ${claudeRes.status}`);
+    if (!aiRes.ok) {
+      throw new Error(`OpenRouter API error: ${aiRes.status}`);
     }
 
-    const claudeData = await claudeRes.json();
-    const rawText = claudeData.content?.[0]?.text || '{}';
+    const aiData = await aiRes.json();
+    const rawText = aiData.choices?.[0]?.message?.content || '{}';
 
     let parsed: ClaudePatternResponse;
     try {

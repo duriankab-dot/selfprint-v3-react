@@ -126,6 +126,24 @@ export default defineConfig({
           // APP FEATURE CHUNKS — heavy src modules shared across lazy routes.
           // ────────────────────────────────────────────────────────────────────
 
+          // SUPABASE-CLNT-001 (9 ก.ย. 2026): the supabase client must never be
+          // absorbed into chunk-intelligence. @supabase/supabase-js is reachable
+          // through lib/supabase/client + services/supabase-service, and those
+          // two source modules are imported by BOTH the entry graph
+          // (AuthContext/AIContext/WorldContext…) AND chunk-intelligence
+          // (PersonalContextBuilder/TwinStateEngine, Onboarding's
+          // AICreationSequence). Rolldown assigns a shared module to exactly one
+          // chunk — it kept choosing chunk-intelligence, so the ENTRY itself was
+          // statically importing the 345 kB intelligence+supabase chunk on
+          // EVERY page (Lighthouse 9 ก.ย. 2026: /th/onboarding transferred
+          // 87 KiB of it, 86 % unused). This dedicated chunk lets the entry/landing
+          // graph load only the small client; chunk-intelligence becomes
+          // reachable only through lazy routes, not the pre-login critical path.
+          if (
+            id.includes('/src/lib/supabase') ||
+            id.includes('/src/services/supabase-service')
+          ) return 'chunk-supabase-client';
+
           // Personality intelligence engine (dashboard widgets)
           // NOTE: chunk-astrology and chunk-sice were removed — supabase-service.ts
           // is statically imported by AIContext (a core provider in App.tsx), so

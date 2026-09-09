@@ -13,7 +13,6 @@ import type { ReactNode } from 'react';
 import type { WorldId } from '../constants/worlds';
 import type { Decision } from '../types/decision';
 import type { FullAnalysisOutput } from '../lib/intelligence/InsightEngine';
-import { createDecision } from '../services/DecisionService';
 import { AuthContext } from './AuthContext';
 import { calculateMaturityScore } from '../services/DynamicValueCalculator';
 import {
@@ -270,6 +269,14 @@ export function TwinProvider({ children }: { children: ReactNode }) {
         world: decision.world || currentWorld || undefined,
       };
 
+      // ENTRY-GRAPH-001 (9 ก.ย. 2026): DecisionService (+ DecisionLearningService
+      // + FollowUpScheduler) was statically imported from this EAGER provider,
+      // so the built ENTRY chunk imported the whole decision-services chunk on
+      // every page load (Lighthouse measured it in the modulepreload list even
+      // on /th/onboarding). saveDecision only fires from authenticated app
+      // flows (dashboard panels), so load the module lazily at call time —
+      // the pre-login critical path no longer requests this chunk.
+      const { createDecision } = await import('../services/DecisionService');
       const result = await createDecision(decisionWithWorld);
       return {
         success: !!result,

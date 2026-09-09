@@ -1,3 +1,4 @@
+import '../styles/core-awakening.css';
 /**
  * CoreAwakening.tsx
  * WOW #3: Twin Birth Ceremony

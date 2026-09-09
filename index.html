@@ -58,10 +58,12 @@
     <link rel="preconnect" href="https://orxteufqeohptpbwkqx.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://orxteufqeohptpbwkqx.supabase.co" />
 
-    <!-- LIGHTHOUSE-PERF-002 (9 ก.ย. 2026): Add prefetch for critical resources.
-         The app's first meaningful paint depends on these assets being ready.
-         Preload the main bundle to reduce LCP. -->
-    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+    <!-- PRELOAD-FIX-001 (9 ก.ย. 2026): The previous preload
+         (<link rel="preload" href="/src/main.tsx" as="script">) was removed —
+         Vite's HTML transform turned the /src/ path into a giant inline
+         base64 data: URI in the built index.html (a useless payload on every
+         page load). The entry script is already preloaded properly by Vite's
+         own generated <link rel="modulepreload"> tags in the built HTML. -->
 
     <!-- Open Graph / Social — updated for GEO/AEO (MetaTagManager overrides per-page) -->
     <meta property="og:type" content="website" />

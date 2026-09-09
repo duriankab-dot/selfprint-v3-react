@@ -1,3 +1,5 @@
+import '../styles/nova-twin.css';
+import '../styles/core-awakening.css';
 /**
  * TwinChat.tsx
  * Personal AI Twin chat interface with world-specific expertise

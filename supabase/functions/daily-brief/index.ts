@@ -60,12 +60,12 @@ serve(async (req) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY');
+  const openRouterKey = Deno.env.get('OPENROUTER_API_KEY');
 
   if (!supabaseUrl || !supabaseAnonKey || !serviceKey) {
     return json({ error: 'Supabase not configured' }, 500);
   }
-  if (!anthropicKey) return json({ error: 'Anthropic key not configured' }, 500);
+  if (!openRouterKey) return json({ error: 'OpenRouter key not configured' }, 500);
 
   // ─── SEC-02: บังคับ verify JWT ก่อนแตะ service_role client ────────────────
   const authHeader = req.headers.get('Authorization');
@@ -202,25 +202,29 @@ ${recentActivity}
 
 สร้าง Daily Brief ภาษาไทย กระชับ อบอุ่น personal`;
 
-    // 5. Generate with Claude
-    const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+    // 5. Generate with OpenRouter (OpenAI-compatible chat completions)
+    const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': anthropicKey,
-        'anthropic-version': '2023-06-01',
+        Authorization: `Bearer ${openRouterKey}`,
+        'HTTP-Referer': 'https://selfprint.app',
+        'X-Title': 'SelfPrint',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-haiku-20241022', // Haiku for speed
+        model: 'anthropic/claude-3.5-haiku', // Haiku for speed
         max_tokens: 300,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
+        temperature: 0.8,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
       }),
     });
 
-    if (!claudeRes.ok) throw new Error(`Claude API error: ${claudeRes.status}`);
-    const claudeData = await claudeRes.json();
-    const briefText = claudeData.content?.[0]?.text?.trim() || '';
+    if (!aiRes.ok) throw new Error(`OpenRouter API error: ${aiRes.status}`);
+    const aiData = await aiRes.json();
+    const briefText = aiData.choices?.[0]?.message?.content?.trim() || '';
 
     if (!briefText) throw new Error('Empty response from Claude');
 

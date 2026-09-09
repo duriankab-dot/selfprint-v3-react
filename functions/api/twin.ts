@@ -29,11 +29,12 @@
  * Rules: lazy client, rate 40 req/min (Twin is heavier), CORS *
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { callOpenRouter } from './_utils/ai-provider.js';
 import { verifyUser } from '../../api/_utils/verify-user.js';
 
 interface Env {
-  ANTHROPIC_API_KEY?: string;
+  OPENROUTER_API_KEY?: string;
+  AI_PROVIDER?: string;
   TWIN_MODEL_ID?: string;
   CLAUDE_MODEL_ID?: string;
   TWIN_RATE_LIMIT?: string;
@@ -107,8 +108,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
   }
 
-  if (!env.ANTHROPIC_API_KEY) {
-    console.error('[functions/api/twin] ANTHROPIC_API_KEY missing');
+  if (!env.OPENROUTER_API_KEY) {
+    console.error('[functions/api/twin] OPENROUTER_API_KEY missing');
     return json({ error: 'API key not configured' }, 500);
   }
 
@@ -141,28 +142,22 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
 
     // Twin uses Sonnet for deeper reasoning (behavioral pattern analysis)
-    // Falls back to haiku only if explicitly overridden via env
-    const model = env.TWIN_MODEL_ID || env.CLAUDE_MODEL_ID || 'claude-3-5-sonnet-20241022';
+    // Falls back to Haiku only if explicitly overridden via env
+    const model = env.TWIN_MODEL_ID || env.CLAUDE_MODEL_ID || 'anthropic/claude-3.5-sonnet';
 
-    const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
-    const claudeRes = await client.messages.create({
+    const content = await callOpenRouter(env, {
       model,
-      max_tokens,
       temperature,
+      max_tokens,
       system,
       messages,
     });
-
-    const content = claudeRes.content
-      .filter((b) => b.type === 'text')
-      .map((b) => (b as { type: 'text'; text: string }).text)
-      .join('\n');
 
     return json({ content });
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[functions/api/twin] Error:', msg);
-    // DEBUGLEAK-001: `msg` is raw Anthropic SDK error text — log only.
+    // DEBUGLEAK-001: `msg` is raw AI provider error text — log only.
     return json({ error: 'Internal server error' }, 500);
   }
 }

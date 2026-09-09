@@ -58,16 +58,18 @@ import { FloatingSelfprintChat } from './components/chat/FloatingSelfprintChat';
 // main bundle. Lazy-loading shaves it from the initial JS payload.
 const TwinEvolutionSceneWrapper = lazy(() => import('./components/TwinEvolutionSceneWrapper'));
 import './styles/global.css';
-import './styles/nova-twin.css';
-import './styles/core-awakening.css';
-import './styles/twin-evolution.css';
-import './styles/decision-dashboard.css';
-import './styles/worlds-hub.css';
-import './styles/twin-nav.css';
-import './styles/twin-settings.css';
-import './styles/twin-personality.css';
-import './styles/faq-page.css';
-import './styles/faq-accordion.css';
+// CSS-SPLIT-001 (9 ก.ย. 2026): The page-scoped stylesheets below used to be
+// imported here in App.tsx — Vite then hoisted every route's CSS into the one
+// entry bundle (Lighthouse 9 ก.ย. 2026: index.css ≈ 96 kB raw / 16 kB gzip was
+// 86 % unused on /th/onboarding). Each of these files already has an import in
+// its own lazy page/component (TwinNav, TwinSettingsPage, TwinPersonalityPage,
+// FAQPage/FAQAccordion, DecisionDashboard, WorldsHub/WorldDetail, TwinChat for
+// nova-twin.css) — the App.tsx copies were pure redundancy that forced the
+// styles ONTO every page, including marketing ones. core-awakening.css and
+// twin-evolution.css are now imported by their consumer pages/components too
+// (CoreAwakening/AnalysisPage/Onboarding/TwinChat and
+// TwinEvolutionScene(+Wrapper)/TwinEvolutionChart/AskCoach). Only true globals
+// stay here.
 import './App.css';
 
 // Phase 5.9: Code splitting
@@ -278,6 +280,63 @@ function ConditionalTwinEvolution() {
     </Suspense>
   );
 }
+// DOMDEPTH-001 (9 ก.ย. 2026): The authenticated provider stack (AI, Hub,
+// World, Subscription, Audio, SFX, Environment, Evolution, Popup) used to be
+// mounted unconditionally — ~20 provider/overlay layers above even the most
+// trivial marketing page. It is only *read* by app routes; the marketing pages
+// (LandingPage, Onboarding, blog, FAQ, about, …) never call those hooks. On a
+// logged-out visit to a marketing route we skip the whole stack: fewer mounted
+// contexts, no EnvironmentEngine 60s timer, no World/Subscription supabase
+// queries, no audio chain — a lighter first paint (Lighthouse LCP focus) and 10
+// fewer nested provider wrappers in the DOM.
+//
+// Safety rule: the gate only ever *removes* providers for the routes listed in
+// MARKETING_PATH_RE. Any other path (dashboard, /chat/*, /core-awakening,
+// /pricing, /worlds/*…) mounts the full stack exactly as before — for both
+// logged-in and logged-out visitors — so direct navigation to an app URL and
+// the async session race (a page renders before supabase auth resolves) keep
+// working unchanged (same pattern as ConditionalExperience below).
+const MARKETING_PATH_RE =
+  /^\/(?:en|th)?(?:\/?$|onboarding\/?$|login\/?$|blog(?:\/.*)?\/?$|faq\/?$|about\/?$|science\/?$|contact\/?$|terms\/?$|privacy\/?$|share(?:\/.*)?\/?$|vs-astrology\/?$|tarot\/?$|palmistry\/?$)/;
+
+function ConditionalPrivateProviders({ children }: { children: React.ReactNode }) {
+  const auth = useContext(AuthContext);
+  const skip = !auth?.session && MARKETING_PATH_RE.test(window.location.pathname);
+  if (skip) {
+    // No session on a marketing route: children contains only
+    // ConditionalTwinEvolution (self-guards on session) + <Routes> — the
+    // overlays below (ContextualPopup/TwinEvolutionSceneWrapper) would call
+    // usePopup()/useEvolution() without their providers and crash, so they
+    // render exclusively inside the mounted stack.
+    return <>{children}</>;
+  }
+  return (
+    <AIProvider>
+      <HubProvider>
+        <WorldProvider>
+        <SubscriptionProvider>
+        <ConditionalExperience>
+          <AudioProvider>
+            <SFXProvider>
+              <EnvironmentProvider>
+              <EvolutionProvider>
+                <PopupProvider>
+                  <ContextualPopup />
+                  <TwinEvolutionSceneWrapper />
+                  {children}
+                </PopupProvider>
+              </EvolutionProvider>
+            </EnvironmentProvider>
+          </SFXProvider>
+        </AudioProvider>
+        </ConditionalExperience>
+        </SubscriptionProvider>
+      </WorldProvider>
+    </HubProvider>
+    </AIProvider>
+  );
+}
+
 function App() {
   // Validate world personalities on app startup
   useEffect(() => {
@@ -302,59 +361,47 @@ function App() {
         <ThemeProvider>
           <AuthProvider>
             <RecoveryRouteHandler />
-            <AIProvider>
-              <PendingOnboardingSaver />
-              <EmotionProvider>
-                <HubProvider>
-                  <TwinProvider>
-                    <WorldProvider>
-                      <SubscriptionProvider>
-                      <ConditionalExperience>
-                        <AudioProvider>
-                          <SFXProvider>
-                            <EnvironmentProvider>
-                            <EvolutionProvider>
-                              <PopupProvider>
-                              {/* LANG-PROVIDER-001 FIX: TwinEvolution and PWAInstallPrompt both
-                                  call useLanguage() (added during the i18n pass), but were mounted
-                                  here — above/outside <LanguageProvider> — which threw "useLanguage
-                                  must be used within LanguageProvider" on every single page load and
-                                  crashed the entire app to a blank/error screen in production.
-                                  LanguageProvider now wraps this whole sibling group instead of just
-                                  <Routes>, with no change to any other provider's nesting order. */}
-                              <LanguageProvider>
-                              <OfflineBanner />
-                              <ConditionalTwinEvolution />
-                              <ContextualPopup />
-                              <TwinEvolutionSceneWrapper />
-                              <PWAInstallPrompt />
-                              {/* SELFPRINTCHAT-001: floating draggable general-assistant
-                                  button, distinct from the Twin — see FloatingSelfprintChat.tsx.
-                                  Same global-mount pattern as the overlays above; renders
-                                  nothing itself until a session exists. */}
-                              <FloatingSelfprintChat />
-                              <Suspense fallback={null}>
-                                <Routes>
-                                  {getLanguagePrefixedRoutes()}
-                                  {/* Catch-all fallback redirects to /th/ (Thai market first) */}
-                                  <Route path="*" element={<Navigate to="/th/" replace />} />
-                                </Routes>
-                              </Suspense>
-                                </LanguageProvider>
-                            </PopupProvider>
-                          </EvolutionProvider>
-                        </EnvironmentProvider>
-                          </SFXProvider>
-                        </AudioProvider>
-                    </ConditionalExperience>
-                  </SubscriptionProvider>
-                  </WorldProvider>
-                </TwinProvider>
-              </HubProvider>
+            <PendingOnboardingSaver />
+            {/* DOMDEPTH-001: EmotionProvider and TwinProvider stay mounted for
+                every visitor — marketing pages (LandingPage, Onboarding) read
+                useEmotion()/useTwin() directly. The heavy authenticated stack
+                (AI … Popup = 9 providers + 4 overlays, ~20 DOM layers) moves
+                into ConditionalPrivateProviders, which skips the whole stack on
+                logged-out marketing routes (/, /onboarding, /blog, /login, …). */}
+            <EmotionProvider>
+              <TwinProvider>
+                {/* LANG-PROVIDER-001 FIX: LanguageProvider wraps this whole sibling
+                    group (see original comment below) — OfflineBanner, PWAInstallPrompt
+                    and FloatingSelfprintChat read useLanguage() and stay public for
+                    every visitor. */}
+                <LanguageProvider>
+                <OfflineBanner />
+                <PWAInstallPrompt />
+                {/* SELFPRINTCHAT-001: floating draggable general-assistant
+                    button, distinct from the Twin — see FloatingSelfprintChat.tsx.
+                    Same global-mount pattern as the overlays above; renders
+                    nothing itself until a session exists. */}
+                <FloatingSelfprintChat />
+                <ConditionalPrivateProviders>
+                  {/* Only routes + the self-guarding TwinEvolution go in the
+                      children slot. ContextualPopup / TwinEvolutionSceneWrapper
+                      render inside ConditionalPrivateProviders instead — they
+                      need Popup/Evolution/Audio contexts, which exist only when
+                      the provider stack is mounted. */}
+                  <ConditionalTwinEvolution />
+                  <Suspense fallback={null}>
+                    <Routes>
+                      {getLanguagePrefixedRoutes()}
+                      {/* Catch-all fallback redirects to /th/ (Thai market first) */}
+                      <Route path="*" element={<Navigate to="/th/" replace />} />
+                    </Routes>
+                  </Suspense>
+                </ConditionalPrivateProviders>
+                </LanguageProvider>
+              </TwinProvider>
             </EmotionProvider>
-          </AIProvider>
-        </AuthProvider>
-      </ThemeProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </Router>
     </HelmetProvider>
   );

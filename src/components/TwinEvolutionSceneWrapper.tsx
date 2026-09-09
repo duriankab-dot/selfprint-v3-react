@@ -1,3 +1,4 @@
+import '../styles/twin-evolution.css';
 import React, { useEffect, useState } from 'react';
 import { useEvolution } from '@/context/EvolutionContext';
 import { usePopup } from '@/context/PopupContext';

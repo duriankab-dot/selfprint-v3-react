@@ -1,3 +1,4 @@
+import '../styles/twin-evolution.css';
 import React, { useEffect, useState } from 'react';
 import { useAudio } from '@/context/AudioContext';
 import './TwinEvolutionScene.css';

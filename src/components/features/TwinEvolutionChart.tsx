@@ -1,3 +1,4 @@
+import '../../styles/twin-evolution.css';
 /**
  * 📈 TwinEvolutionChart Component — Accuracy Trend Visualization
  *

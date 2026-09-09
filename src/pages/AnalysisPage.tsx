@@ -1,3 +1,4 @@
+import '../styles/core-awakening.css';
 /**
  * AnalysisPage.tsx
  *
