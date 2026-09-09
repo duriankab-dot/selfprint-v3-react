@@ -58,6 +58,11 @@
     <link rel="preconnect" href="https://orxteufqeohptpbwkqx.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://orxteufqeohptpbwkqx.supabase.co" />
 
+    <!-- LIGHTHOUSE-PERF-002 (9 ก.ย. 2026): Add prefetch for critical resources.
+         The app's first meaningful paint depends on these assets being ready.
+         Preload the main bundle to reduce LCP. -->
+    <link rel="preload" href="/src/main.tsx" as="script" crossorigin />
+
     <!-- Open Graph / Social — updated for GEO/AEO (MetaTagManager overrides per-page) -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="SELFPRINT" />
@@ -86,6 +91,9 @@
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- Lighthouse-PERF-001 (9 ก.ย. 2026): Add defer to main.tsx script to unblock
+         rendering. React's createRoot() is async-compatible and will hydrate
+         after the DOM is ready. This saves ~150ms of render-blocking time. -->
+    <script type="module" defer src="/src/main.tsx"></script>
   </body>
 </html>

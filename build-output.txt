@@ -1,0 +1,166 @@
+﻿[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+Γ£ô 948 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                      11.06 kB Γöé gzip:  5.00 kB
+dist/assets/AccuracyBadge-Dec0HNJf.css                2.27 kB Γöé gzip:  0.59 kB
+dist/assets/LifeHubsPage-BGAA_6Gn.css                 2.27 kB Γöé gzip:  0.81 kB
+dist/assets/DecisionForm-C7pTKN0f.css                 2.58 kB Γöé gzip:  0.81 kB
+dist/assets/Login-BGOcIvQ4.css                        2.76 kB Γöé gzip:  0.84 kB
+dist/assets/BadgePage-DrIhAVKq.css                    3.32 kB Γöé gzip:  0.85 kB
+dist/assets/NavBar-B8ndECAi.css                       3.94 kB Γöé gzip:  1.15 kB
+dist/assets/PasskeySettings-BmaRR_ET.css              4.58 kB Γöé gzip:  1.11 kB
+dist/assets/TwinEvolutionSceneWrapper-CeMHH3gp.css    4.72 kB Γöé gzip:  1.41 kB
+dist/assets/PricingPage-sgHiTHU5.css                  5.36 kB Γöé gzip:  1.38 kB
+dist/assets/VoiceChatPage-DuQTYeJw.css                5.36 kB Γöé gzip:  1.39 kB
+dist/assets/DecisionLoggerPage-DFYpzWzm.css           5.87 kB Γöé gzip:  1.42 kB
+dist/assets/PrivacyCenter-B-45zMkR.css                6.26 kB Γöé gzip:  1.57 kB
+dist/assets/Dashboard-DPCgRc-1.css                    6.26 kB Γöé gzip:  1.64 kB
+dist/assets/DailyBriefPage-h2ejEd6-.css               9.20 kB Γöé gzip:  2.04 kB
+dist/assets/TwinProfilePage-tJ-lmG6o.css              9.53 kB Γöé gzip:  2.06 kB
+dist/assets/dashboard-BZYJKOs6.css                   13.73 kB Γöé gzip:  2.83 kB
+dist/assets/AnalysisPage-CBw1GspA.css                14.52 kB Γöé gzip:  2.75 kB
+dist/assets/IntelligenceHub-CmSiZWjk.css             34.26 kB Γöé gzip:  6.14 kB
+dist/assets/index-DCAwz-uI.css                       96.29 kB Γöé gzip: 16.33 kB
+dist/assets/ActivitiesPage-C-eTceRX.js                0.25 kB Γöé gzip:  0.21 kB
+dist/assets/analysisStore-EGxwHF74.js                 0.34 kB Γöé gzip:  0.18 kB
+dist/assets/shareService-Cp1H1mZY.js                  0.47 kB Γöé gzip:  0.30 kB
+dist/assets/userStore-CoAr3832.js                     0.57 kB Γöé gzip:  0.31 kB
+dist/assets/getTwinKnowledge-C3amMUvm.js              0.61 kB Γöé gzip:  0.37 kB
+dist/assets/rolldown-runtime-hePW80VL.js              0.71 kB Γöé gzip:  0.42 kB
+dist/assets/BackButton-Dx3c1-aC.js                    0.76 kB Γöé gzip:  0.53 kB
+dist/assets/PricingSuccessPage-BRaq79aS.js            1.18 kB Γöé gzip:  0.68 kB
+dist/assets/Alert-DZevQp_B.js                         1.21 kB Γöé gzip:  0.58 kB
+dist/assets/PasskeyProvider-57Mvhbk0.js               1.72 kB Γöé gzip:  0.66 kB
+dist/assets/Input-BO1cSq8U.js                         1.89 kB Γöé gzip:  0.75 kB
+dist/assets/webauthn-DiNoqBdB.js                      2.06 kB Γöé gzip:  0.89 kB
+dist/assets/TwinNav-CQMlAEU0.js                       2.16 kB Γöé gzip:  1.06 kB
+dist/assets/AccuracyBadge-V2OI-Bod.js                 2.54 kB Γöé gzip:  0.97 kB
+dist/assets/vendor-state-BXTmShHh.js                  2.60 kB Γöé gzip:  1.28 kB
+dist/assets/CurrentChapter-yT0naQmu.js                2.90 kB Γöé gzip:  1.02 kB
+dist/assets/useVoiceTwin-Crx3BZ8c.js                  2.90 kB Γöé gzip:  1.17 kB
+dist/assets/WorldsHub-BxAE9zZA.js                     3.63 kB Γöé gzip:  1.67 kB
+dist/assets/TwinEvolutionSceneWrapper-9d8PSJ3N.js     3.92 kB Γöé gzip:  1.67 kB
+dist/assets/PersonalContextBuilder-BvtOnXZj.js        3.94 kB Γöé gzip:  1.67 kB
+dist/assets/NavRail-Buluo04k.js                       4.10 kB Γöé gzip:  1.46 kB
+dist/assets/LifeHubsPage-CQ20B5T4.js                  4.18 kB Γöé gzip:  1.58 kB
+dist/assets/BadgePage-Bts_WVgp.js                     4.24 kB Γöé gzip:  1.66 kB
+dist/assets/MetaTagManager-BxzLf6We.js                4.28 kB Γöé gzip:  1.46 kB
+dist/assets/Share-BYeL31Ei.js                         4.36 kB Γöé gzip:  1.73 kB
+dist/assets/TwinEvolution-D-arOmfj.js                 4.56 kB Γöé gzip:  2.20 kB
+dist/assets/FeatureMenu-Cb7sn9-9.js                   4.59 kB Γöé gzip:  1.97 kB
+dist/assets/BottomNav-DiQrU3PP.js                     5.21 kB Γöé gzip:  2.07 kB
+dist/assets/seoMetadata-DNgEzU90.js                   5.28 kB Γöé gzip:  1.87 kB
+dist/assets/Footer-D37PhjxU.js                        5.39 kB Γöé gzip:  2.27 kB
+dist/assets/DecisionForm-BrXy3nRu.js                  5.56 kB Γöé gzip:  1.93 kB
+dist/assets/DecisionDashboard-D6vcBiTT.js             5.90 kB Γöé gzip:  2.18 kB
+dist/assets/TermsPage-CgGD0XCD.js                     6.25 kB Γöé gzip:  2.51 kB
+dist/assets/NovaChat-DQ8CClEq.js                      6.44 kB Γöé gzip:  2.68 kB
+dist/assets/ExperienceContext-2xOfFDOc.js             6.66 kB Γöé gzip:  2.46 kB
+dist/assets/ConfidenceIndicator-D_a-pch0.js           6.84 kB Γöé gzip:  2.13 kB
+dist/assets/TwinSettingsPage-DzBTV4q9.js              6.98 kB Γöé gzip:  2.44 kB
+dist/assets/AuthContext-COrAxdKn.js                   7.64 kB Γöé gzip:  2.29 kB
+dist/assets/synthesizeAmbientDrone-9Ks7goxJ.js        8.11 kB Γöé gzip:  2.52 kB
+dist/assets/ContactPage-8huhJREy.js                   8.12 kB Γöé gzip:  2.61 kB
+dist/assets/AboutPage-DlWjHDMy.js                     8.26 kB Γöé gzip:  2.99 kB
+dist/assets/PasskeySettings-Uw6hC14I.js               8.58 kB Γöé gzip:  3.11 kB
+dist/assets/TwinPersonalityPage-5xawGb74.js           8.74 kB Γöé gzip:  2.84 kB
+dist/assets/decision-services-CdvqJbYC.js             8.81 kB Γöé gzip:  3.18 kB
+dist/assets/DecisionLoggerPage-13nu624H.js            9.03 kB Γöé gzip:  2.68 kB
+dist/assets/useStoryNarrative-Cvs8-w5d.js             9.29 kB Γöé gzip:  3.60 kB
+dist/assets/BlogArticle-CnPJqgAg.js                   9.31 kB Γöé gzip:  3.38 kB
+dist/assets/VsAstrologyPage-7G6TWg_5.js               9.45 kB Γöé gzip:  3.29 kB
+dist/assets/VoiceChatPage-BCd1lcpY.js                 9.95 kB Γöé gzip:  3.53 kB
+dist/assets/PricingPage-B_PXkJtP.js                  10.61 kB Γöé gzip:  3.84 kB
+dist/assets/DailyBriefPage-COHqBH2M.js               11.38 kB Γöé gzip:  4.04 kB
+dist/assets/MePage-zkKitmtv.js                       11.84 kB Γöé gzip:  3.55 kB
+dist/assets/Login-o-EGhQGC.js                        12.03 kB Γöé gzip:  4.05 kB
+dist/assets/NavBar-CgrOrX8-.js                       13.79 kB Γöé gzip:  4.06 kB
+dist/assets/CommunityPage-Bl5kxVbH.js                14.00 kB Γöé gzip:  4.57 kB
+dist/assets/TwinProfilePage-CcJFvj2w.js              15.47 kB Γöé gzip:  4.41 kB
+dist/assets/SciencePage-DFKB5Hg3.js                  15.80 kB Γöé gzip:  5.28 kB
+dist/assets/WorldDetail-DU-rIsfB.js                  16.44 kB Γöé gzip:  5.65 kB
+dist/assets/PalmistryPage-CzA_ZDWm.js                16.59 kB Γöé gzip:  5.11 kB
+dist/assets/PrivacyCenter-CZV5sB1l.js                17.78 kB Γöé gzip:  4.68 kB
+dist/assets/FAQPage-DBbiqper.js                      18.37 kB Γöé gzip:  6.25 kB
+dist/assets/BlogListPage-D0HncFse.js                 19.21 kB Γöé gzip:  5.68 kB
+dist/assets/astrology-DGbnh_8h.js                    21.49 kB Γöé gzip:  6.02 kB
+dist/assets/TarotPage-CL5B8NJ8.js                    23.00 kB Γöé gzip:  6.99 kB
+dist/assets/vendor-helmet-xx9uo04A.js                23.88 kB Γöé gzip:  8.43 kB
+dist/assets/Twin-C8lqQ0_G.js                         24.13 kB Γöé gzip:  7.91 kB
+dist/assets/AnalysisPage-C_xiOAfU.js                 24.58 kB Γöé gzip:  6.97 kB
+dist/assets/ExplorePage-DcawHM4M.js                  28.60 kB Γöé gzip:  8.02 kB
+dist/assets/vendor-query-BcKlrGmW.js                 35.56 kB Γöé gzip: 10.44 kB
+dist/assets/vendor-router-00wZXZcn.js                38.02 kB Γöé gzip: 13.67 kB
+dist/assets/TwinChat-BBkSQWdH.js                     40.86 kB Γöé gzip: 14.32 kB
+dist/assets/Dashboard-C-00vqmW.js                    41.09 kB Γöé gzip: 12.31 kB
+dist/assets/LandingPage-BA9c_6B4.js                  45.86 kB Γöé gzip: 12.11 kB
+dist/assets/Onboarding-M8H4IXpW.js                   87.24 kB Γöé gzip: 24.62 kB
+dist/assets/IntelligenceHub-j933t1ZQ.js              87.57 kB Γöé gzip: 20.77 kB
+dist/assets/CoreAwakening-COsDaqnY.js                91.89 kB Γöé gzip: 28.31 kB
+dist/assets/worlds-DlK4foOk.js                       95.41 kB Γöé gzip: 26.22 kB
+dist/assets/vendor-markdown-DYMzTgv-.js             116.00 kB Γöé gzip: 35.16 kB
+dist/assets/index-CHI6gQrj.js                       144.91 kB Γöé gzip: 42.86 kB
+dist/assets/vendor-react-DIW0lKMw.js                181.75 kB Γöé gzip: 57.16 kB
+dist/assets/chunk-intelligence-DzpiLQD-.js          345.38 kB Γöé gzip: 87.05 kB
+
+node.exe : [33m[33m[INEFFECTIVE_DYNAMIC_IMPORT] 
+[0msrc/services/DecisionLearningService.ts is 
+dynamically imported by 
+src/services/DecisionService.ts but also statically 
+imported by src/pages/DecisionDashboard.tsx, 
+src/services/TwinAPIService.ts, 
+src/store/decisionStore.ts, dynamic import will not 
+move module into another chunk.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([33m[33 
+   m[INEF... another chunk.:String) [], RemoteExcepti  
+  on
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[39m
+[32mΓ£ô built in 4.42s[39m
+
+PWA v1.3.0
+Building src/sw.js service worker ("es" format)...
+[36mvite v8.2.2 [32mbuilding client environment for production...[36m[39m
+
+[43m[30m WARN [39m[49m 
+[36minlineDynamicImports[39m option is deprecated, 
+please use [36mcodeSplitting: false[39m instead.
+
+transforming...
+Γ£ô 78 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/sw.mjs  23.45 kB Γöé gzip: 7.73 kB
+
+[32mΓ£ô built in 127ms[39m
+
+PWA v1.3.0
+mode      injectManifest
+format:   es
+precache  1714 entries (32345.56 KiB)
+files generated
+  dist/sw.js
+[33m[33m[PLUGIN_TIMINGS] [0mYour build spent 100% 
+of 4.4s inside plugin hooks (4.6s).
+Measured inside the callback, so queue time is 
+excluded and time the callback itself awaited is not:
+  - vite-plugin-pwa:build closeBundle (59%, 2.6s, 1 
+call)
+Those rows are 59% of the build; the rest of the 100% 
+is below.
+Not measurable ΓÇö 1 hook whose calls overlap, so 
+elapsed time covers work other calls were doing. 
+Profile with `node --cpu-prof`:
+  - @tailwindcss/vite:generate:build transform (57 
+calls)
+See https://rolldown.rs/reference/InputOptions.checks#p
+lugintimings for more details.
+[39m
