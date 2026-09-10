@@ -133,6 +133,43 @@ USER INPUT (birth date, onboarding answers, reflections, decisions)
      Evidence: P0-A §2, P0-B §B1
 
   ↓
+[5] CROSS-ENGINE SYNTHESIS + CRITICAL PERSISTENCE (BLOCKER-01)
+  ├─ performCrossEngineSynthesis(results)
+  │  ├─ extractThemesFromEngine() per engine ← FIXED: cases 4 & 6 added
+  │  ├─ themeMap aggregation (count, confidence, engines[])
+  │  ├─ Classify: agreements (≥2 engines), themes, singleEngineThemes
+  │  ├─ identifyConflicts() — Thai keyword matching
+  │  └─ confidenceScore = avgConfidence * 0.7 + agreement_bonus * 0.3
+  │  File: SICEOrchestrator.ts:148-220
+  │
+  ├─ performFineTuning(input, results)
+  │  ├─ Read sice_feedback history
+  │  ├─ Per-engine historical accuracy calculation
+  │  └─ Confidence adjustment (max ±7.5%)
+  │  File: SICEOrchestrator.ts:349-436
+  │
+  └─ buildPersonalIntelligence(input, results, synthesis, fineTuned)
+     ├─ Extract insights, recommendations, warnings from all engines
+     ├─ Sort by confidence, deduplicate
+     ├─ recommendedAction from first agreement or top recommendation
+     └─ File: SICEOrchestrator.ts:443-518
+
+  ↓
+[5b] CRITICAL PERSISTENCE GATING (BLOCKER-01 FIX)
+  ├─ await Promise.allSettled([
+  │     bridgePatternResults(orchestratorResult),  ← CRITICAL — awaited
+  │     persistOrchestrationResults(orchestratorResult)  ← CRITICAL — awaited
+  │   ])
+  ├─ If critical persistence fails:
+  │   ├─ completionStatus overridden to 'DEGRADED'
+  │   ├─ persistenceError set with details
+  │   └─ Caller MUST check these before treating as success
+  ├─ Non-critical: bridgeBadgeResults() — fire-and-forget (acceptable risk)
+  └─ return orchestratorResult (only after critical persistence confirmed)
+     File: SICEOrchestrator.ts:144-200
+     Evidence: BLOCKER-01 closure
+
+  ↓
 [5] CROSS-ENGINE SYNTHESIS
   ├─ performCrossEngineSynthesis(results)
   │  ├─ extractThemesFromEngine() per engine ← FIXED: cases 4 & 6 added
@@ -177,15 +214,17 @@ USER INPUT (birth date, onboarding answers, reflections, decisions)
      │  2. Link personal_context to essence
      │  3. Insert baseline SICE scores ← FIXED: now gates success
      │  4. Insert birth memory
-     │  5. Create twin_state (with visualDNA) ← FIXED: now gates success
-     │  6. Create world_preferences (12 worlds) ← FIXED: now gates success
-     │  7. Create twin_personality ← FIXED: now gates success
-     │  8. Create twin_capabilities ← FIXED: now gates success
-     │  File: CoreAwakeningService.ts:421-541
-     │
-     └─ Critical failure gate ← FIXED: returns success:false if any fail
-        File: CoreAwakeningService.ts:581-586
-        Evidence: P0-C §C1, C2
+      │  5. Create twin_state (with visualDNA) ← FIXED: now gates success
+      │  6. Create world_preferences (12 worlds) ← FIXED: now gates success
+      │  7. Create twin_personality ← FIXED: now gates success
+      │  8. Create twin_capabilities ← FIXED: now gates success
+      │  9. Birth memory ← FIXED: now a critical operation (BLOCKER-03)
+      │  File: CoreAwakeningService.ts:421-541
+      │
+      └─ Critical failure gate ← FIXED: returns success:false if any fail
+         Compensating rollback ← FIXED: deletes orphaned Twin, marks essence failed (BLOCKER-02)
+         File: CoreAwakeningService.ts:581-607, 638-693
+         Evidence: P0-C §C1, C2
 
   ↓
 [7] TWIN CONTEXT READY
@@ -296,11 +335,13 @@ USER INPUT (birth date, onboarding answers, reflections, decisions)
 |-----------------|-----------|----------|--------|
 | Profile save fails | API returns {success:false} | User retries | PASS |
 | Birth date invalid | Confidence capped at 0.3 | Proceeds with reduced confidence | PASS |
-| SICE engine crashes | completionStatus='DEGRADED'/FAILED | Other engines continue | PASS ✓ |
-| Essence DB write fails | failedOps tracks it | Awakening returns success:false | PASS ✓ |
-| Twin creation partial | Phase A.1 critical gate | Returns success:false with names | PASS ✓ |
+| SICE engine crashes | completionStatus='DEGRADED'/FAILED | Other engines continue | PASS |
+| Essence DB write fails | Awaited + completionStatus override | DEGRADED status + persistenceError set | PASS ✓ |
+| Pattern persistence fails | Awaited + completionStatus override | DEGRADED status + persistenceError set | PASS ✓ |
+| Twin creation partial | compensatingRollback triggered | Orphaned Twin deleted, essence marked failed | PASS ✓ |
+| Birth memory fails | In criticalFailures → rollback | Twin deleted, essence preserved for retry | PASS ✓ |
+| Memory persistence fails | IntelligenceError thrown | Caller receives typed error code | PASS ✓ |
 | Streaming auth missing | 401 Unauthorized | Client must retry with valid token | PASS ✓ |
-| Persistence background fails | console.warn only (by design) | Data still available in-memory | WARN (by design) |
 
 ---
 

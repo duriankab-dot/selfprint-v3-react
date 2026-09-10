@@ -139,23 +139,61 @@ export class SICEOrchestrator {
       completionStatus,
       successfulEngineCount: successfulEngines.length,
       failedEngineNames,
+      persistenceError: null,
     };
 
-    // Wire results through SICEBridge to feed intelligence layer
-    // Non-blocking: don't wait for bridge operations to complete
-    // This ensures UI gets response quickly while bridging happens in background
+    // BLOCKER-01 FIX: Await critical persistence BEFORE returning result.
+    // PRODUCTION SUCCESS REQUIRES DOWNSTREAM SUCCESS — no returning success
+    // until essential data is confirmed persisted.
+    // Critical: essence snapshot (full SICE results + synthesis) + pattern bridging
+    // Non-critical (fire-and-forget): badge unlocking
     try {
-      // Trigger bridge operations without blocking
-      Promise.all([
+      // Critical persistence — must await
+      const [patternPersist, essencePersist] = await Promise.allSettled([
         sICEBridge.bridgePatternResults(orchestratorResult),
-        sICEBridge.bridgeBadgeResults(orchestratorResult),
         sICEBridge.persistOrchestrationResults(orchestratorResult),
-      ]).catch((err) => {
-        console.warn('SICEBridge operations failed (non-critical):', err);
+      ]);
+
+      let criticalPersistenceFailed = false;
+      let criticalErrorMessage: string | null = null;
+
+      if (patternPersist.status === 'rejected') {
+        criticalPersistenceFailed = true;
+        criticalErrorMessage = `Pattern persistence rejected: ${patternPersist.reason instanceof Error ? patternPersist.reason.message : String(patternPersist.reason)}`;
+      } else if (patternPersist.status === 'fulfilled' && !patternPersist.value?.success) {
+        criticalPersistenceFailed = true;
+        criticalErrorMessage = `Pattern persistence failed: ${patternPersist.value?.error || 'unknown'}`;
+      }
+
+      if (essencePersist.status === 'rejected') {
+        criticalPersistenceFailed = true;
+        criticalErrorMessage = `Essence persistence rejected: ${essencePersist.reason instanceof Error ? essencePersist.reason.message : String(essencePersist.reason)}`;
+      } else if (essencePersist.status === 'fulfilled' && !essencePersist.value?.success) {
+        criticalPersistenceFailed = true;
+        criticalErrorMessage = `Essence persistence failed: ${essencePersist.value?.error || 'unknown'}`;
+      }
+
+      if (criticalPersistenceFailed) {
+        console.error('[SICEOrchestrator] CRITICAL: Downstream persistence failed — overriding COMPLETE status');
+        if (completionStatus === 'COMPLETE') {
+          completionStatus = 'DEGRADED';
+          orchestratorResult.completionStatus = completionStatus;
+        }
+        orchestratorResult.persistenceError = criticalErrorMessage;
+      }
+
+      // Non-critical: badge bridging — fire-and-forget (badges can unlock later)
+      sICEBridge.bridgeBadgeResults(orchestratorResult).catch((err) => {
+        console.warn('[SICEOrchestrator] Non-critical: Badge bridging failed:', err);
       });
     } catch (err) {
-      console.warn('Error initiating SICEBridge:', err);
-      // Continue — bridge failure should not block orchestration response
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error('[SICEOrchestrator] CRITICAL: Persistence infrastructure error:', msg);
+      if (completionStatus === 'COMPLETE') {
+        completionStatus = 'DEGRADED';
+        orchestratorResult.completionStatus = completionStatus;
+      }
+      orchestratorResult.persistenceError = `Persistence infrastructure error: ${msg}`;
     }
 
     return orchestratorResult;

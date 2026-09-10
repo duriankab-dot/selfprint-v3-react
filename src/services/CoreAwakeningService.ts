@@ -580,6 +580,7 @@ export async function initializeTwin(
     // ✨ Check if critical operations failed
     const criticalFailures = [
       { name: 'essence', result: essenceResult },
+      { name: 'birth_memory', result: memoryResult },
       { name: 'world_preferences', result: worldPrefsResult },
       { name: 'twin_personality', result: personalityResult },
       { name: 'twin_state', result: stateResult },
@@ -591,10 +592,20 @@ export async function initializeTwin(
     );
 
     if (failedOps.length > 0) {
-      console.warn(`⚠️ PHASE A.1 CRITICAL: ${failedOps.length} operation(s) failed:`, failedOps.map(f => f.name).join(', '));
+      console.error(`⛔ PHASE A.1 CRITICAL ROLLBACK: ${failedOps.length} operation(s) failed:`, failedOps.map(f => f.name).join(', '));
+      // BLOCKER-02 FIX: Compensating rollback — delete the orphaned Twin
+      // record and mark essence as 'failed' so it can be retried.
+      // Without this, the system has a partial Twin with no SICE scores,
+      // no twin_state, no world_preferences — an inconsistent state.
+      await compensatingRollback({
+        twinId: newTwin.id,
+        userId,
+        essenceId: essence.id,
+        failedOps: failedOps.map(f => f.name),
+      });
       return {
         success: false,
-        message: `Twin creation incomplete: ${failedOps.map(f => f.name).join(', ')} failed`,
+        message: `Twin creation rolled back: ${failedOps.map(f => f.name).join(', ')} failed. Essence preserved for retry.`,
       };
     }
 
@@ -621,6 +632,65 @@ export async function initializeTwin(
 // had exactly one caller, CoreAwakening.tsx, which now calls startAwakening()
 // + initializeTwin() instead — the SICE-essence-grounded path defined above.
 // Removed rather than kept as dead code, per project rules.
+
+/**
+ * BLOCKER-02 FIX: Compensating rollback for partial Twin creation.
+ *
+ * When essential post-Twin operations fail (twin_state, world_preferences,
+ * twin_personality, twin_capabilities, essence marking), we cannot leave a
+ * half-initialized Twin record in the database. This method:
+ * 1. Deletes the just-created Twin record
+ * 2. Marks the essence row as 'failed' (not 'used') so it can be retried
+ * 3. Logs what happened for debugging
+ *
+ * This is NOT a SQL transaction (Supabase doesn't support multi-table
+ * transactions via PostgREST). Instead it's an application-level
+ * compensating action that restores consistency.
+ */
+async function compensatingRollback(params: {
+  twinId: string;
+  userId: string;
+  essenceId: string;
+  failedOps: string[];
+}): Promise<void> {
+  const { twinId, userId, essenceId, failedOps } = params;
+
+  try {
+    // Step 1: Delete the orphaned Twin record
+    const { error: deleteError } = await supabase
+      .from('twins')
+      .delete()
+      .eq('id', twinId)
+      .eq('user_id', userId);
+
+    if (deleteError) {
+      console.error(`[compensatingRollback] Failed to delete orphaned twin ${twinId}:`, deleteError.message);
+    } else {
+      console.log(`[compensatingRollback] Deleted orphaned twin ${twinId}`);
+    }
+
+    // Step 2: Mark essence as 'failed' so it can be retried
+    const { error: essenceError } = await supabase
+      .from('awakening_essence')
+      .update({
+        status: 'failed',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', essenceId)
+      .eq('user_id', userId)
+      .eq('status', 'pending');
+
+    if (essenceError) {
+      console.error(`[compensatingRollback] Failed to mark essence ${essenceId} as failed:`, essenceError.message);
+    } else {
+      console.log(`[compensatingRollback] Marked essence ${essenceId} as 'failed' for retry`);
+    }
+
+    console.log(`[compensatingRollback] Rollback complete for user ${userId}, failed ops: ${failedOps.join(', ')}`);
+  } catch (err) {
+    console.error('[compensatingRollback] Unexpected error during rollback:', err);
+  }
+}
 
 /**
  * Celebrate Twin awakening with effects

@@ -1,12 +1,12 @@
-# P0-F — Persistence Consistency Matrix
+# P0-F — Persistence Consistency Matrix (Second Pass)
 
-**Status:** PASS (AFTER FIXES)
+**Status:** PASS — After Blocker Closure
 **Date:** 2026-09-10
-**Scope:** All critical CREATE, UPDATE, DELETE operations — Ownership, Validation, Error Handling, Consistency
+**Scope:** All critical CREATE, UPDATE operations — Ownership, Validation, Error Handling, Consistency, Awaited Critical Ops
 
 ---
 
-## §F1 — CRITICAL WRITE OPERATIONS
+## §F1 — CRITICAL WRITE OPERATIONS (Updated)
 
 ### Write Operation Audit
 
@@ -15,19 +15,21 @@
 | Profile upsert | selfprint.users_profiles | verifyUser() → user.id | user_id matches authenticated user | date/time format, injection check | DB error logged, returns {success:false} | Yes (onConflict: user_id) | PASS |
 | Blueprint insert | selfprint.blueprints | verifyUser() → user.id | user_id matches + marks previous is_latest:false | accuracyLevel 0-100, arrays validated, injection check | DB error logged | Partial (mark-previous first) | PASS |
 | Share link POST | selfprint.share_links | verifyUser() → user.id | user_id matches | Code collision retry (5 attempts) | DB error logged | Yes (collision retry) | PASS |
-| Twin creation | twins | Via CoreAwakeningService (authenticated) | user_id from authenticated session | Name required, archetypes computed | Twin creation failure → success:false | Yes (unique user_id) | PASS |
+| Twin creation | twins | Via CoreAwakeningService (authenticated) | user_id from authenticated session | Name required, archetypes computed | **Compensating rollback on failure** | Yes (unique user_id) | PASS |
 | Awakening essence | awakening_essence | Via CoreAwakeningService (authenticated) | user_id from authenticated session | personal_intelligence JSONB validated | Essence error → failedOps → success:false | No (userId + status check) | PASS |
-| Twin memories | twin_memories | Via TwinAPIService (authenticated) | twin_id linked to authenticated user's twin | Content validation in prompt builder | DB errors handled by Supabase client | No | PASS |
+| Twin memories | twin_memories | Via TwinAPIService (authenticated) | twin_id linked to authenticated user's twin | Content validation in prompt builder | Birth memory in criticalFailures → triggers rollback | No | PASS |
+| Personal memories | personal_memory | Via PersonalContextBuilder | userId from request (validated by caller) | Memory type enum | **IntelligenceError thrown** | No | PASS |
 | Decisions | decisions | Via DecisionService (authenticated) | twin_id linked to authenticated user's twin | World enum validation | DB errors propagated | No | PASS |
 | Decision outcomes | decision_outcomes | unified-handler NOTIFAUTH-001 | user_id verified + twin_id ownership | outcome enum ['positive','neutral','negative'] | DB error logged | No | PASS |
-| SICE patterns | behavioral_patterns | Via SICEBridge (background) | Derived from orchestration userId | Converted from SICE DetectedPattern | Bridge returns {success:false} on error | Partial (updatePattern) | PASS |
-| Badge unlocks | badge_registry | Via SICEBridge (background) | Derived from twin_id | unlockFromSICESignal idempotent | Bridge returns {success:false} on error | Yes (idempotent unlock) | PASS |
+| SICE patterns | behavioral_patterns | Via SICEBridge (awaited critical) | Derived from orchestration userId | Converted from SICE DetectedPattern | Bridge returns {success:false}, orchestrator awaits | Partial (updatePattern) | PASS |
+| Badge unlocks | badge_registry | Via SICEBridge (fire-and-forget) | Derived from twin_id | unlockFromSICESignal idempotent | Bridge returns {success:false} on error | Yes (idempotent unlock) | PASS |
+| Context insights | personal_context | Via PersonalContextBuilder | userId from request | Context type enum | **IntelligenceError thrown** | No | PASS |
 
 ---
 
 ## §F2 — SCHEMA CONSISTENCY
 
-### Table Schema Verification
+Same as first pass — no changes.
 
 | Table | Schema | Key Columns | RLS Policy | Verified |
 |-------|--------|-------------|------------|----------|
@@ -44,7 +46,7 @@
 
 ---
 
-## §F3 — CONCURRENCY & IDEMPOTENCY
+## §F3 — CONCURRENCY & IDEMPOTENCY (Updated)
 
 ### Race Condition Analysis
 
@@ -57,13 +59,41 @@
 | Concurrent essence creation | Medium | No unique constraint on user_id in awakening_essence | WARN |
 | Concurrent decision outcome recording | Low | Separate rows per outcome, no conflict | SAFE |
 
-### Orphaned Record Risk
+### Critical Persistence Gating (BLOCKER-01)
 
-| Orphan Type | Cause | Impact | Mitigation |
-|-------------|-------|--------|------------|
-| Pending essence without Twin | startAwakening succeeds, initializeTwin never called | Low — small table, per-user | Manual cleanup or TTL job |
-| Twin without world_preferences | world_preferences INSERT fails but Twin created | Fixed — now gates success | P0-C C-FIX-02 |
-| Twin without twin_state | twin_state INSERT fails but Twin created | Fixed — now gates success | P0-C C-FIX-02 |
+| Operation Type | Awaited Before Return? | Failure Behavior | Caller Visibility |
+|---------------|----------------------|------------------|-------------------|
+| Essence snapshot (persistOrchestrationResults) | ✅ YES | completionStatus='DEGRADED' + persistenceError set | Full visibility |
+| Pattern bridging (bridgePatternResults) | ✅ YES | completionStatus='DEGRADED' + persistenceError set | Full visibility |
+| Badge bridging (bridgeBadgeResults) | ❌ NO (fire-and-forget) | Logged only, non-critical | Console.warn only |
+
+**Rationale:** Badge unlocking is cosmetic — can happen seconds after response without affecting system correctness. Essence snapshot and pattern bridging are essential for data integrity.
+
+---
+
+## §F4 — MEMORY PERSISTENCE PROPAGATION (BLOCKER-03)
+
+### Memory Write Error Flow
+
+```
+PersonalContextBuilder.createMemoriesFromOnboarding()
+  ↓
+supabase.from('personal_memory').insert(...)
+  ↓
+{ error: PostgrestError } detected
+  ↓
+throw IntelligenceError('MEMORY_PERSISTENCE_FAILED')
+  ↓
+Caller receives typed error with specific code
+  ↓
+Caller handles appropriately (retry / fail-open / degrade)
+```
+
+| Write Location | Error Type | Propagation | Caller Handles? |
+|---------------|------------|-------------|-----------------|
+| createMemoriesFromOnboarding | IntelligenceError(MEMORY_PERSISTENCE_FAILED) | Thrown to caller | Yes — initialize() catches and returns success:false |
+| processAIAnalysis | IntelligenceError(CONTEXT_PERSISTENCE_FAILED) | Thrown to caller | Yes — updateFromReflection() catches and re-throws |
+| initializeTwin birth memory | Detected in criticalFailures array | Triggers compensatingRollback | Yes — Twin deleted, essence marked failed |
 
 ---
 
@@ -76,3 +106,13 @@
 | §F1 Critical Write Operations | PASS | No |
 | §F2 Schema Consistency | PASS | No |
 | §F3 Concurrency & Idempotency | PASS | No |
+| §F4 Memory Persistence Propagation | PASS (BLOCKER-03 closed) | Yes |
+
+### Fixes Applied This Session
+
+| Fix | Description | File | Impact |
+|-----|-------------|------|--------|
+| F-FIX-01 | Critical SICEBridge ops awaited before return | SICEOrchestrator.ts | No more false success on DB failure |
+| F-FIX-02 | memoryResult added to criticalFailures in initializeTwin | CoreAwakeningService.ts | Birth memory failure triggers rollback |
+| F-FIX-03 | createMemoriesFromOnboarding throws IntelligenceError | PersonalContextBuilder.ts | Memory errors propagate to callers |
+| F-FIX-04 | processAIAnalysis throws IntelligenceError on context write fail | PersonalContextBuilder.ts | Context errors propagate to callers |

@@ -386,13 +386,21 @@ export class PersonalContextBuilder {
       updatedAt: new Date(),
     };
 
-    await supabase.from('personal_memory').insert({
+    const { error: insertError } = await supabase.from('personal_memory').insert({
       user_id: memory.userId,
       memory_type: memory.memoryType,
       title: memory.title,
       content: memory.content,
       confidence: memory.confidence,
     });
+
+    if (insertError) {
+      console.error('[PersonalContextBuilder] Failed to persist birth memory:', insertError.message);
+      throw new IntelligenceError(
+        `Memory persistence failed: ${insertError.message}`,
+        'MEMORY_PERSISTENCE_FAILED'
+      );
+    }
 
     return [memory];
   }
@@ -433,7 +441,7 @@ export class PersonalContextBuilder {
       // ai_evidence (migration 010) ส่วน personal_contexts (พหูพจน์, migration 028)
       // มีแค่ id/user_id/awakening_essence_id/timestamps — เขียนลงตัวพหูพจน์จึง
       // ล้มเหลวทุกครั้งด้วย 42703 column does not exist
-      await supabase.from('personal_context').insert({
+      const { error: contextError } = await supabase.from('personal_context').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,
@@ -441,6 +449,14 @@ export class PersonalContextBuilder {
         confidence: entry.confidence,
         ai_evidence: entry.aiEvidence,
       });
+
+      if (contextError) {
+        console.error('[PersonalContextBuilder] Failed to persist insight:', contextError.message);
+        throw new IntelligenceError(
+          `Context persistence failed for insight "${entry.title}": ${contextError.message}`,
+          'CONTEXT_PERSISTENCE_FAILED'
+        );
+      }
 
       insights.push(insight);
     }

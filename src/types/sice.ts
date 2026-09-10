@@ -37,6 +37,8 @@ export interface OrchestratorResult {
   successfulEngineCount: number;
   /** P0-B B2: list of engine names that failed */
   failedEngineNames: string[];
+  /** BLOCKER-01: non-null if critical downstream persistence failed — caller MUST NOT treat as success */
+  persistenceError?: string | null;
 }
 
 export interface CrossEngineSynthesis {
