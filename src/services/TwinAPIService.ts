@@ -124,21 +124,39 @@ export async function streamTwinResponse(
   twinProfile: string,
   worldId: string,
   onChunk: (chunk: string) => void,
+  memories?: Memory[],  // P0-E3: memory parity with callTwinAPI
   language: 'en' | 'th' = 'th', // TWINLANG-001 FIX: thread UI language into the system prompt
 ): Promise<void> {
   try {
-    const systemPrompt = buildTwinSystemPrompt(
-      twinName,
-      twinProfile,
-      worldId,
-      undefined,
-      messages
-        .filter(m => m.role === 'user')
-        .slice(-3)
-        .map(m => m.content)
-        .join(' | '),
-      language,
-    );
+    // P0-E3 FIX: Use buildPrompt() for unified prompt assembly (world + memories),
+    // same as callTwinAPI. Falls back to raw buildTwinSystemPrompt when buildPrompt throws.
+    let systemPrompt: string;
+    try {
+      systemPrompt = buildPrompt({
+        role: 'TWIN',
+        world: worldId,
+        memories: memories ?? [],
+        twinState: {
+          name: twinName,
+          profile: twinProfile,
+        },
+        userContext: { language },
+      });
+    } catch {
+      // Fallback: legacy builder (no memory injection)
+      systemPrompt = buildTwinSystemPrompt(
+        twinName,
+        twinProfile,
+        worldId,
+        undefined,
+        messages
+          .filter(m => m.role === 'user')
+          .slice(-3)
+          .map(m => m.content)
+          .join(' | '),
+        language,
+      );
+    }
 
     const response = await fetch('/api/twin-stream', {
       method: 'POST',

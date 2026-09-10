@@ -336,12 +336,16 @@ USER INPUT (birth date, onboarding answers, reflections, decisions)
 | Profile save fails | API returns {success:false} | User retries | PASS |
 | Birth date invalid | Confidence capped at 0.3 | Proceeds with reduced confidence | PASS |
 | SICE engine crashes | completionStatus='DEGRADED'/FAILED | Other engines continue | PASS |
-| Essence DB write fails | Awaited + completionStatus override | DEGRADED status + persistenceError set | PASS ✓ |
-| Pattern persistence fails | Awaited + completionStatus override | DEGRADED status + persistenceError set | PASS ✓ |
-| Twin creation partial | compensatingRollback triggered | Orphaned Twin deleted, essence marked failed | PASS ✓ |
-| Birth memory fails | In criticalFailures → rollback | Twin deleted, essence preserved for retry | PASS ✓ |
-| Memory persistence fails | IntelligenceError thrown | Caller receives typed error code | PASS ✓ |
+| Essence DB write fails | Awaited + status override | DEGRADED + persistenceError set | PASS ✓ |
+| Pattern persistence fails | Awaited + status override | DEGRADED + persistenceError set | PASS ✓ |
+| twin_sice_scores fails | In criticalFailures array | compensatingRollback triggered | PASS ✓ (GATE-1) |
+| Twin creation partial | RollbackResult.status computed | Orphaned Twin deleted, essence marked failed | PASS ✓ (GATE-2) |
+| Rollback itself fails | Explicit state: partial/unrecoverable | Caller receives error details + action required | PASS ✓ (GATE-2) |
+| Birth memory fails | In criticalFailures → rollback | Twin deleted, essence preserved for retry | PASS ✓ (BLOCKER-03) |
+| Memory persistence fails | IntelligenceError thrown | Caller receives typed error code | PASS ✓ (BLOCKER-03) |
+| Concurrent awakening | Double-check before insert | Second request blocked with message | PASS ✓ (GATE-4) |
 | Streaming auth missing | 401 Unauthorized | Client must retry with valid token | PASS ✓ |
+| Streaming without memory | buildPrompt() used in both | Same system prompt assembly | PASS ✓ (GATE-3) |
 
 ---
 

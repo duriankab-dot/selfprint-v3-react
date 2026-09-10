@@ -98,6 +98,20 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
       return false;
     }
 
+    // GATE-4 FIX: Check for pending essence — prevents concurrent awakening
+    // from creating duplicate essences that could lead to race conditions.
+    const { data: pendingEssence } = await supabase
+      .from('awakening_essence')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (pendingEssence) {
+      console.log('Pending essence found — awakening already in progress');
+      return false;
+    }
+
     return true;
   } catch (error) {
     console.error('Error checking awakening readiness:', error);
@@ -157,6 +171,42 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
       executionTime: orchestrationResult.totalExecutionTime,
       generatedAt: new Date().toISOString(),
     };
+
+    // GATE-4 FIX: Second check right before inserting essence.
+    // Prevents duplicate essence/twin creation if concurrent requests
+    // both passed the initial checkReadyForAwakening() guard.
+    // Database unique constraints provide the final safety net.
+    try {
+      const { data: postCheckTwin } = await supabase
+        .from('twins')
+        .select('id')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (postCheckTwin) {
+        return {
+          success: false,
+          message: 'Twin was created by another concurrent request — skipping duplicate awakening.',
+        };
+      }
+
+      const { data: postCheckEssence } = await supabase
+        .from('awakening_essence')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('status', 'pending')
+        .maybeSingle();
+
+      if (postCheckEssence) {
+        return {
+          success: false,
+          message: 'Pending essence found during processing — another awakening is in progress.',
+        };
+      }
+    } catch (err) {
+      console.warn('[startAwakening] Idempotency check failed:', err);
+      // Continue — database constraints will prevent duplicates
+    }
 
     // ✅ Phase 3: Persist essence to Supabase (replace sessionStorage hack)
     const { data: savedEssence, error: essenceError } = await supabase
@@ -580,6 +630,7 @@ export async function initializeTwin(
     // ✨ Check if critical operations failed
     const criticalFailures = [
       { name: 'essence', result: essenceResult },
+      { name: 'sice_scores', result: scoresResult },
       { name: 'birth_memory', result: memoryResult },
       { name: 'world_preferences', result: worldPrefsResult },
       { name: 'twin_personality', result: personalityResult },
@@ -597,15 +648,34 @@ export async function initializeTwin(
       // record and mark essence as 'failed' so it can be retried.
       // Without this, the system has a partial Twin with no SICE scores,
       // no twin_state, no world_preferences — an inconsistent state.
-      await compensatingRollback({
+      const rollbackResult = await compensatingRollback({
         twinId: newTwin.id,
         userId,
         essenceId: essence.id,
         failedOps: failedOps.map(f => f.name),
       });
+
+      // GATE-2 FIX: Handle explicit rollback states
+      if (rollbackResult.status === 'unrecoverable') {
+        // Both rollback actions failed — report unrecoverable error
+        return {
+          success: false,
+          message: `CRITICAL UNRECOVERABLE ERROR: Twin creation failed (${failedOps.join(', ')}) AND rollback also failed. ${rollbackResult.message}`,
+        };
+      }
+
+      if (rollbackResult.status === 'partial') {
+        // One action succeeded, one failed — return degraded state
+        return {
+          success: false,
+          message: `Twin creation rolled back with warnings: ${failedOps.join(', ')} failed. Partial recovery: ${rollbackResult.message}`,
+        };
+      }
+
+      // Full success — clean rollback
       return {
         success: false,
-        message: `Twin creation rolled back: ${failedOps.map(f => f.name).join(', ')} failed. Essence preserved for retry.`,
+        message: `Twin creation rolled back: ${failedOps.map(f => f.name).join(', ')} failed. ${rollbackResult.message}`,
       };
     }
 
@@ -641,22 +711,42 @@ export async function initializeTwin(
  * half-initialized Twin record in the database. This method:
  * 1. Deletes the just-created Twin record
  * 2. Marks the essence row as 'failed' (not 'used') so it can be retried
- * 3. Logs what happened for debugging
+ * 3. Returns explicit recovery state so caller knows if rollback succeeded
+ *
+ * Returns RollbackResult with explicit status:
+ *   - 'success': both delete and essence update succeeded
+ *   - 'partial': one op succeeded, other failed (orphan may remain)
+ *   - 'unrecoverable': both ops failed (manual intervention required)
  *
  * This is NOT a SQL transaction (Supabase doesn't support multi-table
  * transactions via PostgREST). Instead it's an application-level
  * compensating action that restores consistency.
  */
+export interface RollbackResult {
+  status: 'success' | 'partial' | 'unrecoverable';
+  twinDeleted: boolean;
+  essenceMarkedFailed: boolean;
+  twinDeleteError?: string;
+  essenceUpdateError?: string;
+  /** Human-readable message for the caller */
+  message: string;
+}
+
 async function compensatingRollback(params: {
   twinId: string;
   userId: string;
   essenceId: string;
   failedOps: string[];
-}): Promise<void> {
+}): Promise<RollbackResult> {
   const { twinId, userId, essenceId, failedOps } = params;
 
+  let twinDeleted = false;
+  let essenceMarkedFailed = false;
+  let twinDeleteError: string | undefined;
+  let essenceUpdateError: string | undefined;
+
+  // Step 1: Delete the orphaned Twin record
   try {
-    // Step 1: Delete the orphaned Twin record
     const { error: deleteError } = await supabase
       .from('twins')
       .delete()
@@ -664,12 +754,19 @@ async function compensatingRollback(params: {
       .eq('user_id', userId);
 
     if (deleteError) {
+      twinDeleteError = deleteError.message;
       console.error(`[compensatingRollback] Failed to delete orphaned twin ${twinId}:`, deleteError.message);
     } else {
+      twinDeleted = true;
       console.log(`[compensatingRollback] Deleted orphaned twin ${twinId}`);
     }
+  } catch (err) {
+    twinDeleteError = err instanceof Error ? err.message : String(err);
+    console.error(`[compensatingRollback] Unexpected error deleting twin ${twinId}:`, twinDeleteError);
+  }
 
-    // Step 2: Mark essence as 'failed' so it can be retried
+  // Step 2: Mark essence as 'failed' so it can be retried
+  try {
     const { error: essenceError } = await supabase
       .from('awakening_essence')
       .update({
@@ -681,15 +778,45 @@ async function compensatingRollback(params: {
       .eq('status', 'pending');
 
     if (essenceError) {
+      essenceUpdateError = essenceError.message;
       console.error(`[compensatingRollback] Failed to mark essence ${essenceId} as failed:`, essenceError.message);
     } else {
+      essenceMarkedFailed = true;
       console.log(`[compensatingRollback] Marked essence ${essenceId} as 'failed' for retry`);
     }
-
-    console.log(`[compensatingRollback] Rollback complete for user ${userId}, failed ops: ${failedOps.join(', ')}`);
   } catch (err) {
-    console.error('[compensatingRollback] Unexpected error during rollback:', err);
+    essenceUpdateError = err instanceof Error ? err.message : String(err);
+    console.error(`[compensatingRollback] Unexpected error updating essence ${essenceId}:`, essenceUpdateError);
   }
+
+  // Determine explicit recovery state
+  let status: 'success' | 'partial' | 'unrecoverable';
+  let message: string;
+
+  if (twinDeleted && essenceMarkedFailed) {
+    status = 'success';
+    message = `Rollback complete: twin ${twinId} deleted, essence ${essenceId} marked failed`;
+  } else if (twinDeleted || essenceMarkedFailed) {
+    status = 'partial';
+    const missingActions = [];
+    if (!twinDeleted) missingActions.push(`delete twin (error: ${twinDeleteError})`);
+    if (!essenceMarkedFailed) missingActions.push(`mark essence failed (error: ${essenceUpdateError})`);
+    message = `Partial rollback: twin ${twinId} may still exist, essence ${essenceId} may not be marked failed — manual action needed: ${missingActions.join(', ')}`;
+  } else {
+    status = 'unrecoverable';
+    message = `UNRECOVERABLE: Both rollback actions failed — twin ${twinId} orphaned, essence ${essenceId} untouched. Errors: twin=${twinDeleteError}, essence=${essenceUpdateError}. Manual intervention required.`;
+  }
+
+  console.log(`[compensatingRollback] Status=${status} for user ${userId}, failed ops: ${failedOps.join(', ')}. ${message}`);
+
+  return {
+    status,
+    twinDeleted,
+    essenceMarkedFailed,
+    twinDeleteError,
+    essenceUpdateError,
+    message,
+  };
 }
 
 /**

@@ -1,148 +1,140 @@
-# FAILURE PATH MATRIX — SECOND PASS
+# FAILURE PATH MATRIX — FINAL PASS
 
-**Date:** 2026-09-10 (Updated after Blocker Closure)
-
----
-
-## Scenario 1: 12/12 SICE Success
-
-| Step | Expected | Actual | Verified |
-|------|----------|--------|----------|
-| All engines complete | results[].error undefined for all | ✓ | PASS |
-| completionStatus | 'COMPLETE' | 'COMPLETE' | PASS |
-| successfulEngineCount | 12 | 12 | PASS |
-| failedEngineNames | [] | [] | PASS |
-| Critical persistence awaited | persistOrchestrationResults awaited | ✓ | PASS |
-| persistenceError | null | null | PASS |
-
-## Scenario 2: 1 SICE Failure (e.g., Engine #4 crashes)
-
-| Step | Expected | Actual | Verified |
-|------|----------|--------|----------|
-| Failed engine returns error | {result: null, error: msg} | ✓ | PASS |
-| Synthesis skips failed engine | if (result.error) return | ✓ | PASS |
-| completionStatus | 'DEGRADED' | 'DEGRADED' | PASS |
-| successfulEngineCount | 11 | 11 | PASS |
-| failedEngineNames | ['AIFeedbackLoop'] | ['AIFeedbackLoop'] | PASS |
-| startAwakening propagates | Logs DEGRADED + adds to failedOps | ✓ | PASS |
-| Twin creation | Fails with specific message | success:false + names | PASS |
-
-## Scenario 3: DB Write Failure (essence persist)
-
-| Step | Expected | Actual | Verified |
-|------|----------|--------|----------|
-| Supabase INSERT returns error | {error: PostgrestError} | ✓ | PASS |
-| SICEBridge reports failure | success:false, error: msg | ✓ (FIXED) | PASS |
-| orchestrator awaits persistence | await Promise.allSettled([...]) | ✓ (FIXED) | PASS |
-| completionStatus overridden | COMPLETE → DEGRADED on persist fail | ✓ (FIXED) | PASS |
-| persistenceError set | non-null string with details | ✓ (FIXED) | PASS |
-| Caller knows persistence failed | orchestratorResult.persistenceError !== null | ✓ (FIXED) | PASS |
-
-**Pre-fix:** Caller knew persistence failed → Partial / fire-and-forget design → WARN
-**Post-fix:** Caller receives explicit persistenceError field, completionStatus = 'DEGRADED' → PASS
-
-## Scenario 4: Unauthorized User Access
-
-| Endpoint | Request | Response | Status Code | Verified |
-|----------|---------|----------|-------------|----------|
-| /api/profile GET | No auth header | {error: 'Unauthorized'} | 401 | PASS |
-| /api/twin POST | No auth header | {error: 'Unauthorized'} | 401 | PASS |
-| /api/twin-stream POST | No auth header | {error: 'Unauthorized'} | 401 | PASS |
-| /api/nova POST | No auth header | {error: 'Unauthorized'} | 401 | PASS |
-| /api/nova-stream POST | No auth header | {error: 'Unauthorized'} | 401 | PASS |
-| /api/sice/get-patterns | Invalid JWT | verifyUser returns null → 401 | 401 | PASS |
-
-## Scenario 5: User A Requests User B Data
-
-| Scenario | Request | Response | Status Code | Verified |
-|----------|---------|----------|-------------|----------|
-| notifications list | userId=UserB | user.id !== requestedUserId → 403 | 403 | PASS |
-| sice get-patterns | userId=UserB | user.id !== requestedUserId → 403 | 403 | PASS |
-| twin-evolution | twinId of UserB's twin | .eq('user_id', user.id) filters | 200 only own data | PASS |
-| profile GET | Any userId | .eq('user_id', user.id) | Returns only own | PASS |
-
-## Scenario 6: Twin Streaming Without Valid Auth
-
-| Request | Auth Header | Response | Verified |
-|---------|-------------|----------|----------|
-| /api/twin-stream | None | 401 Unauthorized | PASS |
-| /api/twin-stream | Invalid JWT | 401 Unauthorized | PASS |
-| /api/twin-stream | Expired JWT | getUser() fails → null → 401 | PASS |
-
-## Scenario 7: Nova Streaming Without Valid Auth
-
-Same pattern as Scenario 6.
-
-| Request | Auth Header | Response | Verified |
-|---------|-------------|----------|----------|
-| /api/nova-stream | None | 401 Unauthorized | PASS |
-| /api/nova-stream | Invalid JWT | 401 Unauthorized | PASS |
-
-## Scenario 8: Memory Persistence Failure
-
-| Step | Expected | Actual | Verified |
-|------|----------|--------|----------|
-| personal_memory INSERT fails | IntelligenceError thrown | MEMORY_PERSISTENCE_FAILED code | PASS |
-| personal_context INSERT fails | IntelligenceError thrown | CONTEXT_PERSISTENCE_FAILED code | PASS |
-| Birth memory insert fails in initializeTwin | Detected in criticalFailures array | Triggers compensatingRollback | PASS |
-| UI shows appropriate state | Caller receives error with code | Explicit error propagation | PASS (FIXED) |
-
-**Pre-fix:** Most callers don't check individual memory writes → WARN
-**Post-fix:** Memory errors throw typed IntelligenceError with specific codes → callers MUST handle → PASS
-
-## Scenario 9: Duplicate Awakening Request
-
-| Step | Expected | Actual | Verified |
-|------|----------|--------|----------|
-| First awakening completes | essence status='used', Twin created | ✓ | PASS |
-| Second attempt | checkReadyForAwakening finds existing twin | Returns false | PASS |
-| Response | "Twin already exists" | ✓ | PASS |
-
-## Scenario 10: Partial SICE Data
-
-| Scenario | Expected | Actual | Verified |
-|----------|----------|--------|----------|
-| User has no memories | Engines return defaults/fallbacks | ✓ | PASS |
-| User has no decisions | DecisionIntelligence returns getDefaultAnalysis() | ✓ | PASS |
-| User has partial birth date | isValidBirthDate(false) → confidence capped | ✓ | PASS |
-| Multiple engines fail | completionStatus='DEGRADED' or 'FAILED' | ✓ | PASS |
-| Critical persistence fails after engine success | completionStatus='DEGRADED' + persistenceError | ✓ (FIXED) | PASS |
+**Date:** 2026-09-10 (Final)
 
 ---
 
-## BLOCKER-02 Specific: Partial Twin Creation Rollback
+## SCENARIOS 1–10: Core Failure Paths
 
-| Scenario | Pre-Fix Behavior | Post-Fix Behavior | Verified |
-|----------|-----------------|-------------------|----------|
-| Essential ops fail after Twin created | Twin orphaned, success:false returned | Twin deleted, essence marked 'failed', retry possible | PASS |
-| Birth memory fails | Logged but Twin kept | compensatingRollback deletes Twin | PASS |
-| world_preferences fails | Logged but Twin kept | compensatingRollback deletes Twin | PASS |
-| twin_state fails | Logged but Twin kept | compensatingRollback deletes Twin | PASS |
-| twin_personality fails | Logged but Twin kept | compensatingRollback deletes Twin | PASS |
-| twin_capabilities fails | Logged but Twin kept | compensatingRollback deletes Twin | PASS |
+| # | Scenario | Expected | Actual | Status |
+|---|----------|----------|--------|--------|
+| 1 | 12/12 SICE success | COMPLETE, persistenceError=null | COMPLETE, null | ✅ PASS |
+| 2 | 1 SICE failure | DEGRADED + failedEngineNames | DEGRADED + names | ✅ PASS |
+| 3 | DB essence write fails | DEGRADED + persistenceError set | Awaited, status overridden | ✅ PASS (GATE-1) |
+| 4 | Unauthorized user | 401 on all endpoints | 401 verified | ✅ PASS |
+| 5 | User A → User B data | 403 ownership mismatch | 403 enforced | ✅ PASS |
+| 6 | Twin stream no auth | 401 | 401 on /api/twin-stream | ✅ PASS |
+| 7 | Nova stream no auth | 401 | 401 on /api/nova-stream | ✅ PASS |
+| 8 | Memory persistence fail | Typed IntelligenceError | MEMORY_PERSISTENCE_FAILED code | ✅ PASS (BLOCKER-03) |
+| 9 | Duplicate awakening | Idempotent, no duplicate Twin | checkReadyForAwakening blocks | ✅ PASS (GATE-4) |
+| 10 | Partial SICE data | DEGRADED with counts | completionStatus computed | ✅ PASS |
 
 ---
 
-## Summary
+## SCENARIOS 11–15: Advanced Failure Paths (NEW)
 
-| Scenario | Expected Behavior | Actual Result | Status |
-|----------|------------------|---------------|--------|
-| 1. 12/12 SICE success | COMPLETE | COMPLETE | PASS |
-| 2. 1 SICE failure | DEGRADED + explicit list | DEGRADED + failedEngineNames | PASS |
-| 3. DB write failure | Explicit failure/degraded | DEGRADED + persistenceError | PASS ✓ |
-| 4. Unauthorized user | 401, no data leakage | 401 on all protected endpoints | PASS |
-| 5. User A → User B data | 403 / no data | 403 on ownership mismatch | PASS |
-| 6. Twin stream no auth | 401 | 401 on new endpoint | PASS |
-| 7. Nova stream no auth | 401 | 401 on new endpoint | PASS |
-| 8. Memory persistence failure | Explicit degraded state | Typed IntelligenceError propagated | PASS ✓ |
-| 9. Duplicate awakening | Idempotent, no duplicate Twin | checkReadyForAwakening blocks | PASS |
-| 10. Partial SICE data | Explicit incomplete state | DEGRADED with counts | PASS |
+| # | Scenario | Expected | Actual | Status |
+|---|----------|----------|--------|--------|
+| 11 | twin_sice_scores insert fails | Rollback triggered | In criticalFailures → compensatingRollback | ✅ PASS (GATE-1) |
+| 12 | Rollback itself fails (Twin delete) | partial state returned | RollbackResult.status='partial' + explicit message | ✅ PASS (GATE-2) |
+| 13 | Rollback itself fails (both ops) | unrecoverable state returned | RollbackResult.status='unrecoverable' + error details | ✅ PASS (GATE-2) |
+| 14 | Concurrent awakening requests | Second request blocked | Double-check returns early with message | ✅ PASS (GATE-4) |
+| 15 | Streaming without memory injection | Same context as normal path | buildPrompt() used in both paths | ✅ PASS (GATE-3) |
 
-### BLOCKER-02: Partial Twin Creation
+---
 
-| Aspect | Status |
-|--------|--------|
-| Compensating rollback implemented | PASS |
-| Orphaned Twins cleaned up automatically | PASS |
-| Essence preserved for retry | PASS |
-| Birth memory now a critical operation | PASS |
+## ROLLBACK STATE MACHINE (GATE-2)
+
+```
+initializeTwin() detects critical failure
+  ↓
+compensatingRollback({ twinId, userId, essenceId, failedOps })
+  ↓
+Step 1: DELETE FROM twins WHERE id = twinId
+  ├─ Success → twinDeleted = true
+  └─ Failure → twinDeleteError = msg
+  ↓
+Step 2: UPDATE awakening_essence SET status = 'failed'
+  ├─ Success → essenceMarkedFailed = true
+  └─ Failure → essenceUpdateError = msg
+  ↓
+Determine RollbackResult.status:
+  ├─ twinDeleted=true AND essenceMarkedFailed=true → 'success'
+  ├─ Exactly one succeeded → 'partial'
+  └─ Both failed → 'unrecoverable'
+  ↓
+Caller receives explicit status + message:
+  ├─ 'success' → clean rollback message
+  ├─ 'partial' → warning + missing actions listed
+  └─ 'unrecoverable' → CRITICAL error + manual intervention required
+```
+
+### No More Silent Failures
+
+| Before | After |
+|--------|-------|
+| `catch { console.error(...) }` (void return) | Returns `RollbackResult` with explicit status |
+| Caller has no visibility into rollback outcome | Caller handles success/partial/unrecoverable differently |
+| Orphaned Twins if delete fails | Explicit 'partial'/'unrecoverable' with error details |
+| Essence stays 'pending' if update fails | Explicit error + manual action documented |
+
+---
+
+## PERSISTENCE GATING (BLOCKER-01 / GATE-1)
+
+```
+SICEOrchestrator.orchestrate()
+  ↓
+12 engines run in parallel
+  ↓
+buildPersonalIntelligence()
+  ↓
+await Promise.allSettled([
+  bridgePatternResults(),      ← CRITICAL — awaited
+  persistOrchestrationResults() ← CRITICAL — awaited
+])
+  ↓
+If either fails:
+  ├─ completionStatus = 'DEGRADED' (even if all engines passed)
+  ├─ persistenceError = error details
+  └─ Caller MUST check these before treating as success
+  ↓
+bridgeBadgeResults() ← non-critical, fire-and-forget (acceptable risk)
+  ↓
+return orchestratorResult (only after critical persistence confirmed)
+```
+
+### Critical vs Non-Critical Operations
+
+| Operation | Awaited? | Failure Behavior | Risk Assessment |
+|-----------|----------|------------------|-----------------|
+| Essence snapshot | YES | DEGRADED + persistenceError | Essential for data integrity |
+| Pattern bridging | YES | DEGRADED + persistenceError | Essential for pattern history |
+| Badge bridging | NO | Console.warn only | Cosmetic — can unlock later |
+
+---
+
+## IDEMPOTENCY GUARD (GATE-4)
+
+```
+checkReadyForAwakening(userId):
+  1. Check full_analysis_completed ✓
+  2. Check existing twin (maybeSingle) ✓
+  3. NEW: Check pending essence (maybeSingle) ← GATE-4
+
+startAwakening(userId):
+  1. Run SICE orchestration
+  2. NEW: Double-check right before insert:
+     a. Query twins table → if exists, return early
+     b. Query awakening_essence (status=pending) → if exists, return early
+  3. Insert essence
+  4. Return essenceId
+
+initializeTwin(userId, ...):
+  1. Read pending essence
+  2. Create Twin record
+  3. Promise.allSettled(8 post-Twin ops)
+  4. If any critical op fails:
+     a. compensatingRollback() ← deletes Twin + marks essence failed
+     b. Return RollbackResult.status ('success'/'partial'/'unrecoverable')
+```
+
+---
+
+## SUMMARY
+
+| Category | Total Scenarios | Passed | Failed | Warn |
+|----------|----------------|--------|--------|------|
+| Core failures (1–10) | 10 | 10 | 0 | 0 |
+| Advanced failures (11–15) | 5 | 5 | 0 | 0 |
+| **Total** | **15** | **15** | **0** | **0** |

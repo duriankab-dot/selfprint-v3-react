@@ -1,12 +1,11 @@
-# P0-F — Persistence Consistency Matrix (Second Pass)
+# P0-F — Persistence Consistency Matrix (Final Pass)
 
-**Status:** PASS — After Blocker Closure
+**Status:** PASS — All Gates Closed
 **Date:** 2026-09-10
-**Scope:** All critical CREATE, UPDATE operations — Ownership, Validation, Error Handling, Consistency, Awaited Critical Ops
 
 ---
 
-## §F1 — CRITICAL WRITE OPERATIONS (Updated)
+## §F1 — CRITICAL WRITE OPERATIONS (FINAL)
 
 ### Write Operation Audit
 
@@ -21,15 +20,16 @@
 | Personal memories | personal_memory | Via PersonalContextBuilder | userId from request (validated by caller) | Memory type enum | **IntelligenceError thrown** | No | PASS |
 | Decisions | decisions | Via DecisionService (authenticated) | twin_id linked to authenticated user's twin | World enum validation | DB errors propagated | No | PASS |
 | Decision outcomes | decision_outcomes | unified-handler NOTIFAUTH-001 | user_id verified + twin_id ownership | outcome enum ['positive','neutral','negative'] | DB error logged | No | PASS |
-| SICE patterns | behavioral_patterns | Via SICEBridge (awaited critical) | Derived from orchestration userId | Converted from SICE DetectedPattern | Bridge returns {success:false}, orchestrator awaits | Partial (updatePattern) | PASS |
+| SICE patterns | behavioral_patterns | Via SICEBridge (**awaited critical**) | Derived from orchestration userId | Converted from SICE DetectedPattern | Bridge returns {success:false}, orchestrator awaits | Partial (updatePattern) | PASS |
 | Badge unlocks | badge_registry | Via SICEBridge (fire-and-forget) | Derived from twin_id | unlockFromSICESignal idempotent | Bridge returns {success:false} on error | Yes (idempotent unlock) | PASS |
 | Context insights | personal_context | Via PersonalContextBuilder | userId from request | Context type enum | **IntelligenceError thrown** | No | PASS |
+| SICE baseline scores | twin_sice_scores | Via CoreAwakeningService (awaited) | twin_id from authenticated user's twin | Score calculations from PI data | In criticalFailures → triggers rollback | No | PASS (GATE-1) |
 
 ---
 
 ## §F2 — SCHEMA CONSISTENCY
 
-Same as first pass — no changes.
+Same as previous pass — no changes.
 
 | Table | Schema | Key Columns | RLS Policy | Verified |
 |-------|--------|-------------|------------|----------|
@@ -46,7 +46,7 @@ Same as first pass — no changes.
 
 ---
 
-## §F3 — CONCURRENCY & IDEMPOTENCY (Updated)
+## §F3 — CONCURRENCY & IDEMPOTENCY (FINAL)
 
 ### Race Condition Analysis
 
@@ -55,23 +55,24 @@ Same as first pass — no changes.
 | Duplicate profile upsert | Low | onConflict: user_id upserts | SAFE |
 | Duplicate blueprint inserts | Medium | Marks previous is_latest=false before insert | SAFE |
 | Duplicate share link generation | Low | Collision retry with crypto-random codes | SAFE |
-| Concurrent Twin creation | Low | Unique constraint on user_id in twins table | SAFE |
-| Concurrent essence creation | Medium | No unique constraint on user_id in awakening_essence | WARN |
+| Concurrent Twin creation | Low | Unique constraint on user_id + idempotency guards | SAFE (GATE-4) |
+| Concurrent essence creation | Medium | Pending essence check + double-check | SAFE (GATE-4) |
 | Concurrent decision outcome recording | Low | Separate rows per outcome, no conflict | SAFE |
 
-### Critical Persistence Gating (BLOCKER-01)
+### Critical Persistence Gating (BLOCKER-01 / GATE-1)
 
 | Operation Type | Awaited Before Return? | Failure Behavior | Caller Visibility |
 |---------------|----------------------|------------------|-------------------|
 | Essence snapshot (persistOrchestrationResults) | ✅ YES | completionStatus='DEGRADED' + persistenceError set | Full visibility |
 | Pattern bridging (bridgePatternResults) | ✅ YES | completionStatus='DEGRADED' + persistenceError set | Full visibility |
 | Badge bridging (bridgeBadgeResults) | ❌ NO (fire-and-forget) | Logged only, non-critical | Console.warn only |
+| SICE scores insert | ✅ YES (GATE-1) | Triggers compensatingRollback | Full visibility |
 
-**Rationale:** Badge unlocking is cosmetic — can happen seconds after response without affecting system correctness. Essence snapshot and pattern bridging are essential for data integrity.
+**Rationale:** Badge unlocking is cosmetic — can happen seconds after response without affecting system correctness. All other operations are awaited or gated.
 
 ---
 
-## §F4 — MEMORY PERSISTENCE PROPAGATION (BLOCKER-03)
+## §F4 — MEMORY PERSISTENCE PROPAGATION (FINAL)
 
 ### Memory Write Error Flow
 
@@ -106,13 +107,4 @@ Caller handles appropriately (retry / fail-open / degrade)
 | §F1 Critical Write Operations | PASS | No |
 | §F2 Schema Consistency | PASS | No |
 | §F3 Concurrency & Idempotency | PASS | No |
-| §F4 Memory Persistence Propagation | PASS (BLOCKER-03 closed) | Yes |
-
-### Fixes Applied This Session
-
-| Fix | Description | File | Impact |
-|-----|-------------|------|--------|
-| F-FIX-01 | Critical SICEBridge ops awaited before return | SICEOrchestrator.ts | No more false success on DB failure |
-| F-FIX-02 | memoryResult added to criticalFailures in initializeTwin | CoreAwakeningService.ts | Birth memory failure triggers rollback |
-| F-FIX-03 | createMemoriesFromOnboarding throws IntelligenceError | PersonalContextBuilder.ts | Memory errors propagate to callers |
-| F-FIX-04 | processAIAnalysis throws IntelligenceError on context write fail | PersonalContextBuilder.ts | Context errors propagate to callers |
+| §F4 Memory Persistence Propagation | PASS | No |

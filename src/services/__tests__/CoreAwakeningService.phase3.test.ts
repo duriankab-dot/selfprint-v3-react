@@ -34,16 +34,35 @@ describe('Phase 3: CoreAwakeningService — Essence Persistence', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Default mock: return chainable builder that resolves to mock essence
-    vi.mocked(supabase.from).mockImplementation((tableName: string) => {
-      const responseData = {
-        id: 'mock-essence-id',
-        user_id: 'user-123',
-        personal_intelligence: { test: 'intelligence' },
-        sice_results: {},
-        synthesis: {},
-        status: 'pending',
-      };
-      return createMockBuilder({ tableName, customData: responseData });
+    // GATE-4 FIX: Use vi.spyOn to intercept specific table queries used in
+    // the idempotency double-check, ensuring they return null without
+    // breaking the global mock used by other parts of the service.
+    const baseFrom = vi.mocked(supabase.from);
+    vi.spyOn(supabase, 'from').mockImplementation((tableName: string) => {
+      // GATE-4: Idempotency post-check queries must return no data
+      if (tableName === 'twins') {
+        return createMockBuilder({ tableName, shouldResolveToNull: true });
+      }
+      if (tableName === 'awakening_essence') {
+        // For essence INSERT (the main test target), return the mock essence data
+        // For essence SELECT (the idempotency check), we handle below
+        const builder = createMockBuilder({
+          tableName,
+          customData: {
+            id: 'mock-essence-id',
+            user_id: 'user-123',
+            personal_intelligence: { test: 'intelligence' },
+            sice_results: {},
+            synthesis: {},
+            status: 'pending',
+          },
+        });
+        // Intercept maybeSingle on essence SELECT to return null (no pending essence)
+        const originalMaybeSingle = builder.maybeSingle;
+        builder.maybeSingle = vi.fn(() => Promise.resolve({ data: null, error: null }));
+        return builder;
+      }
+      return baseFrom(tableName);
     });
   });
 
