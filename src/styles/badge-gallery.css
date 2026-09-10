@@ -178,7 +178,10 @@
 
 .badge-unlock-label {
   font-size: var(--font-size-xs, 0.75rem);
-  color: var(--color-accent-secondary, #a78bfa);
+  /* CONTRAST-001: --color-accent-secondary ของ hub เป็นสีขาว (ใช้บนปุ่ม
+     primary) — บนการ์ดพื้นสว่างจะมองไม่เห็น (1.08:1) → ใช้ accent-primary
+     ตาม .badge-earned-date ซึ่งผ่าน 4.5:1 บนพื้นสว่าง */
+  color: var(--color-accent-primary, #7b6ee7);
   flex-shrink: 0;
 }
 

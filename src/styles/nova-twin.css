@@ -40,19 +40,36 @@
 }
 
 .nova-message {
+  /* CONTRAST-001 (10 ก.ย. 2026): เดิมพื้น #fff9e6 ตายตัว + color: token →
+     dark mode เป็นข้อความสว่างบนครีม ≈1.1:1 อ่านไม่ออก
+     Light mode: ครีม + ตัวอักษรเข้มตายตัว (#1E293B ≈13:1 บนครีม)
+     Dark mode: ทับด้วยพื้นทองโปร่งบน navy + ข้อความสว่าง (ด้านล่าง) */
   background: #fff9e6;
   border-left: 3px solid #ffd700;
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: #1E293B;
+}
+
+/* Dark mode: ครีมทึบจะสว่างจี๊ดบน navy — เปลี่ยนเป็น gold tint โปร่งแสง
+   + ข้อความสว่าง (#F9FAFB บน rgba(255,215,0,.12) คลุม navy ≈10:1) */
+[data-mode="dark"] .nova-message {
+  background: rgba(255, 215, 0, 0.12);
+  color: #F9FAFB;
 }
 
 .nova-label {
-  color: #ffa500;
+  /* #ffa500 บนพื้นขาว ≈2.1:1 FAIL → amber-700 #B45309 ≈4.8:1 ✓
+     dark mode ใช้ amber-400 บน navy ≈7.5:1 ✓ */
+  color: #B45309;
   font-weight: 600;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+[data-mode="dark"] .nova-label {
+  color: #FBBF24;
 }
 
 /* ===== TWIN STYLING ===== */
@@ -86,18 +103,27 @@
 }
 
 .twin-message {
+  /* CONTRAST-001: เดิมพื้น #f0f4ff ตายตัว + color: token → dark mode อ่าน
+     ไม่ออก — แก้แบบ theme-aware เหมือน .nova-message */
   background: #f0f4ff;
   border-left: 3px solid #6366f1;
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  color: var(--color-text-primary);
+  color: #1E293B;
   position: relative;
 }
 
+[data-mode="dark"] .twin-message {
+  background: rgba(99, 102, 241, 0.14);
+  color: #F9FAFB;
+}
+
 /* TWINCHAT-UI-001: user's own bubble in TwinChat.tsx — same accent as
-   .twin-header/.twin-label, distinct from the Twin's own .twin-message. */
+   .twin-header/.twin-label, distinct from the Twin's own .twin-message.
+   CONTRAST-001: #6366f1 กับ white = 4.48:1 ติดขอบล่าง → indigo-600
+   #4F46E5 ให้ white ≈6.3:1 ✓ */
 .twin-message-user {
-  background: #6366f1;
+  background: #4F46E5;
   color: white;
   padding: var(--space-md);
   border-radius: var(--radius-md);
@@ -110,7 +136,7 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #6366f1;
+  background: #4F46E5;
   color: white;
   font-size: 11px;
   font-weight: bold;
@@ -120,9 +146,15 @@
 }
 
 .twin-label {
-  color: #6366f1;
+  /* #6366f1 บนขาว ≈4.5:1 (12px ตัวเล็ก = FAIL) → indigo-600 #4F46E5 ≈7.9:1 ✓ */
+  color: #4F46E5;
   font-weight: 600;
   font-size: 12px;
+}
+
+[data-mode="dark"] .twin-label {
+  /* indigo-300 บน navy ≈8:1 ✓ */
+  color: #A5B4FC;
 }
 
 /* ===== AI SWITCHER STYLING ===== */
@@ -155,15 +187,25 @@
 .ai-switcher-button.active-nova {
   border-color: #ffd700;
   background: #ffd70015;
-  color: #ffa500;
+  /* #ffa500 บนพื้นสว่าง ≈2.1:1 FAIL → amber-700 ≈4.8:1 ✓ (dark: amber-400) */
+  color: #B45309;
   box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+[data-mode="dark"] .ai-switcher-button.active-nova {
+  color: #FBBF24;
 }
 
 .ai-switcher-button.active-twin {
   border-color: #6366f1;
   background: #6366f115;
-  color: #6366f1;
+  /* #6366f1 บนขาว ≈4.5:1 ขอบล่าง บน navy (dark) ≈2.9:1 FAIL → #4F46E5 */
+  color: #4F46E5;
   box-shadow: 0 0 12px rgba(99, 102, 241, 0.3);
+}
+
+[data-mode="dark"] .ai-switcher-button.active-twin {
+  color: #A5B4FC;
 }
 
 .ai-switcher-button:disabled {

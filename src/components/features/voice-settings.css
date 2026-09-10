@@ -7,7 +7,9 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: #f9f9f9;
+  /* เดิม #f9f9f9 ตายตัว — ใน dark mode พื้นสว่างแปลกแยกและ text ที่ inherit
+     token จะหาย → theme surface */
+  background: var(--color-bg-secondary);
   border-radius: 8px;
 }
 
@@ -15,7 +17,7 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .settings-group {
@@ -27,16 +29,19 @@
 .settings-group label {
   font-size: 12px;
   font-weight: 600;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .settings-group select,
 .volume-slider {
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 6px;
   font-size: 12px;
-  background: white;
+  background: var(--color-bg-card);
+  /* select ต้องมีสีตัวอักษรตาม theme ไม่งั้นใน dark mode ข้อความสว่างบน
+     พื้นสว่าง (native control) อ่านไม่ออก */
+  color: var(--color-text-primary);
 }
 
 .settings-group select:focus,

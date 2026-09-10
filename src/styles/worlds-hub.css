@@ -290,7 +290,9 @@
 }
 
 .btn-read {
-  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  /* CONTRAST-001: เดิม gradient จบ #a78bfa (white ≈2.7:1 FAIL) → จบด้วย
+     violet-600 #7C3AED ให้ white ≈5:1 ✓ */
+  background: linear-gradient(90deg, #6366f1, #7C3AED);
   color: white;
   border: none;
   padding: var(--space-sm) var(--space-md);
@@ -317,8 +319,14 @@
 }
 
 .wh-twin-guidance h3 {
-  color: #a78bfa;
+  /* #a78bfa บนพื้น tint ลาเวนเดอร์อ่อน ≈2.5:1 FAIL → violet-700 ≈6:1 ✓
+     dark mode ย้อนกลับเป็น lavender อ่อนบน navy */
+  color: #6D28D9;
   margin-bottom: var(--space-md);
+}
+
+[data-mode="dark"] .wh-twin-guidance h3 {
+  color: #A78BFA;
 }
 
 .guidance-text {
@@ -328,7 +336,7 @@
 
 .btn-explore {
   display: inline-block;
-  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  background: linear-gradient(90deg, #6366f1, #7C3AED);
   color: white;
   padding: var(--space-md) var(--space-lg);
   border-radius: var(--radius-md);

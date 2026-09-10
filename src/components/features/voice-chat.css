@@ -1,18 +1,22 @@
 /**
  * 🎤 voice-chat.css
+ * CONTRAST-001 (10 ก.ย. 2026): เดิมพื้น gradient อ่อนตายตัว (#f0f9ff→#fef3c7)
+ * + การ์ด white ตายตัว ทั้งที่ข้อความส่วนใหญ่ inherit จาก token — ใน dark
+ * navy mode เป็นข้อความสว่างบนพื้นสว่าง ≈1:1 อ่านไม่ออกทั้งหน้า
+ * → เปลี่ยนพื้น/เส้นขอบทุกจุดเป็น theme surface token
  */
 
 .voice-chat {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #fef3c7 100%);
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
 }
 
 .voice-chat__header {
   padding: 20px;
-  background: white;
-  border-bottom: 2px solid #ddd;
+  background: var(--color-bg-card);
+  border-bottom: 2px solid var(--color-border);
   text-align: center;
   position: relative;
 }
@@ -21,12 +25,13 @@
   margin: 0;
   font-size: 24px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .voice-chat__header p {
   margin: 6px 0 0;
   font-size: 13px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .voice-chat__settings-btn {
@@ -34,23 +39,25 @@
   top: 20px;
   right: 20px;
   padding: 8px 12px;
-  background: #f0f9ff;
+  background: var(--color-bg-tertiary);
   border: 1px solid #3b82f6;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  color: var(--color-text-primary);
   transition: all 0.2s ease;
 }
 
 .voice-chat__settings-btn:hover {
-  background: #3b82f6;
+  /* #3b82f6 + white ≈3.7:1 marginal → blue-600 ≈5.2:1 ✓ */
+  background: #2563EB;
   color: white;
 }
 
 .voice-chat__settings-panel {
   padding: 16px 20px;
-  background: #fff;
-  border-bottom: 1px solid #ddd;
+  background: var(--color-bg-card);
+  border-bottom: 1px solid var(--color-border);
   animation: slideDown 0.3s ease;
 }
 
@@ -84,8 +91,8 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
-  background: white;
-  border-top: 2px solid #ddd;
+  background: var(--color-bg-card);
+  border-top: 2px solid var(--color-border);
 }
 
 .voice-chat__status {
@@ -94,10 +101,10 @@
   align-items: center;
   justify-content: center;
   padding: 12px;
-  background: #f9f9f9;
-  border-top: 1px solid #ddd;
+  background: var(--color-bg-tertiary);
+  border-top: 1px solid var(--color-border);
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .status-badge {

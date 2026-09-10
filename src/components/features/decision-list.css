@@ -16,7 +16,7 @@
 .decision-item {
   border: 1px solid var(--color-border, #e0e0e0);
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-card);
   overflow: hidden;
 }
 

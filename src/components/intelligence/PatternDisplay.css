@@ -87,7 +87,7 @@
   padding: 6px 12px;
   border: 2px solid var(--color-border, #e0e0e0);
   border-radius: 6px;
-  background: white;
+  background: var(--color-bg-card);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -100,7 +100,11 @@
 }
 
 .pattern-filter-btn.active {
+  /* CONTRAST-001: white บน --accent-primary บาง mood อ่อนเกิน (ready
+     #00C853 ≈2:1) → ผสม navy-900 40% บังคับความเข้ม ให้ white ≥4.8:1
+     ทุก mood (บรรทัดแรก fallback กัน browser ไม่มี color-mix) */
   background: var(--accent-primary, #3b82f6);
+  background: color-mix(in srgb, var(--accent-primary, #3b82f6) 60%, #0F1F3F);
   color: white;
   border-color: var(--accent-primary, #3b82f6);
 }
@@ -109,7 +113,8 @@
   padding: 6px 12px;
   border: 2px solid var(--color-border, #e0e0e0);
   border-radius: 6px;
-  background: white;
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
@@ -128,7 +133,7 @@
 
 .pattern-display__list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(350px, 100%), 1fr));
   gap: 16px;
 }
 
@@ -180,7 +185,9 @@
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  background: white;
+  /* base (ไม่มี variant): กำหนดคู่สีที่อ่านได้ทั้ง 2 modes แทนพื้นขาวตายตัว */
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-secondary);
   border: 1px solid;
 }
 

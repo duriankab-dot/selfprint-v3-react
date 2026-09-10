@@ -90,7 +90,10 @@
 .stage-label {
   text-align: center;
   padding: var(--space-md);
-  background: rgba(15, 23, 42, 0.6);
+  /* CONTRAST-001 (10 ก.ย. 2026): เดิม bg rgba(15,23,42,.6) ตายตัว — ใน
+     light mode ผล composite เป็นเทากลางที่ text token เข้ม (#767676)
+     ≈2.3:1 FAIL → ใช้ theme surface ให้ token text ทำงานถูกทั้ง 2 modes */
+  background: var(--color-bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid rgba(99, 102, 241, 0.2);
   transition: all 0.3s ease;
@@ -98,7 +101,7 @@
 
 .stage-label.active {
   background: rgba(99, 102, 241, 0.15);
-  border-color: #a78bfa;
+  border-color: #7C3AED;
   box-shadow: 0 0 12px rgba(167, 139, 250, 0.2);
 }
 
@@ -113,8 +116,14 @@
 .stage-name {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #a78bfa;
+  /* #a78bfa บนพื้นสว่าง ≈2.3-3.9:1 FAIL → violet-700 บนพื้นสว่าง,
+     lavender บน navy (dark) */
+  color: #6D28D9;
   margin-bottom: var(--space-xs);
+}
+
+[data-mode="dark"] .stage-name {
+  color: #A78BFA;
 }
 
 .stage-desc {

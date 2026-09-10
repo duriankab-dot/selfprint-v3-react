@@ -27,7 +27,9 @@
   color: var(--color-text-secondary, #999);
 }
 
-/* Tabs */
+/* Tabs — RSPNSV-001: tab จำนวนมากบนจอ 320-480px จะล้นแนวนอน → เปลี่ยนจาก
+   การซ่อนด้วย overflow ของหน้าเป็นการเลื่อนแนวนอนภายในแถบแท็บเอง
+   (ซ่อน scrollbar ด้วย scrollbar-width: none + webkit) */
 .decision-logger__tabs {
   display: flex;
   gap: 8px;
@@ -35,6 +37,12 @@
   list-style: none;
   padding: 0;
   margin: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.decision-logger__tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .decision-logger__tab-btn {
@@ -46,6 +54,8 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--color-text-secondary, #999);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.2s ease;
 }
 
@@ -54,8 +64,14 @@
 }
 
 .decision-logger__tab-btn.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  /* #3b82f6 บนพื้นสว่าง ≈3.7:1 FAIL (14px) → blue-600 ≈5.2:1 ✓ (dark: blue-300) */
+  color: #2563EB;
+  border-bottom-color: #2563EB;
+}
+
+[data-mode="dark"] .decision-logger__tab-btn.active {
+  color: #93C5FD;
+  border-bottom-color: #93C5FD;
 }
 
 /* Content */
@@ -120,7 +136,8 @@
 /* Insight box */
 .decision-logger__insight-box {
   padding: 16px;
-  background: #f0f9ff;
+  /* เดิม #f0f9ff ตายตัว + insight-text token → dark mode FAIL → theme surface */
+  background: var(--color-bg-tertiary);
   border-left: 3px solid #3b82f6;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -131,6 +148,10 @@
   font-size: 14px;
   font-weight: 600;
   color: #1e40af;
+}
+
+[data-mode="dark"] .decision-logger__insight-box h3 {
+  color: #93C5FD;
 }
 
 .insight-text {
@@ -149,7 +170,9 @@
 /* Bias warning */
 .decision-logger__bias-warning {
   padding: 12px;
-  background: #fef2f2;
+  /* เดิม #fef2f2 ตายตัว + bias-item token → dark mode FAIL — เก็บแถบเตือน
+     ด้วย border-left แดง แต่ใช้ theme surface */
+  background: var(--color-bg-tertiary);
   border-left: 3px solid #ef4444;
   border-radius: 6px;
   margin-top: 16px;
@@ -160,6 +183,10 @@
   font-size: 13px;
   font-weight: 600;
   color: #991b1b;
+}
+
+[data-mode="dark"] .decision-logger__bias-warning h4 {
+  color: #F87171;
 }
 
 .bias-list {

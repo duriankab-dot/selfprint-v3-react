@@ -80,7 +80,13 @@
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #6366f1;
+  /* #6366f1 บนขาว 4.48:1 (large ✓) แต่บน navy (dark) ≈2.9:1 FAIL →
+     #4F46E5 (light) / indigo-300 (dark) */
+  color: #4F46E5;
+}
+
+[data-mode="dark"] .stat-value {
+  color: #A5B4FC;
 }
 
 /* ===== CONTROLS ===== */
@@ -94,7 +100,8 @@
 
 .btn-primary {
   padding: var(--space-md) var(--space-lg);
-  background: linear-gradient(90deg, #6366f1, #a78bfa);
+  /* CONTRAST-001: เดิม gradient จบ #a78bfa (white ≈2.7:1 FAIL) → #7C3AED */
+  background: linear-gradient(90deg, #6366f1, #7C3AED);
   color: white;
   border: none;
   border-radius: var(--radius-md);
@@ -119,8 +126,12 @@
 }
 
 .dd-new-decision-form h3 {
-  color: #6366f1;
+  color: #4F46E5;
   margin-bottom: var(--space-sm);
+}
+
+[data-mode="dark"] .dd-new-decision-form h3 {
+  color: #A5B4FC;
 }
 
 .form-note {
@@ -141,8 +152,14 @@
 }
 
 .dd-pending-section h2 {
-  color: #ef4444;
+  /* #ef4444 บนพื้นสว่าง 3.76:1 (large ✓ แต่เสี่ยงถ้าขนาดเล็ก) → red-700
+     #B91C1C ≈5.9:1 ✓ ทุกขนาด (dark: red-300) */
+  color: #B91C1C;
   margin-bottom: var(--space-lg);
+}
+
+[data-mode="dark"] .dd-pending-section h2 {
+  color: #F87171;
 }
 
 .dd-pending-list {
@@ -164,8 +181,12 @@
 }
 
 .dd-decisions-section h2 {
-  color: #6366f1;
+  color: #4F46E5;
   margin-bottom: var(--space-lg);
+}
+
+[data-mode="dark"] .dd-decisions-section h2 {
+  color: #A5B4FC;
 }
 
 .dd-empty {
@@ -181,16 +202,23 @@
 
 .dd-decisions-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
   gap: var(--space-lg);
 }
 
 .decision-card {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.6));
+  /* CONTRAST-001: เดิม bg navy overlay 60% ตายตัว — ใน light mode composite
+     เป็นเทากลางที่ text token เข้ม ≈1.6-3.6:1 FAIL → พื้นธีมปกติ และ
+     dark mode คง overlay เดิมเพื่อบรรยากาศเดิม */
+  background: var(--color-bg-secondary);
   border: 1px solid rgba(99, 102, 241, 0.2);
   border-radius: var(--radius-lg);
   padding: var(--space-lg);
   transition: all 0.2s ease;
+}
+
+[data-mode="dark"] .decision-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6), rgba(30, 41, 59, 0.6));
 }
 
 .decision-card:hover {
@@ -215,13 +243,18 @@
 
 .decision-category {
   background: rgba(99, 102, 241, 0.2);
-  color: #a78bfa;
+  /* #a78bfa บนพื้น indigo tint อ่อน ≈2:1 FAIL → indigo-700 (dark: indigo-300) */
+  color: #4338CA;
   padding: var(--space-xs) var(--space-sm);
   border-radius: var(--radius-sm);
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.3px;
   white-space: nowrap;
+}
+
+[data-mode="dark"] .decision-category {
+  color: #A5B4FC;
 }
 
 .decision-description {

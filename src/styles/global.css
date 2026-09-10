@@ -30,10 +30,29 @@
 
 /* 🎨 GLOBAL STYLES */
 
-* {
+/* ── RSPNSV-001 (10 ก.ย. 2026): Global Box Model & Overflow Prevention ──
+   ปัญหาเดิม: fixed-width containers (width: 400px ฯลฯ) ทำให้เฟรม/การ์ด
+  ล้น viewport แนวนอนบนจอ 320-414px และ `*` selector เดิมไม่ครอบ pseudo
+   elements (::before/::after) ทำให้ pseudo decorations ที่มี padding/border
+   ยังขยายเกิน box แม่
+   แก้:
+   1. box-sizing: border-box ทุก element รวม pseudo elements
+   2. html/body ล็อก max-width 100vw + overflow-x: hidden เพื่อกัน
+      horizontal scroll / screen breaking ระดับหน้า
+   3. min-width: 0 บน flex/grid children (ดู flex-width-guard ด้านล่าง)
+   ══════════════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 html {
@@ -43,6 +62,15 @@ html {
   --current-hub: 'identity';
   --current-mood: 'reflective';
   --current-mode: 'light';
+}
+
+/* RSPNSV-001: ลูกของ flex/grid ที่มี text ยาวมักล้นแม่เพราะ default
+   min-width: auto (flex) / min-content (grid) — ระบุ min-width: 0 ให้
+   ทุกตัวที่เป็นลูกโดยตรงของ flex container เพื่อให้ truncate/wrap ได้
+   ไม่กระทบ layout เดิม (block layout ไม่ผล) และไม่ override ค่าที่ไฟล์
+   component ตั้งเอง (specificity ของ component class สูงกว่า) */
+[class] > * {
+  min-width: 0;
 }
 
 body {
@@ -149,6 +177,30 @@ a:hover {
   textarea,
   select {
     cursor: text;
+  }
+
+  /* RSPNSV-001: ปุ่ม/อินพุตไม่ควรทะลุขอบการ์ดบนจอแคบ — จำกัดด้วย
+     max-width: 100% และให้ label ยาว wrap แทนการบีบตัด */
+  button,
+  input,
+  textarea,
+  select,
+  a {
+    max-width: 100%;
+  }
+
+  button {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    text-align: inherit;
+  }
+
+  /* รูป/สื่อฝังตัวห้ามล้น container แม่ */
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100%;
   }
 }
 

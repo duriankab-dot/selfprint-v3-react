@@ -40,12 +40,24 @@
   padding: 0;
 }
 
+/* RSPNSV-001 (10 ก.ย. 2026): แถบแท็บเดิมเป็น flex row ธรรมดา ไม่มี wrap
+   และไม่มี overflow — บนจอ 320-480px แท็บ (มี .tab-label nowrap) จะล้น
+   viewport และถูกซ่อนด้วย html/body overflow-x: hidden ทำให้แท็บขวาสุด
+   เอื้อมไม่ถึง → เปลี่ยนเป็นเลื่อนแนวนอนภายในแถบเอง ซ่อน scrollbar */
 .twin-nav-tabs {
   display: flex;
   gap: var(--space-md, 1rem);
   flex: 1;
+  min-width: 0;
   justify-content: center;
   align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.twin-nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .twin-nav-tab {
@@ -60,6 +72,8 @@
   font-size: var(--font-size-base, 1rem);
   font-weight: var(--font-weight-medium, 500);
   border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all var(--transition-normal, 0.2s ease);
   position: relative;
 }

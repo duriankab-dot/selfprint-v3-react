@@ -52,7 +52,7 @@
   flex-direction: column;
   gap: 4px;
   padding: 8px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 6px;
   text-align: center;
 }

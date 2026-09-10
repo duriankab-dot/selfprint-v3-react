@@ -23,7 +23,8 @@
 .bias-detection__header p {
   margin: 8px 0 0;
   font-size: 13px;
-  color: #666;
+  /* เดิม #666 ตายตัว — บนพื้น navy (dark) ≈2.9:1 FAIL → token ตาม mode */
+  color: var(--color-text-secondary);
 }
 
 .bias-detection--loading {
@@ -68,7 +69,7 @@
 /* Grid */
 .bias-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   gap: 12px;
 }
 

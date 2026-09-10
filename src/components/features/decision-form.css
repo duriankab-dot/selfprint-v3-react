@@ -45,7 +45,10 @@
 .decision-form__input.error,
 .decision-form__textarea.error {
   border-color: #ef4444;
+  /* พื้น tint แดงอ่อนตายตัว — ข้อความต้องเข้มตายตัว (token สว่างใน dark
+     mode จะหายบนพื้นอ่อน) */
   background: #fef2f2;
+  color: #1E293B;
 }
 
 .decision-form__textarea {
@@ -56,8 +59,13 @@
 .decision-form__error {
   margin: 0;
   font-size: 12px;
-  color: #ef4444;
+  /* #ef4444 บนพื้นสว่าง ≈3.8:1 FAIL (12px) → red-700 ≈5.9:1 ✓ (dark: red-300) */
+  color: #B91C1C;
   font-weight: 500;
+}
+
+[data-mode="dark"] .decision-form__error {
+  color: #F87171;
 }
 
 /* Confidence slider */
@@ -101,7 +109,8 @@
 /* Recommendations */
 .decision-form__recommendations {
   padding: 12px;
-  background: #f0f9ff;
+  /* เดิม #f0f9ff ตายตัว + text token → dark mode FAIL → theme surface */
+  background: var(--color-bg-tertiary);
   border-radius: 8px;
   border-left: 3px solid #3b82f6;
 }
@@ -113,6 +122,10 @@
   color: #1e40af;
 }
 
+[data-mode="dark"] .decision-form__recommendations h4 {
+  color: #93C5FD;
+}
+
 .frameworks-list {
   display: flex;
   flex-direction: column;
@@ -121,16 +134,16 @@
 
 .framework-card {
   padding: 8px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 6px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--color-border);
 }
 
 .framework-card h5 {
   margin: 0 0 4px;
   font-size: 12px;
   font-weight: 600;
-  color: #0c4a6e;
+  color: var(--color-text-primary);
 }
 
 .framework-desc {
@@ -151,7 +164,8 @@
 
 .decision-form__btn-submit {
   padding: 10px 20px;
-  background: #3b82f6;
+  /* #3b82f6 + white ≈3.7:1 FAIL (13px) → blue-600 ≈5.2:1 ✓ */
+  background: #2563EB;
   color: white;
   border: none;
   border-radius: 6px;
@@ -162,7 +176,7 @@
 }
 
 .decision-form__btn-submit:hover:not(:disabled) {
-  background: #2563eb;
+  background: #1D4ED8;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 

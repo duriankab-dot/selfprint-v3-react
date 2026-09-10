@@ -105,7 +105,8 @@
 
 .btn-refresh {
   padding: 0.5rem 1rem;
-  background: var(--primary-color, #3b82f6);
+  /* #3b82f6 + white ≈3.7:1 FAIL → blue-600 ≈5.2:1 ✓ */
+  background: var(--primary-color, #2563EB);
   color: white;
   border: none;
   border-radius: var(--radius-md, 8px);

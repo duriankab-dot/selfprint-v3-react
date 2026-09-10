@@ -52,7 +52,8 @@
   padding: 4px 10px;
   border: 2px solid;
   border-radius: 6px;
-  background: white;
+  /* เดิม background: white ตายตัว + label token → dark mode FAIL */
+  background: var(--color-bg-card);
 }
 
 .confidence-badge__percent {
@@ -133,10 +134,16 @@
   padding: 8px 10px;
   border: 2px solid var(--color-border, #e0e0e0);
   border-radius: 6px;
-  background: white;
+  /* เดิม background: white ตายตัว + text inherit → dark mode FAIL
+     RSPNSV-001: label ยาว ("Somewhat true") ใน grid 2 คอลัมน์บนจอแคบ
+     ต้อง wrap ได้ ไม่ทะลุขอบการ์ด */
+  background: var(--color-bg-card);
+  color: var(--color-text-primary);
   cursor: pointer;
   font-size: 12px;
   font-weight: 500;
+  min-width: 0;
+  overflow-wrap: anywhere;
   transition: all 0.2s ease;
 }
 
@@ -152,65 +159,44 @@
 
 .feedback-btn.active {
   background: var(--accent-primary, #3b82f6);
+  /* CONTRAST-001: white บน mood accent บางอันอ่อนเกิน → ผสม navy-900 40%
+     บังคับความเข้มให้ white ≥4.8:1 ทุก mood */
+  background: color-mix(in srgb, var(--accent-primary, #3b82f6) 60%, #0F1F3F);
   color: white;
   border-color: var(--accent-primary, #3b82f6);
 }
 
-/* Color-coded feedback buttons */
+/* Color-coded feedback buttons — CONTRAST-001: เดิมใช้สี 500 (amber
+   #f59e0b + white ≈2.2:1, green #10b981 + white ≈2.5:1, red #ef4444 +
+   white ≈3.8:1 FAIL) → ยกระดับเป็น 600/700-level ที่ white text ผ่าน
+   4.8:1+ ทั้งตอน hover (text บนพื้นขาว) และตอน active (white บนพื้นสี) */
 .feedback-btn--very-true {
-  --btn-color: #10b981; /* green */
-}
-
-.feedback-btn--very-true:hover:not(:disabled) {
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-}
-
-.feedback-btn--very-true.active {
-  background: var(--btn-color);
-  border-color: var(--btn-color);
+  --btn-color: #047857; /* emerald-700 */
 }
 
 .feedback-btn--somewhat {
-  --btn-color: #f59e0b; /* amber */
-}
-
-.feedback-btn--somewhat:hover:not(:disabled) {
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-}
-
-.feedback-btn--somewhat.active {
-  background: var(--btn-color);
-  border-color: var(--btn-color);
+  --btn-color: #B45309; /* amber-700 */
 }
 
 .feedback-btn--not-sure {
-  --btn-color: #6366f1; /* indigo */
-}
-
-.feedback-btn--not-sure:hover:not(:disabled) {
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-}
-
-.feedback-btn--not-sure.active {
-  background: var(--btn-color);
-  border-color: var(--btn-color);
+  --btn-color: #4F46E5; /* indigo-600 */
 }
 
 .feedback-btn--not-me {
-  --btn-color: #ef4444; /* red */
+  --btn-color: #B91C1C; /* red-700 */
 }
 
-.feedback-btn--not-me:hover:not(:disabled) {
-  border-color: var(--btn-color);
-  color: var(--btn-color);
-}
+[data-mode="dark"] .feedback-btn--very-true { --btn-color: #34D399; }
+[data-mode="dark"] .feedback-btn--somewhat { --btn-color: #FCD34D; }
+[data-mode="dark"] .feedback-btn--not-sure { --btn-color: #A5B4FC; }
+[data-mode="dark"] .feedback-btn--not-me { --btn-color: #F87171; }
 
-.feedback-btn--not-me.active {
-  background: var(--btn-color);
-  border-color: var(--btn-color);
+/* ใน dark mode ปุ่ม .active พื้นเป็นสี 300 สว่าง → ตัวอักษรเข้มแทน white */
+[data-mode="dark"] .feedback-btn--very-true.active,
+[data-mode="dark"] .feedback-btn--somewhat.active,
+[data-mode="dark"] .feedback-btn--not-sure.active,
+[data-mode="dark"] .feedback-btn--not-me.active {
+  color: #0F172A;
 }
 
 /* ============================================================================

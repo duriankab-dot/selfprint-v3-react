@@ -83,13 +83,17 @@
 
 .dashboard-header h1 {
   font-size: 2.5rem;
-  color: #212529;
+  /* CONTRAST-001: header อยู่ในโซนบนของ navy gradient (line 14, 0-420px)
+     ในทุก theme เดิม #212529 บน #1E3A5F ≈1.4:1 อ่านไม่ออกทั้งสอง mode
+     → ข้อความสว่างตายตัว (F9FAFB บน navy-800 >12:1) */
+  color: #F9FAFB;
   margin-bottom: 8px;
 }
 
 .dashboard-header p {
   font-size: 1.1rem;
-  color: #6c757d;
+  /* D6DEEA บน navy-800 ≈8:1 ✓ */
+  color: #D6DEEA;
 }
 
 /* Insights Section */
@@ -99,10 +103,12 @@
 
 .insights-section h2 {
   font-size: 1.5rem;
-  color: #212529;
+  /* CONTRAST-001: เดิม hardcoded #212529 — พังใน dark mode (พื้น navy-900)
+     → token จะสลับสีตาม mode ให้เอง */
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .insights-grid {
@@ -113,7 +119,9 @@
 
 /* Chart Section */
 .chart-section {
-  background: white;
+  /* CONTRAST-001: เดิม background: white — ใน dark mode ทำให้ข้อความ token
+     (F9FAFB) หายบนขาว → ใช้ theme surface */
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 40px;
@@ -122,10 +130,10 @@
 
 .chart-section h2 {
   font-size: 1.3rem;
-  color: #212529;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* Filter Section */
@@ -143,7 +151,7 @@
 
 /* Table Section */
 .table-section {
-  background: white;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   padding: 30px;
   margin-bottom: 40px;
@@ -152,16 +160,16 @@
 
 .table-section h2 {
   font-size: 1.3rem;
-  color: #212529;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .loading {
   text-align: center;
   padding: 40px;
-  color: #6c757d;
+  color: var(--color-text-secondary);
   font-size: 1rem;
 }
 
@@ -190,11 +198,11 @@
 .no-data {
   text-align: center;
   padding: 40px;
-  color: #6c757d;
+  color: var(--color-text-secondary);
   font-size: 0.95rem;
-  background: #f8f9fa;
+  background: var(--color-bg-tertiary);
   border-radius: 4px;
-  border: 1px dashed #dee2e6;
+  border: 1px dashed var(--color-border-dark);
 }
 
 /* Export Section */
@@ -204,10 +212,10 @@
 
 .export-section h2 {
   font-size: 1.3rem;
-  color: #212529;
+  color: var(--color-text-primary);
   margin-bottom: 20px;
   padding-bottom: 12px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid var(--color-border);
 }
 
 .export-buttons {
@@ -872,7 +880,7 @@
 
 .p2-panels-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: var(--space-4, 16px);
 }
 

@@ -2,7 +2,7 @@
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--color-bg);
+  background: var(--color-bg-primary);
 }
 
 .passkey-settings-main {
@@ -25,25 +25,25 @@
 .passkey-back-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--text-sm, 14px);
   cursor: pointer;
   padding: 0;
   align-self: flex-start;
   transition: color 0.2s;
 }
-.passkey-back-btn:hover { color: var(--text-primary); }
+.passkey-back-btn:hover { color: var(--color-text-primary); }
 
 .passkey-settings-title {
   font-size: var(--text-2xl, 24px);
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .passkey-settings-subtitle {
   font-size: var(--text-sm, 14px);
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0;
   line-height: 1.5;
 }
@@ -86,8 +86,8 @@
 
 /* List Section */
 .passkey-list-section {
-  background: var(--surface-2, rgba(255,255,255,0.05));
-  border: 1px solid var(--border-subtle, rgba(255,255,255,0.1));
+  background: var(--color-bg-secondary, rgba(255,255,255,0.05));
+  border: 1px solid var(--color-border, rgba(255,255,255,0.1));
   border-radius: var(--radius-lg, 16px);
   overflow: hidden;
 }
@@ -98,13 +98,13 @@
   justify-content: space-between;
   gap: var(--space-3, 12px);
   padding: var(--space-4, 16px) var(--space-5, 20px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .passkey-list-title {
   font-size: var(--text-base, 16px);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0;
   display: flex;
   align-items: center;
@@ -113,14 +113,14 @@
 
 .passkey-count {
   font-size: var(--text-sm, 13px);
-  color: var(--text-muted);
-  background: var(--surface-3, rgba(255,255,255,0.05));
+  color: var(--color-text-tertiary);
+  background: var(--color-bg-tertiary, rgba(255,255,255,0.05));
   padding: 2px 8px;
   border-radius: 99px;
 }
 
 .passkey-add-btn {
-  background: var(--accent-primary, var(--color-accent));
+  background: var(--color-accent-primary);
   color: #fff;
   border: none;
   border-radius: var(--radius-sm, 8px);
@@ -144,7 +144,7 @@
 .passkey-empty {
   padding: var(--space-6, 24px) var(--space-5, 20px);
   text-align: center;
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   font-size: var(--text-sm, 14px);
   display: flex;
   flex-direction: column;
@@ -165,11 +165,11 @@
   align-items: center;
   gap: var(--space-3, 12px);
   padding: var(--space-4, 16px) var(--space-5, 20px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--color-border);
   transition: background 0.15s;
 }
 .passkey-item:last-child { border-bottom: none; }
-.passkey-item:hover { background: var(--surface-3, rgba(255,255,255,0.03)); }
+.passkey-item:hover { background: var(--color-bg-tertiary, rgba(255,255,255,0.03)); }
 
 .passkey-item-icon { font-size: 24px; flex-shrink: 0; }
 
@@ -178,7 +178,7 @@
 .passkey-item-name {
   font-size: var(--text-sm, 14px);
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--color-text-primary);
   margin: 0 0 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -187,15 +187,15 @@
 
 .passkey-item-meta {
   font-size: var(--text-xs, 12px);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   margin: 0;
 }
 
 .passkey-delete-btn {
   background: none;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm, 8px);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   font-size: 16px;
   width: 36px;
   height: 36px;
@@ -215,8 +215,8 @@
 
 /* Security Info */
 .passkey-security-info {
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg, 16px);
   padding: var(--space-4, 16px) var(--space-5, 20px);
 }
@@ -224,7 +224,7 @@
 .passkey-security-title {
   font-size: var(--text-sm, 14px);
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text-secondary);
   margin: 0 0 var(--space-3, 12px);
 }
 
@@ -238,7 +238,7 @@
 
 .passkey-security-list li {
   font-size: var(--text-xs, 12px);
-  color: var(--text-muted);
+  color: var(--color-text-tertiary);
   line-height: 1.5;
 }
 

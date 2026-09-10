@@ -267,12 +267,15 @@
 }
 
 .privacy__btn--primary {
-  background: var(--accent-primary, #4f46e5);
+  /* CONTRAST-001: เดิมใช้ --accent-primary (mood token) ที่บาง mood เป็นสี
+     สดอ่อน (ready #00C853, energetic #FF6D00) ทำให้ white text FAIL →
+     ใช้ hub accent token ที่ถูกปรับให้เข้มพอกับ white แล้ว */
+  background: var(--color-accent-primary, #5B5CEB);
   color: #fff;
 }
 
 .privacy__btn--primary:not(:disabled):hover {
-  background: var(--accent-secondary, #4338ca);
+  background: var(--color-accent-primary-hover, #7477FF);
 }
 
 .privacy__btn--outline {
@@ -286,18 +289,25 @@
 }
 
 .privacy__btn--danger {
-  background: #ef4444;
+  /* #ef4444 + white ≈3.8:1 FAIL (semibold 0.88rem) → red-700 #B91C1C ≈5.9:1 ✓ */
+  background: #B91C1C;
   color: #fff;
 }
 
 .privacy__btn--danger:not(:disabled):hover {
-  background: #dc2626;
+  background: #991B1B;
 }
 
 .privacy__btn--danger-outline {
   background: none;
-  border: 1px solid #ef4444;
-  color: #ef4444;
+  border: 1px solid #B91C1C;
+  /* #ef4444 บนพื้นสว่าง ≈3.8:1 FAIL → red-700 ≈5.9:1 ✓ (dark: red-300) */
+  color: #B91C1C;
+}
+
+[data-mode="dark"] .privacy__btn--danger-outline {
+  color: #F87171;
+  border-color: #F87171;
 }
 
 .privacy__btn--danger-outline:not(:disabled):hover {

@@ -76,7 +76,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 10px;
   border: 1px solid var(--color-border, #e0e0e0);
 }
@@ -165,7 +165,7 @@
   gap: 6px;
   align-items: center;
   padding: 12px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 8px;
   border: 1px solid var(--color-border, #e0e0e0);
 }
@@ -196,7 +196,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 10px;
   border: 1px solid var(--color-border, #e0e0e0);
 }
@@ -278,7 +278,9 @@
   flex-direction: column;
   gap: 10px;
   padding: 12px;
-  background: #f0f9ff;
+  /* เดิม #f0f9ff ตายตัว + text token → dark mode ข้อความสว่างบนฟ้าอ่อน
+     FAIL → ใช้ theme surface */
+  background: var(--color-bg-tertiary);
   border-left: 3px solid #3b82f6;
   border-radius: 6px;
 }
@@ -288,6 +290,10 @@
   font-size: 13px;
   font-weight: 600;
   color: #1e40af;
+}
+
+[data-mode="dark"] .feedback-insights__title {
+  color: #93C5FD;
 }
 
 .insights-list {

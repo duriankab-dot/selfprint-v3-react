@@ -25,7 +25,11 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  color: white;
+  /* CONTRAST-001 (10 ก.ย. 2026): พื้นของ badge มาจาก Tailwind bg-*-500
+     (yellow/orange/red/green/blue) ใน ConfidenceIndicator.tsx — white บน
+     yellow/orange ≈1.9–2.2:1 FAIL → ใช้ตัวอักษรเข้ม #0F172A ซึ่งผ่าน
+     ≥4.5:1 กับทุก 500-shade */
+  color: #0F172A;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease;
@@ -53,7 +57,7 @@
 }
 
 .confidence-label {
-  color: var(--text-secondary, #6b7280);
+  color: var(--color-text-secondary, #6b7280);
   font-weight: 500;
 }
 

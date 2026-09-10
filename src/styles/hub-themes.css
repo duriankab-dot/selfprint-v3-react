@@ -1,6 +1,19 @@
 /* 🎨 HUB THEME OVERRIDES — 11 Hubs */
 /* Each hub has unique color + gradient */
 
+/* ── CONTRAST-001 (10 ก.ย. 2026): WCAG AA ปรับสีต่อ hub ──
+   --color-accent-secondary ถูกใช้เป็น **สีตัวอักษรบนปุ่ม/แท็ก/แบดจ์ที่พื้น
+   เป็น --color-accent-primary** (Button.tsx, Tag.tsx, Badge.tsx,
+   Dropdown.tsx) เดิมหลาย hub ตั้งเป็นสี pastel (#FEF3C7 ฯลฯ) ทำให้ข้อความ
+   บนปุ่มอ่านไม่ออก (1.8–2.9:1) — ตอนนี้กำหนดเป็น #FFFFFF ทุก hub
+   และ --color-accent-primary ของ hub ที่สีอ่อนเกินถูกเข้มขึ้น (700-level)
+   เพื่อให้ข้อความสีขาวบนพื้นนั้นผ่าน 4.5:1 แบบ WCAG AA:
+     career #059669→#047857, health #06B6D4→#0E7490, money #D97706→#B45309,
+     creativity #EA580C→#C2410C, spirituality #A78BFA→#7C3AED,
+     impact #14B8A6→#0F766E (ทุกตัว ≥4.7:1 กับ white)
+   --hub-bg-gradient ยังเป็นพื้นหลัง pastel เดิม (ใช้เป็นพื้นหน้าไม่ใช่
+   พื้นปุ่ม) — text บนพื้นนั้นมาจาก token ปกติจึงไม่กระทบ */
+
 /* 1. IDENTITY — The Mirror — สีธีมแรกตาม SELFPRINT_V4_LANDING_WITH_12HUBS.html (--primary) */
 [data-hub="identity"] {
   --color-accent-primary: #5B5CEB;
@@ -14,7 +27,7 @@
 /* 2. DECISION — The Navigator */
 [data-hub="decision"] {
   --color-accent-primary: #2563EB; /* Bright Blue */
-  --color-accent-secondary: #DBEAFE;
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #DBEAFE, #FAFBFC);
   --hub-illustration-color: #2563EB;
   --duration-hub: 1s;
@@ -22,8 +35,8 @@
 
 /* 3. RELATIONSHIP — The Bridge */
 [data-hub="relationship"] {
-  --color-accent-primary: #E11D48; /* Rose */
-  --color-accent-secondary: #FCE7F3;
+  --color-accent-primary: #E11D48; /* Rose — white text 4.8:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #FCE7F3, #FAFBFC);
   --hub-illustration-color: #E11D48;
   --duration-hub: 2.5s;
@@ -31,35 +44,35 @@
 
 /* 4. CAREER — The Mentor */
 [data-hub="career"] {
-  --color-accent-primary: #059669; /* Emerald */
-  --color-accent-secondary: #DCFCE7;
+  --color-accent-primary: #047857; /* Emerald-700 — was #059669, white 3.7:1 FAIL → white 4.9:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #DCFCE7, #FAFBFC);
-  --hub-illustration-color: #059669;
+  --hub-illustration-color: #047857;
   --duration-hub: 1.5s;
 }
 
 /* 5. HEALTH — The Care Partner */
 [data-hub="health"] {
-  --color-accent-primary: #06B6D4; /* Cyan */
-  --color-accent-secondary: #CFFAFE;
+  --color-accent-primary: #0E7490; /* Cyan-700 — was #06B6D4, white 2.4:1 FAIL → white 4.9:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #CFFAFE, #FAFBFC);
-  --hub-illustration-color: #06B6D4;
+  --hub-illustration-color: #0E7490;
   --duration-hub: 2s;
 }
 
 /* 6. MONEY — The Strategist */
 [data-hub="money"] {
-  --color-accent-primary: #D97706; /* Gold */
-  --color-accent-secondary: #FEF3C7;
+  --color-accent-primary: #B45309; /* Amber-700 — was #D97706, white 3.2:1 FAIL → white 4.8:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #FEF3C7, #FAFBFC);
-  --hub-illustration-color: #D97706;
+  --hub-illustration-color: #B45309;
   --duration-hub: 1.8s;
 }
 
 /* 7. AI TWIN — The Twin */
 [data-hub="ai-twin"] {
   --color-accent-primary: #1D4ED8; /* Electric Blue */
-  --color-accent-secondary: #EDE9FE;
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #EDE9FE, #1D4ED8);
   --hub-illustration-color: #1D4ED8;
   --duration-hub: 2.2s;
@@ -68,7 +81,7 @@
 /* 8. LEARNING — The Teacher */
 [data-hub="learning"] {
   --color-accent-primary: #4F46E5; /* Indigo */
-  --color-accent-secondary: #EEF2FF;
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #EEF2FF, #FAFBFC);
   --hub-illustration-color: #4F46E5;
   --duration-hub: 1.6s;
@@ -76,27 +89,27 @@
 
 /* 9. CREATIVITY — The Muse */
 [data-hub="creativity"] {
-  --color-accent-primary: #EA580C; /* Orange */
-  --color-accent-secondary: #FEE2E2;
+  --color-accent-primary: #C2410C; /* Orange-700 — was #EA580C, white 2.9:1 FAIL → white 5:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #FEE2E2, #FAFBFC);
-  --hub-illustration-color: #EA580C;
+  --hub-illustration-color: #C2410C;
   --duration-hub: 2.3s;
 }
 
 /* 10. SPIRITUALITY — The Sage */
 [data-hub="spirituality"] {
-  --color-accent-primary: #A78BFA; /* Lavender */
-  --color-accent-secondary: #F3E8FF;
+  --color-accent-primary: #7C3AED; /* Violet-600 — was #A78BFA (lavender, white 2.5:1 FAIL) → white 5.4:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #F3E8FF, #FAFBFC);
-  --hub-illustration-color: #A78BFA;
+  --hub-illustration-color: #7C3AED;
   --duration-hub: 2.7s;
 }
 
 /* 11. IMPACT — The Catalyst */
 [data-hub="impact"] {
-  --color-accent-primary: #14B8A6; /* Teal */
-  --color-accent-secondary: #CCFBF1;
+  --color-accent-primary: #0F766E; /* Teal-700 — was #14B8A6, white 2.2:1 FAIL → white 4.7:1 ✓ */
+  --color-accent-secondary: #FFFFFF;
   --hub-bg-gradient: linear-gradient(135deg, #CCFBF1, #FAFBFC);
-  --hub-illustration-color: #14B8A6;
+  --hub-illustration-color: #0F766E;
   --duration-hub: 1.9s;
 }

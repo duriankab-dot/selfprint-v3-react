@@ -28,13 +28,13 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .empty-subtext {
   margin: 0;
   font-size: 12px;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .history-messages {
@@ -68,7 +68,10 @@
   max-width: 70%;
   padding: 10px 12px;
   border-radius: 8px;
-  background: white;
+  background: var(--color-bg-card);
+  /* fallback เมื่อไม่มี .user/.assistant modifier — token จะสลับตาม mode;
+     variant ที่พื้นตายตัว (ด้านล่าง) จะ override ด้วยสีเข้มตายตัวแล้ว */
+  color: var(--color-text-primary);
 }
 
 .message-user .message-content {
@@ -91,7 +94,9 @@
   display: block;
   margin-top: 4px;
   font-size: 10px;
-  color: #999;
+  /* #999 บนพื้น bubble อ่อน ≈2.6:1 FAIL → ใช้สีของ bubble เองจางลง */
+  color: inherit;
+  opacity: 0.75;
 }
 
 .history-clear {

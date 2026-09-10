@@ -21,7 +21,8 @@
 .life-hubs-page__header p {
   margin: 8px 0 0;
   font-size: 14px;
-  color: #666;
+  /* เดิม #666 ตายตัว — บนพื้น navy (dark) ≈2.9:1 FAIL → token ตาม mode */
+  color: var(--color-text-secondary);
 }
 
 .life-hubs-grid {
@@ -34,7 +35,9 @@
 /* Detail Panel */
 .life-hub-detail {
   padding: 20px;
-  background: #f5f5f5;
+  /* เดิม #f5f5f5 ตายตัว + heading token → dark mode ข้อความสว่างบนเทาอ่อน
+     FAIL → theme surface */
+  background: var(--color-bg-secondary);
   border-radius: 12px;
   animation: slideIn 0.3s ease;
 }
@@ -55,7 +58,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid var(--color-border);
   padding-bottom: 12px;
 }
 
@@ -63,6 +66,7 @@
   margin: 0;
   font-size: 20px;
   font-weight: 700;
+  color: var(--color-text-primary);
 }
 
 .detail-close {
@@ -70,7 +74,7 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .detail-content {
@@ -81,7 +85,7 @@
 
 .detail-section {
   padding: 12px;
-  background: white;
+  background: var(--color-bg-card);
   border-radius: 8px;
 }
 
@@ -89,18 +93,19 @@
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .detail-section p {
   margin: 0;
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #ddd;
+  background: var(--color-border);
   border-radius: 4px;
   overflow: hidden;
 }

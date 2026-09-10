@@ -7,7 +7,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: white;
+  background: var(--color-bg-card);
   border: 2px solid var(--color-border, #e0e0e0);
   border-radius: 10px;
   transition: all 0.2s ease;

@@ -144,7 +144,8 @@
 
 .export-btn {
   padding: 8px 16px;
-  background: #3b82f6;
+  /* #3b82f6 + white ≈3.7:1 FAIL (12px) → blue-600 ≈5.2:1 ✓ */
+  background: #2563EB;
   color: white;
   border: none;
   border-radius: 6px;
@@ -155,7 +156,7 @@
 }
 
 .export-btn:hover {
-  background: #2563eb;
+  background: #1D4ED8;
 }
 
 .analytics-loading {
