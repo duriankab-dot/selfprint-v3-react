@@ -111,6 +111,13 @@ export class SICEOrchestrator {
 
     const totalExecutionTime = performance.now() - startTime;
 
+    // P0-B B2: Compute completion status from engine results
+    const successfulEngines = results.filter((r) => !r.error);
+    const failedResults = results.filter((r) => r.error);
+    const failedEngineNames = failedResults.map((r) => r.engineName);
+    const allEnginesFailed = successfulEngines.length === 0;
+    const someEnginesFailed = failedResults.length > 0;
+
     const orchestratorResult = {
       userId: input.userId,
       timestamp: new Date().toISOString(),
@@ -119,6 +126,10 @@ export class SICEOrchestrator {
       fineTuned,
       personalIntelligence,
       totalExecutionTime: Math.round(totalExecutionTime),
+      // P0-B B2: explicit completion status
+      completionStatus: allEnginesFailed ? 'FAILED' : someEnginesFailed ? 'DEGRADED' : 'COMPLETE',
+      successfulEngineCount: successfulEngines.length,
+      failedEngineNames,
     };
 
     // Wire results through SICEBridge to feed intelligence layer
@@ -291,8 +302,36 @@ export class SICEOrchestrator {
           }
           break;
 
-        // Add more engines as they are implemented
-        // Cases 4, 6, 7, 8, 9, 10, 11, 12 follow similar pattern
+        case 4: // AIFeedbackLoop
+          {
+            const feedback = result.result as AIFeedbackResult;
+            if (feedback?.averageScore !== undefined)
+              themes.push(`ความแม่นยำโดยรวม: ${feedback.averageScore}/100`);
+            if (Array.isArray(feedback?.improvements) && feedback.improvements.length > 0) {
+              themes.push(`กำลังพัฒนา: ${feedback.improvements[0]}`);
+            }
+            if (Array.isArray(feedback?.warnings) && feedback.warnings.length > 0) {
+              themes.push(`ข้อควรระวัง: ${feedback.warnings[0]}`);
+            }
+          }
+          break;
+
+        case 6: // ExperienceEngine
+          {
+            const exp = result.result as ExperienceResult;
+            if (Array.isArray(exp?.masteredAreas) && exp.masteredAreas.length > 0) {
+              themes.push(`ด้านที่เชี่ยวชาญ: ${exp.masteredAreas.slice(0, 2).join(', ')}`);
+            }
+            if (Array.isArray(exp?.keyLearnings) && exp.keyLearnings.length > 0) {
+              themes.push(`สิ่งที่เรียนรู้สำคัญ: ${exp.keyLearnings[0]}`);
+            }
+            if (exp?.totalInteractions !== undefined && exp.totalInteractions > 0) {
+              themes.push(`ประสบการณ์รวม: ${exp.totalInteractions} ครั้งโต้ตอบ`);
+            }
+          }
+          break;
+
+        // Cases 7-12 handled by default generic extraction or have inline logic
 
         default:
           // Generic theme extraction for unknown engines

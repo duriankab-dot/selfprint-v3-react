@@ -126,7 +126,10 @@ export async function streamNovaResponse(
 
     const response = await fetch('/api/nova-stream', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(await getAuthHeadersLazy()), // AUTHHDR-001 STREAMING: parity with /api/nova
+      },
       body: JSON.stringify({
         system: systemPrompt,
         messages,

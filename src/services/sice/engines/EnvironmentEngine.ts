@@ -196,7 +196,7 @@ export class EnvironmentEngine extends SICEBase {
       }
     } else if (timeOfDay === 'evening') {
       if (currentMood === 'focused') {
-        recs.push('Leverage focus for reflective work on ${activeWorld} world');
+        recs.push(`Leverage focus for reflective work on ${activeWorld} world`);
       } else {
         recs.push('Wind down mode - good for reviewing and reflection');
       }
@@ -217,16 +217,16 @@ export class EnvironmentEngine extends SICEBase {
         recs.push('Weekend mode - good time for deep work or relaxation');
       }
     } else {
-      recs.push('Weekday rhythm - balance ${activeWorld} world with self-care');
+      recs.push(`Weekday rhythm - balance ${activeWorld} world with self-care`);
     }
 
     // Season recommendations
     if (season === 'spring') {
       recs.push('Spring energy - ideal for new initiatives and growth');
     } else if (season === 'summer') {
-      recs.push('Summer vitality - maintain momentum on your ${activeWorld} goals');
+      recs.push(`Summer vitality - maintain momentum on your ${activeWorld} goals`);
     } else if (season === 'fall') {
-      recs.push('Fall transition - prepare for changes in your ${activeWorld} world');
+      recs.push(`Fall transition - prepare for changes in your ${activeWorld} world`);
     } else if (season === 'winter') {
       recs.push('Winter slowdown - focus on internal goals and well-being');
     }

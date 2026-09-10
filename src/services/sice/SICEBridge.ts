@@ -171,7 +171,10 @@ export class SICEBridge {
 
       if (error) {
         console.warn('Could not save SICE results snapshot:', error);
-        // Non-critical — continue
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Supabase insert failed',
+        };
       }
 
       return {

@@ -31,6 +31,12 @@ export interface OrchestratorResult {
   fineTuned: FineTunedResult;
   personalIntelligence: PersonalIntelligence;
   totalExecutionTime: number;
+  /** P0-B B2: explicit completion status — callers must check this, not just assume success */
+  completionStatus: 'COMPLETE' | 'DEGRADED' | 'FAILED';
+  /** P0-B B2: count of engines that succeeded (no error) */
+  successfulEngineCount: number;
+  /** P0-B B2: list of engine names that failed */
+  failedEngineNames: string[];
 }
 
 export interface CrossEngineSynthesis {

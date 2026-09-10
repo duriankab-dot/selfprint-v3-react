@@ -174,7 +174,7 @@ export class DecisionIntelligenceEngineAdapter extends SICEBase {
     const grouped: Record<string, any> = {};
 
     decisions.forEach((d) => {
-      const world = d.world_id || 'general';
+      const world = d.world || 'general';
       if (!grouped[world]) {
         grouped[world] = { decisions: [], count: 0 };
       }

@@ -142,7 +142,10 @@ export async function streamTwinResponse(
 
     const response = await fetch('/api/twin-stream', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(await getAuthHeaders()), // AUTHHDR-001 STREAMING: parity with /api/twin
+      },
       body: JSON.stringify({
         system: systemPrompt,
         messages,

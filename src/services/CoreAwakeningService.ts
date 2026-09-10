@@ -138,6 +138,17 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
       failedOps.push('SICE orchestration failed');
     }
 
+    // P0-B B2: Log partial engine failures for transparency
+    if (orchestrationResult?.completionStatus === 'DEGRADED') {
+      console.warn(
+        `[startAwakening] DEGRADED: ${orchestrationResult.failedEngineNames.length} engine(s) failed:`,
+        orchestrationResult.failedEngineNames
+      );
+      failedOps.push(`Engines failed: ${orchestrationResult.failedEngineNames.join(', ')}`);
+    } else if (orchestrationResult?.completionStatus === 'FAILED') {
+      failedOps.push('All SICE engines failed');
+    }
+
     // Extract Twin personality essence from orchestration results
     const essence = {
       personalIntelligence: orchestrationResult.personalIntelligence,
@@ -568,6 +579,7 @@ export async function initializeTwin(
 
     // ✨ Check if critical operations failed
     const criticalFailures = [
+      { name: 'essence', result: essenceResult },
       { name: 'world_preferences', result: worldPrefsResult },
       { name: 'twin_personality', result: personalityResult },
       { name: 'twin_state', result: stateResult },
@@ -580,6 +592,10 @@ export async function initializeTwin(
 
     if (failedOps.length > 0) {
       console.warn(`⚠️ PHASE A.1 CRITICAL: ${failedOps.length} operation(s) failed:`, failedOps.map(f => f.name).join(', '));
+      return {
+        success: false,
+        message: `Twin creation incomplete: ${failedOps.map(f => f.name).join(', ')} failed`,
+      };
     }
 
     return {
