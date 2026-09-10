@@ -1,54 +1,106 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   IntelligencePanels.css — PANELS-UI-001 (10 ก.ย. 2026)
+   Production-Ready restyle ตามมาตรฐาน Tailwind v4 design system:
+
+   1. สี: Navy Blue Intelligence — Modern Minimalist
+      พื้นการ์ด = var(--color-bg-secondary) (ขาวนวล / navy-800 ตาม mode)
+      ตัวอักษร = token จริงทุกจุด, สีเน้น = var(--color-accent-primary)
+      พื้น tint ทุกอันใช้ color-mix กับ accent ของ hub ปัจจุบัน (ไม่ผูกสีม่วงตายตัว)
+   2. Whitespace: padding การ์ด 24px (p-6), gap ระหว่าง section 16px (gap-4),
+      ระยะภายใน sub-block 12-16px — ข้อความไม่ติดกัน, อ่านแนวนอนปกติ
+   3. ปุ่ม: rounded-xl/full + layered shadow + transition 200ms ทุกตัว
+      (hover เงยขึ้น translateY(-1px) + เงาลึกขึ้น ตามแนว Tailwind hover states)
+   4. Card Layout: แต่ละ panel เป็นการ์ดอิสระ ไม่ทับกัน — แท็บ carousel ที่
+      เคยใช้ transform: scale(1.1) (ทำให้แท็บ active ทับแท็บประชิด) เปลี่ยนเป็น
+      shadow lift + accent ring ที่ไม่ขยายขอบเขต layout
+   หมายเหตุ: ชื่อ class คงเดิมทุกตัว (IntelligencePanels.tsx อ้างอิงตรง ๆ)
+   ════════════════════════════════════════════════════════════════════════ */
+
 /* ── Shared intel card base ─────────────────────────────────────────── */
 .intel-card {
-  background: var(--color-bg-secondary, rgba(255,255,255,0.05));
-  border: 1px solid var(--color-border, rgba(255,255,255,0.1));
-  border-radius: var(--radius-lg, 16px);
-  padding: var(--space-5, 20px);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl, 16px);            /* rounded-2xl */
+  padding: var(--space-lg, 24px);                    /* p-6 = 24px */
   display: flex;
   flex-direction: column;
-  gap: var(--space-3, 12px);
+  gap: var(--space-md, 16px);                        /* gap-4 = 16px */
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.intel-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--color-accent-primary) 35%, var(--color-border));
 }
 
 .intel-card--empty {
   align-items: center;
   justify-content: center;
-  min-height: 120px;
+  min-height: 140px;
+  border-style: dashed;                              /* การ์ดว่าง = ชัดว่า placeholder */
 }
 
 .intel-empty {
   color: var(--color-text-tertiary);
   font-size: var(--text-sm, 14px);
+  line-height: 1.6;
   text-align: center;
+  max-width: 40ch;                                   /* ไม่ให้บรรทัดยาวเกิน */
+  margin: 0;
 }
 
 .intel-card-header {
   display: flex;
   align-items: center;
-  gap: var(--space-2, 8px);
+  gap: 12px;                                         /* gap-3 */
 }
 
-.intel-card-icon { font-size: 20px; }
+.intel-card-icon {
+  font-size: 18px;
+  width: 40px;                                       /* กรอบไอคอนกลมมน */
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+  border-radius: var(--radius-md, 8px);              /* rounded-lg */
+}
 
 .intel-card-title {
   font-size: var(--text-base, 16px);
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--color-text-primary);
   margin: 0;
   flex: 1;
+  min-width: 0;                                      /* RSPNSV-001: title ยาวไม่ดัน header ล้น */
 }
 
 .intel-confidence {
   font-size: var(--text-xs, 12px);
-  color: var(--color-text-tertiary);
-  background: var(--color-bg-tertiary, rgba(255,255,255,0.05));
-  padding: 2px 8px;
-  border-radius: 99px;
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+  padding: 4px 10px;
+  border-radius: var(--radius-full, 999px);          /* rounded-full pill */
+  flex-shrink: 0;
+}
+
+[data-mode="dark"] .intel-confidence {
+  /* PANELS-UI-002 (จาก review): ห้ามใช้ var(--accent-primary) กับ text เล็ก
+     บนพื้น navy-800 — mood accent ระดับ 400 (เช่น reflective #A78BFA,
+     focused #C084FC) ได้แค่ ≈3.7-3.8:1 ต่ำกว่า AA 4.5:1 (DARKMOOD-001
+     วัดบน navy-900 ไม่ใช่พื้นการ์ด navy-800) — ใช้ indigo-300 ตายตัว
+     ≈5.8:1 ทุก mood */
+  color: #A5B4FC;
 }
 
 .intel-card-summary {
   font-size: var(--text-sm, 14px);
   color: var(--color-text-secondary);
-  line-height: 1.6;
+  line-height: 1.65;
   margin: 0;
 }
 
@@ -57,8 +109,8 @@
   font-weight: 600;
   color: var(--color-text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0 0 6px;
+  letter-spacing: 0.06em;                            /* tracking-wide */
+  margin: 0 0 8px;
 }
 
 .intel-list {
@@ -67,14 +119,14 @@
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;                                          /* gap-2 */
 }
 
 .intel-list li {
   font-size: var(--text-sm, 13px);
   color: var(--color-text-secondary);
-  line-height: 1.5;
-  padding-left: 14px;
+  line-height: 1.6;
+  padding-left: 18px;
   position: relative;
 }
 
@@ -83,25 +135,54 @@
   position: absolute;
   left: 0;
   color: var(--color-accent-primary);
+  font-weight: 700;
 }
 
 .intel-list--action li::before { content: '→'; }
 
+/* ── ปุ่มขยายรายละเอียด — โค้งมน มีมิติ hover สวย ──────────────────── */
 .intel-expand-btn {
-  background: none;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 8px);
-  color: var(--color-text-tertiary);
+  background: color-mix(in srgb, var(--color-accent-primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-accent-primary) 35%, transparent);
+  border-radius: var(--radius-full, 999px);          /* rounded-full */
+  color: var(--color-accent-primary);
   font-size: var(--text-xs, 12px);
-  padding: 6px 12px;
+  font-weight: 600;
+  padding: 10px 18px;                                /* เพิ่ม whitespace รอบ label */
   cursor: pointer;
-  transition: color 0.2s, border-color 0.2s;
+  transition: background-color 200ms ease, color 200ms ease,
+              border-color 200ms ease, box-shadow 200ms ease,
+              transform 200ms ease;
   align-self: flex-start;
 }
 
 .intel-expand-btn:hover {
-  color: var(--color-text-primary);
+  background: var(--color-accent-primary);
   border-color: var(--color-accent-primary);
+  color: var(--color-accent-secondary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);                       /* hover lift */
+}
+
+.intel-expand-btn:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.intel-expand-btn:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+[data-mode="dark"] .intel-expand-btn {
+  /* ตัวปุ่มใน dark mode: --color-accent-primary (hub 700-level) บน navy
+     ≈2.3:1 ต่ำกว่า AA → text/ขอบใช้ indigo-300 (เหตุผลเดียวกับ
+     .intel-confidence ด้านบน) */
+  color: #A5B4FC;
+}
+
+[data-mode="dark"] .intel-expand-btn:hover {
+  color: var(--color-accent-secondary);
 }
 
 /* ── DecisionCard ───────────────────────────────────────────────────── */
@@ -109,57 +190,71 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(139,92,246,0.15);
+  background: color-mix(in srgb, var(--color-accent-primary) 14%, transparent);
   color: var(--color-accent-primary);
   font-size: var(--text-sm, 13px);
   font-weight: 600;
-  padding: 4px 12px;
-  border-radius: 99px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full, 999px);
   align-self: flex-start;
 }
 
 [data-mode="dark"] .decision-style-badge {
-  /* accent-primary เข้มบน navy tint ≈3.5:1 marginal → violet-300 */
-  color: #C4B5FD;
+  /* text เล็กบน tint — mood accent 400-level ต่ำกว่า AA บน navy-800 →
+     indigo-300 ตายตัว (เหตุผลเดียวกับ .intel-confidence) */
+  color: #A5B4FC;
 }
 
-.decision-biases { display: flex; flex-direction: column; gap: 8px; }
+.decision-biases { display: flex; flex-direction: column; gap: 10px; }
 
 .bias-item {
-  background: var(--color-bg-tertiary, rgba(255,255,255,0.03));
-  border-radius: var(--radius-sm, 8px);
-  padding: 8px 12px;
+  background: var(--color-bg-tertiary);
+  border-radius: var(--radius-md, 8px);              /* rounded-lg */
+  padding: 12px 14px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  border-left: 3px solid transparent;                /* เตรียมแถบ severity */
 }
+
+/* severity บอกด้วยแถบซ้าย เพื่อลดจำนวนกล่อง-ใน-กล่อง (ไม่ทับเฟรมชั้นใน) */
+.bias-item--high   { border-left-color: #B91C1C; }
+.bias-item--medium { border-left-color: #B45309; }
+.bias-item--low    { border-left-color: #15803D; }
+
+[data-mode="dark"] .bias-item--high   { border-left-color: #F87171; }
+[data-mode="dark"] .bias-item--medium { border-left-color: #FCD34D; }
+[data-mode="dark"] .bias-item--low    { border-left-color: #34D399; }
 
 .bias-name {
   font-size: var(--text-sm, 13px);
   color: var(--color-text-primary);
   font-weight: 500;
   flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .bias-severity {
   font-size: var(--text-xs, 11px);
   font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 99px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 999px);
   text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
 }
 
-/* CONTRAST-001: #ef4444/#f59e0b/#22c55e (สี 500) บนพื้น tint 15% ที่ 11px
-   uppercase ≈2.2–2.5:1 FAIL → ใช้สี 700/800-level (บนพื้น tint อ่อนผ่าน
-   4.5:1) และ dark mode ใช้สี 300-level บน navy */
-.bias-severity--high { background: rgba(239,68,68,0.15); color: #B91C1C; }
+/* CONTRAST-001: สี 700/800-level บนพื้น tint อ่อน (ผ่าน 4.5:1) — dark
+   mode ใช้ 300-level บน navy */
+.bias-severity--high   { background: rgba(239,68,68,0.15);  color: #B91C1C; }
 .bias-severity--medium { background: rgba(245,158,11,0.15); color: #92400E; }
-.bias-severity--low { background: rgba(34,197,94,0.15); color: #15803D; }
+.bias-severity--low    { background: rgba(34,197,94,0.15);  color: #15803D; }
 
-[data-mode="dark"] .bias-severity--high { color: #F87171; }
+[data-mode="dark"] .bias-severity--high   { color: #F87171; }
 [data-mode="dark"] .bias-severity--medium { color: #FCD34D; }
-[data-mode="dark"] .bias-severity--low { color: #34D399; }
+[data-mode="dark"] .bias-severity--low    { color: #34D399; }
 
 .bias-note {
   font-size: var(--text-xs, 12px);
@@ -167,36 +262,38 @@
   width: 100%;
   margin: 0;
   font-style: italic;
+  line-height: 1.5;
 }
 
-.decision-details { display: flex; flex-direction: column; gap: 12px; }
+.decision-details { display: flex; flex-direction: column; gap: 16px; }
 
-.decision-frameworks { display: flex; flex-direction: column; gap: 8px; }
+.decision-frameworks { display: flex; flex-direction: column; gap: 10px; }
 
 .framework-item {
   background: var(--color-bg-tertiary);
-  border-radius: var(--radius-sm, 8px);
-  padding: 8px 12px;
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;                                /* เพิ่มหายใจรอบเนื้อหา */
 }
 
 .framework-name {
   font-size: var(--text-sm, 13px);
   font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 2px;
+  margin: 0 0 4px;
 }
 
 .framework-desc {
   font-size: var(--text-xs, 12px);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin: 0;
+  line-height: 1.55;
 }
 
-.decision-checklist { display: flex; flex-direction: column; gap: 8px; }
+.decision-checklist { display: flex; flex-direction: column; gap: 12px; }
 
 .checklist-item {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
 }
 
@@ -204,10 +301,10 @@
   font-size: var(--text-xs, 12px);
   font-weight: 700;
   color: var(--color-accent-primary);
-  background: rgba(139,92,246,0.1);
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-full, 999px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,14 +312,14 @@
 }
 
 [data-mode="dark"] .checklist-num {
-  color: #C4B5FD;
+  color: #A5B4FC;
 }
 
 .checklist-q {
   font-size: var(--text-sm, 13px);
   color: var(--color-text-primary);
-  margin: 0 0 2px;
-  line-height: 1.4;
+  margin: 0 0 4px;
+  line-height: 1.5;
 }
 
 .checklist-rationale {
@@ -230,36 +327,79 @@
   color: var(--color-text-tertiary);
   margin: 0;
   font-style: italic;
+  line-height: 1.5;
 }
 
 /* ── LifePackCarousel ───────────────────────────────────────────────── */
 .life-pack-tabs {
   display: flex;
-  gap: 6px;
+  gap: 8px;                                          /* gap-2 — กันแท็บชิดจนมองคลุมเคลือ */
   flex-wrap: wrap;
 }
 
 .life-pack-tab {
   background: var(--color-bg-tertiary);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm, 8px);
+  border-radius: var(--radius-md, 8px);
   font-size: 18px;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  transition: all 0.2s;
+  /* PANELS-UI-001: เดิมแท็บ active ใช้ transform: scale(1.1) ทำให้ทับ
+     แท็บประชิด (เฟรมทับซ้อน) — แทนด้วย shadow lift + เส้นขอบ accent
+     ซึ่งไม่ขยายขอบเขต layout */
+  transition: background-color 200ms ease, border-color 200ms ease,
+              box-shadow 200ms ease, transform 200ms ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.life-pack-tab--active {
-  background: rgba(139,92,246,0.2);
-  border-color: var(--color-accent-primary);
-  transform: scale(1.1);
+.life-pack-tab:hover {
+  border-color: color-mix(in srgb, var(--color-accent-primary) 50%, transparent);
+  background: color-mix(in srgb, var(--color-accent-primary) 8%, var(--color-bg-tertiary));
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-.life-pack-content { display: flex; flex-direction: column; gap: 10px; }
+.life-pack-tab--active {
+  background: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 1px var(--color-accent-primary),
+              var(--shadow-md);                    /* ring + lift แทน scale */
+}
+
+/* PANELS-UI-002 (จาก review): ใน dark mode ring/border สี hub 700-level
+   (#5B5CEB) บน navy ≈2.3:1 ต่ำกว่าเกณฑ์ non-text 3:1 (WCAG 1.4.11) —
+   state cue ใช้ mood accent 400-level ซึ่งผ่าน ≥3:1 บน navy-800 ทุก mood
+   (non-text ใช้เกณฑ์หลวมกว่า text จึง mood var ใช้ได้) */
+[data-mode="dark"] .life-pack-tab--active {
+  border-color: var(--accent-primary, #A5B4FC);
+  box-shadow: 0 0 0 1px var(--accent-primary, #A5B4FC), var(--shadow-md);
+}
+
+.life-pack-tab:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+[data-mode="dark"] .life-pack-tab:focus-visible {
+  outline-color: var(--accent-primary, #A5B4FC);
+}
+
+.life-pack-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  /* PANELS-UI-001: เนื้อหา fade จางขึ้นนุ่มนวลเวลาสลับ pack — เข้ากลุ่ม
+     "subtle emphasis" ของ MOTION-CATEGORIES-001 (ไม่มี bounce) */
+  animation: intel-content-fade 240ms ease-out both;
+}
+
+@keyframes intel-content-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 .life-pack-name {
   font-size: var(--text-base, 15px);
@@ -272,8 +412,17 @@
 
 .life-pack-score {
   font-size: var(--text-xs, 12px);
-  color: var(--color-text-tertiary);
+  font-weight: 600;
+  color: var(--color-accent-primary);
+  background: color-mix(in srgb, var(--color-accent-primary) 12%, transparent);
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 999px);
   margin-left: auto;
+  flex-shrink: 0;
+}
+
+[data-mode="dark"] .life-pack-score {
+  color: #A5B4FC;
 }
 
 .life-pack-note {
@@ -281,13 +430,15 @@
   color: var(--color-accent-primary);
   font-style: italic;
   margin: 0;
-  background: rgba(139,92,246,0.08);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm, 8px);
+  background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent);
+  border-left: 3px solid color-mix(in srgb, var(--color-accent-primary) 45%, transparent);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  line-height: 1.6;
 }
 
 [data-mode="dark"] .life-pack-note {
-  color: #C4B5FD;
+  color: #A5B4FC;
 }
 
 .life-pack-section { display: flex; flex-direction: column; }
@@ -295,19 +446,21 @@
 /* ── ForecastWidget ─────────────────────────────────────────────────── */
 .forecast-mood-hub {
   display: flex;
-  gap: var(--space-3, 12px);
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .forecast-pill {
   flex: 1;
-  min-width: 120px;
-  background: var(--color-bg-tertiary, rgba(255,255,255,0.04));
-  border-radius: var(--radius-md, 12px);
-  padding: 10px 14px;
+  min-width: 140px;                                  /* RSPNSV-001: min() guard ไม่จำเป็น — flex-wrap จะตกบรรทัดเอง */
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg, 12px);             /* rounded-xl */
+  padding: 12px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
 }
 
 .forecast-pill-label {
@@ -323,44 +476,54 @@
   color: var(--color-accent-primary);
 }
 
-.forecast-momentum { display: flex; flex-direction: column; gap: 8px; }
+[data-mode="dark"] .forecast-pill-value {
+  color: #A5B4FC;
+}
+
+.forecast-momentum { display: flex; flex-direction: column; gap: 10px; }
 
 .momentum-item {
   background: var(--color-bg-tertiary);
-  border-radius: var(--radius-sm, 8px);
-  padding: 8px 12px;
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
 }
 
 .momentum-area {
   font-size: var(--text-sm, 13px);
-  font-weight: 500;
+  font-weight: 600;
   color: var(--color-text-primary);
-  margin: 0 0 2px;
+  margin: 0 0 4px;
 }
 
 .momentum-amplify {
   font-size: var(--text-xs, 12px);
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   margin: 0;
+  line-height: 1.55;
 }
 
-.forecast-risks { display: flex; flex-direction: column; gap: 8px; }
+.forecast-risks { display: flex; flex-direction: column; gap: 10px; }
 
 .risk-item {
-  border-radius: var(--radius-sm, 8px);
-  padding: 8px 12px;
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
   border-left: 3px solid transparent;
 }
 
-.risk-item--high { background: rgba(239,68,68,0.06); border-left-color: #ef4444; }
-.risk-item--medium { background: rgba(245,158,11,0.06); border-left-color: #f59e0b; }
-.risk-item--low { background: rgba(34,197,94,0.06); border-left-color: #22c55e; }
+.risk-item--high   { background: rgba(239,68,68,0.07);  border-left-color: #B91C1C; }
+.risk-item--medium { background: rgba(245,158,11,0.07); border-left-color: #B45309; }
+.risk-item--low    { background: rgba(34,197,94,0.07);  border-left-color: #15803D; }
+
+[data-mode="dark"] .risk-item--high   { border-left-color: #F87171; }
+[data-mode="dark"] .risk-item--medium { border-left-color: #FCD34D; }
+[data-mode="dark"] .risk-item--low    { border-left-color: #34D399; }
 
 .risk-text {
   font-size: var(--text-sm, 13px);
   color: var(--color-text-primary);
   margin: 0 0 4px;
   font-weight: 500;
+  line-height: 1.5;
 }
 
 .risk-mitigation {
@@ -368,27 +531,29 @@
   color: var(--color-text-tertiary);
   margin: 0;
   font-style: italic;
+  line-height: 1.5;
 }
 
 /* ── MemorySection (Task 2D) ─────────────────────────────────────────── */
 .memory-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  background: var(--color-bg-secondary, rgba(255,255,255,0.02));
-  border-radius: var(--radius-md, 12px);
-  border: 1px solid var(--color-border, rgba(255,255,255,0.08));
+  gap: 14px;
+  padding: var(--space-lg, 24px);                    /* p-6 = 24px */
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .memory-section--recorder {
-  background: var(--color-bg-primary, rgba(255,255,255,0.01));
-  border: 1px solid var(--border-muted, rgba(255,255,255,0.05));
+  background: var(--color-bg-primary);
+  box-shadow: none;
 }
 
 .memory-section--list {
-  background: var(--color-bg-primary, rgba(255,255,255,0.01));
-  margin-top: 12px;
+  background: var(--color-bg-primary);
+  margin-top: 4px;
 }
 
 .memory-section__title {
@@ -398,12 +563,24 @@
   margin: 0 0 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
-/* Responsive */
+/* ── Responsive ─────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .memory-section {
-    padding: 12px;
+  .intel-card {
+    padding: var(--space-md, 16px);                  /* p-4 = 16px บนจอแคบ */
+    gap: 12px;
+    border-radius: var(--radius-lg, 12px);
   }
+
+  .intel-card-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .memory-section { padding: 16px; }
+
+  .forecast-pill { min-width: 100%; }                /* pill เรียงลงแนวตั้งบนจอแคบ */
 }

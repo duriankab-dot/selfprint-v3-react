@@ -167,7 +167,10 @@ export const LifePackCarousel: React.FC<LifePackCarouselProps> = ({ context }) =
         ))}
       </div>
 
-      <div className="life-pack-content">
+      {/* PANELS-UI-002 (จาก review): key ทำให้ React remount content เวลา
+          สลับ pack — .life-pack-content animation (intel-content-fade)
+          จึงเล่นใหม่ทุกครั้งตาม intent ของ CSS ไม่ใช่เฉพาะตอน mount */}
+      <div key={active.hub} className="life-pack-content">
         <div className="life-pack-name">
           {active.hubEmoji} {active.hubNameThai}
           <span className="life-pack-score">{Math.round(active.relevanceScore * 100)}%</span>
