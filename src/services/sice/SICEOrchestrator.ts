@@ -118,7 +118,16 @@ export class SICEOrchestrator {
     const allEnginesFailed = successfulEngines.length === 0;
     const someEnginesFailed = failedResults.length > 0;
 
-    const orchestratorResult = {
+    let completionStatus: 'COMPLETE' | 'DEGRADED' | 'FAILED';
+    if (allEnginesFailed) {
+      completionStatus = 'FAILED';
+    } else if (someEnginesFailed) {
+      completionStatus = 'DEGRADED';
+    } else {
+      completionStatus = 'COMPLETE';
+    }
+
+    const orchestratorResult: OrchestratorResult = {
       userId: input.userId,
       timestamp: new Date().toISOString(),
       results,
@@ -127,7 +136,7 @@ export class SICEOrchestrator {
       personalIntelligence,
       totalExecutionTime: Math.round(totalExecutionTime),
       // P0-B B2: explicit completion status
-      completionStatus: allEnginesFailed ? 'FAILED' : someEnginesFailed ? 'DEGRADED' : 'COMPLETE',
+      completionStatus,
       successfulEngineCount: successfulEngines.length,
       failedEngineNames,
     };
