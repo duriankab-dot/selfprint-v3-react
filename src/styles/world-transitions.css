@@ -1,0 +1,544 @@
+/**
+ * world-transitions.css — Narrative World Transition Grammar
+ *
+ * เมื่อผู้ใช้เปลี่ยน World (self → mind → relationship → love → career ฯลฯ)
+ * ห้ามเปลี่ยนแบบ hard cut (fade A → fade B)
+ * ต้องเป็น narrative transition ที่:
+ *   1. World เริ่มตอบสนองเมื่อ detect context shift
+ *   2. มี environmental force ดึงดูด Twin
+ *   3. Twin ยืด/ไหล/ตอบสนองต่อการเปลี่ยนแปลง
+ *   4. World เก่ายุบหรือละลาย
+ *   5. World ใหม่ปรากฏ
+ *   6. Twin settle ในบริบทใหม่
+ *
+ * Transition grammar แต่ละแบบเหมาะกับแต่ละ World pair:
+ *   attraction    — self → mind, growth → purpose
+ *   pull          — career → wealth, life → future
+ *   absorption    — love → relationship, wellbeing → calm
+ *   dissolution   — stressed → calm, confused → reflective
+ *   flow          — any → nature worlds (organic, path, horizon)
+ *   fold          — decision → purpose, mind → insight
+ *   tunnel        — awakening → aware, aware → connected
+ *   gravity_shift — wealth → career, explorer → creator
+ *   env_wave      — energetic → calm, stressed → drained
+ */
+
+/* ============================================================================
+   TRANSITION CONTEXT — shared variables
+   ============================================================================ */
+
+:root {
+  /* Transition state control — set via JS when world changes */
+  --world-transition-state: idle; /* idle | entering | active | settling */
+  --world-transition-type: none;  /* attraction | pull | absorption | etc. */
+  --world-transition-progress: 0; /* 0→1 driven by JS animation */
+  --world-transition-duration: 800ms;
+}
+
+/* ============================================================================
+   WORLD ENVIRONMENT TRANSITION LAYER
+   Wraps WorldEnvironment during transitions
+   ============================================================================ */
+
+.world-transition-container {
+  position: fixed;
+  inset: 0;
+  z-index: 1; /* Between Layer 0 (World) and Layer 1 (Twin) */
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Old world dissolving */
+.world-transition--old-world {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity var(--world-transition-duration) var(--easing-dissolve),
+              transform var(--world-transition-duration) var(--easing-smooth);
+}
+
+.world-transition--old-world.is-dissolving {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+/* New world emerging */
+.world-transition--new-world {
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity var(--world-transition-duration) var(--easing-smooth),
+              transform var(--world-transition-duration) var(--easing-smooth);
+}
+
+.world-transition--new-world.is-emerging {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: ATTRACTION
+   Particles and elements pull toward center, Twin drawn in
+   ============================================================================ */
+
+@keyframes world-attraction-pull {
+  0% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1) translate(-5%, -5%);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.95) translate(0, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes world-attraction-emerge {
+  0% {
+    transform: scale(0.9) translate(5%, 5%);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.02) translate(-1%, -1%);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: PULL
+   Strong directional pull toward new world origin point
+   ============================================================================ */
+
+@keyframes world-pull-directional {
+  0% {
+    transform: translate(0, 0) scale(1);
+    filter: blur(0px);
+  }
+  40% {
+    transform: translate(-8%, -8%) scale(1.05);
+    filter: blur(2px);
+  }
+  100% {
+    transform: translate(0, 0) scale(0.95);
+    filter: blur(0px);
+  }
+}
+
+@keyframes world-pull-reverse {
+  0% {
+    transform: translate(10%, 10%) scale(1.1);
+    filter: blur(4px);
+    opacity: 0;
+  }
+  50% {
+    transform: translate(0%, 0%) scale(1);
+    filter: blur(0px);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    filter: blur(0px);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: ABSORPTION
+   Elements spiral inward, consumed by new world gravity
+   ============================================================================ */
+
+@keyframes world-absorption-spiral-in {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  60% {
+    transform: scale(0.3) rotate(180deg);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes world-absorption-spiral-out {
+  0% {
+    transform: scale(0) rotate(-360deg);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(0.4) rotate(-180deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: DISSOLUTION
+   Soft fade with particle scatter, gentle and calming
+   ============================================================================ */
+
+@keyframes world-dissolution-scatter {
+  0% {
+    opacity: 1;
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(1.05);
+  }
+}
+
+@keyframes world-dissolution-gather {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0px);
+    transform: scale(1);
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: FLOW
+   Elements flow like liquid, smooth horizontal movement
+   ============================================================================ */
+
+@keyframes world-flow-drift-right {
+  0% {
+    transform: translateX(0) skewX(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-15%) skewX(-3deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(-30%) skewX(0deg);
+    opacity: 0;
+  }
+}
+
+@keyframes world-flow-drift-left {
+  0% {
+    transform: translateX(30%) skewX(0deg);
+    opacity: 0;
+  }
+  30% {
+    transform: translateX(10%) skewX(2deg);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(0) skewX(0deg);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: FOLD
+   Space folds like paper, crease appears at center
+   ============================================================================ */
+
+@keyframes world-fold-collapse {
+  0% {
+    transform: perspective(800px) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(800px) rotateY(90deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+@keyframes world-fold-unfold {
+  0% {
+    transform: perspective(800px) rotateY(-90deg) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: perspective(800px) rotateY(0deg) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: TUNNEL
+   Elements rush through a tunnel, depth perception shift
+   ============================================================================ */
+
+@keyframes world-tunnel-rush {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes world-tunnel-emerge {
+  0% {
+    transform: scale(4);
+    opacity: 0;
+  }
+  30% {
+    transform: scale(2.5);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: GRAVITY SHIFT
+   Elements fall/drift in new direction, weight redistribution
+   ============================================================================ */
+
+@keyframes world-gravity-shift-fall {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-20%);
+    opacity: 0;
+  }
+}
+
+@keyframes world-gravity-shift-settle {
+  0% {
+    transform: translateY(20%);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(-2%);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   TRANSITION GRAMMAR: ENVIRONMENTAL WAVE
+   Ripple effect sweeps across viewport
+   ============================================================================ */
+
+@keyframes world-wave-sweep {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes world-wave-ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+  }
+}
+
+/* ============================================================================
+   TWIN REACTION DURING TRANSITIONS
+   Twin responds to world change — stretches, flows, reacts
+   ============================================================================ */
+
+.twin-transition-react {
+  transition: transform var(--world-transition-duration) var(--easing-smooth),
+              filter var(--world-transition-duration) var(--easing-smooth);
+}
+
+/* Attraction reaction — Twin stretches toward new world */
+.twin-transition-react.is-attracted {
+  transform: scaleX(1.08) scaleY(0.95);
+  filter: brightness(1.1);
+}
+
+/* Pull reaction — Twin leans into the pull */
+.twin-transition-react.is-pulled {
+  transform: translateX(-5%) rotate(-2deg);
+}
+
+/* Absorption reaction — Twin compresses then releases */
+.twin-transition-react.is-absorbing {
+  transform: scale(0.92);
+  filter: brightness(1.15) saturate(1.2);
+}
+
+/* Dissolution reaction — Twin softens */
+.twin-transition-react.is-dissolving {
+  transform: scale(1.03);
+  filter: blur(0.5px) brightness(1.05);
+}
+
+/* Flow reaction — Twin ripples */
+.twin-transition-react.is-flowing {
+  transform: skewX(-1deg);
+}
+
+/* Fold reaction — Twin folds slightly */
+.twin-transition-react.is-folding {
+  transform: perspective(600px) rotateY(3deg) scale(0.97);
+}
+
+/* Tunnel reaction — Twin expands outward */
+.twin-transition-react.is-tunneling {
+  transform: scale(1.06);
+  filter: brightness(1.2);
+}
+
+/* Gravity shift — Twin settles in new direction */
+.twin-transition-react.is-gravity-shift {
+  transform: translateY(3%);
+}
+
+/* Environmental wave — Twin pulses */
+.twin-transition-react.is-env-wave {
+  transform: scale(1.04);
+  filter: brightness(1.1);
+}
+
+/* Settle — return to normal after transition */
+.twin-transition-react.is-settled {
+  transform: none;
+  filter: none;
+  transition: transform 600ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              filter 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============================================================================
+   PARTICLE TRANSITION EFFECTS
+   Extra particles spawned during world transitions
+   ============================================================================ */
+
+.transition-particle-field {
+  position: fixed;
+  inset: 0;
+  z-index: 2; /* Above Layer 0, below Layer 1 */
+  pointer-events: none;
+}
+
+.transition-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--world-color, #6366f1);
+  opacity: 0;
+}
+
+/* Particle burst during transition start */
+@keyframes transition-particle-burst {
+  0% {
+    transform: translate(0, 0) scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(var(--burst-x, -50px), var(--burst-y, -50px)) scale(0);
+    opacity: 0;
+  }
+}
+
+/* Particle drift during transition */
+@keyframes transition-particle-drift {
+  0% {
+    opacity: 0.6;
+    transform: translate(0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift-x, 30px), var(--drift-y, -80px));
+  }
+}
+
+/* ============================================================================
+   LIGHTING TRANSITION OVERLAY
+   Brief flash/fade during world switch
+   ============================================================================ */
+
+.lighting-transition-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    var(--transition-flash-color, rgba(99, 102, 241, 0.15)) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity var(--world-transition-duration) var(--easing-smooth);
+}
+
+.lighting-transition-overlay.is-active {
+  opacity: 1;
+  animation: lighting-flash-pulse 800ms ease-out forwards;
+}
+
+@keyframes lighting-flash-pulse {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================================================
+   REDUCED MOTION — disable all transitions for accessibility
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .world-transition--old-world,
+  .world-transition--new-world,
+  .twin-transition-react,
+  .lighting-transition-overlay {
+    transition: none;
+    animation: none;
+  }
+
+  /* Simple crossfade for reduced motion */
+  .world-transition--old-world.is-dissolving {
+    opacity: 0;
+    transform: none;
+    filter: none;
+  }
+
+  .world-transition--new-world.is-emerging {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

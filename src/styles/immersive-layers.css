@@ -1,0 +1,517 @@
+/**
+ * immersive-layers.css — Global Visual Grammar for Living Intelligence App
+ *
+ * Defines the 5-layer visual stack that every immersive screen follows:
+ *
+ *   LAYER 0 — World Environment (background, full-screen)
+ *   LAYER 1 — Twin / Living Organism (center of gravity)
+ *   LAYER 2 — Contextual Effects (particles, light, atmosphere)
+ *   LAYER 3 — Primary Controls (input, send, minimal actions)
+ *   LAYER 4 — Temporary UI (drawers, sheets, overlays, expanded content)
+ *
+ * RULES:
+ *   - Layers compose ON TOP of each other, never wrap each other
+ *   - Layer 0-2: pointer-events: none (Twin can still receive events if needed)
+ *   - Layer 3-4: pointer-events: auto (interactive)
+ *   - All layers use z-index scale: 0, 10, 20, 30, 40
+ *   - Glass/surface tokens define overlay appearance
+ *   - Motion grammar defines how layers respond to state changes
+ */
+
+/* ============================================================================
+   LAYER TOKENS — z-index and depth scale
+   ============================================================================ */
+
+:root {
+  /* Layer z-index order — never change these relative values */
+  --layer-world:         0;    /* WorldEnvironment background        */
+  --layer-twin:          10;   /* Canonical Twin presence             */
+  --layer-contextual:    20;   /* Particles, light, atmosphere        */
+  --layer-primary:       30;   /* Input, send, primary controls       */
+  --layer-temporary:     40;   /* Drawers, sheets, overlays           */
+
+  /* Glass/surface tokens for overlay layers */
+  --glass-bg:            rgba(15, 31, 63, 0.65);
+  --glass-border:        rgba(255, 255, 255, 0.08);
+  --glass-blur:          12px;
+  --glass-surface:       rgba(30, 58, 95, 0.5);
+  --glass-elevated:      rgba(15, 31, 63, 0.85);
+
+  /* Transition durations — consistent across all layers */
+  --transition-fast:     150ms;
+  --transition-base:     300ms;
+  --transition-slow:     500ms;
+  --transition-narrative: 800ms;
+
+  /* Easing — smooth, premium feel */
+  --easing-smooth:       cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-spring:       cubic-bezier(0.34, 1.56, 0.64, 1);
+  --easing-dissolve:     cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/* Dark mode glass adjustments */
+[data-mode="dark"] {
+  --glass-bg:            rgba(15, 31, 63, 0.75);
+  --glass-border:        rgba(165, 180, 252, 0.1);
+  --glass-surface:       rgba(30, 58, 95, 0.65);
+  --glass-elevated:      rgba(15, 31, 63, 0.92);
+}
+
+/* ============================================================================
+   LAYER 0 — WORLD ENVIRONMENT
+   Full-screen background, non-interactive
+   ============================================================================ */
+
+.layer-world {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-world);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Ensure WorldEnvironment fills its container properly */
+.world-environment-container {
+  width: 100%;
+  height: 100%;
+  min-height: 100dvh;
+}
+
+/* ============================================================================
+   LAYER 1 — TWIN PRESENCE
+   Center of gravity — always visible, never compete with UI
+   ============================================================================ */
+
+.layer-twin {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-twin);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Twin container — lower-middle of viewport (not dead center) */
+.twin-presence-wrap {
+  width: min(46vmin, 420px);
+  height: min(46vmin, 420px);
+  transform-origin: center bottom;
+  padding-top: 30vh;
+}
+
+/* Twin visibility during state transitions */
+.twin-presence-wrap.is-fading {
+  opacity: 0;
+  transition: opacity var(--transition-slow) var(--easing-dissolve);
+}
+
+.twin-presence-wrap.is-visible {
+  opacity: 1;
+  transition: opacity var(--transition-base) var(--easing-smooth);
+}
+
+/* Twin interaction response — subtle field effect on cursor proximity */
+.twin-presence-wrap.interactive {
+  pointer-events: auto;
+}
+
+/* ============================================================================
+   LAYER 2 — CONTEXTUAL EFFECTS
+   Particles, light, atmosphere — enhances Twin + World
+   ============================================================================ */
+
+.layer-contextual {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-contextual);
+  pointer-events: none;
+}
+
+/* Ambient glow behind Twin */
+.contextual-glow {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    var(--twin-glow-color, rgba(99, 102, 241, 0.15)) 0%,
+    transparent 60%
+  );
+  animation: contextual-glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes contextual-glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.05); }
+}
+
+/* Particle overlay */
+.contextual-particles {
+  width: 100%;
+  height: 100%;
+  opacity: 0.4;
+}
+
+/* ============================================================================
+   LAYER 3 — PRIMARY CONTROLS
+   Minimal: input, send, essential actions only
+   ============================================================================ */
+
+.layer-primary {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--layer-primary);
+  pointer-events: auto;
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+/* Primary control container — centered, constrained width */
+.primary-controls {
+  max-width: 440px;
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+/* Input styling — premium, not generic chatbot */
+.primary-input {
+  flex: 0 1 auto;
+  width: min(100%, 440px);
+  padding: 14px 16px;
+  font-size: 1.05rem;
+  border: 2px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  color: var(--color-text-primary);
+  outline: none;
+  transition: border-color var(--transition-fast) var(--easing-smooth),
+              box-shadow var(--transition-fast) var(--easing-smooth);
+}
+
+.primary-input:focus {
+  border-color: var(--accent-primary, #6366f1);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.primary-input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.primary-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Send button — prominent, accessible */
+.primary-send-btn {
+  flex-shrink: 0;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 16px;
+  background: var(--accent-primary, #6366f1);
+  color: white;
+  cursor: pointer;
+  transition: opacity var(--transition-fast) var(--easing-smooth),
+              transform var(--transition-fast) var(--easing-spring);
+}
+
+.primary-send-btn:hover {
+  opacity: 0.9;
+}
+
+.primary-send-btn:active {
+  transform: scale(0.96);
+}
+
+.primary-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primary controls auto-hide when not focused */
+.layer-primary.auto-hide .primary-input:not(:focus):not(:hover) {
+  opacity: 0.3;
+  transition: opacity var(--transition-narrative) var(--easing-dissolve);
+}
+
+.layer-primary.auto-hide .primary-input:focus,
+.layer-primary.auto-hide .primary-input:hover {
+  opacity: 1;
+}
+
+/* ============================================================================
+   LAYER 4 — TEMPORARY UI
+   Drawers, sheets, overlays — progressive disclosure
+   ============================================================================ */
+
+.layer-temporary {
+  position: fixed;
+  inset: 0;
+  z-index: var(--layer-temporary);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+/* Drawer — slides up from bottom */
+.immersive-drawer {
+  pointer-events: auto;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--glass-elevated);
+  backdrop-filter: blur(var(--glass-blur));
+  border-top: 1px solid var(--glass-border);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 16px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  transform: translateY(100%);
+  transition: transform var(--transition-narrative) var(--easing-spring);
+}
+
+.immersive-drawer.is-open {
+  transform: translateY(0);
+}
+
+/* Sheet — slides from side (desktop) or bottom (mobile) */
+.immersive-sheet {
+  pointer-events: auto;
+  width: min(360px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--glass-elevated);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  padding: 24px;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  transform: translateX(120%);
+  transition: transform var(--transition-narrative) var(--easing-spring);
+}
+
+@media (max-width: 768px) {
+  .immersive-sheet {
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 80vh;
+    border-radius: 24px 24px 0 0;
+  }
+}
+
+.immersive-sheet.is-open {
+  transform: translateX(0);
+}
+
+/* Overlay — dimmed background */
+.immersive-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--layer-temporary) - 1);
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base) var(--easing-smooth);
+}
+
+.immersive-overlay-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Drawer handle indicator */
+.drawer-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-text-tertiary);
+  margin: 0 auto 16px;
+  opacity: 0.5;
+}
+
+/* Sheet/drawer header */
+.immersive-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.immersive-panel-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.immersive-panel-close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast) var(--easing-smooth);
+}
+
+.immersive-panel-close:hover {
+  background: var(--color-bg-tertiary);
+}
+
+/* ============================================================================
+   IMMERSIVE PAGE WRAPPER
+   Full-screen immersive experience shell
+   ============================================================================ */
+
+.immersive-page {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+/* Content area — sits above Layer 0 but below Layer 3/4 */
+.immersive-content {
+  position: relative;
+  z-index: 25; /* Between Layer 2 and Layer 3 */
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Chat messages area — scrollable, sits between Twin and Primary Controls */
+.immersive-chat-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 16px;
+  padding-bottom: 120px; /* Space for primary controls */
+}
+
+/* Message bubbles — theme-aware, contrast-safe */
+.immersive-message {
+  max-width: 80%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.immersive-message--twin {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+[data-mode="dark"] .immersive-message--twin {
+  background: rgba(99, 102, 241, 0.14);
+  color: #F9FAFB;
+}
+
+.immersive-message--user {
+  background: #4F46E5;
+  color: white;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+/* Small text on dark surfaces — WCAG AA safe */
+.immersive-text-small {
+  font-size: 0.75rem;
+  color: #A5B4FC; /* Fixed: ensures ≥4.5:1 on navy-800/900 */
+}
+
+/* ============================================================================
+   ACCESSIBILITY — respect reduced motion preference
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .contextual-glow,
+  .immersive-drawer,
+  .immersive-sheet,
+  .immersive-overlay-backdrop,
+  .primary-input,
+  .primary-send-btn {
+    transition: none;
+  }
+
+  .immersive-drawer,
+  .immersive-sheet {
+    transform: translateY(0);
+  }
+
+  .immersive-overlay-backdrop.is-open {
+    opacity: 1;
+  }
+}
+
+/* ============================================================================
+   MOBILE OPTIMIZATION (320–430px)
+   ============================================================================ */
+
+@media (max-width: 430px) {
+  .primary-controls {
+    gap: 8px;
+  }
+
+  .primary-input {
+    padding: 12px 14px;
+    font-size: 1rem;
+    border-radius: 14px;
+  }
+
+  .primary-send-btn {
+    padding: 12px 20px;
+    border-radius: 14px;
+  }
+
+  .immersive-chat-area {
+    padding: 0 12px;
+    padding-bottom: 100px;
+  }
+
+  .immersive-message {
+    max-width: 85%;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Very small mobile (320px) */
+@media (max-width: 360px) {
+  .primary-input {
+    padding: 10px 12px;
+    font-size: 0.95rem;
+  }
+
+  .primary-send-btn {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .twin-presence-wrap {
+    width: min(38vmin, 280px);
+    height: min(38vmin, 280px);
+  }
+}

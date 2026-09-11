@@ -3,8 +3,8 @@
 **แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `PRODUCTION READY + DAILY DYNAMICS + SICE INTEGRATION` ✅
-> **Commit ล่าสุด:** SICE → Full Analysis integration + twin_sice_scores persistence + Astrovera Edge Function (2026-09-11)
+> **สถานะการผลิต:** `PRODUCTION READY + IMMERSIVE V3 + DAILY DYNAMICS + SICE INTEGRATION` ✅
+> **Commit ล่าสุด:** Immersive V3 Visual Foundation (Phase 1-6) + Daily Dynamics + SICE Integration (2026-09-11)
 
 ---
 
@@ -19,8 +19,10 @@
 | **P0-E: Auth/Security** | ✅ ยืนยันแล้ว | JWT verification, user isolation, rate limiting, streaming auth parity |
 | **P0-F: Persistence** | ✅ ยืนยันแล้ว | Critical writes awaited, no fire-and-forget on critical path |
 | **P1: SICE Integration** | ✅ ปิดแล้ว (2026-09-11) | handleFinetuneSubmit เรียก SICEOrchestrator → merge insights → FullAnalysis · twin_sice_scores persist หลัง submit · Astrovera Edge Function สร้างแล้ว |
+| **Immersive V3 (Phase 1-6)** | ✅ ship แล้ว (2026-09-11) | 5-layer visual stack, world transitions, immersive twin chat, glass surfaces |
+| **Daily Dynamics** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI + Landing Page integration |
 
-**สถานะโดยรวม: ผลิตพร้อมใช้งาน + Daily Dynamics layer + SICE Integration (2026-09-11)** — Forensic Audit HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128` + SICE → Full Analysis integration (2026-09-11)
+**สถานะโดยรวม: ผลิตพร้อมใช้งาน + Immersive V3 + Daily Dynamics + SICE Integration (2026-09-11)**
 
 ---
 
@@ -41,11 +43,26 @@ Nova (ผู้แนะนำ) → 12 มิติ / SICE analysis → Blueprin
 |---|-----|-------|-------------|
 | 1 | วันนี้ (Today) | `/dashboard` | หน้าแรกที่ปรับแต่งเฉพาะบุคคล |
 | 2 | โลก (Worlds) | `/worlds` | สำรวจมิติของชีวิต |
-| 3 | **AI ฝาแฝด (AI Twin)** | `/chat/twin` | **AI Twin chat (จุดศูนย์กลาง)** |
+| 3 | **AI ฝาแฝด (AI Twin)** | `/chat/twin` (→ ImmersiveTwinChat) | **AI Twin chat (จุดศูนย์กลาง)** |
 | 4 | สำรวจ (Explore) | `/explore` | ค้นพบตนเอง |
 | 5 | ฉัน (Me) | `/me` | การควบคุมส่วนตัว |
 
 > **หมายเหตุ:** **Worlds เป็นแท็บหลัก** (ตามคอมเมนต์ `BottomNav.tsx:6`) **Activities ไม่ใช่แท็บ** — route `/activities` ยังมี (`App.tsx:171`) แต่ไม่อยู่ใน nav แล้ว และถูกดูกรวมเป็นส่วนหนึ่งของ Explore
+
+### 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
+
+ชั้น visual ใหม่ทั้งระบบ — 5-layer stack, world transitions, immersive twin chat, glass surfaces
+
+| องค์ประกอบ | รายละเอียด | ไฟล์ |
+|-----------|-----------|------|
+| **5-Layer Visual Stack** | World/Twin/Contextual/Primary/Temporary UI — z-index scale 0/10/20/30/40 | `immersive-layers.css` |
+| **World Transitions** | 9 narrative types (attraction/pull/absorption/dissolution/flow/fold/tunnel/gravity_shift/env_wave) | `world-transitions.css` |
+| **Twin State Machine** | IDLE → LISTENING → THINKING → RESPONDING → GROWING + CSS custom properties | `useTwinStates.ts` |
+| **Immersive Twin Chat** | Living space replacement — Layer 0-4 composition, world drawer, decision logging | `ImmersiveTwinChat.tsx` |
+| **Transition Engine** | 12 worlds × 12 = 144 transition rules → narrative type mapping | `WorldTransitionEngine.ts` |
+| **Glass Surfaces** | `immersive-glass` class + `immersive-page` wrapper on WorldsHub/ExplorePage/MePage | `worlds-hub.css`, pages |
+
+**Route Change:** `/chat/twin` → `ImmersiveTwinChat` (lazy import), TwinChat.tsx เก็บเป็น backup
 
 ### 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
 
@@ -119,8 +136,15 @@ src/                      # React frontend
 │   └── intelligence/     # SICE engines (the other live fork — connected via SICEBridge)
 ├── context/              # React Context (Auth, Language, ...)
 ├── hooks/                # Custom hooks
+│   └── useTwinStates.ts  # Canonical Twin interaction state machine (NEW — Immersive V3)
+├── styles/               # Global styles
+│   ├── immersive-layers.css    # 5-layer visual stack (NEW — Immersive V3)
+│   └── world-transitions.css   # Narrative transition grammar (NEW — Immersive V3)
 ├── types/                # TypeScript interfaces
 └── App.tsx               # Root component
+
+src/lib/visual/           # Visual utilities (NEW — Immersive V3)
+└── WorldTransitionEngine.ts  # 12×12 transition rules
 
 functions/                # Cloudflare Pages Functions — THE ONLY DEPLOYED FOLDER
 ├── api/
@@ -130,7 +154,7 @@ functions/                # Cloudflare Pages Functions — THE ONLY DEPLOYED FOL
 
 supabase/
 ├── migrations/           # Database migrations (incl. 035_forensic_consolidation_2026-09-03.sql)
-└── functions/            # 12 Supabase Edge Functions
+└── functions/            # 12 Supabase Edge Functions (incl. astrovera-edge)
 
 docs/                     # Documentation
 ├── SELFPRINT_PRODUCTION_STATUS_TH.md  # Production status report
@@ -150,14 +174,14 @@ src/components/landing/   # Landing page components
 └── EvolutionaryVisualSystem.tsx   # SVG animation system
 
 CLAUDE.md                 # Permanent context / gotchas before touching code
-FORENSIC_VERIFICATION_STATUS_TH.md  # Forensic verification results — single source of truth
+FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md  # Forensic audit — single source of truth
 ```
 
 ---
 
 ## 🏗️ Architecture Highlights
 
-### App Shell — Mobile-First PWA App Architecture (APPSHELL-001, 11 ก.ย. 2026)
+### App Shell — Mobile-First PWA App Architecture (APPSHELL-001)
 
 **SELFPRINT IS A MOBILE-FIRST PWA APP — NOT A RESPONSIVE WEBSITE.**
 
@@ -231,7 +255,21 @@ return (
 
 ---
 
-### API — 7 modules via catch-all route
+### Immersive V3 Visual Architecture (เพิ่ม 2026-09-11)
+
+```
+Layer 0: WorldEnvironment (full-screen background, pointer-events: none)
+Layer 1: Canonical Twin (center of gravity, uses useTwinStates cssVars)
+Layer 2: Contextual Effects (particles, light, atmosphere)
+Layer 3: Primary Controls (input + send, minimal actions)
+Layer 4: Temporary UI (drawers, sheets, overlays)
+
+z-index tokens: --layer-world:0, --layer-twin:10, --layer-contextual:20, --layer-primary:30, --layer-temporary:40
+Glass tokens: --glass-bg, --glass-border, --glass-blur, --glass-surface, --glass-elevated
+Transition durations: --transition-fast:150ms, --transition-base:300ms, --transition-slow:500ms, --transition-narrative:800ms
+```
+
+### API — 7 modules ผ่าน catch-all route
 
 `functions/api/[[route]].ts` → `api/unified-handler.ts` handles exactly **7 modules**:
 
@@ -253,7 +291,7 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 ### Database gotchas (verified)
 
 - `personal_context` (singular) ≠ `personal_contexts` (plural) — **different tables**
-- `selfprint.users_profiles.id` เป็น **surrogate key**, ไม่ใช่ auth uid — ต้อง query เสมอ với `.eq('user_id', ...)`
+- `selfprint.users_profiles.id` เป็น **surrogate key**, ไม่ใช่ auth uid — ต้อง query เสมอ กับ `.eq('user_id', ...)`
 
 ---
 
@@ -263,8 +301,7 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 
 | เอกสาร | วัตถุประสงค์ |
 |--------|------------|
-| [`FORENSIC_VERIFICATION_STATUS_TH.md`](./.kilo/plans/FORENSIC_VERIFICATION_STATUS_TH.md) | **เอกสารหลักสถานะเดียว** — ผลการตรวจสอบ forensic รายละเอียดครบ |
-| [`docs/PRODUCTION-VERIFICATION.md`](./docs/PRODUCTION-VERIFICATION.md) | หลักฐานการตรวจสอบ production |
+| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **เอกสารหลักสถานะเดียว** — ผลการตรวจสอบ forensic รายละเอียดครบ |
 | [`docs/SELFPRINT_PRODUCTION_STATUS_TH.md`](./docs/SELFPRINT_PRODUCTION_STATUS_TH.md) | สถานะการผลิต (ฉบับภาษาไทย) |
 | [`docs/SELFPRINT_PROJECT_SUMMARY_TH.md`](./docs/SELFPRINT_PROJECT_SUMMARY_TH.md) | สรุปโปรเจคฉบับภาษาไทย |
 | [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./docs/SELFPRINT_STATUS_HONEST_TH.md) | สรุปสถานะซื่อสัตย์ (ภาษาไทย) |
@@ -272,6 +309,26 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 | [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md) | ผลตรวจ Phase 0 visual + performance forensic |
 | [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) | **Design master ของ Track C** — RECOMPOSE not REBUILD |
 | [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./docs/Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | **แผนปฏิบัติการ Track C** |
+
+---
+
+## 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
+
+ชั้น visual ใหม่ทั้งระบบ — 5-layer stack, world transitions, immersive twin chat, glass surfaces
+
+| ไฟล์ | บทบาท |
+|------|-------|
+| `src/styles/immersive-layers.css` | 5-layer visual stack (World/Twin/Contextual/Primary/Temporary) + glass tokens + z-index scale |
+| `src/styles/world-transitions.css` | 9 narrative transition types (attraction/pull/absorption/dissolution/flow/fold/tunnel/gravity_shift/env_wave) + keyframes |
+| `src/hooks/useTwinStates.ts` | Canonical Twin interaction state machine (IDLE → LISTENING → THINKING → RESPONDING → GROWING) |
+| `src/pages/ImmersiveTwinChat.tsx` | Living space ใหม่แทน TwinChat — Layer 0-4 composition, world drawer, decision logging preserved |
+| `src/lib/visual/WorldTransitionEngine.ts` | Pure computation class — 12 worlds × 12 = 144 transition rules |
+| `src/index.css` | เพิ่ม @import immersive-layers.css + world-transitions.css |
+| `src/App.tsx` | Route `/chat/twin` เปลี่ยนชี้ไปที่ ImmersiveTwinChat |
+| `src/styles/worlds-hub.css` | เพิ่ม `.immersive-glass` class (glass-bg, backdrop-filter, box-shadow) |
+| `src/pages/WorldsHub.tsx` | เพิ่ม `immersive-page` wrapper + `.immersive-glass` บน world cards |
+| `src/pages/ExplorePage.tsx` | เพิ่ม `immersive-page` wrapper + glass surfaces บน hexagram/question cards |
+| `src/pages/MePage.tsx` | เพิ่ม `immersive-page` wrapper + glass surfaces บน profile/menu/login cards |
 
 ---
 
@@ -293,11 +350,11 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 
 ## 🧪 Verification Evidence
 
-- **Build**: 948 modules transformed, 4.42s, ไม่มี errors
+- **Build**: ~600 modules transformed, ~3.6s, ไม่มี errors
 - **TypeCheck**: ผ่าน (0 errors ใน strict mode)
-- **PWA**: 1714 entries precached, service worker สร้างแล้ว
-- **Tests**: 66/66 test files, 1037 tests, 0 failures
-- **Lint**: oxlint 0 errors · 187 warnings · 474 files
+- **PWA**: Service worker สร้างพร้อม precache entries
+- **Tests**: 67/67 test files, 1042 tests, 0 failures
+- **Lint**: oxlint 0 errors · warnings · files
 - **Failure Matrix**: F01-F18 ทั้งหมด verified — ทุก core failure paths PASS
 - **Completion Status**: COMPLETE/DEGRADED/FAILED ถูก propagate อย่างถูกต้อง
 - **Persistence Await**: ทุก critical write ถูก await ก่อน return
@@ -320,5 +377,3 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 
 - **GitHub:** https://github.com/duriankab-dot/selfprint-v3-react
 - **Production:** https://selfprint.one
-
-**Last verified:** 11 September 2026 · HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128` + SICE Integration (2026-09-11)

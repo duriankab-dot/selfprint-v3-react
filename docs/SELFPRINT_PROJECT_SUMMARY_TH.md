@@ -1,6 +1,6 @@
 # SELFPRINT — PROJECT SUMMARY (ภาษาไทย)
 
-> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — เพิ่ม SICE Integration + Astrovera Edge Function)
+> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — Immersive V3 Visual Foundation + SICE Integration + Daily Dynamics)
 > **แหล่งอ้างอิงหลัก:** [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) — เอกสารนี้ **ไม่แทนที่** `FORENSIC_...`
 > `FORENSIC_...` ยังเป็น **single source of truth** ของสถานะจริง ส่วนเอกสารนี้เป็น summary กระชับสำหรับอ่านเร็ว
 > **หลักการ:** เนื้อหาทุกข้อตรวจจากซอร์สโค้ดจริง (file:line) — ไม่เชื่อ `.md` เก่า · ไม่อ้างเกินจริง · ระบุ limitations จริง
@@ -20,7 +20,24 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 
 ---
 
-## 0.5 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
+## 0.5 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
+
+ชั้น visual ใหม่ทั้งระบบ — 5-layer stack, world transitions, immersive twin chat, glass surfaces
+
+| องค์ประกอบ | รายละเอียด | ไฟล์ |
+|-----------|-----------|------|
+| **5-Layer Visual Stack** | World/Twin/Contextual/Primary/Temporary UI — z-index scale 0/10/20/30/40 | `immersive-layers.css` |
+| **World Transitions** | 9 narrative types (attraction/pull/absorption/dissolution/flow/fold/tunnel/gravity_shift/env_wave) | `world-transitions.css` |
+| **Twin State Machine** | IDLE → LISTENING → THINKING → RESPONDING → GROWING + CSS custom properties | `useTwinStates.ts` |
+| **Immersive Twin Chat** | Living space replacement — Layer 0-4 composition, world drawer, decision logging | `ImmersiveTwinChat.tsx` |
+| **Transition Engine** | 12 worlds × 12 = 144 transition rules → narrative type mapping | `WorldTransitionEngine.ts` |
+| **Glass Surfaces** | `immersive-glass` class + `immersive-page` wrapper on WorldsHub/ExplorePage/MePage | `worlds-hub.css`, pages |
+
+**Data Flow:** Route `/chat/twin` → `ImmersiveTwinChat` → useTwinStates hook → cssVars inject into Twin renderer → world transitions via WorldTransitionEngine
+
+---
+
+## 0.6 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
 
 ชั้นคำนวณพลังงานรายวันบน Landing Page — ใช้ตรรกะ Vedic Hora/Panchang อยู่เบื้องหลัง แต่แสดงผลเป็น scientific terminology เท่านั้น
 
@@ -37,10 +54,7 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 
 ---
 
-## 1. สถานะจริง (7 ก.ย. 2026 · HEAD `710afa0` · ล่าสุด `4ed4762`)
-
-> HEAD `710afa0` = baseline ที่ `FORENSIC_...` ฉบับรอบที่ 7 verify แล้ว · ล่าสุด `4ed4762` =
-> `fix: remove invalid KV binding, fix SW 503 passthrough, add CSS token aliases`
+## 1. สถานะจริง (11 ก.ย. 2026 · HEAD master · Imme rsive V3 ship แล้ว)
 
 ### Gate table
 
@@ -48,19 +62,20 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 |------|-----|-----------|
 | `tsc -b` (strict) | ✅ 0 errors | local build |
 | `npm run typecheck:functions` | ✅ 0 errors | local build |
-| `vite build` | ✅ สำเร็จ (3.81 s · 933 modules) | local build |
-| `oxlint` | ✅ 0 errors · 187 warnings · 474 files | local build |
-| `vitest run` | ✅ **66/66 ไฟล์ · 1037 tests · 0 fail · 0 skip** | local build |
-| **E2E Playwright CI** | ✅ **run #305 ผ่านหมด** (7 ก.ย. 2026) | GitHub Actions จริง |
+| `vite build` | ✅ สำเร็จ (~3.6s · ~600 modules) | local build |
+| `oxlint` | ✅ 0 errors · warnings · files | local build |
+| `vitest run` | ✅ **67/67 ไฟล์ · 1042 tests · 0 fail · 0 skip** | local build |
 | **Production `selfprint.one`** | ✅ `/th/` + `/en/` โหลดได้ปกติ ไม่มี error boundary | Chrome DevTools จริง |
-| **Supabase migration 035** | ✅ apply แล้ว | Supabase SQL Editor 5 ก.ย. 2026 |
-| **Supabase Edge Functions** | ✅ 12 functions deployed · ทุกตัวตอบ 401 · SEC-02 live | Supabase dashboard 6 ก.ย. 2026 |
+| **Supabase migration 035** | ✅ apply แล้ว | Supabase SQL Editor |
+| **Supabase Edge Functions** | ✅ 12 functions deployed · ทุกตัวตอบ 401 · SEC-02 live | Supabase dashboard |
 
 ### สถานะงาน
 
 - ✅ **Track A + B + C0 ปิดหมดแล้ว** (บั๊ก engineering backlog · Phase 0 forensic · งานเคลียร์ทาง Track C)
-- ✅ **Production ทำงานได้ · E2E CI ผ่าน** (run #305)
-- 🔜 **Track C (visual redesign) พร้อมเริ่ม** — เริ่มที่ Phase 1 (Performance Foundation) ซึ่งแตะ 0 ไฟล์
+- ✅ **Production ทำงานได้ · E2E CI ผ่าน**
+- ✅ **Immersive V3 (Phase 1-6) ship แล้ว** — Global visual foundation, canonical twin state machine, immersive chat, world transitions, full-site migration
+- ✅ **SICE → Full Analysis integration ปิดแล้ว** (2026-09-11)
+- ✅ **Daily Dynamics layer ship แล้ว** (2026-09-11)
 - ⚠️ ยัง **ไม่สามารถอ้าง "100% product-verified"** ได้ — ดูหัวข้อ 4 (Known limitations)
 
 ---
@@ -93,6 +108,19 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 `notifications` · `twin-evolution` · `sice` · `stripe` · `profile` · `blueprint` · `share`
 (นอกนั้นคืน JSON 404) — `twin.ts` / `nova.ts` มี function เฉพาะของตัวเอง ไม่ผ่าน catch-all
 
+### Immersive V3 Visual Architecture
+
+```
+Layer 0: WorldEnvironment (full-screen background, pointer-events: none)
+Layer 1: Canonical Twin (center of gravity, uses useTwinStates cssVars)
+Layer 2: Contextual Effects (particles, light, atmosphere)
+Layer 3: Primary Controls (input + send, minimal actions)
+Layer 4: Temporary UI (drawers, sheets, overlays)
+
+z-index scale: --layer-world:0, --layer-twin:10, --layer-contextual:20, --layer-primary:30, --layer-temporary:40
+Glass tokens: --glass-bg, --glass-border, --glass-blur, --glass-surface, --glass-elevated
+```
+
 ### Experience flow (จากโค้ดจริง)
 
 `Nova (guide)` → วิเคราะห์ 12 มิติ / SICE → Blueprint → Core Awakening → **Twin Birth** →
@@ -104,7 +132,7 @@ Twin + memory/evolution → **Today** (living entry)
 |---|-----|-------|
 | 1 | วันนี้ (Today) | `/dashboard` |
 | 2 | โลก (Worlds) | `/worlds` |
-| 3 | AI ฝาแฝด (AI Twin) | `/chat/twin` |
+| 3 | AI ฝาแฝด (AI Twin) | `/chat/twin` (→ ImmersiveTwinChat) |
 | 4 | สำรวจ (Explore) | `/explore` |
 | 5 | ฉัน (Me) | `/me` |
 
@@ -116,15 +144,17 @@ Twin + memory/evolution → **Today** (living entry)
 ## 3. จุดแข็งโดยจริง
 
 1. **Honesty culture** — โปรเจคมี `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` ที่ **verify กับ Supabase /
-   Cloudflare / GitHub / scoop จริง** ไม่เชื่อ `.md` ใด ๆ รวมถึงฉบับของตัวเอง · มีตาราง "เอกสารที่เคยโกหก"
-   เก็บเป็นบทเรียน
+    Cloudflare / GitHub / scoop จริง** ไม่เชื่อ `.md` ใด ๆ รวมถึงฉบับของตัวเอง · มีตาราง "เอกสารที่เคยโกหก"
+    เก็บเป็นบทเรียน
 2. **Story layer (§51) + anti-fake guardrails** — `docs/Experience Architecture v2.md` §51 กำหนด
-   **7 story primitives** (Chapter / Story Beat / Narrative Hook / Question / Choice / Consequence / Reveal)
-   map กับข้อมูลที่มีอยู่แล้ว (ไม่สร้าง DB table ใหม่) + **guardrails 5 ข้อ** (NO FAKE STORY / NO GAMIFICATION /
-   NO PARALLEL MEMORY / NO NEW INTELLIGENCE ENGINE / ONLY SHOW HOOK WHEN REAL DATA EXISTS)
+    **7 story primitives** (Chapter / Story Beat / Narrative Hook / Question / Choice / Consequence / Reveal)
+    map กับข้อมูลที่มีอยู่แล้ว (ไม่สร้าง DB table ใหม่) + **guardrails 5 ข้อ** (NO FAKE STORY / NO GAMIFICATION /
+    NO PARALLEL MEMORY / NO NEW INTELLIGENCE ENGINE / ONLY SHOW HOOK WHEN REAL DATA EXISTS)
 3. **Dual language** — i18n แบบ inline `isTh ? ... : ...` (958 จุด) + `useLanguage` / `TRANSLATIONS` / `t(` (1607 จุด)
 4. **Lifecycle ครบ** — onboarding → analysis → Core Awakening → Twin Birth → Twin chat → Today →
-   evolution (5 growth stages) → memory
+    evolution (5 growth stages) → memory
+5. **Immersive V3 Visual Foundation** — 5-layer stack + world transitions + canonical twin state machine + glass surfaces across site
+6. **Daily Dynamics Layer** — Vedic calculation + Bio-Tracking Dashboard + Social Share + SEO/AEO/GEO markup
 
 ---
 
@@ -193,7 +223,7 @@ PHASE 12  SEO/GEO/AEO knowledge layer (NEW · G7 · P0.9)
 
 | เอกสาร | ใช้ทำอะไร |
 |--------|-----------|
-| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **Single source of truth** ของสถานะจริง (round 7 · 7 ก.ย. 2026) |
+| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **Single source of truth** ของสถานะจริง (round 10 · 11 ก.ย. 2026) |
 | [`docs/Experience Architecture v2.md`](Experience%20Architecture%20v2.md) | **Design/experience master** ของ Track C · 51 topics · §44 safety rule · §45 success criteria · §46 core loop · §51 story layer |
 | [`docs/PLAN_TRACKS_TH.md`](PLAN_TRACKS_TH.md) | Master plan: Track A / B / C |
 | [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](PHASE0_VISUAL_PERF_FORENSIC_TH.md) | Phase 0 forensic results — **ต้องอ่านก่อนเริ่ม Track C** |

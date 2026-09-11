@@ -482,7 +482,7 @@ export default function ExplorePage() {
 
   return (
     <AppShell>
-      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
+      <div className="page-content immersive-page" style={{ maxWidth: 480, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{
@@ -507,12 +507,14 @@ export default function ExplorePage() {
 
         {/* Hexagram Result */}
         {hexRevealed && hexagram && (
-          <div style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
+          <div className="immersive-glass" style={{
+            background: 'var(--glass-bg, var(--color-bg-secondary))',
+            border: '1px solid var(--glass-border, var(--color-border))',
             borderRadius: 20,
             padding: 24,
             marginBottom: 20,
+            backdropFilter: 'blur(var(--glass-blur, 12px))',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
           }}>
             <div style={{ textAlign: 'center', marginBottom: 4 }}>
               {/* Pattern ID badge แทน ☯ emoji */}
@@ -621,12 +623,14 @@ export default function ExplorePage() {
 
         {/* Question Reflection */}
         {questionOpen && todayQuestion && (
-          <div style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
+          <div className="immersive-glass" style={{
+            background: 'var(--glass-bg, var(--color-bg-secondary))',
+            border: '1px solid var(--glass-border, var(--color-border))',
             borderRadius: 20,
             padding: 24,
             marginBottom: 20,
+            backdropFilter: 'blur(var(--glass-blur, 12px))',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
           }}>
             <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
               {isTh ? 'คำถามประจำวัน' : "Today's question"}

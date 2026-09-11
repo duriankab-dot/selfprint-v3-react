@@ -210,17 +210,19 @@ export default function MePage() {
 
   return (
     <AppShell>
-      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
+      <div className="page-content immersive-page" style={{ maxWidth: 480, margin: '0 auto' }}>
         {/* Profile Card */}
-        <div style={{
-          background: 'var(--color-bg-secondary)',
-          border: '1px solid var(--color-border)',
+        <div className="immersive-glass" style={{
+          background: 'var(--glass-bg, var(--color-bg-secondary))',
+          border: '1px solid var(--glass-border, var(--color-border))',
           borderRadius: 20,
           padding: '24px 20px',
           marginBottom: 24,
           display: 'flex',
           alignItems: 'center',
           gap: 16,
+          backdropFilter: 'blur(var(--glass-blur, 12px))',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}>
           {/* Avatar */}
           <div style={{
@@ -280,13 +282,15 @@ export default function MePage() {
 
         {/* Not logged in state */}
         {!user && (
-          <div style={{
-            background: 'var(--color-bg-secondary)',
-            border: '1px solid var(--color-border)',
+          <div className="immersive-glass" style={{
+            background: 'var(--glass-bg, var(--color-bg-secondary))',
+            border: '1px solid var(--glass-border, var(--color-border))',
             borderRadius: 16,
             padding: '20px',
             textAlign: 'center',
             marginBottom: 24,
+            backdropFilter: 'blur(var(--glass-blur, 12px))',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
           }}>
             <p style={{
               fontSize: 14,
@@ -329,11 +333,13 @@ export default function MePage() {
               {section.title}
             </h2>
 
-            <div style={{
-              background: 'var(--color-bg-secondary)',
-              border: '1px solid var(--color-border)',
+            <div className="immersive-glass" style={{
+              background: 'var(--glass-bg, var(--color-bg-secondary))',
+              border: '1px solid var(--glass-border, var(--color-border))',
               borderRadius: 16,
               overflow: 'hidden',
+              backdropFilter: 'blur(var(--glass-blur, 12px))',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
             }}>
               {section.items.map((item, idx) => (
                 <button

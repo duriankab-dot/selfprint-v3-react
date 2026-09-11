@@ -58,7 +58,7 @@ export default function WorldsHub() {
         />
       )}
       <AppShell>
-      <div className="worlds-hub page-content" data-testid="worlds-container">
+      <div className="worlds-hub immersive-page page-content" data-testid="worlds-container">
         {/* Header */}
         <div className="wh-header">
           {/* TWINGUIDE-001 (Track C Phase 9, G1 / §4.5 / §13): the subtitle
@@ -126,7 +126,7 @@ interface WorldCardProps {
 function WorldCard({ world, isTh, onClick, articleCount }: WorldCardProps) {
   return (
     <div
-      className="world-card"
+      className="world-card immersive-glass"
       data-testid="world-tile"
       onClick={onClick}
       role="button"

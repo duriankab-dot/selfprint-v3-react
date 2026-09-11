@@ -3,6 +3,10 @@
 @import url('./styles/hub-themes.css');
 @import url('./styles/mood-themes.css');
 
+/* Global Visual Foundation — Living Intelligence App */
+@import url('./styles/immersive-layers.css');
+@import url('./styles/world-transitions.css');
+
 /* Then Tailwind (so CSS vars are available) */
 @tailwind base;
 @tailwind components;

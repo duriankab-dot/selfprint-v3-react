@@ -153,6 +153,19 @@
   position: relative;
 }
 
+/* Immersive V3: glass surface overlay for world cards */
+.immersive-glass {
+  background: var(--glass-bg, rgba(15, 31, 63, 0.65));
+  backdrop-filter: blur(var(--glass-blur, 12px));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.08));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.immersive-glass:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border-color: var(--glass-border, rgba(165, 180, 252, 0.15));
+}
+
 .world-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(167, 139, 250, 0.2);

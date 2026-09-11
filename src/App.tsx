@@ -113,7 +113,7 @@ const Share = lazy(() => import('./pages/Share'));
 const FeatureMenu = lazy(() => import('./pages/FeatureMenu'));
 const CoreAwakening = lazy(() => import('./pages/CoreAwakening'));
 const NovaChat = lazy(() => import('./pages/NovaChat'));
-const TwinChat = lazy(() => import('./pages/TwinChat'));
+const TwinChat = lazy(() => import('./pages/ImmersiveTwinChat'));
 const TwinSettingsPage = lazy(() => import('./pages/TwinSettingsPage'));
 const TwinPersonalityPage = lazy(() => import('./pages/TwinPersonalityPage'));
 const DailyBriefPage = lazy(() => import('./pages/DailyBriefPage'));

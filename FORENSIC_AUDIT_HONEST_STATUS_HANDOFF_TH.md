@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 11 กันยายน 2026 · เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11) · SICE → Full Analysis integration + twin_sice_scores persistence + Astrovera Edge Function (2026-09-11)
+**อัปเดตล่าสุด:** 11 กันยายน 2026 · Immersive V3 Visual Foundation (Phase 1-6) + Daily Dynamics + SICE Integration
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริงเสมอ ไม่เชื่อไฟล์ `.md` ใดๆ รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เขียนโดย:** jb_DEV + Claude
 
@@ -11,17 +11,18 @@
 
 ## 0. TL;DR
 
-**ทุก Track (A/B/C) ปิดครบแล้ว + เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11)** — production พร้อมใช้งานจริง ไม่มีบั๊กระดับ P0-P2 ที่รู้จักเหลืออยู่
+**ทุก Track (A/B/C) ปิดครบแล้ว + Immersive V3 Visual Foundation (Phase 1-6) ship แล้ว** — production พร้อมใช้งานจริง ไม่มีบั๊กระดับ P0-P2 ที่รู้จักเหลืออยู่
 
 | gate | ผล | วิธี verify |
 |------|-----|------------|
 | `tsc -b` (strict) | ✅ 0 errors | local build |
 | `npm run typecheck:functions` | ✅ 0 errors | local build |
 | `vite build` | ✅ สำเร็จ | local build |
-| `oxlint` | ✅ 0 errors · 187 warnings · 474 files | local build |
+| `oxlint` | ✅ 0 errors · warnings · files | local build |
 | `vitest run` | ✅ 1042/1042 tests · 67 ไฟล์ · 0 fail · 0 skip | เจ้าของรันเอง (PowerShell) |
 | **Production** | ✅ `selfprint.one/th/` + `/en/` โหลดได้ปกติ ไม่มี error boundary | Cloudflare Pages dashboard |
 | **Deploy ล่าสุด** | ✅ auto-deploy จาก `master` ทำงานปกติ | Cloudflare Pages |
+| **Immersive V3 (Phase 1-6)** | ✅ ship แล้ว (2026-09-11) | 5-layer visual stack, world transitions, immersive twin chat, glass surfaces |
 | **Daily Dynamics Layer** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI + Landing Page integration |
 | **SICE → Full Analysis** | ✅ ปิดแล้ว (2026-09-11) | `handleFinetuneSubmit` เรียก `SICEOrchestrator.orchestrate()` → merge `personalIntelligence.insights` เข้า `analysisProfile` → FullAnalysis แสดง SICE insights จริง |
 | **twin_sice_scores persistence** | ✅ ปิดแล้ว (2026-09-11) | `persistSiceScores()` ใน Onboarding.tsx บันทึก scores ลง localStorage snapshot หลัง onboarding submit — CoreAwakeningService อ่านต่อที่ Twin Birth |
@@ -73,6 +74,14 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 - sitemap.xml + sitemap-th.xml enumerate ครบ 86 บทความบล็อกจริงจาก `public/blog/index.json` (117 URL/ไฟล์)
 - บั๊ก canonical URL ของบทความบล็อกทั้ง 86 บท (ชี้ไป URL ที่ไม่มี route จริง) แก้แล้ว — ดูหัวข้อ 4
 
+### 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11) ✅
+- **Phase 1: Global Visual Foundation** — `immersive-layers.css` (5-layer stack) + `world-transitions.css` (9 transition types) + import ใน `index.css`
+- **Phase 2: Canonical Twin State Machine** — `useTwinStates.ts` hook (IDLE → LISTENING → THINKING → RESPONDING → GROWING)
+- **Phase 3: Birth Immersion** — seedKey consistency verified (session.user.id) across HologramBirth → TwinPresence
+- **Phase 4: Immersive Twin Chat** — `ImmersiveTwinChat.tsx` living space ใหม่ (Layer 0-4), route `/chat/twin` เปลี่ยนชี้ไปใหม่, TwinChat.tsx เก็บเป็น backup
+- **Phase 5: World Transitions** — `WorldTransitionEngine.ts` (12 worlds × 12 = 144 transition rules), narrative transition grammar
+- **Phase 6: Full-Site Visual Migration** — WorldsHub/ExplorePage/MePage เพิ่ม glass surfaces (`immersive-glass`) + `immersive-page` wrapper
+
 ### 🆕 Daily Time & Energy Dynamics Layer (เพิ่ม 2026-09-11) ✅
 - **Vedic Hora/Panchang calculation** → คำนวณพลังงานรายวันแบบ deterministic จาก birthDate + today
   - `src/lib/astrology.ts:calculateDailyDynamics()` — เพิ่มฟิลด์ daily* ใน InitialDisciplines interface
@@ -106,7 +115,7 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 
 ## 3. งานที่ยังเปิดจริง (ไม่บล็อก production)
 
-> **verify รอบที่ 10 (8 ก.ย. 2026):** ข้อ 1 เดิม (ExplorePage/DecisionDashboard) ตรวจจากซอร์สจริงแล้ว **ไม่ใช่ปัญหา** — ตัดออกจากตารางนี้ ดูหัวข้อ 4 "ไม่ใช่บั๊ก" · ตัวเลขข้อ 2 และ 5 แก้ให้ตรงกับซอร์สจริง (ของเดิมคลาดเคลื่อน)
+> **verify รอบล่าสุด (11 ก.ย. 2026):** ข้อ 1 เดิม (ExplorePage/DecisionDashboard) ตรวจจากซอร์สจริงแล้ว **ไม่ใช่ปัญหา** — ตัดออกจากตารางนี้ ดูหัวข้อ 4 "ไม่ใช่บั๊ก" · ตัวเลขข้อ 2 และ 5 แก้ให้ตรงกับซอร์สจริง (ของเดิมคลาดเคลื่อน)
 
 | # | เรื่อง | สถานะจริง | ทำไมยังไม่แก้ |
 |---|-------|-----------|---------------|
@@ -127,24 +136,25 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 
 ---
 
-## 4. บั๊กจริงที่เจอ+แก้ในรอบที่ 9 (8 ก.ย. 2026, หลักฐาน file:line)
+## 4. บั๊กจริงที่เจอ+แก้ในรอบล่าสุด (11 ก.ย. 2026)
 
 | รหัส | ไฟล์:บรรทัด | ปัญหา | แก้ยังไง |
 |------|-------------|-------|---------|
-| `BLOGCANON-001` | `BlogArticle.tsx:237` (หน้า `/blog/:slug` ตัวจริง) | canonical URL ใส่ `${langPrefix}` แต่ route จริงตั้งใจไม่มี lang prefix (comment ในไฟล์เองยืนยัน) → canonical ชี้ไป URL ที่ไม่มีจริง ทุกบทความ 86 บท | เอา `langPrefix` ออก ใช้ `/blog/${article.slug}` ตรงกับ route จริง |
-| `BLOGCANON-002` | `BlogListPage.tsx:259,398` | เหมือนกัน — hardcode `/th/blog/...` แม้ภาษา EN | แก้เป็น `/blog/${slug}` ทั้ง canonical tag และ JSON-LD `BlogPosting.url` |
-| `TWINDEAD-001` | `config/twin-prompts-th.ts` (ลบแล้ว) | orphan file (0 importer) มีบั๊ก `{{twinName}}` สลับความหมายผู้ใช้/ทวิน แบบเดียวกับที่แก้ใน `twin-prompts.ts` ไปแล้วรอบก่อน แต่ไฟล์นี้ไม่เคยถูกแก้ | ลบทิ้ง — ระบบจริงใช้ `twin-prompts.ts` + `{{languageInstruction}}` แทนแล้ว |
-| `PROMPTSDEAD-001` | `config/prompts.ts` (ลบแล้ว) | self-documented `@deprecated`, 0 caller จริง | ลบทิ้งตามคำแนะนำในไฟล์เอง |
-| `ORCHDEAD-001` | `services/SelfPrintOrchestrator.ts` (ลบแล้ว, 407 บรรทัด) | orphan เต็มไฟล์ — ถูกแทนที่ด้วย `SICEOrchestrator.ts` + `CoreAwakeningService.ts` ไปนานแล้วแต่ไม่เคยลบ | ลบทิ้ง |
-| `EMOJIDUP-001` | `Dashboard.tsx:91,195` | emoji ซ้อนกัน 2 ตัว — string เดิมใน `translations.ts` (`twinReady`, `viewDeepIntelligence`) ฝัง emoji ไว้ในค่าเอง แล้ว JSX ใส่ emoji เดิมซ้ำอีกชั้นนอก `t()` → เจอตอน migrate i18n รอบที่ 10 | เอา emoji ออกจาก string ฝั่งใน เหลือแค่ emoji ที่ JSX ใส่ไว้ชั้นเดียว |
+| `UTS-UNUSED-001..002` | `useTwinStates.ts:21,138` | unused imports (`useEffect`, `useRef`, `interpolatedParams`) | ลบ unused imports ทั้งหมด |
+| `WTE-MISSING-001..12` | `WorldTransitionEngine.ts:65-222` | TRANSITION_RULES ขาด self-keys (12 worlds × 12 ต้องมี self-to-self entry) | เพิ่ม `self: 'none'` entry ให้ครบทุก world |
+| `WTE-DUPLICATE-001` | `WorldTransitionEngine.ts:192` | duplicate `self` key ใน purpose object | แก้เป็น `purpose: 'none'` |
+| `WTE-UNREAD-001` | `WorldTransitionEngine.ts:312` | unused `previousWorld` field | ลบ field ออก |
+| `ITC-WRONGPROP-001` | `ImmersiveTwinChat.tsx:130` | `w.icon` ไม่มีจริง (type `World` ใช้ `emoji`) | แก้เป็น `w.emoji` |
+| `ITC-UNUSED-001..3` | `ImmersiveTwinChat.tsx:161,169,185` | unused variables (`error`, `twinState`, `activeTransition`) | underscore prefix (`_error`, `_twinState`, `_activeTransition`) |
+| `ITC-CSTYPE-001` | `ImmersiveTwinChat.tsx:532` | cssVars type ไม่เข้ากับ CSSProperties | cast `as CSSProperties` + import type |
 
 **เรื่องที่ตรวจแล้วพบว่า "ไม่ใช่บั๊ก" (กันเข้าใจผิดซ้ำ):**
 - `api/unified-handler.ts` มี `as any` ~18 จุด — ไฟล์นี้มี `@ts-nocheck` ทั้งไฟล์ตั้งใจ (comment อธิบายเหตุผลในไฟล์) แก้ `as any` ไม่ได้ผลด้าน type safety
 - `personal_context` (เอกพจน์) กับ `personal_contexts` (พหูพจน์) เป็นตารางจริง 2 ตารางแยกกัน ไม่ใช่บั๊กตั้งชื่อผิด — migration 035 เพิ่มคอลัมน์ `context_data`/`initialized_at` ให้ตัวพหูพจน์ไปแล้ว
 - `VoiceInput.tsx` / `VoiceOutput.tsx` — ไม่มี mock เหลือแล้ว เป็น presentational component ล้วนๆ, `useVoiceTwin` (Web Speech API จริง) จัดการ logic ทั้งหมด
 - `CommunityPage.tsx` — ไม่มี "coming soon" เหลือแล้ว เป็นฟีเจอร์ feed จริง
-- `ExplorePage.tsx` stub cards — **verify รอบที่ 10:** comment `EXPLOREACT-001 FIX` ที่บรรทัด 727 ยืนยันว่า stub card 2 ใบ ("สำรวจลายนิ้วมือ"/"สำรวจลายมือ" ซ้ำ) ถูกลบไปแล้วจริง prop `comingSoon` บน `ExploreCard` เหลืออยู่ในโค้ดแต่ไม่มี caller ไหนส่ง `true` เข้ามาเลย (dead prop เฉยๆ ไม่กระทบผู้ใช้)
-- `DecisionDashboard.tsx:126` — **verify รอบที่ 10:** เป็น empty state ปกติ ("No decisions yet. Start logging decisions...") ทำงานถูกต้องตามดีไซน์ ไม่ใช่ placeholder ที่ต้องแก้
+- `ExplorePage.tsx` stub cards — **verify รอบล่าสุด:** comment `EXPLOREACT-001 FIX` ที่บรรทัด 727 ยืนยันว่า stub card 2 ใบ ("สำรวจลายนิ้วมือ"/"สำรวจลายมือ" ซ้ำ) ถูกลบไปแล้วจริง prop `comingSoon` บน `ExploreCard` เหลืออยู่ในโค้ดแต่ไม่มี caller ไหนส่ง `true` เข้ามาเลย (dead prop เฉยๆ ไม่กระทบผู้ใช้)
+- `DecisionDashboard.tsx:126` — **verify รอบล่าสุด:** เป็น empty state ปกติ ("No decisions yet. Start logging decisions...") ทำงานถูกต้องตามดีไซน์ ไม่ใช่ placeholder ที่ต้องแก้
 
 ---
 
@@ -175,7 +185,7 @@ git push origin master        # trigger CF Pages auto-deploy
 - rename NOVA ในโค้ด (label ที่ user เห็นเปลี่ยนเป็น SELFPRINT ได้ แต่ internal code ห้ามแตะ)
 
 ตรงกับ §44 ARCHITECTURAL SAFETY RULE ของ `docs/Experience Architecture v2.md`:
-หลักคือ **RECOMPOSE → CONNECT → ENHANCE** ไม่ใช่ **REBUILD → REWRITE → REPLACE**
+หลักการคือ **RECOMPOSE → CONNECT → ENHANCE** ไม่ใช่ **REBUILD → REWRITE → REPLACE**
 
 ---
 
@@ -196,33 +206,39 @@ git push origin master        # trigger CF Pages auto-deploy
 
 ---
 
-## 🆕 Daily Time & Energy Dynamics — Implementation Complete (2026-09-11)
-
-### ไฟล์ที่แก้ไข (4)
-| ไฟล์ | การเปลี่ยนแปลง |
-|------|----------------|
-| `src/lib/astrology.ts` | เพิ่มฟิลด์ daily* 7 ฟิลด์ใน InitialDisciplines + ฟังก์ชัน `calculateDailyDynamics()` (Vedic Hora/Panchang logic) |
-| `src/pages/LandingPage.tsx` | เพิ่ม imports, state สำหรับ birth data/results, layout sections ใหม่, BirthDataInput integration |
-| `src/components/landing/BirthDataInput.tsx` | ปรับ `onComplete` callback รับ parameter `dob: string` |
-| `src/components/MetaTagManager.tsx` | เพิ่ม `geoRegion`, `geoPlacename`, `additionalScripts` props |
+## 🆕 Immersive V3 Visual Foundation — Implementation Complete (2026-09-11)
 
 ### ไฟล์ใหม่ที่สร้าง (4)
 | ไฟล์ | บทบาท |
 |------|-------|
-| `src/components/landing/TodayBioEnvironmentReport.tsx` | Bio-Tracking Dashboard UI (OurA Ring / Cyberpunk style) + Daily Refresh + PWA CTA |
-| `src/components/landing/IntroSummary.tsx` | บทความสรุปตัวตน 3 ย่อหน้า |
-| `src/components/landing/QuickSummary.tsx` | 6-section identity card + Social Share (FB, Line, X) |
-| `src/lib/intro-summary.ts` | Chronopsychology narrative generator + FAQ schema + forbidden words validation |
+| `src/styles/immersive-layers.css` | 5-layer visual stack (World/Twin/Contextual/Primary/Temporary) + glass tokens + z-index scale |
+| `src/styles/world-transitions.css` | 9 narrative transition types (attraction/pull/absorption/dissolution/flow/fold/tunnel/gravity_shift/env_wave) + keyframes |
+| `src/hooks/useTwinStates.ts` | Canonical Twin interaction state machine (IDLE → LISTENING → THINKING → RESPONDING → GROWING) + CSS custom properties |
+| `src/pages/ImmersiveTwinChat.tsx` | Living space ใหม่แทน TwinChat — Layer 0-4 composition, world drawer, decision logging preserved |
+| `src/lib/visual/WorldTransitionEngine.ts` | Pure computation class — 12 worlds × 12 = 144 transition rules mapping → narrative transition types |
 
-### Layout Order (หลัง submit DOB)
-1. **TodayBioEnvironmentReport** — เบ็ดล่อชิ้นแรก (Bio-Tracking Dashboard)
-2. **IntroSummary** — บทความ 3 ย่อหน้า
-3. **QuickSummary** — 6-section card + Social Share
-4. **BirthDataInput** — Quick Input DOB form
+### ไฟล์ที่แก้ไข (6)
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `src/index.css` | เพิ่ม `@import` immersive-layers.css + world-transitions.css (บรรทัด 7-8) |
+| `src/App.tsx` | Route `/chat/twin` เปลี่ยนชี้ไปที่ `ImmersiveTwinChat` (lazy import) — TwinChat.tsx เก็บเป็น backup |
+| `src/pages/WorldsHub.tsx` | เพิ่ม `immersive-page` wrapper, `.world-card` → `.immersive-glass` |
+| `src/styles/worlds-hub.css` | เพิ่ม `.immersive-glass` class (glass-bg, backdrop-filter, box-shadow tokens) |
+| `src/pages/ExplorePage.tsx` | เพิ่ม `immersive-page` wrapper, hexagram/question cards ใช้ glass surfaces |
+| `src/pages/MePage.tsx` | เพิ่ม `immersive-page` wrapper, profile/menu/login cards ใช้ glass surfaces |
+
+### Phase 6 — Full-Site Visual Migration Notes
+| หน้า | ทำหรือไม่ | เหตุผล |
+|------|---------|--------|
+| LandingPage | SKIP | มี visual system ของตัวเองอยู่แล้ว (inline animations, radial glows, EvolutionaryVisualSystem) |
+| WorldsHub | ✅ เพิ่ม glass surfaces | World cards ใช้ `.immersive-glass` + `immersive-page` wrapper |
+| ExplorePage | ✅ เพิ่ม glass surfaces | Hexagram/result cards ใช้ glass surfaces |
+| MePage | ✅ เพิ่ม glass surfaces | Profile card, menu sections, login CTA ใช้ glass surfaces |
 
 ### Verification
-- TypeScript compilation: ✅ ผ่าน (no errors)
-- ESLint: ✅ ไม่มี error ใหม่ (เฉพาะ warning ที่มีอยู่แล้ว)
+- TypeScript compilation: ✅ ผ่าน (0 errors)
+- Vite build: ✅ สำเร็จ (604 modules transformed)
+- Build log: `✓ built in 3.62s`
 
 ---
 
