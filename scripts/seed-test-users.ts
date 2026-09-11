@@ -16,6 +16,29 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
+import * as path from 'path';
+import * as fs from 'fs';
+import { fileURLToPath } from 'url';
+
+// Load .env.e2e.staging if exists (for local development)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const envFile = path.join(__dirname, '..', '.env.e2e.staging');
+if (fs.existsSync(envFile)) {
+  const envContent = fs.readFileSync(envFile, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) return;
+    const eqIndex = trimmed.indexOf('=');
+    if (eqIndex > 0) {
+      const key = trimmed.substring(0, eqIndex).trim();
+      const value = trimmed.substring(eqIndex + 1).trim();
+      if (key && !process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
 
 // --- Config -----------------------------------------------------------
 
