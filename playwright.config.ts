@@ -53,6 +53,7 @@ export default defineConfig({
         '**/upload.spec.ts',
         '**/world-visual.spec.ts',
         '**/lifecycle.spec.ts',
+        '**/master-gate.spec.ts',
       ],
     }] : []),
     // Mobile — Phase A only
