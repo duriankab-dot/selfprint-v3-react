@@ -29,15 +29,18 @@ import { useAnalysisStore } from '@/store/analysisStore';
 import { WORLDS, type WorldId } from '@/constants/worlds';
 import type { Decision, DecisionOutcome } from '@/types/decision';
 import { WorldTransitionEngine } from '@/lib/visual/WorldTransitionEngine';
+import { useSFX } from '@/components/audio/SFXProvider';
 import { AppShell } from '@/components/layout/AppShell';
 import { supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '@/services/TwinAPIService';
+import { streamTwinResponse } from '@/services/TwinAPIService';
 import { loadRecentMemories } from '@/lib/memory/loadRecentMemories';
 import { recordWorldInteraction } from '@/services/WorldExpertiseService';
 import * as DecisionService from '@/services/DecisionService';
 import { Twin } from '@/components/twin/Twin';
 import { WorldEnvironment } from '@/components/world/WorldEnvironment';
 import { useTwinStates } from '@/hooks/useTwinStates';
+import { useEvolutionTracking } from '@/hooks/useEvolutionTracking';
 import { Helmet } from 'react-helmet-async';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import { ProvenanceStrip } from '@/components/story/ProvenanceStrip';
@@ -185,6 +188,12 @@ export default function ImmersiveTwinChat() {
   const [transitioning, setTransitioning] = useState(false);
   const [_activeTransition, setActiveTransition] = useState<string | null>(null);
 
+  // Evolution tracking
+  const { recordInteraction } = useEvolutionTracking();
+
+  // Audio SFX
+  const sfx = useSFX();
+
   // Handle world change with narrative transition
   const handleWorldChange = useCallback((newWorld: WorldId) => {
     const oldWorld = currentWorld;
@@ -211,72 +220,6 @@ export default function ImmersiveTwinChat() {
     }
   }, [currentWorld, transitionEngine]);
 
-  // Loading guard
-  if (twinLoading) {
-    return (
-      <AppShell hideNav>
-        <div className="immersive-page" style={{ background: 'var(--color-bg-primary)' }}>
-          <div className="flex items-center justify-center h-full">
-            <p style={{ color: 'var(--color-text-secondary)' }}>
-              {isTh ? 'กำลังโหลดทวินของคุณ...' : 'Loading your Twin...'}
-            </p>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
-  // No twin yet
-  if (!twin) {
-    return (
-      <AppShell hideNav>
-        <div className="immersive-page">
-          <WorldEnvironment worldId="self" />
-          <div className="flex flex-col items-center justify-center h-full p-6" style={{ position: 'relative', zIndex: 30 }}>
-            <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
-            <h1 style={{ fontSize: 'clamp(1.25rem, 6vw, 1.75rem)', fontWeight: 800, color: 'var(--color-text-primary)', margin: '0 0 12px', lineHeight: 1.3 }}>
-              {isTh ? 'Twin ของคุณยังไม่ตื่น' : "Your Twin hasn't awakened yet"}
-            </h1>
-            <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 28px', fontSize: '1rem' }}>
-              {isTh ? 'ทำ Core Awakening ให้เสร็จก่อน เพื่อให้ทวินของคุณตื่นขึ้นและพร้อมคุยกับคุณ' : 'Complete Core Awakening first so your Twin can awaken and start talking with you.'}
-            </p>
-            <button
-              onClick={() => navigate('/core-awakening')}
-              style={{
-                padding: '14px 32px',
-                borderRadius: 12,
-                border: 'none',
-                background: '#6366f1',
-                color: 'white',
-                fontWeight: 700,
-                fontSize: '1rem',
-                cursor: 'pointer',
-              }}
-            >
-              {`✨ ${isTh ? 'ตื่นรู้ตัวตน' : 'Core Awakening'}`}
-            </button>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
-  // Not logged in
-  if (!session?.user?.id) {
-    return (
-      <AppShell hideNav>
-        <div className="immersive-page">
-          <WorldEnvironment worldId="self" />
-          <div className="flex items-center justify-center h-full">
-            <p style={{ color: 'var(--color-text-secondary)' }}>
-              {isTh ? 'กรุณาเข้าสู่ระบบเพื่อคุยกับทวินของคุณ' : 'Please login to chat with your Twin'}
-            </p>
-          </div>
-        </div>
-      </AppShell>
-    );
-  }
-
   // ─── Sync world param from URL ──────────────────────────────────────────
   useEffect(() => {
     const worldParam = searchParams.get('world');
@@ -290,16 +233,6 @@ export default function ImmersiveTwinChat() {
       }
     }
   }, [searchParams, setCurrentWorld, setWorldContextCurrentWorld]);
-
-  // ─── Auto-send initial message from route state ─────────────────────────
-  useEffect(() => {
-    if (!twin || !session?.user?.id) return;
-    const initial = (location.state as { initialMessage?: string } | null)?.initialMessage;
-    if (initial && !autoSentInitialMessage.current) {
-      autoSentInitialMessage.current = true;
-      handleSend(initial);
-    }
-  }, [location.state, twin, session]);
 
   // ─── Load analysis from Twin.fullAnalysis ───────────────────────────────
   useEffect(() => {
@@ -331,7 +264,7 @@ export default function ImmersiveTwinChat() {
   const twinProfile = useMemo(() => {
     const a = currentAnalysis ?? twin?.fullAnalysis ?? null;
     const parts = [
-      `IDENTITY: ${twin.name} | Archetype: ${twin.primaryArchetype ?? 'unknown'}${twin.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin.maturityScore ?? 30}/100`,
+      `IDENTITY: ${twin?.name ?? 'Unknown'} | Archetype: ${twin?.primaryArchetype ?? 'unknown'}${twin?.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin?.maturityScore ?? 30}/100`,
       userProfile.birthDate
         ? `BIRTH DATA: ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
         : null,
@@ -407,6 +340,9 @@ export default function ImmersiveTwinChat() {
 
       await saveTwinMemory(twin.id, currentWorld ?? null, 'user', userMessage);
 
+      // Growth pipeline: track interaction for evolution
+      try { await recordInteraction(twin.id); } catch { /* non-fatal */ }
+
       const apiMessages: Array<{ role: 'user' | 'assistant'; content: string }> = messages
         .filter(m => m.role === 'user' || m.role === 'twin')
         .map(m => ({
@@ -417,25 +353,43 @@ export default function ImmersiveTwinChat() {
 
       const recentMemories = await loadRecentMemories(twin.id, currentWorld ?? null);
 
-      // Trigger listening state
       startListening();
+      try { if (sfx?.twin) sfx.twin.play('interact'); } catch {}
 
-      const twinResponse = await callTwinAPI(
-        apiMessages,
-        twin.name || 'Twin',
-        twinProfile,
-        currentWorld || undefined,
-        recentMemories,
-        language,
-      );
+      let twinResponse: string;
+      try {
+        const chunks: string[] = [];
+        await streamTwinResponse(
+          apiMessages,
+          twin.name || 'Twin',
+          twinProfile,
+          currentWorld || undefined,
+          {
+            onChunk: (chunk: string) => chunks.push(chunk),
+            memories: recentMemories,
+            language,
+          },
+        );
+        twinResponse = chunks.join('');
+      } catch (streamError) {
+        console.warn('[ImmersiveTwinChat] Streaming failed, falling back:', streamError);
+        twinResponse = await callTwinAPI(
+          apiMessages,
+          twin.name || 'Twin',
+          twinProfile,
+          currentWorld || undefined,
+          recentMemories,
+          language,
+        );
+      }
 
       await saveTwinMemory(twin.id, currentWorld ?? null, 'twin', twinResponse);
 
       const options = extractOptions(twinResponse);
 
-      // Stop listening, start thinking briefly, then responding
       stopListening();
       startThinking();
+      try { if (sfx?.twin) sfx.twin.play('glitch'); } catch {}
 
       setMessages(prev => [...prev, {
         role: 'twin',
@@ -446,6 +400,7 @@ export default function ImmersiveTwinChat() {
 
       stopThinking();
       startResponding();
+      try { if (sfx?.twin) sfx.twin.play('sweep'); } catch {}
 
       if (currentWorld) {
         recordWorldInteraction(twin.id, currentWorld).catch((err) =>
@@ -453,7 +408,7 @@ export default function ImmersiveTwinChat() {
         );
       }
 
-      setTimeout(() => stopResponding(), 1500);
+      setTimeout(() => { stopResponding(); try { if (sfx?.ui) sfx.ui.play('option-select'); } catch {} }, 1500);
 
     } catch (err) {
       const errorMsg = err instanceof Error
@@ -468,6 +423,82 @@ export default function ImmersiveTwinChat() {
       setIsSending(false);
     }
   }, [message, messages, twin, session, currentWorld, twinProfile, language, isTh, startListening, stopListening, startThinking, stopThinking, startResponding, stopResponding]);
+
+  // ─── Auto-send initial message from route state ─────────────────────────
+  useEffect(() => {
+    if (!twin || !session?.user?.id) return;
+    const initial = (location.state as { initialMessage?: string } | null)?.initialMessage;
+    if (initial && !autoSentInitialMessage.current) {
+      autoSentInitialMessage.current = true;
+      handleSend(initial);
+    }
+  }, [location.state, twin, session, handleSend]);
+
+  // Loading guard
+  if (twinLoading) {
+    return (
+      <AppShell hideNav>
+        <div className="immersive-page" style={{ background: 'var(--color-bg-primary)' }}>
+          <div className="flex items-center justify-center h-full">
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              {isTh ? 'กำลังโหลดทวินของคุณ...' : 'Loading your Twin...'}
+            </p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // No twin yet
+  if (!twin) {
+    return (
+      <AppShell hideNav>
+        <div className="immersive-page">
+          <WorldEnvironment worldId="self" />
+          <div className="flex flex-col items-center justify-center h-full p-6" style={{ position: 'relative', zIndex: 30 }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
+            <h1 style={{ fontSize: 'clamp(1.25rem, 6vw, 1.75rem)', fontWeight: 800, color: 'var(--color-text-primary)', margin: '0 0 12px', lineHeight: 1.3 }}>
+              {isTh ? 'Twin ของคุณยังไม่ตื่น' : "Your Twin hasn't awakened yet"}
+            </h1>
+            <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 28px', fontSize: '1rem' }}>
+              {isTh ? 'ทำ Core Awakening ให้เสร็จก่อน เพื่อให้ทวินของคุณตื่นขึ้นและพร้อมคุยกับคุณ' : 'Complete Core Awakening first so your Twin can awaken and start talking with you.'}
+            </p>
+            <button
+              onClick={() => navigate('/core-awakening')}
+              style={{
+                padding: '14px 32px',
+                borderRadius: 12,
+                border: 'none',
+                background: '#6366f1',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1rem',
+                cursor: 'pointer',
+              }}
+            >
+              {`✨ ${isTh ? 'ตื่นรู้ตัวตน' : 'Core Awakening'}`}
+            </button>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  // Not logged in
+  if (!session?.user?.id) {
+    return (
+      <AppShell hideNav>
+        <div className="immersive-page">
+          <WorldEnvironment worldId="self" />
+          <div className="flex items-center justify-center h-full">
+            <p style={{ color: 'var(--color-text-secondary)' }}>
+              {isTh ? 'กรุณาเข้าสู่ระบบเพื่อคุยกับทวินของคุณ' : 'Please login to chat with your Twin'}
+            </p>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
   // ─── Decision handling ──────────────────────────────────────────────────
   const handleSaveDecision = async (messageIndex: number) => {

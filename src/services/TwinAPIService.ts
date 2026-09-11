@@ -122,12 +122,18 @@ export async function streamTwinResponse(
   messages: Message[],
   twinName: string,
   twinProfile: string,
-  worldId: string,
-  onChunk: (chunk: string) => void,
-  memories?: Memory[],  // P0-E3: memory parity with callTwinAPI
-  language: 'en' | 'th' = 'th', // TWINLANG-001 FIX: thread UI language into the system prompt
+  worldId?: string,
+  options?: {
+    onChunk: (chunk: string) => void;
+    memories?: Memory[];
+    language?: 'en' | 'th';
+  },
 ): Promise<void> {
   try {
+    const onChunk = options?.onChunk ?? (() => {});
+    const memories = options?.memories;
+    const language = options?.language ?? 'th';
+
     // P0-E3 FIX: Use buildPrompt() for unified prompt assembly (world + memories),
     // same as callTwinAPI. Falls back to raw buildTwinSystemPrompt when buildPrompt throws.
     let systemPrompt: string;

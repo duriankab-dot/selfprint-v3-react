@@ -1,4 +1,8 @@
 /**
+ * @deprecated Legacy SICE orchestrator implementation. No longer imported anywhere.
+ * Kept for reference only. The live implementation is in src/services/sice/SICEOrchestrator.ts
+ */
+/**
  * SICEOrchestratorImpl.ts
  * 12 SICE visible implementation + orchestration
  */

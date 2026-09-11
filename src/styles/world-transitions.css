@@ -542,3 +542,71 @@
     filter: none;
   }
 }
+
+/* ============================================================================
+   WORLD TRANSITION TYPE SELECTORS
+   Map runtime class names to existing @keyframes
+   ============================================================================ */
+
+.world-transition--attraction .world-transition--old-world {
+  animation: world-attraction-pull var(--transition-narrative, 800ms) ease-out forwards;
+}
+.world-transition--attraction .world-transition--new-world {
+  animation: world-attraction-emerge var(--transition-narrative, 800ms) ease-in forwards;
+}
+
+.world-transition--pull .world-transition--old-world {
+  animation: world-pull-directional var(--transition-narrative, 800ms) ease-out forwards;
+}
+.world-transition--pull .world-transition--new-world {
+  animation: world-pull-reverse var(--transition-narrative, 800ms) ease-in forwards;
+}
+
+.world-transition--absorption .world-transition--old-world {
+  animation: world-absorption-spiral-in var(--transition-narrative, 900ms) ease-out forwards;
+}
+.world-transition--absorption .world-transition--new-world {
+  animation: world-absorption-spiral-out var(--transition-narrative, 900ms) ease-in forwards;
+}
+
+.world-transition--dissolution .world-transition--old-world {
+  animation: world-dissolution-scatter var(--transition-narrative, 1000ms) ease-out forwards;
+}
+.world-transition--dissolution .world-transition--new-world {
+  animation: world-dissolution-gather var(--transition-narrative, 1000ms) ease-in forwards;
+}
+
+.world-transition--flow .world-transition--old-world {
+  animation: world-flow-drift-right var(--transition-narrative, 700ms) ease-out forwards;
+}
+.world-transition--flow .world-transition--new-world {
+  animation: world-flow-drift-left var(--transition-narrative, 700ms) ease-in forwards;
+}
+
+.world-transition--fold .world-transition--old-world {
+  animation: world-fold-collapse var(--transition-narrative, 800ms) ease-out forwards;
+}
+.world-transition--fold .world-transition--new-world {
+  animation: world-fold-unfold var(--transition-narrative, 800ms) ease-in forwards;
+}
+
+.world-transition--tunnel .world-transition--old-world {
+  animation: world-tunnel-rush var(--transition-narrative, 1000ms) ease-out forwards;
+}
+.world-transition--tunnel .world-transition--new-world {
+  animation: world-tunnel-emerge var(--transition-narrative, 1000ms) ease-in forwards;
+}
+
+.world-transition--gravity_shift .world-transition--old-world {
+  animation: world-gravity-shift-fall var(--transition-narrative, 800ms) ease-out forwards;
+}
+.world-transition--gravity_shift .world-transition--new-world {
+  animation: world-gravity-shift-settle var(--transition-narrative, 800ms) ease-in forwards;
+}
+
+.world-transition--env_wave .world-transition--old-world {
+  animation: world-wave-sweep var(--transition-narrative, 900ms) ease-out forwards;
+}
+.world-transition--env_wave .world-transition--new-world {
+  animation: world-wave-ripple var(--transition-narrative, 900ms) ease-in forwards;
+}

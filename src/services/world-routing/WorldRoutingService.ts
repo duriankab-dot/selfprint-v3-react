@@ -1,4 +1,9 @@
 /**
+ * @deprecated routeToWorld() has zero production callers.
+ * World selection is done manually via WorldDrawer in ImmersiveTwinChat.
+ * Kept for reference only.
+ */
+/**
  * WorldRoutingService.ts
  * Main orchestrator for world context routing
  * Routes user input to world-specific Twin expertise

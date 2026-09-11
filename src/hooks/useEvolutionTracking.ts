@@ -1,5 +1,8 @@
 import { useEvolution } from '@/context/EvolutionContext';
 import { useContextualPopup } from './useContextualPopup';
+import { supabase } from '@/lib/supabase/client';
+import { checkMicroEvolution, evolveTwin } from '@/services/TwinEvolutionService';
+import type { ProgressMetrics } from '@/constants/twinStages';
 
 /**
  * Hook for Twin Evolution Tracking
@@ -8,7 +11,7 @@ import { useContextualPopup } from './useContextualPopup';
  * Usage in Chat/Reflection components:
  * ```tsx
  * function ChatComponent() {
- *   const { recordReflectionSession } = useEvolutionTracking();
+ *   const { recordReflectionSession, recordInteraction } = useEvolutionTracking();
  *
  *   async function handleSubmitReflection(text: string) {
  *     // Process reflection...
@@ -17,6 +20,11 @@ import { useContextualPopup } from './useContextualPopup';
  *     // Record for evolution tracking
  *     recordReflectionSession();
  *   }
+ *
+ *   async function handleSend(message: string) {
+ *     await sendMessage(message);
+ *     recordInteraction(twin.id);
+ *   }
  * }
  * ```
  */
@@ -24,6 +32,49 @@ import { useContextualPopup } from './useContextualPopup';
 export function useEvolutionTracking() {
   const { state, recordReflection, isUnlocked } = useEvolution();
   const { showMilestone, showDiscovery } = useContextualPopup();
+
+  /**
+   * Record a chat interaction — triggers micro-evolution check
+   * Call this after each successful message exchange with the Twin
+   */
+  const recordInteraction = async (twinId: string) => {
+    try {
+      const { data: twin } = await supabase
+        .from('twins')
+        .select('user_id, stage, created_at, maturity_score')
+        .eq('id', twinId)
+        .maybeSingle();
+
+      if (!twin?.user_id || !twin.stage) return;
+
+      const [messagesResult, patternsResult, memoriesResult, feedbackResult] = await Promise.all([
+        supabase.from('messages').select('id', { count: 'exact', head: true }).eq('twin_id', twinId),
+        supabase.from('behavioral_patterns').select('id', { count: 'exact', head: true }).eq('twin_id', twinId),
+        supabase.from('twin_memories').select('id', { count: 'exact', head: true }).eq('twin_id', twinId).eq('memory_type', 'interaction'),
+        supabase.from('feedback').select('id', { count: 'exact', head: true }).eq('twin_id', twinId),
+      ]);
+
+      const createdAt = twin.created_at ? new Date(twin.created_at) : new Date();
+      const daysSinceAwakening = Math.max(1, Math.floor((Date.now() - createdAt.getTime()) / 86400000));
+
+      const metrics: ProgressMetrics = {
+        messageCount: messagesResult.count ?? 0,
+        daysSinceAwakening,
+        patternCount: patternsResult.count ?? 0,
+        memoryCount: memoriesResult.count ?? 0,
+        feedbackCount: feedbackResult.count ?? 0,
+      };
+
+      const result = await checkMicroEvolution(twin.user_id, twinId, metrics, twin.stage);
+
+      if (result.evolved && result.newStage && result.previousStage) {
+        await evolveTwin(twin.user_id, twinId, result.previousStage, result.newStage, metrics);
+        console.log(`[Evolution] Twin evolved from ${result.previousStage} → ${result.newStage}`);
+      }
+    } catch (err) {
+      console.warn('[EvolutionTracking] recordInteraction failed:', err);
+    }
+  };
 
   /**
    * Call this after user completes a reflection
@@ -136,6 +187,7 @@ export function useEvolutionTracking() {
   return {
     reflectionCount: state.reflectionCount,
     recordReflectionSession,
+    recordInteraction,
     getProgressInfo,
     isEvolutionUnlocked: isUnlocked('twin-evolution'),
   };

@@ -1,3 +1,7 @@
+/**
+ * @deprecated Use ImmersiveTwinChat instead. This file is kept as backup only.
+ * Route /chat/twin now points to ImmersiveTwinChat (App.tsx).
+ */
 import '../styles/nova-twin.css';
 import '../styles/core-awakening.css';
 /**

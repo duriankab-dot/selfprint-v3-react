@@ -5,7 +5,7 @@
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import { registerClient, getRegisteredClient } from './client-registry';
+import { registerClient, getRegisteredClient } from './client-registry.js';
 
 /**
  * Initialize Supabase client with project URL and anon key
