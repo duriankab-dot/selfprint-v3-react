@@ -3,8 +3,8 @@
 **แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `100% PRODUCTION VERIFIED` ✅
-> **Commit:** `13e815e3a5e1f35b62f7be1f38261042c26b4128`
+> **สถานะการผลิต:** `PRODUCTION READY + DAILY DYNAMICS LAYER ADDED` ✅
+> **Commit ล่าสุด:** Daily Time & Energy Dynamics implementation (2026-09-11)
 
 ---
 
@@ -18,8 +18,9 @@
 | **P0-D: TwinChat** | ✅ ยืนยันแล้ว | Normal + streaming parity, auth + memory injection |
 | **P0-E: Auth/Security** | ✅ ยืนยันแล้ว | JWT verification, user isolation, rate limiting, streaming auth parity |
 | **P0-F: Persistence** | ✅ ยืนยันแล้ว | Critical writes awaited, no fire-and-forget on critical path |
+| **P1: Daily Time & Energy** | ✅ เพิ่มใหม่ (2026-09-11) | Vedic Hora/Panchang calculation + Bio-Tracking Dashboard UI + Landing Page integration |
 
-**สถานะโดยรวม: ผลิตแล้ว 100%** — Forensic Audit HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128`
+**สถานะโดยรวม: ผลิตพร้อมใช้งาน + Daily Dynamics layer ใหม่** — Forensic Audit HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128` + Daily Dynamics implementation (2026-09-11)
 
 ---
 
@@ -45,6 +46,15 @@ Nova (ผู้แนะนำ) → 12 มิติ / SICE analysis → Blueprin
 | 5 | ฉัน (Me) | `/me` | การควบคุมส่วนตัว |
 
 > **หมายเหตุ:** **Worlds เป็นแท็บหลัก** (ตามคอมเมนต์ `BottomNav.tsx:6`) **Activities ไม่ใช่แท็บ** — route `/activities` ยังมี (`App.tsx:171`) แต่ไม่อยู่ใน nav แล้ว และถูกดูกรวมเป็นส่วนหนึ่งของ Explore
+
+### 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
+
+Landing Page มีชั้นคำนวณพลังงานรายวันใหม่:
+- **Vedic Hora/Panchang logic** → คำนวณ Accelerated Phase, High Friction Interval, Circadian Color, Attraction Vector
+- **Bio-Tracking Dashboard UI** (Oura Ring / Cyberpunk style) แสดงรายงานรายวันบน Landing Page
+- **Retention Loop**: ค่า refresh อัตโนมัติทุกวัน → ผู้ใช้ bookmark กลับมาเช้าวันละครั้ง
+- **SEO/AEO/GEO markup**: FAQ JSON-LD + GEO tags (TH-22 / Chanthaburi)
+- **Flow**: Quick Input DOB → Daily Dynamics + Quick Summary → CTA ไป Onboarding
 
 ---
 
@@ -124,12 +134,20 @@ supabase/
 
 docs/                     # Documentation
 ├── SELFPRINT_PRODUCTION_STATUS_TH.md  # Production status report
+├── SELFPRINT_PROJECT_SUMMARY_TH.md    # Project summary (ภาษาไทย)
 ├── SELFPRINT_STATUS_HONEST_TH.md      # Honest status summary
 ├── PRODUCTION-VERIFICATION.md         # Verification evidence
 ├── verification/                      # Verification matrices
 ├── Experience Architecture v2.md      # Design/experience master for Track C
 ├── PLAN_TRACKS_TH.md     # Master plan: Track A / B / C
 └── PHASE0_VISUAL_PERF_FORENSIC_TH.md  # Phase 0 forensic results
+
+src/components/landing/   # Landing page components
+├── TodayBioEnvironmentReport.tsx  # Bio-Tracking Dashboard UI (NEW — Daily Dynamics)
+├── IntroSummary.tsx               # 3-paragraph identity article (NEW)
+├── QuickSummary.tsx               # 6-section card + Social Share (NEW)
+├── BirthDataInput.tsx             # Quick Input DOB form
+└── EvolutionaryVisualSystem.tsx   # SVG animation system
 
 CLAUDE.md                 # Permanent context / gotchas before touching code
 FORENSIC_VERIFICATION_STATUS_TH.md  # Forensic verification results — single source of truth
@@ -248,11 +266,28 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 | [`FORENSIC_VERIFICATION_STATUS_TH.md`](./.kilo/plans/FORENSIC_VERIFICATION_STATUS_TH.md) | **เอกสารหลักสถานะเดียว** — ผลการตรวจสอบ forensic รายละเอียดครบ |
 | [`docs/PRODUCTION-VERIFICATION.md`](./docs/PRODUCTION-VERIFICATION.md) | หลักฐานการตรวจสอบ production |
 | [`docs/SELFPRINT_PRODUCTION_STATUS_TH.md`](./docs/SELFPRINT_PRODUCTION_STATUS_TH.md) | สถานะการผลิต (ฉบับภาษาไทย) |
+| [`docs/SELFPRINT_PROJECT_SUMMARY_TH.md`](./docs/SELFPRINT_PROJECT_SUMMARY_TH.md) | สรุปโปรเจคฉบับภาษาไทย |
 | [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./docs/SELFPRINT_STATUS_HONEST_TH.md) | สรุปสถานะซื่อสัตย์ (ภาษาไทย) |
 | [`docs/PLAN_TRACKS_TH.md`](./docs/PLAN_TRACKS_TH.md) | แผนงานรวม 3 Track (A=bugs / B=Phase 0 forensic / C=visual redesign) |
 | [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md) | ผลตรวจ Phase 0 visual + performance forensic |
 | [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) | **Design master ของ Track C** — RECOMPOSE not REBUILD |
 | [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./docs/Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | **แผนปฏิบัติการ Track C** |
+
+---
+
+## 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
+
+ชั้นคำนวณพลังงานรายวันบน Landing Page — Vedic Hora/Panchang logic → Bio-Tracking Dashboard UI
+
+| ไฟล์ | บทบาท |
+|------|-------|
+| `src/lib/astrology.ts` | เพิ่มฟิลด์ `daily*` ใน InitialDisciplines + ฟังก์ชัน `calculateDailyDynamics()` |
+| `src/components/landing/TodayBioEnvironmentReport.tsx` | Bio-Tracking Dashboard UI + Retention Loop (daily refresh) |
+| `src/components/landing/IntroSummary.tsx` | บทความสรุปตัวตน 3 ย่อหน้า |
+| `src/components/landing/QuickSummary.tsx` | 6-section identity card + Social Share (FB, Line, X) |
+| `src/lib/intro-summary.ts` | Chronopsychology narrative generator + FAQ schema |
+| `src/pages/LandingPage.tsx` | Layout sections ใหม่ + Quick Input DOB integration |
+| `src/components/MetaTagManager.tsx` | GEO tags + additionalScripts props สำหรับ AEO JSON-LD |
 
 ---
 

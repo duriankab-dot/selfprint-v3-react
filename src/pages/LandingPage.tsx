@@ -27,6 +27,13 @@ import { Link } from 'react-router-dom';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useTheme } from '@/context/ThemeContext';
 import EvolutionaryVisualSystem from '@/components/landing/EvolutionaryVisualSystem';
+import TodayBioEnvironmentReport from '@/components/landing/TodayBioEnvironmentReport';
+import IntroSummary from '@/components/landing/IntroSummary';
+import QuickSummary from '@/components/landing/QuickSummary';
+import { BirthDataInput } from '@/components/landing/BirthDataInput';
+import { calculateInitialDisciplines } from '@/lib/astrology.js';
+import { buildFallbackResponse } from '@/lib/astrovera-adapter.js';
+import { generateFAQSchema } from '@/lib/intro-summary.js';
 
 // ─── Story copy (display) ─────────────────────────────────────────────────────
 
@@ -320,6 +327,29 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const s3Ref = useRef<HTMLElement>(null);
   const s2VisualRef = useRef<HTMLDivElement>(null);
 
+  // ── Landing Page Quick Input DOB + Results State ───────────────────────────
+  const [submittedDob, setSubmittedDob] = useState<string | null>(null);
+  const [landingDisciplines, setLandingDisciplines] = useState(() => {
+    const saved = localStorage.getItem('landing_disciplines');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    return null;
+  });
+  const [landingAnalysis, setLandingAnalysis] = useState(() => {
+    const saved = localStorage.getItem('landing_analysis');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    return null;
+  });
+
+  // Persist disciplines + analysis to localStorage for page refresh
+  useEffect(() => {
+    if (landingDisciplines) localStorage.setItem('landing_disciplines', JSON.stringify(landingDisciplines));
+    if (landingAnalysis) localStorage.setItem('landing_analysis', JSON.stringify(landingAnalysis));
+  }, [landingDisciplines, landingAnalysis]);
+
   useEffect(() => {
     const el = s2VisualRef.current;
     if (!el || visualNear) return;
@@ -343,6 +373,26 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
     } else {
       navigate('/onboarding');
     }
+  };
+
+  // ── Birth Data Submit Handler (Quick Input DOB) ────────────────────────────
+
+  const handleBirthDataSubmit = (dob: string) => {
+    setSubmittedDob(dob);
+
+    // Save to userStore
+    useUserStore.getState().updateProfile({ birthDate: dob });
+
+    // Calculate disciplines + analysis
+    const disciplines = calculateInitialDisciplines(dob);
+    const analysis = buildFallbackResponse({
+      birthDate: dob,
+      mood: mood ?? 'neutral',
+      finetuneAnswers: {},
+    });
+
+    setLandingDisciplines(disciplines);
+    setLandingAnalysis(analysis);
   };
 
   // IntersectionObserver — trigger per-screen animations once
@@ -415,6 +465,10 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         ogImage={ogUrl}
         ogType="website"
         canonicalUrl={`/${lang}`}
+        // GEO Tagging — lock target audience to Chanthaburi region
+        geoRegion="TH-22"
+        geoPlacename="Chanthaburi"
+        // AEO FAQ Schema (JSON-LD) — hidden from UI, readable by Google/Gemini/ChatGPT bots
         schema={{
           '@context': 'https://schema.org',
           '@type': 'SoftwareApplication',
@@ -428,6 +482,12 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             ? ['AI Digital Twin ฝาแฝดดิจิทัล สร้างใน 2 นาที', 'วิเคราะห์พฤติกรรม 12 มิติ (SICE)', 'ตรวจจับ Blind Spots', 'จำลองการตัดสินใจอัจฉริยะ', 'Twin เรียนรู้และพัฒนาแบบ Real-time']
             : ['AI Digital Twin creation in 2 minutes', '12-dimension behavioral analysis (SICE)', 'Blind spot detection', 'Decision simulation', 'Real-time learning Twin'],
         }}
+        additionalScripts={[
+          {
+            type: 'application/ld+json',
+            content: generateFAQSchema(),
+          },
+        ]}
       />
 
       <style>{`
@@ -920,6 +980,39 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             </Link>
           </div>
         </section>
+
+        {/* ════════════════════════════════════════════════════════════ */}
+        {/* POST-SCREEN SECTIONS — Visible after birth data submission   */}
+        {/* Layout order:                                                */}
+        {/*   [1] TodayBioEnvironmentReport  (first hook / daily refresh)*/}
+        {/*   [2] IntroSummary               (3-paragraph identity article)*/}
+        {/*   [3] QuickSummary               (6-section card + social share)*/}
+        {/*   [4] BirthDataInput             (Quick Input DOB form)       */}
+        {/* ════════════════════════════════════════════════════════════ */}
+        <div style={{ maxWidth: '720px', margin: '0 auto', padding: 'clamp(32px, 5vw, 64px) clamp(16px, 3vw, 32px)' }}>
+          {/* TodayBioEnvironmentReport — placed FIRST as the "first hook" */}
+          {submittedDob && landingDisciplines && landingAnalysis && (
+            <>
+              <TodayBioEnvironmentReport
+                birthDate={submittedDob}
+                compact
+              />
+              <IntroSummary disciplines={landingDisciplines} analysis={landingAnalysis} />
+              <QuickSummary
+                disciplines={landingDisciplines}
+                analysis={landingAnalysis}
+                birthDate={submittedDob}
+              />
+            </>
+          )}
+
+          {/* BirthDataInput — Quick Input DOB at bottom */}
+          <div style={{ marginTop: '40px' }}>
+            <BirthDataInput
+              onComplete={(dob: string) => handleBirthDataSubmit(dob)}
+            />
+          </div>
+        </div>
 
       </main>
       </AppShell>

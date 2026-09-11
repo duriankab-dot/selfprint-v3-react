@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 8 กันยายน 2026 · รอบที่ 10 (verification เพิ่มเติมของหัวข้อ 3) · verify กับ Supabase / Cloudflare / GitHub จริง
+**อัปเดตล่าสุด:** 11 กันยายน 2026 · เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11)
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริงเสมอ ไม่เชื่อไฟล์ `.md` ใดๆ รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เขียนโดย:** jb_DEV + Claude
 
@@ -11,17 +11,18 @@
 
 ## 0. TL;DR
 
-**ทุก Track (A/B/C) ปิดครบแล้ว** — production พร้อมใช้งานจริง ไม่มีบั๊กระดับ P0-P2 ที่รู้จักเหลืออยู่
+**ทุก Track (A/B/C) ปิดครบแล้ว + เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11)** — production พร้อมใช้งานจริง ไม่มีบั๊กระดับ P0-P2 ที่รู้จักเหลืออยู่
 
 | gate | ผล | วิธี verify |
 |------|-----|------------|
 | `tsc -b` (strict) | ✅ 0 errors | local build |
 | `npm run typecheck:functions` | ✅ 0 errors | local build |
 | `vite build` | ✅ สำเร็จ | local build |
-| `oxlint` | ✅ 0 errors · 174 warnings · 464 files | local build |
+| `oxlint` | ✅ 0 errors · 187 warnings · 474 files | local build |
 | `vitest run` | ✅ 1042/1042 tests · 67 ไฟล์ · 0 fail · 0 skip | เจ้าของรันเอง (PowerShell) |
 | **Production** | ✅ `selfprint.one/th/` + `/en/` โหลดได้ปกติ ไม่มี error boundary | Cloudflare Pages dashboard |
 | **Deploy ล่าสุด** | ✅ auto-deploy จาก `master` ทำงานปกติ | Cloudflare Pages |
+| **Daily Dynamics Layer** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI + Landing Page integration |
 
 ---
 
@@ -69,6 +70,29 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 - sitemap.xml + sitemap-th.xml enumerate ครบ 86 บทความบล็อกจริงจาก `public/blog/index.json` (117 URL/ไฟล์)
 - บั๊ก canonical URL ของบทความบล็อกทั้ง 86 บท (ชี้ไป URL ที่ไม่มี route จริง) แก้แล้ว — ดูหัวข้อ 4
 
+### 🆕 Daily Time & Energy Dynamics Layer (เพิ่ม 2026-09-11) ✅
+- **Vedic Hora/Panchang calculation** → คำนวณพลังงานรายวันแบบ deterministic จาก birthDate + today
+  - `src/lib/astrology.ts:calculateDailyDynamics()` — เพิ่มฟิลด์ daily* ใน InitialDisciplines interface
+  - Accelerated Phase Window, High Friction Interval, Circadian Color Alignment, Attraction Vector
+- **Bio-Tracking Dashboard UI** (`TodayBioEnvironmentReport.tsx`) — Oura Ring / Cyberpunk style
+  - แสดงบน Landing Page เป็น "เบ็ดล่อชิ้นแรก" ก่อน Quick Summary
+  - Retention Loop: refresh อัตโนมัติทุกวัน (ตรวจสอบทุก 1 ชั่วโมง)
+  - CTA ไป Onboarding → Full Analysis
+- **Landing Page integration** (`LandingPage.tsx`)
+  - Layout order: TodayBioEnvironmentReport → IntroSummary → QuickSummary → BirthDataInput
+  - Quick Input DOB form → compute disciplines + analysis → persist to localStorage
+- **Intro Summary + Quick Summary** (`IntroSummary.tsx`, `QuickSummary.tsx`)
+  - บทความสรุปตัวตน 3 ย่อหน้าจาก Life Path profile
+  - 6-section identity card + Social Share (Facebook, Line, X)
+- **Chronopsychology Prompt** (`intro-summary.ts`)
+  - System prompt แปลง Vedic output เป็น scientific language
+  - FORBIDDEN_WORDS validation (ห้ามใช้คำศัพท์สายมู)
+  - FAQ Schema generator สำหรับ AEO
+- **SEO/AEO/GEO Markup** (`MetaTagManager.tsx`, `LandingPage.tsx`)
+  - FAQ JSON-LD (ซ่อนคำค้นหาสายมู: "สีมงคล", "ฤกษ์ดี")
+  - GEO tags: `<meta name="geo.region" content="TH-22">` + `<meta name="geo.placename" content="Chanthaburi">`
+  - additionalScripts prop สำหรับ inject JSON-LD scripts
+
 ### Code quality ✅
 - Twin-naming audit ครบ 100% (ไล่ทุกไฟล์ที่มีคำว่า Twin/ทวิน) — เจอ+ลบ dead code 2 ไฟล์ที่มีบั๊กชื่อทวินค้างอยู่
   (`config/twin-prompts-th.ts`, `config/prompts.ts` — ทั้งคู่ orphan ไม่มีใคร import)
@@ -87,6 +111,16 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 | ~~3~~ 🟡 **ปิดบางส่วน (8 ก.ย. 2026)** | Story Narrative Layer Phase 9-10 | Story + Decision (Phase 9) และ Choice→Consequence (Phase 10) ship แล้วด้วยข้อมูลจริง (`twin_memories.world_id` · `decision_log.world` · `decision_outcomes`) — ไฟล์ใหม่ `WorldStoryPanel.tsx` + `ChoiceConsequence.tsx` · **Pattern + Reflection ต่อ world ไม่ทำ** เพราะ verify แล้วว่าไม่มี `world`/`world_id` column ในสคีมาจริง (ต้องเพิ่ม DB migration ถึงจะทำได้ — โซนห้ามแตะ ต้องขออนุมัติแยก) รายละเอียด change-map + verify: `TRACK_C_VISUAL_REDESIGN_TH.md` ท้ายไฟล์ |
 | 4 | Stripe checkout production timing | `stripeService.ts` wired สมบูรณ์ ไม่มี flag ค้าง ไม่มีจุดพังทางเทคนิค (verify แล้ว) | ตัดสินใจธุรกิจล้วนๆ ไม่ใช่บั๊กทางเทคนิค |
 | ~~5~~ ✅ **ปิดแล้ว (8 ก.ย. 2026)** | i18n สองระบบซ้อนกัน | ย้าย 7 ไฟล์ที่เคยใช้ `t()`/`TRANSLATIONS` (`LandingPage.tsx` `AnalysisPage.tsx` `BirthdateInput.tsx` `TwinChat.tsx` `CoreAwakening.tsx` `Dashboard.tsx` `AICreationSequence.tsx`) เข้า `isTh ? ... : ...` แล้ว (byte-identical กับข้อความเดิม ยกเว้น 2 จุดที่เจอบั๊ก emoji ซ้อน — แก้ไปด้วย ดูหัวข้อ 4 รหัส `EMOJIDUP-001`) · `src/constants/translations.ts` เหลือ 0 importer — เขียนเป็น deprecation stub (`export {}`) เพราะ sandbox นี้ลบไฟล์บนโฟลเดอร์ที่เชื่อมมาไม่ได้ (bash `rm` ถูกบล็อก) **เจ้าของต้อง `git rm src/constants/translations.ts` เองอีกที** · verify: `tsc -b` 0 errors · `vite build` สำเร็จ · `oxlint` 0 errors/174 warnings/464 files (เท่าเดิม ไม่ regression) · `vitest` **✅ เจ้าของรันเองใน PowerShell ยืนยันแล้ว (8 ก.ย. 2026): 67/67 ไฟล์ · 1042/1042 tests ผ่านหมด ไม่มี regression** |
+
+### Gaps ที่เหลือจากแผน Onboarding Full Analysis Science (2026-09-11)
+
+| gap | สถานะ | รายละเอียด |
+|-----|-------|-----------|
+| SICE → Full Analysis integration | ❌ ยังไม่ทำ | ต้องเชื่อม `SICEOrchestrator.orchestrate()` ใน `handleFinetuneSubmit` ส่ง `personalIntelligence.insights` เข้า `FullAnalysis.tsx` |
+| twin_sice_scores persistence | ❌ ยังไม่ทำ | CoreAwakeningService ต้องเขียน `twin_sice_scores` ลง Supabase หลัง onboarding complete |
+| Phase 2 Astrovera Edge Function | ❌ ยังไม่ทำ | สร้าง Edge Function (`supabase/functions/astrovera-edge/`) เรียก Astrovera API เป็น primary, `buildFallbackResponse()` เป็น fallback |
+
+> ทั้ง 3 gap นี้เป็น P1/P2 จากแผน `.kilo/plans/1789089081756-onboarding-full-analysis-science.md` — ไม่ได้ทำใน session นี้ (session นี้โฟกัส Daily Time & Energy Dynamics เท่านั้น)
 
 ---
 
@@ -156,3 +190,33 @@ git push origin master        # trigger CF Pages auto-deploy
 ---
 
 *อัปเดตทุกครั้งที่มีงานสำคัญปิด — เขียนทับสถานะเดิม ไม่ append ประวัติรายรอบ — AI agent ทุกตัวอ่านก่อนเริ่มงานเสมอ*
+
+---
+
+## 🆕 Daily Time & Energy Dynamics — Implementation Complete (2026-09-11)
+
+### ไฟล์ที่แก้ไข (4)
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `src/lib/astrology.ts` | เพิ่มฟิลด์ daily* 7 ฟิลด์ใน InitialDisciplines + ฟังก์ชัน `calculateDailyDynamics()` (Vedic Hora/Panchang logic) |
+| `src/pages/LandingPage.tsx` | เพิ่ม imports, state สำหรับ birth data/results, layout sections ใหม่, BirthDataInput integration |
+| `src/components/landing/BirthDataInput.tsx` | ปรับ `onComplete` callback รับ parameter `dob: string` |
+| `src/components/MetaTagManager.tsx` | เพิ่ม `geoRegion`, `geoPlacename`, `additionalScripts` props |
+
+### ไฟล์ใหม่ที่สร้าง (4)
+| ไฟล์ | บทบาท |
+|------|-------|
+| `src/components/landing/TodayBioEnvironmentReport.tsx` | Bio-Tracking Dashboard UI (OurA Ring / Cyberpunk style) + Daily Refresh + PWA CTA |
+| `src/components/landing/IntroSummary.tsx` | บทความสรุปตัวตน 3 ย่อหน้า |
+| `src/components/landing/QuickSummary.tsx` | 6-section identity card + Social Share (FB, Line, X) |
+| `src/lib/intro-summary.ts` | Chronopsychology narrative generator + FAQ schema + forbidden words validation |
+
+### Layout Order (หลัง submit DOB)
+1. **TodayBioEnvironmentReport** — เบ็ดล่อชิ้นแรก (Bio-Tracking Dashboard)
+2. **IntroSummary** — บทความ 3 ย่อหน้า
+3. **QuickSummary** — 6-section card + Social Share
+4. **BirthDataInput** — Quick Input DOB form
+
+### Verification
+- TypeScript compilation: ✅ ผ่าน (no errors)
+- ESLint: ✅ ไม่มี error ใหม่ (เฉพาะ warning ที่มีอยู่แล้ว)

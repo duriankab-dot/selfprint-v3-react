@@ -15,7 +15,7 @@ import { useLanguage } from '@/context/LanguageContext';
 
 interface BirthDataInputProps {
   className?: string;
-  onComplete?: () => void;
+  onComplete?: (dob: string) => void;
 }
 
 export const BirthDataInput: React.FC<BirthDataInputProps> = ({
@@ -96,7 +96,7 @@ export const BirthDataInput: React.FC<BirthDataInputProps> = ({
     if (formData.place) localStorage.setItem('birth_place', formData.place);
 
     if (onComplete) {
-      onComplete();
+      onComplete(formData.dob);
     }
   };
 

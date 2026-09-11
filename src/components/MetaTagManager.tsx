@@ -16,6 +16,12 @@ interface MetaTagsProps {
   canonicalUrl?: string;
   schema?: Record<string, any>; // Additional JSON-LD schema
   breadcrumbs?: BreadcrumbItem[]; // For BreadcrumbList schema
+  /** GEO Tag: region code (e.g. "TH-22" for Chanthaburi) */
+  geoRegion?: string;
+  /** GEO Tag: placename (e.g. "Chanthaburi") */
+  geoPlacename?: string;
+  /** Additional scripts to inject (e.g. FAQ JSON-LD) */
+  additionalScripts?: Array<{ type: string; content: string }>;
 }
 
 export function MetaTagManager({
@@ -27,6 +33,9 @@ export function MetaTagManager({
   canonicalUrl,
   schema,
   breadcrumbs,
+  geoRegion,
+  geoPlacename,
+  additionalScripts,
 }: MetaTagsProps) {
   const { language } = useLanguage();
   const baseUrl = 'https://selfprint.one';
@@ -129,6 +138,17 @@ export function MetaTagManager({
           {JSON.stringify(schema)}
         </script>
       )}
+
+      {/* GEO Tags — regional targeting */}
+      {geoRegion && <meta name="geo.region" content={geoRegion} />}
+      {geoPlacename && <meta name="geo.placename" content={geoPlacename} />}
+
+      {/* Additional Scripts (e.g. FAQ JSON-LD) */}
+      {additionalScripts?.map((script, i) => (
+        <script key={i} type={script.type}>
+          {script.content}
+        </script>
+      ))}
     </Helmet>
   );
 }

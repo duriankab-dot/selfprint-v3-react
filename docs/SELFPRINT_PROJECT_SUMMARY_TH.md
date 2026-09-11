@@ -1,6 +1,6 @@
 # SELFPRINT — PROJECT SUMMARY (ภาษาไทย)
 
-> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (บันทึกจาก consultation session 7 ก.ย. 2026)
+> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — เพิ่ม Daily Time & Energy Dynamics layer)
 > **แหล่งอ้างอิงหลัก:** [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) — เอกสารนี้ **ไม่แทนที่** `FORENSIC_...`
 > `FORENSIC_...` ยังเป็น **single source of truth** ของสถานะจริง ส่วนเอกสารนี้เป็น summary กระชับสำหรับอ่านเร็ว
 > **หลักการ:** เนื้อหาทุกข้อตรวจจากซอร์สโค้ดจริง (file:line) — ไม่เชื่อ `.md` เก่า · ไม่อ้างเกินจริง · ระบุ limitations จริง
@@ -17,6 +17,23 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
   แล้วเติบโตไปกับผู้ใช้ผ่าน growth stages
 - ภาษา: รองรับไทย + อังกฤษ (dual language)
 - หลักการออกแบบ (ตามเอกสารแม่): **RECOMPOSE → CONNECT → ENHANCE** ไม่ใช่ REBUILD → REWRITE → REPLACE (§44)
+
+---
+
+## 0.5 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
+
+ชั้นคำนวณพลังงานรายวันบน Landing Page — ใช้ตรรกะ Vedic Hora/Panchang อยู่เบื้องหลัง แต่แสดงผลเป็น scientific terminology เท่านั้น
+
+| องค์ประกอบ | รายละเอียด | ไฟล์ |
+|-----------|-----------|------|
+| **Daily Dynamics Engine** | คำนวณ Accelerated Phase, High Friction Interval, Circadian Color, Attraction Vector จาก birthDate + today | `astrology.ts:calculateDailyDynamics()` |
+| **Bio-Tracking Dashboard UI** | หน้ารายงานพลังงานรายวันสไตล์ Oura Ring / Cyberpunk — แสดงบน Landing Page เป็น "เบ็ดล่อชิ้นแรก" | `TodayBioEnvironmentReport.tsx` |
+| **Quick Summary + Intro Article** | บทความสรุปตัวตน 3 ย่อหน้า + 6-section identity card + Social Share (FB, Line, X) | `IntroSummary.tsx`, `QuickSummary.tsx` |
+| **Retention Loop** | ค่า refresh อัตโนมัติทุกวัน (ตรวจสอบทุก 1 ชั่วโมง) → CTA ไป Onboarding → Full Analysis | `TodayBioEnvironmentReport.tsx`, `LandingPage.tsx` |
+| **SEO/AEO/GEO Markup** | FAQ JSON-LD (ซ่อนคำค้นหาสายมู) + GEO tags (TH-22 / Chanthaburi) | `MetaTagManager.tsx`, `intro-summary.ts` |
+| **Chronopsychology Prompt** | System prompt แปลง Vedic output เป็น scientific language — ห้ามใช้คำศัพท์สายมู | `intro-summary.ts:CHRONOPSYCHOLOGY_SYSTEM_PROMPT` |
+
+**Data Flow:** Quick Input DOB → calculateInitialDisciplines() → buildFallbackResponse() → render TodayBioEnvironmentReport → IntroSummary → QuickSummary → CTA /onboarding
 
 ---
 
@@ -125,6 +142,9 @@ Twin + memory/evolution → **Today** (living entry)
 | **`dangerouslySetInnerHTML`** | 8 จุด — ปลอดภัยทั้งหมดผ่าน `safeJsonLd()` |
 | **`chunk-intelligence` 345 kB** | chunk ใหญ่สุด — ส่วนใหญ่คือ Supabase SDK ถูกกลืน (verify ใน Phase 0) |
 | **X1 env** | `structuredData.ts:21` `'+66-2-XXX-XXXX'` fake phone fallback → GEO spam signal |
+| **SICE → Full Analysis** | ❌ ยังไม่ได้เชื่อม `SICEOrchestrator.orchestrate()` เข้ากับ Full Analysis — ใช้เฉพาะ astrology fallback |
+| **twin_sice_scores persistence** | ❌ migration มี table แล้วแต่ CoreAwakeningService เท่านั้นเขียน `twin_awakening_essence` — ยังไม่เขียน `twin_sice_scores` |
+| **Phase 2 Edge Function** | ❌ ยังไม่มี Astrovera Edge Function — `buildFallbackResponse()` เป็น primary แทนที่จะเป็น fallback |
 
 > ทั้งหมดนี้ **ไม่บล็อกการเริ่ม Track C** — แต่ต้องรู้ก่อน redesign และต้องแก้ก่อนอ้าง "100% product-verified"
 

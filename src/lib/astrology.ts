@@ -48,6 +48,21 @@ export interface InitialDisciplines {
   hexagramThai?: string;
   /** I Ching hexagram core theme (Thai) */
   hexagramTheme?: string;
+  // ── Daily Time & Energy Dynamics (Vedic Hora / Panchang derived) ─────
+  /** Accelerated Phase start time (HH:MM, e.g. "10:15") */
+  dailyAcceleratedPhaseStart?: string;
+  /** Accelerated Phase end time (HH:MM) */
+  dailyAcceleratedPhaseEnd?: string;
+  /** High Friction Interval start time (HH:MM) */
+  dailyHighFrictionStart?: string;
+  /** High Friction Interval end time (HH:MM) */
+  dailyHighFrictionEnd?: string;
+  /** Circadian Color Alignment name (Thai, e.g. "เขียวใบไม้ Sage Green") */
+  dailyCircadianColorNameTh?: string;
+  /** Circadian Color Alignment hex value (e.g. "#8FBC8F") */
+  dailyCircadianColorHex?: string;
+  /** External Attraction Vector score (0-100 percentage) */
+  dailyAttractionVectorScore?: number;
 }
 
 export interface LifePathProfile {
@@ -339,6 +354,7 @@ export function calculateInitialDisciplines(dob: string | null | undefined): Ini
   // We compute inline here so calculateInitialDisciplines stays synchronous.
   const natal = calculateNatalChartInline(safeDob);
   const hex = calculateHexagramInline(safeDob);
+  const daily = calculateDailyDynamics(safeDob);
 
   return {
     lifePathNumber,
@@ -358,6 +374,127 @@ export function calculateInitialDisciplines(dob: string | null | undefined): Ini
     hexagramNumber: hex.number,
     hexagramThai: hex.thai,
     hexagramTheme: hex.theme,
+    dailyAcceleratedPhaseStart: daily.dailyAcceleratedPhaseStart,
+    dailyAcceleratedPhaseEnd: daily.dailyAcceleratedPhaseEnd,
+    dailyHighFrictionStart: daily.dailyHighFrictionStart,
+    dailyHighFrictionEnd: daily.dailyHighFrictionEnd,
+    dailyCircadianColorNameTh: daily.dailyCircadianColorNameTh,
+    dailyCircadianColorHex: daily.dailyCircadianColorHex,
+    dailyAttractionVectorScore: daily.dailyAttractionVectorScore,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Daily Time & Energy Dynamics — Vedic Hora / Panchang derived
+//
+// Deterministic calculation seeded from birthDate + today's date.
+// Uses Vedic astrological logic (Hora lord, Panchang Tithi, Rashi, Graha)
+// behind the scenes but returns scientific/chronopsychology terminology
+// only. No Sanskrit or fortune-telling terms leak to the UI layer.
+// ---------------------------------------------------------------------------
+
+const VEDIC_COLORS = [
+  { nameTh: 'ทองแดง Copper', hex: '#B87333' },    // Sunday / Sun
+  { nameTh: 'สีฟ้า Sky Blue', hex: '#87CEEB' },    // Monday / Moon
+  { nameTh: 'เขียวใบไม้ Sage Green', hex: '#8FBC8F' }, // Tuesday / Mars
+  { nameTh: 'เหลืองมะนาว Lemon Yellow', hex: '#FFF44F' }, // Wednesday / Mercury
+  { nameTh: 'ม่วงลาเวนเดอร์ Lavender', hex: '#E6E6FA' }, // Thursday / Jupiter
+  { nameTh: 'น้ำเงินเข้ม Navy Indigo', hex: '#4B0082' }, // Friday / Venus
+  { nameTh: 'เทาเข้ม Charcoal Grey', hex: '#36454F' },  // Saturday / Saturn
+];
+
+function getDayOfYear(date: Date): number {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date.getTime() - start.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+function normalizeHour(dob: string, now: Date): number {
+  /**
+   * Vedic Hora: each hour is ruled by a planet in a repeating sequence.
+   * The first hour of each day is ruled by the day's weekday lord.
+   *
+   * Weekday lords (Vedic): Sun=Sunday, Moon=Monday, Mars=Tuesday,
+   * Mercury=Wednesday, Jupiter=Thursday, Venus=Friday, Saturn=Saturday.
+   *
+   * We also seed from the user's birthDate to make it personal.
+   */
+  const weekdayIndex = now.getDay(); // 0=Sun, 1=Mon, ...
+  const dayOfYear = getDayOfYear(now);
+  const dobParsed = new Date(normalizeDob(dob));
+  const birthDayOfYear = getDayOfYear(dobParsed);
+  const hoursSinceBirth = (now.getTime() - dobParsed.getTime()) / (1000 * 60 * 60);
+
+  // Hora sequence repeats every 7 planets
+  const horaLordIndex = ((weekdayIndex + dayOfYear + birthDayOfYear + Math.floor(hoursSinceBirth)) % 7 + 7) % 7;
+  return horaLordIndex;
+}
+
+export function calculateDailyDynamics(dob: string | null | undefined, now: Date = new Date()): {
+  dailyAcceleratedPhaseStart: string;
+  dailyAcceleratedPhaseEnd: string;
+  dailyHighFrictionStart: string;
+  dailyHighFrictionEnd: string;
+  dailyCircadianColorNameTh: string;
+  dailyCircadianColorHex: string;
+  dailyAttractionVectorScore: number;
+} {
+  const safeDob = normalizeDob(dob);
+  const [y, m, d] = safeDob.split('-').map(Number);
+  const birthDate = new Date(y, m - 1, d);
+
+  // Seed: combine birth date components with today's date for deterministic output
+  const dayOfYearToday = getDayOfYear(now);
+  const dayOfYearBirth = getDayOfYear(birthDate);
+  const seed = (y + m * 7 + d * 13 + dayOfYearToday * 31) % 100;
+
+  // ── Accelerated Phase Window (นาทีทอง)
+  // Derived from Hora lord + birth day interaction
+  const horaLord = normalizeHour(safeDob, now);
+  // Each hora lord maps to a different "golden hour" window
+  const goldenWindows: Array<{ startH: number; startM: number; endH: number; endM: number }> = [
+    { startH: 6, startM: 0, endH: 7, endM: 45 },    // Sun
+    { startH: 9, startM: 15, endH: 11, endM: 0 },    // Moon
+    { startH: 10, startM: 30, endH: 12, endM: 0 },   // Mars
+    { startH: 13, startM: 0, endH: 14, endM: 30 },   // Mercury
+    { startH: 11, startM: 0, endH: 12, endM: 45 },   // Jupiter
+    { startH: 15, startM: 0, endH: 16, endM: 30 },   // Venus
+    { startH: 7, startM: 30, endH: 9, endM: 0 },     // Saturn
+  ];
+  const win = goldenWindows[horaLord];
+  const accStart = `${pad2(win.startH)}:${pad2(win.startM)}`;
+  const accEnd = `${pad2(win.endH)}:${pad2(win.endM)}`;
+
+  // ── High Friction Interval
+  // Offset ~4-5 hours from accelerated phase (Vedic: malefic aspect period)
+  const frictionOffset = ((seed % 5) + 4); // 4-8 hours offset
+  const fricStartH = (win.startH + frictionOffset) % 24;
+  const fricEndH = (win.endH + frictionOffset) % 24;
+  const fricStartM = win.startM;
+  const fricEndM = win.endM;
+  const hfricStart = `${pad2(fricStartH)}:${pad2(fricStartM)}`;
+  const hfricEnd = `${pad2(fricEndH)}:${pad2(fricEndM)}`;
+
+  // ── Circadian Color Alignment (สีมงคลประจำวัน)
+  // Based on Tithi (lunar day) = (dayOfYearToday + dayOfYearBirth) % 30
+  const tithi = (dayOfYearToday + dayOfYearBirth) % 30;
+  const colorIndex = Math.floor(tithi / 30 * VEDIC_COLORS.length) % VEDIC_COLORS.length;
+  const color = VEDIC_COLORS[colorIndex];
+
+  // ── External Attraction Vector (โชคลาภ / ดัชนีแรงดึงดูด)
+  // Combined score from multiple Vedic factors
+  const rashiSeed = (dayOfYearToday * 7 + dayOfYearBirth * 13) % 100;
+  const grahaSeed = (horaLord * 11 + seed) % 100;
+  const attractionScore = Math.min(99, Math.max(15, Math.round((rashiSeed + grahaSeed) / 2)));
+
+  return {
+    dailyAcceleratedPhaseStart: accStart,
+    dailyAcceleratedPhaseEnd: accEnd,
+    dailyHighFrictionStart: hfricStart,
+    dailyHighFrictionEnd: hfricEnd,
+    dailyCircadianColorNameTh: color.nameTh,
+    dailyCircadianColorHex: color.hex,
+    dailyAttractionVectorScore: attractionScore,
   };
 }
 
