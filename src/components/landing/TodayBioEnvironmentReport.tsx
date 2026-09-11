@@ -39,7 +39,6 @@ function pad2(n: number): string {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 function GaugeBar({ value, label, color }: { value: number; label: string; color: string }) {
-  const isTh = !label.includes('External') && !label.includes('Attraction');
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
@@ -72,7 +71,6 @@ function PhaseCard({ icon, title, timeRange, description, type }: {
   type: 'accelerated' | 'friction';
 }) {
   const borderColor = type === 'accelerated' ? 'var(--color-accent-primary)' : '#ef5350';
-  const glowColor = type === 'accelerated' ? 'rgba(91,92,235,0.3)' : 'rgba(239,83,80,0.3)';
 
   return (
     <div
@@ -163,7 +161,7 @@ const TH = {
   relationalResonance: 'คลื่นความสัมพันธ์ส่งเสริม (Relational Resonance Graph)',
   relationalDesc: 'Analytical Nodes (กลุ่มคนสายตรรกะ) — วันนี้คลื่นความถี่ของคุณเปิดรับการส่งเสริมจากผู้ที่มีลักษณะตรรกะสูง การปรึกษาหรือทำงานร่วมกับคนกลุ่มนี้จะช่วยขยายผลลัพธ์ได้ทวีคูณ',
   socialFriction: 'ดัชนีแรงเสียดทานจากบุคคลภายนอก (Social Friction Intercept)',
-  socialFrictionDesc: (start: string, end: string) =>
+  socialFrictionDesc: (_start: string, _end: string) =>
     `ตรวจพบสัญญาณแรงเสียดทานทางอารมณ์จากบุคคลรอบข้างในช่วงเวลาดังกล่าว แนะนำให้ลดการปะทะหรือระวังการตีความเจตนาที่ผิดพลาดจากฝ่ายตรงข้าม`,
   colorTitle: 'มิติคลื่นแสงประจำวัน (Color Frequency Alignment)',
   colorDesc: 'การเปิดรับหรือใช้สีนี้ในพื้นที่ทำงานวันนี้ จะช่วยลดแรงกระตุ้นประจุลบ และเพิ่มสมาธิในการวิเคราะห์',
@@ -190,7 +188,7 @@ const EN = {
   relationalResonance: 'Relational Resonance Graph',
   relationalDesc: 'Analytical Nodes — Your frequency band is open to support from highly analytical individuals. Collaboration with this cluster amplifies outcomes exponentially.',
   socialFriction: 'Social Friction Intercept',
-  socialFrictionDesc: (start: string, end: string) =>
+  socialFrictionDesc: (_start: string, _end: string) =>
     `Emotional friction signals from surrounding individuals detected during this window. Recommend de-escalation and careful interpretation of opposing intentions.`,
   colorTitle: 'Color Frequency Alignment',
   colorDesc: 'Exposure to or use of this color in your workspace today reduces negative charge stimulation and enhances analytical focus.',

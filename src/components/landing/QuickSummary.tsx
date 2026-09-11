@@ -257,7 +257,7 @@ function ShareButton({ label, onClick, color, altText }: {
         opacity: altText ? 0.7 : 1,
       }}
       onMouseEnter={(e) => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'translateY(-1px)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.opacity = altText ? 0.7 : 1; e.currentTarget.style.transform = 'translateY(0)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.opacity = altText ? '0.7' : '1'; e.currentTarget.style.transform = 'translateY(0)'; }}
     >
       {altText || label}
     </button>
