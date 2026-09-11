@@ -1,188 +1,195 @@
 # 📊 SELFPRINT PROJECT STATUS — Honest Summary ภาษาไทย
 
-**อัปเดตล่าสุด:** 11 กันยายน 2026 (Immersive V3 Visual Foundation + Daily Dynamics + SICE Integration)  
+**อัปเดตล่าสุด:** 11 กันยายน 2026 (Master Gate Forensic Verification)  
 **Project:** Selfprint v3 (React + Vite + TypeScript + Supabase + Cloudflare Pages)  
-**วิธีตรวจ:** อ่านซอร์สโค้ดจริง + รัน build/test/lint จริง + **verify กับ Supabase / Cloudflare / GitHub จริงเมื่อ 5 ก.ย. 2026**
+**วิธีตรวจ:** อ่านซอร์สโค้ดจริง + grep call graph — **ไม่สามารถรัน build/test/lint ได้** (environment permission gate)  
 **เอกสารอ้างอิงหลัก:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` — **เอกสารสถานะฉบับเดียวที่ถูกต้อง**
 
-> ✅ **สถานะโครงการ:** **PRODUCTION VERIFIED 100%** (P0-A through P0-F ทั้งหมดผ่าน)  
-> Build / test / lint ผ่านทั้งหมด · Twin creation ทำงานได้จริง · Architecture ตรวจสอบแล้ว
+> ⚠️ **สถานะโครงการ:** **MASTER GATE = NOT PASS**  
+> มี 6 critical gaps ที่ต้องปิดก่อนเรียก "Production Ready"
 
 ---
 
-## 🎯 สถานะ gate ปัจจุบัน — วัดจริงทุกตัว (11 ก.ย. 2026)
+## 🎯 สถานะ gate ปัจจุบัน — วัดจาก source code (11 ก.ย. 2026)
 
 | gate | ผล | verify กับ |
 |------|-----|----------|
-| `tsc -b` (strict: true) | ✅ 0 errors | local build |
-| `npm run typecheck:functions` | ✅ 0 errors | local build |
-| `vite build` | ✅ สำเร็จ ~3.6s · ~600 modules | local build |
-| `oxlint` | ✅ 0 errors · warnings · files | local build |
-| `vitest run` | ✅ 67/67 ไฟล์ · 1042 tests · 0 fail · 0 skip | local build |
-| **migration 035** | ✅ **apply แล้ว** | Supabase SQL Editor |
-| **Cloudflare Pages build** | ✅ Build PASS | Cloudflare Pages |
-| **`git filter-repo`** | ✅ v2.47.0 ติดตั้งแล้ว | เครื่องจริง |
-| **P0-A ฯลฯ Verification** | ✅ **100% VERIFIED** | **Forensic Audit** |
-| **Immersive V3 (Phase 1-6)** | ✅ ship แล้ว (2026-09-11) | 5-layer stack, world transitions, immersive chat, glass surfaces |
-| **Daily Dynamics Layer** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI |
-| **SICE → Full Analysis** | ✅ ปิดแล้ว (2026-09-11) | `handleFinetuneSubmit` เรียก `SICEOrchestrator.orchestrate()` |
-| **twin_sice_scores persistence** | ✅ ปิดแล้ว (2026-09-11) | `persistSiceScores()` บันทึก scores ลง localStorage |
-| **Phase 2 Astrovera Edge Function** | ✅ สร้างแล้ว (2026-09-11) | `supabase/functions/astrovera-edge/index.ts` |
+| SICE engine pipeline | ✅ GREEN (source verified) | SICEOrchestrator.ts:55-197, call graph traced |
+| Auth / Security | ✅ GREEN (source verified) | verify-user.ts, twin.ts, unified-handler.ts |
+| Persistence | 🟡 YELLOW | await present; migration 035 apply status unknown |
+| Awakening → Twin | ✅ GREEN (source verified) | CoreAwakeningService.ts:131-820 |
+| Canonical Twin Identity | ✅ GREEN (source verified) | seedKey=session.user.id through birth→presence |
+| Visual DNA | ✅ GREEN (source verified) | 18 archetype parameter table + per-user deterministic traits |
+| Birth Continuity | ✅ GREEN (source verified) | Same DNA/traits derivation in canvas and SVG |
+| Immersive Chat Layer | ✅ GREEN (source verified) | Layer architecture verified at source |
+| Growth | 🔴 ORANGE | checkMicroEvolution/evolveTwin/useEvolutionTracking = zero production callers |
+| Three.js / Living Body | 🔴 RED | NO three.js dependency — actual renderer is SVG/canvas2D/CSS |
+| World System | 🟢 Manual selection real; auto-routing DEAD | routeToWorld() has zero callers |
+| World Transition | 🟠 ORANGE | Engine real but CSS wiring broken |
+| Streaming path | 🟡 IMPLEMENTED BUT NOT VERIFIED | streamTwinResponse() has zero callers |
+| Audio behavior | 🟠 ORANGE | Infrastructure exists, no consumer wiring |
+| Build/Test/Lint | 🔵 BLOCKED | Environment gate prevents execution |
+| Live Environment | 🔵 NOT VERIFIED | No credentials available |
 
-**สรุป:** ทุก gate ผ่าน · Build สำเร็จ · Tests 100% pass · Lint ไม่มี errors · **Production verified 100%**
+### สรุปภาพรวม
+
+```text
+MASTER GATE = NOT PASS
+```
+
+มี 6 critical gaps:
+
+| # | Gap | Severity |
+|---|-----|----------|
+| 1 | Growth pipeline unwired | P0 CRITICAL |
+| 2 | Three.js gate not met | P0 CRITICAL |
+| 3 | World Transition CSS broken | P0 MAJOR |
+| 4 | Migration 035/034 apply UNKNOWN | P0 CRITICAL |
+| 5 | Streaming path dead | P0 MAJOR |
+| 6 | Build/Test/Lint blocked | P1 MAJOR |
+
+รายละเอียดเต็ม: ดู `MASTER_GATE_AS_IS.md`, `MASTER_GATE_EVIDENCE.md`, `MASTER_GATE_REMEDIATION_PLAN.md`
 
 ---
 
-## ✅ สิ่งทำเสร็จ 100% VERIFIED
+## ✅ สิ่งทำเสร็จแล้ว (source verified)
 
 ### P0-A: 12 SICE Engines Implementation
 - PersonalContextBuilder, PatternDetector, InsightEngine, AIFeedbackLoop, TwinStateEngine, ExperienceEngine, EnvironmentEngine, BadgeEngine, BehavioralForecastEngine, FutureSelfEngine, MemoryManagerEngine, DecisionIntelligenceEngineAdapter
 - ทุก engine มี implementation จริง · ลงทะเบียนและเรียกผ่าน orchestrator · output ไหลสู่ synthesis และ persistence
+- Engine internal verification: REAL queries to Supabase (decisions, twin_memories, world_stats, profiles) + real aggregation/sentiment logic
 
 ### P0-B: SICE Orchestration & Synthesis
 - Orchestrator รัน engines แบบ parallel ผ่าน Promise.all
 - Completion Status logic: COMPLETE / DEGRADED / FAILED
-- Critical persistence ถูก await ก่อนคืนค่า
-- มีการจัดการข้อผิดพลาดที่เหมาะสม
+- Critical persistence ถูก await ก่อนคืนค่า (Promise.allSettled + status override)
+- Non-critical badge bridge เป็น fire-and-forget (ยอมรับได้)
 
 ### P0-C: Awakening / Twin Creation
-- CoreAwakeningService ทำงานครบ 9 operations
-- มี integrity check และ compensating rollback
-- Atomic creation ป้องกัน orphan records
+- CoreAwakeningService ทำงานครบ 9 operations ใน Promise.allSettled
+- Idempotency guards: double-check twin/essence existence before insert
+- Compensating rollback: delete orphan twin + mark essence as 'failed' for retry
+- UNIQUE(user_id) constraint on twins table prevents duplicates
+- Transaction boundary = application-level compensating action (not SQL transaction)
 
-### P0-D: TwinChat Normal + Streaming
-- ทั้งสอง path มี auth parity (JWT verification)
-- Rate limiting เท่ากัน
-- Memory injection ปรับให้เท่ากัน
-- System prompt มีความสอดคล้องกับ twin identity
+### P0-D: TwinChat Normal Path (VERIFIED)
+- Normal path: callTwinAPI → /api/twin (JWT verified) → OpenRouter REST API
+- Memory injection: loadRecentMemories → sanitized cap 10 → buildPrompt [RELEVANT MEMORY]
+- Persistence: saveTwinMemory awaited after both user and twin messages
+- Semantic parity: callTwinAPI and streamTwinResponse share identical buildPrompt()
 
 ### P0-E: Auth / Security
-- ทุก API endpoint ตรวจสอบ JWT อย่างเหมาะสม
-- client ไม่ได้ปลอมแปลง user_id
-- User A และ User B แยกกันอย่างเข้มงวด
-- Rate limiting ทำงานถูกต้อง
+- ทุก API endpoint ตรวจสอบ JWT อย่างเหมาะสม (verifyUser via Supabase auth API)
+- Rate limiting: twin 40 req/min, nova 60 req/min (in-memory Map)
+- Client ไม่ได้ปลอมแปลง user_id (handleSICE rejects mismatched userId → 403)
+- User A และ User B แยกกันอย่างเข้มงวด (RLS + .eq('user_id', user.id))
+- Ownership enforcement: handleTwinEvolution .eq('user_id', user.id) in code, not only by RLS
 
 ### P0-F: Persistence
-- ทุก critical write operation ถูก await
-- Compensating rollback ทำงานถูกต้อง
-- Idempotency guards ป้องกัน duplicate execution
-- ไม่มี fire-and-forget บน critical path
+- ทุก critical write operation ถูก await (Promise.allSettled + status override)
+- Compensating rollback ทำงานถูกต้อง (delete orphan + mark essence failed)
+- Idempotency guards ป้องกัน duplicate execution (double-check before insert)
+- ไม่มี fire-and-forget บน critical path (badge bridge เป็น non-critical เท่านั้น)
 
-### 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
-- **Phase 1:** `immersive-layers.css` (5-layer stack) + `world-transitions.css` (9 transition types) + import ใน `index.css`
-- **Phase 2:** `useTwinStates.ts` hook (IDLE → LISTENING → THINKING → RESPONDING → GROWING)
-- **Phase 3:** seedKey consistency verified across HologramBirth → TwinPresence
-- **Phase 4:** `ImmersiveTwinChat.tsx` living space ใหม่ + route `/chat/twin` เปลี่ยนชี้ไปใหม่
-- **Phase 5:** `WorldTransitionEngine.ts` (12 worlds × 12 = 144 transition rules)
-- **Phase 6:** WorldsHub/ExplorePage/MePage เพิ่ม glass surfaces (`immersive-glass`) + `immersive-page` wrapper
+### Canonical Twin Identity
+- Birth: HologramBirth canvas ใช้ getTwinVisualDNA + getUniqueTwinTraits(seedKey=session.user.id)
+- Chat: TwinPresence SVG ใช้ useTwinIdentity ซึ่งคำนวณจาก seedKey เดียวกัน + archetype จาก DB
+- Deterministic: same birthDate → same calculateArchetypes → same archetype → same DNA/traits
+- Continuity holds via identical seedKey derivation
 
-### Infrastructure
-- TypeScript strict mode: PASS (0 errors)
-- Build: PASS (~600 modules, 0 errors)
-- Tests: PASS (67/67 files, 1042 tests, 0 failures)
+### Visual DNA Parameter Space
+- 18-archetype parameter table (coreColor/auraColor/coreShape/motionSpeed/auraStyle)
+- Per-user deterministic traits: hueShiftDeg, facetCount, shapeJitterSeed, orbitDirection
+- Shape families: sphere/crystal/ring/diamond/bloom/wave (6 types)
+- Parameter-space DNA, NOT 18 hardcoded avatars
 
----
+### Immersive Chat Layer Architecture
+- immersive-layers.css @import in index.css (lines 7-8)
+- Layer 0: WorldEnvironment → Layer 1: Canonical Twin → Layer 2: Contextual Effects → Layer 3: Primary Controls → Layer 4: Temporary UI
+- AppShell hideNav, no legacy chrome conflict, no duplicate renderer
 
-## 🧩 สิ่งที่ทำเสร็จแล้ว
-
-### Core Awakening (โค้ดฝั่ง client)
-- `src/services/CoreAwakeningService.ts` — `startAwakening()` / `initializeTwin()` ทำงานครบ
-- `src/services/TwinSupabaseService.ts` — `createTwinInDatabase()` ทำ **INSERT จริง**
-- `checkReadyForAwakening()` แก้บั๊กแล้ว
-
-### SICE — 12 engines จริง
-- `SICEOrchestrator.ts` ลงทะเบียน 12 engines จริง
-- `nova.ts` + `twin.ts` เรียก OpenRouter API จริง
-- `SICEBridge.ts` เชื่อมโยง orchestrator output → persistence
-
-### C0 fixes — verify ครบทุกข้อ
-| รหัส | เรื่อง | สถานะ |
-|------|-------|--------|
-| TWFIX-001 | VoiceChat.tsx:80 — ✅ แก้แล้ว | Web Speech API + /api/nova |
-| REALBUG-001..004 | แก้ครบ → 1042/1042 ผ่าน · 0 skip | ✅ |
-| SEC-02 | send-push บังคับ JWT | ✅ |
-| NOTIFAUTH-001, TWINEVOAUTH-001 | Auth gate สมบูรณ์ | ✅ |
-| NAVGAP-001 | nav หายช่วง 761–1023 px | ✅ |
-| DEADCHUNK-001 | ลบ manualChunks branch ที่ตาย | ✅ |
-| ASSET404-001 | แก้ asset ที่อ้างแต่ไม่มีไฟล์จริง | ✅ |
-| RAFLOOP-001 | rAF loop เคารพ `prefers-reduced-motion` | ✅ |
-| AUTHHDR-001 | client ส่ง `Authorization` ครบ | ✅ |
-| NOVAPROV-001 | `NovaProvider` mount ครบ | ✅ |
-| ERRBOUND-001 + SENTRY-INIT-001 | ErrorBoundary + Sentry init | ✅ |
-| HOMEBLANK-001 | หน้าแรกไม่ blank แล้ว | ✅ |
-
-### Migration & Setup
-- **migration 035_forensic_consolidation_2026-09-03**: ✅ **apply แล้ว**
-- **git filter-repo v2.47.0**: ✅ **ติดตั้งแล้ว**
-- Build สำเร็จใน Cloudflare Pages ด้วย dist/ สะอาด
+### Daily Dynamics Layer
+- Vedic Hora/Panchang calculation → deterministic daily dynamics
+- Bio-Tracking Dashboard UI on Landing Page
+- Quick Summary + Intro Summary + Social Share (FB, Line, X)
+- SEO/AEO/GEO markup: FAQ JSON-LD + GEO tags
 
 ---
 
-## ⚠️ ข้อควรระวังที่ยังมีหลัง (Grace Notes)
+## 🔴 สิ่งที่พบว่าเป็นปัญหา (Forensic Audit)
 
-1. **Live DB Integration** — ไม่ได้รันทดสอบกับ Supabase production จริงใน sandbox (ขาด credentials) แต่โค้ดพร้อมและ pattern ตรวจสอบแล้วถูกต้อง
-2. **Live OpenRouter Calls** — ไม่ได้รันทดสอบ (ไม่มี API key ใน sandbox) แตะโค้ดพร้อมและ typecheck ผ่าน
-3. **E2E Browser Tests** — ไม่ได้รันใน sandbox (ขาด Playwright session) มี test cases ครบถ้วน
-4. **Non-Critical Fire-and-Forget** — Badge bridging, world interaction recording เป็น graceful degradation ที่ยอมรับได้
+### 1. Growth Pipeline Unwired (P0 CRITICAL)
+- `src/services/TwinEvolutionService.ts:44` checkMicroEvolution — real logic
+- `src/services/TwinEvolutionService.ts:109` evolveTwin — real DB updates
+- `src/hooks/useEvolutionTracking.ts:24` hook exists
+- **Zero production callers** (grep confirmed)
+- maturityScore set once at birth (CoreAwakeningService.ts:354), static afterward
+- Product lock says GROWTH = EVOLUTION ("growth เปลี่ยน Twin จริง") — loop ไม่เกิด
 
----
+### 2. Three.js / Living Body Not Met (P0 CRITICAL)
+- package.json: NO three dependency
+- grep "from 'three'" across all files: zero matches
+- Comment in Twin.tsx:12-14: C5 decided against WebGL (~350kB gzip not justified)
+- Actual renderers: HologramBirth (canvas 2D), TwinPresence (SVG), fallbacks (CSS radial gradients)
+- Twin IS a living presence via SVG animation, but Three.js gate = not met
 
-## 🧩 Stub / Mockup / Hardcode ที่ยังเหลือ (ไม่ส่งผลกระทบ)
+### 3. World Transition CSS Broken (P0 MAJOR)
+- `WorldTransitionEngine.computeTransition()` returns correct type
+- `ImmersiveTwinChat.handleWorldChange` sets container class like `world-transition--attraction`
+- **MISSING**: CSS rules `.world-transition--attraction { ... }` etc. — selectors don't exist
+- Container element empty — no old/new-world children rendered
+- Actual effect: lighting flash overlay + useTwinStates CSS vars only
 
-| ไฟล์:บรรทัด | สิ่งที่ยังเป็นของปลอม | สถานะ |
-|-------------|---------------------|--------|
-| `VoiceInput.tsx:38` | mock speech recognition | ยังเป็น mock แต่ VoiceChat แก้แล้วใช้ Web Speech API |
-| `VoiceOutput.tsx:34` | mock TTS | มีแผนการ implementing ในรอบต่อไป |
-| `CommunityPage.tsx:397` | "Coming soon" | ตามแผนการตั้งชื่อ |
-| `ExplorePage.tsx:728,898` | stub cards | มีแผนการ complete ใน Track C |
-| `DecisionDashboard.tsx:126` | placeholder "Phase F Dashboard" | ตามแผนการ design |
-| `structuredData.ts:21` | `VITE_BUSINESS_PHONE \|\| '+66-2-XXX-XXXX'` fake phone fallback | X1 env issue — ไม่ใช่ production path |
-| `public/soundscape-manifest.json` | 23 จุด CLOUDINARY_URL | ต้องอัปเดตเมื่อมี asset ใหม่ |
-| `SentryService.ts:15` | `MockSentry` class (orphan) | มีเลิกไปแล้ว แต่ยังคงอยู่เพื่อ compatibility |
+### 4. Migration 035/034 Apply Unknown (P0 CRITICAL)
+- PRODUCTION_DB_CATCHUP (09-01) does NOT include 035 (09-03)
+- Comment in 035:1186: "migrations/ folder ที่ config.toml ไม่ได้ scope ให้ CLI apply เลย จึงไม่ยืนยันได้ว่ามีอยู่จริงใน production หรือไม่"
+- Without 035: twin_state/twin_personality/twin_capabilities INSERT policies missing → RLS blocks inserts → Twin birth fails silently
 
----
+### 5. Streaming Path Dead (P0 MAJOR)
+- `/api/twin-stream` exists with full auth/rate-limit/parity
+- `streamTwinResponse()` in TwinAPIService.ts uses shared buildPrompt()
+- **Zero callers** in production UI (ImmersiveTwinChat uses callTwinAPI only)
 
-## 📚 รายการเอกสารที่เกี่ยวข้อง (อัปเดต 11 ก.ย. 2026)
-
-### 🟢 ชั้น 1 — Single Source of Truth (ต้องอ่านก่อนทำอะไร)
-
-| # | เอกสาร | ที่อยู่ | สถานะ |
-|---|--------|--------|--------|
-| 1 | `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` | [../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | ✅ **Production Verified 100%** |
-| 2 | `docs/SELFPRINT_PRODUCTION_STATUS_TH.md` | [./SELFPRINT_PRODUCTION_STATUS_TH.md](./SELFPRINT_PRODUCTION_STATUS_TH.md) | ✅ อัปเดตแล้ว |
-| 3 | `docs/SELFPRINT_PROJECT_SUMMARY_TH.md` | [./SELFPRINT_PROJECT_SUMMARY_TH.md](./SELFPRINT_PROJECT_SUMMARY_TH.md) | ✅ อัปเดตแล้ว |
-| 4 | `README.md` | [../README.md](../README.md) | ✅ อัปเดตแล้ว |
-
-### 🟡 ชั้น 2 — แผนงานรวม + ผลตรวจ (Phase 0 / Track A/B/C)
-
-| # | เอกสาร | ที่อยู่ | สถานะ |
-|---|--------|--------|--------|
-| 5 | `docs/PLAN_TRACKS_TH.md` | [./PLAN_TRACKS_TH.md](./PLAN_TRACKS_TH.md) | ✅ อัปเดตแล้ว |
-| 6 | `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` | [./PHASE0_VISUAL_PERF_FORENSIC_TH.md](./PHASE0_VISUAL_PERF_FORENSIC_TH.md) | ✅ |
-| 7 | `docs/Experience Architecture v2.md` | [./Experience Architecture v2.md](./Experience%20Architecture%20v2.md) | 🟡 Proposed Architecture |
-| 8 | `docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md` | [./Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md](./Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | ✅ Track C ปิดครบ |
+### 6. Build/Test/Lint Blocked (P1 MAJOR)
+- Environment permission gate blocks npm commands
+- dist/assets modified 2026-09-11 13:46 — indirect evidence that build succeeded today
+- Cannot confirm from source alone without execution
 
 ---
 
-## 🎯 สรุป
+## 🧩 Legacy / Duplicate Systems (Not bugs, just cleanup candidates)
 
-> **✅ สถานะ: PRODUCTION VERIFIED 100%**
->
-> - **Code Quality:** TypeScript strict mode ผ่าน 0 errors
-> - **Build:** ~600 modules transformed, ~3.6s, ไม่มี errors
-> - **Tests:** 1042/1042 ผ่าน, 0 failures
-> - **Architecture:** 12 engines + 13 services + 7 APIs, ทุกอย่าง verified
-> - **Security:** Auth, authorization, rate limiting ตรวจสอบแล้ว
-> - **Persistence:** Critical operations await และมี rollback
-> - **Immersive V3:** 5-layer visual stack + world transitions + canonical twin state machine + glass surfaces (Phase 1-6 ship แล้ว)
-> - **Daily Dynamics:** Vedic calculation + Bio-Tracking Dashboard + Social Share (ship แล้ว)
-> - **Documentation:** Single source of truth established
->
-> **ไม่มี blocker ใด ๆ** — Track A, B, C ทั้งหมดเสร็จแล้ว
+| File | Status | Notes |
+|------|--------|-------|
+| `src/pages/TwinChat.tsx` | LEGACY | Not routed; App.tsx routes /chat/twin to ImmersiveTwinChat |
+| `src/services/SICEOrchestratorImpl.ts` | DEAD | Zero imports, only self-reference |
+| `src/services/world-routing/WorldRoutingService.ts` | DEAD | routeToWorld() has zero callers |
+| `src/services/world-routing/WorldDecisionRouter.ts` | DEAD | Zero callers |
+| `twin_memory` (singular) table | DUPLICATE EMPTY TABLE | Code uses twin_memories (plural); documented in 035:694-715 |
 
 ---
 
-**สถานะ:** ✅ **PRODUCTION VERIFIED 100%**  
-**ฐานข้อมูล:** `035_forensic_consolidation_2026-09-03` apply แล้ว  
-**Deployment:** Cloudflare Pages build PASS  
-**Update:** 11 กันยายน 2026
+## 🛠️ Commands
+
+```powershell
+npm install
+npm run dev
+npm run build                 # tsc -b && vite build — ต้องผ่านก่อน commit
+npm test                      # vitest — ต้องผ่านหมด
+npm run lint                  # oxlint — 0 errors (warning ไม่บล็อก)
+npm run typecheck:functions   # functions/ + api/
+npx playwright test           # E2E
+git push origin master        # trigger CF Pages auto-deploy
+supabase db push --include-all # Apply migrations 034+035 to production
+```
+
+⚠️ ถ้า build/test พังด้วย **bus error** ในเครื่อง Linux/sandbox = ไฟล์ native binding ติดตั้งไม่ครบ
+ไม่ใช่ platform ไม่รองรับ — เช็คขนาด `@rolldown/binding-*` ~19.9 MB · `lightningcss-*` ~10 MB ·
+`@oxlint/binding-*` ~16 MB ถ้าเล็กกว่านั้นมาก `rm -rf node_modules && npm install` ใหม่
+
+---
+
+## 📞 Links
+
+- **GitHub:** https://github.com/duriankab-dot/selfprint-v3-react
+- **Production:** https://selfprint.one

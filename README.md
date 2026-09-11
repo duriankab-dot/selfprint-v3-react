@@ -1,10 +1,10 @@
 # 🌟 SELFPRINT — Living Intelligence Platform
 
-**แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**
+**แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**  
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `PRODUCTION READY + IMMERSIVE V3 + DAILY DYNAMICS + SICE INTEGRATION` ✅
-> **Commit ล่าสุด:** Immersive V3 Visual Foundation (Phase 1-6) + Daily Dynamics + SICE Integration (2026-09-11)
+> **สถานะการผลิต:** `MASTER GATE = NOT PASS` (Forensic Audit 2026-09-11)  
+> มี 6 critical gaps ที่ต้องปิดก่อนเรียก "Production Ready"
 
 ---
 
@@ -12,17 +12,25 @@
 
 | พื้นที่ | สถานะ | หลักฐาน |
 |--------|--------|---------|
-| **P0-A: 12 Sciences** | ✅ ยืนยันแล้ว | ทุก engine มี implementation, registration, execution, output flow |
-| **P0-B: SICE Orchestration** | ✅ ยืนยันแล้ว | Parallel execution, completionStatus, persistence awaited |
-| **P0-C: Awakening/Twin** | ✅ ยืนยันแล้ว | Atomic twin creation, compensating rollback, orphan prevention |
-| **P0-D: TwinChat** | ✅ ยืนยันแล้ว | Normal + streaming parity, auth + memory injection |
-| **P0-E: Auth/Security** | ✅ ยืนยันแล้ว | JWT verification, user isolation, rate limiting, streaming auth parity |
-| **P0-F: Persistence** | ✅ ยืนยันแล้ว | Critical writes awaited, no fire-and-forget on critical path |
-| **P1: SICE Integration** | ✅ ปิดแล้ว (2026-09-11) | handleFinetuneSubmit เรียก SICEOrchestrator → merge insights → FullAnalysis · twin_sice_scores persist หลัง submit · Astrovera Edge Function สร้างแล้ว |
-| **Immersive V3 (Phase 1-6)** | ✅ ship แล้ว (2026-09-11) | 5-layer visual stack, world transitions, immersive twin chat, glass surfaces |
-| **Daily Dynamics** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI + Landing Page integration |
+| **P0-A: 12 Sciences** | ✅ GREEN (source verified) | ทุก engine มี implementation, registration, execution, output flow |
+| **P0-B: SICE Orchestration** | ✅ GREEN (source verified) | Parallel execution, completionStatus, persistence awaited |
+| **P0-C: Awakening/Twin** | ✅ GREEN (source verified) | Atomic twin creation, compensating rollback, orphan prevention |
+| **P0-D: TwinChat** | 🟡 YELLOW | Normal path real + persisted; streaming path IMPLEMENTED BUT NOT VERIFIED (zero callers) |
+| **P0-E: Auth/Security** | ✅ GREEN (source verified) | JWT verification, user isolation, rate limiting, streaming auth parity |
+| **P0-F: Persistence** | 🟡 YELLOW | Critical writes awaited + rollback; migration 035 apply status UNKNOWN |
+| **Canonical Twin Identity** | ✅ GREEN (source verified) | Same seedKey + archetype through birth→presence |
+| **Visual DNA** | ✅ GREEN (source verified) | 18-archetype parameter table + per-user deterministic traits |
+| **Birth Continuity** | ✅ GREEN (source verified) | Canvas 2D → SVG presence, same identity math |
+| **Immersive Chat Layer** | ✅ GREEN (source verified) | Layer architecture verified at source |
+| **Growth** | 🔴 ORANGE | checkMicroEvolution/evolveTwin/useEvolutionTracking = zero production callers |
+| **Three.js / Living Body** | 🔴 RED | NO three.js dependency — actual renderer is SVG/canvas2D/CSS |
+| **World Transition** | 🟠 ORANGE | Engine real, CSS wiring broken (missing selectors), visual dead |
+| **Audio Behavior** | 🟠 ORANGE | Infrastructure exists, behavior wiring absent (useSFX zero consumers) |
+| **Migration 035/034 apply** | 🔵 BLOCKED | No evidence in repo that applied to production |
+| **Build/Test/Lint** | 🔵 BLOCKED | Environment permission gate prevents execution in this session |
+| **Live Environment** | 🔵 NOT VERIFIED | No credentials available |
 
-**สถานะโดยรวม: ผลิตพร้อมใช้งาน + Immersive V3 + Daily Dynamics + SICE Integration (2026-09-11)**
+**สถานะโดยรวม: NOT PASS** — มี 6 blockers ต้องปิดก่อน Production Ready claim
 
 ---
 
@@ -46,8 +54,6 @@ Nova (ผู้แนะนำ) → 12 มิติ / SICE analysis → Blueprin
 | 3 | **AI ฝาแฝด (AI Twin)** | `/chat/twin` (→ ImmersiveTwinChat) | **AI Twin chat (จุดศูนย์กลาง)** |
 | 4 | สำรวจ (Explore) | `/explore` | ค้นพบตนเอง |
 | 5 | ฉัน (Me) | `/me` | การควบคุมส่วนตัว |
-
-> **หมายเหตุ:** **Worlds เป็นแท็บหลัก** (ตามคอมเมนต์ `BottomNav.tsx:6`) **Activities ไม่ใช่แท็บ** — route `/activities` ยังมี (`App.tsx:171`) แต่ไม่อยู่ใน nav แล้ว และถูกดูกรวมเป็นส่วนหนึ่งของ Explore
 
 ### 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
 
@@ -81,15 +87,16 @@ Landing Page มีชั้นคำนวณพลังงานรายว�
 |-------|-----------|
 | Frontend | React 19 + TypeScript + Vite + Tailwind CSS 4 |
 | State | Zustand + TanStack React Query |
-| Serverless | Cloudflare Pages Functions (`functions/` — **โฟลเดอร์เดียวที่ deploy**) + Supabase Edge Functions (12 functions deployed ✅) |
+| Serverless | Cloudflare Pages Functions (`functions/`) + Supabase Edge Functions (12 deployed) |
 | Database | Supabase (PostgreSQL + Auth + RLS) |
-| AI | 12 SICE (Selfprint Intelligence Core Engines — client-side) + OpenRouter REST API (Nova guide + AI Twin) |
+| AI | 12 SICE engines (client-side) + OpenRouter REST API (twin/nova) |
 | Payments | Stripe |
 | Auth | Supabase Auth + Passkeys (WebAuthn) |
 | Monitoring | Sentry |
 | Deploy | Cloudflare Pages (selfprint.one) |
+| Render | **SVG** (TwinPresence) + **Canvas 2D** (HologramBirth) + CSS fallbacks — **NO THREE.JS** |
 
-> **หมายเหตุ:** Express.js (Node) backend และ Vercel deployment **ถูกลบออก** แล้ว ไม่มี Node server — backend คือ Cloudflare Pages Functions + Supabase Edge Functions
+> Express.js (Node) backend และ Vercel deployment ถูกลบออกแล้ว ไม่มี Node server — backend คือ Cloudflare Pages Functions + Supabase Edge Functions
 
 ---
 
@@ -136,20 +143,20 @@ src/                      # React frontend
 │   └── intelligence/     # SICE engines (the other live fork — connected via SICEBridge)
 ├── context/              # React Context (Auth, Language, ...)
 ├── hooks/                # Custom hooks
-│   └── useTwinStates.ts  # Canonical Twin interaction state machine (NEW — Immersive V3)
+│   └── useTwinStates.ts  # Canonical Twin interaction state machine
 ├── styles/               # Global styles
-│   ├── immersive-layers.css    # 5-layer visual stack (NEW — Immersive V3)
-│   └── world-transitions.css   # Narrative transition grammar (NEW — Immersive V3)
+│   ├── immersive-layers.css    # 5-layer visual stack
+│   └── world-transitions.css   # Narrative transition grammar
 ├── types/                # TypeScript interfaces
 └── App.tsx               # Root component
 
-src/lib/visual/           # Visual utilities (NEW — Immersive V3)
+src/lib/visual/           # Visual utilities
 └── WorldTransitionEngine.ts  # 12×12 transition rules
 
 functions/                # Cloudflare Pages Functions — THE ONLY DEPLOYED FOLDER
 ├── api/
 │   ├── [[route]].ts      # Catch-all → api/unified-handler.ts
-│   └── unified-handler.ts# 7 API modules (see below)
+│   └── unified-handler.ts# 7 API modules
 └── _utils/verify-user.ts # JWT verification
 
 supabase/
@@ -157,24 +164,24 @@ supabase/
 └── functions/            # 12 Supabase Edge Functions (incl. astrovera-edge)
 
 docs/                     # Documentation
-├── SELFPRINT_PRODUCTION_STATUS_TH.md  # Production status report
-├── SELFPRINT_PROJECT_SUMMARY_TH.md    # Project summary (ภาษาไทย)
-├── SELFPRINT_STATUS_HONEST_TH.md      # Honest status summary
-├── PRODUCTION-VERIFICATION.md         # Verification evidence
-├── verification/                      # Verification matrices
-├── Experience Architecture v2.md      # Design/experience master for Track C
-├── PLAN_TRACKS_TH.md     # Master plan: Track A / B / C
-└── PHASE0_VISUAL_PERF_FORENSIC_TH.md  # Phase 0 forensic results
+├── FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md  # Forensic audit — single source of truth
+├── SELFPRINT_PROJECT_SUMMARY_TH.md             # Project summary (ภาษาไทย)
+├── SELFPRINT_STATUS_HONEST_TH.md               # Honest status summary
+├── MASTER_GATE_AS_IS.md                        # Master Gate AS-IS state
+├── MASTER_GATE_CHANGE_MAP.md                   # Required changes
+├── MASTER_GATE_EVIDENCE.md                     # Source-level evidence
+├── MASTER_GATE_REMEDIATION_PLAN.md             # Remediation plan
+├── Experience Architecture v2.md               # Design/experience master
+└── PLAN_TRACKS_TH.md                           # Master plan: Track A / B / C
 
 src/components/landing/   # Landing page components
-├── TodayBioEnvironmentReport.tsx  # Bio-Tracking Dashboard UI (NEW — Daily Dynamics)
-├── IntroSummary.tsx               # 3-paragraph identity article (NEW)
-├── QuickSummary.tsx               # 6-section card + Social Share (NEW)
+├── TodayBioEnvironmentReport.tsx  # Bio-Tracking Dashboard UI
+├── IntroSummary.tsx               # 3-paragraph identity article
+├── QuickSummary.tsx               # 6-section card + Social Share
 ├── BirthDataInput.tsx             # Quick Input DOB form
 └── EvolutionaryVisualSystem.tsx   # SVG animation system
 
 CLAUDE.md                 # Permanent context / gotchas before touching code
-FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md  # Forensic audit — single source of truth
 ```
 
 ---
@@ -235,7 +242,7 @@ return (
   </AppShell>
 );
 
-// ❌ WRONG — each of these belongs in AppShell
+// ❌ WRONG
 <div style={{ minHeight: '100dvh' }}>
   <NavBar />
   <div>{content}</div>
@@ -255,7 +262,7 @@ return (
 
 ---
 
-### Immersive V3 Visual Architecture (เพิ่ม 2026-09-11)
+### Immersive V3 Visual Architecture
 
 ```
 Layer 0: WorldEnvironment (full-screen background, pointer-events: none)
@@ -275,18 +282,18 @@ Transition durations: --transition-fast:150ms, --transition-base:300ms, --transi
 
 `notifications` · `twin-evolution` · `sice` · `stripe` · `profile` · `blueprint` · `share`
 
-Anything else returns a JSON 404 (no fallback to `index.html`). Note `twin.ts` and `nova.ts` have their own dedicated functions.
+Anything else returns a JSON 404. Note `twin.ts` and `nova.ts` have their own dedicated functions.
 
 ### SICE — 12 Selfprint Intelligence Core Engines
 
 Client-side, rule-based intelligence engines (PersonalContextBuilder, PatternDetector, InsightEngine, TwinStateEngine, MemoryManagerEngine, DecisionIntelligenceEngineAdapter, ...), orchestrated by `SICEOrchestrator`.
 
 > **⚠️ Two live SICE forks** — Do NOT delete either
-> `src/lib/intelligence/*` และ `src/services/sice/engines/*` เป็น **two separate live implementations**, connected one-way via `SICEBridge.ts`. พวกเขามิใช่ duplicates — การลบใดๆ จะทำให้ระบบพัง
+> `src/lib/intelligence/*` และ `src/services/sice/engines/*` เป็น **two separate live implementations**, connected one-way via `SICEBridge.ts`.
 
 ### i18n pattern
 
-Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จุด) รวมกับ `useLanguage` / `TRANSLATIONS` / `t(` (1607 จุด) สองระบบทับซ้อนกัน — Track C จะตัดสินใจ
+Internationalization ทำด้วย **inline `isTh ? ... : ...`** (~958 จุด) รวมกับ `useLanguage` / `TRANSLATIONS` / `t(` (~1607 จุด) สองระบบทับซ้อนกัน
 
 ### Database gotchas (verified)
 
@@ -302,74 +309,29 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 | เอกสาร | วัตถุประสงค์ |
 |--------|------------|
 | [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **เอกสารหลักสถานะเดียว** — ผลการตรวจสอบ forensic รายละเอียดครบ |
-| [`docs/SELFPRINT_PRODUCTION_STATUS_TH.md`](./docs/SELFPRINT_PRODUCTION_STATUS_TH.md) | สถานะการผลิต (ฉบับภาษาไทย) |
+| [`MASTER_GATE_AS_IS.md`](../MASTER_GATE_AS_IS.md) | Master Gate AS-IS state document |
+| [`MASTER_GATE_EVIDENCE.md`](../MASTER_GATE_EVIDENCE.md) | Source-level evidence for all gates |
+| [`MASTER_GATE_REMEDIATION_PLAN.md`](../MASTER_GATE_REMEDIATION_PLAN.md) | Required remediation steps |
 | [`docs/SELFPRINT_PROJECT_SUMMARY_TH.md`](./docs/SELFPRINT_PROJECT_SUMMARY_TH.md) | สรุปโปรเจคฉบับภาษาไทย |
 | [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./docs/SELFPRINT_STATUS_HONEST_TH.md) | สรุปสถานะซื่อสัตย์ (ภาษาไทย) |
 | [`docs/PLAN_TRACKS_TH.md`](./docs/PLAN_TRACKS_TH.md) | แผนงานรวม 3 Track (A=bugs / B=Phase 0 forensic / C=visual redesign) |
 | [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](./docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md) | ผลตรวจ Phase 0 visual + performance forensic |
 | [`docs/Experience Architecture v2.md`](./docs/Experience%20Architecture%20v2.md) | **Design master ของ Track C** — RECOMPOSE not REBUILD |
-| [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](./docs/Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md) | **แผนปฏิบัติการ Track C** |
 
 ---
 
-## 🆕 Immersive V3 Visual Foundation (เพิ่ม 2026-09-11)
+## ⚠️ Known Blockers (Forensic Audit 2026-09-11)
 
-ชั้น visual ใหม่ทั้งระบบ — 5-layer stack, world transitions, immersive twin chat, glass surfaces
+**MASTER GATE = NOT PASS** — กblocks ที่ต้องปิด:
 
-| ไฟล์ | บทบาท |
-|------|-------|
-| `src/styles/immersive-layers.css` | 5-layer visual stack (World/Twin/Contextual/Primary/Temporary) + glass tokens + z-index scale |
-| `src/styles/world-transitions.css` | 9 narrative transition types (attraction/pull/absorption/dissolution/flow/fold/tunnel/gravity_shift/env_wave) + keyframes |
-| `src/hooks/useTwinStates.ts` | Canonical Twin interaction state machine (IDLE → LISTENING → THINKING → RESPONDING → GROWING) |
-| `src/pages/ImmersiveTwinChat.tsx` | Living space ใหม่แทน TwinChat — Layer 0-4 composition, world drawer, decision logging preserved |
-| `src/lib/visual/WorldTransitionEngine.ts` | Pure computation class — 12 worlds × 12 = 144 transition rules |
-| `src/index.css` | เพิ่ม @import immersive-layers.css + world-transitions.css |
-| `src/App.tsx` | Route `/chat/twin` เปลี่ยนชี้ไปที่ ImmersiveTwinChat |
-| `src/styles/worlds-hub.css` | เพิ่ม `.immersive-glass` class (glass-bg, backdrop-filter, box-shadow) |
-| `src/pages/WorldsHub.tsx` | เพิ่ม `immersive-page` wrapper + `.immersive-glass` บน world cards |
-| `src/pages/ExplorePage.tsx` | เพิ่ม `immersive-page` wrapper + glass surfaces บน hexagram/question cards |
-| `src/pages/MePage.tsx` | เพิ่ม `immersive-page` wrapper + glass surfaces บน profile/menu/login cards |
+1. **Growth pipeline ไม่ถูก wire** — conversation → growth → visual change loop ตัด
+2. **Three.js gate ไม่ผ่าน** — rendering ใช้ SVG/canvas2D/CSS แทน WebGL
+3. **World Transition CSS wiring ตัด** — engine real แต่ visual dead
+4. **Migration 035/034 apply status UNKNOWN** — Twin birth อาจ fail ถ้าไม่ apply
+5. **Streaming path zero callers** — implemented but not wired into UI
+6. **Build/Test/Lint ไม่ได้ execute** — environment gate blocks execution
 
----
-
-## 🆕 Daily Time & Energy Dynamics (เพิ่ม 2026-09-11)
-
-ชั้นคำนวณพลังงานรายวันบน Landing Page — Vedic Hora/Panchang logic → Bio-Tracking Dashboard UI
-
-| ไฟล์ | บทบาท |
-|------|-------|
-| `src/lib/astrology.ts` | เพิ่มฟิลด์ `daily*` ใน InitialDisciplines + ฟังก์ชัน `calculateDailyDynamics()` |
-| `src/components/landing/TodayBioEnvironmentReport.tsx` | Bio-Tracking Dashboard UI + Retention Loop (daily refresh) |
-| `src/components/landing/IntroSummary.tsx` | บทความสรุปตัวตน 3 ย่อหน้า |
-| `src/components/landing/QuickSummary.tsx` | 6-section identity card + Social Share (FB, Line, X) |
-| `src/lib/intro-summary.ts` | Chronopsychology narrative generator + FAQ schema |
-| `src/pages/LandingPage.tsx` | Layout sections ใหม่ + Quick Input DOB integration |
-| `src/components/MetaTagManager.tsx` | GEO tags + additionalScripts props สำหรับ AEO JSON-LD |
-
----
-
-## 🧪 Verification Evidence
-
-- **Build**: ~600 modules transformed, ~3.6s, ไม่มี errors
-- **TypeCheck**: ผ่าน (0 errors ใน strict mode)
-- **PWA**: Service worker สร้างพร้อม precache entries
-- **Tests**: 67/67 test files, 1042 tests, 0 failures
-- **Lint**: oxlint 0 errors · warnings · files
-- **Failure Matrix**: F01-F18 ทั้งหมด verified — ทุก core failure paths PASS
-- **Completion Status**: COMPLETE/DEGRADED/FAILED ถูก propagate อย่างถูกต้อง
-- **Persistence Await**: ทุก critical write ถูก await ก่อน return
-
----
-
-## ⚠️ ข้อควรระวัง (ไม่ใช่ความล้มเหลว — Graceful Degradation)
-
-1. **Live Database Integration** — ยังไม่ได้รันทดสอบใน sandbox (ขาด credentials) แต่ source code แสดง pattern ที่ถูกต้อง
-2. **Live Model API Calls** — ยังไม่ได้รัน (ไม่มี API key ใน sandbox) แต่ build และ typecheck ผ่าน
-3. **E2E Browser Tests** — ยังไม่ได้รัน (ไม่มี Playwright session) แต่มี unit + integration tests สำหรับทุก critical path
-4. **Non-Critical Fire-and-Forget** — Badge bridging และ world interaction recording ทำแบบ fire-and-forget แต่ยอมรับได้เพราะไม่ส่งผลต่อความถูกต้องของการตอบกลับหลัก
-5. **SICEOrchestratorImpl.ts** — Dead code ด้วยชื่อ engine เก่า (P1 minor, ไม่ถูก import)
-
-ข้อควรระวังเหล่านี้ **ไม่ได้ลดสถานะ 100% ที่ยืนยันแล้ว** — บันทึกเพื่อความโปร่งใสเท่านั้น
+รายละเอียดเต็ม: ดู `MASTER_GATE_REMEDIATION_PLAN.md`
 
 ---
 
