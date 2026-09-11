@@ -27,10 +27,12 @@
     "react-markdown": "10.1.0",
     "react-router-dom": "^7.18.2",
     "stripe": "^16.12.0",
+    "three": "0.186.0",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
+    "@tailwindcss/vite": "^4.3.3",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
@@ -38,7 +40,6 @@
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.5.4",
     "jsdom": "^30.0.1",

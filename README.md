@@ -3,8 +3,38 @@
 **แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**  
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `MASTER GATE = PASS` ✅ (Production Verified 2026-09-11)  
-> ทุก critical gap ถูกปิดแล้ว — build/test/lint ผ่าน 0 errors
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+
+---
+
+> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
+> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
 
 ---
 
@@ -17,20 +47,22 @@
 | **P0-C: Awakening/Twin** | ✅ GREEN (source verified) | Atomic twin creation, compensating rollback, orphan prevention |
 | **P0-D: TwinChat** | ✅ GREEN | Streaming path wired with fallback (streamTwinResponse → callTwinAPI) |
 | **P0-E: Auth/Security** | ✅ GREEN (source verified) | JWT verification, user isolation, rate limiting, streaming auth parity |
-| **P0-F: Persistence** | ✅ GREEN | Critical writes awaited + rollback; migration 035 apply = MANUAL ACTION |
+| **P0-F: Persistence** | ✅ GREEN | Critical writes awaited + rollback; migration 035 applied ✅ |
 | **Canonical Twin Identity** | ✅ GREEN (source verified) | Same seedKey + archetype through birth→presence |
 | **Visual DNA** | ✅ GREEN (source verified) | 18-archetype parameter table + per-user deterministic traits |
 | **Birth Continuity** | ✅ GREEN (source verified) | Canvas 2D → SVG presence, same identity math |
 | **Immersive Chat Layer** | ✅ GREEN (source verified) | Layer architecture verified at source |
 | **Growth** | ✅ GREEN | recordInteraction() wired into ImmersiveTwinChat after saveTwinMemory |
-| **Three.js / Living Body** | 🟡 YELLOW | Deferred per C5 decision — SVG animation provides living presence |
+| **Three.js / Living Body** | 🟢 GREEN (code) / 🟡 VERIFY (browser) | Three.js renderer implemented at HIGH fidelity, needs browser verification |
+| **Intelligent World** | 🟢 GREEN (code) / 🟡 VERIFY (browser) | SICE-driven world recommendation implemented, needs browser verification |
 | **World Transition** | ✅ GREEN | CSS rules mapping 9 transition types to @keyframes complete |
 | **Audio Behavior** | ✅ GREEN | useSFX consumed in ImmersiveTwinChat (interact/glitch/sweep/select) |
-| **Migration 035/034 apply** | 📝 MANUAL | ต้อง run ผ่าน Supabase Dashboard SQL Editor หรือ CLI |
+| **Migration 035/034 apply** | ✅ APPLIED | Run ผ่าน Supabase Dashboard SQL Editor — confirmed 09-11 |
 | **Build/Test/Lint** | ✅ PASS | npm run build + test + lint + typecheck:functions = 0 errors |
-| **Live Environment** | 🔵 NOT VERIFIED | No credentials available |
+| **E2E Tests** | 🟡 PENDING | master-gate.spec.ts created, needs staging environment to run |
+| **Live Environment** | 🔵 NOT VERIFIED | No staging credentials available |
 
-**สถานะโดยรวม: PASS** ✅ — Production Verified พร้อม deploy
+**สถานะโดยรวม: CODE PASS + MIGRATION APPLIED** 🔍 — ต้อง verify ใน browser ก่อน claim Production Verified
 
 ---
 

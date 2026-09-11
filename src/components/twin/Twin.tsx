@@ -7,11 +7,12 @@
  *
  *   FALLBACK → TwinFallbackRenderer (static gradient, zero motion)
  *   LOW      → TwinLowRenderer (CSS-only breathing orb, no SVG)
- *   MEDIUM   → TwinPresence (today's full-detail SVG — unchanged)
- *   HIGH     → also TwinPresence — C5 decided against building a WebGL
- *              renderer (three.js ~350kB gzip not justified vs. the
- *              current ~250kB gzip initial bundle without real Lighthouse
- *              numbers to argue from). Reserved for later.
+ *   MEDIUM   → TwinPresence (SVG + CSS var pipeline — full detail)
+ *   HIGH     → TwinThreeRenderer (Three.js Living Body) + TwinPresence
+ *              (SVG Intelligence Layer) — Master Concept:
+ *                Three.js = Physical Embodiment / Living Body
+ *                SVG      = Intelligence Language / Signals
+ *                CSS      = UI / Surface
  *
  * variant="birth" delegates to HologramBirth (kept as-is, canvas 2D, C5)
  * for MEDIUM/HIGH fidelity, but skips the 150-particle canvas simulation
@@ -29,6 +30,7 @@ import { useTwinIdentity } from '@/hooks/useTwinIdentity';
 import { getTwinVisualDNA } from '@/lib/twin/twinVisualDNA';
 import { TwinPresence } from './TwinPresence';
 import { HologramBirth } from './HologramBirth';
+import { TwinThreeRenderer } from './TwinThreeRenderer';
 
 function hexToRgba(hex: string, alpha: number): string {
   const clean = hex.replace('#', '');
@@ -240,17 +242,41 @@ export function Twin(props: TwinProps) {
     );
   }
 
-  // MEDIUM or HIGH (HIGH renderer not implemented — see file header)
+  if (fidelity === 'MEDIUM') {
+    // MEDIUM: SVG-only (no Three.js)
+    return (
+      <TwinPresence
+        primaryArchetype={primaryArchetype}
+        secondaryArchetype={secondaryArchetype}
+        worldColor={worldColor}
+        seedKey={seedKey}
+        worldId={worldId}
+        contained={contained}
+        maturityScore={maturityScore}
+      />
+    );
+  }
+
+  // HIGH: Three.js Living Body + SVG Intelligence Layer
   return (
-    <TwinPresence
-      primaryArchetype={primaryArchetype}
-      secondaryArchetype={secondaryArchetype}
-      worldColor={worldColor}
-      seedKey={seedKey}
-      worldId={worldId}
-      contained={contained}
-      maturityScore={maturityScore}
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <TwinThreeRenderer
+        primaryArchetype={primaryArchetype}
+        secondaryArchetype={secondaryArchetype}
+        worldColor={worldColor}
+        seedKey={seedKey}
+        maturityScore={maturityScore}
+      />
+      <TwinPresence
+        primaryArchetype={primaryArchetype}
+        secondaryArchetype={secondaryArchetype}
+        worldColor={worldColor}
+        seedKey={seedKey}
+        worldId={worldId}
+        contained={contained}
+        maturityScore={maturityScore}
+      />
+    </div>
   );
 }
 

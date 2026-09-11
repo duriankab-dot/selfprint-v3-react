@@ -41,6 +41,7 @@ import { Twin } from '@/components/twin/Twin';
 import { WorldEnvironment } from '@/components/world/WorldEnvironment';
 import { useTwinStates } from '@/hooks/useTwinStates';
 import { useEvolutionTracking } from '@/hooks/useEvolutionTracking';
+import { useWorldRecommendation } from '@/hooks/useWorldRecommendation';
 import { Helmet } from 'react-helmet-async';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import { ProvenanceStrip } from '@/components/story/ProvenanceStrip';
@@ -190,6 +191,24 @@ export default function ImmersiveTwinChat() {
 
   // Evolution tracking
   const { recordInteraction } = useEvolutionTracking();
+
+  // Intelligent world recommendation (SICE-driven)
+  const worldRec = useWorldRecommendation({
+    messages,
+    analysis: currentAnalysis ?? twin?.fullAnalysis ?? null,
+    currentWorld,
+    evolutionStage: twin ? undefined : undefined,
+  });
+
+  // Auto-switch world when intelligence signal is strong
+  useEffect(() => {
+    if (!worldRec.shouldAutoSwitch || !worldRec.recommendedWorld) return;
+    const target = worldRec.recommendedWorld as WorldId;
+    handleWorldChange(target);
+    setLocalWorld(target);
+    setCurrentWorld(target);
+    setWorldContextCurrentWorld(target);
+  }, [worldRec.shouldAutoSwitch, worldRec.recommendedWorld]);
 
   // Audio SFX
   const sfx = useSFX();
