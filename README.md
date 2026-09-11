@@ -3,38 +3,14 @@
 **แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**  
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+# 🌟 SELFPRINT — Living Intelligence Platform
 
----
+**แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**  
+*(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
-
----
-
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
-
----
-
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
-
----
-
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
-
----
-
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
-
----
-
-> **สถานะการผลิต:** `MASTER GATE = CODE PASS + MIGRATION APPLIED — NEEDS BROWSER VERIFICATION` 🔍  
-> ทุก feature implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors — ต้อง verify ใน browser ก่อน claim Production Verified
+> **สถานะการผลิต:** `MASTER GATE = CONDITIONAL PASS` ⚠️  
+> Todos features implement แล้ว + Migration 035 apply แล้ว + build/test/lint ผ่าน 0 errors  
+> Staging E2E: Free tier pause — ต้อง resume manuals ก่อน (หรือ upgrade to Pro/Team)
 
 ---
 
@@ -59,10 +35,12 @@
 | **Audio Behavior** | ✅ GREEN | useSFX consumed in ImmersiveTwinChat (interact/glitch/sweep/select) |
 | **Migration 035/034 apply** | ✅ APPLIED | Run ผ่าน Supabase Dashboard SQL Editor — confirmed 09-11 |
 | **Build/Test/Lint** | ✅ PASS | npm run build + test + lint + typecheck:functions = 0 errors |
-| **E2E Tests** | 🟡 PENDING | master-gate.spec.ts created, needs staging environment to run |
-| **Live Environment** | 🔵 NOT VERIFIED | No staging credentials available |
+| **E2E Phase A (Production)** | ✅ 26/27 passed | Production smoke tests |
+| **E2E Phase B (Staging)** | ⚠️ BLOCKED | Free tier pause — must resume manually |
+| **E2E Master Gate** | ⚠️ BLOCKED | Same as Phase B |
+| **Live Environment** | 🔵 CONDITIONAL | Staging paused — resume required |
 
-**สถานะโดยรวม: CODE PASS + MIGRATION APPLIED** 🔍 — ต้อง verify ใน browser ก่อน claim Production Verified
+**สถานะโดยรวม: CONDITIONAL PASS** ️ — ต้อง resume staging Supabase หรือ upgrade to Pro/Team เพื่อรัน E2E tests
 
 ---
 

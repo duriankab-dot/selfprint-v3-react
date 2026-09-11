@@ -12,7 +12,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "test:e2e:staging": "node e2e/run-staging.mjs"
+    "test:e2e:staging": "node e2e/run-staging.mjs",
+    "supabase:resume": "ts-node scripts/supabase-lifecycle.ts resume",
+    "supabase:pause": "ts-node scripts/supabase-lifecycle.ts pause",
+    "supabase:status": "ts-node scripts/supabase-lifecycle.ts status",
+    "supabase:resume-all": "ts-node scripts/supabase-lifecycle.ts resume-all",
+    "supabase:pause-all": "ts-node scripts/supabase-lifecycle.ts pause-all",
+    "e2e:with-supabase": "ts-node scripts/e2e-with-supabase.ts",
+    "e2e:resume-only": "ts-node scripts/e2e-with-supabase.ts --resume-only",
+    "e2e:pause-only": "ts-node scripts/e2e-with-supabase.ts --pause-only",
+    "weekly:resume": "ts-node scripts/weekly-supabase-resume.ts",
+    "seed:test-users": "ts-node scripts/seed-test-users.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
