@@ -13,6 +13,7 @@ import React, { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import LifeHubCard from '@/components/features/LifeHubCard';
+import { AppShell } from '@/components/layout/AppShell';
 import './life-hubs-page.css';
 
 type HubType = 'career' | 'relationships' | 'health' | 'growth' | 'balance';
@@ -84,14 +85,17 @@ export const LifeHubsPage: React.FC = () => {
 
   if (!userId) {
     return (
-      <div className="life-hubs-page">
-        <p>{isTh ? 'กรุณาเข้าสู่ระบบ' : 'Please sign in'}</p>
-      </div>
+      <AppShell>
+        <div className="page-content life-hubs-page">
+          <p>{isTh ? 'กรุณาเข้าสู่ระบบ' : 'Please sign in'}</p>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <main className="life-hubs-page">
+    <AppShell>
+      <main className="life-hubs-page page-content">
       <div className="life-hubs-page__header">
         <h1>🎯 {isTh ? 'Life Hubs — 5 พื้นที่ชีวิต' : 'Life Hubs — 5 life areas'}</h1>
         <p>
@@ -155,6 +159,7 @@ export const LifeHubsPage: React.FC = () => {
         </div>
       )}
     </main>
+    </AppShell>
   );
 };
 

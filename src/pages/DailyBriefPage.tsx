@@ -10,20 +10,19 @@
  * Same NavRail/BottomNav pattern as Dashboard.tsx.
  */
 import { BackButton } from '@/components/common/BackButton';
-import { NavRail } from '@/components/layout/NavRail';
-import { BottomNav } from '@/components/layout/BottomNav';
+import { AppShell } from '@/components/layout/AppShell';
 import { DailyBrief } from '@/components/features/DailyBrief';
 import '@/styles/daily-brief.css';
 
 export default function DailyBriefPage() {
   return (
-    <>
-      <main style={{ maxWidth: 560, margin: '0 auto', padding: '2rem 1rem' }}>
-        <BackButton fallbackTo="/dashboard" style={{ marginBottom: '1rem' }} />
-        <DailyBrief />
-      </main>
-      <NavRail />
-      <BottomNav />
-    </>
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 560, margin: '0 auto' }}>
+        <main style={{ padding: '2rem 1rem' }}>
+          <BackButton fallbackTo="/dashboard" style={{ marginBottom: '1rem' }} />
+          <DailyBrief />
+        </main>
+      </div>
+    </AppShell>
   );
 }

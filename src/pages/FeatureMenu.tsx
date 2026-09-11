@@ -6,10 +6,7 @@
  */
 
 import { Link } from 'react-router-dom';
-import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { NavRail } from '@/components/layout/NavRail';
+import { AppShell } from '@/components/layout/AppShell';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface Feature {
@@ -66,16 +63,15 @@ export default function FeatureMenu() {
   // the intended page. "/" is left alone (own dedicated redirect rule).
   const prefixedTo = (to: string) => (to === '/' ? '/' : `/${language}${to}`);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <NavBar />
+    <AppShell>
+      <div className="page-content" style={{ background: 'linear-gradient(135deg, var(--accent-light, var(--color-bg-secondary)) 0%, var(--color-bg-primary) 100%)' }}>
       <div
         style={{
-          flex: 1,
-          background: 'linear-gradient(135deg, var(--accent-light, var(--color-bg-secondary)) 0%, var(--color-bg-primary) 100%)',
+          maxWidth: '980px',
+          margin: '0 auto',
           padding: '48px 24px 64px',
         }}
       >
-        <div style={{ maxWidth: '980px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h1
               style={{
@@ -171,10 +167,7 @@ export default function FeatureMenu() {
             ))}
           </div>
         </div>
-      </div>
-      <Footer />
-      <NavRail />
-      <BottomNav />
-    </div>
+</div>
+    </AppShell>
   );
 }

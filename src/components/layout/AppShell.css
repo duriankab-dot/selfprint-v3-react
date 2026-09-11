@@ -1,0 +1,220 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   APPSHELL-001 (11 ก.ย. 2026) — Mobile-First PWA App Shell Architecture
+   
+   SELFPRINT IS A MOBILE-FIRST PWA / APP-LIKE EXPERIENCE.
+   NOT a responsive website that gets squished to mobile.
+   
+   Primary target: 320–430px viewport on mobile devices.
+   Tablet/desktop = progressive enhancements ON TOP of mobile base.
+   
+   AppShell owns ALL layout concerns:
+     - Viewport height: 100dvh (dynamic, handles mobile browser chrome)
+     - Safe area insets: env(safe-area-inset-*) for notches/home indicators
+     - Header region: optional NavBar for public/SEO pages
+     - Main content: scrollable flex child, properly padded
+     - Bottom nav: mobile/tablet ≤1023px
+     - Desktop nav rail: desktop ≥1024px
+     - Scroll behavior: no horizontal overflow, natural vertical scroll
+   
+   Pages MUST use <AppShell>. Pages MUST NOT independently import
+   BottomNav, NavRail, or modify body styles.
+   
+   DESIGN CONSTRAINTS (NEVER do this to "fix" mobile):
+     ✗ Shrinking desktop columns
+     ✗ Forcing fixed widths
+     ✗ Negative margins
+     ✗ Random z-index
+     ✗ Transform positioning
+     ✗ overflow-hidden
+     ✗ scale()
+     ✗ Arbitrary pixel offsets
+   
+   MOBILE FIRST RULES:
+     ✓ width: 100%
+     ✓ max-width: 100%
+     ✓ min-width: 0 (on flex/grid children)
+     ✓ box-sizing: border-box
+     ✓ text wraps naturally
+     ✓ no horizontal page overflow
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root shell container ───────────────────────────────────────────────────
+   Uses 100dvh (dynamic viewport height) instead of 100vh so mobile browsers
+   with address bars/toolbars don't clip the bottom nav or cut off content.
+   
+   Flex column layout:
+     - header (optional, auto-height)
+     - main (flex: 1, fills remaining space, scrolls internally)
+     - footer/bottom-nav (auto-height, pinned to bottom)
+   
+   Desktop enhancement (≥1024px):
+     - NavRail appears on left edge (88px wide)
+     - Shell gains padding-left to offset rail
+     - Content area shifts right but maintains same structure
+   ═────────────────────────────────────────────────────────────────────────── */
+.sp-appshell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  /* Prevent horizontal overflow at shell level */
+  overflow-x: hidden;
+}
+
+/* ── Desktop nav rail offset (≥1024px) ──────────────────────────────────────
+   NavRail is 88px wide + 16px padding = needs 104px total offset.
+   Applied via inline style on .sp-appshell when NavRail is visible.
+   The nav rail itself uses `position: fixed` and is always rendered inside
+   the shell — this padding just makes room for it.
+   ═────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .sp-appshell {
+    padding-left: 104px;
+  }
+}
+
+/* ── Optional header region ─────────────────────────────────────────────────
+   Used by SEO/public pages (LandingPage, etc.) that need a top navigation bar.
+   Auto-height, positioned above main content.
+   Mobile: sits at top of viewport, below any browser chrome.
+   Desktop: sits to the right of NavRail.
+   ═────────────────────────────────────────────────────────────────────────── */
+.sp-appshell-header {
+  flex-shrink: 0;
+  width: 100%;
+  position: relative;
+  z-index: 100;
+}
+
+/* ── Main content region ────────────────────────────────────────────────────
+   This is where each page's content renders.
+   
+   Key properties:
+     - flex: 1 → fills all available vertical space between header and footer
+     - overflow-y: auto → scrolls independently when content exceeds viewport
+     - padding → consistent spacing around page content (mobile-first)
+     - width/max-width/min-width → prevents width collapse, ensures text wraps
+   
+   Mobile padding (default):
+     - Top: 16px (breathing room below browser chrome / header)
+     - Left/Right: 16px (card edges from screen edge)
+     - Bottom: 72px (space for bottom nav on mobile ≤1023px)
+   
+   Desktop padding (≥1024px):
+     - Bottom: 0 (no bottom nav on desktop, NavRail handles navigation)
+   ═────────────────────────────────────────────────────────────────────────── */
+.sp-appshell-main {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  padding-bottom: 72px; /* Space for BottomNav on mobile */
+  /* Ensure children can never force horizontal overflow */
+  contain: layout style;
+}
+
+/* Remove bottom padding when no nav is shown (e.g., Onboarding full-screen flow) */
+.sp-appshell-main[data-hide-nav="true"] {
+  padding-bottom: 16px;
+}
+
+/* ── Desktop: remove bottom padding (no bottom nav) ─────────────────────────
+   On desktop ≥1024px, NavRail replaces BottomNav, so no bottom gap needed.
+   ═────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .sp-appshell-main {
+    padding-bottom: 16px;
+  }
+}
+
+/* ── Footer / BottomNav container ───────────────────────────────────────────
+   Holds the BottomNav component on mobile/tablet (≤1023px).
+   Position: sticky to bottom of viewport (follows scroll) OR static (pushed
+   below content if content > viewport).
+   
+   On desktop (≥1024px), this container is still rendered but visually hidden
+   — NavRail owns desktop navigation.
+   ═────────────────────────────────────────────────────────────────────────── */
+.sp-appshell-footer {
+  flex-shrink: 0;
+  width: 100%;
+  position: sticky;
+  bottom: 0;
+  z-index: 250;
+}
+
+/* Force show nav even on desktop (rare edge case, e.g., testing) */
+.sp-appshell-footer[data-force-show="true"] {
+  display: block !important;
+}
+
+/* ── Mobile/Tablet (≤1023px): BottomNav visible ─────────────────────────────
+   The sp-bottomnav class is controlled by BottomNav.tsx's internal <style>.
+   This section ensures the footer container doesn't interfere.
+   ═────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .sp-appshell-footer {
+    /* No additional rules needed — BottomNav controls its own visibility */
+  }
+}
+
+/* ── Desktop (≥1024px): BottomNav hidden, NavRail visible ───────────────────
+   The sp-navrail class is controlled by NavRail.tsx's internal <style>.
+   This section ensures the footer container collapses when nav rail is active.
+   ═────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  .sp-appshell-footer {
+    /* Footer container stays in DOM but BottomNav hides itself via its own
+       media query (.sp-bottomnav { display: none; }) */
+  }
+}
+
+/* ── Page content wrapper (conventional class for pages) ────────────────────
+   When a page wraps its content in AppShell, it should give its root element
+   a className like "page-content" for consistent spacing and sizing.
+   
+   If a page already has its own layout classes, they work as-is inside
+   AppShell — no need to change them. AppShell only manages the outer frame.
+   ═────────────────────────────────────────────────────────────────────────── */
+.page-content {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* ── Narrow content constraint (for card-style pages) ───────────────────────
+   Some pages (Dashboard, IntelligenceHub, etc.) look best with constrained
+   width on larger screens. This provides a max-width without restricting
+   mobile (where 100% is correct).
+   
+   Default: no constraint (full width on mobile).
+   Enhancement: constrain on tablet/desktop.
+   ═────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .page-content--narrow {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .page-content--narrow {
+    max-width: 800px;
+  }
+}
+
+/* ── Full-width content (for immersive pages like LandingPage) ──────────────
+   Some pages intentionally span the full viewport width. Use this class
+   to opt out of narrow constraints.
+   ═────────────────────────────────────────────────────────────────────────── */
+.page-content--full {
+  width: 100%;
+  max-width: 100%;
+}

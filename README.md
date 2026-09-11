@@ -101,6 +101,7 @@ npm run dev
 ```
 src/                      # React frontend
 ├── components/           # UI components
+│   ├── layout/           # Layout shell (AppShell, BottomNav, NavRail, NavBar)
 ├── pages/                # Page components (5-tab navigation)
 ├── services/             # Business logic (CoreAwakeningService, SICEOrchestrator, ...)
 │   └── sice/engines/     # SICE engines (12 engines)
@@ -136,7 +137,81 @@ FORENSIC_VERIFICATION_STATUS_TH.md  # Forensic verification results — single s
 
 ---
 
-## 🧩 Architecture Highlights
+## 🏗️ Architecture Highlights
+
+### App Shell — Mobile-First PWA App Architecture (APPSHELL-001, 11 ก.ย. 2026)
+
+**SELFPRINT IS A MOBILE-FIRST PWA APP — NOT A RESPONSIVE WEBSITE.**
+
+The mental model for layout is: **"mobile operating environment"**, not "desktop website responsive down to mobile".
+
+| Principle | Detail |
+|-----------|--------|
+| **Primary target** | 320–430px viewport on mobile devices |
+| **Tablet/desktop** | Progressive enhancements layered ON TOP of mobile base |
+| **Never solve mobile by** | Shrinking desktop columns, fixed widths, negative margins, `overflow-hidden`, `scale()`, arbitrary pixel offsets |
+
+#### AppShell Component (`src/components/layout/AppShell.tsx`)
+
+AppShell owns ALL layout concerns:
+
+```tsx
+<AppShell>                        {/* 100dvh, overflow-x:hidden */}
+  <div className="page-content">  {/* scrollable, padded */}
+    {pageContent}
+  </div>
+  {/* BottomNav ≤1023px, NavRail ≥1024px — inside AppShell */}
+</AppShell>
+```
+
+Layout responsibilities owned by AppShell:
+1. **Viewport**: `min-height: 100dvh` (dynamic viewport height for mobile browser chrome)
+2. **Safe area**: `env(safe-area-inset-bottom)` handled in footer padding
+3. **Header**: Optional `<NavBar>` via `showHeader` + `header` props
+4. **Main content**: Scrollable flex child with consistent padding (16px edges, 72px bottom for nav)
+5. **Bottom navigation**: Mobile/tablet ≤1023px (controlled by BottomNav's own media query)
+6. **Desktop nav rail**: Desktop ≥1024px (88px wide, controlled by NavRail's own media query)
+7. **Scroll behavior**: No horizontal overflow, natural vertical scroll
+
+#### Page Layout Rules
+
+Every page MUST wrap content in `<AppShell>`. Pages MUST NOT:
+- Import `BottomNav`, `NavRail`, `NavBar`, or `Footer` directly
+- Modify `body` styles (padding, margin, etc.)
+- Define their own `minHeight: 100vh` / `100dvh`
+- Invent their own bottom navigation spacing
+
+```tsx
+// ✅ CORRECT
+import { AppShell } from '../components/layout/AppShell';
+
+return (
+  <AppShell>
+    <div className="page-content">
+      {/* page-specific content only */}
+    </div>
+  </AppShell>
+);
+
+// ❌ WRONG — each of these belongs in AppShell
+<div style={{ minHeight: '100dvh' }}>
+  <NavBar />
+  <div>{content}</div>
+  <Footer />
+  <NavRail />
+  <BottomNav />
+</div>
+```
+
+#### Special Cases
+
+| Page Type | Props | Example |
+|-----------|-------|---------|
+| Standard app page | `<AppShell>` | Dashboard, Me, Explore |
+| Public/SEO page | `<AppShell showHeader header={<NavBar />} >` | LandingPage |
+| Full-screen flow | `<AppShell hideNav={true}>` | Onboarding |
+
+---
 
 ### API — 7 modules via catch-all route
 
@@ -211,4 +286,4 @@ Internationalization ทำด้วย **inline `isTh ? ... : ...`** (958 จ�
 - **GitHub:** https://github.com/duriankab-dot/selfprint-v3-react
 - **Production:** https://selfprint.one
 
-**Last verified:** 10 September 2026 · HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128`
+**Last verified:** 11 September 2026 · HEAD `13e815e3a5e1f35b62f7be1f38261042c26b4128`

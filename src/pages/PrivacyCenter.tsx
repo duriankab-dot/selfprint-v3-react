@@ -24,10 +24,7 @@ import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase/client';
-import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { NavRail } from '@/components/layout/NavRail';
+import { AppShell } from '@/components/layout/AppShell';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import '../styles/privacy.css';
@@ -337,15 +334,17 @@ const PrivacyCenter: React.FC = () => {
 
   if (!userId) {
     return (
-      <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <p>{isTh ? 'กรุณาเข้าสู่ระบบก่อน' : 'Please sign in first'}</p>
-        <button
-          onClick={() => navigate('/onboarding')}
-          style={{ marginTop: 16 }}
-        >
-          {isTh ? 'เข้าสู่ระบบ' : 'Sign in'}
-        </button>
-      </div>
+      <AppShell>
+        <div className="page-content" style={{ padding: '80px 20px', textAlign: 'center' }}>
+          <p>{isTh ? 'กรุณาเข้าสู่ระบบก่อน' : 'Please sign in first'}</p>
+          <button
+            onClick={() => navigate('/onboarding')}
+            style={{ marginTop: 16 }}
+          >
+            {isTh ? 'เข้าสู่ระบบ' : 'Sign in'}
+          </button>
+        </div>
+      </AppShell>
     );
   }
 
@@ -364,8 +363,8 @@ const PrivacyCenter: React.FC = () => {
           canonicalUrl={`/${language}/privacy`}
         />
       )}
-      <NavBar />
-      <main className="privacy__page">
+      <AppShell>
+      <main className="privacy__page page-content">
         {/* Page Header */}
         <header className="privacy__page-header">
           <button className="privacy__back-btn" onClick={() => navigate('/dashboard')}>
@@ -645,9 +644,7 @@ const PrivacyCenter: React.FC = () => {
         </div>
       )}
 
-      <Footer />
-      <NavRail />
-      <BottomNav />
+</AppShell>
     </>
   );
 };

@@ -26,10 +26,7 @@ import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { InsightEngine } from '@/lib/intelligence/InsightEngine';
 import { ConfidenceIndicator } from '@/components/intelligence/ConfidenceIndicator';
-import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { NavRail } from '@/components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { Alert } from '@/components/composites/Alert';
 import { useAnalysisStore } from '@/store/analysisStore';
 import { useLanguage } from '@/context/LanguageContext';
@@ -433,10 +430,8 @@ const AnalysisPage: React.FC = () => {
   // --------------------------------------------------------------------------
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <NavBar />
-
-      <main className="analysis__page">
+    <AppShell>
+      <main className="analysis__page page-content">
         {/* Page header */}
         <div className="analysis__page-header">
           <button
@@ -909,11 +904,7 @@ const AnalysisPage: React.FC = () => {
           </div>
         )}
       </main>
-
-      <Footer />
-      <NavRail />
-      <BottomNav />
-    </div>
+    </AppShell>
   );
 };
 

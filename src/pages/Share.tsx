@@ -2,10 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getPairAnalysis } from '@/features/viral/api/shareService';
 import type { PairPreview } from '@/features/viral/api/shareService';
-import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { NavRail } from '@/components/layout/NavRail';
+import { AppShell } from '@/components/layout/AppShell';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -42,7 +39,8 @@ export default function SharePage() {
   }, [code]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <AppShell>
+      <div className="page-content">
       <MetaTagManager
         title={shareTitle}
         description={shareDescription}
@@ -50,7 +48,6 @@ export default function SharePage() {
         ogImage="/og-default-th.jpg"
         canonicalUrl={code ? `/${language}/share/${code}` : `/${language}/share`}
       />
-      <NavBar />
       <div
         style={{
           flex: 1,
@@ -182,9 +179,7 @@ export default function SharePage() {
         </a>
       </div>
       </div>
-      <Footer />
-      <NavRail />
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

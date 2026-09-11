@@ -14,9 +14,7 @@
 
 import { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
-import { NavBar } from '../components/layout/NavBar';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { useTwin } from '../context/TwinContext';
 import { useLanguage } from '../context/LanguageContext';
 import { MetaTagManager } from '../components/MetaTagManager';
@@ -389,16 +387,16 @@ export default function TarotPage() {
     });
   };
 
-  return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
+return (
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
       <MetaTagManager
         title={isTh ? 'การอ่านสัญลักษณ์ — SELFPRINT' : 'Symbol Reading — SELFPRINT'}
         description={isTh ? 'สะท้อนความคิดผ่านสัญลักษณ์ทางจิตวิทยา' : 'Reflect on yourself through psychological symbols'}
         canonicalUrl={isTh ? '/th/tarot' : '/en/tarot'}
       />
-      <NavBar />
 
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
+      <div style={{ padding: '24px 16px 0' }}>
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <button
@@ -547,10 +545,8 @@ export default function TarotPage() {
           </div>
         )}
       </div>
-
-      <NavRail />
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }
 

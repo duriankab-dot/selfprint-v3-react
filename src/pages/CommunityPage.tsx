@@ -17,9 +17,7 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
-import { NavBar } from '../components/layout/NavBar';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useAuth } from '../context/AuthContext';
 import { useWorld } from '../context/WorldContext';
@@ -140,15 +138,15 @@ export default function CommunityPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
       <MetaTagManager
         title={isTh ? 'ชุมชน — SELFPRINT' : 'Community — SELFPRINT'}
         description={isTh ? 'เชื่อมต่อกับชุมชน SELFPRINT' : 'Connect with the SELFPRINT community'}
         canonicalUrl={isTh ? '/th/community' : '/en/community'}
       />
-      <NavBar />
 
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
+      <div style={{ padding: '24px 16px 0' }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{ fontSize: 26, fontWeight: 700, color: 'var(--color-text-primary)', margin: 0 }}>
@@ -430,10 +428,8 @@ export default function CommunityPage() {
           </div>
         )}
       </div>
-
-      <NavRail />
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }
 

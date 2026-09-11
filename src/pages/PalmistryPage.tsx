@@ -13,9 +13,7 @@
 
 import { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
-import { NavBar } from '../components/layout/NavBar';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { useLanguage } from '../context/LanguageContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 
@@ -305,15 +303,15 @@ export default function PalmistryPage() {
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
       <MetaTagManager
         title={isTh ? 'อ่านลักษณะมือ — SELFPRINT' : 'Palm Reading — SELFPRINT'}
         description={isTh ? 'วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ' : 'Explore how your hand shape relates to personality'}
         canonicalUrl={isTh ? '/th/palmistry' : '/en/palmistry'}
       />
-      <NavBar />
 
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
+      <div style={{ padding: '24px 16px 0' }}>
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <button
@@ -557,9 +555,7 @@ export default function PalmistryPage() {
           </div>
         )}
       </div>
-
-      <NavRail />
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 }

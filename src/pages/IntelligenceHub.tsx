@@ -45,10 +45,7 @@ import AnalyticsSummary from '../components/dashboard/AnalyticsSummary';
 import IntelligencePanel from '../components/dashboard/IntelligencePanel';
 import FutureSelfPanel from '../components/dashboard/FutureSelfPanel';
 import { DecisionCard, LifePackCarousel, ForecastWidget } from '../components/dashboard/IntelligencePanels';
-import { NavBar } from '../components/layout/NavBar';
-import { Footer } from '../components/layout/Footer';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import '../styles/dashboard.css';
 
 interface Insights {
@@ -181,17 +178,17 @@ const IntelligenceHub: React.FC = () => {
           canonicalUrl={`/${language}/intelligence`}
         />
       )}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <NavBar />
-        <div className="dashboard" data-testid="intelligence-hub-container" style={{ flex: 1 }}>
-          <div className="dashboard-header">
-            <h1>🧬 {isTh ? 'ปัญญาเชิงลึก' : 'Deep Intelligence'}</h1>
-            <p>
-              {isTh
-                ? 'ข้อมูลเชิงลึก แนวโน้ม รูปแบบพฤติกรรม และบันทึกการตัดสินใจทั้งหมดของคุณ'
-                : 'Your full insights, trends, behavioral patterns, and decision history'}
-            </p>
-          </div>
+      <AppShell>
+        <div className="page-content">
+          <div className="dashboard" data-testid="intelligence-hub-container">
+            <div className="dashboard-header">
+              <h1>🧬 {isTh ? 'ปัญญาเชิงลึก' : 'Deep Intelligence'}</h1>
+              <p>
+                {isTh
+                  ? 'ข้อมูลเชิงลึก แนวโน้ม รูปแบบพฤติกรรม และบันทึกการตัดสินใจทั้งหมดของคุณ'
+                  : 'Your full insights, trends, behavioral patterns, and decision history'}
+              </p>
+            </div>
 
           {/* Growth Space — §12 PAST → NOW → NEXT visualization */}
           <GrowthSpace />
@@ -323,10 +320,8 @@ const IntelligenceHub: React.FC = () => {
             </button>
           </div>
         </div>
-        <Footer />
-        <NavRail />
-      <BottomNav />
-      </div>
+        </div>
+      </AppShell>
     </>
   );
 };

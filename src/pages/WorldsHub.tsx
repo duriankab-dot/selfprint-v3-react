@@ -13,8 +13,7 @@ import { getAllWorlds, getWorldArticles, WORLDS } from '../constants/worlds';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { getSeoMetadata } from '../constants/seoMetadata';
-import { NavRail } from '../components/layout/NavRail';
-import { BottomNav } from '../components/layout/BottomNav';
+import { AppShell } from '../components/layout/AppShell';
 import { Twin } from '../components/twin/Twin';
 import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
@@ -58,20 +57,8 @@ export default function WorldsHub() {
           canonicalUrl={`/${language}/worlds`}
         />
       )}
-      {/* APPSHELL-006 FIX: desktop nav rail — overrides the earlier
-          "full-immersion, no chrome" decision, same as WorldDetail.tsx. */}
-      <NavRail />
-      {/* BACKBUTTON-002 FIX: /worlds is a BottomNav root destination
-          ("โลก"), same as /dashboard, /explore, /chat/twin, /me — a
-          history-back button here made no sense ("อยู่หน้าแรก จะย้อนไปไหน").
-          WorldsHub previously had no BottomNav at all (leftover from the
-          old full-immersion design) and stood in a lone ad-hoc back button
-          as its only exit — replaced with the real 5-tab BottomNav that
-          every other root page already has, consistent with the App Shell
-          (see NavBar.tsx's ROOT_TAB_PATHS suppression for the matching fix
-          on pages that do use NavBar). */}
-      <BottomNav />
-      <div className="worlds-hub" data-testid="worlds-container">
+      <AppShell>
+      <div className="worlds-hub page-content" data-testid="worlds-container">
         {/* Header */}
         <div className="wh-header">
           {/* TWINGUIDE-001 (Track C Phase 9, G1 / §4.5 / §13): the subtitle
@@ -124,6 +111,7 @@ export default function WorldsHub() {
           </p>
         </div>
       </div>
+      </AppShell>
     </>
   );
 }

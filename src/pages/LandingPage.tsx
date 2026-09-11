@@ -15,8 +15,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
+import { AppShell } from '@/components/layout/AppShell';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
@@ -384,10 +383,11 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   if (session && lifecycleStatus && twin) {
     return (
       <>
-        <NavBar position="fixed" />
-        <WelcomeBackHero lang={lang} twinName={twin.name ?? undefined} onEnter={() => navigate('/twin')} />
-        <Footer />
-        <BottomNav />
+        <AppShell showHeader header={<NavBar position="fixed" />}>
+          <div className="page-content">
+            <WelcomeBackHero lang={lang} twinName={twin.name ?? undefined} onEnter={() => navigate('/twin')} />
+          </div>
+        </AppShell>
       </>
     );
   }
@@ -395,10 +395,11 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   if (session && lifecycleStatus && lifecycleStatus === 'ONBOARDING') {
     return (
       <>
-        <NavBar position="fixed" />
-        <ResumeHero lang={lang} onResume={() => navigate('/onboarding')} onRestart={() => navigate('/onboarding')} />
-        <Footer />
-        <BottomNav />
+        <AppShell showHeader header={<NavBar position="fixed" />}>
+          <div className="page-content">
+            <ResumeHero lang={lang} onResume={() => navigate('/onboarding')} onRestart={() => navigate('/onboarding')} />
+          </div>
+        </AppShell>
       </>
     );
   }
@@ -457,28 +458,32 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         }
       `}</style>
 
-      <main style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
-
-        {/* ── NAV ── */}
-        <NavBar
-          position="fixed"
-          rightSlot={
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <button
-                onClick={() => navigate('/login')}
-                style={{ padding: '10px 16px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', background: 'transparent', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)' }}
-              >
-                {lang === 'th' ? 'เข้าสู่ระบบ' : 'Log in'}
-              </button>
-              <button
-                onClick={goFull}
-                style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', background: 'var(--color-accent-primary)', color: 'white', border: 'none' }}
-              >
-                {lang === 'th' ? 'เริ่มฟรี' : 'Start Free'}
-              </button>
-            </div>
-          }
-        />
+      <AppShell
+        showHeader
+        hideNav
+        header={(
+          <NavBar
+            position="fixed"
+            rightSlot={
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <button
+                  onClick={() => navigate('/login')}
+                  style={{ padding: '10px 16px', borderRadius: '8px', fontWeight: 600, fontSize: '14px', cursor: 'pointer', background: 'transparent', color: 'var(--color-text-secondary)', border: '1.5px solid var(--color-border)' }}
+                >
+                  {lang === 'th' ? 'เข้าสู่ระบบ' : 'Log in'}
+                </button>
+                <button
+                  onClick={goFull}
+                  style={{ padding: '10px 20px', borderRadius: '8px', fontWeight: 700, fontSize: '14px', cursor: 'pointer', background: 'var(--color-accent-primary)', color: 'white', border: 'none' }}
+                >
+                  {lang === 'th' ? 'เริ่มฟรี' : 'Start Free'}
+                </button>
+              </div>
+            }
+          />
+        )}
+      >
+      <main className="page-content" style={{ backgroundColor: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', fontFamily: "'Inter','Noto Sans Thai',sans-serif" }}>
 
         {/* ══════════════════════════════════════════════════════ */}
         {/* SCREEN 1 — "คุณคือใคร จริงๆ?"                        */}
@@ -916,9 +921,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           </div>
         </section>
 
-        <Footer />
-        <BottomNav />
       </main>
+      </AppShell>
     </>
   );
 }

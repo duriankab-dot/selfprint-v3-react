@@ -13,13 +13,16 @@
 
 import React from 'react';
 import VoiceChat from '@/components/features/VoiceChat';
+import { AppShell } from '@/components/layout/AppShell';
 import './voice-chat-page.css';
 
 export const VoiceChatPage: React.FC = () => {
   return (
-    <main className="voice-chat-page">
-      <VoiceChat />
-    </main>
+    <AppShell>
+      <main className="voice-chat-page page-content">
+        <VoiceChat />
+      </main>
+    </AppShell>
   );
 };
 

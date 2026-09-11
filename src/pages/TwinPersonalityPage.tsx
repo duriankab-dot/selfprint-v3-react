@@ -12,7 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { PersonalContextBuilder } from '../services/sice/engines/PersonalContextBuilder';
 import type { PersonalContext } from '../types/sice';
 import { TwinNav } from '../components/twin/TwinNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import '../styles/twin-personality.css';
 
 interface PersonalityMetrics {
@@ -195,9 +195,11 @@ export default function TwinPersonalityPage() {
 
   if (isLoading) {
     return (
-      <div className="twin-personality-page loading">
-        {isTh ? 'กำลังโหลดข้อมูลบุคลิกภาพ...' : 'Loading personality...'}
-      </div>
+      <AppShell>
+        <div className="page-content twin-personality-page loading">
+          {isTh ? 'กำลังโหลดข้อมูลบุคลิกภาพ...' : 'Loading personality...'}
+        </div>
+      </AppShell>
     );
   }
 
@@ -208,8 +210,8 @@ export default function TwinPersonalityPage() {
   const nextStage = stages.find((s) => s.stage === stageNumber + 1);
 
   return (
-    <div className="twin-personality-page">
-      <NavRail />
+    <AppShell>
+      <div className="twin-personality-page page-content">
       {/* APPSHELL-004: Twin app-space sub-nav */}
       <TwinNav currentTab="personality" />
       <div className="personality-container">
@@ -332,6 +334,7 @@ export default function TwinPersonalityPage() {
           </section>
         )}
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }

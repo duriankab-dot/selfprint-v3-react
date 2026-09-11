@@ -20,10 +20,7 @@ import {
   arrayBufferToBase64Url,
 } from '../lib/auth/webauthn';
 import type { RegistrationOptions } from '../lib/auth/webauthn';
-import { NavBar } from '../components/layout/NavBar';
-import { Footer } from '../components/layout/Footer';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import './PasskeySettings.css';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -202,9 +199,8 @@ const PasskeySettings: React.FC = () => {
   // ── Render ──────────────────────────────────────────────────────────────
 
   return (
-    <div className="passkey-settings-page">
-      <NavBar />
-
+    <AppShell>
+      <div className="passkey-settings-page page-content">
       <main className="passkey-settings-main">
         <div className="passkey-settings-container">
           <div className="passkey-settings-header">
@@ -343,13 +339,10 @@ const PasskeySettings: React.FC = () => {
                 : '⚠️ This device or browser doesn\'t support Passkeys — try Chrome / Safari on iOS/Android'}
             </div>
           )}
-        </div>
+</div>
       </main>
-
-      <Footer />
-      <NavRail />
-      <BottomNav />
-    </div>
+      </div>
+    </AppShell>
   );
 };
 

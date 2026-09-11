@@ -11,7 +11,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../services/supabase-service';
 import { TwinNav } from '../components/twin/TwinNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import '../styles/twin-settings.css';
 
 interface TwinPreferences {
@@ -113,15 +113,17 @@ export default function TwinSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="twin-settings-page loading">
-        {isTh ? 'กำลังโหลดการตั้งค่า...' : 'Loading preferences...'}
-      </div>
+      <AppShell>
+        <div className="page-content twin-settings-page loading">
+          {isTh ? 'กำลังโหลดการตั้งค่า...' : 'Loading preferences...'}
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="twin-settings-page">
-      <NavRail />
+    <AppShell>
+      <div className="twin-settings-page page-content">
       {/* APPSHELL-004: Twin app-space sub-nav */}
       <TwinNav currentTab="settings" />
       <div className="twin-settings-container">
@@ -252,6 +254,7 @@ export default function TwinSettingsPage() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }

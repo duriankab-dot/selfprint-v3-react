@@ -17,9 +17,7 @@
 
 import { useState, useEffect } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
-import { NavBar } from '../components/layout/NavBar';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { supabase } from '../services/supabase-service';
@@ -483,10 +481,8 @@ export default function ExplorePage() {
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
-      <NavBar />
-
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <h1 style={{
@@ -834,10 +830,7 @@ export default function ExplorePage() {
             : 'Self-exploration results are signals for reflection, not absolute facts — please use your own judgment'}
         </p>
       </div>
-
-      <NavRail />
-      <BottomNav />
-    </div>
+    </AppShell>
   );
 }
 

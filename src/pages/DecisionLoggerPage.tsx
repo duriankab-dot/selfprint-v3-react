@@ -12,13 +12,16 @@
 
 import React from 'react';
 import DecisionLogger from '@/components/features/DecisionLogger';
+import { AppShell } from '@/components/layout/AppShell';
 import './decision-logger-page.css';
 
 export const DecisionLoggerPage: React.FC = () => {
   return (
-    <main className="decision-logger-page">
-      <DecisionLogger />
-    </main>
+    <AppShell>
+      <main className="decision-logger-page page-content">
+        <DecisionLogger />
+      </main>
+    </AppShell>
   );
 };
 

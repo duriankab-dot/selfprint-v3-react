@@ -97,7 +97,6 @@ export function NavRail() {
         .sp-navrail { display: none; }
         @media (min-width: 1024px) {
           .sp-navrail { display: flex !important; }
-          body { padding-left: 88px; }
         }
         .sp-nr-tab:hover { background: color-mix(in srgb, var(--color-accent-primary) 8%, transparent); }
       `}</style>

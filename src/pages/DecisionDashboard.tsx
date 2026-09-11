@@ -13,6 +13,7 @@ import { useDecisionStore } from '../store/decisionStore';
 import { useTwin } from '../context/TwinContext';
 import * as DecisionLearningService from '../services/DecisionLearningService';
 import DecisionForm from '../components/features/DecisionForm';
+import { AppShell } from '../components/layout/AppShell';
 import '../styles/decision-dashboard.css';
 
 export default function DecisionDashboard() {
@@ -48,14 +49,17 @@ export default function DecisionDashboard() {
 
   if (!session?.user?.id) {
     return (
-      <div className="decision-dashboard-error">
-        <p>Please login to track decisions</p>
-      </div>
+      <AppShell>
+        <div className="page-content decision-dashboard-error">
+          <p>Please login to track decisions</p>
+        </div>
+      </AppShell>
     );
   }
 
   return (
-    <div className="decision-dashboard">
+    <AppShell>
+      <div className="decision-dashboard page-content">
       {/* Header */}
       <div className="dd-header">
         <h1>📊 Decision Tracker</h1>
@@ -135,7 +139,8 @@ export default function DecisionDashboard() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </AppShell>
   );
 }
 

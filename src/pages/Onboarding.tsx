@@ -8,6 +8,7 @@ import '../styles/core-awakening.css';
 
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
+import { AppShell } from '@/components/layout/AppShell';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useAuth } from '@/context/AuthContext';
@@ -617,7 +618,9 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
   // silent forward-navigation into a state the database doesn't reflect.
   if (lifecycleError) {
     return (
+      <AppShell hideNav={true}>
       <div
+        className="page-content"
         style={{
           minHeight: '100vh',
           display: 'flex',
@@ -661,6 +664,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           </button>
         </div>
       </div>
+      </AppShell>
     );
   }
 
@@ -672,7 +676,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // "Document does not have a main landmark" (other pages render <main>,
     // this one didn't). Wrapping the whole flow in <main> gives assistive
     // tech a single skip target and repairs the audit.
-    <main style={{ display: 'contents' }}>
+    <AppShell hideNav={true}>
       {seoData && (
         <MetaTagManager
           title={seoData.title}
@@ -682,7 +686,8 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           canonicalUrl={`/${language}/onboarding`}
         />
       )}
-      <div
+      <main
+        className="page-content"
         style={{
         minHeight: '100vh',
         backgroundColor: 'var(--color-bg-primary)',
@@ -892,7 +897,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       {step === 'claim-account' && (
         <ClaimAccount data={pendingOnboardingData} onDone={handleComplete} />
       )}
-    </div>
     </main>
+    </AppShell>
   );
 }

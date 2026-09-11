@@ -11,9 +11,7 @@
  */
 
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
-import { NavBar } from '../components/layout/NavBar';
-import { BottomNav } from '../components/layout/BottomNav';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -211,10 +209,8 @@ export default function MePage() {
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-bg-primary)', paddingBottom: 80 }}>
-      <NavBar />
-
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 0' }}>
+    <AppShell>
+      <div className="page-content" style={{ maxWidth: 480, margin: '0 auto' }}>
         {/* Profile Card */}
         <div style={{
           background: 'var(--color-bg-secondary)',
@@ -400,9 +396,6 @@ export default function MePage() {
           {isTh ? 'SELFPRINT · รู้จักตัวเองให้ลึกขึ้น ทุกวัน' : 'SELFPRINT · Know yourself more deeply, every day'}
         </div>
       </div>
-
-      <NavRail />
-      <BottomNav />
-    </div>
+    </AppShell>
   );
 }

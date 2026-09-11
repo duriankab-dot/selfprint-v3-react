@@ -24,8 +24,7 @@ import { WorldContextHeader } from '../components/chat/WorldContextHeader';
 import { WorldTabs } from '../components/WorldTabs';
 import { TwinNav } from '../components/twin/TwinNav';
 import { Twin } from '../components/twin/Twin';
-import { NavRail } from '../components/layout/NavRail';
-import { BottomNav } from '../components/layout/BottomNav';
+import { AppShell } from '../components/layout/AppShell';
 import { supabase } from '@/services/supabase-service';
 import { callTwinAPI } from '../services/TwinAPIService';
 import { loadRecentMemories } from '../lib/memory/loadRecentMemories';
@@ -562,11 +561,13 @@ export default function TwinChat() {
   // while TwinContext is still checking.
   if (twinLoading) {
     return (
-      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          {isTh ? 'กำลังโหลดทวินของคุณ...' : 'Loading your Twin...'}
-        </p>
-      </div>
+      <AppShell>
+        <div className="page-content twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+          <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+            {isTh ? 'กำลังโหลดทวินของคุณ...' : 'Loading your Twin...'}
+          </p>
+        </div>
+      </AppShell>
     );
   }
 
@@ -583,9 +584,8 @@ export default function TwinChat() {
       // scroll means content taller than the viewport (icon + heading +
       // paragraph + button, at narrow widths) still gets cut off with no
       // way to reach the button underneath.
-      <div className="flex flex-col h-screen overflow-y-auto">
-        <NavRail />
-        <BottomNav />
+      <AppShell>
+        <div className="page-content flex flex-col h-screen overflow-y-auto">
         <div className="twin-container flex flex-col flex-1 items-center justify-center text-center max-w-2xl mx-auto p-6">
           <div style={{ fontSize: '3rem', marginBottom: '1rem' }} aria-hidden="true">💫</div>
           <h1
@@ -625,18 +625,21 @@ export default function TwinChat() {
             {`✨ ${isTh ? 'ตื่นรู้ตัวตน' : 'Core Awakening'}`}
           </button>
         </div>
-      </div>
+        </div>
+      </AppShell>
     );
   }
 
   // GUARD: Check if user is logged in
   if (!session?.user?.id) {
     return (
-      <div className="twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
-        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
-          {isTh ? 'กรุณาเข้าสู่ระบบเพื่อคุยกับทวินของคุณ' : 'Please login to chat with your Twin'}
-        </p>
-      </div>
+      <AppShell>
+        <div className="page-content twin-container flex flex-col h-screen items-center justify-center text-center max-w-2xl mx-auto p-4">
+          <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+            {isTh ? 'กรุณาเข้าสู่ระบบเพื่อคุยกับทวินของคุณ' : 'Please login to chat with your Twin'}
+          </p>
+        </div>
+      </AppShell>
     );
   }
 
@@ -718,17 +721,8 @@ export default function TwinChat() {
           <link rel="canonical" href={`/${language}/chat/twin`} />
         </Helmet>
       )}
-      <div className="flex flex-col h-screen">
-      <NavRail />
-      {/* TWINCHAT-EXIT-001 FIX: this page only ever rendered NavRail
-          (desktop-only, hidden below 1024px) and TwinNav's own BackButton
-          is deliberately hidden on the 'chat' tab (see TwinNav.tsx) since
-          /chat/twin is a BottomNav root destination — except BottomNav
-          itself was never actually rendered here, so on mobile there was
-          truly no way out of this page at all ("ไม่มีปุ่มออก"). Same
-          NavRail+BottomNav pairing every other root tab page (Dashboard,
-          WorldsHub) already uses. */}
-      <BottomNav />
+      <AppShell>
+      <div className="page-content flex flex-col h-screen">
       {/* APPSHELL-004: Twin app-space sub-nav — Conversation / What Twin
           Knows / Personality / Settings. Sits above the chat column, not
           inside it, so the conversation itself stays a plain focused
@@ -964,7 +958,8 @@ export default function TwinChat() {
         </button>
       </div>
       </div>
-    </div>
+      </div>
+    </AppShell>
     </>
   );
 }

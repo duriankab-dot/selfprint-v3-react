@@ -25,7 +25,7 @@ import { useEnvironment } from '../context/EnvironmentContext';
 import { useTwin } from '../context/TwinContext';
 import { useAuth } from '../context/AuthContext';
 import { BackButton } from '../components/common/BackButton';
-import { NavRail } from '../components/layout/NavRail';
+import { AppShell } from '../components/layout/AppShell';
 import { WorldStoryPanel } from '../components/world/WorldStoryPanel';
 import { CurrentChapter } from '../components/story/CurrentChapter'; // §51 Layer 2
 import { getRecentlyLearned, type LearnedMemory } from '../lib/memory/getTwinKnowledge';
@@ -168,12 +168,8 @@ export default function WorldDetail() {
           ? `AI ฝาแฝดของคุณอยู่กับคุณในโลก${world.nameTh}นี้ด้วย`
           : `Your AI Twin is here with you in the ${world.name} world`}
       </span>
-      {/* APPSHELL-006 FIX: user explicitly asked for the desktop nav rail
-          here too, overriding the earlier "full-immersion, no chrome"
-          decision. */}
-      <NavRail />
-      <div
-        className="world-detail"
+      <AppShell>
+      <div className="world-detail page-content"
         style={{ '--world-color': world.color } as React.CSSProperties}
       >
         <div className="wd-header">
@@ -327,6 +323,7 @@ export default function WorldDetail() {
           </Link>
         </div>
       </div>
+      </AppShell>
     </>
   );
 }

@@ -7,10 +7,7 @@
  * Route: /th/vs-astrology, /en/vs-astrology
  */
 
-import { NavBar } from '@/components/layout/NavBar';
-import { Footer } from '@/components/layout/Footer';
-import { BottomNav } from '@/components/layout/BottomNav';
-import { NavRail } from '@/components/layout/NavRail';
+import { AppShell } from '@/components/layout/AppShell';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
@@ -132,9 +129,9 @@ export default function VsAstrologyPage() {
         }}
       />
 
-      <NavBar />
+      <AppShell>
 
-      <main style={{ minHeight: '100vh', paddingTop: 72 }}>
+      <main className="page-content" style={{ paddingTop: 72 }}>
 
         {/* Hero */}
         <section style={{
@@ -260,9 +257,7 @@ export default function VsAstrologyPage() {
 
       </main>
 
-      <Footer />
-      <NavRail />
-      <BottomNav />
+      </AppShell>
     </>
   );
 }
