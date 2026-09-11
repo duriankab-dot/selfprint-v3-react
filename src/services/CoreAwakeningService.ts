@@ -39,7 +39,7 @@ export interface AwakeningResult {
  * engine names ('MemoryManagerEngine' / 'DecisionIntelligenceEngineAdapter'),
  * so any lookup by name would have silently missed those two engines.
  */
-const REAL_SICE_ENGINE_NAMES = [
+export const REAL_SICE_ENGINE_NAMES = [
   'PersonalContextBuilder',
   'PatternDetector',
   'InsightEngine',

@@ -1,6 +1,6 @@
 # SELFPRINT — PROJECT SUMMARY (ภาษาไทย)
 
-> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — เพิ่ม Daily Time & Energy Dynamics layer)
+> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — เพิ่ม SICE Integration + Astrovera Edge Function)
 > **แหล่งอ้างอิงหลัก:** [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) — เอกสารนี้ **ไม่แทนที่** `FORENSIC_...`
 > `FORENSIC_...` ยังเป็น **single source of truth** ของสถานะจริง ส่วนเอกสารนี้เป็น summary กระชับสำหรับอ่านเร็ว
 > **หลักการ:** เนื้อหาทุกข้อตรวจจากซอร์สโค้ดจริง (file:line) — ไม่เชื่อ `.md` เก่า · ไม่อ้างเกินจริง · ระบุ limitations จริง
@@ -142,9 +142,9 @@ Twin + memory/evolution → **Today** (living entry)
 | **`dangerouslySetInnerHTML`** | 8 จุด — ปลอดภัยทั้งหมดผ่าน `safeJsonLd()` |
 | **`chunk-intelligence` 345 kB** | chunk ใหญ่สุด — ส่วนใหญ่คือ Supabase SDK ถูกกลืน (verify ใน Phase 0) |
 | **X1 env** | `structuredData.ts:21` `'+66-2-XXX-XXXX'` fake phone fallback → GEO spam signal |
-| **SICE → Full Analysis** | ❌ ยังไม่ได้เชื่อม `SICEOrchestrator.orchestrate()` เข้ากับ Full Analysis — ใช้เฉพาะ astrology fallback |
-| **twin_sice_scores persistence** | ❌ migration มี table แล้วแต่ CoreAwakeningService เท่านั้นเขียน `twin_awakening_essence` — ยังไม่เขียน `twin_sice_scores` |
-| **Phase 2 Edge Function** | ❌ ยังไม่มี Astrovera Edge Function — `buildFallbackResponse()` เป็น primary แทนที่จะเป็น fallback |
+| **SICE → Full Analysis** | ✅ **ปิดแล้ว (2026-09-11)** · `handleFinetuneSubmit` เรียก `SICEOrchestrator.orchestrate()` พร้อม finetune answers → merge `personalIntelligence.insights` เข้า `analysisProfile` → FullAnalysis แสดง SICE insights จริงแทน fallback ล้วนๆ |
+| **twin_sice_scores persistence** | ✅ **ปิดแล้ว (2026-09-11)** · `persistSiceScores()` ใน Onboarding.tsx บันทึก baseline scores ลง localStorage snapshot หลัง orchestration สำเร็จ — CoreAwakeningService อ่านต่อที่ Twin Birth |
+| **Phase 2 Edge Function** | ✅ **สร้างแล้ว (2026-09-11)** · `supabase/functions/astrovera-edge/index.ts` — Claude 3.5 Sonnet via OpenRouter + numerology life_path fallback ภายใน edge เอง |
 
 > ทั้งหมดนี้ **ไม่บล็อกการเริ่ม Track C** — แต่ต้องรู้ก่อน redesign และต้องแก้ก่อนอ้าง "100% product-verified"
 

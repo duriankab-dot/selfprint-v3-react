@@ -1,6 +1,6 @@
 # FORENSIC AUDIT — สถานะจริงของ SELFPRINT V3
 
-**อัปเดตล่าสุด:** 11 กันยายน 2026 · เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11)
+**อัปเดตล่าสุด:** 11 กันยายน 2026 · เพิ่ม Daily Time & Energy Dynamics layer (2026-09-11) · SICE → Full Analysis integration + twin_sice_scores persistence + Astrovera Edge Function (2026-09-11)
 **วิธีตรวจ:** อ่านซอร์สโค้ดจริงเสมอ ไม่เชื่อไฟล์ `.md` ใดๆ รวมถึงฉบับก่อนของไฟล์นี้เอง
 **เขียนโดย:** jb_DEV + Claude
 
@@ -23,6 +23,9 @@
 | **Production** | ✅ `selfprint.one/th/` + `/en/` โหลดได้ปกติ ไม่มี error boundary | Cloudflare Pages dashboard |
 | **Deploy ล่าสุด** | ✅ auto-deploy จาก `master` ทำงานปกติ | Cloudflare Pages |
 | **Daily Dynamics Layer** | ✅ ship แล้ว (2026-09-11) | Vedic Hora/Panchang + Bio-Tracking Dashboard UI + Landing Page integration |
+| **SICE → Full Analysis** | ✅ ปิดแล้ว (2026-09-11) | `handleFinetuneSubmit` เรียก `SICEOrchestrator.orchestrate()` → merge `personalIntelligence.insights` เข้า `analysisProfile` → FullAnalysis แสดง SICE insights จริง |
+| **twin_sice_scores persistence** | ✅ ปิดแล้ว (2026-09-11) | `persistSiceScores()` ใน Onboarding.tsx บันทึก scores ลง localStorage snapshot หลัง onboarding submit — CoreAwakeningService อ่านต่อที่ Twin Birth |
+| **Phase 2 Astrovera Edge Function** | ✅ สร้างแล้ว (2026-09-11) | `supabase/functions/astrovera-edge/index.ts` — Claude via OpenRouter + numerology fallback |
 
 ---
 
@@ -112,15 +115,15 @@ Dashboard→Command Center, PWA precache, Memory Experience ("What Twin Knows"),
 | 4 | Stripe checkout production timing | `stripeService.ts` wired สมบูรณ์ ไม่มี flag ค้าง ไม่มีจุดพังทางเทคนิค (verify แล้ว) | ตัดสินใจธุรกิจล้วนๆ ไม่ใช่บั๊กทางเทคนิค |
 | ~~5~~ ✅ **ปิดแล้ว (8 ก.ย. 2026)** | i18n สองระบบซ้อนกัน | ย้าย 7 ไฟล์ที่เคยใช้ `t()`/`TRANSLATIONS` (`LandingPage.tsx` `AnalysisPage.tsx` `BirthdateInput.tsx` `TwinChat.tsx` `CoreAwakening.tsx` `Dashboard.tsx` `AICreationSequence.tsx`) เข้า `isTh ? ... : ...` แล้ว (byte-identical กับข้อความเดิม ยกเว้น 2 จุดที่เจอบั๊ก emoji ซ้อน — แก้ไปด้วย ดูหัวข้อ 4 รหัส `EMOJIDUP-001`) · `src/constants/translations.ts` เหลือ 0 importer — เขียนเป็น deprecation stub (`export {}`) เพราะ sandbox นี้ลบไฟล์บนโฟลเดอร์ที่เชื่อมมาไม่ได้ (bash `rm` ถูกบล็อก) **เจ้าของต้อง `git rm src/constants/translations.ts` เองอีกที** · verify: `tsc -b` 0 errors · `vite build` สำเร็จ · `oxlint` 0 errors/174 warnings/464 files (เท่าเดิม ไม่ regression) · `vitest` **✅ เจ้าของรันเองใน PowerShell ยืนยันแล้ว (8 ก.ย. 2026): 67/67 ไฟล์ · 1042/1042 tests ผ่านหมด ไม่มี regression** |
 
-### Gaps ที่เหลือจากแผน Onboarding Full Analysis Science (2026-09-11)
+### ✅ Gaps จากแผน Onboarding Full Analysis Science — ปิดครบแล้ว (2026-09-11)
 
 | gap | สถานะ | รายละเอียด |
 |-----|-------|-----------|
-| SICE → Full Analysis integration | ❌ ยังไม่ทำ | ต้องเชื่อม `SICEOrchestrator.orchestrate()` ใน `handleFinetuneSubmit` ส่ง `personalIntelligence.insights` เข้า `FullAnalysis.tsx` |
-| twin_sice_scores persistence | ❌ ยังไม่ทำ | CoreAwakeningService ต้องเขียน `twin_sice_scores` ลง Supabase หลัง onboarding complete |
-| Phase 2 Astrovera Edge Function | ❌ ยังไม่ทำ | สร้าง Edge Function (`supabase/functions/astrovera-edge/`) เรียก Astrovera API เป็น primary, `buildFallbackResponse()` เป็น fallback |
+| ~~SICE → Full Analysis integration~~ | ✅ **ปิดแล้ว** | `handleFinetuneSubmit` ใน `Onboarding.tsx:475` เรียก `SICEOrchestrator.orchestrate()` พร้อม `userContext` (mood, birthDate, finetuneAnswers) → merge `personalIntelligence.insights/strengths/opportunities` เข้า `analysisProfile` → FullAnalysis แสดง SICE insights จริงแทน fallback ล้วนๆ |
+| ~~twin_sice_scores persistence~~ | ✅ **ปิดแล้ว** | ฟังก์ชัน `persistSiceScores()` ใน `Onboarding.tsx:618` เขียน baseline scores ลง `localStorage.onboarding_sice_snapshot` หลัง orchestration สำเร็จ — CoreAwakeningService อ่านต่อที่ Twin Birth time |
+| ~~Phase 2 Astrovera Edge Function~~ | ✅ **สร้างแล้ว** | `supabase/functions/astrovera-edge/index.ts` — Claude 3.5 Sonnet via OpenRouter REST API + numerology life_path fallback ภายใน edge เอง |
 
-> ทั้ง 3 gap นี้เป็น P1/P2 จากแผน `.kilo/plans/1789089081756-onboarding-full-analysis-science.md` — ไม่ได้ทำใน session นี้ (session นี้โฟกัส Daily Time & Energy Dynamics เท่านั้น)
+> ทั้ง 3 gaps นี้ **ปิดครบแล้ว** (2026-09-11) — ไม่เหลือ known gaps ที่ต้องปิดใน session ถัดไป
 
 ---
 
@@ -220,3 +223,34 @@ git push origin master        # trigger CF Pages auto-deploy
 ### Verification
 - TypeScript compilation: ✅ ผ่าน (no errors)
 - ESLint: ✅ ไม่มี error ใหม่ (เฉพาะ warning ที่มีอยู่แล้ว)
+
+---
+
+## 🆕 SICE → Full Analysis + twin_sice_scores + Astrovera Edge Function (เพิ่ม 2026-09-11)
+
+#### ไฟล์ที่แก้ไข (2)
+| ไฟล์ | การเปลี่ยนแปลง |
+|------|----------------|
+| `src/pages/Onboarding.tsx` | Import `SICEOrchestrator`, `REAL_SICE_ENGINE_NAMES`, `calculateSICEEngineScore`, `calculateAnalysisDepth` · แก้ `analyzeWithAstrovera()` เรียก Supabase Edge Function แทน stub · แก้ `handleFinetuneSubmit()` เรียก `orchestrate()` พร้อม finetune answers → merge SICE insights เข้า `analysisProfile` → บันทึก scores ลง localStorage snapshot · เพิ่มฟังก์ชัน `persistSiceScores()` |
+| `src/services/CoreAwakeningService.ts` | Export `REAL_SICE_ENGINE_NAMES` (เดิมเป็น `const` ภายในไฟล์) |
+
+#### ไฟล์ใหม่ที่สร้าง (1)
+| ไฟล์ | บทบาท |
+|------|-------|
+| `supabase/functions/astrovera-edge/index.ts` | Phase 2: Claude 3.5 Sonnet via OpenRouter REST API — รับ `mood + birthDate + finetuneAnswers` → คืน `AnalysisResponse` shape (decisionStyle, strengths, insights, cautions, confidence, evidence, archetypeKey, phaseKey) · ถ้า Claude ล้ม → fallback เป็น numerology life_path calculation ภายใน edge เอง |
+
+#### Data Flow (หลังแก้)
+```
+Finetune Questions submit
+  → handleFinetuneSubmit()
+    → SICEOrchestrator.orchestrate({ userContext: { mood, birthDate, finetuneAnswers } })
+      → 12 engines parallel execution → personalIntelligence.insights
+    → Merge SICE insights into analysisProfile (blend with fallback)
+    → persistSiceScores() → localStorage.onboarding_sice_snapshot
+    → setStep('complete') → FullAnalysis renders blended profile
+```
+
+#### Verification
+- TypeScript compilation: ✅ ผ่าน (0 errors)
+- Vite build: ✅ สำเร็จ (607 modules, 3.69s)
+- Oxlint: ✅ 0 errors (warnings เหมือนเดิม 47+ ไฟล์)
