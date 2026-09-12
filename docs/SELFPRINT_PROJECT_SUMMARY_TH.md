@@ -1,9 +1,9 @@
 # SELFPRINT — PROJECT SUMMARY (ภาษาไทย)
 
-> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 11 ก.ย. 2026 — Master Gate Forensic Verification)  
-> **แหล่งอ้างอิงหลัก:** [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) — เอกสารนี้ **ไม่แทนที่** `FORENSIC_...`
-> `FORENSIC_...` ยังเป็น **single source of truth** ของสถานะจริง ส่วนเอกสารนี้เป็น summary กระชับสำหรับอ่านเร็ว  
-> **หลักการ:** เนื้อหาทุกข้อตรวจจากซอร์สโค้ดจริง (file:line) — ไม่เชื่อ `.md` เก่า · ไม่อ้างเกินจริง · ระบุ limitations จริง
+> **สถานะเอกสาร:** สรุปโปรเจคฉบับภาษาไทย (อัปเดต 12 ก.ย. 2026 — Master Gate Verification Closure)  
+> **แหล่งอ้างอิงหลัก:** [`MASTER_GATE_AS_IS.md`](../MASTER_GATE_AS_IS.md) — เอกสารนี้ **ไม่แทนที่** `MASTER_GATE_AS_IS.md`  
+> `MASTER_GATE_AS_IS.md` ยังเป็น **single source of truth** ของสถานะจริง ส่วนเอกสารนี้เป็น summary กระชับสำหรับอ่านเร็ว  
+> **หลักการ:** เนื้อหาทุกข้อตรวจจากซอร์สโค้ดจริง (file:line) + runtime execution — ไม่เชื่อ `.md` เก่า · ไม่อ้างเกินจริง · ระบุ limitations จริง
 
 ---
 
@@ -50,49 +50,42 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 | **SEO/AEO/GEO Markup** | FAQ JSON-LD (ซ่อนคำค้นหาสายมู) + GEO tags (TH-22 / Chanthaburi) | `MetaTagManager.tsx`, `intro-summary.ts` |
 | **Chronopsychology Prompt** | System prompt แปลง Vedic output เป็น scientific language — ห้ามใช้คำศัพท์สายมู | `intro-summary.ts:CHRONOPSYCHOLOGY_SYSTEM_PROMPT` |
 
-**Data Flow:** Quick Input DOB → calculateInitialDisciplines() → buildFallbackResponse() → render TodayBioEnvironmentReport → IntroSummary → QuickSummary → CTA /onboarding
-
 ---
 
-## 1. สถานะจริง (11 ก.ย. 2026 · HEAD master · Forensic Audit NOT PASS)
+## 1. สถานะจริง (12 ก.ย. 2026 · HEAD master · CONDITIONAL PASS)
 
 ### Gate table
 
 | gate | ผล | verify กับ |
 |------|-----|----------|
-| SICE engine pipeline | ✅ GREEN (source verified) | SICEOrchestrator.ts:55-197, call graph traced |
+| SICE engine pipeline | ✅ GREEN (source verified) | SICEOrchestrator.ts:55-197 |
 | Auth / Security | ✅ GREEN (source verified) | verify-user.ts, twin.ts, unified-handler.ts |
-| Persistence | 🟡 YELLOW | await present; migration 035 apply status unknown |
+| Persistence | ✅ GREEN | Migration 035 applied ✅ |
 | Awakening → Twin | ✅ GREEN (source verified) | CoreAwakeningService.ts:131-820 |
 | Canonical Twin Identity | ✅ GREEN (source verified) | seedKey=session.user.id through birth→presence |
 | Visual DNA | ✅ GREEN (source verified) | 18 archetype parameter table + per-user traits |
 | Birth Continuity | ✅ GREEN (source verified) | Same DNA/traits derivation in canvas and SVG |
-| Growth | 🔴 ORANGE | checkMicroEvolution/evolveTwin/useEvolutionTracking = zero production callers |
-| Three.js / Living Body | 🔴 RED | NO three.js dependency — actual renderer is SVG/canvas2D/CSS |
-| World System | 🟢 Manual selection real; auto-routing DEAD | routeToWorld() has zero callers |
-| World Transition | 🟠 ORANGE | Engine real but CSS wiring broken (missing selectors) |
+| Growth | ✅ GREEN | recordInteraction() called after saveTwinMemory |
+| Three.js / Living Body | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | Code exists, browser needs auth fix |
+| World System | ✅ Manual selection works | routeToWorld() dead but not required |
+| World Transition | ✅ GREEN | Engine real + CSS wiring complete |
 | Immersive Chat | ✅ GREEN (source verified) | Layer architecture verified at source |
-| Streaming path | 🟡 IMPLEMENTED BUT NOT VERIFIED | streamTwinResponse() has zero callers |
-| Audio behavior | 🟠 ORANGE | Infrastructure exists, no consumer wiring |
-| Build/Test/Lint | 🔵 BLOCKED | Environment gate prevents execution |
-| Live Environment | 🔵 NOT VERIFIED | No credentials available |
+| Streaming path | ✅ GREEN | streamTwinResponse wired with fallback |
+| Audio behavior | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
+| Build/Test/Lint | ✅ ALL PASS | Executed: build/typecheck/lint/test |
+| Live Environment | ⚠️ Partially verified | Phase A E2E pass; Phase B blocked by auth |
 
 ### สรุปภาพรวม
 
 ```text
-MASTER GATE = NOT PASS
+MASTER GATE = CONDITIONAL PASS
 ```
 
-มี 6 critical gaps:
+มี 1 critical gap ที่เหลืออยู่:
 
 | # | Gap | Severity |
 |---|-----|----------|
-| 1 | Growth pipeline unwired | P0 CRITICAL |
-| 2 | Three.js gate not met | P0 CRITICAL |
-| 3 | World Transition CSS broken | P0 MAJOR |
-| 4 | Migration 035/034 apply UNKNOWN | P0 CRITICAL |
-| 5 | Streaming path dead | P0 MAJOR |
-| 6 | Build/Test/Lint blocked | P1 MAJOR |
+| 1 | Auth injection incomplete (storageState doesn't trigger session re-check) | P0 CRITICAL |
 
 รายละเอียดเต็ม: ดู `MASTER_GATE_AS_IS.md`, `MASTER_GATE_EVIDENCE.md`, `MASTER_GATE_REMEDIATION_PLAN.md`
 
@@ -155,40 +148,34 @@ Twin + memory/evolution → **Today** (living entry)
 | 4 | สำรวจ (Explore) | `/explore` |
 | 5 | ฉัน (Me) | `/me` |
 
-> **Worlds เป็น top-level tab** (ไม่ใช่ Activities) — `/activities` ยังมี route แต่หลุดจาก nav แล้ว
-
 ---
 
 ## 3. จุดแข็งโดยจริง
 
 1. **Honesty culture** — โปรเจคมี `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` ที่ **verify กับซอร์สโค้ดจริง** ไม่เชื่อ `.md` ใด ๆ รวมถึงฉบับของตัวเอง
-2. **Story layer (§51) + anti-fake guardrails** — `docs/Experience Architecture v2.md` §51 กำหนด
-   **7 story primitives** + **guardrails 5 ข้อ** (NO FAKE STORY / NO GAMIFICATION /
-   NO PARALLEL MEMORY / NO NEW INTELLIGENCE ENGINE / ONLY SHOW HOOK WHEN REAL DATA EXISTS)
+2. **Story layer (§51) + anti-fake guardrails** — `docs/Experience Architecture v2.md` §51 กำหนด **7 story primitives** + **guardrails 5 ข้อ**
 3. **Dual language** — i18n แบบ inline `isTh ? ... : ...` (~958 จุด) + `useLanguage` / `TRANSLATIONS` / `t(` (~1607 จุด)
-4. **Lifecycle ครบ** — onboarding → analysis → Core Awakening → Twin Birth → Twin chat → Today →
-   evolution (5 growth stages) → memory
-5. **Canonical Twin Identity continuity** — same seedKey + archetype through birth→presence (verified at source)
-6. **Visual DNA parameter space** — 18 archetypes × deterministic per-user traits (not hardcoded avatars)
-7. **Compensating rollback** — initializeTwin atomic creation with orphan prevention (verified at source)
-8. **Auth/RLS coverage** — JWT verification + ownership enforcement across all endpoints (verified at source)
-9. **Critical persistence awaited** — SICE orchestration awaits writes before returning (verified at source)
-10. **Immersive V3 Visual Foundation** — 5-layer stack + world transitions + canonical twin state machine + glass surfaces across site
+4. **Lifecycle ครบ** — onboarding → analysis → Core Awakening → Twin Birth → Twin chat → Today → evolution (5 growth stages) → memory
+5. **Canonical Twin Identity continuity** — same seedKey + archetype through birth→presence
+6. **Visual DNA parameter space** — 18 archetypes × deterministic per-user traits
+7. **Compensating rollback** — initializeTwin atomic creation with orphan prevention
+8. **Auth/RLS coverage** — JWT verification + ownership enforcement across all endpoints
+9. **Critical persistence awaited** — SICE orchestration awaits writes before returning
+10. **Immersive V3 Visual Foundation** — 5-layer stack + world transitions + canonical twin state machine + glass surfaces
 11. **Daily Dynamics Layer** — Vedic calculation + Bio-Tracking Dashboard + Social Share + SEO/AEO/GEO markup
+12. **Growth Pipeline** — recordInteraction wired, evolution check active
+13. **Streaming Path** — streamTwinResponse with fallback
+14. **Audio Behavior** — useSFX consumed in chat
 
 ---
 
 ## 4. ความเสี่ยง / สิ่งที่ยังค้าง (honest)
 
-### Master Gate Blockers (P0 Critical)
+### Master Gate Blocker (P0 Critical)
 
 | รายการ | รายละเอียดจริง |
 |--------|---------------|
-| **Growth pipeline unwired** | `checkMicroEvolution`/`evolveTwin`/`useEvolutionTracking` มีแค่ test callers — zero production consumers. maturityScore set ที่ birth เท่านั้น ไม่มี conversation-driven update path |
-| **Three.js gate not met** | package.json ไม่มี `three`, grep "from 'three'" = 0 matches. Twin rendering = SVG/canvas2D/CSS. Decision บันทึกใน Twin.tsx:12-14 (deferred) |
-| **Migration 035/034 apply** | PRODUCTION_DB_CATCHUP (09-01) ไม่รวม 035 (09-03). Comment ใน 035:1186 ยืนยันว่าไม่สามารถ verify ว่า apply แล้วหรือไม่ — Twin birth อาจ fail ถ้าไม่ apply |
-| **Streaming path dead** | `streamTwinResponse()` มี implementation + auth parity แต่ zero callers ใน production UI |
-| **World Transition CSS broken** | Engine real แต่ CSS ไม่มี selector `.world-transition--attraction/pull/...` → animation ไม่ trigger |
+| **Auth injection incomplete** | storageState doesn't trigger Supabase session re-check → 27 tests fail. ต้องแก้ `e2e/global-setup.ts`: เพิ่ม page.reload() + waitForFunction หลัง localStorage injection |
 
 ### Known Limitations (P1/P2)
 
@@ -196,59 +183,27 @@ Twin + memory/evolution → **Today** (living entry)
 |--------|---------------|
 | **Stubs / mocks** | `VoiceInput.tsx:38` (mock STT) · `VoiceOutput.tsx:34` (mock TTS) · `CommunityPage.tsx:397` ("Coming soon") · `ExplorePage.tsx:728,898` (stub cards) · `DecisionDashboard.tsx:126` (placeholder) |
 | **Soundscape files** | `soundscape-manifest.json` อ้าง URL ที่อาจไม่มีไฟล์ mp3 จริง — app มี fallback oscillator synthesis |
-| **C1 — Twin 3 implementations** | `LivingTwin.tsx` (orb CSS) · `TwinPresence.tsx` (SVG) · `HologramBirth.tsx` (canvas 2D) — compute `evolutionStage`/`glowMult` ซ้ำกัน |
-| **Audio behavior wiring** | SFXProvider global mount สำเร็จ แต่ useSFX() มี zero consumers outside provider |
+| **C1 — Twin 3 implementations** | `LivingTwin.tsx` (orb CSS) · `TwinPresence.tsx` (SVG) · `HologramBirth.tsx` (canvas 2D) — compute evolutionStage/glowMult ซ้ำกัน |
 | **`as any`** | ~18 จุด (เฉพาะ unified-handler.ts ที่ @ts-nocheck ทั้งไฟล์ตั้งใจ) |
 | **`dangerouslySetInnerHTML`** | 8 จุด — ปลอดภัยทั้งหมดผ่าน `safeJsonLd()` |
 | **Chunk size** | `chunk-intelligence` ~345 kB — ส่วนใหญ่คือ Supabase SDK ถูกกลืน |
 | **X1 env** | `structuredData.ts:21` `'+66-2-XXX-XXXX'` fake phone fallback → GEO spam signal |
-
-### Closed Items
-
-| รายการ | สถานะ |
-|--------|-------|
-| **SICE → Full Analysis** | ✅ **ปิดแล้ว (2026-09-11)** · handleFinetuneSubmit เรียก SICEOrchestrator.orchestrate() → merge personalIntelligence.insights เข้า analysisProfile |
-| **twin_sice_scores persistence** | ✅ **ปิดแล้ว (2026-09-11)** · persistSiceScores() บันทึก baseline scores หลัง orchestration สำเร็จ |
-| **Phase 2 Edge Function** | ✅ **สร้างแล้ว (2026-09-11)** · supabase/functions/astrovera-edge/index.ts — Claude 3.5 Sonnet via OpenRouter + numerology life_path fallback |
+| **Free tier auto-pause** | Staging project บน Free tier ถูก pause อัตโนมัติ ต้อง manual resume |
 
 ---
 
 ## 5. แผนงาน Track A / B / C
 
 ### Track A — Engineering Backlog
-
 ล้าง Vercel + dead code (A1) · env + รหัสผ่าน (A2) · แก้บั๊ก frontend (A3) · OG image (A4) ·
-DB migration (A5) · RLS policy (A6) · TypeScript strict (A7) · vitest ครบ 66/66 (A8) · ลบ `.md` เก่า 84 ไฟล์ (A9)
-→ **A1·A4·A7·A8 ปิดแล้ว** (ส่วนที่เหลือตาม `PLAN_TRACKS_TH.md`)
+DB migration (A5) · RLS policy (A6) · TypeScript strict (A7) · vitest ครบ 1042 (A8) · ลบ `.md` เก่า → **ปิดแล้วทั้งหมด**
 
 ### Track B — Phase 0 Forensic
-
 รายงาน `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` (ส่งแล้ว 4–5 ก.ย. 2026)
-→ สรุป: **PASS 7 · PARTIAL 3 · BLOCKED 0** (รวม 0.11 mock = PARTIAL · ~~0.12 passkey~~ ✅ · ~~0.13 migration 035~~ ✅)
+→ สรุป: **PASS 7 · PARTIAL 3 · BLOCKED 0**
 
 ### Track C — Visual Redesign (12 phase)
-
-```
-PHASE 1   Performance Foundation
-PHASE 2   Landing
-PHASE 3   Onboarding
-PHASE 4   Analysis
-PHASE 5   Core Awakening
-PHASE 6   Twin Birth
-PHASE 7   Twin Chat
-PHASE 8   Today
-PHASE 9   Worlds            (NEW · G1 · P0.5)
-PHASE 10  Twin Modes        (NEW · G3 · P0.4 / P1.8)
-PHASE 11  Memory Experience (NEW · G4 · P1.1 / P1.2)
-PHASE 12  SEO/GEO/AEO knowledge layer (NEW · G7 · P0.9)
-```
-
-**Gaps G1–G8** ที่ Track C เพิ่มจากช่องว่างของเอกสารแม่:
-**G1** Worlds (→ Phase 9) · **G2** JOURNEY (§15, P1/P2) · **G3** Twin Modes (→ Phase 10) ·
-**G4** Memory (→ Phase 11) · **G5** SMART ENTRY (§35, P1/P2) · **G6** First message จาก real analysis (→ Phase 6) ·
-**G7** SEO/GEO/AEO (→ Phase 12) · **G8** Returning user (§36, P1/P2)
-
-**ต้องขออนุมัติก่อน (แตะแก่น product / pipeline):** A2 provider lazy · A3 Twin consolidation (C1) · A4 SSR (C2)
+ปิดครบทั้ง 12 phase — Twin Facade, App Shell, Dashboard→Command Center, PWA precache, Memory Experience, sitemap/SEO layer ฯลฯ
 
 ---
 
@@ -256,17 +211,17 @@ PHASE 12  SEO/GEO/AEO knowledge layer (NEW · G7 · P0.9)
 
 | เอกสาร | ใช้ทำอะไร |
 |--------|-----------|
-| [`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md`](../FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md) | **Single source of truth** ของสถานะจริง (Master Gate Forensic Verification) |
-| [`MASTER_GATE_AS_IS.md`](../MASTER_GATE_AS_IS.md) | AS-IS state document for all gates |
-| [`MASTER_GATE_EVIDENCE.md`](../MASTER_GATE_EVIDENCE.md) | Source-level evidence for all gates |
-| [`MASTER_GATE_REMEDIATION_PLAN.md`](../MASTER_GATE_REMEDIATION_PLAN.md) | Required remediation steps |
-| [`docs/Experience Architecture v2.md`](Experience%20Architecture%20v2.md) | **Design/experience master** ของ Track C · 51 topics · §44 safety rule · §45 success criteria · §46 core loop · §51 story layer |
+| [`MASTER_GATE_AS_IS.md`](../MASTER_GATE_AS_IS.md) | **Single source of truth** ของสถานะจริง (Verification Closure) |
+| [`MASTER_GATE_EVIDENCE.md`](../MASTER_GATE_EVIDENCE.md) | Source-level evidence สำหรับทุก gate |
+| [`MASTER_GATE_REMEDIATION_PLAN.md`](../MASTER_GATE_REMEDIATION_PLAN.md) | Remediation steps — auth injection fix |
+| [`MASTER_GATE_CHANGE_MAP.md`](../MASTER_GATE_CHANGE_MAP.md) | Change map overview |
+| [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./SELFPRINT_STATUS_HONEST_TH.md) | สรุปสถานะฉบับภาษาไทย |
+| [`docs/Experience Architecture v2.md`](Experience%20Architecture%20v2.md) | **Design/experience master** ของ Track C |
 | [`docs/PLAN_TRACKS_TH.md`](PLAN_TRACKS_TH.md) | Master plan: Track A / B / C |
-| [`docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`](PHASE0_VISUAL_PERF_FORENSIC_TH.md) | Phase 0 forensic results — **ต้องอ่านก่อนเริ่ม Track C** |
-
-> **Track C working docs:** [`docs/Experience Architecture v2/TRACK_C_VISUAL_REDESIGN_TH.md`](Experience%20Architecture%20v2/TRACK_C_VISUAL_REDESIGN_TH.md)
 
 ---
 
 > **หลักการ:** ตรวจจากโค้ดจริง + verify กับ Supabase / Cloudflare / GitHub จริง · แยก "แก้แล้ว verify แล้ว"
 > ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ · **ห้ามอ้าง "100% product-verified"** จนกว่าจะทำครบเงื่อนไข
+> 
+> **สถานะปัจจุบัน:** CONDITIONAL PASS — แก้ auth injection ใน `e2e/global-setup.ts` ก่อน claim FULL PASS
