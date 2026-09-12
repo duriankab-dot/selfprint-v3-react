@@ -74,23 +74,20 @@ test('TWIN-04 Twin learns from decisions — decision → Twin insight', async (
   await page.goto('/en/decision-log', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ TWIN-04: Redirected to login — SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/decision-log — session not persisted across goto');
   }
 
   const addTab = page.locator('[data-testid="decision-tab-create"]');
   const addTabVisible = await addTab.isVisible({ timeout: 8000 }).catch(() => false);
   if (!addTabVisible) {
-    console.log('⚠️ TWIN-04: Add decision tab not visible — page likely stale/broken, SKIPPING');
-    return;
+    test.skip(true, 'Add decision tab not visible on /en/decision-log — page likely stale/broken');
   }
   await addTab.click();
 
   const decisionForm = page.locator('[data-testid="decision-form"]');
   const formVisible = await decisionForm.isVisible({ timeout: 8000 }).catch(() => false);
   if (!formVisible) {
-    console.log('⚠️ TWIN-04: [data-testid="decision-form"] missing — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, '[data-testid="decision-form"] missing on /en/decision-log — staging may be stale');
   }
 
   // The "Twin insight" is the personal recommendation box — it appears when the

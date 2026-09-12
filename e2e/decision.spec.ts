@@ -44,8 +44,7 @@ test('DECISION-01 Log decision flow — form → Twin analysis → insight', asy
   await page.goto('/en/decision-log', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ DECISION-01: Redirected to login — SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/decision-log — session not persisted across goto');
   }
 
   // The DecisionLogger opens on the List tab; the form is in the "Add decision"
@@ -53,16 +52,14 @@ test('DECISION-01 Log decision flow — form → Twin analysis → insight', asy
   const addTab = page.locator('[data-testid="decision-tab-create"]');
   const addTabVisible = await addTab.isVisible({ timeout: 8000 }).catch(() => false);
   if (!addTabVisible) {
-    console.log('⚠️ DECISION-01: Add decision tab not visible — page likely stale/broken, SKIPPING');
-    return;
+    test.skip(true, 'Add decision tab not visible on /en/decision-log — page likely stale/broken');
   }
   await addTab.click();
 
   const decisionForm = page.locator('[data-testid="decision-form"]');
   const formVisible = await decisionForm.isVisible({ timeout: 8000 }).catch(() => false);
   if (!formVisible) {
-    console.log('⚠️ DECISION-01: [data-testid="decision-form"] missing — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, '[data-testid="decision-form"] missing on /en/decision-log — staging may be stale');
   }
 
   // Twin analysis (Personal recommendation box) appears when personal context loads.
@@ -102,15 +99,13 @@ test('DECISION-02 Decision history persists — list shows all logged decisions'
   await page.goto('/en/decisions', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ DECISION-02: Redirected to login — SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/decisions — session not persisted across goto');
   }
 
   const historyList = page.locator('[data-testid="decision-history-list"]');
   const listVisible = await historyList.isVisible({ timeout: 8000 }).catch(() => false);
   if (!listVisible) {
-    console.log('⚠️ DECISION-02: [data-testid="decision-history-list"] missing — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, '[data-testid="decision-history-list"] missing on /en/decisions — staging may be stale');
   }
 
   const decisionItems = page.locator('[data-testid="decision-item"]');

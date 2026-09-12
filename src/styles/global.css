@@ -24,6 +24,8 @@
 @import './tokens.css';
 @import './hub-themes.css';
 @import './mood-themes.css';
+@import './immersive-layers.css';
+@import './world-transitions.css';
 
 /* map token เดิมของโปรเจกต์เข้า Tailwind (v4 อ่าน config เก่าผ่าน @config) */
 @config "../../tailwind.config.js";

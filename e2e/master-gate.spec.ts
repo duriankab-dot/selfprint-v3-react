@@ -60,6 +60,21 @@ async function goToImmersiveChat(page: Page) {
         : 'Staging bundle is stale: .immersive-page wrapper missing from /th/chat/twin — rebuild/redeploy staging from current src (MASTER_GATE_AS_IS blocker #1), then re-run'
     );
   }
+
+// MG-NOTWIN-001 (12 Sep 2026): when the signed-in user has NO Twin, the chat
+  // page renders the "Your Twin hasn't awakened yet" branch (ImmersiveTwinChat
+  // ~line 480) instead of the presence/canvas layers. That is a data
+  // prerequisite (a seeded Twin), not a render regression — skip with reason so
+  // the gate reports an honest precondition instead of a misleading FAIL.
+  const notAwakened = page.locator('h1').filter({ hasText: /awakened|ตื่น/ }).first();
+  const notAwakenedVisible = await notAwakened
+    .waitFor({ state: 'visible', timeout: 8000 })
+    .then(() => true)
+    .catch(() => false);
+  if (notAwakenedVisible) {
+    test.skip(true, 'Signed-in user has no Twin — chat page shows "Your Twin hasn\'t awakened yet". Seed a Twin for the test user (seed-test-users.ts) then re-run.');
+  }
+
   return immersivePage;
 }
 
@@ -308,7 +323,7 @@ test.describe('MG-06 Immersive Chat Layer', () => {
     const container = page.locator('.world-transition-container');
     const count = await container.count();
 
-    expect(count >= 1, 'World transition container should exist').toBeGreaterThanOrEqual(1);
+    expect(count, 'World transition container should exist').toBeGreaterThanOrEqual(1);
 
     console.log('MG-06-02 ✓ World transition infrastructure present');
   });

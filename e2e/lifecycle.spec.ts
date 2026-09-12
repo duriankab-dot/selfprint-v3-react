@@ -42,27 +42,39 @@ function collectErrors(page: Page): string[] {
 // ─── LIFE-01: Landing page has working CTA ────────────────────────────────────
 
 test.describe('Lifecycle — Landing Entry', () => {
-  test('LIFE-01 landing /en loads and CTA is clickable', async ({ page }) => {
-    const errors = collectErrors(page);
+  // LIFE-01 targets the PUBLIC marketing landing page. The Phase B project
+  // injects an authenticated storageState, and /en/ for a signed-in user
+  // redirects to /en/dashboard (HomeRoute) — so the public "Start Free" CTA
+  // can never render for an authed session. That redirect is INTENDED product
+  // behavior (Lifecycle — Authenticated Landing), not a bug; therefore this
+  // test alone clears the auth state so it verifies the real public landing
+  // contract. Authenticated landing coverage is exercised by the authed nav/
+  // dashboard tests in this suite.
+  test.describe('LIFE-01 public landing (no auth state)', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
 
-    await page.goto('/en', { waitUntil: 'domcontentloaded' });
+    test('LIFE-01 landing /en loads and CTA is clickable', async ({ page }) => {
+      const errors = collectErrors(page);
 
-    // H1 or hero text visible
-    const hero = page.locator('h1').first();
-    await expect(hero).toBeVisible({ timeout: 10000 });
+      await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
-    // Primary CTA: "Start Free" or "เริ่มฟรี"
-    const cta = page.locator(
-      'button:has-text("Start Free"), button:has-text("เริ่มฟรี"), ' +
-      'a:has-text("Start Free"), a:has-text("เริ่มฟรี")'
-    ).first();
-    await expect(cta).toBeVisible({ timeout: 10000 });
+      // H1 or hero text visible
+      const hero = page.locator('h1').first();
+      await expect(hero).toBeVisible({ timeout: 10000 });
 
-    // CTA must be clickable (not hidden by overlay, not disabled)
-    await expect(cta).toBeEnabled({ timeout: 5000 });
+      // Primary CTA: "Start Free" or "เริ่มฟรี"
+      const cta = page.locator(
+        'button:has-text("Start Free"), button:has-text("เริ่มฟری"), ' +
+        'a:has-text("Start Free"), a:has-text("เริ่มฟری")'
+      ).first();
+      await expect(cta).toBeVisible({ timeout: 10000 });
 
-    // No critical JS errors on landing
-    expect(errors.filter(e => !e.includes('ResizeObserver'))).toHaveLength(0);
+      // CTA must be clickable (not hidden by overlay, not disabled)
+      await expect(cta).toBeEnabled({ timeout: 5000 });
+
+      // No critical JS errors on landing
+      expect(errors.filter(e => !e.includes('ResizeObserver'))).toHaveLength(0);
+    });
   });
 
   test('LIFE-02 landing /th loads without error', async ({ page }) => {

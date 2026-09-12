@@ -94,8 +94,8 @@
 
 /* Twin container — lower-middle of viewport (not dead center) */
 .twin-presence-wrap {
-  width: min(46vmin, 420px);
-  height: min(46vmin, 420px);
+  width: min(46vh, 46vw, 420px);
+  height: min(46vh, 46vw, 420px);
   transform-origin: center bottom;
   padding-top: 30vh;
 }
@@ -511,7 +511,7 @@
   }
 
   .twin-presence-wrap {
-    width: min(38vmin, 280px);
-    height: min(38vmin, 280px);
+    width: min(38vh, 38vw, 280px);
+    height: min(38vh, 38vw, 280px);
   }
 }

@@ -39,22 +39,19 @@ test('WORLD-01 12 Worlds visualization renders all dimensions', async ({ page })
 
   // Guard: /en/worlds may redirect to login if session not carried across navigation
   if (page.url().includes('/login')) {
-    console.log('⚠️ WORLD-01: Redirected to login on /en/worlds — session not persisted across goto, SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/worlds — session not persisted across goto');
   }
 
   const worldsContainer = page.locator('[data-testid="worlds-container"]');
   const containerVisible = await worldsContainer.isVisible({ timeout: 10000 }).catch(() => false);
   if (!containerVisible) {
-    console.log('⚠️ WORLD-01: worlds-container not visible — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, 'worlds-container not visible on /en/worlds — staging may be stale');
   }
 
   const worldTiles = page.locator('[data-testid="world-tile"]');
   const tileVisible = await worldTiles.first().isVisible({ timeout: 5000 }).catch(() => false);
   if (!tileVisible) {
-    console.log('⚠️ WORLD-01: world-tile testid missing — staging may be stale, SKIPPING count check');
-    return;
+    test.skip(true, 'world-tile testid missing on /en/worlds — staging may be stale');
   }
 
   const worldCount = await worldTiles.count();
@@ -75,15 +72,13 @@ test('WORLD-02 World tiles show correct data — name + icon', async ({ page }) 
   await page.goto('/en/worlds', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ WORLD-02: Redirected to login — session not persisted, SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/worlds — session not persisted, WORLD-02');
   }
 
   const firstWorldTile = page.locator('[data-testid="world-tile"]').first();
   const tileVisible = await firstWorldTile.isVisible({ timeout: 10000 }).catch(() => false);
   if (!tileVisible) {
-    console.log('⚠️ WORLD-02: world-tile testid missing — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, 'world-tile testid missing on /en/worlds — staging may be stale, WORLD-02');
   }
 
   const worldName = firstWorldTile.locator('[data-testid="world-name"]');
@@ -103,15 +98,13 @@ test('WORLD-03 Click world → detail view shows Twin insights', async ({ page }
   await page.goto('/en/worlds', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ WORLD-03: Redirected to login — session not persisted, SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/worlds — session not persisted, WORLD-03');
   }
 
   const firstWorldTile = page.locator('[data-testid="world-tile"]').first();
   const tileVisible = await firstWorldTile.isVisible({ timeout: 10000 }).catch(() => false);
   if (!tileVisible) {
-    console.log('⚠️ WORLD-03: world-tile testid missing — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, 'world-tile testid missing on /en/worlds — staging may be stale, WORLD-03');
   }
 
   await firstWorldTile.click();
@@ -119,8 +112,7 @@ test('WORLD-03 Click world → detail view shows Twin insights', async ({ page }
   const detailView = page.locator('[data-testid="world-detail"]');
   const detailVisible = await detailView.isVisible({ timeout: 10000 }).catch(() => false);
   if (!detailVisible) {
-    console.log('⚠️ WORLD-03: [data-testid="world-detail"] not visible after click — route/render broke, SKIPPING');
-    return;
+    test.skip(true, 'world-detail not visible after click on /en/worlds — route/render broke');
   }
 
   const insight = page.locator('[data-testid="world-insight"]');
@@ -137,22 +129,19 @@ test('WORLD-04 Scroll through worlds smoothly', async ({ page }) => {
   await page.goto('/en/worlds', { waitUntil: 'load' });
 
   if (page.url().includes('/login')) {
-    console.log('⚠️ WORLD-04: Redirected to login on /en/worlds — session not persisted, SKIPPING');
-    return;
+    test.skip(true, 'Redirected to login on /en/worlds — session not persisted, WORLD-04');
   }
 
   const worldsScroller = page.locator('[data-testid="worlds-scroller"]');
   const scrollerVisible = await worldsScroller.isVisible({ timeout: 5000 }).catch(() => false);
   if (!scrollerVisible) {
-    console.log('⚠️ WORLD-04: worlds-scroller not found — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, 'worlds-scroller not found on /en/worlds — staging may be stale');
   }
 
   const worldTiles = page.locator('[data-testid="world-tile"]');
   const tileVisible = await worldTiles.first().isVisible({ timeout: 5000 }).catch(() => false);
   if (!tileVisible) {
-    console.log('⚠️ WORLD-04: [data-testid="world-tile"] not found — staging may be stale, SKIPPING');
-    return;
+    test.skip(true, 'world-tile testid not found on /en/worlds — staging may be stale, WORLD-04');
   }
 
   const startTime = Date.now();
@@ -215,7 +204,7 @@ test('WORLD-06 Compare worlds — side-by-side view (optional feature)', async (
 
     console.log('✅ WORLD-06 PASS: World comparison feature works');
   } else {
-    console.log('⏭️ WORLD-06 SKIP: Compare feature not available yet');
+    test.skip(true, 'Compare feature not available yet on /en/worlds');
   }
 });
 
@@ -227,8 +216,7 @@ test('WORLD-07 World insights personalized per Twin', async ({ page }) => {
   const worldTile = page.locator('[data-testid="world-tile"]').first();
   const tileVisible = await worldTile.isVisible({ timeout: 5000 }).catch(() => false);
   if (!tileVisible) {
-    console.log('⏭️ WORLD-07 SKIP: No world tiles — staging may be stale');
-    return;
+    test.skip(true, 'No world tiles on /en/worlds — staging may be stale, WORLD-07');
   }
 
   const twinSelector = page.locator('[data-testid="twin-selector"]');
@@ -239,8 +227,7 @@ test('WORLD-07 World insights personalized per Twin', async ({ page }) => {
 
     const insightLocator = page.locator('[data-testid="world-insight"]');
     if (!(await insightLocator.isVisible({ timeout: 3000 }).catch(() => false))) {
-      console.log('⏭️ WORLD-07 SKIP: world-insight testid not in WorldDetail yet');
-      return;
+      test.skip(true, 'world-insight testid not in WorldDetail yet');
     }
     const insight1 = await insightLocator.textContent();
 
@@ -255,6 +242,6 @@ test('WORLD-07 World insights personalized per Twin', async ({ page }) => {
     expect(insight1).not.toBe(insight2);
     console.log('✅ WORLD-07 PASS: Insights personalized per Twin');
   } else {
-    console.log('⏭️ WORLD-07 SKIP: Multiple Twins not available yet');
+    test.skip(true, 'Multiple Twins not available yet - WORLD-07');
   }
 });
