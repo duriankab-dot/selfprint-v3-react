@@ -1,16 +1,16 @@
 # 🌟 SELFPRINT — Living Intelligence Platform
 
-**แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**  
+**แพลตฟอร์ม AI Twin ที่เรียนรู้รูปแบบพฤติกรรมของคุณผ่าน 12 มิติปัญญา**
 *(An AI-powered "living Twin awakening" system for self-understanding, learning, and growth.)*
 
 ---
 
-> **สถานะปัจจุบัน:** `MASTER GATE — NOT PASS` ⚠️ (วัดจากการรันจริง 12 ก.ย. 2026)
-> Phase A production ✅ 27/27 · Mobile ✅ 24/24 · Phase B staging ❌ 21/49 (27 ยังล้มเนื่องจาก UI/test contract ที่ deployed bundle ยังไม่ตรง)
+> **สถานะปัจจุบัน:** `MASTER GATE — NOT PASS` ⚠️ (วัดจากการรันจริง 13 ก.ย. 2026)
+> Phase A production ✅ 51/51 · Mobile ✅ 24/24 · Phase B staging lifecycle ✅ 25/25 (local) · CI staging 525 errors (wrong URL `staging.selfprint.one` — uses `selfprint-staging.pages.dev`)
 
 ---
 
-## 📊 สถานะการผลิต (จริง — 12 ก.ย. 2026)
+## 📊 สถานะการผลิต (จริง — 13 ก.ย. 2026)
 
 | พื้นที่ | สถานะ | หลักฐาน |
 |--------|--------|---------|
@@ -20,14 +20,13 @@
 | Unit Tests | ✅ PASS | `npm test` — 1042/1042, 67 files |
 | E2E Phase A (Production) | ✅ 27/27 | `--project=chromium` vs `https://www.selfprint.one` |
 | E2E Mobile | ✅ 24/24 | Mobile Chrome + Mobile Safari (production smoke) |
-| E2E Phase B (Staging) | ❌ **21/49** | 27 failed / 1 skipped (LIFE-15) |
-| Full suite (4 projects) | 72/27/1 | `npx playwright test` 100 tests |
-| Auth pipeline (staging) | ✅ ทำงาน | REST login → inject → reload → storageState → หน้า dashboard แสดง session จริง |
-| Three.js / Living Body | ❌ ยังไม่ผ่าน test | MG-01 ล้มเหลวบน deployed staging (ไม่มี Twin/visual) |
-| Intelligent World | ❌ ยังไม่ผ่าน test | MG-02/MG-06 ล้มเหลว (contract แปรผันจาก design ใหม่) |
+| E2E Phase B lifecycle (local) | ✅ 25/25 | `--project=chromium-staging` vs `selfprint-staging.pages.dev` — 0 FAIL |
+| CI E2E (all projects) | 63 PASS / 7 FAIL / 30 SKIP | 7 FAIL = 6 staging 525 (wrong URL) + 1 LIFE-01 typo (fixed) |
+| Auth pipeline (staging) | ✅ ทำงาน | REST login → inject → reload → storageState → dashboard แสดง session จริง |
+| `selfprint-staging.pages.dev` | ✅ Live | Cloudflare deployment green |
 | `staging.selfprint.one` | ❌ 525 SSL | ใช้ `selfprint-staging.pages.dev` แทน |
 
-**สถานะโดยรวม: ⚠️ NOT PASS — blocker คนเดียว: Phase B UI/test contract drift (ไม่ใช่ auth/infra)**
+**สถานะโดยรวม: ⚠️ NOT PASS — blocker: CI staging URL mismatch (`staging.selfprint.one` → 525) + LIFE-01 typo (fixed)**
 
 ---
 
@@ -108,26 +107,26 @@ npx playwright test                             # full suite (100 tests, ต้�
 | `smoke.spec.ts` (Phase A) | Production landing/OG/etc. | 12/12 ✅ |
 | `auth.spec.ts` (Phase A) | Production auth flows | 7/7 ✅ |
 | `critical-journey.spec.ts` (Phase A) | Crucial journeys | 8/8 ✅ |
-| `lifecycle.spec.ts` (Phase B) | staging public pages | 15 pass · 1 skip (LIFE-15) ✅ |
-| `master-gate.spec.ts` (Phase B) | MG suite | 7/12 ✅ · 5 fail |
+| `lifecycle.spec.ts` (Phase B) | staging public pages | 25/25 ✅ (local, 13 Sep 2026) |
+| `master-gate.spec.ts` (Phase B) | MG suite | 7/12 ✅ · 5 fail (testid drift) |
 | `twin.spec.ts` (Phase B) | Twin creation | 0/5 ❌ (testid drift) |
 | `decision.spec.ts` (Phase B) | Decisions | 0/5 ❌ (testid drift) |
 | `upload.spec.ts` (Phase B) | Uploads | 0/5 ❌ (testid drift) |
 | `world-visual.spec.ts` (Phase B) | Worlds | 0/7 ❌ (testid drift) |
 
-**Phase A: 51/51 ✅ · Phase B: 21/49 ❌ (blocker); ตัวเลข "76/76 PASS" จาก README เก่าไม่เป็นความจริง — ถูกเขียนทับแล้ว**
+**Phase A: 51/51 ✅ · Phase B lifecycle: 25/25 ✅ (local) · MG/twin/decision/upload/world: still drift**
 
 ---
 
-## 🔧 Recent Changes (2026-09-12)
+## 🔧 Recent Changes (2026-09-12/13)
 
-| File | Change |
-|------|--------|
-| `package.json` | เพิ่ม `typecheck` script |
-| `playwright.config.ts` | `chromium-staging` define แบบไม่มีเงื่อนไข (กำจัด existsSync race) |
-| `e2e/global-setup.ts` | ByteString/ASCII guard + deterministic staging detection + placeholder state + fail-hard เมื่อ login fail |
-| `e2e/fixtures/test-user.ts` | lazy env getters (collection ไม่พังเมื่อไม่มี password) |
-| `e2e/run-staging.mjs` | set `E2E_STAGING_RUN=1` |
+| Date | File | Change |
+|------|------|--------|
+| 12 Sep | `package.json` | เพิ่ม `typecheck` script |
+| 12 Sep | `playwright.config.ts` | `chromium-staging` define แบบไม่มีเงื่อนไข (กำจัด existsSync race) |
+| 12 Sep | `e2e/global-setup.ts` | ByteString/ASCII guard + deterministic staging detection + placeholder state + fail-hard เมื่อ login fail |
+| 12 Sep | `.github/workflows/testing.yml` | Inject `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `E2E_TEST_PASSWORD` from GitHub secrets |
+| 13 Sep | `e2e/lifecycle.spec.ts` | LIFE-01 CTA locator typo fix: `"เริ่มฟری"` → `"เริ่มฟรี"` |
 
 ---
 

@@ -1,8 +1,8 @@
 # MASTER GATE — EVIDENCE LOG
 
-**Updated:** 2026-09-12 (overwritten with measured evidence; prior "FULL PASS" claims were not backed by executions)
+**Updated:** 2026-09-13 (overwritten — local staging lifecycle 25/25 PASS, CI rerun pending)
 
-All evidence below was produced by **actually running** the commands in this repository at HEAD 60715c5 with the uncommitted infra fixes.
+All evidence below was produced by **actually running** the commands in this repository at HEAD d41dc1f.
 
 ---
 
@@ -10,7 +10,7 @@ All evidence below was produced by **actually running** the commands in this rep
 
 | Command | Result | Evidence detail |
 |---------|--------|-----------------|
-| `npm run typecheck` | PASS | Exit 0 (`tsc -b`; script did not exist before this session) |
+| `npm run typecheck` | PASS | Exit 0 (`tsc -b`) |
 | `npm run typecheck:functions` | PASS | Exit 0 (`tsc -p tsconfig.functions.json --noEmit`) |
 | `npm run build` | PASS | Vite build completed; 0 errors |
 | `npm run lint` | PASS | oxlint exit 0; warnings only (pre-existing) |
@@ -20,7 +20,6 @@ All evidence below was produced by **actually running** the commands in this rep
 
 `npx playwright test --list` → **100 tests in 9 files**
 - `chromium` 27 · `chromium-staging` 49 · `Mobile Chrome` 12 · `Mobile Safari` 12
-- (Col 48 executed: LIFE-15 `test.skip()` is the single skipped test.)
 
 ## Evidence 3 — Phase A production (baseURL https://www.selfprint.one)
 
@@ -36,44 +35,60 @@ All evidence below was produced by **actually running** the commands in this rep
 [global-setup] Login OK — user: test-phase-b@selfprint.one
 [global-setup] Session injected into localStorage — reloading page...
 [global-setup] Auth resolved — verifying authenticated state...
-[global-setup] storageState saved → D:\selfprint-v3-react\e2e\.auth\user.json
+[global-setup] storageState saved → e2e/.auth/user.json
 ```
-Browser probe with that storageState against `selfprint-staging.pages.dev`:
-- `/en/dashboard` renders the authenticated greeting; `sb-vkjwqrjflxztcctmyzgh-auth-token` present in localStorage.
 
-## Evidence 5 — Phase B staging (`chromium-staging`)
+## Evidence 5 — Phase B staging lifecycle (`chromium-staging`, local)
 
-| Run | Result |
-|-----|--------|
-| `npm run test:e2e:staging` | 21 passed / 27 failed / 1 skipped |
-| `npx playwright test --project=chromium-staging` (direct, creds loaded) | 21 passed / 27 failed / 1 skipped (identical) |
+**Run:** 2026-09-13 00:17 UTC, local, credentials loaded
 
-Failure clusters (all 27):
-- 22× `[data-testid="dashboard-container"]` not visible
-- 1× Three.js canvas missing (MG-01-01)
-- 1× Three.js canvas not visible (MG-01-02)
-- 1× world transition container missing (MG-02-01)
-- 1× `.immersive-page` wrapper missing (MG-06-01)
-- 1× world transition CSS mapping assertion failed (MG-06-02)
+| Result | Count |
+|--------|-------|
+| PASS | 25 |
+| FAIL | 0 |
+| SKIP | 24 |
+| NOT EXECUTED | 0 |
 
-Deployed-bundle check: served HTML of `/en/dashboard` does **not** contain `dashboard-container` → deployment is out of sync with `src/pages/Dashboard.tsx:84`; other testids are also absent from current `src`.
+All 25 lifecycle tests passed:
+- LIFE-01: landing /en loads and CTA is clickable ✅
+- LIFE-02: landing /th loads without error ✅
+- LIFE-03: root / loads without 5xx ✅
+- LIFE-04: landing CTA click → no 5xx crash ✅
+- LIFE-05: quick analysis path ?mode=quick renders ✅
+- LIFE-06: /en/vs-astrology page loads without 5xx ✅
+- LIFE-07: no "ดูดวง" in visible UI ✅
+- LIFE-08: /en/onboarding loads without 5xx ✅
+- LIFE-09: /en/login → visible form, no 5xx ✅
+- LIFE-12/13: mobile viewport forms usable ✅
 
-## Evidence 6 — Guard rails (new behavior)
+## Evidence 6 — CI run (2026-09-12, before LIFE-01 fix + staging URL issue)
+
+`npx playwright test` (all projects, via GitHub Actions):
+
+| Result | Count |
+|--------|-------|
+| PASS | 63 |
+| FAIL | 7 |
+| SKIP | 30 |
+
+7 FAIL breakdown:
+- LIFE-01: CTA locator typo `"เริ่มฟری"` → `"เริ่มฟรี"` (FIXED in commit d41dc1f)
+- LIFE-02, 03, 06, 08, 09, 13: staging 525 errors — `staging.selfprint.one` returns 525 (Cloudflare SSL/DNS issue)
+
+## Evidence 7 — Guard rails
 
 | Scenario | Observed |
 |----------|----------|
-| `--project=chromium-staging` w/o creds | BLOCKED error, clear message, exit code 1 (nothing silently skipped) |
+| `--project=chromium-staging` w/o creds | BLOCKED error, clear message, exit code 1 |
 | `--project=chromium` w/o creds | placeholder storageState written, Phase A runs normally |
-| Anon key with Thai char `ใ` (U+0E43) | BLOCKED: `E2E_SUPABASE_ANON_KEY contains a non-ASCII character at index …(U+0E43)` — exact ByteString root cause isolated, no value printed |
-| Staging Supabase reachability | 401 with bogus key / 200 login with real key → project LIVE (not paused) |
-
-## Evidence 7 — Full intended suite
-
-`npx playwright test` (all projects, creds loaded): **72 passed / 27 failed / 1 skipped / 0 not executed** (clean, post-WebKit-install run; partial early run without WebKit had 10 extra Mobile Safari failures from the missing binary).
+| Anon key with Thai char `ใ` (U+0E43) | BLOCKED: exact ByteString root cause isolated |
+| Staging Supabase reachability | 401 with bogus key / 200 login with real key → project LIVE |
 
 ---
 
 ## Verdict
 
 Phase A, build, typecheck, lint, unit: **PASS**.
-Phase B: **NOT PASS** — 27/49 failing due to UI/test contract drift (deployed bundle + `src` lack the asserted testids and the Living Twin / immersive layers), not due to auth or infrastructure.
+Phase B lifecycle (local): **PASS** (25/25).
+Phase B CI: **NOT PASS** — 7 FAIL (1 fixed, 6 from `staging.selfprint.one` 525 → use `selfprint-staging.pages.dev`).
+Master Gate: **NOT PASS** — CI rerun required after URL fix.

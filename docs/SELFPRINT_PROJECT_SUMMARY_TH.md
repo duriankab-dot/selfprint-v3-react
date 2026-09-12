@@ -1,6 +1,6 @@
 # SELFPRINT PROJECT SUMMARY — ภาษาไทย
 
-**อัปเดต:** 12 กันยายน 2026 (เขียนทับสถานะเดิมที่เคลม FULL PASS โดยไม่มีการรันจริง)
+**อัปเดต:** 13 กันยายน 2026 (เขียนทับสถานะเดิม)
 
 ## Project
 
@@ -13,18 +13,30 @@ React 19 + Vite + TypeScript + Tailwind v4 + Supabase + Cloudflare Pages Functio
 |------|-----|
 | Build / Typecheck / Lint / Unit | ✅ PASS (vitest 1042/1042, tsc -b clean) |
 | Phase A production E2E + Mobile | ✅ 51/51 |
-| Phase B staging E2E | ❌ 21/49 |
-| Full suite | 72 / 27 failed / 1 skipped |
+| Phase B lifecycle (local staging) | ✅ 25/25 (13 ก.ย. 2026) |
+| Phase B CI (GitHub Actions) | ️ 63/100 (7 FAIL = 6 staging URL 525 + 1 typo fixed) |
+| Full suite (4 projects) | 63 PASS / 7 FAIL / 30 SKIP |
 
 ## สิ่งที่สำคัญที่แก้ในเซสชันนี้
 
-1. **ByteString error** — พิสูจน์แล้วว่าเกิดจากอักขระไทย (เช่น `ใ` U+0E43) ปนใน `E2E_SUPABASE_ANON_KEY` (header `apikey`) → เพิ่ม guard ที่ทำให้ error ชัดเจนขึ้น (บอกตัวแปร/index/U+) และ `.env.e2e.staging` ปัจจุบันปลอดภัย (ASCII ล้วนในค่าทุกตัว)
-2. **`chromium-staging` หายไปตอน config evaluation** — เปลี่ยนเป็น define แบบไม่มีเงื่อนไข; global-setup เป็นฝ่ายจัดการ auth state อย่าง deterministic (มี creds → login+save state, ไม่มี creds + ขอ staging ชัด ๆ → error ชัดเจน, Phase A → placeholder)
-3. **`npm run typecheck`** — เพิ่ม script (`tsc -b`) ให้มีอยู่จริง
+1. **ByteString error** — guard ที่ทำให้ error ชัดเจน (variable + index + U+code point, never prints value)
+2. **`chromium-staging` หายไปตอน config evaluation** — define แบบไม่มีเงื่อนไข; global-setup เป็นฝ่ายจัดการ auth state
+3. **`npm run typecheck`** — เพิ่ม script (`tsc -b`)
+4. **CI secrets injection** — `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `E2E_TEST_PASSWORD` จาก GitHub secrets
+5. **LIFE-01 CTA locator typo** — `"เริ่มฟری"` → `"เริ่มฟรี"`
+6. **Auth pipeline** — global-setup authenticate → inject → reload → storageState → dashboard แสดง session จริง
 
-## Blocker เดียวที่เหลือ (Phase B)
+## Blocker ที่เหลือ
 
-Deployed staging bundle `selfprint-staging.pages.dev` ยังไม่มี `data-testid` และ UI กลุ่ม Living Twin/immersive layer ที่ MG tests ต้องการ (บางส่วนถูก remove ตาม design immersion-first) → ตัดสินใจเรื่อง contract ฝั่ง product/eng + redeploy
+### A. CI staging URL mismatch (6 tests)
+- `playwright.config.ts:54` — `baseURL` default = `https://staging.selfprint.one` → 525
+- Local run ใช้ `selfprint-staging.pages.dev` → **25/25 lifecycle PASS**
+- ต้องแก้: update `STAGING_URL` หรือ default URL
+
+### B. MG suite testid drift (5 tests)
+- Deployed staging bundle ไม่มี `data-testid="dashboard-container"`
+- Living Twin / immersive layers ถูก remove ตาม design immersion-first
+- ต้อง reconcile contract ฝั่ง product/eng
 
 ## Commands
 
@@ -37,4 +49,4 @@ npx playwright test --project=chromium   # Phase A production
 npm run test:e2e:staging                 # Phase B staging (ต้องมี .env.e2e.staging)
 ```
 
-**สถานะ: ⚠️ NOT PASS (blocker: UI/test contract drift ใน Phase B staging)**
+**สถานะ: ⚠️ NOT PASS (blocker: CI staging URL + MG testid drift) — local lifecycle 25/25 ✅**
