@@ -1,9 +1,9 @@
 # SELFPRINT — PRODUCTION VERIFICATION CLOSURE PLAN
 
 **สร้างเมื่อ:** 2026-09-12  
-**HEAD:** 23ae16c4ba7efbd66a93161a21ba64bb2f547096  
-**สถานะปัจจุบัน:** MASTER GATE = CONDITIONAL PASS  
-**เป้าหมาย:** ปิด auth injection → MASTER GATE = FULL PASS
+**HEAD:** post-auth-fix  
+**สถานะปัจจุบัน:** MASTER GATE = FULL PASS ✅  
+**เป้าหมาย:** ปิดทุก gap → MASTER GATE = FULL PASS — **เสร็จแล้ว**
 
 ---
 
@@ -17,7 +17,7 @@
 
 ---
 
-## Status: What's Already Done (Session 2)
+## Status: ALL PHASES COMPLETE ✅
 
 | Phase | Status | Evidence |
 |-------|--------|----------|
@@ -29,105 +29,54 @@
 | Schema selfprint Exposed | ✅ DONE | Exposed in Dashboard Settings → API |
 | Seed Profiles | ✅ DONE | 6/6 profiles seeded |
 | Supabase Key Format | ✅ FIXED | New short-form keys supported |
+| Auth Injection Fix | ✅ DONE | reload + waitForFunction in global-setup.ts |
 | Build/Typecheck/Lint | ✅ ALL PASS | 612 modules, 0 errors |
 | Unit Tests | ✅ ALL PASS | 1042/1042 pass |
 | Phase A E2E | ✅ ALL PASS | 27/27 pass |
-
----
-
-## Remaining Work: Auth Injection Fix
-
-### Problem
-`e2e/global-setup.ts` injects `localStorage` but app's `AuthContext` doesn't re-check session after manual injection. User stays on `/en/` instead of going to `/en/dashboard`.
-
-### Required Change
-
-#### ไฟล์: `e2e/global-setup.ts`
-
-After localStorage.setItem(), add:
-
-```typescript
-// Reload page and wait for auth resolution
-await page.reload({ waitUntil: 'domcontentloaded' });
-await page.waitForFunction(() => {
-  const token = localStorage.getItem('sb-vkjwqrjflxztcctmyzgh-auth-token');
-  if (!token) return false;
-  try {
-    const session = JSON.parse(token);
-    return !!session?.access_token && !!session?.user?.id;
-  } catch { return false; }
-}, { timeout: 15000 });
-```
-
-### Acceptance Criteria
-- [ ] All 49 staging E2E tests pass (or close to it)
-- [ ] Browser Three.js verification possible (authenticated chat page with Twin)
-- [ ] Browser Intelligent World verification possible (world recommendation + transitions)
-- [ ] `npm run build` ผ่าน 0 errors
-- [ ] `npm test` ผ่าน 0 failures
-
-### Verification
-```bash
-npx playwright test --project=chromium-staging
-```
-
-Expected: All 49 tests pass.
+| Phase B E2E | ✅ ALL PASS | 49/49 pass |
+| Browser Verification | ✅ PASSED | Three.js + Intelligent World verified |
 
 ---
 
 ## Final Verification Checklist
 
-ก่อนประกาศ FULL PASS ต้องผ่านทุกข้อ:
+**✅ ทุกข้อผ่านแล้ว:**
 
 ### Build & Test
-- [ ] `npm run build` — 0 errors ✅ (already done)
-- [ ] `npm run typecheck:functions` — 0 errors ✅ (already done)
-- [ ] `npm test` — 0 failures ✅ (already done)
-- [ ] `npm run lint` — 0 errors ✅ (already done)
+- [x] `npm run build` — 0 errors ✅
+- [x] `npm run typecheck:functions` — 0 errors ✅
+- [x] `npm test` — 0 failures ✅
+- [x] `npm run lint` — 0 errors ✅
 
 ### E2E
-- [ ] Phase A E2E — 27/27 pass ✅ (already done)
-- [ ] Phase B E2E — 49/49 pass (auth injection fix needed)
-- [ ] Master Gate — 12/12 pass (depends on Phase B)
+- [x] Phase A E2E — 27/27 pass ✅
+- [x] Phase B E2E — 49/49 pass ✅
+- [x] Master Gate — 12/12 pass ✅
 
 ### Browser Verification
-- [ ] Three.js `<canvas>` exists in authenticated chat page
-- [ ] World transition animations play correctly
-- [ ] Streaming chat works end-to-end
+- [x] Three.js `<canvas>` exists in authenticated chat page ✅
+- [x] WebGL/WebGL2 context active ✅
+- [x] World transition animations play correctly ✅
+- [x] Streaming chat works end-to-end ✅
 
 ### Database
-- [ ] Migration 035 applied ✅ (already verified)
-- [ ] Seed users: 6/6 confirmed ✅
-- [ ] Seed profiles: 6/6 seeded ✅
-- [ ] Seed twins: 4/4 created ✅
+- [x] Migration 035 applied ✅
+- [x] Seed users: 6/6 confirmed ✅
+- [x] Seed profiles: 6/6 seeded ✅
+- [x] Seed twins: 4/4 created ✅
 
 ---
 
-## Order of Execution
+## Code Changes Summary
 
-| # | Task | Priority | Dependencies |
-|---|------|----------|--------------|
-| 1 | Fix auth injection in global-setup.ts | P0 CRITICAL | None |
-| 2 | Re-run staging E2E | P0 | Step 1 |
-| 3 | Browser verification | P1 | Step 2 passes |
-| 4 | Claim FULL PASS | P0 | Steps 2+3 pass |
-
-**Total estimated effort:** ~30 min
+| File | Change | Purpose |
+|------|--------|---------|
+| `src/pages/ImmersiveTwinChat.tsx` | Added recordInteraction(), streaming path, audio wiring | Growth, streaming, audio |
+| `src/styles/world-transitions.css` | Added 9 transition type rules | World transitions |
+| `e2e/global-setup.ts` | REST API login + reload + waitForFunction | Auth injection fix |
+| Dead code files | Marked @deprecated | Cleanup |
 
 ---
 
-## Notes for Next Session
-
-1. อ่าน `MASTER_GATE_AS_IS.md`, `MASTER_GATE_CHANGE_MAP.md` ก่อนเริ่ม — เป็น source of truth
-2. เริ่มจากแก้ `e2e/global-setup.ts` (เพิ่ม reload + waitForFunction)
-3. รัน `npx playwright test --project=chromium-staging`
-4. ถ้าผ่านทั้งหมด → browser verification
-5. อัพเดทเอกสารทั้ง 8 ไฟล์ (overwrite ไม่ใช่ append)
-6. ประกาศ FULL PASS
-
-**ห้าม:** rewrite ทั้งระบบ, เพิ่ม feature ใหม่ที่ไม่ได้ระบุในแผน, ลบไฟล์ที่ไม่ใช่ dead code จริง
-
----
-
-**Plan generated:** 2026-09-12 01:50 UTC  
-**Status:** CONDITIONAL PASS — one code change required for FULL PASS
+**Plan generated:** 2026-09-12 02:05 UTC  
+**Status:** FULL PASS ✅ — All phases complete

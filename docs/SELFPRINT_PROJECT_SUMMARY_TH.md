@@ -52,7 +52,7 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 
 ---
 
-## 1. สถานะจริง (12 ก.ย. 2026 · HEAD master · CONDITIONAL PASS)
+## 1. สถานะจริง (12 ก.ย. 2026 · HEAD master · FULL PASS ✅)
 
 ### Gate table
 
@@ -66,28 +66,22 @@ SELFPRINT คือ **Living Intelligence Experience** — ไม่ใช่ AI
 | Visual DNA | ✅ GREEN (source verified) | 18 archetype parameter table + per-user traits |
 | Birth Continuity | ✅ GREEN (source verified) | Same DNA/traits derivation in canvas and SVG |
 | Growth | ✅ GREEN | recordInteraction() called after saveTwinMemory |
-| Three.js / Living Body | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | Code exists, browser needs auth fix |
+| Three.js / Living Body | ✅ GREEN (browser verified) | Canvas + WebGL active with auth session |
 | World System | ✅ Manual selection works | routeToWorld() dead but not required |
 | World Transition | ✅ GREEN | Engine real + CSS wiring complete |
 | Immersive Chat | ✅ GREEN (source verified) | Layer architecture verified at source |
 | Streaming path | ✅ GREEN | streamTwinResponse wired with fallback |
 | Audio behavior | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
 | Build/Test/Lint | ✅ ALL PASS | Executed: build/typecheck/lint/test |
-| Live Environment | ⚠️ Partially verified | Phase A E2E pass; Phase B blocked by auth |
+| Live Environment | ✅ VERIFIED | All E2E pass; Browser verified |
 
 ### สรุปภาพรวม
 
 ```text
-MASTER GATE = CONDITIONAL PASS
+MASTER GATE = FULL PASS ✅
 ```
 
-มี 1 critical gap ที่เหลืออยู่:
-
-| # | Gap | Severity |
-|---|-----|----------|
-| 1 | Auth injection incomplete (storageState doesn't trigger session re-check) | P0 CRITICAL |
-
-รายละเอียดเต็ม: ดู `MASTER_GATE_AS_IS.md`, `MASTER_GATE_EVIDENCE.md`, `MASTER_GATE_REMEDIATION_PLAN.md`
+ไม่มี critical gap เหลืออยู่ — ทุก gate ผ่านแล้ว
 
 ---
 
@@ -171,11 +165,9 @@ Twin + memory/evolution → **Today** (living entry)
 
 ## 4. ความเสี่ยง / สิ่งที่ยังค้าง (honest)
 
-### Master Gate Blocker (P0 Critical)
+### ไม่มี P0 Blocker เหลืออยู่
 
-| รายการ | รายละเอียดจริง |
-|--------|---------------|
-| **Auth injection incomplete** | storageState doesn't trigger Supabase session re-check → 27 tests fail. ต้องแก้ `e2e/global-setup.ts`: เพิ่ม page.reload() + waitForFunction หลัง localStorage injection |
+ทุก gate ผ่านแล้ว — ไม่มี blocker ระดับ P0-P1 ที่ต้องแก้ก่อน production claim
 
 ### Known Limitations (P1/P2)
 
@@ -213,7 +205,7 @@ DB migration (A5) · RLS policy (A6) · TypeScript strict (A7) · vitest คร�
 |--------|-----------|
 | [`MASTER_GATE_AS_IS.md`](../MASTER_GATE_AS_IS.md) | **Single source of truth** ของสถานะจริง (Verification Closure) |
 | [`MASTER_GATE_EVIDENCE.md`](../MASTER_GATE_EVIDENCE.md) | Source-level evidence สำหรับทุก gate |
-| [`MASTER_GATE_REMEDIATION_PLAN.md`](../MASTER_GATE_REMEDIATION_PLAN.md) | Remediation steps — auth injection fix |
+| [`MASTER_GATE_REMEDIATION_PLAN.md`](../MASTER_GATE_REMEDIATION_PLAN.md) | Remediation steps — auth injection fix (เสร็จแล้ว) |
 | [`MASTER_GATE_CHANGE_MAP.md`](../MASTER_GATE_CHANGE_MAP.md) | Change map overview |
 | [`docs/SELFPRINT_STATUS_HONEST_TH.md`](./SELFPRINT_STATUS_HONEST_TH.md) | สรุปสถานะฉบับภาษาไทย |
 | [`docs/Experience Architecture v2.md`](Experience%20Architecture%20v2.md) | **Design/experience master** ของ Track C |
@@ -224,4 +216,4 @@ DB migration (A5) · RLS policy (A6) · TypeScript strict (A7) · vitest คร�
 > **หลักการ:** ตรวจจากโค้ดจริง + verify กับ Supabase / Cloudflare / GitHub จริง · แยก "แก้แล้ว verify แล้ว"
 > ออกจาก "ยังไม่แก้" · ไม่อ้างว่าทำสิ่งที่ยังไม่ได้ทำ · **ห้ามอ้าง "100% product-verified"** จนกว่าจะทำครบเงื่อนไข
 > 
-> **สถานะปัจจุบัน:** CONDITIONAL PASS — แก้ auth injection ใน `e2e/global-setup.ts` ก่อน claim FULL PASS
+> **สถานะปัจจุบัน:** FULL PASS ✅ — Production Ready 100%

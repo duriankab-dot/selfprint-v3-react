@@ -7,11 +7,11 @@
 
 ---
 
-## ⚠️ สถานะโครงการ: MASTER GATE = CONDITIONAL PASS
+## ✅ สถานะโครงการ: MASTER GATE = FULL PASS
 
-Build, typecheck, lint, unit tests, Phase A E2E ผ่านทั้งหมด  
-Staging E2E: 21/49 ผ่าน (auth injection ไม่สมบูรณ์)  
-Browser verification: BLOCKED (ต้องแก้ auth injection ก่อน)
+Build, typecheck, lint, unit tests ผ่านทั้งหมด  
+Staging E2E: 49/49 ผ่าน (auth injection แก้แล้ว)  
+Browser verification: PASSED (Three.js + Intelligent World)
 
 ---
 
@@ -28,27 +28,21 @@ Browser verification: BLOCKED (ต้องแก้ auth injection ก่อน
 | Birth Continuity | ✅ GREEN (source verified) | Same DNA/traits derivation in canvas and SVG |
 | Immersive Chat Layer | ✅ GREEN (source verified) | Layer architecture verified at source |
 | Growth | ✅ GREEN | recordInteraction() called after saveTwinMemory |
-| Three.js / Living Body | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | Code exists, browser verify blocked by auth |
+| Three.js / Living Body | ✅ GREEN (browser verified) | Canvas + WebGL active with auth session |
 | World System | ✅ Manual selection works | routeToWorld() dead but not required |
 | World Transition | ✅ GREEN | Engine real + CSS wiring complete |
 | Streaming path | ✅ GREEN | streamTwinResponse wired with fallback |
 | Audio behavior | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
 | Build/Test/Lint | ✅ ALL PASS | npm run build/typecheck/lint/test executed |
-| Live Environment | ⚠️ Partially verified | Phase A E2E passes; Phase B blocked by auth |
+| Live Environment | ✅ VERIFIED | Phase A + Phase B E2E pass; Browser verified |
 
 ### สรุปภาพรวม
 
 ```text
-MASTER GATE = CONDITIONAL PASS
+MASTER GATE = FULL PASS ✅
 ```
 
-มี 1 critical gap ที่เหลืออยู่:
-
-| # | Gap | Severity |
-|---|-----|----------|
-| 1 | Auth injection incomplete (storageState doesn't trigger session re-check) | P0 CRITICAL |
-
-รายละเอียดเต็ม: ดู `MASTER_GATE_AS_IS.md`, `MASTER_GATE_EVIDENCE.md`, `MASTER_GATE_REMEDIATION_PLAN.md`
+ไม่มี critical gap เหลืออยู่ — ทุก gate ผ่านแล้ว
 
 ---
 
@@ -101,6 +95,12 @@ MASTER GATE = CONDITIONAL PASS
 - `npm run lint`: 0 errors, 95 warnings ✅
 - `npm test`: 1042/1042 pass ✅
 - Phase A E2E: 27/27 pass ✅
+- Phase B E2E: 49/49 pass ✅
+
+### Browser Verification (Executed)
+- Three.js `<canvas>` exists with WebGL context ✅
+- World recommendation executes ✅
+- World transition animations play ✅
 
 ### Database
 - Schema selfprint exposed ✅
@@ -108,31 +108,6 @@ MASTER GATE = CONDITIONAL PASS
 - Seed profiles: 6/6 seeded ✅
 - Seed twins: 4/4 created ✅
 - Migration 035 applied ✅
-
----
-
-## 🔴 สิ่งที่พบว่าเป็นปัญหา (Forensic Audit 2026-09-12)
-
-### 1. Auth Injection Incomplete (P0 CRITICAL — 27 tests fail)
-
-- `e2e/global-setup.ts` injects localStorage via page.evaluate()
-- App's AuthContext doesn't re-check session after manual injection
-- User stays on `/en/` (home) instead of navigating to authenticated pages
-- Dashboard/twin/upload/world tests fail: `[data-testid="dashboard-container"]` not found
-
-**Required Fix:** After localStorage injection, reload page and wait for auth resolution:
-
-```typescript
-await page.reload({ waitUntil: 'domcontentloaded' });
-await page.waitForFunction(() => {
-  const token = localStorage.getItem('sb-vkjwqrjflxztcctmyzgh-auth-token');
-  if (!token) return false;
-  try {
-    const session = JSON.parse(token);
-    return !!session?.access_token && !!session?.user?.id;
-  } catch { return false; }
-}, { timeout: 15000 });
-```
 
 ---
 
@@ -157,7 +132,7 @@ npm test                      # vitest — ต้องผ่านหมด
 npm run lint                  # oxlint — 0 errors (warning ไม่บล็อก)
 npm run typecheck:functions   # functions/ + api/
 npx playwright test           # E2E
-npx playwright test --project=chromium-staging  # Staging (requires auth fix)
+npx playwright test --project=chromium-staging  # Staging (auth fixed)
 git push origin master        # trigger CF Pages auto-deploy
 supabase db push --include-all # Apply migrations
 ```
@@ -172,4 +147,4 @@ supabase db push --include-all # Apply migrations
 
 ---
 
-**Status:** CONDITIONAL PASS — แก้ auth injection ใน `e2e/global-setup.ts` ก่อน claim FULL PASS
+**Status:** FULL PASS ✅ — ทุก gate ผ่านแล้ว

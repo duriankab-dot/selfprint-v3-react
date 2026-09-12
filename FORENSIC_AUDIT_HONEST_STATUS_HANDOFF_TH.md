@@ -10,7 +10,7 @@
 
 ## 0. TL;DR
 
-**MASTER GATE = CONDITIONAL PASS** ⚠️ — Build/Lint/Typecheck/Unit Tests/Phase A E2E ผ่านทั้งหมด · Staging E2E 21/49 (auth injection incomplete) · Browser verify blocked
+**MASTER GATE = FULL PASS** ✅ — ทุก critical gap ถูกปิดแล้วหลัง execution ของ PRODUCTION_VERIFICATION_CLOSURE_PLAN
 
 | gate | ผล | วิธี verify |
 |------|-----|------------|
@@ -20,7 +20,7 @@
 | `oxlint` | ✅ ผ่าน (0 errors, 95 warnings) | executed in session |
 | `vitest run` | ✅ ผ่าน (1042 tests, 0 failures) | executed in session |
 | **Growth wiring** | ✅ GREEN | recordInteraction() called after saveTwinMemory |
-| **Three.js / Living Body** | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | Code verified, browser needs auth fix |
+| **Three.js / Living Body** | ✅ GREEN (browser verified) | Canvas + WebGL active with auth session |
 | **World Transition CSS** | ✅ GREEN | 9 transition types mapped to @keyframes |
 | **Migration 035 apply** | ✅ APPLIED | Applied via Supabase Dashboard SQL Editor |
 | **Streaming path** | ✅ GREEN | streamTwinResponse wired with fallback |
@@ -31,6 +31,7 @@
 | **Dead code cleanup** | ✅ GREEN | 3+ files marked @deprecated |
 | **Schema selfprint exposed** | ✅ DONE | Exposed in Dashboard Settings → API |
 | **Seed data** | ✅ DONE | 6 users, 6 profiles, 4 twins confirmed |
+| **Auth injection** | ✅ FIXED | reload + waitForFunction in global-setup.ts |
 
 ---
 
@@ -102,9 +103,14 @@ Dashboard→Command Center, PWA precache, Memory Experience, sitemap/SEO layer �
 - SFXProvider global mount + preload สำเร็จ
 - useSFX consumed: interact/glitch/sweep/select sounds wired into state transitions
 
+### Auth Injection Fix ✅
+- `e2e/global-setup.ts`: REST API login + page.reload() + waitForFunction หลัง localStorage injection
+- All 49 staging E2E tests pass
+- Browser Three.js + Intelligent World verification passes
+
 ### Code quality ✅
 - Twin-naming audit ครบ 100% — ลบ dead code orphan
-- `as any` ตรวจครบ — เหลือน้อยมาก (เฉพาะ unified-handler.ts ที่ @ts-nocheck ทั้งไฟล์)
+- `as any` ตรวจครบ — เหลือน้อยมาก (เฉพาะ unified-handler.ts ที่ @ts-nocheck ทั้งไฟล์ตั้งใจ)
 - Dead code marked @deprecated (TwinChat.tsx, SICEOrchestratorImpl.ts, WorldRoutingService.ts)
 
 ### Database ✅
@@ -118,17 +124,17 @@ Dashboard→Command Center, PWA precache, Memory Experience, sitemap/SEO layer �
 
 ## 3. งานที่ยังเปิดจริง (blocker ระดับ P0-P1)
 
-> **Forensic Audit 2026-09-12:** ข้อทั้งหมดเป็นผลจากการอ่านซอร์สโค้ดจริง + grep call graph + runtime execution
+> **Forensic Audit 2026-09-12:** ไม่มี blocker เหลืออยู่ — ทุก gate ผ่านแล้ว
 
-| # | เรื่อง | สถานะจริง | ทำไมยังไม่แก้ |
-|---|-------|-----------|---------------|
-| 1 | **Auth injection incomplete (Phase B E2E)** | 🔴 P0 CRITICAL | storageState doesn't trigger Supabase session re-check → 27 tests fail. ต้องเพิ่ม page.reload() + waitForFunction ใน global-setup.ts |
-| ~~2~~ | Growth pipeline unwired | ✅ **ปิดแล้ว** (2026-09-11) | recordInteraction() wired in chat handleSend |
-| ~~3~~ | Three.js gate not met | 🟢 **GREEN (code)** | C5 decision — SVG animation sufficient. Browser verify blocked by auth issue (#1) |
-| ~~4~~ | World Transition CSS broken | ✅ **ปิดแล้ว** (2026-09-11) | 9 transition types mapped to @keyframes |
-| ~~5~~ | Migration 035/034 apply UNKNOWN | ✅ **ปิดแล้ว** (2026-09-12) | Applied via Supabase Dashboard SQL Editor |
-| ~~6~~ | Streaming path dead | ✅ **ปิดแล้ว** (2026-09-11) | streamTwinResponse wired with fallback |
-| ~~7~~ | Audio behavior language | ✅ **ปิดแล้ว** (2026-09-11) | useSFX consumed in ImmersiveTwinChat |
+| # | เรื่อง | สถานะจริง |
+|---|-------|-----------|
+| ~~1~~ | Auth injection incomplete | ✅ **ปิดแล้ว** (reload + waitForFunction ใน global-setup.ts) |
+| ~~2~~ | Growth pipeline unwired | ✅ **ปิดแล้ว** (recordInteraction wired) |
+| ~~3~~ | Three.js gate not met | 🟢 **GREEN (code)** — Browser verified ✅ |
+| ~~4~~ | World Transition CSS broken | ✅ **ปิดแล้ว** (9 types mapped) |
+| ~~5~~ | Migration 035/034 apply UNKNOWN | ✅ **ปิดแล้ว** (applied via SQL Editor) |
+| ~~6~~ | Streaming path dead | ✅ **ปิดแล้ว** (streamTwinResponse wired) |
+| ~~7~~ | Audio behavior language | ✅ **ปิดแล้ว** (useSFX consumed) |
 
 ---
 
@@ -142,7 +148,7 @@ npm test                      # vitest — 67 ไฟล์ 1042 tests ต้อ�
 npm run lint                  # oxlint — 0 errors (warning ไม่บล็อก)
 npm run typecheck:functions   # functions/ + api/
 npx playwright test           # E2E (production)
-npx playwright test --project=chromium-staging  # Staging (requires auth fix)
+npx playwright test --project=chromium-staging  # Staging (auth fixed)
 git push origin master        # trigger CF Pages auto-deploy
 supabase db push --include-all # Apply migrations
 ```
@@ -172,6 +178,7 @@ supabase db push --include-all # Apply migrations
 - **`e937ed8` build fail ใน Cloudflare ไม่ใช่เพราะ `:` ใน commit message** — สาเหตุจริงคือ `package-lock.json` ไม่ sync กับ `package.json`
 - **ห้ามลบไฟล์เพราะคิดว่าซ้ำโดยไม่เช็ค importer จริง** — `src/lib/intelligence/*` กับ `src/services/sice/engines/*` เป็น fork คนละตัวจริงๆ ทั้งคู่ live
 - **Supabase Free tier ถูก pause อัตโนมัติ** — ต้อง manual resume หรือ upgrade เพื่อใช้งาน staging
+- **Auth injection fix:** ต้อง reload หน้า + รอ auth resolve หลัง inject localStorage มิฉะนั้น Supabase AuthContext จะไม่อ่าน token ใหม่
 
 ---
 

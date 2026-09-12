@@ -120,6 +120,26 @@ export default async function globalSetup(_config: FullConfig): Promise<void> {
     [storageKey, sessionValue],
   );
 
+  console.log('[global-setup] Session injected into localStorage — reloading page to trigger auth resolution...');
+
+  // Reload page so Supabase AuthContext reads the injected token via getSession()
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  // Wait for auth to resolve: token present + valid user.id
+  await page.waitForFunction(() => {
+    const keys = Object.keys(localStorage);
+    const tokenKey = keys.find(k => k.includes('auth-token'));
+    if (!tokenKey) return false;
+    try {
+      const session = JSON.parse(localStorage.getItem(tokenKey) || '{}');
+      return !!(session?.access_token && session?.user?.id);
+    } catch {
+      return false;
+    }
+  }, { timeout: 15000 });
+
+  console.log('[global-setup] Auth resolved — verifying authenticated state...');
+
   // Ensure .auth directory exists
   fs.mkdirSync(path.dirname(AUTH_STATE_PATH), { recursive: true });
 

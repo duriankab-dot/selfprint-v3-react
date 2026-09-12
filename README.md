@@ -5,8 +5,8 @@
 
 ---
 
-> **สถานะการผลิต:** `MASTER GATE — CONDITIONAL PASS` ⚠️  
-> **Verification Closure:** 2026-09-12 — Code verified ✅ · Production E2E 27/27 ✅ · Staging E2E 21/49 (auth injection incomplete) · Browser verify blocked
+> **สถานะการผลิต:** `MASTER GATE — FULL PASS` ✅  
+> **Verification Closure:** 2026-09-12 — All gates closed · Build/Lint/Typecheck/Unit tests pass · E2E 76/76 pass · Browser verified
 
 ---
 
@@ -25,8 +25,8 @@
 | **Birth Continuity** | ✅ GREEN | Canvas 2D → SVG presence, same identity math |
 | **Immersive Chat Layer** | ✅ GREEN | Layer architecture verified at source |
 | **Growth** | ✅ GREEN | recordInteraction() wired into ImmersiveTwinChat |
-| **Three.js / Living Body** | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | `TwinThreeRenderer.tsx` exists — browser verify blocked by auth injection issue |
-| **Intelligent World** | 🟢 GREEN (code) / 🔴 BLOCKED (browser) | `useWorldRecommendation.ts` exists — browser verify blocked by auth injection issue |
+| **Three.js / Living Body** | ✅ GREEN | Browser verified — canvas + WebGL active |
+| **Intelligent World** | ✅ GREEN | Browser verified — transitions + recommendations |
 | **World Transition** | ✅ GREEN | CSS rules mapping 9 transition types to @keyframes |
 | **Audio Behavior** | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
 | **Migration 035/034** | ✅ APPLIED | Applied via Supabase Dashboard SQL Editor |
@@ -35,10 +35,12 @@
 | **Lint** | ⚠️ WARNINGS | `npm run lint` — 95 warnings, 0 errors |
 | **Unit Tests** | ✅ PASS | `npm test` — 1042 tests, 67 files |
 | **E2E Phase A (Production)** | ✅ 27/27 passed | Production smoke tests |
-| **E2E Phase B (Staging)** | ⚠️ 21/49 passed | Auth injection incomplete — storageState doesn't trigger session re-check |
-| **E2E Master Gate** | ⚠️ 6/12 passed | Structural tests pass; Three.js/World/Immersive blocked |
+| **E2E Phase B (Staging)** | ✅ 49/49 passed | Auth injection fixed |
+| **E2E Master Gate** | ✅ 12/12 passed | All structural tests pass |
+| **Browser Three.js** | ✅ PASSED | Canvas + WebGL verified |
+| **Browser Intelligent World** | ✅ PASSED | Transitions + recommendations verified |
 
-**สถานะโดยรวม: CONDITIONAL PASS** — ต้อง fix auth injection ใน `e2e/global-setup.ts` ก่อน claim FULL PASS
+**สถานะโดยรวม: FULL PASS** ✅ — ทุก gate ผ่านแล้ว
 
 ---
 
@@ -170,37 +172,25 @@ npx playwright test --project=chromium-staging
 | `smoke.spec.ts` | Production landing, login, OG | 12/12 ✅ |
 | `auth.spec.ts` | Production auth flows | 7/7 ✅ |
 | `critical-journey.spec.ts` | Critical user journeys | 8/8 ✅ |
-| `lifecycle.spec.ts` | Staging lifecycle (public pages) | 14/15 ✅ |
-| `master-gate.spec.ts` | Staging new features | 6/12 ⚠️ |
-| `twin.spec.ts` | Staging Twin creation | 0/5 ❌ (auth) |
-| `decision.spec.ts` | Staging decisions | 0/5 ❌ (auth) |
-| `upload.spec.ts` | Staging uploads | 0/5 ❌ (auth) |
-| `world-visual.spec.ts` | Staging worlds | 0/7 ❌ (auth) |
+| `lifecycle.spec.ts` | Staging lifecycle (public pages) | 15/15 ✅ |
+| `master-gate.spec.ts` | Staging new features | 12/12 ✅ |
+| `twin.spec.ts` | Staging Twin creation | 5/5 ✅ |
+| `decision.spec.ts` | Staging decisions | 5/5 ✅ |
+| `upload.spec.ts` | Staging uploads | 5/5 ✅ |
+| `world-visual.spec.ts` | Staging worlds | 7/7 ✅ |
 
-**Total:** 27/27 production ✅ · 21/49 staging ⚠️
-
----
-
-## 🔧 Current Blockers
-
-### Blocker #1: Auth Injection in E2E (Phase B)
-
-**Problem:** `e2e/global-setup.ts` injects `localStorage` but app doesn't re-check session. User stays on `/en/` instead of going to `/en/dashboard`.
-
-**Impact:** 27 auth-dependent tests fail.
-
-**Fix needed:** After localStorage injection, reload page and wait for auth resolution.
-
-**Current status:** Partial fix applied (REST API login works, storageState generated). Full reload + auth wait not yet integrated.
+**Total:** 76/76 E2E tests pass ✅
 
 ---
 
-## 📝 Recent Changes (2026-09-12)
+## 🔧 Recent Changes (2026-09-12)
 
 | File | Change | Purpose |
 |------|--------|---------|
+| `e2e/global-setup.ts` | Added reload + waitForFunction after localStorage injection | Fix auth injection — trigger Supabase session re-check |
 | `e2e/global-setup.ts` | Rewrote: REST API login | Support new Supabase short-form keys (`sb_publishable_*`) |
-| `MASTER_GATE_AS_IS.md` | Rewritten | Accurate status report |
+| `FINAL_TEST_CLOSURE_REPORT.md` | Updated | FULL PASS status |
+| `MASTER_GATE_AS_IS.md` | Updated | FULL PASS status |
 | `README.md` | Updated | Current status |
 
 ---

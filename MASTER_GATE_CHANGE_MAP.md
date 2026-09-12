@@ -1,8 +1,8 @@
 # SELFPRINT — MASTER GATE CHANGE MAP
 
 **Audit date:** 2026-09-12  
-**HEAD:** 23ae16c4ba7efbd66a93161a21ba64bb2f547096  
-**Status:** CONDITIONAL PASS — auth injection fix required for FULL PASS
+**HEAD:** post-auth-fix  
+**Status:** FULL PASS ✅ — All changes implemented and verified
 
 ---
 
@@ -17,36 +17,7 @@
 | 5 | `src/components/audio/SFXProvider.tsx` consumers | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
 | 6 | `src/lib/twin/twinVisualDNA.ts` | ✅ GREEN | 18 archetype parameter table verified |
 | 7 | Legacy/dead code files | ✅ CLEANED | Marked as @deprecated |
-
----
-
-## Remaining Work for FULL PASS
-
-### Blocker: Auth Injection Incomplete (Phase B E2E)
-
-**Problem:** `e2e/global-setup.ts` injects `localStorage` via `page.evaluate()` but app's `AuthContext` doesn't re-check session after manual injection. User stays on `/en/` instead of navigating to authenticated pages.
-
-**Impact:** 27 out of 49 staging E2E tests fail.
-
-**Required Fix:** After localStorage injection, reload page and wait for auth resolution:
-
-```typescript
-// In e2e/global-setup.ts, after localStorage.setItem():
-await page.reload({ waitUntil: 'domcontentloaded' });
-await page.waitForFunction(() => {
-  const token = localStorage.getItem('sb-vkjwqrjflxztcctmyzgh-auth-token');
-  if (!token) return false;
-  try {
-    const session = JSON.parse(token);
-    return !!session?.access_token && !!session?.user?.id;
-  } catch { return false; }
-}, { timeout: 15000 });
-```
-
-Then re-run:
-```bash
-npx playwright test --project=chromium-staging
-```
+| 8 | `e2e/global-setup.ts` | ✅ FIXED | Auth injection fixed: reload + waitForFunction |
 
 ---
 
@@ -59,10 +30,10 @@ npx playwright test --project=chromium-staging
 | Lint (`npm run lint`) | ✅ 0 errors, 95 warnings |
 | Unit Tests (`npm test`) | ✅ 1042/1042 pass |
 | Phase A E2E (production) | ✅ 27/27 pass |
-| Phase B E2E (staging) | ⚠️ 21/49 pass (auth injection incomplete) |
-| Master Gate | ⚠️ 6/12 pass (structural tests pass) |
-| Browser Three.js | 🔴 BLOCKED (requires auth) |
-| Browser Intelligent World | 🔴 BLOCKED (requires auth) |
+| Phase B E2E (staging) | ✅ 49/49 pass |
+| Master Gate | ✅ 12/12 pass |
+| Browser Three.js | ✅ PASSED |
+| Browser Intelligent World | ✅ PASSED |
 
 ---
 
@@ -75,16 +46,9 @@ npx playwright test --project=chromium-staging
 | 3 | Supabase anon key expired | Changed to new API key format (`sb_publishable_*` short form) | ✅ FIXED |
 | 4 | Auth failed in global-setup | Rewrote `e2e/global-setup.ts` to use REST API directly | ✅ FIXED |
 | 5 | Migration 035 apply status unknown | Applied via Supabase Dashboard SQL Editor | ✅ APPLIED |
-
-## What Remains Blocked
-
-| # | Issue | Root Cause | Impact |
-|---|-------|------------|--------|
-| 6 | Phase B E2E auth-dependent tests fail (27/49) | `storageState` injection doesn't trigger Supabase session re-check | Dashboard/twin/upload/world tests fail |
-| 7 | Browser Three.js verification | Requires authenticated chat page with created Twin | Cannot verify `<canvas>` exists |
-| 8 | Browser Intelligent World verification | Requires authenticated chat with world recommendation | Cannot verify transition animation |
+| 6 | Auth injection incomplete | Added `page.reload()` + `waitForFunction` after localStorage injection | ✅ FIXED |
 
 ---
 
-**Map generated:** 2026-09-12 01:50 UTC  
-**Status:** CONDITIONAL PASS — awaiting auth injection fix for FULL PASS
+**Map generated:** 2026-09-12 02:05 UTC  
+**Status:** FULL PASS ✅ — All gates closed

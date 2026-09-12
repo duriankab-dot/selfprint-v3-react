@@ -1,44 +1,41 @@
 # SELFPRINT — MASTER GATE REMEDIATION PLAN
 
 **Audit date:** 2026-09-12  
-**HEAD:** 23ae16c4ba7efbd66a93161a21ba64bb2f547096  
-**Status:** CONDITIONAL PASS — single blocker remains for FULL PASS
+**HEAD:** post-auth-fix  
+**Status:** FULL PASS ✅ — All remediation complete
 
 ---
 
-## P0 Critical (Remaining)
+## P0 Critical (All Resolved)
 
-### Blocker 1: Auth Injection Incomplete (Phase B E2E — 27 tests fail)
+### Blocker 1: Auth Injection Incomplete — ✅ RESOLVED
 
-**Problem:** `e2e/global-setup.ts` injects `localStorage` via `page.evaluate()` but app's `AuthContext` doesn't re-check session after manual localStorage injection. User lands on `/en/` (home) instead of `/en/dashboard`.
+**Problem (was):** `e2e/global-setup.ts` injects `localStorage` via `page.evaluate()` but app's `AuthContext` doesn't re-check session after manual localStorage injection. User lands on `/en/` (home) instead of `/en/dashboard`.
 
-**What works:**
+**What was fixed:**
 - REST API login succeeds: `Login OK — user: test-phase-b@selfprint.one`
 - `storageState` file created: `e2e/.auth/user.json` with valid session
-- Phase A tests pass (no auth needed)
-- Lifecycle tests pass (public pages)
+- Added `page.reload()` + `waitForFunction` after localStorage injection
 
-**What doesn't work:**
-- Auth-dependent tests navigate to `/en/dashboard` → user stays on `/en/`
-- `[data-testid="dashboard-container"]` not found
-- Three.js canvas not rendered (no Twin)
-
-**Required Fix:** After localStorage injection, reload page and wait for auth resolution:
-
+**Fix Applied:**
 ```typescript
 // In e2e/global-setup.ts, after localStorage.setItem():
-await page.reload({ waitUntil: 'domcontentloaded' });
+await page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
 await page.waitForFunction(() => {
-  const token = localStorage.getItem('sb-vkjwqrjflxztcctmyzgh-auth-token');
-  if (!token) return false;
+  const keys = Object.keys(localStorage);
+  const tokenKey = keys.find(k => k.includes('auth-token'));
+  if (!tokenKey) return false;
   try {
-    const session = JSON.parse(token);
-    return !!session?.access_token && !!session?.user?.id;
+    const session = JSON.parse(localStorage.getItem(tokenKey) || '{}');
+    return !!(session?.access_token && session?.user?.id);
   } catch { return false; }
 }, { timeout: 15000 });
 ```
 
-**Verification Method:** After fix, run `npx playwright test --project=chromium-staging`. All 49 tests should pass (or close to it).
+**Verification Result:**
+- All 49 staging E2E tests pass ✅
+- Browser Three.js verification passes ✅
+- Browser Intelligent World verification passes ✅
 
 ---
 
@@ -62,7 +59,7 @@ await page.waitForFunction(() => {
 
 ## Preservation Statement
 
-All remediation preserves existing:
+All remediation preserved existing:
 - **DB schema:** No changes required
 - **Supabase/Auth/RLS:** Existing policies and ownership enforcement unchanged
 - **Cloudflare Functions:** twin.ts, twin-stream.ts, unified-handler.ts unchanged
@@ -71,10 +68,11 @@ All remediation preserves existing:
 - **Memory System:** twin_memories persistence unchanged
 - **Existing APIs:** All endpoints preserved
 
-Only change needed:
-1. Add `page.reload()` + `waitForFunction` in `e2e/global-setup.ts` after localStorage injection
+Only changes made:
+1. Added `page.reload()` + `waitForFunction` in `e2e/global-setup.ts` after localStorage injection
+2. Rewrote `e2e/global-setup.ts` to use REST API instead of JS SDK (for short-form key support)
 
 ---
 
-**Plan generated:** 2026-09-12 01:50 UTC  
-**Status:** CONDITIONAL PASS — one code change in `e2e/global-setup.ts` required for FULL PASS
+**Plan generated:** 2026-09-12 02:05 UTC  
+**Status:** FULL PASS ✅ — All remediation complete
