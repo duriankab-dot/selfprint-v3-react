@@ -160,7 +160,16 @@ test.describe('Lifecycle — Landing Entry', () => {
       if (r.status() >= 500) serverErrors.push(`${r.status()} ${r.url()}`);
     });
 
-    await page.waitForTimeout(2000);
+    // WAIT-ON-CONTENT (13 Sep 2026): the previous fixed waitForTimeout(2000)
+    // measured the SPA shell before lazy chunks rendered under full-suite
+    // parallel load (assertion then saw body length 2 and flaked). Wait for
+    // the real contract instead: rendered content (the same > 50 threshold the
+    // assertion below enforces). Assertion itself is unchanged.
+    await page.waitForFunction(
+      () => document.body && document.body.innerText.trim().length > 50,
+      undefined,
+      { timeout: 15000 }
+    );
     expect(serverErrors).toHaveLength(0);
 
     // Page should render something meaningful (not blank)
@@ -230,6 +239,14 @@ test.describe('Lifecycle — Onboarding Entry', () => {
     expect(acceptable).toBe(true);
   });
 
+  // LIFE-09 targets the PUBLIC /en/login page. Phase B storageState injects an
+  // authenticated session, and /en/login correctly redirects signed-in users to
+  // /en/dashboard — so the login form would never render. Same public-page
+  // contract as LIFE-01 / LIFE-13: clear the auth state for this test only.
+  // Authed redirect is intended product behavior (no product change).
+  test.describe('LIFE-09 public login (no auth state)', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
+
   test('LIFE-09 /en/login → visible form, no 5xx', async ({ page }) => {
     const serverErrors: string[] = [];
     page.on('response', r => {
@@ -244,6 +261,8 @@ test.describe('Lifecycle — Onboarding Entry', () => {
 
     expect(serverErrors).toHaveLength(0);
   });
+
+  }); // /LIFE-09 public login (no auth state)
 
   test('LIFE-10 login page back navigation safe', async ({ page }) => {
     // Go to login, then back — should not crash
@@ -275,6 +294,15 @@ test.describe('Lifecycle — Mobile Viewport (375px)', () => {
     }
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1); // +1 for sub-pixel rounding
   });
+
+  // LIFE-12 / LIFE-13 target the PUBLIC mobile landing page and login form.
+  // Phase B storageState injects an authenticated session, and /en/ and
+  // /en/login correctly redirect signed-in users to /en/dashboard — so the
+  // public landing CTA and the login form would never render. Same public-page
+  // contract as LIFE-01: clear the auth state for these two tests only. The
+  // authed redirect is intended product behavior (no product change).
+  test.describe('LIFE-12/13 public mobile (no auth state)', () => {
+    test.use({ storageState: { cookies: [], origins: [] } });
 
   test('LIFE-12 landing page has interactive elements on mobile', async ({ page }) => {
     // At 375px, landing CTA layout may differ from desktop (responsive CSS).
@@ -319,6 +347,8 @@ test.describe('Lifecycle — Mobile Viewport (375px)', () => {
     const clientWidth = await page.evaluate(() => document.documentElement.clientWidth);
     expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
   });
+
+  }); // /LIFE-12/13 public mobile (no auth state)
 
   test('LIFE-14 mobile load performance < 7s', async ({ page }) => {
     const t0 = Date.now();

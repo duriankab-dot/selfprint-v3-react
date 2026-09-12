@@ -7,9 +7,10 @@
 ## สর্নাম ըจริง (วัดจาก REAL RUN)
 
 ```
-MASTER GATE — REAL RUN 12 Sep 2026 11:43 UTC, deployment 57719663.selfprint-staging.pages.dev:
+MASTER GATE — FINAL REAL RUN 12 Sep 2026 13:28 UTC, deployment 57719663.selfprint-staging.pages.dev:
   PASS: 28  |  FAIL: 0  |  SKIP: 21  |  NOT EXECUTED: 0
-Control rerun ของ full suite ก็ 0 FAIL; LIFE-05 / LIFE-09 ที่ flake ใน прогонกลาง pass отдельно (2/2)
+Все FAIL закрыты честно (LIFE-01, MG-01×2, LIFE-12, LIFE-13, LIFE-09, LIFE-05, WORLD-05);
+LIFE-05/LIFE-09/LIFE-12/LIFE-13 — public-page контракты; WORLD-05 — load flake (PASS в этом run)
 ```
 
 | หมعد | ফল |
@@ -51,9 +52,15 @@ Control rerun ของ full suite ก็ 0 FAIL; LIFE-05 / LIFE-09 ที่ fl
 - Fix: `src/styles/global.css` — добавлены bare-string `@import './immersive-layers.css'` и `'./world-transitions.css'` (паттерн CSSIMPORT-FIX-002); `immersive-layers.css` — `min(46vmin,420px)` → `min(46vh,46vw,420px)` (+mobile 38).
 - После fix (live): `.layer-twin` fixed h:1227; wrap 414×414; canvas 414×144 `webgl2=true`; bob 416.7 visible; 0 console errors → MG-01-01/MG-01-02 PASS.
 
-### C. LIFE-01 (и затем LIFE-05/LIFE-09) — public pages под authed session
+### C. Public-page тесты под authed session (LIFE-01 → LIFE-12/13 → LIFE-09)
 - StorageState Phase B (authenticated) + правильное product-поведение: authed `/en/` и `/en/login` → redirect на `/en/dashboard` → публичные "Start Free"/login-form никогда не рендерятся.
-- Fix (только тест): LIFE-01 обёрнут в nested describe с `test.use({ storageState: { cookies: [], origins: [] } })`. Продукт НЕ тронут; authed-redirect — intended behavior. LIFE-05/LIFE-09 — load-sensitive flake (2s фиксированные ожидания): isolated PASS 2/2, control full run 0 FAIL.
+- Fix (только тесты, по одному с approved): каждый public-page тест обёрнут в свой nested describe с `test.use({ storageState: { cookies: [], origins: [] } })`. Продукт НЕ тронут; authed-redirect — intended behavior.
+- Scope: LIFE-01 (landing CTA), LIFE-12 + LIFE-13 (mobile 375px landing/login), LIFE-09 (`/en/login` form). Все isolated 3/3 PASS после фикса.
+
+### C2. LIFE-05 — load-sensitive body check → wait-on-content
+- Симптом: body length ≥ 2 < 50 при полном параллельном прогоне (snapshot = только плавающая кнопка "Open Selfprint chat" — SPA shell не отрендерился к замеру через фиксированные `waitForTimeout(2000)`).
+- Диагноз: НЕ product defect (isolated PASS 3/3 и дофикс; полный прогон зависел от скорости lazy-рендера на нагруженной машине).
+- Fix: `waitForTimeout(2000)` → `page.waitForFunction(() => document.body.innerText.trim().length > 50, undefined, { timeout: 15000 })`. Assertion `> 50` НЕ изменён. Isolated после фикса: 3/3 PASS (5.2s/4.7s/6.1s).
 
 ### D. Hidden passes (PASS без исполнения) — устранены
 - `console.log('…SKIPPING'); return;` в WORLD-01/02/03/04/06/07, TWIN-04, DECISION-01/02 конвертированы в `test.skip(true, reason)` — теперь PASS/SKIP отражают факт исполнения. Ни один FAIL не превращён в SKIP.

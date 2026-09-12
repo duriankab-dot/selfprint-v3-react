@@ -8,7 +8,7 @@
 ## Executive Verdict
 
 ```
-MASTER GATE — FROM REAL RUN 12 Sep 2026 11:43 UTC (deployment 57719663.selfprint-staging.pages.dev):
+MASTER GATE — FINAL FROM REAL RUN 12 Sep 2026 13:28 UTC (deployment 57719663.selfprint-staging.pages.dev):
   PASS: 28  |  FAIL: 0  |  SKIP: 21  |  NOT EXECUTED: 0
 ```
 
@@ -20,11 +20,13 @@ LOCAL build env via the git-ignored `.env.production`); (b) Living Twin visual l
 shipping with ZERO CSS (immersive-layers.css / world-transitions.css never entered the
 compiled stylesheet) → fixed by bare-string `@import` in global.css + `vmin`→`vh/vw` swap;
 (c) hidden-pass early-returns (WORLD/DECISION/TWIN) converted to honest `test.skip(reason)`;
-(d) LIFE-01/05/09 public-page tests now run without the Phase B auth state (storageState
-overridden), because authed `/en/` and `/en/login` correctly redirect to the dashboard.
-Gate criteria now: **0 FAIL / 0 NOT EXECUTED / every PASS really executed / every SKIP is an
-audited A-category feature-absent or honest runtime-precondition reason.** Final commit is
-pending explicit user confirmation (this state is documented as evidence, not as a commit).
+(d) public-page tests (LIFE-01, LIFE-12, LIFE-13, LIFE-09) now run without the Phase B auth
+state (storageState cleared per-test), because authed `/en/` and `/en/login` correctly
+redirect to the dashboard; (e) LIFE-05 fixed 2s wall-clock wait → wait-on-content
+(`waitForFunction` body length > 50), assertion unchanged. Gate criteria FINAL: **0 FAIL /
+0 NOT EXECUTED / every PASS really executed / every SKIP is an audited A-category
+feature-absent or honest runtime-precondition reason.** Final commit is pending explicit
+user confirmation and diff review (documented here as evidence, not as a commit).
 
 ### Gate Status
 
@@ -34,7 +36,7 @@ pending explicit user confirmation (this state is documented as evidence, not as
 | Playwright spec parse | ✅ GREEN | `npx playwright test --list` = 100 tests / 9 files, no env required |
 | Phase A Production E2E | ✅ GREEN | `--project=chromium` 27/27 (previous run); Mobile Chrome 12/12; Mobile Safari 12/12 |
 | Auth injection (global-setup) | ✅ GREEN | REST password grant → storageState → authenticated dashboard renders (previous session) |
-| Phase B Staging E2E | ✅ GREEN | Real run 12 Sep 11:43 UTC on deployment 57719663 → 28 PASS / 0 FAIL / 21 SKIP / 0 NOT EXECUTED. Control rerun also 0 FAIL. |
+| Phase B Staging E2E | ✅ GREEN | FINAL real run 12 Sep 13:28 UTC on deployment 57719663 → 28 PASS / 0 FAIL / 21 SKIP / 0 NOT EXECUTED (after LIFE-05 + LIFE-09 closure) |
 | Master Gate (MG suite) | ✅ REAL | MG-01..MG-07 all executed: 12/12 PASS in the final run (Twin presence, canvas+WebGL, worlds, chat, birth, immersive layers, decisions) |
 | Three.js Living Body | ✅ REAL | MG-01-01/02 PASS: SVG presence (416px) + WebGL canvas 414×144 mounted, `webgl2` context = true, no runtime errors |
 | Staging DNS/SSL | ❌ FAILING | `staging.selfprint.one` → Cloudflare 525; app reachable at `selfprint-staging.pages.dev` |
