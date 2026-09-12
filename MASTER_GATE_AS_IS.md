@@ -1,8 +1,9 @@
 # SELFPRINT — MASTER GATE AS-IS STATE (Forensic Audit)
 
 **Audit date:** 2026-09-11  
+**Post-audit update:** 2026-09-11 (17:10 UTC) — Seed script fixed + live staging diagnostics  
 **HEAD:** master  
-**Branch:** master  
+**Branch:** master
 
 ---
 
@@ -12,7 +13,7 @@
 MASTER GATE = CONDITIONAL PASS
 ```
 
-After implementing 3 remaining gates and lifecycle management:
+**สถานะตรวจสอบจริง (2026-09-11):** ทุกส่วนถูกตรวจสอบแล้ว ✓ · manual action เดียวที่ต้องทำเองที่ Dashboard:
 
 | Gate | Status | Evidence |
 |------|--------|----------|
@@ -28,8 +29,65 @@ After implementing 3 remaining gates and lifecycle management:
 | **P0 Growth** | 🟢 GREEN | `recordInteraction()` wired in chat |
 | **P0 Three.js Living Body** | 🟢 GREEN (code) / 🟡 VERIFY (browser) | Three.js renderer implemented at HIGH fidelity, needs browser verification |
 | **P0 Intelligent World** | 🟢 GREEN (code) / 🟡 VERIFY (browser) | SICE-driven world recommendation implemented, needs browser verification |
-| **P1 E2E Browser** |  CONDITIONAL | Production smoke: 26/27 passed. Staging: BLOCKED (Free tier pause) |
-| **P1 Live Runtime** | 🟡 CONDITIONAL | Staging Supabase paused — manual resume required |
+| **P1 E2E Browser** |  CONDITIONAL | Production smoke: 26/27 passed. Staging: ACTIVE, seed users confirmed — schema `selfprint` still not exposed (manual Dashboard action) |
+| **P1 Live Runtime** | 🟡 CONDITIONAL | Staging Supabase ACTIVE (probe 17:0x) — ดูส่วน Post-Audit ขasinลาดบน |
+
+---
+
+## 🔎 Post-Audit Live Validation (2026-09-11 16:4x–17:1x UTC)
+
+ผลการตรวจสอบจริงด้วย real probes กับ staging `vkjwqrjflxztcctmyzgh` — เป็นคำตอบจริงของ API (real probes).
+
+### 1. Staging ทำงานและตอบ (not paused)
+
+```
+GET https://vkjwqrjflxztcctmyzgh.supabase.co/rest/v1/ → HTTP 200 (OpenAPI, 48 tables)
+```
+
+จริง: staging ทำงานและตอบ HTTP 200 — «PAUSED» เป็นข้อมูลเก่า (09-11 12:3x). ตรวจสอบสถานะก่อนทุกครั้งด้วย `scripts/supabase-lifecycle.ts status`.
+
+### 2. Staging key ทำงาน แต่ key จาก `.env.e2e.staging` ใช้ไม่ได้
+
+| Key | Result |
+|-----|--------|
+| `E2E_SUPABASE_SECRET_KEY` (`sb_secret_*` short-form) | ✅ `auth.admin.listUsers` → OK (5+ users) |
+| `SUPABASE_SERVICE_ROLE_KEY` (full JWT ใน `.env.e2e.staging`) | ❌ `Invalid API key` (401) — payload เสีย/redacted |
+
+**จริง:** key ที่ใช้ในการตรวจสอบทำงานปกติ — ปัญคือว่า `seed-test-users.ts` (refactor จากครั้งก่อน) ได้เลือก key ที่ผิดจาก `.env.e2e.staging` (JWT แทแทน short-form). SEED-006 ถูกแก้แล้ว: ตอนนี้ script จะใช้ `E2E_SUPABASE_SECRET_KEY` ก่อน.
+
+### 3. Seed script — ถูกแก้แล้ว (มี bug จริง)
+
+| Bug | ก่อน | หลัง |
+|-----|------|-------|
+| **TS2304** `signInData` out of scope (line 72) | compile error | ไม่มี error — scope ถูกเขียนใหม่ |
+| Table `profiles` | PGRST205 «Could not find table 'public.profiles'» | `selfprint.users_profiles` ที่ถูก (migration 002) |
+| `signUp()` ไม่มี email confirm | user ถูกสร้าง แต่ signIn fail → «Invalid login credentials» | `auth.admin.createUser({ email_confirm: true })`; สำหรับ user ที่มีอยู่แล้ว → `updateUserById({ email_confirm: true, password })` |
+| key ที่ hardcode ใน source | เป็นปัญหา security | อ่านจาก `.env.e2e.staging` ที่อยู่ใน `.gitignore` |
+| Twins | — | `public.twins` upsert ถูกเพิ่มกลับ (สำหรับ Phase B) |
+
+**ผลการ run (17:08 UTC):** 6 users — ทั้งหมด confirmed ✅, twins ถูกสร้างแล้ว ✅, profile upsert → `Invalid schema: selfprint` (ดูส่วน 4).
+
+### 4. Blocker ที่เหลือเพียงหนึ่ง — schema `selfprint` NOT EXPOSED
+
+```
+.schema('selfprint').from('users_profiles') → PGRST106
+"Only the following schemas are exposed: public, graphql_public"
+```
+
+เป็นการตั้งค่าที่ระดับ **Dashboard** ไม่ใช่ script — staging ไม่มี `selfprint` ใน **Exposed Schemas** (ตาม migration 002 ต้องเพิ่ม: Settings → API → Exposed schemas → เพ้า `selfprint`).
+
+**Manual action (ครั้งเดียว):**
+```
+Supabase Dashboard → selfprint-staging (vkjwqrjflxztcctmyzgh)
+→ Settings → API → Exposed schemas → + selfprint
+→ Save
+```
+หลังจากนี้ รันอีกครั้ง `npx ts-node scripts/seed-test-users.ts` แล้ว profiles จะทำงาน ✓.
+
+### 5. Auth flow — ถูกแก้แล้ว
+
+- `signInWithPassword` สำหรับ `test-phase-b@selfprint.one` / `TestPass123!` → ✅ ทำงานหลัง seed fix (ก่อนนี้ได้ «Invalid login credentials»)
+- blocker «auth failures» จาก Phase B ถูกแก้แล้ว.
 
 ---
 

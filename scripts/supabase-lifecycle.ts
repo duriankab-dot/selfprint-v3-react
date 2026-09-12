@@ -223,6 +223,10 @@ async function main() {
   const command = args[0];
 
   if (!command || args.length < 2) {
+    if (command === 'manual-instructions') {
+      printManualInstructions();
+      return; // exit 0
+    }
     printUsage();
     process.exit(1);
   }
@@ -248,6 +252,7 @@ async function main() {
 
     case 'manual-instructions':
       printManualInstructions();
+      return; // exit 0 — critical for orchestrator subprocess calls
       break;
 
     case 'resume':

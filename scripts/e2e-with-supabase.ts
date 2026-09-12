@@ -36,7 +36,11 @@ import * as fs from 'fs';
 const STAGING_PROJECT_REF = 'vkjwqrjflxztcctmyzgh';
 const STAGING_SUPABASE_URL = process.env.E2E_SUPABASE_URL ?? 'https://vkjwqrjflxztcctmyzgh.supabase.co';
 const STAGING_ANON_KEY = process.env.E2E_SUPABASE_ANON_KEY ?? '';
-const STAGING_SERVICE_ROLE_KEY = process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ?? '';
+const STAGING_SERVICE_ROLE_KEY =
+  process.env.E2E_SUPABASE_SECRET_KEY ??
+  process.env.SUPABASE_SERVICE_ROLE_KEY ??
+  process.env.E2E_SUPABASE_SERVICE_ROLE_KEY ??
+  '';
 const STAGING_URL = process.env.STAGING_URL ?? 'https://selfprint-staging.pages.dev';
 const ORG_API_KEY = process.env.SUPABASE_ORG_API_KEY ?? '';
 
@@ -233,7 +237,26 @@ async function main() {
   // Manual mode: just show instructions
   if (manual) {
     log('Manual mode: showing instructions...');
-    runCommand('npx ts-node scripts/supabase-lifecycle.ts manual-instructions', process.cwd());
+    log(`========================================`);
+    log(`Supabase Lifecycle - Manual Instructions (Free Tier)`);
+    log(`========================================`);
+    log('');
+    log(`Project: ${STAGING_PROJECT_REF}`);
+    log(`Dashboard URL: https://supabase.com/dashboard/project/${STAGING_PROJECT_REF}`);
+    log('');
+    log('Steps to resume:');
+    log(`  1. Open: https://supabase.com/dashboard/project/${STAGING_PROJECT_REF}`);
+    log('  2. Click "Resume" button (top right)');
+    log('  3. Wait for status to change from "Coming up..." to "Healthy"');
+    log('  4. Wait ~2-3 minutes for database to initialize');
+    log('  5. Then run: npx ts-node scripts/e2e-with-supabase.ts');
+    log('');
+    log('Steps to pause (after tests):');
+    log(`  1. Open: https://supabase.com/dashboard/project/${STAGING_PROJECT_REF}`);
+    log('  2. Click "Pause" button (top right)');
+    log('  3. Confirm pause');
+    log('');
+    log('========================================');
     return;
   }
 
@@ -246,21 +269,26 @@ async function main() {
       if (resumeOnly || !resumeOnly) {
         if (isProTeamPlan()) {
           resumed = await resumeStaging();
+          if (resumed) {
+            const ready = await waitForStagingReady();
+            if (!ready) {
+              log('❌ Staging project did not become active in time');
+              process.exit(1);
+            }
+          }
         } else {
-          log('⚠️  Free tier detected. Please resume staging manually:');
-          log(`   https://supabase.com/dashboard/project/${STAGING_PROJECT_REF}`);
-          log('');
-          log('   After resuming, re-run this script without --manual flag.');
-          log('');
-          // Show instructions
-          runCommand('npx ts-node scripts/supabase-lifecycle.ts manual-instructions', process.cwd());
-          process.exit(1);
-        }
-
-        if (resumed) {
+          // Free Tier: no API resume — check whether the project is already active.
+          // If active → continue to seed + tests. If paused → show instructions & exit.
+          log('⚠️  Free tier detected. Checking whether staging is already active...');
           const ready = await waitForStagingReady();
-          if (!ready) {
-            log('❌ Staging project did not become active in time');
+          if (ready) {
+            log('✅ Staging is already active — continuing with seed + tests.');
+            resumed = true;
+          } else {
+            log('⏸️  Staging is paused. Please resume manually:');
+            log(`   https://supabase.com/dashboard/project/${STAGING_PROJECT_REF}`);
+            log('');
+            runCommand('npx ts-node scripts/supabase-lifecycle.ts manual-instructions', process.cwd());
             process.exit(1);
           }
         }
