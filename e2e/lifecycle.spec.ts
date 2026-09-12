@@ -64,8 +64,8 @@ test.describe('Lifecycle — Landing Entry', () => {
 
       // Primary CTA: "Start Free" or "เริ่มฟรี"
       const cta = page.locator(
-        'button:has-text("Start Free"), button:has-text("เริ่มฟری"), ' +
-        'a:has-text("Start Free"), a:has-text("เริ่มฟری")'
+        'button:has-text("Start Free"), button:has-text("เริ่มฟรี"), ' +
+        'a:has-text("Start Free"), a:has-text("เริ่มฟรี")'
       ).first();
       await expect(cta).toBeVisible({ timeout: 10000 });
 
