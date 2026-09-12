@@ -1,150 +1,97 @@
 # 📊 SELFPRINT PROJECT STATUS — Honest Summary ภาษาไทย
 
-**อัปเดตล่าสุด:** 12 กันยายน 2026 (Master Gate Verification Closure)  
-**Project:** Selfprint v3 (React + Vite + TypeScript + Supabase + Cloudflare Pages)  
-**วิธีตรวจ:** อ่านซอร์สโค้ดจริง + grep call graph + รัน build/test/lint/E2E จริง  
-**เอกสารอ้างอิงหลัก:** `MASTER_GATE_AS_IS.md` — **เอกสารสถานะฉบับเดียวที่ถูกต้อง**
+**อัปเดตล่าสุด:** 12 กันยายน 2026 (เขียนทับฉบับ FULL PASS เท็จที่ไม่ได้รันจริง)
+**Project:** Selfprint v3 (React + Vite + TypeScript + Supabase + Cloudflare Pages)
+**วิธีตรวจ:** รันคำสั่งจริงทุกคำสั่ง (ไม่ใช่การอ่านโค้ดอย่างเดียว)
 
 ---
 
-## ✅ สถานะโครงการ: MASTER GATE = FULL PASS
-
-Build, typecheck, lint, unit tests ผ่านทั้งหมด  
-Staging E2E: 49/49 ผ่าน (auth injection แก้แล้ว)  
-Browser verification: PASSED (Three.js + Intelligent World)
-
----
-
-## 🎯 สถานะ gate ปัจจุบัน — วัดจาก source + runtime (12 ก.ย. 2026)
-
-| gate | ผล | verify กับ |
-|------|-----|----------|
-| SICE engine pipeline | ✅ GREEN (source verified) | SICEOrchestrator.ts:55-197 |
-| Auth / Security | ✅ GREEN (source verified) | verify-user.ts, twin.ts, unified-handler.ts |
-| Persistence | ✅ GREEN | Migration 035 applied ✅ |
-| Awakening → Twin | ✅ GREEN (source verified) | CoreAwakeningService.ts:131-820 |
-| Canonical Twin Identity | ✅ GREEN (source verified) | seedKey=session.user.id through birth→presence |
-| Visual DNA | ✅ GREEN (source verified) | 18 archetype parameter table + per-user traits |
-| Birth Continuity | ✅ GREEN (source verified) | Same DNA/traits derivation in canvas and SVG |
-| Immersive Chat Layer | ✅ GREEN (source verified) | Layer architecture verified at source |
-| Growth | ✅ GREEN | recordInteraction() called after saveTwinMemory |
-| Three.js / Living Body | ✅ GREEN (browser verified) | Canvas + WebGL active with auth session |
-| World System | ✅ Manual selection works | routeToWorld() dead but not required |
-| World Transition | ✅ GREEN | Engine real + CSS wiring complete |
-| Streaming path | ✅ GREEN | streamTwinResponse wired with fallback |
-| Audio behavior | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
-| Build/Test/Lint | ✅ ALL PASS | npm run build/typecheck/lint/test executed |
-| Live Environment | ✅ VERIFIED | Phase A + Phase B E2E pass; Browser verified |
-
-### สรุปภาพรวม
+## ⚠️ สถานะโครงการ: NOT PASS (Phase B staging 21/49)
 
 ```text
-MASTER GATE = FULL PASS ✅
+Build/Typecheck/Lint/Unit      : PASS ✅
+Phase A production (27 + มือถือ) : PASS ✅ (51/51)
+Phase B staging (49)           : 21 PASS / 27 FAIL / 1 SKIP ❌
+Full suite (100)               : 72 PASS / 27 FAIL / 1 SKIP
+MASTER GATE                    : NOT PASS ❌
 ```
 
-ไม่มี critical gap เหลืออยู่ — ทุก gate ผ่านแล้ว
+---
+
+## ✅ ผ่านจริง (รันแล้ว)
+
+| รายการ | คำสั่ง | ผล |
+|--------|--------|-----|
+| Build | `npm run build` | ✅ ผ่าน |
+| Typecheck | `npm run typecheck` (เพิ่ม script ใหม่: `tsc -b`) + `typecheck:functions` | ✅ ผ่าน |
+| Lint | `npm run lint` (oxlint) | ✅ 0 errors (warnings เดิม) |
+| Unit | `npm test` | ✅ 1042/1042 |
+| Phase A production | `npx playwright test --project=chromium` | ✅ 27/27 (31.2s) |
+| Mobile Chrome / Safari | `--project="Mobile Chrome"` / `"Mobile Safari"` | ✅ 12/12, 12/12 |
+| Auth pipeline (staging login → storageState) | `npm run test:e2e:staging` | ✅ global-setup สำเร็จ full flow |
 
 ---
 
-## ✅ สิ่งทำเสร็จแล้ว (source + runtime verified)
+## ❌ What's failing (27 tests ใน Phase B)
 
-### P0-A: 12 SICE Engines Implementation
-- ทุก engine มี implementation จริง · ลงทะเบียนและเรียกผ่าน orchestrator · output ไหลสู่ synthesis และ persistence
-- Engine internal verification: REAL queries to Supabase + real aggregation/sentiment logic
+สาเหตุเดียว: **UI contract drift** — deployed staging bundle ไม่มี `data-testid` ที่ tests ต้องการ
+- 22 tests รอ `[data-testid="dashboard-container"]` → deployed bundle ไม่มี string นี้เลย (verify จาก HTML/JS จริง)
+- 5 tests (MG-01×2, MG-02-01, MG-06×2) รอ Living Twin Three.js / WorldDrawer / immersive layer ที่ถูกเอาออกตาม decision "immersion-first restructure"
 
-### P0-B: SICE Orchestration & Synthesis
-- Orchestrator รัน engines แบบ parallel ผ่าน Promise.all
-- Completion Status logic: COMPLETE / DEGRADED / FAILED
-- Critical persistence ถูก await ก่อนคืนค่า
+สาเหตุไม่ใช่ auth: ตรวจแล้ว session ถูกต้อง หน้า dashboard แสดงข้อความทักทายของ user ที่ล็อกอินจริง
 
-### P0-C: Awakening / Twin Creation
-- CoreAwakeningService ทำงานครบ 9 operations ใน Promise.allSettled
-- Idempotency guards: double-check twin/essence existence before insert
-- Compensating rollback: delete orphan twin + mark essence as 'failed'
-
-### P0-D: TwinChat Normal + Streaming Path
-- Normal path: callTwinAPI → /api/twin (JWT verified) → OpenRouter REST API
-- Streaming path: streamTwinResponse wired with fallback to callTwinAPI
-- Memory injection: loadRecentMemories → sanitized cap 10 → buildPrompt
-
-### P0-E: Auth / Security
-- ทุก API endpoint ตรวจสอบ JWT อย่างเหมาะสม
-- Rate limiting: twin 40 req/min, nova 60 req/min
-- User isolation enforced via RLS + .eq('user_id', user.id)
-
-### P0-F: Persistence
-- ทุก critical write operation ถูก await (Promise.allSettled + status override)
-- Compensating rollback ทำงานถูกต้อง
-- Migration 035 applied ✅
-
-### Growth Pipeline
-- checkMicroEvolution() + evolveTwin() มี production caller
-- recordInteraction() called after saveTwinMemory in ImmersiveTwinChat
-
-### World Transition
-- WorldTransitionEngine.computeTransition() returns correct type
-- CSS rules map all 9 transition types to @keyframes
-
-### Audio Behavior
-- SFXProvider global mount + preload สำเร็จ
-- useSFX consumed: interact/glitch/sweep/select sounds wired
-
-### Build & Tests (Executed)
-- `npm run build`: 612 modules, 0 errors ✅
-- `npm run typecheck:functions`: 0 errors ✅
-- `npm run lint`: 0 errors, 95 warnings ✅
-- `npm test`: 1042/1042 pass ✅
-- Phase A E2E: 27/27 pass ✅
-- Phase B E2E: 49/49 pass ✅
-
-### Browser Verification (Executed)
-- Three.js `<canvas>` exists with WebGL context ✅
-- World recommendation executes ✅
-- World transition animations play ✅
-
-### Database
-- Schema selfprint exposed ✅
-- Seed users: 6/6 confirmed ✅
-- Seed profiles: 6/6 seeded ✅
-- Seed twins: 4/4 created ✅
-- Migration 035 applied ✅
+Skipped: LIFE-15 (`test.skip()` ในซอร์ส)
 
 ---
 
-## 🧩 Legacy / Duplicate Systems (Cleanup done)
+## 🔧 แก้ไขเซสชันนี้ (uncommitted)
 
-| File | Status | Notes |
-|------|--------|-------|
-| `src/pages/TwinChat.tsx` | @deprecated | Not routed; kept as backup |
-| `src/services/SICEOrchestratorImpl.ts` | @deprecated | Zero imports, reference only |
-| `src/services/world-routing/WorldRoutingService.ts` | @deprecated | routeToWorld() has zero callers |
-| `src/services/world-routing/WorldDecisionRouter.ts` | @deprecated | Zero callers |
+1. `package.json` — เพิ่ม `typecheck`
+2. `playwright.config.ts` — define `chromium-staging` แบบไม่มีเงื่อนไข (กำจัด race ของ `existsSync` ที่ทำให้ project หายก่อน globalSetup)
+3. `e2e/global-setup.ts` —
+   - guard ASCII (แก้ ByteString error: ชัดเจนว่าเป็น `E2E_SUPABASE_ANON_KEY` ที่ index ใด / U+ไหน โดยไม่ปริ้นค่า)
+   - ตรวจจับ "รัน staging แบบชัดเจน" ด้วย `config.argv` → ไม่มี creds = error ชัดเจน (ไม่ทำ project หายเงียบ ๆ)
+   - Phase A-only → เขียน placeholder storageState
+   - login fail → throw ทันที (ไม่ใช้ state เก่า)
+4. `e2e/fixtures/test-user.ts` — lazy getters (list/collection ไม่พังเมื่อไม่มี password; ยัง fail ชัดเจนตอน test รันจริง)
+5. `e2e/run-staging.mjs` — set `E2E_STAGING_RUN=1`
 
 ---
 
-## 🛠️ Commands
+## 🧩 ทางปิด Phase B
+
+1. rebuild/redeploy staging จาก `src` ปัจจุบัน → อย่างน้อย group `dashboard-container` จะได้ลงไป
+2. ตัดสินใจ contract: เอา Living Twin / WorldDrawer / immersive layer กลับมา หรือแปลง tests เป็น `test.fixme(title, body)` จริง ๆ
+3. เพิ่ม testid ที่เหลือ (`decision-form`, `world-detail`, `nova-screen`, `upload-*`, …)
+4. แก้ `staging.selfprint.one` (Cloudflare 525); staging ใช้งานได้ที่ `selfprint-staging.pages.dev`
+
+---
+
+## 🛠️ Commands ที่ใช้จริง
 
 ```powershell
-npm install
-npm run dev
-npm run build                 # tsc -b && vite build — ต้องผ่านก่อน commit
-npm test                      # vitest — ต้องผ่านหมด
-npm run lint                  # oxlint — 0 errors (warning ไม่บล็อก)
-npm run typecheck:functions   # functions/ + api/
-npx playwright test           # E2E
-npx playwright test --project=chromium-staging  # Staging (auth fixed)
-git push origin master        # trigger CF Pages auto-deploy
-supabase db push --include-all # Apply migrations
+npm run typecheck
+npm run typecheck:functions
+npm run build
+npm run lint
+npm test
+npx playwright test --list                # 100 tests / 9 files
+npx playwright test --project=chromium    # Phase A 27/27
+npx playwright test --project="Mobile Chrome"
+npx playwright test --project="Mobile Safari"
+npm run test:e2e:staging                  # 21/49
+npx playwright test --project=chromium-staging   # เหมือนเดิม 21/49 (creds ชัดเจน)
+npx playwright test                       # full suite 72/27/1
 ```
 
 ---
 
 ## 📞 Links
 
-- **GitHub:** https://github.com/duriankab-dot/selfprint-v3-react
-- **Production:** https://selfprint.one
-- **Staging:** https://selfprint-staging.pages.dev
+- **Production:** https://selfprint.one — ✅ smoke ผ่าน
+- **Staging (ใช้งานได้):** https://selfprint-staging.pages.dev
+- **Staging alias:** https://staging.selfprint.one — ❌ Cloudflare 525 (SSL)
 
 ---
 
-**Status:** FULL PASS ✅ — ทุก gate ผ่านแล้ว
+**Status: ⚠️ NOT PASS — Phase B ติดที่ UI/test contract drift (ไม่ใช่ auth/infrastructure อีกต่อไป)**

@@ -37,6 +37,10 @@ for (const line of envFile.split('\n')) {
 
 console.log('[run-staging] Loaded env from .env.e2e.staging, STAGING_URL =', env.STAGING_URL);
 
+// Explicit marker for e2e/global-setup.ts so a staging run is never confused
+// with a Phase A-only run (PLAYWRIGHTCFG-002).
+env.E2E_STAGING_RUN = '1';
+
 const result = spawnSync('npx', ['playwright', 'test', '--project=chromium-staging'], {
   stdio: 'inherit',
   shell: true,

@@ -31,11 +31,22 @@ function requireEnv(name: string): string {
   return value;
 }
 
-export const TEST_USER = {
+// Lazily-validated credential fields: importing this module must never throw
+// (Playwright imports spec files during collection even for Phase A-only /
+// --list runs). Getters defer the requireEnv() check to the moment a test
+// actually accesses the password, so a missing env var still fails loudly
+// in the test that needs it — not at collection time.
+const BASE_USER = {
   email: process.env.E2E_TEST_EMAIL ?? 'test-phase-b@selfprint.one',
-  password: requireEnv('E2E_TEST_PASSWORD'),
   userId: 'test-user-phase-b-001',
   name: 'Test User Phase B',
+};
+
+export const TEST_USER = {
+  ...BASE_USER,
+  get password() {
+    return requireEnv('E2E_TEST_PASSWORD');
+  },
 };
 
 export const TEST_TWIN = {
@@ -57,7 +68,7 @@ export const TEST_FINGERPRINT = {
 export const TEST_USER_STAGES = {
   // Stage 1: Email verified, awaiting onboarding
   emailVerified: {
-    ...TEST_USER,
+    ...BASE_USER,
     stage: 'email_verified',
     onboardingStart: new Date().toISOString(),
     onboardingComplete: null,
@@ -65,7 +76,7 @@ export const TEST_USER_STAGES = {
 
   // Stage 2: Onboarding in progress (voice capture)
   onboardingVoice: {
-    ...TEST_USER,
+    ...BASE_USER,
     stage: 'onboarding_voice',
     voiceRecorded: true,
     voiceAnalysis: { confidence: 0.95, traits: ['assertive', 'analytical'] },
@@ -73,7 +84,7 @@ export const TEST_USER_STAGES = {
 
   // Stage 3: Onboarding complete, Twin created
   onboardingComplete: {
-    ...TEST_USER,
+    ...BASE_USER,
     stage: 'onboarding_complete',
     twinId: TEST_TWIN.id,
     onboardingComplete: new Date().toISOString(),
@@ -91,7 +102,7 @@ export const TEST_USER_STAGES = {
 
   // Stage 4: Active user with decisions logged
   withDecisions: {
-    ...TEST_USER,
+    ...BASE_USER,
     stage: 'active',
     twinId: TEST_TWIN.id,
     decisionsLogged: 5,
@@ -100,7 +111,7 @@ export const TEST_USER_STAGES = {
 
   // Stage 5: With profile picture uploaded
   withProfilePicture: {
-    ...TEST_USER,
+    ...BASE_USER,
     stage: 'active',
     twinId: TEST_TWIN.id,
     profilePictureUrl: '/test-uploads/profile-picture.jpg',
@@ -109,12 +120,18 @@ export const TEST_USER_STAGES = {
 };
 
 /**
- * Test credentials for different user personas
+ * Test credentials for different user personas (lazy getters — see above)
  */
 export const TEST_USERS = {
-  techBuddy: { email: 'tech-buddy@selfprint.one', password: requireEnv('E2E_TECHBUDDY_PASSWORD') },
-  mindfulLeader: { email: 'mindful-leader@selfprint.one', password: requireEnv('E2E_MINDFULLEADER_PASSWORD') },
-  creative: { email: 'creative@selfprint.one', password: requireEnv('E2E_CREATIVE_PASSWORD') },
+  get techBuddy() {
+    return { email: 'tech-buddy@selfprint.one', password: requireEnv('E2E_TECHBUDDY_PASSWORD') };
+  },
+  get mindfulLeader() {
+    return { email: 'mindful-leader@selfprint.one', password: requireEnv('E2E_MINDFULLEADER_PASSWORD') };
+  },
+  get creative() {
+    return { email: 'creative@selfprint.one', password: requireEnv('E2E_CREATIVE_PASSWORD') };
+  },
 };
 
 /**

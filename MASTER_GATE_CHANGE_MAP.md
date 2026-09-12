@@ -1,54 +1,25 @@
-# SELFPRINT — MASTER GATE CHANGE MAP
+# MASTER GATE — CHANGE MAP (2026-09-12)
 
-**Audit date:** 2026-09-12  
-**HEAD:** post-auth-fix  
-**Status:** FULL PASS ✅ — All changes implemented and verified
+**Overwrites the previous "FULL PASS" change map** — that map recorded no real E2E execution. This map reflects the actual code changes and measured outcomes.
 
----
+## Changes applied this session (HEAD 60715c5 + uncommitted)
 
-## Change Map Status
+| # | File | Change | Why |
+|---|------|--------|-----|
+| 1 | `package.json` | Added `"typecheck": "tsc -b"` | `npm run typecheck` did not exist (was a claimed command) |
+| 2 | `playwright.config.ts` | `chromium-staging` defined **unconditionally**; deleted `existsSync('./e2e/.auth/user.json')` gating | config-time existsSync raced globalSetup — project could disappear before auth state was created |
+| 3 | `e2e/global-setup.ts` | Added ASCII/ByteString guard on header/URL values | non-ASCII char (e.g. Thai `ใ` pasted into `E2E_SUPABASE_ANON_KEY`) crashed `fetch` with cryptic `ByteString` error |
+| 4 | `e2e/global-setup.ts` | Deterministic staging detection via `config.argv` + `E2E_STAGING_RUN` | staging run without creds now fails with a clear BLOCKED error instead of silently removing the project |
+| 5 | `e2e/global-setup.ts` | Placeholder `{cookies:[],origins:[]}` storageState written on Phase A-only runs | keeps project index stable; `--project=chromium` in CI with no creds still works |
+| 6 | `e2e/global-setup.ts` | Login failure / missing token → throws (never proceeds with stale state) | prevents false-PASS via an old/expired `user.json` |
+| 7 | `e2e/fixtures/test-user.ts` | `requireEnv` moved into lazy getters | `--list`/collection no longer throws when E2E passwords absent; still fails loudly at first use in a test |
+| 8 | `e2e/run-staging.mjs` | Sets `E2E_STAGING_RUN=1` | belt-and-braces marker for global-setup |
 
-| # | File(s) | Gate Status | Notes |
-|---|---------|-------------|-------|
-| 1 | `src/pages/ImmersiveTwinChat.tsx` + `src/hooks/useEvolutionTracking.ts` | ✅ GREEN | Growth wired: recordInteraction() called after saveTwinMemory |
-| 2 | `src/styles/world-transitions.css` | ✅ GREEN | 9 transition types mapped to @keyframes |
-| 3 | `supabase/migrations/035_forensic_consolidation_2026-09-03.sql` | ✅ APPLIED | Applied via Supabase Dashboard SQL Editor |
-| 4 | `functions/api/twin-stream.ts` + `src/services/TwinAPIService.ts` | ✅ GREEN | Streaming path wired with fallback |
-| 5 | `src/components/audio/SFXProvider.tsx` consumers | ✅ GREEN | useSFX consumed in ImmersiveTwinChat |
-| 6 | `src/lib/twin/twinVisualDNA.ts` | ✅ GREEN | 18 archetype parameter table verified |
-| 7 | Legacy/dead code files | ✅ CLEANED | Marked as @deprecated |
-| 8 | `e2e/global-setup.ts` | ✅ FIXED | Auth injection fixed: reload + waitForFunction |
+## Previous session's change (revalidated)
+- `e2e/global-setup.ts` reload + `waitForFunction` after localStorage injection — kept; confirmed functional by live probe (authenticated dashboard renders).
 
----
-
-## Verification Results
-
-| Category | Result |
-|----------|--------|
-| Build (`npm run build`) | ✅ 612 modules, 0 errors |
-| Typecheck (`npm run typecheck:functions`) | ✅ 0 errors |
-| Lint (`npm run lint`) | ✅ 0 errors, 95 warnings |
-| Unit Tests (`npm test`) | ✅ 1042/1042 pass |
-| Phase A E2E (production) | ✅ 27/27 pass |
-| Phase B E2E (staging) | ✅ 49/49 pass |
-| Master Gate | ✅ 12/12 pass |
-| Browser Three.js | ✅ PASSED |
-| Browser Intelligent World | ✅ PASSED |
-
----
-
-## What Was Fixed This Session
-
-| # | Issue | Resolution | Status |
-|---|-------|------------|--------|
-| 1 | Schema `selfprint` not exposed | Exposed manually in Dashboard (Settings → API → Exposed schemas) | ✅ DONE |
-| 2 | Seed profiles failed | Re-ran `seed-test-users.ts` → 6/6 profiles seeded | ✅ DONE |
-| 3 | Supabase anon key expired | Changed to new API key format (`sb_publishable_*` short form) | ✅ FIXED |
-| 4 | Auth failed in global-setup | Rewrote `e2e/global-setup.ts` to use REST API directly | ✅ FIXED |
-| 5 | Migration 035 apply status unknown | Applied via Supabase Dashboard SQL Editor | ✅ APPLIED |
-| 6 | Auth injection incomplete | Added `page.reload()` + `waitForFunction` after localStorage injection | ✅ FIXED |
-
----
-
-**Map generated:** 2026-09-12 02:05 UTC  
-**Status:** FULL PASS ✅ — All gates closed
+## Not changed (explicitly)
+- No test was skipped/removed/weakened.
+- Phase B (chromium-staging) is fully preserved.
+- No secrets were added to code or docs; the anon key previously leaked into committed reports has been scrubbed from the rewritten docs.
+- `staging.selfprint.one` SSL issue and the deployed-bundle/test contract drift are environment/product blockers, not covered by these code changes.

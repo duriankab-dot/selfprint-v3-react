@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
     "lint": "oxlint",
     "typecheck:functions": "tsc -p tsconfig.functions.json --noEmit",
     "preview": "vite preview",
