@@ -51,7 +51,7 @@ export default defineConfig({
       name: 'chromium-staging',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: process.env.STAGING_URL || 'https://staging.selfprint.one',
+        baseURL: process.env.STAGING_URL || 'https://selfprint-staging.pages.dev',
         storageState: AUTH_STATE,
       },
       testMatch: [
