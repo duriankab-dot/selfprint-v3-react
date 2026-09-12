@@ -124,7 +124,7 @@ export default function DecisionDashboard() {
       )}
 
       {/* Decisions List */}
-      <div className="dd-decisions-section">
+      <div className="dd-decisions-section" data-testid="decision-history-list">
         <h2>📋 Your Decisions ({filteredDecisions.length})</h2>
 
         {filteredDecisions.length === 0 ? (
@@ -156,7 +156,7 @@ function StatCard({ icon, label, value }: { icon: string; label: string; value: 
 
 function DecisionCard({ decision }: { decision: Decision }) {
   return (
-    <div className="decision-card">
+    <div className="decision-card" data-testid="decision-item">
       <div className="decision-header">
         <h3>{decision.title || decision.question}</h3>
         <span className="decision-category">{decision.world}</span>

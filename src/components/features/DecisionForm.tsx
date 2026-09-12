@@ -125,14 +125,15 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
   };
 
   return (
-    <form className="decision-form" onSubmit={handleSubmit}>
+<form className="decision-form" data-testid="decision-form" onSubmit={handleSubmit}>
       <div className="decision-form__group">
         <label className="decision-form__label" htmlFor="title">
-          {isTh ? 'ชื่อการตัดสินใจ' : 'Decision title'} <span className="required">*</span>
+          {isTh ? 'ชื่อการตัดսիկ' : 'Decision title'} <span className="required">*</span>
         </label>
         <input
           id="title"
           type="text"
+          data-testid="decision-title"
           className={`decision-form__input${errors.title ? ' error' : ''}`}
           placeholder={isTh ? 'เช่น: เปลี่ยนงาน, ย้ายเมือง, ลงทุนในโครงการนี้' : 'e.g.: Change jobs, move cities, invest in this project'}
           value={formData.title}
@@ -147,6 +148,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
         </label>
         <textarea
           id="context"
+          data-testid="decision-context"
           className={`decision-form__textarea${errors.context ? ' error' : ''}`}
           placeholder={isTh ? 'อธิบายสถานการณ์ที่ทำให้คุณต้องตัดสินใจ...' : 'Describe the situation that requires this decision...'}
           rows={3}
@@ -162,6 +164,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
         </label>
         <textarea
           id="expectedOutcome"
+          data-testid="decision-expected-outcome"
           className={`decision-form__textarea${errors.expectedOutcome ? ' error' : ''}`}
           placeholder={isTh ? 'คุณหวังว่าการตัดสินใจนี้จะนำไปสู่อะไร?' : 'What do you hope this decision leads to?'}
           rows={3}
@@ -223,6 +226,7 @@ const DecisionForm: React.FC<DecisionFormProps> = ({
       <div className="decision-form__actions">
         <button
           type="submit"
+          data-testid="decision-submit"
           className="decision-form__btn-submit"
           disabled={createDecisionMutation.isPending}
         >

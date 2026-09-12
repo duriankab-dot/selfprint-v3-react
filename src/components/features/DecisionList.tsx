@@ -27,10 +27,10 @@ const DecisionList: React.FC<DecisionListProps> = ({ decisions }) => {
   const isTh = language === 'th';
 
   return (
-    <div className="decision-list">
+    <div className="decision-list" data-testid="decision-history-list">
       <div className="decision-list__items">
         {decisions.map((decision) => (
-          <div key={decision.id} className="decision-item">
+          <div key={decision.id} className="decision-item" data-testid="decision-item">
             <div
               className="decision-item__header"
               onClick={() =>

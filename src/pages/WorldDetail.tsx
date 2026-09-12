@@ -170,6 +170,7 @@ export default function WorldDetail() {
       </span>
       <AppShell>
       <div className="world-detail page-content"
+        data-testid="world-detail"
         style={{ '--world-color': world.color } as React.CSSProperties}
       >
         <div className="wd-header">
@@ -311,7 +312,7 @@ export default function WorldDetail() {
           decisions={worldDecisions}
         />
 
-        <div className="wh-twin-guidance">
+        <div className="wh-twin-guidance" data-testid="world-insight">
           <h3>💡 {isTh ? 'คำแนะนำจากทวิน' : "Twin's Guidance"}</h3>
           <p className="guidance-text">
             {isTh

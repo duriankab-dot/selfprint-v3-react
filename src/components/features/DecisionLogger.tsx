@@ -157,6 +157,7 @@ export const DecisionLogger: React.FC = () => {
       <nav className="decision-logger__tabs" role="tablist">
         <button
           role="tab"
+          data-testid="decision-tab-create"
           aria-selected={activeView === 'create'}
           className={`decision-logger__tab-btn${activeView === 'create' ? ' active' : ''}`}
           onClick={() => setActiveView('create')}
@@ -165,6 +166,7 @@ export const DecisionLogger: React.FC = () => {
         </button>
         <button
           role="tab"
+          data-testid="decision-tab-list"
           aria-selected={activeView === 'list'}
           className={`decision-logger__tab-btn${activeView === 'list' ? ' active' : ''}`}
           onClick={() => setActiveView('list')}
@@ -187,9 +189,9 @@ export const DecisionLogger: React.FC = () => {
         {activeView === 'create' && (
           <div className="decision-logger__panel">
             {decisionAnalysis && (
-              <div className="decision-logger__insight-box">
+              <div className="decision-logger__insight-box" data-testid="decision-analysis">
                 <h3>💡 {isTh ? 'ข้อเสนอแนะส่วนตัว' : 'Personal recommendation'}</h3>
-                <p className="insight-text">{decisionAnalysis.topInsight}</p>
+                <p className="insight-text" data-testid="twin-insight-message">{decisionAnalysis.topInsight}</p>
                 <p className="insight-style">
                   {isTh ? 'สไตล์การตัดสินใจของคุณ:' : 'Your decision style:'} <strong>{decisionAnalysis.styleProfile.type}</strong>
                 </p>
