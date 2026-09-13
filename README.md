@@ -251,6 +251,24 @@ k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 
 ---
 
+## CI Workflow (testing.yml)
+
+**Dependency Graph:**
+```
+Push → Unit Tests ──┐
+                    ├──> Generate Test Report
+       E2E Tests ────┘
+
+k6 Smoke / Full: MANUAL ONLY (workflow_dispatch)
+ไม่เป็น dependency ของ Generate Test Report
+```
+
+- `report-results` depends only on `[unit-tests, e2e-tests]`
+- k6 jobs remain opt-in via `workflow_dispatch` with `test_type` input
+- No queued/blocking behavior on push events
+
+---
+
 ## Rules going forward
 
 - Never claim PASS without an actual run.
