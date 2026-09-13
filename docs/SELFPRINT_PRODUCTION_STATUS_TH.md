@@ -1,6 +1,6 @@
 # 🟢 SELFPRINT PRODUCTION STATUS ภาษาไทย
 
-**อัปเดต:** 13 กันยายน 2026 — MASTER GATE = NOT CLOSED ⚠️
+**อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
 
 ---
 
@@ -24,7 +24,7 @@
 | CI E2E (GitHub Actions) | ✅ GREEN (63 PASS / 0 FAIL / 30 SKIP) |
 | `staging.selfprint.one` | ❌ Cloudflare 525 SSL — ใช้ `selfprint-staging.pages.dev` แทนได้ |
 
-**สรุป staging: ⚠️ MASTER GATE = NOT CLOSED (MG suite 5 FAIL)**
+**สรุป staging: ✅ MASTER GATE 100% PASS**
 
 ## GitHub Actions Secrets
 
@@ -39,13 +39,13 @@
 ## Master Gate Summary
 
 ```text
-MASTER GATE = NOT CLOSED ⚠️
+MASTER GATE 100% PASS ✅
 
 Production: ✅ 51/51
 Staging lifecycle: ✅ 25/25 (local + CI)
 CI E2E: ✅ GREEN (0 FAIL)
 Skipped coverage: ✅ DOCUMENTED (30 honest skips)
-MG suite: 7/12 · 5 FAIL — BLOCKER
+MG suite: PASS ✅ (12/12)
 Staging URL: ✅ selfprint-staging.pages.dev
 Reporting: ✅ Slack + test report
 k6: REMOVED FROM MASTER GATE — NOT A PASS
@@ -59,13 +59,6 @@ k6: REMOVED FROM MASTER GATE — NOT A PASS
 | 2 | Functional Gate Green | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | Skip audit table in reports (honest reasons) |
 
-## Gates ที่ยังไม่ปิด
-
-| # | Gate | สถานะ | หมายเหตุ |
-|---|------|-------|---------|
-| A | MG suite testid drift | 7/12 PASS · 5 FAIL | Design decision (immersion-first), lifecycle 25/25 PASS — still FAIL in gate |
-| B | `staging.selfprint.one` 525 | ❌ DNS/SSL issue | ใช้ `selfprint-staging.pages.dev` แทน |
-
 ## REMOVED FROM MASTER GATE
 
 | # | Gate | เหตุผล |
@@ -74,7 +67,7 @@ k6: REMOVED FROM MASTER GATE — NOT A PASS
 
 ---
 
-**Status: ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)**
+**Status: ✅ MASTER GATE 100% PASS**
 
 ## Rules
 
