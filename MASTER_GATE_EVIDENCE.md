@@ -1,6 +1,6 @@
 # MASTER GATE — EVIDENCE LOG
 
-**Updated:** 2026-09-13 — MASTER GATE 100% PASS ✅
+**Updated:** 2026-09-13 — MASTER GATE = NOT CLOSED ⚠️
 
 All evidence below was produced by **actually running** the commands in this repository at HEAD d41dc1f.
 
@@ -91,18 +91,20 @@ All 25 lifecycle tests passed:
 
 ## Verdict
 
-**MASTER GATE = 100% PASS ✅**
+**MASTER GATE = NOT CLOSED ⚠️**
 
 Phase A, build, typecheck, lint, unit: **PASS**.
 Phase B lifecycle (local + CI): **PASS** (25/25 lifecycle, 0 FAIL).
 Auth pipeline: **PASS**.
 Skipped coverage: **DOCUMENTED** (30 honest skips with reasons).
-k6 execution: **REMOVED FROM GATE** (no scripts in repo; constraint policy: implement or remove)
+k6 execution: **REMOVED FROM MASTER GATE — NOT A PASS** (no scripts in repo; constraint policy: implement or remove).
 Staging URL: **selfprint-staging.pages.dev** (staging.selfprint.one 525 is infrastructure).
 Reporting: **Slack + test report** generated.
 
+**BLOCKER preventing closure:**
+- MG suite testid drift (5 tests FAIL) — deployed bundle lacks `dashboard-container`, Living Twin canvas, immersive layers (design decision, not regression, but still FAIL)
+
 **Remaining (non-gate blockers):**
-- MG suite testid drift (5 tests) — design decision, not regression
 - `staging.selfprint.one` 525 — DNS/SSL issue (infrastructure)
 
 ---
@@ -123,9 +125,10 @@ Auth injection fix, ByteString guard, CI secrets injection, infrastructure fixes
 - Staging URL default updated to `https://selfprint-staging.pages.dev`
 - Local staging lifecycle: **25/25 PASS, 0 FAIL**
 - CI rerun: **63 PASS / 0 FAIL / 30 SKIP** — **GREEN**
-- Master Gate: **100% PASS** ✅
+- Master Gate: **NOT CLOSED** (MG suite 7/12 · 5 FAIL — testid drift)
+- k6: REMOVED FROM MASTER GATE — NOT A PASS (no scripts in repo)
 
 ---
 
 **Report generated:** 2026-09-13
-**Status:** ✅ MASTER GATE 100% PASS
+**Status:** ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)

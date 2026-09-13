@@ -5,8 +5,8 @@
 
 ---
 
-> **สถานะปัจจุบัน:** `MASTER GATE — 100% PASS` ✅ (13 ก.ย. 2026)
-> Phase A production ✅ 51/51 · Mobile ✅ 24/24 · Phase B lifecycle ✅ 25/25 · CI GREEN
+> **สถานะปัจจุบัน:** `MASTER GATE — NOT CLOSED` ⚠️ (13 ก.ย. 2026)
+> Phase A production ✅ 51/51 · Mobile ✅ 24/24 · Phase B lifecycle ✅ 25/25 · CI GREEN · MG suite 7/12 (5 FAIL — testid drift)
 
 ---
 
@@ -27,11 +27,11 @@
 | `selfprint-staging.pages.dev` | ✅ Live | Cloudflare deployment green |
 | `staging.selfprint.one` | ❌ 525 SSL | ใช้ `selfprint-staging.pages.dev` แทน (DNS issue, infrastructure) |
 
-**สถานะโดยรวม: ✅ MASTER GATE 100% PASS (3 gates closed)**
+**สถานะโดยรวม: ⚠️ NOT CLOSED — blocker: MG suite 5 FAIL (testid drift)**
 
 ---
 
-## ✅ 3 Gates ที่ปิดแล้ว (13 ก.ย. 2026)
+## ✅ Gates ที่ปิดแล้ว (13 ก.ย. 2026)
 
 | # | Gate | สถานะก่อน | สถานะหลัง | วิธีปิด |
 |---|------|-----------|-----------|---------|
@@ -39,7 +39,18 @@
 | 2 | Functional Gate Green | MG suite 7/12 | Lifecycle 25/25 PASS | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | 30 tests skipped | Documented | Skip audit table in reports (honest reasons) |
 
----
+## ⚠️ Gates ที่ยังไม่ปิด
+
+| # | Gate | สถานะ | หมายเหตุ |
+|---|------|-------|---------|
+| A | MG Suite (master-gate.spec.ts) | 7/12 · 5 FAIL | testid drift — deployed bundle lacks `dashboard-container`, Living Twin canvas, immersive layers (design decision) |
+| B | `staging.selfprint.one` 525 | ❌ DNS/SSL issue | ใช้ `selfprint-staging.pages.dev` แทน |
+
+## REMOVED FROM MASTER GATE
+
+| # | Gate | เหตุผล |
+|---|------|--------|
+| k6 | REMOVED FROM MASTER GATE — NOT A PASS | No test files exist; constraint policy: implement or remove |
 
 ## 🧠 SELFPRINT คืออะไร
 
@@ -178,7 +189,7 @@ npx playwright test                             # full suite (100 tests, ต้�
 ## Master Gate Summary
 
 ```text
-MASTER GATE = 100% PASS ✅
+MASTER GATE = NOT CLOSED ⚠️
 
 Build/Typecheck/Lint/Unit           : PASS ✅
 Phase A production (27 + mobile)     : PASS ✅ (51/51)
@@ -186,8 +197,10 @@ Phase B lifecycle (staging)          : PASS ✅ (25/25)
 Auth pipeline                        : PASS ✅
 CI E2E                               : GREEN ✅
 Skipped coverage                     : DOCUMENTED ✅
+MG suite                             : 7/12 · 5 FAIL (testid drift) — BLOCKER
 Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
+k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 ```
 
 ---

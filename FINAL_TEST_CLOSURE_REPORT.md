@@ -8,13 +8,13 @@
 
 ## Executive Summary
 
-```
-MASTER GATE — 100% PASS ✅  (13 Sep 2026)
+```text
+MASTER GATE — NOT CLOSED ⚠️  (13 Sep 2026)
 ```
 
 **Status (verified by actually executing every command):**
 - ✅ Build: `npm run build` — PASS
-- ✅ Typecheck: `npm run typecheck` (tsc -b) / `npm run typecheck:functions` — PASS
+- ✅ Typecheck: `npm run typecheck` (`tsc -b`) / `npm run typecheck:functions` — PASS
 - ✅ Lint: `npm run lint` — PASS (0 errors; warnings non-blocking, pre-existing)
 - ✅ Unit tests: `npm test` — 1042/1042 PASS
 - ✅ Phase A (production `chromium`): 27/27 PASS
@@ -23,6 +23,7 @@ MASTER GATE — 100% PASS ✅  (13 Sep 2026)
 - ✅ Auth injection pipeline: WORKS — global-setup authenticates via Supabase REST, injects session, resolves auth, saves storageState
 - ✅ Phase B lifecycle (local `chromium-staging`): **25/25 PASS** (13 Sep 2026 00:17 UTC)
 - ✅ Phase B CI (GitHub Actions): **63/100 PASS / 0 FAIL / 30 SKIP** — **GREEN**
+- ⚠️ MG suite (`master-gate.spec.ts`): **7/12 PASS · 5 FAIL** (testid drift)
 
 ---
 
@@ -139,7 +140,7 @@ Mobile variants also green: Mobile Chrome 12/12, Mobile Safari 12/12.
 ## Master Gate Summary
 
 ```text
-MASTER GATE = 100% PASS ✅
+MASTER GATE = NOT CLOSED ⚠️
 
 Build/Typecheck/Lint/Unit           : PASS ✅
 Phase A production (27 + mobile)     : PASS ✅ (51/51)
@@ -147,8 +148,10 @@ Phase B lifecycle (staging)          : PASS ✅ (25/25)
 Auth pipeline                        : PASS ✅
 CI E2E                               : GREEN ✅
 Skipped coverage                     : DOCUMENTED ✅
+MG suite                             : 7/12 · 5 FAIL (testid drift) — BLOCKER
 Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
+k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 ```
 
 ---
@@ -169,9 +172,10 @@ Auth injection fix, ByteString guard, CI secrets injection, infrastructure fixes
 - Staging URL default updated to `https://selfprint-staging.pages.dev`
 - Local staging lifecycle: **25/25 PASS, 0 FAIL**
 - CI rerun: **63 PASS / 0 FAIL / 30 SKIP** — **GREEN**
-- Master Gate: **100% PASS** ✅
+- Master Gate: **NOT CLOSED** (MG suite 7/12 · 5 FAIL — testid drift)
+- k6: REMOVED FROM MASTER GATE — NOT A PASS (no scripts in repo)
 
 ---
 
 **Report generated:** 2026-09-13
-**Status:** ✅ MASTER GATE 100% PASS
+**Status:** ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)

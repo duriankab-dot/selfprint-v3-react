@@ -1,6 +1,6 @@
 # 📊 SELFPRINT PROJECT STATUS — สรุปสถานะจริง
 
-**อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
+**อัปเดต:** 13 กันยายน 2026 — MASTER GATE = NOT CLOSED ⚠️
 
 ---
 
@@ -31,13 +31,25 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 
 ---
 
-## ✅ 3 Gates ที่ปิดแล้ว
+## ⚠️ Gates ที่ยังไม่ปิด
+
+| # | Gate | สถานะ | หมายเหตุ |
+|---|------|-------|---------|
+| A | MG Suite (master-gate.spec.ts) | 7/12 · 5 FAIL | testid drift — deployed bundle lacks `dashboard-container`, Living Twin canvas, immersive layers |
+
+## ✅ Gates ที่ปิดแล้ว
 
 | # | Gate | สถานะก่อน | สถานะหลัง | วิธีปิด |
 |---|------|-----------|-----------|---------|
 | 1 | CI E2E Green | 63 PASS / 7 FAIL | 63 PASS / 0 FAIL | LIFE-01 typo fixed + staging URL default updated |
 | 2 | Functional Gate Green | MG suite 7/12 | Lifecycle 25/25 PASS | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | 30 tests skipped | Documented | Skip audit table in reports (honest reasons) |
+
+## REMOVED FROM MASTER GATE
+
+| # | Gate | เหตุผล |
+|---|------|--------|
+| k6 | REMOVED FROM MASTER GATE — NOT A PASS | No test files exist; constraint policy: implement or remove |
 
 ---
 
@@ -126,7 +138,7 @@ npx playwright test --project=chromium-staging lifecycle.spec.ts   # isolated li
 
 ---
 
-**Status: ✅ MASTER GATE 100% PASS**
+**Status: ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)**
 
 ## Rules going forward
 

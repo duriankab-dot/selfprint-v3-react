@@ -1,6 +1,6 @@
 # SELFPRINT PROJECT SUMMARY — ภาษาไทย
 
-**อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
+**อัปเดต:** 13 กันยายน 2026 — MASTER GATE = NOT CLOSED ⚠️
 
 ## Project
 
@@ -29,7 +29,7 @@ React 19 + Vite + TypeScript + Tailwind v4 + Supabase + Cloudflare Pages Functio
 ## Master Gate Summary
 
 ```text
-MASTER GATE = 100% PASS ✅
+MASTER GATE = NOT CLOSED ⚠️
 
 Build/Typecheck/Lint/Unit           : PASS ✅
 Phase A production (27 + mobile)     : PASS ✅ (51/51)
@@ -37,8 +37,10 @@ Phase B lifecycle (staging)          : PASS ✅ (25/25)
 Auth pipeline                        : PASS ✅
 CI E2E                               : GREEN ✅ (0 FAIL)
 Skipped coverage                     : DOCUMENTED ✅ (30 honest skips)
+MG suite                             : 7/12 · 5 FAIL (testid drift) — BLOCKER
 Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
+k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 ```
 
 ## Blocker ที่เหลือ (non-gate)
@@ -46,13 +48,16 @@ Reporting hygiene                    : Slack + test report ✅
 ### A. MG suite testid drift (5 tests)
 - Deployed staging bundle ไม่มี `data-testid="dashboard-container"`
 - Living Twin / immersive layers ถูก remove ตาม design immersion-first
-- **这不是 regression** — lifecycle tests (25/25) PASS
+- **นี่ไม่ใช่ regression** — lifecycle tests (25/25) PASS
+- แต่ยังคงเป็น 5 FAIL ใน gate → MASTER GATE = NOT CLOSED
 
 ### B. `staging.selfprint.one` alias
 - Cloudflare 525 SSL
 - ใช้ `selfprint-staging.pages.dev` แทนได้
 
-### C. k6 load tests — REMOVED FROM MASTER GATE
+## REMOVED FROM MASTER GATE
+
+### C. k6 load tests — REMOVED FROM MASTER GATE — NOT A PASS
 - Files not implemented (`loadtest-smoke.js`, `loadtest.js`)
 - Decision: removed per constraint policy ("implement real tests or remove")
 - Workflow has opt-in jobs but no test files → always skip
@@ -68,4 +73,4 @@ npx playwright test --project=chromium   # Phase A production
 npm run test:e2e:staging                 # Phase B staging (ต้องมี .env.e2e.staging)
 ```
 
-**สถานะ: ✅ MASTER GATE 100% PASS**
+**สถานะ: ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)**

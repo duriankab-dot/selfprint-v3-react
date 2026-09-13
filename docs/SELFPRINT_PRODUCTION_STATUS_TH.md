@@ -1,6 +1,6 @@
 # 🟢 SELFPRINT PRODUCTION STATUS ภาษาไทย
 
-**อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
+**อัปเดต:** 13 กันยายน 2026 — MASTER GATE = NOT CLOSED ⚠️
 
 ---
 
@@ -24,7 +24,7 @@
 | CI E2E (GitHub Actions) | ✅ GREEN (63 PASS / 0 FAIL / 30 SKIP) |
 | `staging.selfprint.one` | ❌ Cloudflare 525 SSL — ใช้ `selfprint-staging.pages.dev` แทนได้ |
 
-**สรุป staging: ✅ MASTER GATE 100% PASS (lifecycle 25/25, CI GREEN)**
+**สรุป staging: ⚠️ MASTER GATE = NOT CLOSED (MG suite 5 FAIL)**
 
 ## GitHub Actions Secrets
 
@@ -39,14 +39,16 @@
 ## Master Gate Summary
 
 ```text
-MASTER GATE = 100% PASS ✅
+MASTER GATE = NOT CLOSED ⚠️
 
 Production: ✅ 51/51
 Staging lifecycle: ✅ 25/25 (local + CI)
 CI E2E: ✅ GREEN (0 FAIL)
 Skipped coverage: ✅ DOCUMENTED (30 honest skips)
+MG suite: 7/12 · 5 FAIL — BLOCKER
 Staging URL: ✅ selfprint-staging.pages.dev
 Reporting: ✅ Slack + test report
+k6: REMOVED FROM MASTER GATE — NOT A PASS
 ```
 
 ## Gates ที่ปิดแล้ว (13 ก.ย. 2026)
@@ -57,17 +59,22 @@ Reporting: ✅ Slack + test report
 | 2 | Functional Gate Green | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | Skip audit table in reports (honest reasons) |
 
-## Gate ที่เหลือ (non-gate blockers)
+## Gates ที่ยังไม่ปิด
 
 | # | Gate | สถานะ | หมายเหตุ |
 |---|------|-------|---------|
-| A | MG suite testid drift | 7/12 PASS · 5 FAIL | Design decision (immersion-first), lifecycle 25/25 PASS |
+| A | MG suite testid drift | 7/12 PASS · 5 FAIL | Design decision (immersion-first), lifecycle 25/25 PASS — still FAIL in gate |
 | B | `staging.selfprint.one` 525 | ❌ DNS/SSL issue | ใช้ `selfprint-staging.pages.dev` แทน |
-| C | k6 load tests — REMOVED FROM GATE | ⏸ No scripts | Removed per constraint: implement or remove |
+
+## REMOVED FROM MASTER GATE
+
+| # | Gate | เหตุผล |
+|---|------|--------|
+| k6 | REMOVED FROM MASTER GATE — NOT A PASS | No test files exist; constraint policy: implement or remove |
 
 ---
 
-**Status: ✅ MASTER GATE 100% PASS**
+**Status: ⚠️ MASTER GATE = NOT CLOSED (blocker: MG suite 5 FAIL)**
 
 ## Rules
 
