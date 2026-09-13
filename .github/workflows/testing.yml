@@ -244,7 +244,7 @@ jobs:
     name: Generate Test Report
     runs-on: ubuntu-latest
     if: always()
-    needs: [unit-tests, e2e-tests, smoke-test, full-load-test]
+    needs: [unit-tests, e2e-tests]
 
     steps:
       - name: Checkout
@@ -293,15 +293,13 @@ jobs:
           |------|--------|----------|
           | Unit Tests (Vitest) | ${{ needs.unit-tests.result }} | < 10 min |
           | E2E Tests | ${{ needs.e2e-tests.result }} | 20-30 min |
-          | Smoke Test | ${{ needs.smoke-test.result }} | 10 min |
-          | Full Load Test | ${{ needs.full-load-test.result }} | 39 min |
+          | Smoke Test (k6) | SKIPPED — manual only | N/A |
+          | Full Load Test (k6) | SKIPPED — manual only | N/A |
 
           ## Artifacts
 
           - Playwright Report: playwright-report/
           - Test Results: test-results/
-          - Smoke Test: smoke-test-results/
-          - Load Test: full-load-test-results/
 
           ## Performance Targets
 
@@ -342,14 +340,5 @@ jobs:
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
-              "text": "Test Suite Complete",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*PHASE 3 Testing Complete* ✅\n\n*E2E:* ${{ needs.e2e-tests.result }}\n*Smoke:* ${{ needs.smoke-test.result }}\n*Full Load:* ${{ needs.full-load-test.result }}\n\n*Report:* Check artifacts"
-                  }
-                }
-              ]
+              "text": "Test Suite Complete\n\n*Unit:* ${{ needs.unit-tests.result }}\n*E2E:* ${{ needs.e2e-tests.result }}\n*k6:* MANUAL ONLY (not auto-run)\n\n*Report:* Check artifacts"
             }'
