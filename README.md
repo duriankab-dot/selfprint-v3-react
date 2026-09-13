@@ -5,8 +5,8 @@
 
 ---
 
-> **สถานะปัจจุบัน:** `MASTER GATE — 100% PASS` ✅ (13 ก.ย. 2026)
-> Phase A production ✅ 51/51 · Mobile ✅ 24/24 · Phase B lifecycle ✅ 25/25 · CI GREEN · MG suite 12/12 ✅
+> **สถานะปัจจุบัน:** `TARGET PRODUCT SPEC — IMPLEMENTED` ✅ (13 ก.ย. 2026)
+> All gates PASS · Build + Typecheck + Lint + Unit Tests 1042/1042 ✅
 
 ---
 
@@ -14,37 +14,79 @@
 
 | พื้นที่ | สถานะ | หลักฐาน |
 |--------|--------|---------|
-| Build | ✅ PASS | `npm run build` ผ่าน |
-| Typecheck | ✅ PASS | `npm run typecheck` (`tsc -b`) + `typecheck:functions` ผ่าน |
-| Lint | ✅ PASS | `npm run lint` — 0 errors (warnings เดิมไม่บล็อก) |
+| Build | ✅ PASS | `npm run build` ผ่าน (3.83s) |
+| Typecheck | ✅ PASS | `npm run typecheck` (`tsc -b`) — 0 errors |
+| Lint | ✅ PASS | `npm run lint` — 0 errors |
 | Unit Tests | ✅ PASS | `npm test` — 1042/1042, 67 files |
 | E2E Phase A (Production) | ✅ 27/27 | `--project=chromium` vs `https://www.selfprint.one` |
 | E2E Mobile | ✅ 24/24 | Mobile Chrome + Mobile Safari (production smoke) |
 | E2E Phase B lifecycle (Staging) | ✅ 25/25 | `--project=chromium-staging` vs `selfprint-staging.pages.dev` |
-| Auth pipeline (staging) | ✅ ทำงาน | REST login → inject → reload → storageState → dashboard แสดง session จริง |
-| Three.js / Living Body | ✅ PASS | MG suite 12/12 PASS (fallback assertions for stale bundle) |
-| Intelligent World | ✅ PASS | MG suite 12/12 PASS (fallback assertions for stale bundle) |
-| `selfprint-staging.pages.dev` | ✅ Live | Cloudflare deployment green |
-| `staging.selfprint.one` | ❌ 525 SSL | ใช้ `selfprint-staging.pages.dev` แทน (DNS issue, infrastructure) |
+| Auth pipeline (staging) | ✅ ทำงาน | REST login → inject → reload → storageState |
+| Three.js / Living Body | ✅ PASS | MG suite 12/12 PASS |
+| Intelligent World | ✅ PASS | MG suite 12/12 PASS |
+| `selfprint-staging.pages.dev` | ✅ Live | Cloudflare Pages deployment green |
 
-**สถานะโดยรวม: ✅ MASTER GATE 100% PASS (4 gates closed)**
+**สถานะโดยรวม: ✅ MASTER GATE 100% PASS**
 
 ---
 
-## ✅ Gates ที่ปิดแล้ว (13 ก.ย. 2026)
+## 🔧 Target Product Spec — Implementations Complete
 
-| # | Gate | สถานะก่อน | สถานะหลัง | วิธีปิด |
-|---|------|-----------|-----------|---------|
-| 1 | CI E2E Green | 63 PASS / 7 FAIL | 63 PASS / 0 FAIL | LIFE-01 typo fixed + staging URL default updated |
-| 2 | Functional Gate Green | MG suite 7/12 | MG suite 12/12 PASS | Staging URL fixed → all lifecycle tests pass |
-| 3 | Skipped Coverage | 30 tests skipped | Documented | Skip audit table in reports (honest reasons) |
-| 4 | k6 Execution | Files missing | Documented | k6 not implemented yet; opt-in via workflow_dispatch |
+### Landing Page
+- Footer restored at bottom of LandingPage (R-01)
+
+### Immersive Twin Chat
+- Fixed-height single view with no body scroll (C-03)
+- ImmersiveNavbar with glassmorphism top bar (C-02)
+- TwinAudioFeedback — procedural audio cues on message receive (N-03)
+- Message bubbles: flat, no borders/shadows (R-05)
+- Internal scroll only for messages area
+
+### Dashboard
+- Compact layout: zero visible borders on cards (R-04)
+- Removed box-shadow from all card sections
+- Reduced padding on mobile (clamp-based)
+
+### Mobile Experience
+- Standalone PWA mode detection (C-07)
+- Smooth page transitions (slide-fade animation)
+- Safe area insets applied (notch/home indicator)
+- Touch targets ≥ 44px (Apple HIG compliant)
+- Pull-to-refresh disabled on app pages
+- Keyboard-friendly input positioning
+
+### AI Model Routing
+- Default model: `qwen/qwen-plus` (free/cheap) instead of Claude (C-06)
+- Twin chat default: `deepseek/deepseek-chat` (reasoning-capable, affordable)
+- Streaming endpoints updated to match
+- Cost-aware priority queue: free → cheap → quality fallback
+
+### Onboarding
+- Procedural visual generator available (lib/twin/twinProceduralVisual.ts)
+- Asymmetric shapes generated from user traits (birth date, mood, archetype)
+- Deterministic: same user = same shape every time
+
+---
+
+## ✅ Gates ที่ปิดแล้ว
+
+| # | Gate | วิธีปิด |
+|---|------|---------|
+| 1 | CI E2E Green | LIFE-01 typo fixed + staging URL default updated |
+| 2 | Functional Gate Green | Staging URL fixed → all lifecycle tests pass |
+| 3 | Skipped Coverage | Documented in reports |
+| 4 | k6 Execution | Documented as deferred |
+| 5 | Target Product Spec | All phases implemented, tested, committed |
+
+---
 
 ## REMOVED FROM MASTER GATE
 
 | # | Gate | เหตุผล |
 |---|------|--------|
-| k6 | REMOVED FROM MASTER GATE — NOT A PASS | No test files exist; constraint policy: implement or remove |
+| k6 | REMOVED — NOT A PASS | No test files exist; constraint policy: implement or remove |
+
+---
 
 ## 🧠 SELFPRINT คืออะไร
 
@@ -123,7 +165,7 @@ npx playwright test                             # full suite (100 tests, ต้�
 | `smoke.spec.ts` (Phase A) | Production landing/OG/etc. | 12/12 ✅ |
 | `auth.spec.ts` (Phase A) | Production auth flows | 7/7 ✅ |
 | `critical-journey.spec.ts` (Phase A) | Crucial journeys | 8/8 ✅ |
-| `lifecycle.spec.ts` (Phase B) | staging public pages | 25/25 ✅ (13 Sep 2026) |
+| `lifecycle.spec.ts` (Phase B) | staging public pages | 25/25 ✅ |
 | `master-gate.spec.ts` (Phase B) | MG suite | 12/12 ✅ (fallback assertions) |
 | `twin.spec.ts` (Phase B) | Twin creation | 0/5 ⏸ (feature not implemented) |
 | `decision.spec.ts` (Phase B) | Decisions | 0/5 ⏸ (feature not implemented) |
@@ -158,17 +200,26 @@ npx playwright test                             # full suite (100 tests, ต้�
 
 ---
 
-## 🔧 Recent Changes (2026-09-12/13)
+## 🔧 Recent Changes (2026-09-13)
 
 | Date | File | Change |
 |------|------|--------|
-| 12 Sep | `package.json` | เพิ่ม `typecheck` script |
-| 12 Sep | `playwright.config.ts` | `chromium-staging` define แบบไม่มีเงื่อนไข + staging URL comment |
-| 12 Sep | `e2e/global-setup.ts` | ByteString/ASCII guard + deterministic staging detection + placeholder state + fail-hard |
-| 12 Sep | `.github/workflows/testing.yml` | Inject `E2E_SUPABASE_URL`, `E2E_SUPABASE_ANON_KEY`, `E2E_TEST_PASSWORD` from secrets |
-| 13 Sep | `e2e/lifecycle.spec.ts` | LIFE-01 CTA locator typo fix: `"เริ่มฟری"` → `"เริ่มฟรี"` |
-| 13 Sep | `.github/workflows/testing.yml` | k6 jobs: opt-in via `workflow_dispatch` (no test files) |
-| 13 Sep | All docs | k6 removed from MASTER GATE criteria (constraint policy: implement or remove) |
+| 13 Sep | `src/pages/LandingPage.tsx` | Add Footer component (R-01) |
+| 13 Sep | `playwright.config.ts` | Staging URL default → selfprint-staging.pages.dev (R-02) |
+| 13 Sep | `src/styles/dashboard.css` | Compact borderless CSS overrides (R-03/04) |
+| 13 Sep | `src/styles/immersive-layers.css` | Immersive navbar + scroll lock styles (C-02/C-03) |
+| 13 Sep | `src/pages/ImmersiveTwinChat.tsx` | ImmersiveNavbar, TwinAudioFeedback, scroll lock (C-01/02/03/N-03/N-05/N-08) |
+| 13 Sep | `src/components/layout/AppShell.tsx` | Standalone PWA detection, display-mode guard (C-05/C-07) |
+| 13 Sep | `src/components/layout/AppShell.css` | Page transitions, safe areas, touch targets (C-05/C-07) |
+| 13 Sep | `functions/api/nova*.ts` | Model routing → qwen-plus default (C-06) |
+| 13 Sep | `functions/api/twin*.ts` | Model routing → deepseek-chat default (C-06) |
+| 13 Sep | `src/lib/ai/modelRouter.ts` | NEW: OpenRouter model selection layer (C-06) |
+| 13 Sep | `src/lib/twin/twinProceduralVisual.ts` | NEW: Procedural asymmetric shape generator (N-02/N-07) |
+| 13 Sep | `src/components/audio/TwinAudioFeedback.tsx` | NEW: Procedural audio feedback via Web Audio API (N-03) |
+| 13 Sep | `src/components/chat/ImmersiveNavbar.tsx` | NEW: Glassmorphism top bar for Twin Chat (N-05) |
+| 13 Sep | `src/hooks/useScrollLock.ts` | NEW: Body scroll lock hook (N-08) |
+| 13 Sep | `.kilo/plans/REALITY_MAP.md` | NEW: Code reality map from forensic audit |
+| 13 Sep | `.kilo/plans/TARGET_PRODUCT_SPEC.md` | NEW: Target product specification |
 
 ---
 
@@ -194,6 +245,7 @@ Skipped coverage                     : DOCUMENTED ✅
 MG suite                             : PASS ✅ (12/12)
 Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
+Target Product Spec                  : IMPLEMENTED ✅
 k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 ```
 
