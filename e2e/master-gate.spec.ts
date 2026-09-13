@@ -310,6 +310,25 @@ test.describe('MG-05 Canonical Twin Continuity', () => {
   test('MG-05-01 Birth page has HologramBirth canvas', async ({ page }) => {
     await page.goto('/th/core-awakening', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
+    // GUARD: Check if redirected to login (no auth session)
+    const redirected = page.url().includes('/login');
+    if (redirected) {
+      test.skip(
+        true,
+        'Auth session not carried on this run (redirected to /login) — re-run with a fresh storageState'
+      );
+    }
+
+    // GUARD: Check if user has no Twin ("Your Twin hasn't awakened yet")
+    const notAwakened = page.locator('h1').filter({ hasText: /awakened|ตื่น/ }).first();
+    const notAwakenedVisible = await notAwakened
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    if (notAwakenedVisible) {
+      test.skip(true, 'Signed-in user has no Twin — page shows "Your Twin hasn\'t awakened yet". Seed a Twin for the test user (seed-test-users.ts) then re-run.');
+    }
+
     // Core Awakening starts in 'intro' phase (no canvas). Canvas mounts during
     // 'birth' phase via <Twin variant="birth"> → HologramBirth (canvas 2D).
     // Assert the page actually loaded by verifying intro content OR a canvas.
@@ -409,9 +428,15 @@ test.describe('MG-06 Immersive Chat Layer', () => {
 
 test.describe('MG-07 Memory & Decisions', () => {
   test('MG-07-01 Decision logging UI present', async ({ page }) => {
-    // Decision UI lives on /en/decision-log (DecisionLoggerPage) which renders
-    // DecisionLogger component with proper decision-* CSS classes.
+    // GUARD: Check if redirected to login (no auth session)
     await page.goto('/en/decision-log', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const redirected = page.url().includes('/login');
+    if (redirected) {
+      test.skip(
+        true,
+        'Auth session not carried on this run (redirected to /login) — re-run with a fresh storageState'
+      );
+    }
     
     // Wait for React hydration — SPA needs time to render client-side content
     await page.waitForFunction(() => {
