@@ -86,7 +86,6 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
-          if-no-files-found: ignore
 
       - name: Upload Test Results
         if: always()
@@ -95,7 +94,6 @@ jobs:
           name: test-results
           path: test-results/
           retention-days: 7
-          if-no-files-found: ignore
 
       - name: Notify Slack - E2E Tests
         if: always() && env.SLACK_WEBHOOK != ''
@@ -121,8 +119,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: e2e-tests
-    # DISABLED: k6 load tests against production consume Edge Request quota (50 VUs × 10min per push)
-    # Re-enable only for scheduled/manual runs against a staging environment
+    # k6 load test files (loadtest-smoke.js) NOT YET IMPLEMENTED
+    # Enabled only for manual runs via workflow_dispatch (test_type=load)
+    # TODO: Implement k6 load tests against staging environment
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'load'
 
     steps:
@@ -183,7 +182,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: e2e-tests
-    # DISABLED: runs only when manually triggered with test_type=full
+    # k6 load test files (loadtest.js) NOT YET IMPLEMENTED
+    # Enabled only for manual runs via workflow_dispatch (test_type=full)
+    # TODO: Implement k6 full load tests against staging environment
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'full'
 
     steps:
@@ -251,7 +252,30 @@ jobs:
 
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
-        continue-on-error: true
+        with:
+          name: playwright-report
+          path: playwright-report/
+        if: always()
+
+      - name: Download Test Results
+        uses: actions/download-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+        if: always()
+
+      - name: Verify Mandatory Artifacts
+        run: |
+          if [ ! -d "playwright-report" ]; then
+            echo "❌ FAIL: playwright-report artifact missing"
+            exit 1
+          fi
+          if [ ! -d "test-results" ]; then
+            echo "❌ FAIL: test-results artifact missing"
+            exit 1
+          fi
+          echo "✅ Mandatory artifacts present"
+        if: always()
 
       - name: Generate Report
         run: |

@@ -608,8 +608,8 @@ export default function ImmersiveTwinChat() {
               alignItems: 'center',
               pointerEvents: 'none',
             }}>
-              {/* Left: Twin label */}
-              <div style={{ pointerEvents: 'auto' }}>
+              {/* Left: Twin label + decision indicator */}
+              <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
                 <span style={{
                   fontSize: 12,
                   fontWeight: 600,
@@ -617,6 +617,17 @@ export default function ImmersiveTwinChat() {
                   letterSpacing: 0.5,
                 }}>
                   💫 {isTh ? 'ทวินของคุณ' : 'Your Twin'}
+                </span>
+                {/* Persistent decision system indicator — visible even without messages */}
+                <span className="decision-system-indicator" style={{
+                  fontSize: 10,
+                  color: 'var(--color-text-tertiary)',
+                  padding: '2px 8px',
+                  borderRadius: 12,
+                  background: 'var(--color-bg-tertiary)',
+                  border: '1px solid var(--color-border)',
+                }}>
+                  {isTh ? 'ระบบตัดสินใจพร้อม' : 'Decisions ready'}
                 </span>
                 {topInsight && (
                   <p style={{
@@ -636,6 +647,8 @@ export default function ImmersiveTwinChat() {
               {/* Right: World button + settings */}
               <div style={{ display: 'flex', gap: 8, pointerEvents: 'auto' }}>
                 <button
+                  data-testid="world-drawer-open"
+                  className="world-drawer-toggle"
                   onClick={() => setShowWorldDrawer(true)}
                   style={{
                     width: 36,
@@ -652,6 +665,7 @@ export default function ImmersiveTwinChat() {
                     justifyContent: 'center',
                   }}
                   title={isTh ? 'เลือกโลก' : 'Select world'}
+                  aria-label={isTh ? 'เลือกโลก' : 'World'}
                 >
                   🌍
                 </button>
@@ -707,6 +721,8 @@ export default function ImmersiveTwinChat() {
                     {msg.role === 'twin' && currentWorld && !savedDecisionIds.has(idx) && (
                       <div className="flex justify-start mt-1">
                         <button
+                          data-testid="decision-save-btn"
+                          className="decision-action-btn"
                           onClick={() => handleSaveDecision(idx)}
                           disabled={savingDecisionIndex === idx || (msg.options && msg.options.length > 0 && !msg.selectedChoice)}
                           style={{

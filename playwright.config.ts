@@ -51,6 +51,8 @@ export default defineConfig({
       name: 'chromium-staging',
       use: {
         ...devices['Desktop Chrome'],
+        // Staging URL: https://selfprint-staging.pages.dev (Cloudflare Pages)
+        // NOTE: staging.selfprint.one returns 525 (DNS/SSL issue) — use pages.dev URL
         baseURL: process.env.STAGING_URL || 'https://selfprint-staging.pages.dev',
         storageState: AUTH_STATE,
       },

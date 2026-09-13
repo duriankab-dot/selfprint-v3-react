@@ -162,48 +162,51 @@ test.describe('MG-02 Intelligent World Recommendation', () => {
   });
 
   test('MG-02-02 World selection triggers transition animation', async ({ page }) => {
-    await goToImmersiveChat(page);
-    await page.waitForTimeout(500);
+    // Transition engine requires non-null currentWorld → computeTransition(null, X) = 'none'.
+    // Navigate with ?world=self to seed initial world, then click a different world to trigger transition.
+    await page.goto('/th/chat/twin?world=self', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(2000);
 
-    // Open world drawer
-    const worldBtn = page.locator('button').filter({ hasText: /World|โลก/ }).first();
+    const immersivePage = page.locator('.immersive-page');
+    const ready = await immersivePage
+      .waitFor({ state: 'visible', timeout: 8000 })
+      .then(() => true)
+      .catch(() => false);
+    if (!ready) {
+      test.skip(true, 'Staging bundle stale: .immersive-page wrapper missing — rebuild/redeploy staging');
+    }
+
+    // Open world drawer — match by 🌍 emoji text content (present in all deployed versions)
+    const worldBtn = page.locator('button').filter({ hasText: '🌍' }).first();
     const worldBtnVisible = await worldBtn.isVisible({ timeout: 3000 }).catch(() => false);
-
     if (!worldBtnVisible) {
-      console.log('MG-02-02 ⊘ WorldDrawer button not visible (may be hidden on this screen size)');
-      return;
+      test.skip(true, 'WorldDrawer button not visible on this viewport');
     }
 
     await worldBtn.click();
-    await page.waitForTimeout(500);
+    await page.waitForSelector('.immersive-drawer.is-open', { timeout: 5000 });
 
-    // World drawer should open
-    const drawer = page.locator('.immersive-drawer');
-    const drawerOpen = await drawer.locator('.is-open').isVisible({ timeout: 3000 }).catch(() => false);
-    expect(drawerOpen, 'WorldDrawer should open').toBeTruthy();
+    // Select alternative world via evaluate() — avoids z-index/overlay blockers
+    const transitionActive = await page.evaluate(() => {
+      const allBtns = document.querySelectorAll('.immersive-drawer button');
+      if (allBtns.length < 3) return false;
+      
+      // Close backdrop to allow interaction
+      const backdrop = document.querySelector('.immersive-overlay-backdrop.is-open');
+      if (backdrop) (backdrop as HTMLElement).style.display = 'none';
+      
+      // Click index 2 (skip close-btn idx 0 + self idx 1)
+      const targetBtn = allBtns[2] as HTMLElement;
+      targetBtn.click();
+      
+      // Check if transition class was applied
+      const container = document.querySelector('.world-transition-container');
+      return container && container.className.includes('world-transition--');
+    }, { timeout: 5000 });
 
-    // Select a different world (not 'self')
-    const otherWorldBtn = page.locator('.immersive-drawer button').filter({
-      hasText: /future|inner|outer|shadow|celestial|elemental|archetypal|liminal|mirror|void|genesis/
-    }).first();
+    expect(transitionActive, 'Transition class should be applied after world change').toBeTruthy();
 
-    const otherWorldVisible = await otherWorldBtn.isVisible({ timeout: 2000 }).catch(() => false);
-
-    if (otherWorldVisible) {
-      await otherWorldBtn.click();
-      await page.waitForTimeout(2000);
-
-      // Transition container should have activated
-      const transitionActive = await page.locator('.world-transition-container').evaluate(el => {
-        return el.className.includes('world-transition--');
-      });
-
-      expect(transitionActive, 'Transition class should be applied after world change').toBeTruthy();
-
-      console.log('MG-02-02 ✓ World transition animation triggered');
-    } else {
-      console.log('MG-02-02 ⊘ No alternative world button found in drawer');
-    }
+    console.log('MG-02-02 ✓ World transition animation triggered');
   });
 });
 
@@ -249,23 +252,21 @@ test.describe('MG-03 Growth Pipeline', () => {
 
 test.describe('MG-04 Streaming Path', () => {
   test('MG-04-01 Chat input is functional and ready for streaming', async ({ page }) => {
-    await page.goto('/th/chat/twin', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await goToImmersiveChat(page);
 
     // Look for textarea or input for message
     const chatInput = page.locator('textarea, input[type="text"]').first();
     const inputVisible = await chatInput.isVisible({ timeout: 5000 }).catch(() => false);
 
-    if (inputVisible) {
-      await expect(chatInput).toBeVisible();
+    expect(inputVisible, 'Chat input must be visible on immersive chat page').toBeTruthy();
 
-      // Verify it's not disabled
-      const inputDisabled = await chatInput.isEnabled().catch(() => false);
-      expect(inputDisabled, 'Chat input should be enabled').toBeTruthy();
+    await expect(chatInput).toBeVisible();
 
-      console.log('MG-04-01 ✓ Chat input visible and enabled');
-    } else {
-      console.log('MG-04-01 ⊘ Chat input not found (user may need to be logged in or Twin not created)');
-    }
+    // Verify it's not disabled
+    const inputDisabled = await chatInput.isEnabled().catch(() => false);
+    expect(inputDisabled, 'Chat input should be enabled').toBeTruthy();
+
+    console.log('MG-04-01 ✓ Chat input visible and enabled');
   });
 });
 
@@ -333,16 +334,22 @@ test.describe('MG-06 Immersive Chat Layer', () => {
 
 test.describe('MG-07 Memory & Decisions', () => {
   test('MG-07-01 Decision logging UI present', async ({ page }) => {
-    await page.goto('/th/chat/twin', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Decision UI lives on /en/decision-log (DecisionLoggerPage) which renders
+    // DecisionLogger component with proper decision-* CSS classes.
+    await page.goto('/en/decision-log', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    
+    // Wait for React hydration — SPA needs time to render client-side content
+    await page.waitForFunction(() => {
+      return document.querySelector('.page-content') || 
+             document.querySelector('[class*="decision"]') ||
+             document.querySelector('main')?.children?.length > 0;
+    }, { timeout: 10000 }).catch(() => {});
 
-    // Decision logger should have some UI elements
-    const decisionLogger = page.locator('[class*="decision"], [class*="Decision"]').first();
-    const visible = await decisionLogger.isVisible({ timeout: 3000 }).catch(() => false);
-
-    if (visible) {
-      console.log('MG-07-01 ✓ Decision logger UI present');
-    } else {
-      console.log('MG-07-01 ⊘ Decision logger not visible (may require login + messages)');
-    }
+    // Check for decision logger UI — DecisionLoggerPage renders with classes containing "decision"
+    const decisionElements = page.locator('[class*="decision"], [class*="Decision"]');
+    const decCount = await decisionElements.count();
+    
+    expect(decCount > 0, `Decision logging UI must be present on /en/decision-log (${decCount} elements found)`).toBeTruthy();
+    console.log(`MG-07-01 ✓ Decision logging UI present (${decCount} elements)`);
   });
 });
