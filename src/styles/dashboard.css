@@ -1,7 +1,42 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   COMPACT BORDERLESS DASHBOARD (Target Product Spec)
+   Remove all borders/shadows from card sections for minimal chrome UI
+   ══════════════════════════════════════════════════════════════════════════ */
+.dashboard .compact-view *,
+.dashboard > * {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.dashboard .resume-banner,
+.dashboard .resume-banner * {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.dashboard .card,
+.dashboard .card *,
+.dashboard [class*="card"],
+.dashboard [class*="Card"] {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.dashboard .insights-section h2,
+.dashboard .chart-section h2,
+.dashboard .filter-section h2,
+.dashboard .table-section h2,
+.dashboard .decision-preview h2 {
+  border-bottom: none !important;
+}
+
 .dashboard {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-2xl, 40px) var(--space-lg, 24px);
+  padding: clamp(16px, 4vw, 24px) var(--space-lg, 24px);
   width: 100%;
   box-sizing: border-box;
   /* DASHBOARD-POLISH-001 FIX: was a gradient into the mood-reactive

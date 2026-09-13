@@ -127,7 +127,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       return json({ error: 'messages[] is required' }, 400);
     }
 
-    const model = env.NOVA_MODEL_ID || env.CLAUDE_MODEL_ID || 'anthropic/claude-3.5-haiku';
+    const model = env.NOVA_MODEL_ID || 'qwen/qwen-plus';
 
     // ── Stream response (SSE) ────────────────────────────────────────────
     const stream = await getOpenRouterStream(env, {

@@ -129,13 +129,9 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       return json({ error: 'messages[] is required' }, 400);
     }
 
-    // Nova can work without a custom system prompt (she has a default identity).
-    // But if one is provided (hub×mood×archetype context), inject it.
-
-    // Nova uses Haiku for speed — conversational cadence matters more than depth.
-    // Model resolved the same way; NOVA_MODEL_ID wins, and overrides are now
-    // OpenRouter `vendor/model-name` slugs (e.g. anthropic/claude-3.5-sonnet).
-    const model = env.NOVA_MODEL_ID || env.CLAUDE_MODEL_ID || 'anthropic/claude-3.5-haiku';
+    // Nova uses priority-based model routing (C-06): free/cheap first, quality fallback
+    // Env override: NOVA_MODEL_ID → default chain: qwen-plus → deepseek-chat → claude-haiku
+    const model = env.NOVA_MODEL_ID || 'qwen/qwen-plus';
 
     const content = await callOpenRouter(env, {
       system,

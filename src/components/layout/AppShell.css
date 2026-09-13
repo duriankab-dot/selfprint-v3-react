@@ -213,8 +213,73 @@
 /* ── Full-width content (for immersive pages like LandingPage) ──────────────
    Some pages intentionally span the full viewport width. Use this class
    to opt out of narrow constraints.
-   ═────────────────────────────────────────────────────────────────────────── */
+   ═══════════════════════════════════════════════════════════════════════════ */
 .page-content--full {
   width: 100%;
   max-width: 100%;
+}
+
+/* ============================================================================
+   MOBILE APP EXPERIENCE ENHANCEMENTS (C-05, C-07)
+   Smooth page transitions, standalone mode, safe area improvements
+   ============================================================================ */
+
+/* Standalone PWA mode — remove browser chrome effects */
+.sp-appshell--standalone {
+  /* In standalone mode, ensure no browser UI interference */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+/* Page transition animation for mobile (slide-fade) */
+@media (max-width: 1023px) {
+  .sp-appshell-main {
+    animation: sp-page-enter 0.2s ease-out;
+  }
+  
+  @keyframes sp-page-enter {
+    from {
+      opacity: 0.85;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Enhanced safe area handling for modern devices */
+@supports (padding: max(0px)) {
+  .sp-appshell-main {
+    padding-left: max(16px, env(safe-area-inset-left, 16px));
+    padding-right: max(16px, env(safe-area-inset-right, 16px));
+    padding-bottom: max(72px, calc(72px - env(safe-area-inset-bottom, 0px)));
+  }
+  
+  .sp-appshell-main[data-hide-nav="true"] {
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  }
+}
+
+/* Prevent pull-to-refresh on app pages */
+@media (max-width: 1023px) {
+  body {
+    overscroll-behavior-y: contain;
+  }
+}
+
+/* Touch target minimums (Apple HIG compliant) */
+@media (max-width: 1023px) {
+  button, a[role="button"], input[type="button"], input[type="submit"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Keyboard-friendly input positioning on mobile */
+@media (max-width: 1023px) {
+  .primary-input:focus {
+    scroll-margin-bottom: 80px;
+  }
 }

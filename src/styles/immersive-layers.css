@@ -409,11 +409,11 @@
   padding-bottom: 120px; /* Space for primary controls */
 }
 
-/* Message bubbles — theme-aware, contrast-safe */
+/* Message bubbles — flat, no frame/border (compact UI) */
 .immersive-message {
   max-width: 80%;
   padding: 12px 16px;
-  border-radius: 16px;
+  border-radius: 8px;
   line-height: 1.5;
   word-wrap: break-word;
 }
@@ -421,7 +421,7 @@
 .immersive-message--twin {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  border-bottom-left-radius: 4px;
+  border-bottom-left-radius: 2px;
 }
 
 [data-mode="dark"] .immersive-message--twin {
@@ -433,7 +433,7 @@
   background: #4F46E5;
   color: white;
   margin-left: auto;
-  border-bottom-right-radius: 4px;
+  border-bottom-right-radius: 2px;
 }
 
 /* Small text on dark surfaces — WCAG AA safe */
@@ -514,4 +514,55 @@
     width: min(38vh, 38vw, 280px);
     height: min(38vh, 38vw, 280px);
   }
+}
+
+/* ============================================================================
+   IMMERSIVE NAVBAR (C-02) — compact top bar with glassmorphism
+   ============================================================================ */
+
+.immersive-navbar {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ============================================================================
+   SCROLL LOCK — prevent body scroll when chat is open (C-03)
+   ============================================================================ */
+
+body.scroll-locked {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Immersive page container — fixed height, internal scroll only */
+.immersive-page {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Chat area — scrolls internally, not body */
+.immersive-chat-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.immersive-chat-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.immersive-chat-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.immersive-chat-area::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 2px;
 }

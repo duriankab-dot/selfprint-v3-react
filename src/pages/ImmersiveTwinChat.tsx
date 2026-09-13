@@ -45,6 +45,9 @@ import { useWorldRecommendation } from '@/hooks/useWorldRecommendation';
 import { Helmet } from 'react-helmet-async';
 import { getSeoMetadata } from '@/constants/seoMetadata';
 import { ProvenanceStrip } from '@/components/story/ProvenanceStrip';
+import { ImmersiveNavbar } from '@/components/chat/ImmersiveNavbar';
+import { TwinAudioFeedback } from '@/components/audio/TwinAudioFeedback';
+import { useScrollLock } from '@/hooks/useScrollLock';
 import type { CSSProperties } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -184,6 +187,9 @@ export default function ImmersiveTwinChat() {
   // World drawer
   const [showWorldDrawer, setShowWorldDrawer] = useState(false);
 
+  // Scroll lock — prevent body scroll when chat is open (C-03)
+  const { lock: lockScroll, unlock: unlockScroll } = useScrollLock();
+
   // World transition tracking
   const transitionEngine = useMemo(() => new WorldTransitionEngine(), []);
   const [transitioning, setTransitioning] = useState(false);
@@ -299,13 +305,6 @@ export default function ImmersiveTwinChat() {
     ].filter(Boolean).join('\n\n');
     return parts;
   }, [currentAnalysis, twin, userProfile]);
-
-  // ─── Top insight for header ─────────────────────────────────────────────
-  const topInsight = useMemo(() => {
-    const a = currentAnalysis ?? twin?.fullAnalysis ?? null;
-    if (!a) return null;
-    return a.guidance?.[0] || a.focusAreas?.[0] || a.selfOverview || null;
-  }, [currentAnalysis, twin?.fullAnalysis]);
 
   // ─── Choice consequence ─────────────────────────────────────────────────
   const [choiceConsequence, setChoiceConsequence] = useState<{
@@ -453,6 +452,12 @@ export default function ImmersiveTwinChat() {
     }
   }, [location.state, twin, session, handleSend]);
 
+  // ─── Scroll lock on mount/unmount (C-03) — must be before early returns ──
+  useEffect(() => {
+    lockScroll();
+    return () => unlockScroll();
+  }, [lockScroll, unlockScroll]);
+
   // Loading guard
   if (twinLoading) {
     return (
@@ -594,83 +599,20 @@ export default function ImmersiveTwinChat() {
           </div>
 
           {/* Layer 3+4: Content area with chat and controls */}
-          <div className="immersive-content">
-            {/* Minimal header — Twin label + world + actions */}
-            <div style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              zIndex: 35,
-              padding: '16px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              pointerEvents: 'none',
-            }}>
-              {/* Left: Twin label + decision indicator */}
-              <div style={{ pointerEvents: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{
-                  fontSize: 12,
-                  fontWeight: 600,
-                  color: '#A5B4FC',
-                  letterSpacing: 0.5,
-                }}>
-                  💫 {isTh ? 'ทวินของคุณ' : 'Your Twin'}
-                </span>
-                {/* Persistent decision system indicator — visible even without messages */}
-                <span className="decision-system-indicator" style={{
-                  fontSize: 10,
-                  color: 'var(--color-text-tertiary)',
-                  padding: '2px 8px',
-                  borderRadius: 12,
-                  background: 'var(--color-bg-tertiary)',
-                  border: '1px solid var(--color-border)',
-                }}>
-                  {isTh ? 'ระบบตัดสินใจพร้อม' : 'Decisions ready'}
-                </span>
-                {topInsight && (
-                  <p style={{
-                    fontSize: 12,
-                    color: 'var(--color-text-tertiary)',
-                    margin: '2px 0 0',
-                    maxWidth: 200,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {topInsight}
-                  </p>
-                )}
-              </div>
+          <div className="immersive-content" style={{ paddingTop: '56px' }}>
+            {/* Immersive Navbar — compact top bar (C-02) */}
+            <ImmersiveNavbar
+              twinName={twin?.name}
+              currentWorld={currentWorld ?? undefined}
+              onSettingsClick={() => setShowWorldDrawer(true)}
+            />
 
-              {/* Right: World button + settings */}
-              <div style={{ display: 'flex', gap: 8, pointerEvents: 'auto' }}>
-                <button
-                  data-testid="world-drawer-open"
-                  className="world-drawer-toggle"
-                  onClick={() => setShowWorldDrawer(true)}
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    border: '1px solid var(--glass-border)',
-                    background: 'var(--glass-bg)',
-                    backdropFilter: 'blur(12px)',
-                    color: 'var(--color-text-primary)',
-                    fontSize: 16,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                  title={isTh ? 'เลือกโลก' : 'Select world'}
-                  aria-label={isTh ? 'เลือกโลก' : 'World'}
-                >
-                  🌍
-                </button>
-              </div>
-            </div>
+            {/* Audio feedback for Twin responses */}
+            <TwinAudioFeedback
+              messageCount={messages.length}
+              currentWorld={currentWorld ?? undefined}
+              enabled
+            />
 
             {/* Choice consequence — shown above messages */}
             {choiceConsequence && (

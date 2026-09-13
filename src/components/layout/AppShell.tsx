@@ -15,12 +15,13 @@
  *   5. Bottom navigation (mobile/tablet ≤1023px)
  *   6. Desktop nav rail (desktop ≥1024px)
  *   7. Scroll behavior (no horizontal overflow, natural vertical scroll)
+ *   8. Page transitions (smooth slide-fade on mobile)
  *
  * Pages MUST wrap their content in <AppShell>.
  * Pages MUST NOT independently import BottomNav, NavRail, or modify body styles.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 import { NavRail } from './NavRail';
@@ -47,6 +48,22 @@ export function AppShell({
   forceShowNav = false,
 }: AppShellProps) {
   const location = useLocation();
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  // Detect standalone/PWA mode (C-07)
+  useEffect(() => {
+    const checkStandalone = () => {
+      setIsStandalone(
+        (typeof window.matchMedia === 'function' && window.matchMedia('(display-mode: standalone)').matches) ||
+        (window.navigator as any).standalone === true
+      );
+    };
+    checkStandalone();
+    const mediaQuery = window.matchMedia?.('(display-mode: standalone)');
+    const handler = () => checkStandalone();
+    mediaQuery?.addEventListener?.('change', handler);
+    return () => mediaQuery?.removeEventListener?.('change', handler);
+  }, []);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -54,8 +71,8 @@ export function AppShell({
   }, [location.pathname]);
 
   return (
-    <div className="sp-appshell">
-      {/* Desktop nav rail — ≥1024px */}
+    <div className={`sp-appshell${isStandalone ? ' sp-appshell--standalone' : ''}`}>
+      {/* Desktop nav rail — ≥1024px only */}
       {!hideNav && <NavRail />}
 
       {/* Optional header region */}

@@ -141,9 +141,9 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       );
     }
 
-    // Twin uses Sonnet for deeper reasoning (behavioral pattern analysis)
-    // Falls back to Haiku only if explicitly overridden via env
-    const model = env.TWIN_MODEL_ID || env.CLAUDE_MODEL_ID || 'anthropic/claude-3.5-sonnet';
+    // Twin uses priority-based model routing (C-06): cheap capable models first
+    // Env override: TWIN_MODEL_ID → default: deepseek-chat (reasoning) → qwen-plus
+    const model = env.TWIN_MODEL_ID || 'deepseek/deepseek-chat';
 
     const content = await callOpenRouter(env, {
       model,

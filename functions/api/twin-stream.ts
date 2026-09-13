@@ -134,7 +134,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       );
     }
 
-    const model = env.TWIN_MODEL_ID || env.CLAUDE_MODEL_ID || 'anthropic/claude-3.5-sonnet';
+    const model = env.TWIN_MODEL_ID || 'deepseek/deepseek-chat';
 
     // ── Stream response (SSE) ────────────────────────────────────────────
     const stream = await getOpenRouterStream(env, {

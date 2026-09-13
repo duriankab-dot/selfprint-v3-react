@@ -31,6 +31,7 @@ import TodayBioEnvironmentReport from '@/components/landing/TodayBioEnvironmentR
 import IntroSummary from '@/components/landing/IntroSummary';
 import QuickSummary from '@/components/landing/QuickSummary';
 import { BirthDataInput } from '@/components/landing/BirthDataInput';
+import { Footer } from '@/components/layout/Footer';
 import { calculateInitialDisciplines } from '@/lib/astrology.js';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter.js';
 import { generateFAQSchema } from '@/lib/intro-summary.js';
@@ -1007,14 +1008,16 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           )}
 
           {/* BirthDataInput — Quick Input DOB at bottom */}
-          <div style={{ marginTop: '40px' }}>
-            <BirthDataInput
-              onComplete={(dob: string) => handleBirthDataSubmit(dob)}
-            />
+            <div style={{ marginTop: '40px' }}>
+              <BirthDataInput
+                onComplete={(dob: string) => handleBirthDataSubmit(dob)}
+              />
+            </div>
           </div>
-        </div>
 
-      </main>
+          {/* Footer — restored (R-01) */}
+          <Footer />
+        </main>
       </AppShell>
     </>
   );
