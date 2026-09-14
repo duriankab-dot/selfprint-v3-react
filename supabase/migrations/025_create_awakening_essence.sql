@@ -38,18 +38,21 @@ CREATE INDEX IF NOT EXISTS idx_awakening_essence_expires ON public.awakening_ess
 ALTER TABLE public.awakening_essence ENABLE ROW LEVEL SECURITY;
 
 -- Policy 1: Users can see their own awakening essence
+DROP POLICY IF EXISTS "users_view_own_awakening_essence" ON public.awakening_essence;
 CREATE POLICY "users_view_own_awakening_essence"
   ON public.awakening_essence
   FOR SELECT
   USING (auth.uid() = user_id);
 
 -- Policy 2: Users can create their own awakening essence
+DROP POLICY IF EXISTS "users_create_own_awakening_essence" ON public.awakening_essence;
 CREATE POLICY "users_create_own_awakening_essence"
   ON public.awakening_essence
   FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
 -- Policy 3: Users can update their own awakening essence status
+DROP POLICY IF EXISTS "users_update_own_awakening_essence" ON public.awakening_essence;
 CREATE POLICY "users_update_own_awakening_essence"
   ON public.awakening_essence
   FOR UPDATE

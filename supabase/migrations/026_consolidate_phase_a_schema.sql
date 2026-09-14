@@ -35,16 +35,19 @@ CREATE INDEX IF NOT EXISTS idx_twin_memories_created_at ON twin_memories(created
 
 ALTER TABLE twin_memories ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users_view_own_twin_memories" ON twin_memories;
 CREATE POLICY "users_view_own_twin_memories" ON twin_memories
   FOR SELECT USING (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users_insert_own_twin_memories" ON twin_memories;
 CREATE POLICY "users_insert_own_twin_memories" ON twin_memories
   FOR INSERT WITH CHECK (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users_update_own_twin_memories" ON twin_memories;
 CREATE POLICY "users_update_own_twin_memories" ON twin_memories
   FOR UPDATE USING (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
@@ -76,16 +79,19 @@ CREATE INDEX IF NOT EXISTS idx_twin_sice_scores_sice_name ON twin_sice_scores(si
 
 ALTER TABLE twin_sice_scores ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users_view_own_sice_scores" ON twin_sice_scores;
 CREATE POLICY "users_view_own_sice_scores" ON twin_sice_scores
   FOR SELECT USING (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users_insert_own_sice_scores" ON twin_sice_scores;
 CREATE POLICY "users_insert_own_sice_scores" ON twin_sice_scores
   FOR INSERT WITH CHECK (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
   );
 
+DROP POLICY IF EXISTS "users_update_own_sice_scores" ON twin_sice_scores;
 CREATE POLICY "users_update_own_sice_scores" ON twin_sice_scores
   FOR UPDATE USING (
     twin_id IN (SELECT id FROM twins WHERE user_id = auth.uid())
@@ -114,12 +120,15 @@ CREATE INDEX IF NOT EXISTS idx_personal_contexts_essence_id ON personal_contexts
 
 ALTER TABLE personal_contexts ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users_view_own_context" ON personal_contexts;
 CREATE POLICY "users_view_own_context" ON personal_contexts
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_insert_own_context" ON personal_contexts;
 CREATE POLICY "users_insert_own_context" ON personal_contexts
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_update_own_context" ON personal_contexts;
 CREATE POLICY "users_update_own_context" ON personal_contexts
   FOR UPDATE USING (auth.uid() = user_id);
 

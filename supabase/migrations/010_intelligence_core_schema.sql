@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS public.personal_profiles (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
-CREATE INDEX idx_personal_profiles_user_id ON public.personal_profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_personal_profiles_user_id ON public.personal_profiles(user_id);
 
 -- ============================================================================
 -- 2. PERSONAL MEMORY
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS public.personal_memory (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
-CREATE INDEX idx_personal_memory_user_id ON public.personal_memory(user_id);
-CREATE INDEX idx_personal_memory_type ON public.personal_memory(memory_type);
-CREATE INDEX idx_personal_memory_created_at ON public.personal_memory(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_personal_memory_user_id ON public.personal_memory(user_id);
+CREATE INDEX IF NOT EXISTS idx_personal_memory_type ON public.personal_memory(memory_type);
+CREATE INDEX IF NOT EXISTS idx_personal_memory_created_at ON public.personal_memory(created_at DESC);
 
 -- ============================================================================
 -- 3. BEHAVIORAL PATTERNS
@@ -62,9 +62,9 @@ CREATE TABLE IF NOT EXISTS public.behavioral_patterns (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
-CREATE INDEX idx_behavioral_patterns_user_id ON public.behavioral_patterns(user_id);
-CREATE INDEX idx_behavioral_patterns_type ON public.behavioral_patterns(pattern_type);
-CREATE INDEX idx_behavioral_patterns_confidence ON public.behavioral_patterns(confidence DESC);
+CREATE INDEX IF NOT EXISTS idx_behavioral_patterns_user_id ON public.behavioral_patterns(user_id);
+CREATE INDEX IF NOT EXISTS idx_behavioral_patterns_type ON public.behavioral_patterns(pattern_type);
+CREATE INDEX IF NOT EXISTS idx_behavioral_patterns_confidence ON public.behavioral_patterns(confidence DESC);
 
 -- ============================================================================
 -- 4. PERSONAL CONTEXT
@@ -84,9 +84,9 @@ CREATE TABLE IF NOT EXISTS public.personal_context (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
-CREATE INDEX idx_personal_context_user_id ON public.personal_context(user_id);
-CREATE INDEX idx_personal_context_type ON public.personal_context(context_type);
-CREATE INDEX idx_personal_context_confidence ON public.personal_context(confidence DESC);
+CREATE INDEX IF NOT EXISTS idx_personal_context_user_id ON public.personal_context(user_id);
+CREATE INDEX IF NOT EXISTS idx_personal_context_type ON public.personal_context(context_type);
+CREATE INDEX IF NOT EXISTS idx_personal_context_confidence ON public.personal_context(confidence DESC);
 
 -- ============================================================================
 -- 5. INSIGHT FEEDBACK
@@ -100,8 +100,8 @@ CREATE TABLE IF NOT EXISTS public.insight_feedback (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW())
 );
 
-CREATE INDEX idx_insight_feedback_user_id ON public.insight_feedback(user_id);
-CREATE INDEX idx_insight_feedback_feedback_type ON public.insight_feedback(feedback_type);
+CREATE INDEX IF NOT EXISTS idx_insight_feedback_user_id ON public.insight_feedback(user_id);
+CREATE INDEX IF NOT EXISTS idx_insight_feedback_feedback_type ON public.insight_feedback(feedback_type);
 
 -- ============================================================================
 -- ROW LEVEL SECURITY (RLS)
@@ -117,50 +117,69 @@ ALTER TABLE public.insight_feedback ENABLE ROW LEVEL SECURITY;
 -- Policies: Users can only see their own data
 
 -- personal_profiles
+DROP POLICY IF EXISTS "Users see own profiles" ON public.personal_profiles;
 CREATE POLICY "Users see own profiles" ON public.personal_profiles
   FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create own profiles" ON public.personal_profiles;
 CREATE POLICY "Users create own profiles" ON public.personal_profiles
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own profiles" ON public.personal_profiles;
 CREATE POLICY "Users update own profiles" ON public.personal_profiles
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own profiles" ON public.personal_profiles;
 CREATE POLICY "Users delete own profiles" ON public.personal_profiles
   FOR DELETE USING (auth.uid() = user_id);
 
 -- personal_memory
+DROP POLICY IF EXISTS "Users see own memories" ON public.personal_memory;
 CREATE POLICY "Users see own memories" ON public.personal_memory
   FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create own memories" ON public.personal_memory;
 CREATE POLICY "Users create own memories" ON public.personal_memory
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own memories" ON public.personal_memory;
 CREATE POLICY "Users update own memories" ON public.personal_memory
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own memories" ON public.personal_memory;
 CREATE POLICY "Users delete own memories" ON public.personal_memory
   FOR DELETE USING (auth.uid() = user_id);
 
 -- behavioral_patterns
+DROP POLICY IF EXISTS "Users see own patterns" ON public.behavioral_patterns;
 CREATE POLICY "Users see own patterns" ON public.behavioral_patterns
   FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create own patterns" ON public.behavioral_patterns;
 CREATE POLICY "Users create own patterns" ON public.behavioral_patterns
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own patterns" ON public.behavioral_patterns;
 CREATE POLICY "Users update own patterns" ON public.behavioral_patterns
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own patterns" ON public.behavioral_patterns;
 CREATE POLICY "Users delete own patterns" ON public.behavioral_patterns
   FOR DELETE USING (auth.uid() = user_id);
 
 -- personal_context
+DROP POLICY IF EXISTS "Users see own context" ON public.personal_context;
 CREATE POLICY "Users see own context" ON public.personal_context
   FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create own context" ON public.personal_context;
 CREATE POLICY "Users create own context" ON public.personal_context
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users update own context" ON public.personal_context;
 CREATE POLICY "Users update own context" ON public.personal_context
   FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own context" ON public.personal_context;
 CREATE POLICY "Users delete own context" ON public.personal_context
   FOR DELETE USING (auth.uid() = user_id);
 
 -- insight_feedback
+DROP POLICY IF EXISTS "Users see own feedback" ON public.insight_feedback;
 CREATE POLICY "Users see own feedback" ON public.insight_feedback
   FOR SELECT USING (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users create own feedback" ON public.insight_feedback;
 CREATE POLICY "Users create own feedback" ON public.insight_feedback
   FOR INSERT WITH CHECK (auth.uid() = user_id);
+DROP POLICY IF EXISTS "Users delete own feedback" ON public.insight_feedback;
 CREATE POLICY "Users delete own feedback" ON public.insight_feedback
   FOR DELETE USING (auth.uid() = user_id);
 

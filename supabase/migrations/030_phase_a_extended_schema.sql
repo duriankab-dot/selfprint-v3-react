@@ -1,11 +1,25 @@
--- Phase A Extended Schema (Evolution, Notifications, Decision Learning)
--- Consolidated from 006, 007, 20260817 (all rescheduled to run AFTER twins)
--- Date: 2026-08-25
+-- ============================================================================
+-- 20260825_003_phase_a_extended_schema.sql
+--
+-- Created: 2026-08-25
+-- Purpose: Extended schema tables for Twin evolution, notifications, decision learning
+-- Reference: Replaces migration 006_twin_evolution.sql and 008_notifications.sql
+--
+-- This migration creates:
+-- - twin_evolution_history: immutable log of evolution events
+-- - twin_evolution_progress: cached progress towards next stage
+-- - notification_schedule: scheduled notifications
+-- - notification_queue: notification delivery queue
+-- - notification_analytics: notification event tracking
+-- - decision_patterns: learned decision patterns per Twin/World
+--
+-- IMPORTANT: This migration MUST run AFTER twins table is created (migration 024)
+-- ============================================================
 
 BEGIN TRANSACTION;
 
 -- ============================================================================
--- SECTION 1: Twin Evolution System (from 006_twin_evolution.sql)
+-- SECTION 1: Twin Evolution System
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS twin_evolution_history (
@@ -44,15 +58,19 @@ CREATE INDEX IF NOT EXISTS idx_evolution_progress_twin_id ON twin_evolution_prog
 ALTER TABLE twin_evolution_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE twin_evolution_progress ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS evolution_history_rls ON twin_evolution_history;
 CREATE POLICY evolution_history_rls ON twin_evolution_history
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_history_insert_rls ON twin_evolution_history;
 CREATE POLICY evolution_history_insert_rls ON twin_evolution_history
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_progress_rls ON twin_evolution_progress;
 CREATE POLICY evolution_progress_rls ON twin_evolution_progress
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS evolution_progress_update_rls ON twin_evolution_progress;
 CREATE POLICY evolution_progress_update_rls ON twin_evolution_progress
   FOR UPDATE USING (user_id = auth.uid());
 
@@ -64,6 +82,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS evolution_progress_update_timestamp ON twin_evolution_progress;
+
 CREATE TRIGGER evolution_progress_update_timestamp
   BEFORE UPDATE ON twin_evolution_progress
   FOR EACH ROW
@@ -73,7 +93,7 @@ COMMENT ON TABLE twin_evolution_history IS 'Immutable log of all Twin evolution 
 COMMENT ON TABLE twin_evolution_progress IS 'Cached current progress towards next stage';
 
 -- ============================================================================
--- SECTION 2: Notifications System (from 007_notifications.sql)
+-- SECTION 2: Notifications System
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS notification_schedule (
@@ -106,9 +126,6 @@ CREATE TABLE IF NOT EXISTS notification_queue (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- NOTE: decision_follow_ups and decision_outcomes already created by 020_create_decision_tables.sql
--- Skipping duplicate table definitions
-
 CREATE TABLE IF NOT EXISTS notification_analytics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -123,33 +140,34 @@ CREATE INDEX IF NOT EXISTS idx_notification_schedule_status ON notification_sche
 CREATE INDEX IF NOT EXISTS idx_notification_queue_user ON notification_queue(user_id);
 CREATE INDEX IF NOT EXISTS idx_notification_queue_status ON notification_queue(status);
 CREATE INDEX IF NOT EXISTS idx_notification_queue_read ON notification_queue(user_id, read_at);
--- Indexes removed: decision_follow_ups and decision_outcomes already created with different schema in 020
 CREATE INDEX IF NOT EXISTS idx_notification_analytics_user ON notification_analytics(user_id);
 
 ALTER TABLE notification_schedule ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_queue ENABLE ROW LEVEL SECURITY;
--- RLS removed for decision_follow_ups and decision_outcomes (already handled in 020)
 ALTER TABLE notification_analytics ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS schedule_rls ON notification_schedule;
 CREATE POLICY schedule_rls ON notification_schedule
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS schedule_insert_rls ON notification_schedule;
 CREATE POLICY schedule_insert_rls ON notification_schedule
   FOR INSERT WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS queue_rls ON notification_queue;
 CREATE POLICY queue_rls ON notification_queue
   FOR SELECT USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS queue_update_rls ON notification_queue;
 CREATE POLICY queue_update_rls ON notification_queue
   FOR UPDATE USING (user_id = auth.uid());
 
--- Policies removed: decision_follow_ups and decision_outcomes already handled in 020
-
+DROP POLICY IF EXISTS analytics_rls ON notification_analytics;
 CREATE POLICY analytics_rls ON notification_analytics
   FOR SELECT USING (user_id = auth.uid());
 
 -- ============================================================================
--- SECTION 3: Decision Learning (from 20260817_p0_3_decision_learning.sql)
+-- SECTION 3: Decision Learning
 -- ============================================================================
 
 -- Add system_prompt to twins table
@@ -174,6 +192,7 @@ CREATE INDEX IF NOT EXISTS idx_decision_patterns_world ON decision_patterns(worl
 
 ALTER TABLE decision_patterns ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS decision_patterns_rls ON decision_patterns;
 CREATE POLICY decision_patterns_rls ON decision_patterns
   FOR ALL USING (
     twin_id IN (
@@ -181,11 +200,9 @@ CREATE POLICY decision_patterns_rls ON decision_patterns
     )
   );
 
-COMMENT ON TABLE twin_evolution_history IS 'Immutable log of all Twin evolution events';
-COMMENT ON TABLE twin_evolution_progress IS 'Cached current progress towards next stage';
 COMMENT ON TABLE decision_patterns IS 'Learned decision patterns per Twin/World (P0 #3)';
 COMMENT ON COLUMN twins.system_prompt IS 'Twin system prompt with learned decision patterns';
 
 COMMIT;
 
-SELECT 'Phase A Extended Schema complete ✅' as status;
+SELECT 'Phase A Extended Schema complete ✅ (replaces 006_twin_evolution.sql and 008_notifications.sql)' as status;

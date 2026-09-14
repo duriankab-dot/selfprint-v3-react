@@ -23,6 +23,7 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_customer
 -- RLS: users can only read their own subscription
 ALTER TABLE public.subscriptions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read own subscription" ON public.subscriptions;
 CREATE POLICY "Users can read own subscription"
   ON public.subscriptions FOR SELECT
   USING (auth.uid() = user_id);

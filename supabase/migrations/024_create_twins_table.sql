@@ -15,12 +15,15 @@ CREATE INDEX IF NOT EXISTS idx_twins_user_id ON twins(user_id);
 
 ALTER TABLE twins ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can view their own Twin" ON twins;
 CREATE POLICY "Users can view their own Twin" ON twins
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own Twin" ON twins;
 CREATE POLICY "Users can insert their own Twin" ON twins
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own Twin" ON twins;
 CREATE POLICY "Users can update their own Twin" ON twins
   FOR UPDATE USING (auth.uid() = user_id);
 

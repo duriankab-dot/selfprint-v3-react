@@ -54,14 +54,17 @@ DROP POLICY IF EXISTS "Users can view own profile" ON selfprint.users_profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON selfprint.users_profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON selfprint.users_profiles;
 
+DROP POLICY IF EXISTS "Users can view own profile" ON selfprint.users_profiles;
 CREATE POLICY "Users can view own profile"
   ON selfprint.users_profiles FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can insert own profile" ON selfprint.users_profiles;
 CREATE POLICY "Users can insert own profile"
   ON selfprint.users_profiles FOR INSERT
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update own profile" ON selfprint.users_profiles;
 CREATE POLICY "Users can update own profile"
   ON selfprint.users_profiles FOR UPDATE
   USING (user_id = auth.uid());

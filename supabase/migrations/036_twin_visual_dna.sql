@@ -48,9 +48,11 @@ CREATE INDEX IF NOT EXISTS idx_twin_visual_dna_user_id ON twin_visual_dna(user_i
 -- ============================================================================
 ALTER TABLE twin_visual_dna ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users_view_own_visual_dna" ON twin_visual_dna;
 CREATE POLICY "users_view_own_visual_dna" ON twin_visual_dna
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "users_update_own_visual_dna" ON twin_visual_dna;
 CREATE POLICY "users_update_own_visual_dna" ON twin_visual_dna
   FOR UPDATE USING (auth.uid() = user_id);
 

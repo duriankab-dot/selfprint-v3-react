@@ -51,11 +51,13 @@ DROP POLICY IF EXISTS "Users can view own decision log" ON decision_log;
 DROP POLICY IF EXISTS "Users can insert own decision log" ON decision_log;
 
 -- Create RLS policy: Users can only see their own decision log
+DROP POLICY IF EXISTS "Users can view own decision log" ON decision_log;
 CREATE POLICY "Users can view own decision log"
   ON decision_log
   FOR SELECT
   USING (user_id = auth.uid()::text);
 
+DROP POLICY IF EXISTS "Users can insert own decision log" ON decision_log;
 CREATE POLICY "Users can insert own decision log"
   ON decision_log
   FOR INSERT

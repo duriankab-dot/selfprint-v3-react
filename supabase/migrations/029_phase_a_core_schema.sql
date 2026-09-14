@@ -1,7 +1,22 @@
--- Phase A Core Schema Tables (from 003_core_awakening_ceremony.sql)
--- Rescheduled to run AFTER twins table is created
--- Purpose: All dependent tables for Twin creation flow
--- Date: 2026-08-25
+-- ============================================================================
+-- 20260825_002_phase_a_core_schema.sql
+-- 
+-- Created: 2026-08-25
+-- Purpose: Core schema tables for Twin creation flow (Phase A)
+-- Reference: Replaces migration 003_core_awakening_ceremony.sql
+-- 
+-- This migration creates all dependent tables for Twin creation:
+-- - twin_state: consciousness state and capabilities
+-- - twin_personality: personality, tone, communication style
+-- - twin_memory: Twin's memories and experiences (note: app expects plural "twin_memories")
+-- - twin_capabilities: unlocked features per evolution stage
+-- - conversations: user-Twin conversations per world
+-- - messages: individual messages in conversations
+-- - conversation_settings: user-customized settings per conversation
+-- - conversation_memory: memory/context about each conversation
+--
+-- IMPORTANT: This migration MUST run AFTER twins table is created (migration 024)
+-- ============================================================
 
 BEGIN TRANSACTION;
 
@@ -20,6 +35,21 @@ CREATE TABLE IF NOT EXISTS twin_state (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_twin_state_twin_id ON twin_state(twin_id);
+CREATE INDEX IF NOT EXISTS idx_twin_state_user_id ON twin_state(user_id);
+
+ALTER TABLE twin_state ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_twin_state" ON twin_state;
+CREATE POLICY "users_view_own_twin_state" ON twin_state
+  FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "users_update_own_twin_state" ON twin_state;
+CREATE POLICY "users_update_own_twin_state" ON twin_state
+  FOR UPDATE USING (auth.uid() = user_id);
+
+COMMENT ON TABLE twin_state IS 'Stores Twin consciousness state, stage, and capabilities';
+
 -- ============================================================================
 -- Table: twin_personality
 -- Stores Twin's personality, tone, communication style
@@ -36,16 +66,20 @@ CREATE TABLE IF NOT EXISTS twin_personality (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ============================================================================
--- NOTE: world_preferences already created by 021_world_preferences.sql
--- Skipping duplicate table definition
--- ============================================================================
+CREATE INDEX IF NOT EXISTS idx_twin_personality_twin_id ON twin_personality(twin_id);
+
+ALTER TABLE twin_personality ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_twin_personality" ON twin_personality;
+CREATE POLICY "users_view_own_twin_personality" ON twin_personality
+  FOR SELECT USING (auth.uid() = user_id);
+
+COMMENT ON TABLE twin_personality IS 'Stores Twin personality, communication style, and expertise';
 
 -- ============================================================================
--- Table: twin_memory
+-- Table: twin_memory (note: app expects plural "twin_memories")
 -- Stores Twin's memories and experiences
--- NOTE: App expects plural "twin_memories" but this uses "twin_memory"
--- Consolidation migration (20260825_001) will handle rename
+-- Consolidation migration (028) will create "twin_memories" for app compatibility
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS twin_memory (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -56,6 +90,17 @@ CREATE TABLE IF NOT EXISTS twin_memory (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_twin_memory_twin_id ON twin_memory(twin_id);
+CREATE INDEX IF NOT EXISTS idx_twin_memory_type ON twin_memory(memory_type);
+
+ALTER TABLE twin_memory ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_twin_memory" ON twin_memory;
+CREATE POLICY "users_view_own_twin_memory" ON twin_memory
+  FOR SELECT USING (auth.uid() = user_id);
+
+COMMENT ON TABLE twin_memory IS 'Twin memories and experiences (note: app expects plural "twin_memories")';
 
 -- ============================================================================
 -- Table: twin_capabilities
@@ -71,6 +116,16 @@ CREATE TABLE IF NOT EXISTS twin_capabilities (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_twin_capabilities_twin_id ON twin_capabilities(twin_id);
+
+ALTER TABLE twin_capabilities ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_twin_capabilities" ON twin_capabilities;
+CREATE POLICY "users_view_own_twin_capabilities" ON twin_capabilities
+  FOR SELECT USING (auth.uid() = user_id);
+
+COMMENT ON TABLE twin_capabilities IS 'Tracks which features are unlocked at each Twin Evolution stage';
 
 -- ============================================================================
 -- Table: conversations
@@ -91,6 +146,21 @@ CREATE TABLE IF NOT EXISTS conversations (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_conversations_twin_user ON conversations(twin_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_conversations_world ON conversations(world);
+
+ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_conversations" ON conversations;
+CREATE POLICY "users_view_own_conversations" ON conversations
+  FOR SELECT USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "users_insert_own_conversations" ON conversations;
+CREATE POLICY "users_insert_own_conversations" ON conversations
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+COMMENT ON TABLE conversations IS 'Stores Twin-user conversations per world';
+
 -- ============================================================================
 -- Table: messages
 -- Stores individual messages in conversations
@@ -107,6 +177,17 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
+
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_messages" ON messages;
+CREATE POLICY "users_view_own_messages" ON messages
+  FOR SELECT USING (auth.uid() = user_id);
+
+COMMENT ON TABLE messages IS 'Stores individual messages in conversations';
 
 -- ============================================================================
 -- Table: conversation_settings
@@ -126,6 +207,14 @@ CREATE TABLE IF NOT EXISTS conversation_settings (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE conversation_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "users_view_own_conversation_settings" ON conversation_settings;
+CREATE POLICY "users_view_own_conversation_settings" ON conversation_settings
+  FOR SELECT USING (auth.uid() = user_id);
+
+COMMENT ON TABLE conversation_settings IS 'Stores user-customized settings for each conversation';
+
 -- ============================================================================
 -- Table: conversation_memory
 -- Stores memory/context about each conversation
@@ -142,63 +231,14 @@ CREATE TABLE IF NOT EXISTS conversation_memory (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- ============================================================================
--- INDEXES FOR PERFORMANCE
--- ============================================================================
-CREATE INDEX IF NOT EXISTS idx_twin_state_twin_id ON twin_state(twin_id);
-CREATE INDEX IF NOT EXISTS idx_twin_state_user_id ON twin_state(user_id);
--- INDEX removed: world_preferences already created with different schema in 021
-CREATE INDEX IF NOT EXISTS idx_twin_memory_type ON twin_memory(memory_type);
-CREATE INDEX IF NOT EXISTS idx_conversations_twin_user ON conversations(twin_id, user_id);
-CREATE INDEX IF NOT EXISTS idx_conversations_world ON conversations(world);
-CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(conversation_id);
-CREATE INDEX IF NOT EXISTS idx_messages_created_at ON messages(created_at);
-
--- ============================================================================
--- ROW LEVEL SECURITY (RLS)
--- ============================================================================
-ALTER TABLE twin_state ENABLE ROW LEVEL SECURITY;
-ALTER TABLE twin_personality ENABLE ROW LEVEL SECURITY;
-ALTER TABLE world_preferences ENABLE ROW LEVEL SECURITY;
-ALTER TABLE twin_memory ENABLE ROW LEVEL SECURITY;
-ALTER TABLE twin_capabilities ENABLE ROW LEVEL SECURITY;
-ALTER TABLE conversations ENABLE ROW LEVEL SECURITY;
-ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE conversation_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE conversation_memory ENABLE ROW LEVEL SECURITY;
 
--- ============================================================================
--- RLS POLICIES: Users can only see their own Twin's data
--- ============================================================================
-CREATE POLICY "users_view_own_twin_state" ON twin_state
+DROP POLICY IF EXISTS "users_view_own_conversation_memory" ON conversation_memory;
+CREATE POLICY "users_view_own_conversation_memory" ON conversation_memory
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "users_update_own_twin_state" ON twin_state
-  FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "users_view_own_twin_personality" ON twin_personality
-  FOR SELECT USING (auth.uid() = user_id);
-
--- RLS Policy removed: world_preferences already has policies from 021
-
-CREATE POLICY "users_view_own_twin_memory" ON twin_memory
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "users_view_own_conversations" ON conversations
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "users_view_own_messages" ON messages
-  FOR SELECT USING (auth.uid() = user_id);
-
--- ============================================================================
--- DOCUMENTATION
--- ============================================================================
-COMMENT ON TABLE twin_state IS 'Stores Twin consciousness state, stage, and capabilities';
-COMMENT ON TABLE twin_personality IS 'Stores Twin personality, communication style, and expertise';
-COMMENT ON TABLE world_preferences IS 'Stores Twin expertise for each of 12 Intelligence Worlds';
-COMMENT ON TABLE conversations IS 'Stores Twin-user conversations per world';
-COMMENT ON TABLE messages IS 'Stores individual messages in conversations';
+COMMENT ON TABLE conversation_memory IS 'Stores memory/context about each conversation';
 
 COMMIT;
 
-SELECT 'Phase A Core Schema complete ✅' as status;
+SELECT 'Phase A Core Schema complete ✅ (replaces 003_core_awakening_ceremony.sql)' as status;

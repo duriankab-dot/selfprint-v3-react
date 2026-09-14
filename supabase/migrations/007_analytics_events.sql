@@ -30,10 +30,12 @@ ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own analytics events" ON analytics_events;
 DROP POLICY IF EXISTS "Users can insert own analytics events" ON analytics_events;
 
+DROP POLICY IF EXISTS "Users can view own analytics events" ON analytics_events;
 CREATE POLICY "Users can view own analytics events"
   ON analytics_events FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can insert own analytics events" ON analytics_events;
 CREATE POLICY "Users can insert own analytics events"
   ON analytics_events FOR INSERT
   WITH CHECK (user_id = auth.uid());

@@ -71,6 +71,7 @@ ALTER TABLE decision_patterns ENABLE ROW LEVEL SECURITY;
 -- CREATE POLICY "Users can update own decisions" ON decision_log
 --   FOR UPDATE USING (auth.uid()::text = user_id);
 
+DROP POLICY IF EXISTS "Users can view own outcomes" ON decision_outcomes;
 CREATE POLICY "Users can view own outcomes" ON decision_outcomes
   FOR SELECT USING (
     decision_id IN (
@@ -78,6 +79,7 @@ CREATE POLICY "Users can view own outcomes" ON decision_outcomes
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert own outcomes" ON decision_outcomes;
 CREATE POLICY "Users can insert own outcomes" ON decision_outcomes
   FOR INSERT WITH CHECK (
     decision_id IN (
@@ -85,6 +87,7 @@ CREATE POLICY "Users can insert own outcomes" ON decision_outcomes
     )
   );
 
+DROP POLICY IF EXISTS "Users can view own follow-ups" ON follow_up_schedule;
 CREATE POLICY "Users can view own follow-ups" ON follow_up_schedule
   FOR SELECT USING (
     decision_id IN (
@@ -92,6 +95,7 @@ CREATE POLICY "Users can view own follow-ups" ON follow_up_schedule
     )
   );
 
+DROP POLICY IF EXISTS "Users can update own follow-ups" ON follow_up_schedule;
 CREATE POLICY "Users can update own follow-ups" ON follow_up_schedule
   FOR UPDATE USING (
     decision_id IN (
@@ -99,5 +103,6 @@ CREATE POLICY "Users can update own follow-ups" ON follow_up_schedule
     )
   );
 
+DROP POLICY IF EXISTS "Users can view own patterns" ON decision_patterns;
 CREATE POLICY "Users can view own patterns" ON decision_patterns
   FOR SELECT USING (auth.uid() = twin_id);

@@ -17,16 +17,24 @@
  * without it, every first-visit upsert is blocked by RLS regardless of the
  * column fix above.
  *
- * Run this in Supabase SQL Editor (same steps as 004/005/006):
- * 1. Go to Supabase Dashboard -> SQL Editor
- * 2. Click "New Query"
- * 3. Paste this entire file
- * 4. Click "Run"
+ * Idempotent: safe to run multiple times (DO block guards column creation)
  */
 
-ALTER TABLE public.world_stats
-  ADD COLUMN IF NOT EXISTS last_accessed TIMESTAMPTZ DEFAULT NOW();
+-- Add last_accessed column if it doesn't exist (safe to run multiple times)
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'world_stats'
+      AND column_name = 'last_accessed'
+  ) THEN
+    ALTER TABLE public.world_stats
+      ADD COLUMN last_accessed TIMESTAMPTZ DEFAULT NOW();
+  END IF;
+END $$;
 
+-- Add INSERT policy if it doesn't exist (safe to run multiple times)
 DO $$
 BEGIN
   IF NOT EXISTS (

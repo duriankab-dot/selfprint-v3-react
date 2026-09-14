@@ -23,10 +23,12 @@ CREATE INDEX IF NOT EXISTS idx_chat_messages_role
 -- RLS: users can read/write their own messages
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read own messages" ON public.chat_messages;
 CREATE POLICY "Users can read own messages"
   ON public.chat_messages FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own messages" ON public.chat_messages;
 CREATE POLICY "Users can insert own messages"
   ON public.chat_messages FOR INSERT
   WITH CHECK (auth.uid() = user_id);

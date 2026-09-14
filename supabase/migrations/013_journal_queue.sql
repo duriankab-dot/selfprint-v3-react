@@ -27,14 +27,17 @@ CREATE INDEX IF NOT EXISTS idx_journal_queue_user
 -- RLS: users can only access their own queue
 ALTER TABLE public.journal_queue ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users can read own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can read own journal_queue"
   ON public.journal_queue FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can insert own journal_queue"
   ON public.journal_queue FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update own journal_queue" ON public.journal_queue;
 CREATE POLICY "Users can update own journal_queue"
   ON public.journal_queue FOR UPDATE
   USING (auth.uid() = user_id)

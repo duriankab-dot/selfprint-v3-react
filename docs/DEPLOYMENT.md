@@ -227,25 +227,29 @@ git commit -m "Phase A: Production ready"
 git push origin master
 ```
 
-### 6.2 Deploy to Vercel
+### 6.2 Deploy to Cloudflare Pages
 
 ```bash
-# Option 1: Via Vercel CLI
-vercel --prod
+# Via Cloudflare Dashboard (recommended)
+# 1. Go to: https://dash.cloudflare.com/to/xxx/pages/projects/selfprint-staging
+# 2. Click "Create deployment" or push to GitHub for auto-deploy
 
-# Option 2: Via Vercel Dashboard
-# Push to GitHub → Auto-deploys on Vercel
+# Via Cloudflare CLI (optional)
+# npm install -g wrangler
+# wrangler pages deploy dist/ --project-name selfprint-staging
 ```
 
 ### 6.3 Set Production Environment Variables
 
-In Vercel dashboard → Settings → Environment Variables:
+In Cloudflare Pages → Settings → Variables and secrets:
 
 ```
+SUPABASE_URL=https://prod-project.supabase.co
+SUPABASE_ANON_KEY=prod_anon_key
+SUPABASE_SECRET_KEY=prod_secret_key
 VITE_SUPABASE_URL=https://prod-project.supabase.co
 VITE_SUPABASE_ANON_KEY=prod_anon_key
-VITE_REDIRECT_URL=https://selfprint-v3.vercel.app
-VITE_API_KEY=prod_api_key
+STAGING_URL=https://selfprint-staging.pages.dev
 ```
 
 ### 6.4 Run Production Database Migrations
@@ -257,7 +261,7 @@ supabase link --project-ref prod-id
 # Run migrations
 supabase db push
 
-# Should show: All 032 migrations applied ✅
+# Should show: All migrations applied ✅
 ```
 
 ---
@@ -268,7 +272,7 @@ After deployment, verify everything works:
 
 ### 7.1 Frontend Checks
 
-- [ ] Homepage loads at https://selfprint-v3.vercel.app
+- [ ] Homepage loads at https://selfprint-staging.pages.dev
 - [ ] Can create account
 - [ ] Can login
 - [ ] No console errors (DevTools)
@@ -321,7 +325,7 @@ If deployment fails:
 git revert <commit-hash>
 git push origin master
 
-# Vercel will auto-redeploy from main branch
+# Cloudflare Pages will auto-redeploy from main branch
 # Migrations cannot be rolled back (forward-compatible only)
 ```
 
@@ -333,7 +337,8 @@ git push origin master
 
 Check application logs:
 ```bash
-vercel logs [project-name]
+# Via Cloudflare Pages Dashboard
+# Settings → Logs → View deployment logs
 ```
 
 ### Database
@@ -346,10 +351,10 @@ Settings → Statistics → Database usage
 
 ### Performance
 
-Monitor Vercel Analytics:
+Monitor Cloudflare Analytics:
 ```bash
-# Via Vercel Dashboard
-Analytics → Real User Monitoring
+# Via Cloudflare Dashboard
+Analytics → Page Analytics
 ```
 
 ---

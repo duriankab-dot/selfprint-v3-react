@@ -31,18 +31,22 @@ CREATE INDEX IF NOT EXISTS idx_onboarding_checkpoints_user_id
 ALTER TABLE onboarding_checkpoints ENABLE ROW LEVEL SECURITY;
 
 -- Users can only read their own checkpoint
+DROP POLICY IF EXISTS "users_read_own_checkpoint" ON onboarding_checkpoints;
 CREATE POLICY "users_read_own_checkpoint" ON onboarding_checkpoints
   FOR SELECT USING (auth.uid() = user_id);
 
 -- Users can insert their own checkpoint
+DROP POLICY IF EXISTS "users_insert_own_checkpoint" ON onboarding_checkpoints;
 CREATE POLICY "users_insert_own_checkpoint" ON onboarding_checkpoints
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Users can update their own checkpoint
+DROP POLICY IF EXISTS "users_update_own_checkpoint" ON onboarding_checkpoints;
 CREATE POLICY "users_update_own_checkpoint" ON onboarding_checkpoints
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Users can delete their own checkpoint (clearCheckpoint)
+DROP POLICY IF EXISTS "users_delete_own_checkpoint" ON onboarding_checkpoints;
 CREATE POLICY "users_delete_own_checkpoint" ON onboarding_checkpoints
   FOR DELETE USING (auth.uid() = user_id);
 

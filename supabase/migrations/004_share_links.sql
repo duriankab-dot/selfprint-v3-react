@@ -28,10 +28,12 @@ ALTER TABLE selfprint.share_links ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Users can view own share link" ON selfprint.share_links;
 DROP POLICY IF EXISTS "Users can insert own share link" ON selfprint.share_links;
 
+DROP POLICY IF EXISTS "Users can view own share link" ON selfprint.share_links;
 CREATE POLICY "Users can view own share link"
   ON selfprint.share_links FOR SELECT
   USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can insert own share link" ON selfprint.share_links;
 CREATE POLICY "Users can insert own share link"
   ON selfprint.share_links FOR INSERT
   WITH CHECK (user_id = auth.uid());

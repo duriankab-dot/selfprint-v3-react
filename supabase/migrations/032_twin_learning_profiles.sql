@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.twin_learning_profiles (
 ALTER TABLE public.twin_learning_profiles ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policy: Users view own Twin's learning profiles
+DROP POLICY IF EXISTS "Users can view own Twin learning profiles" ON public.twin_learning_profiles;
 CREATE POLICY "Users can view own Twin learning profiles"
   ON public.twin_learning_profiles
   FOR SELECT
@@ -27,6 +28,7 @@ CREATE POLICY "Users can view own Twin learning profiles"
   );
 
 -- RLS Policy: Twin service can update learning profiles
+DROP POLICY IF EXISTS "Service can update Twin learning profiles" ON public.twin_learning_profiles;
 CREATE POLICY "Service can update Twin learning profiles"
   ON public.twin_learning_profiles
   FOR UPDATE
@@ -34,8 +36,10 @@ CREATE POLICY "Service can update Twin learning profiles"
   WITH CHECK (true);
 
 -- Indices
-CREATE INDEX idx_twin_learning_profiles_twin_id
+DROP INDEX IF EXISTS idx_twin_learning_profiles_twin_id;
+CREATE INDEX IF NOT EXISTS idx_twin_learning_profiles_twin_id
   ON public.twin_learning_profiles(twin_id);
 
-CREATE INDEX idx_twin_learning_profiles_world
+DROP INDEX IF EXISTS idx_twin_learning_profiles_world;
+CREATE INDEX IF NOT EXISTS idx_twin_learning_profiles_world
   ON public.twin_learning_profiles(world);

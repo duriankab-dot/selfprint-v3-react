@@ -21,10 +21,12 @@ CREATE INDEX IF NOT EXISTS idx_daily_briefs_user_date
 
 ALTER TABLE public.daily_briefs ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Users read own briefs" ON public.daily_briefs;
 CREATE POLICY "Users read own briefs"
   ON public.daily_briefs FOR SELECT
   USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Service role full access" ON public.daily_briefs;
 CREATE POLICY "Service role full access"
   ON public.daily_briefs FOR ALL
   USING (true)

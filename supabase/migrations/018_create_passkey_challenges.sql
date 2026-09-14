@@ -35,6 +35,7 @@ ALTER TABLE public.passkey_challenges ENABLE ROW LEVEL SECURITY;
 -- Policy: Service role can read/write (for edge functions)
 -- Note: Edge functions use SUPABASE_SERVICE_ROLE_KEY which bypasses RLS
 -- But we set this policy for completeness
+DROP POLICY IF EXISTS "Service role manages challenges" ON public.passkey_challenges;
 CREATE POLICY "Service role manages challenges"
   ON public.passkey_challenges
   FOR ALL

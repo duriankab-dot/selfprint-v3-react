@@ -35,21 +35,25 @@ create index if not exists idx_push_subscriptions_user_active
 alter table public.push_subscriptions enable row level security;
 
 -- RLS Policies
+drop policy if exists "Users can view their own subscriptions" on public.push_subscriptions;
 create policy "Users can view their own subscriptions"
   on public.push_subscriptions
   for select
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can insert their own subscriptions" on public.push_subscriptions;
 create policy "Users can insert their own subscriptions"
   on public.push_subscriptions
   for insert
   with check (auth.uid() = user_id);
 
+drop policy if exists "Users can update their own subscriptions" on public.push_subscriptions;
 create policy "Users can update their own subscriptions"
   on public.push_subscriptions
   for update
   using (auth.uid() = user_id);
 
+drop policy if exists "Users can delete their own subscriptions" on public.push_subscriptions;
 create policy "Users can delete their own subscriptions"
   on public.push_subscriptions
   for delete

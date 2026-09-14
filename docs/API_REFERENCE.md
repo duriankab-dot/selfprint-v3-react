@@ -525,7 +525,7 @@ All endpoints follow standard response format:
 ## ✅ TESTING
 
 **Local Dev:** `npm run dev` → http://localhost:5173  
-**Staging:** https://selfprint-v3-react-staging.vercel.app  
+**Staging:** https://selfprint-staging.pages.dev  
 **Production:** https://www.selfprint.one
 
 **Test Tools:**
@@ -538,7 +538,7 @@ All endpoints follow standard response format:
 ## 📞 SUPPORT
 
 For API issues:
-1. Check Vercel logs: https://vercel.com/self-print/selfprint-v3-react/logs
+1. Check Cloudflare Pages deployments: https://dash.cloudflare.com/to/xxx/pages/projects/selfprint-staging
 2. Review error response message
 3. Verify authentication (session cookie present)
 4. Check database connection (Supabase status)

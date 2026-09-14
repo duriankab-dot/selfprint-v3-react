@@ -22,18 +22,21 @@ CREATE INDEX IF NOT EXISTS idx_user_credentials_credential_id ON public.user_cre
 ALTER TABLE public.user_credentials ENABLE ROW LEVEL SECURITY;
 
 -- Policy: Users can only see their own credentials
+DROP POLICY IF EXISTS "Users can view own credentials" ON public.user_credentials;
 CREATE POLICY "Users can view own credentials"
   ON public.user_credentials
   FOR SELECT
   USING (user_id = auth.uid()::text);
 
 -- Policy: Users can only insert their own credentials
+DROP POLICY IF EXISTS "Users can insert own credentials" ON public.user_credentials;
 CREATE POLICY "Users can insert own credentials"
   ON public.user_credentials
   FOR INSERT
   WITH CHECK (user_id = auth.uid()::text);
 
 -- Policy: Users can only update their own credentials
+DROP POLICY IF EXISTS "Users can update own credentials" ON public.user_credentials;
 CREATE POLICY "Users can update own credentials"
   ON public.user_credentials
   FOR UPDATE
@@ -41,6 +44,7 @@ CREATE POLICY "Users can update own credentials"
   WITH CHECK (user_id = auth.uid()::text);
 
 -- Policy: Users can only delete their own credentials
+DROP POLICY IF EXISTS "Users can delete own credentials" ON public.user_credentials;
 CREATE POLICY "Users can delete own credentials"
   ON public.user_credentials
   FOR DELETE

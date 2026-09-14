@@ -29,16 +29,19 @@ CREATE INDEX IF NOT EXISTS idx_community_insights_user_id
 
 ALTER TABLE public.community_insights ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone authenticated can read published insights" ON public.community_insights;
 CREATE POLICY "Anyone authenticated can read published insights"
   ON public.community_insights FOR SELECT
   TO authenticated
   USING (status = 'published' OR user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can post their own insights" ON public.community_insights;
 CREATE POLICY "Users can post their own insights"
   ON public.community_insights FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can delete their own insights" ON public.community_insights;
 CREATE POLICY "Users can delete their own insights"
   ON public.community_insights FOR DELETE
   TO authenticated
@@ -63,16 +66,19 @@ CREATE INDEX IF NOT EXISTS idx_community_insight_likes_insight_id
 
 ALTER TABLE public.community_insight_likes ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone authenticated can read likes" ON public.community_insight_likes;
 CREATE POLICY "Anyone authenticated can read likes"
   ON public.community_insight_likes FOR SELECT
   TO authenticated
   USING (true);
 
+DROP POLICY IF EXISTS "Users can like as themselves" ON public.community_insight_likes;
 CREATE POLICY "Users can like as themselves"
   ON public.community_insight_likes FOR INSERT
   TO authenticated
   WITH CHECK (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can unlike their own like" ON public.community_insight_likes;
 CREATE POLICY "Users can unlike their own like"
   ON public.community_insight_likes FOR DELETE
   TO authenticated

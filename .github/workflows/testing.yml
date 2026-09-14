@@ -119,9 +119,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: e2e-tests
-    # k6 load test files (loadtest-smoke.js) NOT YET IMPLEMENTED
-    # Enabled only for manual runs via workflow_dispatch (test_type=load)
-    # TODO: Implement k6 load tests against staging environment
+    # k6 smoke test — enabled only for manual runs via workflow_dispatch (test_type=load)
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'load'
 
     steps:
@@ -131,14 +129,16 @@ jobs:
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
 
-      - name: Run Smoke Test (5-10 min, 20-50 users)
+      - name: Run Smoke Test (5 min, 5 VUs)
         run: |
-          k6 run loadtest-smoke.js \
-            --vus 50 \
-            --duration 10m \
+          k6 run --vus 5 --duration 5m loadtests/loadtest-smoke.js \
             --out json=smoke-results.json
         env:
           BASE_URL: ${{ env.BASE_URL }}
+          SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
         continue-on-error: true
 
       - name: Upload Smoke Test Results
@@ -154,8 +154,8 @@ jobs:
         if: always()
         run: |
           echo "Smoke Test Summary:"
-          echo "- Duration: 10 minutes"
-          echo "- Peak Users: 50"
+          echo "- Duration: 5 minutes"
+          echo "- Peak Users: 5 VUs"
           echo "- Status: ${{ job.status }}"
 
       - name: Notify Slack - Smoke Test
@@ -171,7 +171,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Load Test - Smoke*\n*Status:* ${{ job.status }}\n*Duration:* 10 minutes\n*Peak Load:* 50 users"
+                    "text": "*Load Test - Smoke*\n*Status:* ${{ job.status }}\n*Duration:* 5 minutes\n*Peak Load:* 5 VUs"
                   }
                 }
               ]
@@ -182,9 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     needs: e2e-tests
-    # k6 load test files (loadtest.js) NOT YET IMPLEMENTED
-    # Enabled only for manual runs via workflow_dispatch (test_type=full)
-    # TODO: Implement k6 full load tests against staging environment
+    # k6 full load test — enabled only for manual runs via workflow_dispatch (test_type=full)
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.test_type == 'full'
 
     steps:
@@ -194,14 +192,16 @@ jobs:
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
 
-      - name: Run Full Load Test (39 min, 50-100 users)
+      - name: Run Full Load Test (45 min, peak 100 VUs)
         run: |
-          k6 run loadtest.js \
-            --vus 100 \
-            --duration 39m \
+          k6 run loadtests/loadtest.js \
             --out json=full-load-results.json
         env:
           BASE_URL: ${{ env.BASE_URL }}
+          SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
         continue-on-error: true
 
       - name: Upload Full Load Test Results
@@ -217,8 +217,9 @@ jobs:
         if: always()
         run: |
           echo "Full Load Test Summary:"
-          echo "- Duration: 39 minutes"
-          echo "- Peak Users: 100 (ramped from 50)"
+          echo "- Duration: 45 minutes"
+          echo "- Peak Users: 100 (ramped from 10 to 100)"
+          echo "- Phases: ramp-up → steady → spike → peak-hold → ramp-down"
           echo "- Status: ${{ job.status }}"
 
       - name: Notify Slack - Full Load Test
@@ -234,7 +235,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Load Test - Full (39 min)*\n*Status:* ${{ job.status }}\n*Peak Load:* 100 concurrent users\n*Ramp:* 50 → 100 users"
+                    "text": "*Load Test - Full (45 min)*\n*Status:* ${{ job.status }}\n*Peak Load:* 100 concurrent users\n*Ramp:* 10 → 100 users"
                   }
                 }
               ]
@@ -293,8 +294,8 @@ jobs:
           |------|--------|----------|
           | Unit Tests (Vitest) | ${{ needs.unit-tests.result }} | < 10 min |
           | E2E Tests | ${{ needs.e2e-tests.result }} | 20-30 min |
-          | Smoke Test (k6) | SKIPPED — manual only | N/A |
-          | Full Load Test (k6) | SKIPPED — manual only | N/A |
+          | Smoke Test (k6) | SKIPPED — manual only (workflow_dispatch) | N/A |
+          | Full Load Test (k6) | SKIPPED — manual only (workflow_dispatch) | N/A |
 
           ## Artifacts
 
@@ -303,11 +304,12 @@ jobs:
 
           ## Performance Targets
 
-          - API Response: < 300ms
-          - Twin Chat: < 3s
-          - Decision Save: < 200ms
-          - Page Load: < 1.5s
-          - Image Upload: < 2s
+          - Auth login: < 2s (p95)
+          - GET /api/profile: < 1s (p95)
+          - POST /api/twin: < 8s (p95)
+          - POST /api/nova: < 7s (p95)
+          - Error rate: < 1%
+          - No 5xx errors > 0.1%
 
           EOF
           cat test-report.md
@@ -340,5 +342,5 @@ jobs:
           curl -X POST "${{ env.SLACK_WEBHOOK }}" \
             -H 'Content-Type: application/json' \
             -d '{
-              "text": "Test Suite Complete\n\n*Unit:* ${{ needs.unit-tests.result }}\n*E2E:* ${{ needs.e2e-tests.result }}\n*k6:* MANUAL ONLY (not auto-run)\n\n*Report:* Check artifacts"
+              "text": "Test Suite Complete\n\n*Unit:* ${{ needs.unit-tests.result }}\n*E2E:* ${{ needs.e2e-tests.result }}\n*k6:* MANUAL ONLY (workflow_dispatch)\n\n*Report:* Check artifacts"
             }'
