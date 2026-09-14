@@ -99,12 +99,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     return json({ error: 'Unauthorized' }, 401);
   }
 
-  // Rate limit
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('cf-connecting-ip') ||
-    'unknown';
-  if (!checkRateLimit(ip, env.TWIN_RATE_LIMIT)) {
+  // Rate limit (user-based: per-user rate limiting via JWT user ID)
+  if (!checkRateLimit(user.id, env.TWIN_RATE_LIMIT)) {
     return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
   }
 
@@ -157,7 +153,10 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[functions/api/twin] Error:', msg);
-    // DEBUGLEAK-001: `msg` is raw AI provider error text — log only.
+    // Propagate OpenRouter rate limit (429) as 429, not 500
+    if (msg.includes('429')) {
+      return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
+    }
     return json({ error: 'Internal server error' }, 500);
   }
 }

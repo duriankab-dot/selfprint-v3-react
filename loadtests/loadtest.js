@@ -338,8 +338,9 @@ function runTwinTest(headers) {
     'twin POST 200 or 429': (r) => r.status === 200 || r.status === 429,
     'twin has content on success': (r) => (r.status === 200 ? !!r.json('content') : true),
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runTwinStreamTest(headers) {
@@ -359,8 +360,9 @@ function runTwinStreamTest(headers) {
     'twin-stream content-type is SSE': (r) =>
       r.status === 200 ? (r.headers['Content-Type'] || '').includes('text/event-stream') : true,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runNovaTest(headers) {
@@ -380,8 +382,9 @@ function runNovaTest(headers) {
     'nova POST 200 or 429': (r) => r.status === 200 || r.status === 429,
     'nova has content on success': (r) => (r.status === 200 ? !!r.json('content') : true),
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runNovaStreamTest(headers) {
@@ -401,8 +404,9 @@ function runNovaStreamTest(headers) {
     'nova-stream content-type is SSE': (r) =>
       r.status === 200 ? (r.headers['Content-Type'] || '').includes('text/event-stream') : true,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runProfileGetTest(headers) {
@@ -417,8 +421,9 @@ function runProfileGetTest(headers) {
   const ok = check(res, {
     'profile GET 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runProfilePostTest(headers) {
@@ -431,8 +436,9 @@ function runProfilePostTest(headers) {
     'profile POST 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
     'profile POST success flag when 200': (r) => (r.status === 200 ? r.json('success') === true : true),
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runNotificationsListTest(headers) {
@@ -445,8 +451,9 @@ function runNotificationsListTest(headers) {
   const ok = check(res, {
     'notifications list 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runNotificationsScheduleTest(headers) {
@@ -464,8 +471,9 @@ function runNotificationsScheduleTest(headers) {
   const ok = check(res, {
     'notifications schedule 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runNotificationsMarkReadTest(headers) {
@@ -481,8 +489,9 @@ function runNotificationsMarkReadTest(headers) {
   const ok = check(res, {
     'notifications mark-read 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runBlueprintPostTest(headers) {
@@ -494,8 +503,9 @@ function runBlueprintPostTest(headers) {
   const ok = check(res, {
     'blueprint POST 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runShareGetTest(headers) {
@@ -509,8 +519,9 @@ function runShareGetTest(headers) {
     'share GET 400/404 or 429 (rate-limited)': (r) =>
       r.status === 400 || r.status === 404 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }
 
 function runAutonomyLogTest(headers) {
@@ -569,6 +580,7 @@ function runOtherTests(data, headers) {
     'notifications list 200 or 429 (rate-limited, no-twin fallback)': (r) =>
       r.status === 200 || r.status === 429,
   });
-  loadErrorRate.add(!ok);
-  rateLimitedRate.add(res.status === 429);
+  const isRateLimited = res.status === 429;
+  loadErrorRate.add(!ok && !isRateLimited);
+  rateLimitedRate.add(isRateLimited);
 }

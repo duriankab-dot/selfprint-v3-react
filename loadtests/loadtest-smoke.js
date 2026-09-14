@@ -188,8 +188,9 @@ export default function (data) {
       'twin POST 200 or 429': (r) => r.status === 200 || r.status === 429,
       'twin has content on success': (r) => (r.status === 200 ? !!r.json('content') : true),
     });
-    smokeErrorRate.add(!twinOk);
-    rateLimitedRate.add(twinRes.status === 429);
+    const isRateLimited = twinRes.status === 429;
+    smokeErrorRate.add(!twinOk && !isRateLimited);
+    rateLimitedRate.add(isRateLimited);
 
     // ── Test 5: POST /api/nova (AI chat) — 200 หรือ 429
     const novaPayload = JSON.stringify({
@@ -208,8 +209,9 @@ export default function (data) {
       'nova POST 200 or 429': (r) => r.status === 200 || r.status === 429,
       'nova has content on success': (r) => (r.status === 200 ? !!r.json('content') : true),
     });
-    smokeErrorRate.add(!novaOk);
-    rateLimitedRate.add(novaRes.status === 429);
+    const isRateLimited = novaRes.status === 429;
+    smokeErrorRate.add(!novaOk && !isRateLimited);
+    rateLimitedRate.add(isRateLimited);
 
     // ── Test 6: POST /api/autonomy-log (telemetry) — ต้อง auth
     const autonomyRes = http.post(

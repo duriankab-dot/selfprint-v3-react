@@ -26,6 +26,12 @@ export const SUPABASE_ANON_KEY = _anonKey;
 export const TEST_EMAIL = _testEmail;
 export const TEST_PASSWORD = _testPassword;
 
+// Rate limits — override via env for staging/test (higher than production defaults)
+export const TWIN_RATE_LIMIT = parseInt(env.TWIN_RATE_LIMIT || '40', 10);
+export const TWIN_STREAM_RATE_LIMIT = parseInt(env.TWIN_STREAM_RATE_LIMIT || '40', 10);
+export const NOVA_RATE_LIMIT = parseInt(env.NOVA_RATE_LIMIT || '60', 10);
+export const NOVA_STREAM_RATE_LIMIT = parseInt(env.NOVA_STREAM_RATE_LIMIT || '60', 10);
+
 // ── API endpoints ────────────────────────────────────────────────────────────
 
 const API_BASE = `${BASE_URL}/api`;

@@ -145,7 +145,10 @@ export async function onRequest(context: PagesContext): Promise<Response> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Unknown error';
     console.error('[functions/api/nova] Error:', msg);
-    // DEBUGLEAK-001: `msg` is raw OpenRouter API error text — log only.
+    // Propagate OpenRouter rate limit (429) as 429, not 500
+    if (msg.includes('429')) {
+      return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
+    }
     return json({ error: 'Internal server error' }, 500);
   }
 }

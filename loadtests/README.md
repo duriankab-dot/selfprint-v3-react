@@ -1,11 +1,11 @@
 # k6 Performance Tests — SELFPRINT V3
 
-**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001 + NOTIFCLIENT-001):** ✅ **PASS ทุก threshold ด้วยการรันจริง**
+**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001):** ⚠️ **K6V3-FIX-001 IN PROGRESS** — twin/twin-stream 429 ถูกนับเป็น load_error_rate เพราะ OpenRouter 429 ถูก handler แปลงเป็น 500
 
 | ผลรันจริง (selfprint-staging) | ผลลัพธ์ |
 |---|---|
-| k6 smoke 5 VU × 5min | **792/792 checks (100%)**, `smoke_error_rate` **0.00%**, ทุก latency threshold ผ่าน |
-| k6 quick load 20 VU × 60s (LOAD_PROFILE=quick) | **336/336 checks (100%)**, `load_error_rate` **0.00%**, `rate_limited_rate` 1.64% (rate limiter ทำงานถูกต้องและถูกจัดประเภทถูกต้อง) |
+| k6 smoke 5 VU × 5min | **792/792 checks (100%)**, `smoke_error_rate` **0.00%**, ทุก latency threshold ผ่าน (K6V2-FIX-001 + K6SLO-001) |
+| k6 quick load 20 VU × 60s | **FAIL** — `load_error_rate` 16.41% (twin 64%, twin-stream 42%) — K6V3-FIX-001 กำลังแก้: propagate OpenRouter 429 เป็น 429 (ไม่ 500) + user-based rate limiter + staging rate limit elevation |
 | k6 full load 45min (peak 100 VU) — รันโดยผู้ใช้ | **30929 iterations สมบูรณ์ 0 interrupted** — รอบแรก crossed `load_error_rate` จาก 2 สาเหตุด้านล่าง แก้ครบแล้ว; re-run ได้ทันที |
 | Node smoke 10 iterations | **70/70 PASS, Error rate 0.00%** |
 
@@ -128,6 +128,44 @@ k6 ถูก trigger ผ่าน **workflow_dispatch only** (manual):
 2. เลือก test type: `load` (smoke) หรือ `full`
 
 **สำคัญ:** k6 ไม่ใช่ dependency ของ Master Gate — รันแยก ไม่ block reporting
+
+## K6V3-FIX-001 (14 ก.ย. 2026) — twin/twin-stream 429 ถูกนับเป็น load_error_rate
+
+**ปัญหา:**
+- k6 quick test (20 VU × 60s) บน staging: `load_error_rate` 11-16%, twin 54-64%, twin-stream 42-81%
+- `rate_limited_rate` = 0% (ไม่มี 429 responses)
+- รากเหง้า: **2 bugs**
+
+**Bug 1: OpenRouter 429 ถูก handler แปลงเป็น 500**
+- `functions/api/twin.ts`, `twin-stream.ts`, `nova.ts`, `nova-stream.ts`: catch block ส่ง `return json({error:'Internal server error'}, 500)`.every OpenRouter error (รวม 429 rate limit)
+- `functions/api/_utils/ai-provider.ts`: throw `new Error('OpenRouter API error: ${res.status}')` — ไม่มี error text → handler ตรวจไม่ออกว่าเป็น 429
+- **ผล:** k6 ได้ 500 แทน 429 → check `200 or 429` ล้มเหลว → `loadErrorRate.add(!ok)` นับเป็น error
+
+**Bug 2: Rate limiter ใช้ IP-based (ทุก VU共用同一个 IP)**
+- `functions/api/twin.ts:70-80`, `twin-stream.ts`: `const ip = request.headers.get('x-forwarded-for')...`
+- k6 รันจาก GitHub Actions runner IP เดียว → 20 VUs共用同一个 rate limit bucket (40 req/min)
+- Twin weight 17.5% + twin-stream 17.5% = 35% ของ total requests → ชน 40 req/min ภายใน 1 นาทีแรก
+- **ผล:** Request ส่วนใหญ่โดน 429 → แต่ 429 ถูก handler แปลงเป็น 500 → k6 นับเป็น error
+
+**แก้ไข:**
+1. `ai-provider.ts`: throw message รวม status + error text → `throw new Error(\`OpenRouter API error: ${res.status} ${errorText}\`)`
+2. `twin.ts`, `twin-stream.ts`: catch block ตรวจ `msg.includes('429')` → ส่ง 429 แทน 500
+3. `nova.ts`, `nova-stream.ts`: เดียวกัน
+4. `twin.ts`, `twin-stream.ts`: rate limiter เปลี่ยนจาก IP-based เป็น user-based (`user.id` จาก JWT)
+5. `loadtests/loadtest.js`, `loadtest-smoke.js`: `loadErrorRate.add(!ok && !isRateLimited)` — 429 นับเป็น `rate_limited_rate` เท่านั้น
+6. `loadtests/config.js`: export `TWIN_RATE_LIMIT`, `TWIN_STREAM_RATE_LIMIT`, `NOVA_RATE_LIMIT`, `NOVA_STREAM_RATE_LIMIT`
+7. `.env.e2e.staging`: เพิ่ม `TWIN_RATE_LIMIT=200`, `TWIN_STREAM_RATE_LIMIT=200`, `NOVA_RATE_LIMIT=200`, `NOVA_STREAM_RATE_LIMIT=200` (สำหรับ staging test)
+
+**ไฟล์ที่แก้:**
+- `functions/api/_utils/ai-provider.ts`
+- `functions/api/twin.ts`
+- `functions/api/twin-stream.ts`
+- `functions/api/nova.ts`
+- `functions/api/nova-stream.ts`
+- `loadtests/loadtest.js`
+- `loadtests/loadtest-smoke.js`
+- `loadtests/config.js`
+- `.env.e2e.staging`
 
 ## Troubleshooting
 

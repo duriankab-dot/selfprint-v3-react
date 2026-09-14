@@ -75,7 +75,7 @@
 | 1 | CI E2E Green | LIFE-01 typo fixed + staging URL default updated |
 | 2 | Functional Gate Green | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | Documented in reports |
-| 4 | k6 Execution | **PASS on staging** — smoke 5 VU/5min: 792/792 checks (100%), error rate 0.00%, ทุก threshold ผ่าน (K6V2-FIX-001 + K6SLO-001) |
+| 4 | k6 Execution | **IN PROGRESS — K6V3-FIX-001** (14 ก.ย. 2026) — twin/twin-stream 429 ถูกนับเป็น load_error_rate เพราะ OpenRouter 429 ถูกแปลงเป็น 500 โดย handler + rate limiter ใช้ IP-based (ทุก VU จาก GitHub Actions共用同一个 IP ชน limit เร็ว) — แก้: propagate 429 จาก OpenRouter เป็น 429 (ไม่ 500) + เปลี่ยน rate limiter เป็น user-based + เพิ่ม rate limit สำหรับ staging — deploy แล้วรอ test ยืนยัน |
 | 5 | Target Product Spec | All phases implemented, tested, committed |
 
 ---

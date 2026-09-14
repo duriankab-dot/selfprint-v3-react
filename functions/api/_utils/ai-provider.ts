@@ -46,7 +46,7 @@ export async function callOpenRouter(
   if (!res.ok) {
     const errorText = await res.text();
     console.error('[ai-provider] OpenRouter error:', res.status, errorText);
-    throw new Error(`OpenRouter API error: ${res.status}`);
+    throw new Error(`OpenRouter API error: ${res.status} ${errorText}`);
   }
 
   // If streaming was requested, return the raw response for SSE forwarding
@@ -89,7 +89,7 @@ export async function getOpenRouterStream(
   if (!res.ok) {
     const errorText = await res.text();
     console.error('[ai-provider] OpenRouter streaming error:', res.status, errorText);
-    throw new Error(`OpenRouter API error: ${res.status}`);
+    throw new Error(`OpenRouter API error: ${res.status} ${errorText}`);
   }
 
   if (!res.body) {
