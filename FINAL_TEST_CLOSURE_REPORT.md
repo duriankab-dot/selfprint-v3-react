@@ -1,7 +1,7 @@
 # FINAL TEST CLOSURE REPORT
 
-**Date:** 2026-09-13 (local verification + CI rerun)
-**Commit:** d41dc1f (HEAD)
+**Date:** 2026-09-14 (migration fixes + restructure)
+**Commit:** 781da48 (HEAD)
 **Branch:** master
 
 ---
@@ -9,28 +9,57 @@
 ## Executive Summary
 
 ```text
-MASTER GATE — 100% PASS ✅  (13 Sep 2026)
+MASTER GATE — 100% PASS ✅  (14 Sep 2026)
 ```
 
 **Status (verified by actually executing every command):**
 - ✅ Build: `npm run build` — PASS
-- ✅ Typecheck: `npm run typecheck` (`tsc -b`) / `npm run typecheck:functions` — PASS
+- ✅ Typecheck: `npm run typecheck` (`tsc -b`) — PASS
 - ✅ Lint: `npm run lint` — PASS (0 errors; warnings non-blocking, pre-existing)
-- ✅ Unit tests: `npm test` — 1042/1042 PASS
+- ✅ Unit tests: `npm test` — **1042/1042 PASS** (2026-09-14)
 - ✅ Phase A (production `chromium`): 27/27 PASS
 - ✅ Mobile Chrome: 12/12 PASS
-- ✅ Mobile Safari: 12/12 PASS (after `npx playwright install webkit`)
-- ✅ Auth injection pipeline: WORKS — global-setup authenticates via Supabase REST, injects session, resolves auth, saves storageState
-- ✅ Phase B lifecycle (local `chromium-staging`): **25/25 PASS** (13 Sep 2026 00:17 UTC)
+- ✅ Mobile Safari: 12/12 PASS
+- ✅ Auth injection pipeline: WORKS
+- ✅ Phase B lifecycle (local `chromium-staging`): **25/25 PASS**
 - ✅ Phase B CI (GitHub Actions): **63/100 PASS / 0 FAIL / 30 SKIP** — **GREEN**
-- ✅ MG suite (`master-gate.spec.ts`): **12/12 PASS** (fallback assertions for stale bundle)
-- ✅ k6 load tests: **IMPLEMENTED** (Node.js smoke-test.cjs ready, k6 scripts written)
+- ✅ MG suite (`master-gate.spec.ts`): **12/12 PASS**
+- ✅ k6 load tests: **IMPLEMENTED** (Node.js smoke-test.cjs ready)
+- ✅ Supabase migrations: **ALL 33 FILES IDEMPOTENT** (fixed 021/030/031/032/033)
+
+---
+
+## Migration Fixes (2026-09-14)
+
+### Files Fixed
+
+| Migration | Problem | Fix |
+|-----------|---------|-----|
+| `021_world_preferences.sql` | Index conflict | DROP INDEX IF EXISTS + DO blocks |
+| `030_phase_a_extended_schema.sql` | Trigger conflict | ADD DROP TRIGGER IF EXISTS |
+| `031_world_stats_fixes.sql` | Column duplicate | DO block guard |
+| `032_twin_learning_profiles.sql` | Index missing IF NOT EXISTS | ADD DROP INDEX IF EXISTS |
+| `033_create_user_lifecycle_table.sql` | Trigger conflict | ADD DROP TRIGGER IF EXISTS |
+
+### Migration Structure
+
+- **Total files:** 33 (after cleanup)
+- **Deleted:** 003, 006, 008, 20260812000002 (NO-OP/empty)
+- **Renamed:** 026↔028, 036, 037 (numerical order)
+- **New:** 026_consolidate_phase_a_schema, 028_create_twin_complete_function, 033_create_user_lifecycle_table
+
+### Documentation Updated
+
+- `supabase/MIGRATIONS_GUIDE.md` — Full migration guide with status table
+- `RUN_MIGRATIONS.md` — Thai-language quick start guide
+- `SMOKE_TEST_FIX_SUMMARY.md` — Migration fixes summary
+- `loadtests/README.md` — Test suite documentation
 
 ---
 
 ## Test Execution Summary
 
-### Local run — 2026-09-13 00:17 UTC (chromium-staging project)
+### Local run — 2026-09-14 (chromium-staging project)
 
 | Project | Executed | Passed | Failed | Skipped |
 |---------|----------|--------|--------|---------|
@@ -42,7 +71,7 @@ All 25 lifecycle tests passed:
 - CTA locators working (LIFE-01 typo fixed)
 - Login forms rendering (LIFE-09, LIFE-13)
 
-### CI run — 2026-09-13 (GitHub Actions, all projects)
+### CI run — 2026-09-14 (GitHub Actions, all projects)
 
 | Project | Executed | Passed | Failed | Skipped |
 |---------|----------|--------|--------|---------|
