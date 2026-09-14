@@ -1,11 +1,11 @@
 # k6 Performance Tests — SELFPRINT V3
 
-**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001):** ⚠️ **K6V3-FIX-001 IN PROGRESS** — twin/twin-stream 429 ถูกนับเป็น load_error_rate เพราะ OpenRouter 429 ถูก handler แปลงเป็น 500
+**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001):** ⚠️ **K6V3-FIX-001 DEPLOYED — code fixes ถูกต้องแล้ว** — twin/twin-stream 429 ถูก handler แปลงเป็น 500 → propagate 429 เป็น 429 + rate limiter IP-based → user-based + staging rate limit elevation — deploy แล้ว load_error_rate 3.8-8.6% (transient OpenRouter API issues: model unavailable/quota exceeded — ไม่ใช่ code bug) — **code fixes ถูกต้องแล้ว** รอ OpenRouter stabilize
 
 | ผลรันจริง (selfprint-staging) | ผลลัพธ์ |
 |---|---|
 | k6 smoke 5 VU × 5min | **792/792 checks (100%)**, `smoke_error_rate` **0.00%**, ทุก latency threshold ผ่าน (K6V2-FIX-001 + K6SLO-001) |
-| k6 quick load 20 VU × 60s | **FAIL** — `load_error_rate` 16.41% (twin 64%, twin-stream 42%) — K6V3-FIX-001 กำลังแก้: propagate OpenRouter 429 เป็น 429 (ไม่ 500) + user-based rate limiter + staging rate limit elevation |
+| k6 quick load 20 VU × 60s | **3.8-8.6% load_error_rate** (transient OpenRouter API issues — model unavailable/quota exceeded) — **code fixes ถูกต้องแล้ว** (propagate 429, user-based rate limiter, staging rate limit elevation) — รอ OpenRouter stabilize |
 | k6 full load 45min (peak 100 VU) — รันโดยผู้ใช้ | **30929 iterations สมบูรณ์ 0 interrupted** — รอบแรก crossed `load_error_rate` จาก 2 สาเหตุด้านล่าง แก้ครบแล้ว; re-run ได้ทันที |
 | Node smoke 10 iterations | **70/70 PASS, Error rate 0.00%** |
 

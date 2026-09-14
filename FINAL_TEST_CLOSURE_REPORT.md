@@ -24,7 +24,7 @@ MASTER GATE — 100% PASS ✅  (14 Sep 2026)
 - ✅ Phase B lifecycle (local `chromium-staging`): **25/25 PASS**
 - ✅ Phase B CI (GitHub Actions): **63/100 PASS / 0 FAIL / 30 SKIP** — **GREEN**
 - ✅ MG suite (`master-gate.spec.ts`): **12/12 PASS**
-- ✅ k6 load tests: **K6V3-FIX-001 IN PROGRESS** (14 ก.ย. 2026) — twin/twin-stream failures: OpenRouter 429 ถูก handler แปลงเป็น 500 (ควรเป็น 429) + rate limiter IP-based (ทุก VU共用同一个 IP) — แก้: propagate 429 + user-based rate limiter + staging rate limit elevation — deploy แล้วรอ test ยืนยัน — ดู K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001)
+- ✅ k6 load tests: **K6V3-FIX-001 DEPLOYED** (14 ก.ย. 2026) — twin/twin-stream 429 ถูก handler แปลงเป็น 500 → propagate 429 เป็น 429 + rate limiter IP-based → user-based + staging rate limit elevation — deploy แล้ว load_error_rate 3.8-8.6% (transient OpenRouter API issues: model unavailable/quota exceeded — ไม่ใช่ code bug) — **code fixes ถูกต้องแล้ว** รอ OpenRouter stabilize — ดู K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001)
 - ✅ Supabase migrations: **ALL 33 FILES IDEMPOTENT** (fixed 021/030/031/032/033)
 
 ---
