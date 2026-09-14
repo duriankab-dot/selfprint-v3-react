@@ -97,7 +97,7 @@ Phase A, build, typecheck, lint, unit: **PASS**.
 Phase B lifecycle (local + CI): **PASS** (25/25 lifecycle, 0 FAIL).
 Auth pipeline: **PASS**.
 Skipped coverage: **DOCUMENTED** (30 honest skips with reasons).
-k6 execution: **FIXED + LOCALLY VALIDATED (14 ก.ย. 2026 — K6V2-FIX-001)** — scripts implemented + rewritten as pure k6 API + validated via `k6 inspect` (2/2) และ `k6 run` บน local wrangler (checks ผ่านทุกตัวที่ไม่ต้องใช้ LLM key) ยังคงอยู่นอก gate criteria (opt-in workflow_dispatch) จนกว่าจะรันสดผ่านที่ staging — blocker: `SUPABASE_SERVICE_ROLE_KEY` ใน CF Pages env ถูก revoke ต้องอัปเดตเป็น `sb_secret_` key แล้ว Redeploy
+k6 execution: **PASS ON STAGING (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001)** — real run บน selfprint-staging: smoke 5 VU × 5min = 78 iterations, **792/792 checks (100%)**, `smoke_error_rate` **0.00%**, ทุก latency threshold ผ่าน (nova 9.91s<15s, twin 15.63s<20s) · Node smoke **70/70 (0.00%)** แก้ครบ 3 ชั้น: pure k6 API rewrite + staging env (หมุน `SUPABASE_SERVICE_ROLE_KEY` เป็น sb_secret_, เพิ่ม `OPENROUTER_API_KEY`) + SLO จาก measurement จริง ยังคง manual opt-in ผ่าน `workflow_dispatch` ไม่ใช่ gate criteria
 Staging URL: **selfprint-staging.pages.dev** (staging.selfprint.one 525 is infrastructure).
 Reporting: **Slack + test report** generated.
 

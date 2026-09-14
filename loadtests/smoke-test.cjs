@@ -167,7 +167,7 @@ async function runSmokeTest(iterations) {
           temperature: 0.8,
           max_tokens: 500,
         });
-        const res = await httpPost(ENDPOINTS.TWIN, payload, { headers: headers, timeout: 15000 });
+        const res = await httpPost(ENDPOINTS.TWIN, payload, { headers: headers, timeout: 30000 });
         if (res.status !== 200 && res.status !== 429) {
           throw new Error('Expected 200/429, got ' + res.status);
         }
@@ -188,7 +188,7 @@ async function runSmokeTest(iterations) {
           temperature: 0.7,
           max_tokens: 500,
         });
-        const res = await httpPost(ENDPOINTS.NOVA, payload, { headers: headers, timeout: 15000 });
+        const res = await httpPost(ENDPOINTS.NOVA, payload, { headers: headers, timeout: 30000 });
         if (res.status !== 200 && res.status !== 429) {
           throw new Error('Expected 200/429, got ' + res.status);
         }

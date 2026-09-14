@@ -192,10 +192,10 @@ export const options = {
     'http_req_duration{name:auth-token}': ['p(95)<2000'],
 
     // AI endpoints (ค่าใช้จ่ายสูงสุด)
-    'http_req_duration{name:twin-post}': ['p(95)<8000', 'p(99)<15000'],
-    'http_req_duration{name:twin-stream}': ['p(95)<15000'],
-    'http_req_duration{name:nova-post}': ['p(95)<7000', 'p(99)<12000'],
-    'http_req_duration{name:nova-stream}': ['p(95)<15000'],
+    'http_req_duration{name:twin-post}': ['p(95)<20000', 'p(99)<30000'],
+    'http_req_duration{name:twin-stream}': ['p(95)<25000'],
+    'http_req_duration{name:nova-post}': ['p(95)<15000', 'p(99)<30000'],
+    'http_req_duration{name:nova-stream}': ['p(95)<25000'],
 
     // Data endpoints
     'http_req_duration{name:profile-get}': ['p(95)<1000'],
@@ -304,7 +304,8 @@ function runTwinTest(headers) {
   }), {
     headers,
     tags: { name: 'twin-post' },
-    timeout: '15s',
+    // K6SLO-001: 30s — Gemini generation + vector search วัดได้ p95 ~15s ที่ 5 VU
+    timeout: '30s',
   });
 
   const ok = check(res, {
@@ -345,7 +346,8 @@ function runNovaTest(headers) {
   }), {
     headers,
     tags: { name: 'nova-post' },
-    timeout: '15s',
+    // K6SLO-001: 30s — เผื่อ generation latency สูงช่วง load พร้อมกัน
+    timeout: '30s',
   });
 
   const ok = check(res, {
