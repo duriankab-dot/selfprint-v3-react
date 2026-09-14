@@ -10,6 +10,7 @@
 
 import { supabase } from '../lib/supabase/client.js';
 import { scheduleNotification } from './PushScheduler.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface DecisionFollowUp {
   decisionId: string;
@@ -24,13 +25,19 @@ export interface DecisionFollowUp {
 /**
  * Schedule follow-up reminders for a decision
  * Creates 3 follow-ups: 1 day, 7 days, 30 days
+ *
+ * NOTIFCLIENT-001: optional `client` — server caller (unified-handler) ส่ง
+ * admin client เข้ามา (frontend client ใช้ไม่ได้ใน CF Functions runtime และ
+ * anon key โดน RLS block — ดู PushScheduler.scheduleNotification comment)
+ * caller ฝั่ง frontend ไม่ส่ง = default เดิม
  */
 export async function scheduleDecisionFollowUps(
   decisionId: string,
   userId: string,
   twinId: string,
   decisionTitle: string,
-  timezone: string = 'UTC'
+  timezone: string = 'UTC',
+  client: SupabaseClient = supabase
 ): Promise<{ success: boolean; followUpsCreated?: number }> {
   try {
     const now = new Date();
@@ -53,7 +60,7 @@ export async function scheduleDecisionFollowUps(
           followUpDays: days,
           stage: days === 1 ? '1-day' : days === 7 ? '7-day' : '30-day',
         },
-      });
+      }, client);
 
       if (result.success) {
         created++;
@@ -62,7 +69,7 @@ export async function scheduleDecisionFollowUps(
 
     // Store follow-up tracking record
     if (created > 0) {
-      await supabase.from('decision_follow_ups').insert({
+      await client.from('decision_follow_ups').insert({
         decision_id: decisionId,
         user_id: userId,
         twin_id: twinId,

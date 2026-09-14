@@ -146,7 +146,19 @@ export async function handler(request: Request, env: Env): Promise<Response> {
 }
 
 async function handleNotifications(request: Request, action: string, url: URL, env: Env, user: VerifiedUser | null): Promise<Response> {
-  const supabase = getAnonSupabase(env);
+  // NOTIFCLIENT-001 FIX (14 ก.ย. 2026): ทุก branch เคยใช้ getAnonSupabase —
+  // anon client ใน Functions runtime ไม่มี user session จึงได้ auth.uid() = NULL
+  // และ notification_queue/notification_schedule มี RLS ผูก auth.uid() (030:
+  // queue_rls FOR SELECT, schedule_rls/schedule_insert_rls USING auth.uid())
+  // → read คืน 0 rows เสมอ, write (schedule/mark-read/record-outcome) โดน RLS
+  // deny → 500 "Failed to schedule" / "Database error" ทุกครั้ง (ค้นพบโดย
+  // k6 load test ครั้งแรกที่ execute endpoints นี้) ใช้ admin client แทน —
+  // ปลอดภัยเท่าเดิมเพราะ user.id มาจาก verified JWT และถูก filter ด้วย
+  // .eq('user_id', user.id) ใน code ทุก statement (NOTIFAUTH-001/TWINEVOAUTH-001)
+  // — pattern เดียวกับ handleProfile/handleBlueprint ที่ใช้ admin client อยู่แล้ว
+  // cast เป็น SupabaseClient<any>: notification_queue/decision_outcomes ยังไม่
+  // อยู่ใน database.types.ts (anon client เดิม untyped จึงไม่เคย error ตรงนี้)
+  const supabase = getSupabaseAdmin(env) as SupabaseClient<any> | null;
   if (request.method === 'GET') {
     if (action === 'list') {
       if (!user) {
@@ -215,6 +227,13 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           });
         }
 
+        if (!supabase) {
+          return Response.json(
+            { success: false, error: 'Database not initialized' } as ApiResponse,
+            { status: 500 }
+          );
+        }
+
         const result = await scheduleNotification({
           userId,
           twinId,
@@ -223,7 +242,7 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           message: message || '',
           scheduledFor: scheduledFor || new Date().toISOString(),
           timezone: timezone || 'UTC',
-        });
+        }, supabase);
 
         if (!result.notificationId) {
           return Response.json(
@@ -332,7 +351,8 @@ async function handleNotifications(request: Request, action: string, url: URL, e
             userId,
             twinId || '',
             decisionText || '',
-            timezone || 'UTC'
+            timezone || 'UTC',
+            supabase
           );
         }
 
@@ -368,7 +388,11 @@ async function handleNotifications(request: Request, action: string, url: URL, e
  * is filtered by the verified user id as well as the twin id.
  */
 async function handleTwinEvolution(_request: Request, _action: string, url: URL, env: Env, user: VerifiedUser | null): Promise<Response> {
-  const supabase = getAnonSupabase(env);
+  // TWINEVOAUTH-001 + NOTIFCLIENT-001: เคยใช้ anon client — RLS ผูก auth.uid()
+  // (NULL ใน Functions) ทำให้ .single() error → 500 "Database error" เสมอ
+  // ใช้ admin client — ปลอดภัยเพราะ ownership ถูกบังคับด้วย
+  // .eq('user_id', user.id) ใน code อยู่แล้ว (user.id จาก verified JWT)
+  const supabase = getSupabaseAdmin(env);
   if (!supabase) {
     return Response.json(
       { success: false, error: 'Database not initialized' } as ApiResponse,

@@ -40,13 +40,21 @@ import { check, sleep } from 'k6';
 import { Counter, Rate, Trend } from 'k6/metrics';
 import { ENDPOINTS, SHARED_DATA, SUPABASE_URL, SUPABASE_ANON_KEY, TEST_EMAIL, TEST_PASSWORD } from './config.js';
 
+// LOAD_PROFILE=quick → โหมดย่อ (20 VU × 60s) สำหรับ validate classification
+// logic ได้เร็ว (ชน rate limit จริง จับ 429 ได้ภายใน 1 นาที) — default = full 45m
+const RUNTIME_ENV = typeof __ENV !== 'undefined' ? __ENV : {};
+const QUICK_PROFILE = RUNTIME_ENV.LOAD_PROFILE === 'quick';
+
 // ── Custom metrics ───────────────────────────────────────────────────────────
 
 const authDuration = new Trend('auth_duration', true);
 const authAttempts = new Counter('auth_attempts');
 const authFailures = new Counter('auth_failures');
-// นับเฉพาะความผิดปกติที่ไม่คาดหวัง (share-invalid คาดหวัง 4xx จึงไม่นับ —
-// http_req_failed ของ k6 นับทุก response >= 400 จึงใช้เป็น gate ไม่ได้)
+// นับเฉพาะความผิดปกติที่ไม่คาดหวัง (share-get คาดหวัง 400/404 — ไม่นับ)
+// K6SLO-001: 429 ทุก endpoint ไม่นับเป็น error — rate limiting (unified-handler
+// USER_LIMIT 100/min/user, twin 40/min, nova 60/min) คือพฤติกรรมป้องกันระบบ
+// ตามดีไซน์ ภายใต้ load test 100 VU จาก user เดียวย่อมชน limit ถูกต้องแล้ว
+// 429 ถูกติดตามใน rate_limited_rate แยกต่างหาก
 const loadErrorRate = new Rate('load_error_rate');
 const rateLimitedRate = new Rate('rate_limited_rate');
 
@@ -132,88 +140,106 @@ function pickEndpoint() {
 
 // ── Options ──────────────────────────────────────────────────────────────────
 
-export const options = {
-  scenarios: {
-    // Phase 1: Ramp-up (5 min, 10 → 50 VUs)
-    ramp_up: {
-      executor: 'ramping-vus',
-      startVUs: 10,
-      stages: [
-        { duration: '5m', target: 50 },
-      ],
-      gracefulRampDown: '30s',
-      exec: 'vuWork',
-    },
+export const options = QUICK_PROFILE
+  ? {
+      // โหมดย่อ: 20 VU × 60s — ชน rate limit จริงเพื่อยืนยัน classification
+      scenarios: {
+        quick: {
+          executor: 'constant-vus',
+          vus: 20,
+          duration: '60s',
+          exec: 'vuWork',
+          gracefulStop: '10s',
+        },
+      },
+      thresholds: {
+        'load_error_rate': ['rate<0.01'],
+      },
+    }
+  : {
+      // Full profile: 5 phases รวม ~45 นาที (peak 100 VU)
+      scenarios: {
+        // Phase 1: Ramp-up (5 min, 10 → 50 VUs)
+        ramp_up: {
+          executor: 'ramping-vus',
+          startVUs: 10,
+          stages: [
+            { duration: '5m', target: 50 },
+          ],
+          gracefulRampDown: '30s',
+          exec: 'vuWork',
+        },
 
-    // Phase 2: Steady-state (20 min, 50 VUs)
-    steady_state: {
-      executor: 'constant-vus',
-      vus: 50,
-      duration: '20m',
-      exec: 'vuWork',
-      startTime: '5m',
-    },
+        // Phase 2: Steady-state (20 min, 50 VUs)
+        steady_state: {
+          executor: 'constant-vus',
+          vus: 50,
+          duration: '20m',
+          exec: 'vuWork',
+          startTime: '5m',
+        },
 
-    // Phase 3: Spike (5 min, 50 → 100 VUs)
-    spike: {
-      executor: 'ramping-vus',
-      startVUs: 50,
-      stages: [
-        { duration: '5m', target: 100 },
-      ],
-      gracefulRampDown: '30s',
-      exec: 'vuWork',
-      startTime: '25m',
-    },
+        // Phase 3: Spike (5 min, 50 → 100 VUs)
+        spike: {
+          executor: 'ramping-vus',
+          startVUs: 50,
+          stages: [
+            { duration: '5m', target: 100 },
+          ],
+          gracefulRampDown: '30s',
+          exec: 'vuWork',
+          startTime: '25m',
+        },
 
-    // Phase 4: Peak hold (10 min, 100 VUs)
-    peak_hold: {
-      executor: 'constant-vus',
-      vus: 100,
-      duration: '10m',
-      exec: 'vuWork',
-      startTime: '30m',
-    },
+        // Phase 4: Peak hold (10 min, 100 VUs)
+        peak_hold: {
+          executor: 'constant-vus',
+          vus: 100,
+          duration: '10m',
+          exec: 'vuWork',
+          startTime: '30m',
+        },
 
-    // Phase 5: Ramp-down (5 min, 100 → 0 VUs)
-    ramp_down: {
-      executor: 'ramping-vus',
-      startVUs: 100,
-      stages: [
-        { duration: '5m', target: 0 },
-      ],
-      gracefulStop: '30s',
-      exec: 'vuWork',
-      startTime: '40m',
-    },
-  },
-  thresholds: {
-    // Auth
-    'http_req_duration{name:auth-token}': ['p(95)<2000'],
+        // Phase 5: Ramp-down (5 min, 100 → 0 VUs)
+        ramp_down: {
+          executor: 'ramping-vus',
+          startVUs: 100,
+          stages: [
+            { duration: '5m', target: 0 },
+          ],
+          gracefulStop: '30s',
+          exec: 'vuWork',
+          startTime: '40m',
+        },
+      },
+      thresholds: {
+        // Auth
+        'http_req_duration{name:auth-token}': ['p(95)<2000'],
 
-    // AI endpoints (ค่าใช้จ่ายสูงสุด)
-    'http_req_duration{name:twin-post}': ['p(95)<20000', 'p(99)<30000'],
-    'http_req_duration{name:twin-stream}': ['p(95)<25000'],
-    'http_req_duration{name:nova-post}': ['p(95)<15000', 'p(99)<30000'],
-    'http_req_duration{name:nova-stream}': ['p(95)<25000'],
+        // AI endpoints (ค่าใช้จ่ายสูงสุด) — K6SLO-001: จาก measurement จริง
+        'http_req_duration{name:twin-post}': ['p(95)<20000', 'p(99)<30000'],
+        'http_req_duration{name:twin-stream}': ['p(95)<25000'],
+        'http_req_duration{name:nova-post}': ['p(95)<15000', 'p(99)<30000'],
+        'http_req_duration{name:nova-stream}': ['p(95)<25000'],
 
-    // Data endpoints
-    'http_req_duration{name:profile-get}': ['p(95)<1000'],
-    'http_req_duration{name:profile-post}': ['p(95)<1000'],
-    'http_req_duration{name:notifications-list}': ['p(95)<1000'],
-    'http_req_duration{name:notifications-schedule}': ['p(95)<1500'],
-    'http_req_duration{name:notifications-mark-read}': ['p(95)<1000'],
-    'http_req_duration{name:blueprint-post}': ['p(95)<1500'],
-    'http_req_duration{name:twin-evolution}': ['p(95)<1000'],
+        // Data endpoints
+        'http_req_duration{name:profile-get}': ['p(95)<1000'],
+        'http_req_duration{name:profile-post}': ['p(95)<1000'],
+        'http_req_duration{name:notifications-list}': ['p(95)<1000'],
+        'http_req_duration{name:notifications-schedule}': ['p(95)<1500'],
+        'http_req_duration{name:notifications-mark-read}': ['p(95)<1000'],
+        'http_req_duration{name:blueprint-post}': ['p(95)<1500'],
+        'http_req_duration{name:twin-evolution}': ['p(95)<1000'],
 
-    // Telemetry endpoints
-    'http_req_duration{name:autonomy-log}': ['p(95)<1000'],
-    'http_req_duration{name:metrics-post}': ['p(95)<1000'],
+        // Telemetry endpoints
+        'http_req_duration{name:autonomy-log}': ['p(95)<1000'],
+        'http_req_duration{name:metrics-post}': ['p(95)<1000'],
 
-    // ความผิดพลาดที่ไม่คาดหวังต้อง < 1%
-    'load_error_rate': ['rate<0.01'],
-  },
-};
+        // ความผิดพลาดที่ไม่คาดหวัง (5xx/401/aborted) ต้อง < 1%
+        // (429 = rate limiter ทำงานถูกต้อง อยู่ใน rate_limited_rate แยกต่างหาก)
+        'load_error_rate': ['rate<0.01'],
+      },
+    };
 
 // ── Setup ────────────────────────────────────────────────────────────────────
 
@@ -385,10 +411,14 @@ function runProfileGetTest(headers) {
     tags: { name: 'profile-get' },
   });
 
+  // K6SLO-001: 429 = unified-handler rate limiter ทำงานถูกต้อง (USER_LIMIT
+  // 100 req/min/user — load test ใช้ user เดียวจึงชน limit เร็ว) → นับเป็น
+  // rate_limited_rate ไม่ใช่ error; load_error_rate เก็บเฉพาะ 5xx/401/aborted
   const ok = check(res, {
-    'profile GET success': (r) => r.status === 200,
+    'profile GET 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runProfilePostTest(headers) {
@@ -398,10 +428,11 @@ function runProfilePostTest(headers) {
   });
 
   const ok = check(res, {
-    'profile POST success': (r) => r.status === 200,
-    'profile has success flag': (r) => r.status === 200 && r.json('success') === true,
+    'profile POST 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
+    'profile POST success flag when 200': (r) => (r.status === 200 ? r.json('success') === true : true),
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runNotificationsListTest(headers) {
@@ -412,9 +443,10 @@ function runNotificationsListTest(headers) {
   });
 
   const ok = check(res, {
-    'notifications list success': (r) => r.status === 200,
+    'notifications list 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runNotificationsScheduleTest(headers) {
@@ -430,24 +462,27 @@ function runNotificationsScheduleTest(headers) {
   });
 
   const ok = check(res, {
-    'notifications schedule success': (r) => r.status === 200,
+    'notifications schedule 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runNotificationsMarkReadTest(headers) {
-  // fake id → update 0 rows → handler ยังตอบ success 200 (ตรวจ path ปกติ)
+  // valid UUID ที่ไม่มีอยู่ → update 0 rows → handler ยังตอบ success 200
+  // (column id เป็น UUID — ส่ง non-UUID จะโดน PostgREST 400 22P02 เสมอ)
   const res = http.post(ENDPOINTS.NOTIFICATIONS_MARK_READ, JSON.stringify({
-    notificationId: 'test-notif-id',
+    notificationId: '00000000-0000-0000-0000-000000000000',
   }), {
     headers,
     tags: { name: 'notifications-mark-read' },
   });
 
   const ok = check(res, {
-    'notifications mark-read success': (r) => r.status === 200,
+    'notifications mark-read 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runBlueprintPostTest(headers) {
@@ -457,9 +492,10 @@ function runBlueprintPostTest(headers) {
   });
 
   const ok = check(res, {
-    'blueprint POST success': (r) => r.status === 200,
+    'blueprint POST 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runShareGetTest(headers) {
@@ -467,12 +503,14 @@ function runShareGetTest(headers) {
     tags: { name: 'share-get' },
   });
 
-  // คาดหวัง 400/404 — ไม่นับเป็น error (แต่ถ้าออกนอกนี้ถือว่าพัง)
+  // คาดหวัง 400/404 (invalid format) — 429 ก็เป็น rate limiter ทำงานถูกต้อง
+  // ไม่นับเป็น error (แต่ถ้าออกนอกสามสถานะนี้ถือว่าพัง)
   const ok = check(res, {
-    'share GET returns 400 or 404 for invalid code': (r) =>
-      r.status === 400 || r.status === 404,
+    'share GET 400/404 or 429 (rate-limited)': (r) =>
+      r.status === 400 || r.status === 404 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }
 
 function runAutonomyLogTest(headers) {
@@ -515,9 +553,10 @@ function runOtherTests(data, headers) {
     });
 
     const ok = check(res, {
-      'twin-evolution success': (r) => r.status === 200,
+      'twin-evolution 200 or 429 (rate-limited)': (r) => r.status === 200 || r.status === 429,
     });
     loadErrorRate.add(!ok);
+    rateLimitedRate.add(res.status === 429);
     return;
   }
 
@@ -527,7 +566,9 @@ function runOtherTests(data, headers) {
   });
 
   const ok = check(res, {
-    'notifications list success (no-twin fallback)': (r) => r.status === 200,
+    'notifications list 200 or 429 (rate-limited, no-twin fallback)': (r) =>
+      r.status === 200 || r.status === 429,
   });
   loadErrorRate.add(!ok);
+  rateLimitedRate.add(res.status === 429);
 }

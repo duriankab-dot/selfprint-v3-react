@@ -15,6 +15,7 @@
  */
 
 import { supabase } from '../lib/supabase/client.js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export interface NotificationSchedule {
   id?: string;
@@ -51,16 +52,25 @@ export interface NotificationQueue {
 
 /**
  * Schedule a notification for future delivery
+ *
+ * NOTIFCLIENT-001 (14 ก.ย. 2026): เพิ่ม optional `client` parameter — server
+ * caller (unified-handler บน CF Functions runtime) ต้องส่ง admin client เข้ามา
+ * เพราะ (1) frontend `supabase` อ่าน import.meta.env ซึ่งไม่มีใน Functions
+ * runtime (ENVNAME-001) และ (2) แม้มี anon key การเขียน notification_schedule /
+ * notification_queue ก็โดน RLS block (policies ผูก auth.uid() ซึ่งเป็น NULL
+ * เมื่อไม่มี user session ใน Functions) — caller ฝั่ง frontend ไม่ส่ง client
+ * จะได้ default เดิม ทำงานเหมือนก่อนทุกอย่าง
  */
 export async function scheduleNotification(
-  notification: NotificationSchedule
+  notification: NotificationSchedule,
+  client: SupabaseClient = supabase
 ): Promise<{ success: boolean; notificationId?: string; message: string }> {
   try {
     if (!notification.userId || !notification.scheduledFor) {
       return { success: false, message: 'Missing required fields' };
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from('notification_schedule')
       .insert({
         user_id: notification.userId,

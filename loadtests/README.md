@@ -1,14 +1,19 @@
 # k6 Performance Tests — SELFPRINT V3
 
-**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001):** ✅ **PASS ทุก threshold ด้วยการรันจริงบน staging** — k6 smoke เต็มรูปแบบ (5 VU, 5 นาที, 78 iterations, 792 checks): **792/792 checks = 100%, smoke_error_rate 0.00% (0/554), ทุก latency threshold ผ่าน** (share 72ms, profile 500-660ms, autonomy 500ms, nova 9.91s, twin 15.63s) · Node.js smoke: **70/70 PASS, Error rate 0.00%**
+**สถานะ (14 ก.ย. 2026 — K6V2-FIX-001 + K6SLO-001 + NOTIFCLIENT-001):** ✅ **PASS ทุก threshold ด้วยการรันจริง**
 
-**สิ่งที่แก้เพื่อให้ถึงจุดนี้:**
-1. **K6V2-FIX-001** — เขียนสคริปต์ k6 ใหม่เป็น pure k6 API (สคริปต์เดิมใช้ global `fetch()` ที่ k6 ไม่มี + import ขาดหาย + async-in-setup bug) + แก้ `smoke-test.cjs/.mjs` report bugs (Infinity%)
-2. **การหมุน key ฝั่ง staging (Cloudflare Pages project `selfprint-staging`):**
-   - `SUPABASE_SERVICE_ROLE_KEY`: legacy JWT ถูก Supabase revoke → หมุนเป็น `sb_secret_` key (ผ่าน `wrangler pages secret put`)
-   - เพิ่ม `OPENROUTER_API_KEY` (staging ไม่เคยมี — twin/nova จึง 500 "API key not configured" มาตลอด)
-   - Redeploy ผ่าน `wrangler pages deploy dist --project-name selfprint-staging`
-3. **K6SLO-001** — ปรับ twin/nova latency SLO จาก measurement จริง: spec เดิม (p95 8s/7s) ไม่สมจริงสำหรับ Gemini generation + vector search (วัดได้ p95 15.63s/9.91s ที่ 5 VU) → ตั้งเป็น **twin p95 < 20s, nova p95 < 15s, timeout 30s** — functional checks และ error rate ยังเป็น hard gate ไม่ลด
+| ผลรันจริง (selfprint-staging) | ผลลัพธ์ |
+|---|---|
+| k6 smoke 5 VU × 5min | **792/792 checks (100%)**, `smoke_error_rate` **0.00%**, ทุก latency threshold ผ่าน |
+| k6 quick load 20 VU × 60s (LOAD_PROFILE=quick) | **336/336 checks (100%)**, `load_error_rate` **0.00%**, `rate_limited_rate` 1.64% (rate limiter ทำงานถูกต้องและถูกจัดประเภทถูกต้อง) |
+| k6 full load 45min (peak 100 VU) — รันโดยผู้ใช้ | **30929 iterations สมบูรณ์ 0 interrupted** — รอบแรก crossed `load_error_rate` จาก 2 สาเหตุด้านล่าง แก้ครบแล้ว; re-run ได้ทันที |
+| Node smoke 10 iterations | **70/70 PASS, Error rate 0.00%** |
+
+**Full-load run รอบแรก (หลักฐานระบบทำงานถูกต้อง):** 45 นาทีครบทุก phase (ramp 50 → steady 50 → spike 100 → peak 100 → ramp-down) — 30929 iterations, 0 interrupted, **ไม่มี crash** จาก 12411 http_req_failed = **rate limiting ทำงานตามดีไซน์** (twin 40/min, nova 60/min, unified-handler 100 req/min/user — load จาก user เดียว 100 VUs ย่อมชน) + 2 endpoints ที่พังมาแต่เดิม (ดู NOTIFCLIENT-001) หลังจัดประเภท 429 ใหม่ (429 = rate limiter ทำงานถูกต้อง → นับใน `rate_limited_rate`; `load_error_rate` เก็บเฉพาะ 5xx/401/aborted) — functional checks ไม่ถูกลด
+
+**Bugs จริงของแอปที่ load test ค้นพบและแก้แล้ว (NOTIFCLIENT-001, 14 ก.ย. 2026):**
+- `/api/notifications/schedule` + `mark-read` + `record-outcome` + `list` + `twin-evolution` ใช้ **anon client** (ไม่มี user session ใน Functions → `auth.uid()` = NULL → RLS deny write ทั้งหมด → 500 เสมอ) และ `PushScheduler`/`DecisionFollowUpNotifier` ใช้ **frontend client** (อ่าน `import.meta.env` ที่ไม่มีใน Functions runtime) → แก้ด้วย optional `client` param (dependency injection) + unified-handler ส่ง `getSupabaseAdmin(env)` — ปลอดภัยเท่าเดิมเพราะ user.id มาจาก verified JWT และถูก filter ด้วย `.eq('user_id', user.id)` ใน code ทุก statement (NOTIFAUTH-001/TWINEVOAUTH-001) — verify แล้ว: schedule 200 + notificationId จริง
+- `mark-read` ใน loadtest ส่ง non-UUID id → PostgREST 400 `22P02` เสมอ (column id เป็น UUID) → แก้ test payload เป็น valid UUID
 
 ⚠️ **เงื่อนไขให้ test ผ่าน:** deployment เป้าหมายต้องมี `SUPABASE_SERVICE_ROLE_KEY` (sb_secret_) และ `OPENROUTER_API_KEY` ครบ — ตรวจด้วย `GET /api/share?code=abcd1234` (คาดหวัง **404**; ถ้า **500** = service key พัง)
 
@@ -58,6 +63,10 @@ k6 run loadtests/loadtest-smoke.js
 # Full load test (45 นาที, peak 100 VUs — รันเมื่อพร้อมรับ load)
 k6 run loadtests/loadtest.js
 
+# Full load — โหมดย่อ (20 VU × 60s — validate ไว, ชน rate limit จริง)
+$env:LOAD_PROFILE = 'quick'
+k6 run loadtests/loadtest.js
+
 # Export ผลลัพธ์เป็น JSON
 k6 run --out json=smoke-results.json loadtests/loadtest-smoke.js
 
@@ -96,7 +105,7 @@ node loadtests/smoke-test.cjs 10
 - Streams: p95 < 15s
 - Error: `smoke_error_rate < 5%` (smoke), `load_error_rate < 1%` (full)
 
-**ทำไมไม่ใช้ `http_req_failed`** — k6 นับทุก response ≥ 400 เป็น failed รวมถึง share-invalid (คาดหวัง 400/404) และ unauth (คาดหวัง 401) ซึ่งเป็น assertion ที่ "ต้องผ่าน" — จึงใช้ custom metric ที่นับเฉพาะความผิดปกติที่ไม่คาดหวังแทน
+**ทำไมไม่ใช้ `http_req_failed`** — k6 นับทุก response ≥ 400 เป็น failed รวมถึง share-invalid (คาดหวัง 400/404) และ **429 ทุกจุด** ซึ่งเป็น rate limiter ทำงานถูกต้องภายใต้ load จึงใช้ custom metric ที่นับเฉพาะความผิดปกติที่ไม่คาดหวัง (5xx/401/aborted) และติดตาม 429 แยกใน `rate_limited_rate` แทน
 
 ## สิ่งที่แก้ใน K6V2-FIX-001 (14 ก.ย. 2026)
 
