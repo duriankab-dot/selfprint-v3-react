@@ -75,16 +75,16 @@
 | 1 | CI E2E Green | LIFE-01 typo fixed + staging URL default updated |
 | 2 | Functional Gate Green | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | Documented in reports |
-| 4 | k6 Execution | Documented as deferred |
+| 4 | k6 Execution | Scripts fixed (K6V2-FIX-001) + validated locally — staging run pending `SUPABASE_SERVICE_ROLE_KEY` update in CF Pages env |
 | 5 | Target Product Spec | All phases implemented, tested, committed |
 
 ---
 
 ## REMOVED FROM MASTER GATE
 
-| # | Gate | เหตุผล |
-|---|------|--------|
-| k6 | REMOVED — NOT A PASS | No test files exist; constraint policy: implement or remove |
+| # | Gate | เหตุผล | สถานะปัจจุบัน |
+|---|------|--------|--------------|
+| k6 | REMOVED — NOT A PASS | No test files exist; constraint policy: implement or remove | **FIXED 14 ก.ย. 2026** — scripts implemented + fixed (K6V2-FIX-001) + validated locally; ยังไม่เป็น gate criteria จนกว่าจะรันสดผ่านที่ staging |
 
 ---
 
@@ -189,14 +189,21 @@ npx playwright test                             # full suite (100 tests, ต้�
 
 ---
 
-## 🛠️ k6 Load Testing Status — Removed from MASTER GATE
+## 🛠️ k6 Load Testing Status — FIXED + LOCALLY VALIDATED (14 ก.ย. 2026)
 
 | Test | Status | Notes |
 |------|--------|-------|
-| Smoke (50 VUs, 10 min) | ⏸ Not implemented | `loadtest-smoke.js` not in repo |
-| Full (100 VUs, 39 min) |  Not implemented | `loadtest.js` not in repo |
+| Smoke (5 VUs, 5 min) | ✅ Fixed + validated locally | `loadtests/loadtest-smoke.js` — pure k6 API (`k6/http`) |
+| Full (peak 100 VUs, 45 min) | ✅ Fixed (ผ่าน `k6 inspect`) | `loadtests/loadtest.js` — pure k6 API |
+| Smoke (Node.js fallback) | ✅ Fixed | `loadtests/smoke-test.cjs` — เมื่อไม่มี k6 |
 
-**Decision:** k6 removed from MASTER GATE criteria per constraint policy ("must implement real tests or remove"). No scripts exist → cannot execute → excluded from gate assessment. Workflow still has opt-in jobs (`workflow_dispatch`) but with no test files they will always skip. Future: implement `loadtest-smoke.js` / `loadtest.js` against staging if load testing becomes required.
+**สรุปแก้ไข (K6V2-FIX-001):** สคริปต์เดิมรันไม่ได้แม้แต่ request เดียว — ใช้ global `fetch()` ที่ k6 ไม่มี (probe ยืนยัน), `loadtest.js` ไม่เคย import `k6/http` + import functions ที่ไม่มีอยู่จาก config.js, `setup()` ไม่ await async auth → token เป็น Promise → 401 ทุก request เขียนใหม่เป็น pure k6 API ทั้งหมด + แก้ `?userId=test` ที่โดน 403 guard + ตัด `/api/sice/get-patterns` (ตาราง `pattern_analysis` ไม่มีใน staging DB) + แก้ `smoke-test.cjs` `Error rate: Infinity%` (totalRequests ไม่เคยนับ)
+
+**Validation จริง:** `k6 inspect` ผ่านทั้ง 2 ไฟล์ · `k6 run` บน local `wrangler pages dev` ผ่าน checks ทุกตัวที่ไม่ต้องใช้ LLM key · node smoke ผ่าน 10/10 บน non-AI endpoints
+
+**⚠️ Blocker ฝั่ง staging:** legacy JWT `SUPABASE_SERVICE_ROLE_KEY` ใน Cloudflare Pages env ถูก Supabase revoke (พิสูจน์: `auth/v1/user` ด้วย key เดิม → 401 "Invalid API key", ด้วย `sb_secret_` → 200) → ทุก endpoint ที่ต้อง auth คืน 401 จาก staging — **ต้องอัปเดต env นี้ใน CF Pages dashboard แล้ว Redeploy ก่อนรันสด** (รายละเอียดคำสั่ง: `loadtests/README.md`)
+
+**Decision:** k6 ยังคงอยู่นอก MASTER GATE criteria (opt-in ผ่าน `workflow_dispatch` เหมือนเดิม) แต่ตอนนี้ scripts พร้อมรันจริงแล้ว — หลังอัปเดต staging env ให้รัน `k6 run loadtests/loadtest-smoke.js` และบันทึกผลเป็นหลักฐาน
 
 ---
 
@@ -246,7 +253,7 @@ MG suite                             : PASS ✅ (12/12)
 Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
 Target Product Spec                  : IMPLEMENTED ✅
-k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
+k6                                   : FIXED + LOCALLY VALIDATED (staging run pending SUPABASE_SERVICE_ROLE_KEY update in CF Pages env)
 ```
 
 ---

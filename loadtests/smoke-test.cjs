@@ -78,6 +78,7 @@ async function authenticate() {
 async function httpGet(url, options) {
   options = options || {};
   const startTime = performance.now();
+  metrics.totalRequests++;
   const res = await fetch(url, {
     method: 'GET',
     headers: options.headers || {},
@@ -97,6 +98,7 @@ async function httpGet(url, options) {
 async function httpPost(url, body, options) {
   options = options || {};
   const startTime = performance.now();
+  metrics.totalRequests++;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -251,7 +253,10 @@ async function runSmokeTest(iterations) {
   console.log('Successful: ' + metrics.successfulRequests);
   console.log('Failed: ' + metrics.failedRequests);
   console.log('Rate limited: ' + metrics.rateLimitedRequests);
-  console.log('Error rate: ' + ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2) + '%');
+  var errorPercent = metrics.totalRequests > 0
+    ? ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2)
+    : '0.00';
+  console.log('Error rate: ' + errorPercent + '%');
 
   if (metrics.responseTimes.length > 0) {
     var avgDuration = metrics.responseTimes.reduce(function(sum, t) { return sum + t.duration; }, 0) / metrics.responseTimes.length;

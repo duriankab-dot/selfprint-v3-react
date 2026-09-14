@@ -97,7 +97,7 @@ Phase A, build, typecheck, lint, unit: **PASS**.
 Phase B lifecycle (local + CI): **PASS** (25/25 lifecycle, 0 FAIL).
 Auth pipeline: **PASS**.
 Skipped coverage: **DOCUMENTED** (30 honest skips with reasons).
-k6 execution: **REMOVED FROM MASTER GATE — NOT A PASS** (no scripts in repo; constraint policy: implement or remove).
+k6 execution: **FIXED + LOCALLY VALIDATED (14 ก.ย. 2026 — K6V2-FIX-001)** — scripts implemented + rewritten as pure k6 API + validated via `k6 inspect` (2/2) และ `k6 run` บน local wrangler (checks ผ่านทุกตัวที่ไม่ต้องใช้ LLM key) ยังคงอยู่นอก gate criteria (opt-in workflow_dispatch) จนกว่าจะรันสดผ่านที่ staging — blocker: `SUPABASE_SERVICE_ROLE_KEY` ใน CF Pages env ถูก revoke ต้องอัปเดตเป็น `sb_secret_` key แล้ว Redeploy
 Staging URL: **selfprint-staging.pages.dev** (staging.selfprint.one 525 is infrastructure).
 Reporting: **Slack + test report** generated.
 

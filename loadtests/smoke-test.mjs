@@ -73,6 +73,7 @@ async function authenticate() {
 
 async function httpGet(url, options = {}) {
   const startTime = performance.now();
+  metrics.totalRequests++;
   const res = await fetch(url, {
     method: 'GET',
     headers: options.headers || {},
@@ -91,6 +92,7 @@ async function httpGet(url, options = {}) {
 
 async function httpPost(url, body, options = {}) {
   const startTime = performance.now();
+  metrics.totalRequests++;
   const res = await fetch(url, {
     method: 'POST',
     headers: {
@@ -123,7 +125,7 @@ async function runSmokeTest(iterations = 10) {
   const tests = [
     {
       name: 'GET /api/share (invalid code)',
-      async () => {
+      test: async () => {
         const res = await httpGet(`${ENDPOINTS.SHARE}?code=invalidCode123`);
         if (res.status !== 400 && res.status !== 404) {
           throw new Error(`Expected 400/404, got ${res.status}`);
@@ -133,7 +135,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'POST /api/profile (upsert)',
-      async () => {
+      test: async () => {
         const res = await httpPost(ENDPOINTS.PROFILE, SHARED_DATA.profileData, { headers });
         if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
         const data = await res.json();
@@ -143,7 +145,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'GET /api/profile (retrieve)',
-      async () => {
+      test: async () => {
         const res = await httpGet(ENDPOINTS.PROFILE, { headers });
         if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
         metrics.successfulRequests++;
@@ -151,7 +153,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'POST /api/twin (chat)',
-      async () => {
+      test: async () => {
         const payload = JSON.stringify({
           system: 'คุณคือ Twin ของผู้ใช้ ให้คำแนะนำแบบใกล้ชิด',
           messages: SHARED_DATA.twinMessages,
@@ -172,7 +174,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'POST /api/nova (chat)',
-      async () => {
+      test: async () => {
         const payload = JSON.stringify({
           system: 'คุณคือนิรา นำทางผู้ใช้ด้วยคำถามที่กระตุ้นความคิด',
           messages: SHARED_DATA.novaMessages,
@@ -193,7 +195,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'POST /api/autonomy-log',
-      async () => {
+      test: async () => {
         const res = await httpPost(ENDPOINTS.AUTONOMY_LOG, SHARED_DATA.autonomySignal, { headers });
         if (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);
         metrics.successfulRequests++;
@@ -201,7 +203,7 @@ async function runSmokeTest(iterations = 10) {
     },
     {
       name: 'Unauthenticated request (should fail)',
-      async () => {
+      test: async () => {
         const res = await httpGet(ENDPOINTS.PROFILE);
         if (res.status !== 401) {
           throw new Error(`Expected 401, got ${res.status}`);
@@ -219,7 +221,7 @@ async function runSmokeTest(iterations = 10) {
 
     for (const test of tests) {
       try {
-        await test();
+        await test.test();
         console.log(`  ✓ ${test.name}`);
         passed++;
       } catch (err) {
@@ -243,12 +245,19 @@ async function runSmokeTest(iterations = 10) {
   console.log(`Successful: ${metrics.successfulRequests}`);
   console.log(`Failed: ${metrics.failedRequests}`);
   console.log(`Rate limited: ${metrics.rateLimitedRequests}`);
-  console.log(`Error rate: ${((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2)}%`);
+  const errorPercent = metrics.totalRequests > 0
+    ? ((metrics.failedRequests / metrics.totalRequests) * 100).toFixed(2)
+    : '0.00';
+  console.log(`Error rate: ${errorPercent}%`);
+
+  let avgDuration = null;
+  let maxDuration = null;
+  let p95Duration = null;
 
   if (metrics.responseTimes.length > 0) {
-    const avgDuration = metrics.responseTimes.reduce((sum, t) => sum + t.duration, 0) / metrics.responseTimes.length;
-    const maxDuration = Math.max(...metrics.responseTimes.map(t => t.duration));
-    const p95Duration = [...metrics.responseTimes].sort((a, b) => a.duration - b.duration)[Math.floor(metrics.responseTimes.length * 0.95)];
+    avgDuration = metrics.responseTimes.reduce((sum, t) => sum + t.duration, 0) / metrics.responseTimes.length;
+    maxDuration = Math.max(...metrics.responseTimes.map(t => t.duration));
+    p95Duration = [...metrics.responseTimes].sort((a, b) => a.duration - b.duration)[Math.floor(metrics.responseTimes.length * 0.95)];
 
     console.log(`\nResponse times:`);
     console.log(`  Average: ${avgDuration.toFixed(2)}ms`);
@@ -261,7 +270,7 @@ async function runSmokeTest(iterations = 10) {
   return {
     passed,
     failed,
-    errorRate: metrics.failedRequests / metrics.totalRequests,
+    errorRate: metrics.totalRequests > 0 ? metrics.failedRequests / metrics.totalRequests : 0,
     avgDuration,
     maxDuration,
     p95Duration: p95Duration?.duration,
