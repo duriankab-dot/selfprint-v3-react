@@ -5,7 +5,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import type { Decision, DecisionInsights } from '../types/decision';
+import type { Decision, DecisionInsights, DecisionOutcome } from '../types/decision';
 import type { WorldId } from '../constants/worlds';
 import { WORLDS } from '../constants/worlds';
 import { useAuth } from '../context/AuthContext';
@@ -13,6 +13,7 @@ import { useDecisionStore } from '../store/decisionStore';
 import { useTwin } from '../context/TwinContext';
 import * as DecisionLearningService from '../services/DecisionLearningService';
 import DecisionForm from '../components/features/DecisionForm';
+import { DecisionCompare } from '../components/features/DecisionCompare';
 import { AppShell } from '../components/layout/AppShell';
 import '../styles/decision-dashboard.css';
 
@@ -24,6 +25,7 @@ export default function DecisionDashboard() {
   const [insights, setInsights] = useState<DecisionInsights | null>(null);
   const [showNewDecision, setShowNewDecision] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<WorldId | 'all'>(currentWorld || 'all');
+  const [outcomesMap, setOutcomesMap] = useState<Map<string, DecisionOutcome[]>>(new Map());
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -37,6 +39,25 @@ export default function DecisionDashboard() {
       DecisionLearningService.getDecisionInsights(session.user.id).then(setInsights);
     }
   }, [session?.user?.id, decisions, selectedWorld]);
+
+  // Load outcomes for comparison
+  useEffect(() => {
+    async function loadOutcomes() {
+      const map = new Map<string, DecisionOutcome[]>();
+      for (const decision of filteredDecisions.slice(0, 10)) {
+        try {
+          const { data } = await (await import('../services/DecisionService')).getDecisionOutcomes(decision.id);
+          if (data) {
+            map.set(decision.id, data);
+          }
+        } catch {
+          // Skip if table doesn't exist
+        }
+      }
+      setOutcomesMap(map);
+    }
+    loadOutcomes();
+  }, [filteredDecisions]);
 
   const filteredDecisions = getFilteredDecisions();
 
@@ -107,6 +128,16 @@ export default function DecisionDashboard() {
         >
           {showNewDecision ? '✕ Cancel' : '➕ New Decision'}
         </button>
+        {filteredDecisions.length >= 2 && (
+          <span style={{ marginLeft: '1rem', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+            Select decisions below to compare
+          </span>
+        )}
+      </div>
+
+      {/* Compare Feature */}
+      <div style={{ margin: '1rem 0' }}>
+        <DecisionCompare decisions={filteredDecisions.slice(0, 10)} outcomesMap={outcomesMap} />
       </div>
 
       {/* New Decision Form (collapsible) */}

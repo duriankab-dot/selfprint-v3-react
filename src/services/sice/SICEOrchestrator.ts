@@ -1,6 +1,6 @@
 /**
  * SICEOrchestrator.ts
- * Orchestrates all 12 SICE engines in parallel
+ * Orchestrates all 16 SICE engines in parallel
  * Synthesizes results into PersonalIntelligence
  */
 
@@ -39,6 +39,10 @@ import { BehavioralForecastEngine } from './engines/BehavioralForecastEngine';
 import { FutureSelfEngine } from './engines/FutureSelfEngine';
 import { MemoryManagerEngine } from './engines/MemoryManagerEngine';
 import { DecisionIntelligenceEngineAdapter } from './engines/DecisionIntelligenceEngineAdapter';
+import { EmotionalIntelligenceEngine } from './engines/EmotionalIntelligenceEngine';
+import { SocialConnectionEngine } from './engines/SocialConnectionEngine';
+import { GoalTrackingEngine } from './engines/GoalTrackingEngine';
+import { WellnessEngine } from './engines/WellnessEngine';
 import { sICEBridge } from './SICEBridge';
 
 export class SICEOrchestrator {
@@ -49,11 +53,11 @@ export class SICEOrchestrator {
   }
 
   /**
-   * Register all 12 SICE engines
+   * Register all 16 SICE engines
    * P0 #7.3: All engines now receive currentWorld in SICEInput
    */
   private registerEngines(): void {
-    // All 12 SICE Engines (World-aware)
+    // All 16 SICE Engines (World-aware)
     this.engines.set(1, new PersonalContextBuilder());
     this.engines.set(2, new PatternDetector());
     this.engines.set(3, new InsightEngine());
@@ -66,6 +70,10 @@ export class SICEOrchestrator {
     this.engines.set(10, new FutureSelfEngine());
     this.engines.set(11, new MemoryManagerEngine());
     this.engines.set(12, new DecisionIntelligenceEngineAdapter());
+    this.engines.set(13, new EmotionalIntelligenceEngine());
+    this.engines.set(14, new SocialConnectionEngine());
+    this.engines.set(15, new GoalTrackingEngine());
+    this.engines.set(16, new WellnessEngine());
   }
 
   /**

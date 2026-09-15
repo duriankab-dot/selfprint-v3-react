@@ -31,15 +31,9 @@ interface StoredPasskey {
   name: string;
   createdAt: string;
   lastUsedAt: string | null;
-  deviceType: 'platform' | 'cross-platform';
-  aaguid?: string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function deviceIcon(type: StoredPasskey['deviceType']): string {
-  return type === 'platform' ? '📱' : '🔑';
-}
 
 function formatDate(iso: string | null, isTh: boolean): string {
   if (!iso) return isTh ? 'ยังไม่ได้ใช้งาน' : 'Never used';
@@ -79,15 +73,15 @@ const PasskeySettings: React.FC = () => {
     void isPasskeyAvailable().then(setPasskeySupported);
   }, []);
 
-  // ── Load passkeys จาก Supabase ─────────────────────────────────────────
+  // ── Load passkeys จาก Supabase (user_credentials — same table as edge functions) ──
   const loadPasskeys = useCallback(async () => {
     if (!userId || !supabase) return;
     setLoading(true);
     setError(null);
     try {
       const { data, error: err } = await supabase
-        .from('user_passkeys')
-        .select('id, credential_id, name, created_at, last_used_at, device_type, aaguid')
+        .from('user_credentials')
+        .select('id, credential_id, name, created_at, last_used_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
@@ -100,8 +94,6 @@ const PasskeySettings: React.FC = () => {
           name: (row.name as string | null) ?? 'Passkey',
           createdAt: row.created_at as string,
           lastUsedAt: row.last_used_at as string | null,
-          deviceType: (row.device_type as StoredPasskey['deviceType']) ?? 'platform',
-          aaguid: row.aaguid as string | undefined,
         }))
       );
     } catch (e) {
@@ -142,13 +134,12 @@ const PasskeySettings: React.FC = () => {
 
       const credential = await createPasskeyCredential(regOptions);
 
-      // บันทึก credential ใน Supabase — rawId ใช้เป็น public_key identifier
-      const { error: insertErr } = await supabase.from('user_passkeys').insert({
+      // บันทึก credential ใน Supabase — rawId ใช้เป็น public_key identifier (user_credentials)
+      const { error: insertErr } = await supabase.from('user_credentials').insert({
         user_id: userId,
         credential_id: credential.id,
         public_key: credential.rawId,
         name: `Passkey ${new Date().toLocaleDateString(isTh ? 'th-TH' : 'en-US')}`,
-        device_type: 'platform',
         counter: 0,
       });
 
@@ -180,7 +171,7 @@ const PasskeySettings: React.FC = () => {
     if (!supabase) { setError('Database not configured'); return; }
     try {
       const { error: deleteErr } = await supabase
-        .from('user_passkeys')
+        .from('user_credentials')
         .delete()
         .eq('id', passkeyId)
         .eq('user_id', userId);
@@ -287,7 +278,7 @@ const PasskeySettings: React.FC = () => {
               <ul className="passkey-list">
                 {passkeys.map((pk) => (
                   <li key={pk.id} className="passkey-item">
-                    <div className="passkey-item-icon">{deviceIcon(pk.deviceType)}</div>
+                    <div className="passkey-item-icon">🔑</div>
                     <div className="passkey-item-info">
                       <p className="passkey-item-name">{pk.name}</p>
                       <p className="passkey-item-meta">

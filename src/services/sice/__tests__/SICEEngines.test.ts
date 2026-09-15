@@ -228,13 +228,13 @@ describe('SICE Engines - Complete Verification (12/12)', () => {
     });
   });
 
-  describe('SICE Orchestrator - All 12 Engines Integrated', () => {
-    it('should orchestrate all 12 engines in parallel', async () => {
+  describe('SICE Orchestrator - All 16 Engines Integrated', () => {
+    it('should orchestrate all 16 engines in parallel', async () => {
       const orchestrator = new SICEOrchestrator();
       const result = await orchestrator.orchestrate(testInput);
 
       expect(result).toBeDefined();
-      expect(result.results).toHaveLength(12);
+      expect(result.results).toHaveLength(16);
       expect(result.userId).toBe(testInput.userId);
       expect(result.timestamp).toBeDefined();
       expect(result.totalExecutionTime).toBeGreaterThan(0);
@@ -288,11 +288,11 @@ describe('SICE Engines - Complete Verification (12/12)', () => {
   });
 
   describe('SICE Engine Status', () => {
-    it('should report all 12 engines ready', () => {
+    it('should report all 16 engines ready', () => {
       const orchestrator = new SICEOrchestrator();
       const engines = orchestrator.getEngineStatus();
 
-      expect(engines).toHaveLength(12);
+      expect(engines).toHaveLength(16);
       expect(engines.every((e) => e.ready === true)).toBe(true);
 
       // Verify engine IDs and names
@@ -309,6 +309,10 @@ describe('SICE Engines - Complete Verification (12/12)', () => {
       expect(engineMap.get(10)).toBe('FutureSelfEngine');
       expect(engineMap.get(11)).toBe('MemoryManagerEngine');
       expect(engineMap.get(12)).toBe('DecisionIntelligenceEngineAdapter');
+      expect(engineMap.get(13)).toBe('EmotionalIntelligenceEngine');
+      expect(engineMap.get(14)).toBe('SocialConnectionEngine');
+      expect(engineMap.get(15)).toBe('GoalTrackingEngine');
+      expect(engineMap.get(16)).toBe('WellnessEngine');
     });
   });
 });

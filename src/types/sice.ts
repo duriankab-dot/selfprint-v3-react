@@ -1,6 +1,6 @@
 /**
  * sice.ts
- * 12 Specialized Intelligence Capability Engines
+ * 16 Specialized Intelligence Capability Engines
  * Core intelligence system powering Twin
  */
 
@@ -26,7 +26,7 @@ export interface SICEOutput {
 export interface OrchestratorResult {
   userId: string;
   timestamp: string;
-  results: SICEOutput[]; // Results from all 12 engines
+  results: SICEOutput[]; // Results from all 16 engines
   synthesis: CrossEngineSynthesis;
   fineTuned: FineTunedResult;
   personalIntelligence: PersonalIntelligence;
@@ -263,8 +263,85 @@ export interface DecisionIntelligenceResult {
 }
 
 /**
- * Discriminated Union of all engine result types
+ * SICE #13: EmotionalIntelligenceEngine
+ * Analyzes emotional patterns and trends
  */
+export interface EmotionalState {
+  dominantEmotion: string;
+  emotionalTrend: 'improving' | 'stable' | 'declining';
+  stressLevel: number; // 0-100
+  resilienceScore: number; // 0-100
+  emotionalTriggers: string[];
+  copingPatterns: string[];
+}
+
+export interface EmotionalIntelligenceResult {
+  emotionalAwareness: number; // 0-100
+  regulationSkills: string[];
+  growthOpportunities: string[];
+  recommendedExercises: string[];
+}
+
+/**
+ * SICE #14: SocialConnectionEngine
+ * Tracks social relationship patterns
+ */
+export interface SocialInsight {
+  relationshipType: string;
+  interactionFrequency: number;
+  quality: 'strong' | 'moderate' | 'weak';
+  satisfaction: number; // 0-100
+  areasForGrowth: string[];
+}
+
+export interface SocialConnectionResult {
+  totalRelationships: number;
+  strongestConnections: string[];
+  connectionGaps: string[];
+  socialHealthScore: number; // 0-100
+  recommendations: string[];
+}
+
+/**
+ * SICE #15: GoalTrackingEngine
+ * Monitors goal progress and achievement
+ */
+export interface TrackedGoal {
+  goalId: string;
+  title: string;
+  category: string;
+  progress: number; // 0-100
+  deadline?: string;
+  status: 'active' | 'completed' | 'abandoned';
+}
+
+export interface GoalTrackingResult {
+  activeGoals: number;
+  completionRate: number; // 0-100
+  goalCategories: Record<string, number>;
+  bottlenecks: string[];
+  nextRecommendedGoals: string[];
+}
+
+/**
+ * SICE #16: WellnessEngine
+ * Tracks overall wellness across dimensions
+ */
+export interface WellnessDimension {
+  name: string;
+  score: number; // 0-100
+  trend: 'improving' | 'stable' | 'declining';
+  contributingFactors: string[];
+}
+
+export interface WellnessResult {
+  overallWellness: number; // 0-100
+  dimensions: WellnessDimension[];
+  immediateActions: string[];
+  longTermRecommendations: string[];
+}
+
+// Discriminated union updated to include new engine results
 export type SICEEngineResult =
   | PersonalContextResult
   | PatternResult
@@ -278,6 +355,10 @@ export type SICEEngineResult =
   | FutureSelfResult
   | MemoryManagerResult
   | DecisionIntelligenceResult
+  | EmotionalIntelligenceResult
+  | SocialConnectionResult
+  | GoalTrackingResult
+  | WellnessResult
   | null; // Error case
 
 /**
