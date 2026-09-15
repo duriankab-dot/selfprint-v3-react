@@ -25,7 +25,7 @@ export const FAQS: FAQ[] = [
       'SELFPRINT คือแพลตฟอร์ม AI วิเคราะห์พฤติกรรมที่สร้าง "ฝาแฝดดิจิทัล" (AI Twin) เฉพาะของคุณ โดยอ้างอิงจากข้อมูลพฤติกรรม 12 มิติ ไม่ใช่ดวงชะตาหรือความเชื่อ\n\nระบบเรียนรู้จากคุณจริงๆ และช่วยชี้จุดบอด (Blind Spots) ที่ขัดขวางการตัดสินใจในชีวิต การงาน และความสัมพันธ์',
     questionEn: 'What is SELFPRINT?',
     answerEn:
-      'SELFPRINT is a behavioral-analysis AI platform that builds your own "digital twin" (AI Twin), grounded in 12 dimensions of behavioral data — not astrology or belief.\n\nThe system learns from the real you, and helps surface blind spots that get in the way of decisions about life, work, and relationships.',
+      'SELFPRINT is a behavioral-analysis AI platform that builds your own "digital twin" (AI Twin), grounded in 12 specialized intelligence engines (SICE) — not astrology or belief.\n\nThe system learns from the real you, and helps surface blind spots that get in the way of decisions about life, work, and relationships.',
     order: 1,
   },
   {

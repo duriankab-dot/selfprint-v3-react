@@ -1,7 +1,22 @@
 /**
- * Intelligence Core Module
+ * ⚠️ DEPRECATED — src/lib/intelligence (15 ก.ย. 2026)
+ * 
+ * This module is a duplicate of `src/services/sice/engines/*`.
+ * All SICE engines now live in services/sice/engines and are orchestrated
+ * by SICEOrchestrator (16 engines registered).
+ * 
+ * Migration path:
+ *   import { PatternDetector } from '@/lib/intelligence/PatternDetector'
+ * → import { PatternDetector } from '@/services/sice/engines/PatternDetector'
+ * 
+ * Files kept for backward compatibility only — will be removed after all
+ * callers are migrated. See: F3 — Duplicate intelligence engine layers.
+ */
+
+/**
+ * Intelligence Core Module (DEPRECATED — use services/sice/engines)
  * Central exports for Selfprint Personal Intelligence Engine
- * @module intelligence
+ * @module intelligence [DEPRECATED]
  */
 
 export * from './types';

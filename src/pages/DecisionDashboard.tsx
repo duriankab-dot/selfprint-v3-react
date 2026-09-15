@@ -15,6 +15,7 @@ import * as DecisionLearningService from '../services/DecisionLearningService';
 import DecisionForm from '../components/features/DecisionForm';
 import { DecisionCompare } from '../components/features/DecisionCompare';
 import { AppShell } from '../components/layout/AppShell';
+import { exportDecisionLogs } from '../services/supabase-service';
 import '../styles/decision-dashboard.css';
 
 export default function DecisionDashboard() {
@@ -26,6 +27,32 @@ export default function DecisionDashboard() {
   const [showNewDecision, setShowNewDecision] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<WorldId | 'all'>(currentWorld || 'all');
   const [outcomesMap, setOutcomesMap] = useState<Map<string, DecisionOutcome[]>>(new Map());
+  const [exporting, setExporting] = useState<'csv' | 'json' | null>(null);
+
+  const handleExport = useCallback(async (format: 'csv' | 'json') => {
+    if (!session?.user?.id) return;
+    setExporting(format);
+    try {
+      const content = await exportDecisionLogs(session.user.id, format);
+      if (!content) {
+        alert(isTh ? 'ไม่มีข้อมูลสำหรับการส่งออก' : 'No data to export');
+        return;
+      }
+      const blob = new Blob([content], { type: format === 'csv' ? 'text/csv;charset=utf-8;' : 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `decisions_${new Date().toISOString().split('T')[0]}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export error:', err);
+    } finally {
+      setExporting(null);
+    }
+  }, [session, isTh]);
 
   useEffect(() => {
     if (session?.user?.id) {
@@ -85,6 +112,38 @@ export default function DecisionDashboard() {
       <div className="dd-header">
         <h1>📊 Decision Tracker</h1>
         <p className="dd-subtitle">Track decisions and learn from 30/90/180/365 follow-ups</p>
+
+        {/* Export Buttons */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          <button
+            onClick={() => handleExport('csv')}
+            disabled={exporting !== null || filteredDecisions.length === 0}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              background: exporting ? 'var(--border-color)' : 'var(--card-bg)',
+              color: exporting ? 'var(--text-secondary)' : 'var(--text-primary)',
+              cursor: exporting || filteredDecisions.length === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {exporting === 'csv' ? (isTh ? 'กำลังส่งออก...' : 'Exporting...') : `📥 ${isTh ? 'CSV' : 'CSV'}`}
+          </button>
+          <button
+            onClick={() => handleExport('json')}
+            disabled={exporting !== null || filteredDecisions.length === 0}
+            style={{
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              border: '1px solid var(--border-color)',
+              background: exporting ? 'var(--border-color)' : 'var(--card-bg)',
+              color: exporting ? 'var(--text-secondary)' : 'var(--text-primary)',
+              cursor: exporting || filteredDecisions.length === 0 ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {exporting === 'json' ? (isTh ? 'กำลังส่งออก...' : 'Exporting...') : `📥 ${isTh ? 'JSON' : 'JSON'}`}
+          </button>
+        </div>
 
         {/* World Filter */}
         <div className="dd-world-filter" style={{ marginTop: '1rem' }}>

@@ -107,12 +107,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     return json({ error: 'Unauthorized' }, 401, corsHeaders);
   }
 
-  // Rate limit
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('cf-connecting-ip') ||
-    'unknown';
-  if (!checkRateLimit(ip, env.NOVA_RATE_LIMIT)) {
+  // Rate limit (user-based: per-user rate limiting via JWT user ID — matches twin.ts pattern)
+  if (!checkRateLimit(user.id, env.NOVA_RATE_LIMIT)) {
     return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429, corsHeaders);
   }
 

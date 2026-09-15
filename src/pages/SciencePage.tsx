@@ -102,7 +102,7 @@ export default function SciencePage() {
         {/* 12 SICE */}
         <div className="sci-section">
           <span className="sci-badge">12 SICE Engines</span>
-          <h2>{isTh ? '12 มิติที่เปลี่ยนข้อมูลให้เป็นความเข้าใจ' : '12 dimensions that turn data into understanding'}</h2>
+          <h2>{isTh ? '12 เอนจินที่เปลี่ยนข้อมูลให้เป็นความเข้าใจ' : '12 engines that turn data into understanding'}</h2>
           <p>
             {isTh
               ? 'SICE ย่อจาก Specialized Intelligence Capability Engines — ระบบ AI 12 โมดูลที่แต่ละโมดูลเชี่ยวชาญด้านหนึ่งของชีวิตมนุษย์ ทำงานร่วมกันเพื่อสร้างภาพรวมพฤติกรรมที่สมบูรณ์'
@@ -127,7 +127,7 @@ export default function SciencePage() {
           <p>
             {isTh
               ? 'ข้อมูล SICE ทั้ง 12 มิติไม่ได้จบที่รายงานบนกระดาษ แต่ถูกแปรสภาพให้เป็น AI Twin ที่โต้ตอบได้จริง เรียนรู้ต่อเนื่อง และเติบโตไปพร้อมคุณ'
-              : "The 12 dimensions of SICE data don't end up as a report on paper — they become an AI Twin that actually converses, keeps learning, and grows alongside you."}
+              : "The 12 engines of SICE data don't end up as a report on paper — they become an AI Twin that actually converses, keeps learning, and grows alongside you."}
           </p>
           <div className="sci-timeline">
             {(isTh

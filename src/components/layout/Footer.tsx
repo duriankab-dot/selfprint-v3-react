@@ -80,7 +80,7 @@ export function Footer() {
           <p style={{ fontSize: '13px', color: 'var(--color-text-secondary)', margin: '0 0 16px', lineHeight: 1.75, maxWidth: '240px' }}>
             {isTh
               ? 'แพลตฟอร์ม AI วิเคราะห์พฤติกรรม 12 มิติ สร้าง AI Twin เฉพาะบุคคล ไม่ใช่ดวงชะตา'
-              : 'AI platform analyzing 12 dimensions of behavior, building your personal AI Twin — not astrology.'}
+              : 'AI platform analyzing 12 SICE engines of behavior, building your personal AI Twin — not astrology.'}
           </p>
           <p style={{ fontSize: '12px', color: 'var(--color-text-tertiary)', margin: 0, lineHeight: 1.6 }}>
             {isTh ? (

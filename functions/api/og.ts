@@ -34,10 +34,18 @@ const COPY: Record<string, { title: string; desc: string }> = {
   },
 };
 
+const KNOWN_ORIGINS = ['https://selfprint.one', 'https://www.selfprint.one', 'http://localhost:5173', 'http://localhost:3000'];
+
 export async function onRequestGet({ request }: PagesContext): Promise<Response> {
   const url = new URL(request.url);
   const lang = (url.searchParams.get('lang') ?? 'en') as 'th' | 'en';
   const copy = COPY[lang] ?? COPY['en'];
+  const origin = request.headers.get('origin') || null;
+  
+  // Dynamic base URL from origin or default
+  const baseUrl = origin && KNOWN_ORIGINS.includes(origin) 
+    ? origin.replace(/\/$/, '') 
+    : 'https://selfprint.one';
 
   const html = `<!DOCTYPE html>
 <html lang="${lang}">
@@ -47,13 +55,13 @@ export async function onRequestGet({ request }: PagesContext): Promise<Response>
   <title>${copy.title}</title>
   <meta property="og:title" content="${copy.title}" />
   <meta property="og:description" content="${copy.desc}" />
-  <meta property="og:url" content="https://selfprint.one" />
-  <meta property="og:image" content="https://selfprint.one/icons/icon-512x512.png" />
+  <meta property="og:url" content="${baseUrl}" />
+  <meta property="og:image" content="${baseUrl}/icons/icon-512x512.png" />
   <meta property="og:type" content="website" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${copy.title}" />
   <meta name="twitter:description" content="${copy.desc}" />
-  <meta name="twitter:image" content="https://selfprint.one/icons/icon-512x512.png" />
+  <meta name="twitter:image" content="${baseUrl}/icons/icon-512x512.png" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -77,11 +85,17 @@ export async function onRequestGet({ request }: PagesContext): Promise<Response>
 </body>
 </html>`;
 
+  const corsHeaders: Record<string, string> = {};
+  if (origin && KNOWN_ORIGINS.includes(origin)) {
+    corsHeaders['Access-Control-Allow-Origin'] = origin;
+  }
+
   return new Response(html, {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': 'public, max-age=3600, s-maxage=86400',
+      ...corsHeaders,
     },
   });
 };

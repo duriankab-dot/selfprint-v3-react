@@ -346,11 +346,11 @@ export default function BlogArticle() {
                     <p className="text-xs text-slate-400">Digital Twin + Personal AI</p>
                   </Link>
                   <Link
-                    to="/blog/12-dimensions-explained"
+                    to="/blog/sice-engines-explained"
                     className="block p-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg transition-colors"
                   >
-                    <p className="font-medium text-white text-sm">{isTh ? '12 มิติ พฤติกรรมมนุษย์' : 'The 12 dimensions of human behavior'}</p>
-                    <p className="text-xs text-slate-400">{isTh ? 'ทำไมต้อง 12 มิติ?' : 'Why 12 dimensions?'}</p>
+                    <p className="font-medium text-white text-sm">{isTh ? '12 เอนจิน SICE' : 'The 12 SICE engines of intelligence'}</p>
+                    <p className="text-xs text-slate-400">{isTh ? 'ทำไมต้อง 12 เอนจิน?' : 'Why 12 engines?'}</p>
                   </Link>
                 </div>
               </div>

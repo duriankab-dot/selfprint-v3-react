@@ -84,7 +84,7 @@ export default function WorldsHub() {
           <p className="wh-subtitle">
             {isTh
               ? 'สำรวจทั้ง 12 มิติของชีวิตคุณ โดยมีทวินเป็นไกด์นำทาง — เลื่อนลงเพื่อดูทั้งหมด'
-              : 'Explore all 12 dimensions of your life with Twin as your guide — scroll down to see them all'}
+              : 'Explore all 12 worlds of your life with Twin as your guide — scroll down to see them all'}
           </p>
         </div>
 

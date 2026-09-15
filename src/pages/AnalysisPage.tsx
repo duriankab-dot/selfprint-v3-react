@@ -550,7 +550,7 @@ const AnalysisPage: React.FC = () => {
                 {(essenceAnalysis._synth.agreements ?? []).length > 0 && (
                   <div className="analysis__summary-agreements">
                     <p className="analysis__summary-agreements-label">
-                      {isTh ? 'สิ่งที่ SICE เห็นตรงกันทั้ง 12 มิติ:' : 'Patterns agreed across all 12 dimensions:'}
+                      {isTh ? 'สิ่งที่ SICE เห็นตรงกันทั้ง 12 เอนจิน:' : 'Patterns agreed across all 12 SICE engines:'}
                     </p>
                     <ul className="analysis__summary-agreements-list">
                       {(essenceAnalysis._synth.agreements ?? []).map((a, i) => (

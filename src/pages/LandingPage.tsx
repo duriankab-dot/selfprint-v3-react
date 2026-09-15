@@ -87,7 +87,7 @@ const STORY = {
       badge: '12 SICE Engines · Behavioral AI · Free 2 min',
       h1: 'Unlock Your\nDigital Twin —\nthe AI that knows you best',
       sub: 'Not destiny, not beliefs — but behavioral science. Create an AI Twin that warns you, reveals blind spots, and guides your decisions in work, love and life.',
-      microcopy: '⚡ Unlock your 12-dimension behavioral blueprint free in 2 minutes',
+      microcopy: '⚡ Unlock your behavioral blueprint from 12 SICE engines free in 2 minutes',
       cta: 'Give Birth to My AI Twin →',
       scroll: 'See how SELFPRINT reads you',
     },
@@ -97,7 +97,7 @@ const STORY = {
       sub: 'SELFPRINT processes your Initial State Matrix across 12 behavioral dimensions — before you answer a single question.',
       reading: [
         'Scanning Initial State Matrix...',
-        'Detecting 12-dimensional patterns',
+        'Detecting behavioral patterns across 12 intelligence engines',
         'Identifying hidden Blind Spots',
         'Ready to decode your identity ✓',
       ],
@@ -462,7 +462,7 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         description={seo.seoDesc}
         keywords={lang === 'th'
           ? 'แบบทดสอบจิตวิทยา, วิเคราะห์พฤติกรรม, ดูดวงพฤติกรรม, AI Twin, ฝาแฝดดิจิทัล, SELFPRINT, 12 มิติ, ทำนายนิสัย, AI ดูดวง, Blind Spots'
-          : 'AI twin, digital twin, behavioral analysis, SELFPRINT, 12 dimensions, blind spots, personal intelligence, decision AI'}
+          : 'AI twin, digital twin, behavioral analysis, SELFPRINT, SICE engines, blind spots, personal intelligence, decision AI'}
         ogImage={ogUrl}
         ogType="website"
         canonicalUrl={`/${lang}`}
@@ -477,11 +477,11 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           operatingSystem: 'All',
           applicationCategory: 'Psychology & AI Application',
           inLanguage: lang,
-          description: 'An AI-powered behavioral analysis platform that creates a digital twin based on a 12-dimensional psychological matrix, outperforming traditional astrology and personality quizzes.',
+          description: 'An AI-powered behavioral analysis platform that creates a digital twin based on 12 SICE intelligence engines, outperforming traditional astrology and personality quizzes.',
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'THB' },
           featureList: lang === 'th'
             ? ['AI Digital Twin ฝาแฝดดิจิทัล สร้างใน 2 นาที', 'วิเคราะห์พฤติกรรม 12 มิติ (SICE)', 'ตรวจจับ Blind Spots', 'จำลองการตัดสินใจอัจฉริยะ', 'Twin เรียนรู้และพัฒนาแบบ Real-time']
-            : ['AI Digital Twin creation in 2 minutes', '12-dimension behavioral analysis (SICE)', 'Blind spot detection', 'Decision simulation', 'Real-time learning Twin'],
+            : ['AI Digital Twin creation in 2 minutes', '12-engine SICE behavioral analysis (SICE)', 'Blind spot detection', 'Decision simulation', 'Real-time learning Twin'],
         }}
         additionalScripts={[
           {

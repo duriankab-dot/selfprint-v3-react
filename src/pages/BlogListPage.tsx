@@ -356,7 +356,7 @@ export default function BlogListPage() {
               <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
                 {isTh
                   ? 'ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติและค้นพบตัวเองที่แท้จริง'
-                  : 'Let your AI Twin analyze 12 dimensions of behavior and discover who you really are'}
+                  : 'Let your AI Twin analyze 12 SICE engines of behavior and discover who you really are'}
               </p>
               <button
                 onClick={() => navigate('/onboarding')}
