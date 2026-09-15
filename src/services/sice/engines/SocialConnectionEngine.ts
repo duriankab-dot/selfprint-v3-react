@@ -8,15 +8,15 @@ import type { SICEInput, SICEOutput, SocialConnectionResult } from '../../../typ
 import { supabase } from '../../supabase-service';
 
 export class SocialConnectionEngine extends SICEBase {
-  id: number = 14;
-  name: string = 'SocialConnectionEngine';
-  description: string = 'Tracks social relationship patterns and connections';
+  constructor() {
+    super(14, 'SocialConnectionEngine', 'Tracks social relationship patterns and connections');
+  }
 
-  async process(input: SICEInput): Promise<SICEOutput> {
+  async process(_input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeSocialConnections(input);
+      const result = await this.analyzeSocialConnections(_input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,7 +39,7 @@ export class SocialConnectionEngine extends SICEBase {
     }
   }
 
-  private async analyzeSocialConnections(input: SICEInput): Promise<SocialConnectionResult> {
+  private async analyzeSocialConnections(_input: SICEInput): Promise<SocialConnectionResult> {
     // Analyze conversations for social topics
     const { data: messages } = await supabase
       .from('twin_memories')

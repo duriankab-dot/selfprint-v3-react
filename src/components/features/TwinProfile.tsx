@@ -19,7 +19,7 @@
  * @module features/TwinProfile
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -33,8 +33,6 @@ import { WORLDS, type WorldId } from '@/constants/worlds';
 import { AccuracyBadgeFromMetrics } from '@/components/intelligence/AccuracyBadge';
 import { TwinEvolutionChart } from './TwinEvolutionChart';
 import { TwinStatsCard } from './TwinStatsCard';
-import { FileUploadUI } from './FileUploadUI';
-import { uploadProfilePicture, deleteProfilePicture, getLatestProfilePicture } from '@/lib/storage/FileUploadService';
 import './TwinProfile.css';
 
 /** Humanize a snake_case archetype key without inventing a translation
@@ -68,39 +66,6 @@ export const TwinProfile: React.FC = () => {
   const { twin } = useTwin();
   const twinId = twin?.id ?? '';
   const queryClient = useQueryClient();
-
-  // Upload state
-  const [profilePictureUrl, setProfilePictureUrl] = useState<string | null>(currentUrl);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
-
-  useEffect(() => {
-    if (twinId && userId) {
-      getLatestProfilePicture(userId, twinId).then(setProfilePictureUrl);
-    }
-  }, [twinId, userId]);
-
-  const handleUploadComplete = useCallback(async (file: File) => {
-    if (!userId || !twinId) return;
-    setUploading(true);
-    setUploadError(null);
-    try {
-      const uploaded = await uploadProfilePicture(userId, twinId, file);
-      setProfilePictureUrl(uploaded.url);
-      onUploadComplete?.(uploaded.url);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Upload failed';
-      setUploadError(msg);
-    } finally {
-      setUploading(false);
-    }
-  }, [userId, twinId, onUploadComplete]);
-
-  const handleRemovePicture = useCallback(async () => {
-    if (!profilePictureUrl) return;
-    setProfilePictureUrl(null);
-    onPictureRemoved?.();
-  }, [profilePictureUrl, onPictureRemoved]);
 
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
@@ -255,21 +220,6 @@ export const TwinProfile: React.FC = () => {
             <p>Evolution Score</p>
             <p className="evolution-badge__subtitle">0-100</p>
           </div>
-        </div>
-
-        {/* Upload profile picture */}
-        <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-          <FileUploadUI
-            currentUrl={profilePictureUrl}
-            onUploadComplete={(url) => setProfilePictureUrl(url)}
-            onUploadError={(error) => setUploadError(error)}
-            label={isTh ? 'อัปโหลดรูปโปรไฟล์' : 'Upload Profile Picture'}
-          />
-          {uploadError && (
-            <p style={{ color: '#ef4444', fontSize: '0.875rem', marginTop: '0.5rem', textAlign: 'center' }}>
-              {uploadError}
-            </p>
-          )}
         </div>
       </div>
 

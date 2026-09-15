@@ -8,15 +8,15 @@ import type { SICEInput, SICEOutput, WellnessResult } from '../../../types/sice'
 import { supabase } from '../../supabase-service';
 
 export class WellnessEngine extends SICEBase {
-  id: number = 16;
-  name: string = 'WellnessEngine';
-  description: string = 'Tracks overall wellness across multiple dimensions';
+  constructor() {
+    super(16, 'WellnessEngine', 'Tracks overall wellness across multiple dimensions');
+  }
 
-  async process(input: SICEInput): Promise<SICEOutput> {
+  async process(_input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeWellness(input);
+      const result = await this.analyzeWellness(_input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,7 +39,7 @@ export class WellnessEngine extends SICEBase {
     }
   }
 
-  private async analyzeWellness(input: SICEInput): Promise<WellnessResult> {
+  private async analyzeWellness(_input: SICEInput): Promise<WellnessResult> {
     // Analyze conversations for wellness indicators
     const { data: messages } = await supabase
       .from('twin_memories')

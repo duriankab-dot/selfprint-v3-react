@@ -8,15 +8,15 @@ import type { SICEInput, SICEOutput, GoalTrackingResult } from '../../../types/s
 import { supabase } from '../../supabase-service';
 
 export class GoalTrackingEngine extends SICEBase {
-  id: number = 15;
-  name: string = 'GoalTrackingEngine';
-  description: string = 'Monitors goal progress and achievement patterns';
+  constructor() {
+    super(15, 'GoalTrackingEngine', 'Monitors goal progress and achievement patterns');
+  }
 
-  async process(input: SICEInput): Promise<SICEOutput> {
+  async process(_input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeGoals(input);
+      const result = await this.analyzeGoals(_input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,7 +39,7 @@ export class GoalTrackingEngine extends SICEBase {
     }
   }
 
-  private async analyzeGoals(input: SICEInput): Promise<GoalTrackingResult> {
+  private async analyzeGoals(_input: SICEInput): Promise<GoalTrackingResult> {
     // Analyze conversations for goal-related content
     const { data: messages } = await supabase
       .from('twin_memories')

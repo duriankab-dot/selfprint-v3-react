@@ -8,15 +8,15 @@ import type { SICEInput, SICEOutput, EmotionalIntelligenceResult } from '../../.
 import { supabase } from '../../supabase-service';
 
 export class EmotionalIntelligenceEngine extends SICEBase {
-  id: number = 13;
-  name: string = 'EmotionalIntelligenceEngine';
-  description: string = 'Analyzes emotional patterns and trends from user interactions';
+  constructor() {
+    super(13, 'EmotionalIntelligenceEngine', 'Analyzes emotional patterns and trends from user interactions');
+  }
 
-  async process(input: SICEInput): Promise<SICEOutput> {
+  async process(_input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeEmotionalPatterns(input);
+      const result = await this.analyzeEmotionalPatterns(_input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,7 +39,7 @@ export class EmotionalIntelligenceEngine extends SICEBase {
     }
   }
 
-  private async analyzeEmotionalPatterns(input: SICEInput): Promise<EmotionalIntelligenceResult> {
+  private async analyzeEmotionalPatterns(_input: SICEInput): Promise<EmotionalIntelligenceResult> {
     // Analyze recent conversations for emotional tone
     const { data: messages } = await supabase
       .from('twin_memories')

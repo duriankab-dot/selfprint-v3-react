@@ -130,9 +130,6 @@ const TwinProfilePage = lazy(() => import('./pages/TwinProfilePage'));
 const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
 const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
-const TwinBirthPage = lazy(() => import('./pages/TwinBirthPage'));
-const TwinDetailPage = lazy(() => import('./pages/TwinDetailPage'));
-const PatternsPage = lazy(() => import('./pages/PatternsPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
@@ -230,9 +227,6 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/life-hubs', element: <LifeHubsPage /> },
     { path: '/decisions', element: <DecisionDashboard /> },
     { path: '/decision-log', element: <DecisionLoggerPage /> },
-    { path: '/twin-birth', element: <TwinBirthPage /> },
-    { path: '/twin/:id', element: <TwinDetailPage /> },
-    { path: '/twin/patterns', element: <PatternsPage /> },
     { path: '/faq', element: <FAQPage /> },
     { path: '/vs-astrology', element: <VsAstrologyPage /> },
     { path: '/menu', element: <FeatureMenu /> },
