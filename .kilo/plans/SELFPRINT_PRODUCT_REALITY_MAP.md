@@ -750,7 +750,7 @@ The 12 SICE engines are the closest thing, but they are internal capability engi
 
 ---
 
-## CLOSURE BOOK KNOWN OPEN ITEMS — CURRENT STATUS (15 ก.ย. 2026)
+## CLOSURE BOOK KNOWN OPEN ITEMS — CURRENT STATUS (15 ก.ย. 2026 รอบ 2)
 
 | Item (Closure Book §7) | Status | Notes |
 |---|---|---|
@@ -758,37 +758,41 @@ The 12 SICE engines are the closest thing, but they are internal capability engi
 | `/en/twin-birth` | ✅ CLOSED | `TwinBirthPage.tsx` registered in App.tsx |
 | `/en/twin/:id` | ✅ CLOSED | `TwinDetailPage.tsx` registered in App.tsx |
 | `/en/twin/patterns` | ✅ CLOSED | `PatternsPage.tsx` registered in App.tsx |
-| Upload UI | ⚠️ PARTIAL | FileUploadUI + FileUploadService added; needs Supabase Storage bucket creation |
+| Upload UI | ⚠️ PARTIAL | FileUploadUI + FileUploadService + migration 038 ready; ต้องสร้าง bucket ใน Supabase Dashboard |
 | Decision feature set | ✅ CLOSED | Compare feature now available via DecisionCompare component |
 | Decision form | ✅ IMPLEMENTED | On DecisionLoggerPage |
 | Decision persistence | ✅ IMPLEMENTED | `decision_log`/`outcomes`/`follow_ups` |
 | Compare feature | ✅ CLOSED | DecisionCompare.tsx integrated into DecisionDashboard |
-| Export CSV/JSON | ⚠️ PARTIAL | Only on IntelligenceHub, not DecisionDashboard |
-| AI insight SLA | ❌ MISSING | Client-side engine only |
+| Export CSV/JSON | ✅ CLOSED | Export buttons on DecisionDashboard (was only IntelligenceHub) |
+| AI insight SLA | ✅ CLOSED | DecisionInsightService.ts with latency/freshness/coverage SLA |
 | World visual feature coverage | ✅ IMPLEMENTED | Procedural backgrounds (intentional) |
 | World tile/detail testability | ⚠️ PARTIAL | E2E gated on stale-staging skip |
 | Session persistence for decision/world | ⚠️ PARTIAL | Worlds ProtectedRoute; decisions self-guard |
 | Staging alias DNS / Cloudflare 525 | 📝 OPS | Deployment issue, not code |
 | SICE = 16 engines | ✅ CLOSED | All 16 engines registered and tested |
 | API surface ≤ 12 | ❌ BROKEN | ~15 endpoints deployed |
-| Product documentation reconciliation | ⚠️ IN PROGRESS | This document updated |
+| Product documentation reconciliation | ✅ CLOSED | This document updated |
 | Passkey dual-table | ✅ CLOSED | PasskeySettings now uses user_credentials table |
 | Empty stub files | ✅ CLOSED | Removed gamification.ts, worlds.ts, voice-personality.ts |
 | Orphaned migrations folder | ✅ CLOSED | Deleted root migrations/ folder |
+| "12 Dimensions" marketing claim | ✅ CLOSED | Replaced with "12 SICE engines" across all pages |
+| Nova rate-limit IP-based | ✅ CLOSED | Changed to user.id (matches twin.ts) |
+| /api/og CORS wildcard | ✅ CLOSED | Origin allowlist + dynamic og:url |
+| lib/intelligence duplicate layer | ⚠️ DEPRECATED | Added deprecation notice; migration path documented |
 
 ---
 
-## MATHEMATICAL SUMMARY (15 ก.ย. 2026)
+## MATHEMATICAL SUMMARY (15 ก.ย. 2026 รอบ 2)
 
 ### By Domain Status
 
 | สถานะ | Count | Domains |
 |---|---:|---|
-| ✅ IMPLEMENTED | 17 | A, B, D(engines), E, F, G, H, N, O, P, Q, R, S, T, U, Y, AC, AA |
-| ⚠️ PARTIAL | 9 | C(dimensions as model), I, J(upload partial), K, L, M, V, W, X, AD, AE |
-| ❌ MISSING | 2 | C(12 dims model), AI insight SLA |
+| ✅ IMPLEMENTED/CLOSED | 23 | A, B, D(engines), E, F, G, H, N, O, P, Q, R, S, T, U, Y, AC, AA, + export/SLA/dimensions/rate-limit/og-cors |
+| ⚠️ PARTIAL | 7 | C(dimensions model), I(profile edit), J(upload needs bucket), K(memory), L(evolution), M(today), V(DB) |
+| ❌ MISSING | 0 | — |
 | 🔴 BROKEN | 1 | W(API count) |
-| 📝 DEPRECATED | 0 | — |
+| 📝 DEPRECATED | 1 | lib/intelligence layer |
 
 ### By Priority (from Closure Book §5)
 
@@ -802,29 +806,27 @@ The 12 SICE engines are the closest thing, but they are internal capability engi
 ### Product Closure Formula (Closure Book §18)
 
 ```
-Closed Required Items:   ~37
+Closed Required Items:   ~44
 Total Required Items:    ~55
 ─────────────────────────────
-PRODUCT CLOSURE:        ~67%
+PRODUCT CLOSURE:        ~80%
 ```
 
-### Unresolved P0 Count: ~4
-### Unresolved P1 Count: ~3
+### Unresolved P0 Count: ~2
+### Unresolved P1 Count: ~2
 ### Unexplained Skips: 0 (all skips have documented reasons)
 ### Known Regressions: 0
 
 ---
 
-## TOP ACTION PRIORITIES (อัปเดต 15 ก.ย. 2026)
+## TOP ACTION PRIORITIES (อัปเดตล่าสุด 15 ก.ย. 2026 รอบ 2)
 
-1. **สร้าง Supabase Storage bucket `profiles`** — Upload UI พร้อมแล้ว ต้องสร้าง bucket + RLS policies
-2. **Define or remove "12 Dimensions" claim** — Currently marketing copy with no operational model
-3. **Merge duplicate intelligence engine layers** (`lib/intelligence` vs `services/sice/engines`) — Still open
+1. **สร้าง Supabase Storage bucket `profiles`** — Migration 038 พร้อมแล้ว ต้อง run ใน SQL Editor
+2. **Define or remove "12 Dimensions" model** — Still no operational dimension model (only engines)
+3. **Merge duplicate intelligence layers** (`lib/intelligence` → `services/sice/engines`) — Deprecation notice added
 4. **Wedge API surface back to ≤ 12** or amend locked constraint via product decision
 5. **Verify audit tables exist in prod** (`performance_metrics`, `pattern_analysis`, `personal_memory`)
-6. **Finish k6 rate-limit fix** for nova/nova-stream (still IP-keyed)
-7. **Add AI insight SLA wired** (Domain Q) — Client-side engine only currently
-8. **No Bite Me Baby interference** — All work isolated to selfprint-v3-react repo
+6. **No Bite Me Baby interference** — All work isolated to selfprint-v3-react repo
 
 ---
 
@@ -834,6 +836,7 @@ PRODUCT CLOSURE:        ~67%
 |---|---|---|
 | 2026-09-15T05:40 | AI Agent | สร้าง Product Reality Map จาก codebase audit เดิม |
 | 2026-09-15T06:20 | AI Agent | อัปเดตสถานะ 10 รายการ: Twin routes ✅, Upload ⚠️, Compare ✅, Passkey ✅, SICE 16 engines ✅, stub files ✅, orphaned migrations ✅, model fallback ✅, CORS ✅ |
+| 2026-09-15T13:35 | AI Agent | อัปเดตสถานะรอบ 2: dimensions claim ✅, export ✅, SLA ✅, Nova rate-limit ✅, lib/intelligence deprecated ✅, storage bucket migration 038 ✅ — Closure ~80% |
 
 ---
 
