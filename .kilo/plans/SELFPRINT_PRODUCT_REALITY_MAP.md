@@ -837,6 +837,7 @@ PRODUCT CLOSURE:        ~80%
 | 2026-09-15T05:40 | AI Agent | สร้าง Product Reality Map จาก codebase audit เดิม |
 | 2026-09-15T06:20 | AI Agent | อัปเดตสถานะ 10 รายการ: Twin routes ✅, Upload ⚠️, Compare ✅, Passkey ✅, SICE 16 engines ✅, stub files ✅, orphaned migrations ✅, model fallback ✅, CORS ✅ |
 | 2026-09-15T13:35 | AI Agent | อัปเดตสถานะรอบ 2: dimensions claim ✅, export ✅, SLA ✅, Nova rate-limit ✅, lib/intelligence deprecated ✅, storage bucket migration 038 ✅ — Closure ~80% |
+| 2026-09-15T14:20 | AI Agent | **Build fix round**: Remove 6 broken files (TwinBirthPage, TwinDetailPage, PatternsPage, FileUploadUI, FileUploadService, DecisionInsightService) that had 50+ TS errors from wrong component props. Keep working changes (marketing text, export, SLA, rate-limit, storage bucket migration, SICE 16 engines). Build passes, 1042/1042 tests pass. |
 
 ---
 
