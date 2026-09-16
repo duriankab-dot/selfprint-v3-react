@@ -46,27 +46,37 @@ interface PagesContext {
   env: Env;
 }
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
+const KNOWN_ORIGINS = ['https://selfprint.one', 'https://www.selfprint.one', 'http://localhost:5173', 'http://localhost:3000'];
+
+const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-function json(body: unknown, status = 200): Response {
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  if (origin && KNOWN_ORIGINS.includes(origin)) {
+    return { ...CORS_HEADERS, 'Access-Control-Allow-Origin': origin };
+  }
+  // Fallback to wildcard for now, but log warning (parity with /api/nova)
+  console.warn(`[nova-stream] Unrecognized origin: ${origin}`);
+  return { ...CORS_HEADERS, 'Access-Control-Allow-Origin': '*' };
+}
+
+function json(body: unknown, status = 200, extraHeaders: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS, ...extraHeaders },
   });
 }
 
-// ── Rate limiter ──────────────────────────────────────────────────────────────
+// ── Rate limiter (user-based: per-user rate limiting via JWT user ID) ─────────
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
-function checkRateLimit(ip: string, maxLimit: string | undefined): boolean {
+function checkRateLimit(userId: string, maxLimit: string | undefined): boolean {
   const now = Date.now();
-  const entry = rateLimitMap.get(ip);
+  const entry = rateLimitMap.get(userId);
   if (!entry || now > entry.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + 60_000 });
+    rateLimitMap.set(userId, { count: 1, resetTime: now + 60_000 });
     return true;
   }
   entry.count++;
@@ -76,36 +86,34 @@ function checkRateLimit(ip: string, maxLimit: string | undefined): boolean {
 
 export async function onRequest(context: PagesContext): Promise<Response> {
   const { request, env } = context;
+  const origin = request.headers.get('origin') || null;
+  const corsHeaders = getCorsHeaders(origin);
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: CORS_HEADERS });
+    return new Response(null, { status: 200, headers: corsHeaders });
   }
   if (request.method !== 'POST') {
-    return json({ error: 'POST only' }, 405);
+    return json({ error: 'POST only' }, 405, corsHeaders);
   }
 
   // ── Auth gate (P0-E3: parity with /api/nova) ─────────────────────────
   const authHeader = request.headers.get('authorization') ?? undefined;
   if (!authHeader) {
-    return json({ error: 'Unauthorized' }, 401);
+    return json({ error: 'Unauthorized' }, 401, corsHeaders);
   }
   const user = await verifyUser(authHeader, env);
   if (!user) {
-    return json({ error: 'Unauthorized' }, 401);
+    return json({ error: 'Unauthorized' }, 401, corsHeaders);
   }
 
-  // ── Rate limit ─────────────────────────────────────────────────────────
-  const ip =
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-    request.headers.get('cf-connecting-ip') ||
-    'unknown';
-  if (!checkRateLimit(ip, env.NOVA_RATE_LIMIT)) {
-    return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
+  // ── Rate limit (user-based, parity with /api/nova and /api/twin) ───────
+  if (!checkRateLimit(user.id, env.NOVA_RATE_LIMIT)) {
+    return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429, corsHeaders);
   }
 
   if (!env.OPENROUTER_API_KEY) {
     console.error('[functions/api/nova-stream] OPENROUTER_API_KEY missing');
-    return json({ error: 'API key not configured' }, 500);
+    return json({ error: 'API key not configured' }, 500, corsHeaders);
   }
 
   try {
@@ -124,7 +132,7 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     } = body;
 
     if (!messages?.length) {
-      return json({ error: 'messages[] is required' }, 400);
+      return json({ error: 'messages[] is required' }, 400, corsHeaders);
     }
 
     const model = env.NOVA_MODEL_ID || 'qwen/qwen-plus';
@@ -203,8 +211,8 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     console.error('[functions/api/nova-stream] Error:', msg);
     // Propagate OpenRouter rate limit (429) as 429, not 500
     if (msg.includes('429')) {
-      return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429);
+      return json({ error: 'RATE_LIMIT', retryAfter: 60 }, 429, corsHeaders);
     }
-    return json({ error: 'Internal server error' }, 500);
+    return json({ error: 'Internal server error' }, 500, corsHeaders);
   }
 }

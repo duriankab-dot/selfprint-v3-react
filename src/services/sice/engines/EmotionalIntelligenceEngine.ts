@@ -12,11 +12,11 @@ export class EmotionalIntelligenceEngine extends SICEBase {
     super(13, 'EmotionalIntelligenceEngine', 'Analyzes emotional patterns and trends from user interactions');
   }
 
-  async process(_input: SICEInput): Promise<SICEOutput> {
+  async process(input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeEmotionalPatterns(_input);
+      const result = await this.analyzeEmotionalPatterns(input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,22 +39,37 @@ export class EmotionalIntelligenceEngine extends SICEBase {
     }
   }
 
-  private async analyzeEmotionalPatterns(_input: SICEInput): Promise<EmotionalIntelligenceResult> {
+  private getEmptyEmotionalResult(): EmotionalIntelligenceResult {
+    return {
+      emotionalAwareness: 50,
+      regulationSkills: [],
+      growthOpportunities: ['Continue tracking emotional patterns'],
+      recommendedExercises: ['Daily mood journaling', 'Mindfulness practice'],
+    };
+  }
+
+  private async analyzeEmotionalPatterns(input: SICEInput): Promise<EmotionalIntelligenceResult> {
+    if (!supabase) return this.getEmptyEmotionalResult();
+
+    // Resolve the user's Twin first — twin_memories is keyed by twin_id, not user_id
+    const { data: twin } = await supabase
+      .from('twins')
+      .select('id')
+      .eq('user_id', input.userId)
+      .maybeSingle();
+
+    if (!twin) return this.getEmptyEmotionalResult();
+
     // Analyze recent conversations for emotional tone
     const { data: messages } = await supabase
       .from('twin_memories')
       .select('content, created_at')
-      .eq('twin_id', '') // Would be set with actual twin_id
+      .eq('twin_id', twin.id)
       .order('created_at', { ascending: false })
       .limit(50);
 
     if (!messages || messages.length === 0) {
-      return {
-        emotionalAwareness: 50,
-        regulationSkills: [],
-        growthOpportunities: ['Continue tracking emotional patterns'],
-        recommendedExercises: ['Daily mood journaling', 'Mindfulness practice'],
-      };
+      return this.getEmptyEmotionalResult();
     }
 
     // Simple sentiment analysis based on keywords

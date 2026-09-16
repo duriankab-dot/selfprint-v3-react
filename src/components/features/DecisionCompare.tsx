@@ -8,7 +8,8 @@
 import React, { useState, useMemo } from 'react';
 import type { Decision, DecisionOutcome } from '../../types/decision';
 import { WORLDS, type WorldId } from '../../constants/worlds';
-import './DecisionDashboard.css';
+import { useLanguage } from '../../context/LanguageContext';
+import '../../styles/decision-dashboard.css';
 
 interface DecisionCompareProps {
   decisions: Decision[];
@@ -16,6 +17,8 @@ interface DecisionCompareProps {
 }
 
 export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, outcomesMap }) => {
+  const { language } = useLanguage();
+  const isTh = language === 'th';
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
 
@@ -54,7 +57,7 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
       <div className="dc-comparison-overlay">
         <div className="dc-comparison-panel">
           <div className="dc-comparison-header">
-            <h2>📊 Decision Comparison</h2>
+            <h2>📊 {isTh ? 'เปรียบเทียบการตัดสินใจ' : 'Decision Comparison'}</h2>
             <button onClick={handleCloseComparison} className="dc-close-btn">
               ✕
             </button>
@@ -70,17 +73,17 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
 
                 <div className="dc-card-body">
                   <div className="dc-field">
-                    <label>Twin Recommendation</label>
+                    <label>{isTh ? 'คำแนะนำจาก Twin' : 'Twin Recommendation'}</label>
                     <p>{decision.twinRecommendation}</p>
                   </div>
 
                   <div className="dc-field">
-                    <label>Your Choice</label>
+                    <label>{isTh ? 'ตัวเลือกของคุณ' : 'Your Choice'}</label>
                     <p>{decision.userChoice}</p>
                   </div>
 
                   <div className="dc-field">
-                    <label>Options</label>
+                    <label>{isTh ? 'ตัวเลือก' : 'Options'}</label>
                     <ul>
                       {decision.options.map((opt, idx) => (
                         <li key={idx} style={{ color: opt === decision.userChoice ? 'var(--primary-color)' : 'inherit', fontWeight: opt === decision.userChoice ? 'bold' : 'normal' }}>
@@ -92,24 +95,24 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
 
                   {decision.context && (
                     <div className="dc-field">
-                      <label>Context</label>
+                      <label>{isTh ? 'บริบท' : 'Context'}</label>
                       <p>{decision.context}</p>
                     </div>
                   )}
 
                   <div className="dc-field">
-                    <label>Date</label>
+                    <label>{isTh ? 'วันที่' : 'Date'}</label>
                     <p>{new Date(decision.chosenAt).toLocaleDateString()}</p>
                   </div>
 
                   {/* Outcomes */}
                   {outcomesMap.has(decision.id) && (
                     <div className="dc-field">
-                      <label>Outcomes</label>
+                      <label>{isTh ? 'ผลลัพธ์' : 'Outcomes'}</label>
                       {outcomesMap.get(decision.id)?.map((outcome) => (
                         <div key={outcome.id} style={{ padding: '0.5rem', margin: '0.5rem 0', background: 'var(--card-bg)', borderRadius: '0.5rem' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>Day {outcome.followUpDay}</span>
+                            <span>{isTh ? `วันที่ ${outcome.followUpDay}` : `Day ${outcome.followUpDay}`}</span>
                             <span style={{
                               color: outcome.impact === 'positive' ? '#10b981' : outcome.impact === 'negative' ? '#ef4444' : '#f59e0b',
                             }}>
@@ -118,7 +121,7 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
                           </div>
                           <p style={{ margin: '0.25rem 0' }}>{outcome.feedback}</p>
                           <p style={{ margin: '0.25rem 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                            Lessons: {outcome.lessons}
+                            {isTh ? 'บทเรียน: ' : 'Lessons: '}{outcome.lessons}
                           </p>
                         </div>
                       ))}
@@ -137,7 +140,7 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
   return (
     <div className="dc-selection-mode">
       <div className="dc-selection-header">
-        <h3>Select decisions to compare ({selectedIds.length}/4)</h3>
+        <h3>{isTh ? `เลือกการตัดสินใจเพื่อเปรียบเทียบ (${selectedIds.length}/4)` : `Select decisions to compare (${selectedIds.length}/4)`}</h3>
         <button
           onClick={handleCompare}
           disabled={selectedIds.length < 2}
@@ -150,7 +153,7 @@ export const DecisionCompare: React.FC<DecisionCompareProps> = ({ decisions, out
             cursor: selectedIds.length >= 2 ? 'pointer' : 'not-allowed',
           }}
         >
-          Compare Selected
+          {isTh ? 'เปรียบเทียบ' : 'Compare Selected'}
         </button>
       </div>
 

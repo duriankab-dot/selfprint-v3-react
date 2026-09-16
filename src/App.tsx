@@ -208,6 +208,14 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/chat/nova', element: <NovaProvider><NovaChat /></NovaProvider> }, // NOVAPROV-001
     { path: '/chat/twin', element: <TwinChat /> },
     { path: '/twin', element: <LangRedirect to="/chat/twin" /> },
+    // TWINROUTE-001 (16 ก.ย. 2026): dedicated /twin-birth, /twin/:id and
+    // /twin/patterns pages were removed in the build-fix round (they had
+    // broken component props). Their functionality lives at /core-awakening,
+    // /twin-profile and /intelligence — add alias redirects so old deep links
+    // (and the audit's B06/B07/B08 items) resolve instead of 404ing.
+    { path: '/twin-birth', element: <LangRedirect to="/core-awakening" /> },
+    { path: '/twin/patterns', element: <LangRedirect to="/intelligence" /> },
+    { path: '/twin/:id', element: <LangRedirect to="/twin-profile" /> },
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/intelligence', element: <IntelligenceHub /> },
     { path: '/analysis', element: <AnalysisPage /> },

@@ -19,7 +19,7 @@
  * @module features/TwinProfile
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -29,6 +29,8 @@ import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { MemoryManager } from '@/lib/intelligence/MemoryManager';
 import { getRecentlyLearned, forgetMemory, type LearnedMemory } from '@/lib/memory/getTwinKnowledge';
 import { getUserDecisions, getDecisionOutcomesBatch } from '@/services/DecisionService';
+import { getLatestProfilePicture } from '@/lib/storage/FileUploadService';
+import { FileUploadUI } from './FileUploadUI';
 import { WORLDS, type WorldId } from '@/constants/worlds';
 import { AccuracyBadgeFromMetrics } from '@/components/intelligence/AccuracyBadge';
 import { TwinEvolutionChart } from './TwinEvolutionChart';
@@ -66,6 +68,24 @@ export const TwinProfile: React.FC = () => {
   const { twin } = useTwin();
   const twinId = twin?.id ?? '';
   const queryClient = useQueryClient();
+
+  // Upload feature (UPLOAD-001): profile picture lives in Supabase Storage
+  // bucket `profiles` (migration 038). When the bucket doesn't exist yet,
+  // getLatestProfilePicture self-guards to null and the uploader surfaces a
+  // readable error — no crash.
+  const [profileUrl, setProfileUrl] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useQuery({
+    queryKey: ['profilePicture', userId, twinId],
+    queryFn: async () => {
+      const url = await getLatestProfilePicture(userId, twinId);
+      if (url) setProfileUrl(url);
+      return url;
+    },
+    enabled: !!userId && !!twinId,
+    staleTime: 60_000,
+  });
 
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
@@ -222,6 +242,27 @@ export const TwinProfile: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Profile picture upload (UPLOAD-001) — real storage-backed uploader */}
+      <section className="twin-profile__upload-section">
+        <h2 className="section-title">📷 {isTh ? 'รูปโปรไฟล์' : 'Profile Picture'}</h2>
+        <FileUploadUI
+          userId={userId}
+          twinId={twinId}
+          currentUrl={profileUrl}
+          onUploadComplete={(url) => {
+            setProfileUrl(url);
+            setUploadError(null);
+          }}
+          onUploadError={(error) => setUploadError(error)}
+        />
+        {uploadError && (
+          <p className="twin-profile__upload-error">
+            {isTh ? `ไม่สามารถอัปโหลดได้: ${uploadError}` : `Upload failed: ${uploadError}`}
+            {isTh ? ' — ตรวจสอบว่า Storage bucket "profiles" ถูกสร้างแล้ว (migration 038)' : ' — make sure the "profiles" Storage bucket has been created (migration 038).'}
+          </p>
+        )}
+      </section>
 
       {/* MEMORY-KNOWS-001 (Track C Phase 11, §16): "What Twin Knows" —
           About you / Recently learned / Patterns / Decisions / Questions.

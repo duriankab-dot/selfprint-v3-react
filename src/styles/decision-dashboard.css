@@ -412,3 +412,196 @@
 .marker:focus-visible {
   outline: 1px solid var(--color-focus);
 }
+
+/* ===== INSIGHTS + SLA ===== */
+
+.dd-insights {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.dd-sla {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-xl);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.dd-sla h2 {
+  color: #4F46E5;
+  margin: 0;
+  font-size: 1rem;
+}
+
+[data-mode="dark"] .dd-sla h2 {
+  color: #A5B4FC;
+}
+
+.dd-sla__item {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #475569);
+}
+
+/* ===== DECISION COMPARE (dc-*) ===== */
+/* Styling for DecisionCompare.tsx — "select to compare" + side-by-side overlay */
+
+.dc-selection-mode {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(167, 139, 250, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+
+.dc-selection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+}
+
+.dc-selection-header h3 {
+  color: #4F46E5;
+  margin: 0;
+}
+
+[data-mode="dark"] .dc-selection-header h3 {
+  color: #A5B4FC;
+}
+
+.dc-decision-list {
+  display: grid;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.dc-comparison-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(4px);
+  padding: var(--space-lg);
+}
+
+.dc-comparison-panel {
+  background: var(--color-bg-primary, #f8fafc);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  max-width: 960px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.4);
+}
+
+[data-mode="dark"] .dc-comparison-panel {
+  background: #0f172a;
+}
+
+.dc-comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.dc-comparison-header h2 {
+  color: #4F46E5;
+  margin: 0;
+}
+
+[data-mode="dark"] .dc-comparison-header h2 {
+  color: #A5B4FC;
+}
+
+.dc-close-btn {
+  background: transparent;
+  border: 1px solid var(--color-border, rgba(99, 102, 241, 0.2));
+  color: var(--color-text-secondary, #64748b);
+  font-size: 1.1rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.dc-comparison-card {
+  flex: 1 1 280px;
+  min-width: 260px;
+  background: var(--color-bg-secondary, #f1f5f9);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md);
+}
+
+[data-mode="dark"] .dc-comparison-card {
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.dc-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.dc-card-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.dc-world-badge {
+  background: rgba(99, 102, 241, 0.2);
+  color: #4338CA;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+[data-mode="dark"] .dc-world-badge {
+  color: #A5B4FC;
+}
+
+.dc-field {
+  margin-bottom: var(--space-md);
+}
+
+.dc-field label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: var(--color-text-tertiary, #94a3b8);
+  margin-bottom: var(--space-xs);
+}
+
+.dc-field p {
+  margin: 0;
+  color: var(--color-text-secondary, #475569);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dc-field ul {
+  margin: 0;
+  padding-left: var(--space-lg);
+  color: var(--color-text-secondary, #475569);
+  font-size: 0.9rem;
+}

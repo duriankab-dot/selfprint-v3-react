@@ -12,11 +12,11 @@ export class WellnessEngine extends SICEBase {
     super(16, 'WellnessEngine', 'Tracks overall wellness across multiple dimensions');
   }
 
-  async process(_input: SICEInput): Promise<SICEOutput> {
+  async process(input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeWellness(_input);
+      const result = await this.analyzeWellness(input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,22 +39,37 @@ export class WellnessEngine extends SICEBase {
     }
   }
 
-  private async analyzeWellness(_input: SICEInput): Promise<WellnessResult> {
+  private getEmptyWellnessResult(): WellnessResult {
+    return {
+      overallWellness: 50,
+      dimensions: [],
+      immediateActions: ['Start tracking your wellness journey'],
+      longTermRecommendations: ['Regular self-reflection', 'Balanced lifestyle'],
+    };
+  }
+
+  private async analyzeWellness(input: SICEInput): Promise<WellnessResult> {
+    if (!supabase) return this.getEmptyWellnessResult();
+
+    // Resolve the user's Twin first — twin_memories is keyed by twin_id, not user_id
+    const { data: twin } = await supabase
+      .from('twins')
+      .select('id')
+      .eq('user_id', input.userId)
+      .maybeSingle();
+
+    if (!twin) return this.getEmptyWellnessResult();
+
     // Analyze conversations for wellness indicators
     const { data: messages } = await supabase
       .from('twin_memories')
       .select('content, created_at')
-      .eq('twin_id', '')
+      .eq('twin_id', twin.id)
       .order('created_at', { ascending: false })
       .limit(100);
 
     if (!messages || messages.length === 0) {
-      return {
-        overallWellness: 50,
-        dimensions: [],
-        immediateActions: ['Start tracking your wellness journey'],
-        longTermRecommendations: ['Regular self-reflection', 'Balanced lifestyle'],
-      };
+      return this.getEmptyWellnessResult();
     }
 
     // Analyze wellness dimensions

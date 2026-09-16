@@ -12,11 +12,11 @@ export class GoalTrackingEngine extends SICEBase {
     super(15, 'GoalTrackingEngine', 'Monitors goal progress and achievement patterns');
   }
 
-  async process(_input: SICEInput): Promise<SICEOutput> {
+  async process(input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeGoals(_input);
+      const result = await this.analyzeGoals(input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,23 +39,38 @@ export class GoalTrackingEngine extends SICEBase {
     }
   }
 
-  private async analyzeGoals(_input: SICEInput): Promise<GoalTrackingResult> {
+  private getEmptyGoalResult(): GoalTrackingResult {
+    return {
+      activeGoals: 0,
+      completionRate: 0,
+      goalCategories: {},
+      bottlenecks: [],
+      nextRecommendedGoals: ['Define clear goals to track'],
+    };
+  }
+
+  private async analyzeGoals(input: SICEInput): Promise<GoalTrackingResult> {
+    if (!supabase) return this.getEmptyGoalResult();
+
+    // Resolve the user's Twin first — twin_memories is keyed by twin_id, not user_id
+    const { data: twin } = await supabase
+      .from('twins')
+      .select('id')
+      .eq('user_id', input.userId)
+      .maybeSingle();
+
+    if (!twin) return this.getEmptyGoalResult();
+
     // Analyze conversations for goal-related content
     const { data: messages } = await supabase
       .from('twin_memories')
       .select('content, created_at')
-      .eq('twin_id', '')
+      .eq('twin_id', twin.id)
       .order('created_at', { ascending: false })
       .limit(100);
 
     if (!messages || messages.length === 0) {
-      return {
-        activeGoals: 0,
-        completionRate: 0,
-        goalCategories: {},
-        bottlenecks: [],
-        nextRecommendedGoals: ['Define clear goals to track'],
-      };
+      return this.getEmptyGoalResult();
     }
 
     // Analyze goal-related keywords

@@ -5,15 +5,17 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import type { DecisionInsights } from '../types/decision';
+import type { DecisionInsights, DecisionOutcome } from '../types/decision';
 import type { WorldId } from '../constants/worlds';
 import { WORLDS } from '../constants/worlds';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useDecisionStore } from '../store/decisionStore';
 import { useTwin } from '../context/TwinContext';
-import * as DecisionLearningService from '../services/DecisionLearningService';
+import { getDecisionOutcomesBatch } from '../services/DecisionService';
+import { getDecisionInsightsWithSLA, type InsightSLA } from '../services/DecisionInsightService';
 import DecisionForm from '../components/features/DecisionForm';
+import { DecisionCompare } from '../components/features/DecisionCompare';
 import { AppShell } from '@/components/layout/AppShell';
 import { exportDecisionLogs } from '../services/supabase-service';
 import '../styles/decision-dashboard.css';
@@ -26,9 +28,11 @@ export default function DecisionDashboard() {
   const { decisions, loadDecisions, getFilteredDecisions } = useDecisionStore();
 
   const [insights, setInsights] = useState<DecisionInsights | null>(null);
+  const [sla, setSla] = useState<InsightSLA | null>(null);
   const [showNewDecision, setShowNewDecision] = useState(false);
   const [selectedWorld, setSelectedWorld] = useState<WorldId | 'all'>(currentWorld || 'all');
   const [exporting, setExporting] = useState<'csv' | 'json' | null>(null);
+  const [outcomesMap, setOutcomesMap] = useState<Map<string, DecisionOutcome[]>>(new Map());
 
   const handleExport = useCallback(async (format: 'csv' | 'json') => {
     if (!session?.user?.id) return;
@@ -62,11 +66,34 @@ export default function DecisionDashboard() {
   }, [session?.user?.id, loadDecisions]);
 
   useEffect(() => {
-    if (session?.user?.id) {
-      // Load insights from DecisionLearningService
-      DecisionLearningService.getDecisionInsights(session.user.id).then(setInsights);
+    if (!session?.user?.id) return;
+    // Insights + SLA tracking (latency / freshness / coverage) via
+    // DecisionInsightService; best-effort persisted to decision_insights_cache.
+    let cancelled = false;
+    getDecisionInsightsWithSLA(session.user.id, decisions, outcomesMap).then((state) => {
+      if (cancelled) return;
+      setInsights(state.insights);
+      setSla(state.sla);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id, decisions, outcomesMap]);
+
+  // Load outcome map for the Compare feature (one batch query, not N+1)
+  useEffect(() => {
+    if (decisions.length === 0) {
+      setOutcomesMap(new Map());
+      return;
     }
-  }, [session?.user?.id, decisions, selectedWorld]);
+    let cancelled = false;
+    getDecisionOutcomesBatch(decisions.map((d) => d.id)).then((map) => {
+      if (!cancelled) setOutcomesMap(map);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [decisions]);
 
   const filteredDecisions = getFilteredDecisions();
 
@@ -185,6 +212,30 @@ export default function DecisionDashboard() {
             )}
           </div>
         )}
+
+        {/* AI insight SLA health (latency / freshness / coverage) */}
+        {sla && (
+          <div className="dd-sla">
+            <h2>{isTh ? 'คุณภาพบทวิเคราะห์ (SLA)' : 'Insight SLA'}</h2>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              <span className="dd-sla__item" style={{ color: sla.fresh ? '#10b981' : '#f59e0b' }}>
+                {sla.fresh ? '●' : '◐'} {isTh ? 'สดใหม่' : 'Fresh'}: {sla.fresh ? (isTh ? 'ใช่' : 'Yes') : (isTh ? 'เก่าเกิน 24 ชม.' : 'stale > 24h')}
+              </span>
+              <span className="dd-sla__item">
+                {isTh ? `ความครอบคลุมข้อมูล: ${sla.coverage}%` : `Coverage: ${sla.coverage}%`}
+              </span>
+              <span className="dd-sla__item">
+                {isTh ? `เวลาเฉลี่ย: ${sla.avgLatencyMs.toFixed(0)}ms` : `Avg latency: ${sla.avgLatencyMs.toFixed(0)}ms`}
+              </span>
+              <span className="dd-sla__item">
+                {isTh ? `การตัดสินใจ: ${sla.decisionCount} รายการ` : `Decisions: ${sla.decisionCount}`}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Compare feature — side-by-side decision comparison */}
+        <DecisionCompare decisions={filteredDecisions} outcomesMap={outcomesMap} />
 
         {/* Decisions List */}
         <div className="dd-decisions">

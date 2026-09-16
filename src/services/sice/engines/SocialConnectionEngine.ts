@@ -12,11 +12,11 @@ export class SocialConnectionEngine extends SICEBase {
     super(14, 'SocialConnectionEngine', 'Tracks social relationship patterns and connections');
   }
 
-  async process(_input: SICEInput): Promise<SICEOutput> {
+  async process(input: SICEInput): Promise<SICEOutput> {
     const startTime = performance.now();
 
     try {
-      const result = await this.analyzeSocialConnections(_input);
+      const result = await this.analyzeSocialConnections(input);
       const executionTime = performance.now() - startTime;
 
       return {
@@ -39,23 +39,38 @@ export class SocialConnectionEngine extends SICEBase {
     }
   }
 
-  private async analyzeSocialConnections(_input: SICEInput): Promise<SocialConnectionResult> {
+  private getEmptySocialResult(): SocialConnectionResult {
+    return {
+      totalRelationships: 0,
+      strongestConnections: [],
+      connectionGaps: ['No social data available yet'],
+      socialHealthScore: 50,
+      recommendations: ['Share more about your relationships'],
+    };
+  }
+
+  private async analyzeSocialConnections(input: SICEInput): Promise<SocialConnectionResult> {
+    if (!supabase) return this.getEmptySocialResult();
+
+    // Resolve the user's Twin first — twin_memories is keyed by twin_id, not user_id
+    const { data: twin } = await supabase
+      .from('twins')
+      .select('id')
+      .eq('user_id', input.userId)
+      .maybeSingle();
+
+    if (!twin) return this.getEmptySocialResult();
+
     // Analyze conversations for social topics
     const { data: messages } = await supabase
       .from('twin_memories')
       .select('content, created_at')
-      .eq('twin_id', '')
+      .eq('twin_id', twin.id)
       .order('created_at', { ascending: false })
       .limit(50);
 
     if (!messages || messages.length === 0) {
-      return {
-        totalRelationships: 0,
-        strongestConnections: [],
-        connectionGaps: ['No social data available yet'],
-        socialHealthScore: 50,
-        recommendations: ['Share more about your relationships'],
-      };
+      return this.getEmptySocialResult();
     }
 
     // Analyze social keywords
