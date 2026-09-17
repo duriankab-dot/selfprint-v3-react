@@ -6,17 +6,22 @@
  * the build-fix round with a broken import path). The wrong relative import
  * (`../services/supabase-service`) pointed outside src/lib, which is what
  * broke the build. Correct path from src/lib/storage is `../../services`.
+ *
+ * P3.2 (17 ก.ย. 2026): Added browser-side image optimization pipeline
+ * using native Canvas API. Images are resized to 512×512 max, converted
+ * to WebP/JPEG at 85% quality, and capped at ~200KB before upload.
  */
 
 import { supabase } from '../../services/supabase-service';
+import { processImageForUpload } from './imageProcessor';
 
 export interface UploadedFile {
   path: string;
   url: string;
   size: number;
   mimeType: string;
+  processedSize?: number;
 }
-
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -44,31 +49,33 @@ export async function uploadProfilePicture(
     throw new Error(validation.error);
   }
 
+  const processed = await processImageForUpload(file);
+
+  const ext = (processed.blob as File).name.split('.').pop() || 'webp';
   const timestamp = Date.now();
-  const ext = file.name.split('.').pop() || 'jpg';
   const path = `profiles/${userId}/${twinId}/${timestamp}.${ext}`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from('profiles')
-    .upload(path, file, {
+    .upload(path, processed.blob, {
       upsert: true,
-      contentType: file.type,
+      contentType: processed.mimeType,
     });
 
   if (error) {
     throw new Error(`Upload failed: ${error.message}`);
   }
 
-  // Get public URL
   const { data: urlData } = supabase.storage
     .from('profiles')
     .getPublicUrl(path);
 
   return {
-    path: data.path,
+    path,
     url: urlData.publicUrl,
-    size: file.size,
-    mimeType: file.type,
+    size: processed.size,
+    mimeType: processed.mimeType,
+    processedSize: processed.size,
   };
 }
 
@@ -86,24 +93,21 @@ export async function deleteProfilePicture(path: string): Promise<void> {
   }
 }
 
-export async function getLatestProfilePicture(userId: string, twinId: string): Promise<string | null> {
+export async function getLatestProfilePicture(userId: string, twinId?: string): Promise<string | null> {
   if (!supabase) {
     return null;
   }
 
-  const { data: files, error } = await supabase.storage
-    .from('profiles')
-    .list(`profiles/${userId}/${twinId}`);
+  const folder = twinId ? `profiles/${userId}/${twinId}` : `profiles/${userId}`;
+  const { data: files, error } = await supabase.storage.from('profiles').list(folder);
 
   if (error || !files || files.length === 0) {
     return null;
   }
 
-  // Get the most recent file (sorted by name which includes timestamp)
   const latest = files.sort((a, b) => b.name.localeCompare(a.name))[0];
-  const { data: urlData } = supabase.storage
-    .from('profiles')
-    .getPublicUrl(`profiles/${userId}/${twinId}/${latest.name}`);
+  const fullPath = `${folder}/${latest.name}`;
+  const { data: urlData } = supabase.storage.from('profiles').getPublicUrl(fullPath);
 
   return urlData.publicUrl;
 }

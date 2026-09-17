@@ -19,7 +19,7 @@
  * @module features/TwinProfile
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -138,6 +138,44 @@ export const TwinProfile: React.FC = () => {
     enabled: !!twinId,
     staleTime: 30_000,
   });
+
+  // P3.3 Memory search — debounced search over twin_memories
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery), 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const { data: searchResults = [], isLoading: searchLoading } = useQuery({
+    queryKey: ['twinMemoriesSearch', twinId, debouncedQuery],
+    queryFn: async () => {
+      if (!twinId || !debouncedQuery.trim()) return [];
+      const { supabase } = await import('@/services/supabase-service');
+      const escapedQuery = debouncedQuery.replace(/[.%]/g, '\\$&');
+      const { data, error } = await supabase
+        .from('twin_memories')
+        .select('id, content, world_id, role, created_at')
+        .eq('twin_id', twinId)
+        .eq('role', 'user')
+        .ilike('content', `%${escapedQuery}%`)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) throw error;
+      return (data || []).map((d: any) => ({
+        id: d.id,
+        content: d.content,
+        worldId: d.world_id,
+        createdAt: d.created_at,
+      }));
+    },
+    enabled: !!twinId && !!debouncedQuery.trim(),
+    staleTime: 10_000,
+  });
+
+  const isSearching = !!debouncedQuery.trim();
+  const searchResultsCount = searchResults.length;
 
   const { data: knownDecisions = [], isLoading: decisionsKnowLoading } = useQuery({
     queryKey: ['twinDecisionsKnows', twinId],
@@ -292,7 +330,64 @@ export const TwinProfile: React.FC = () => {
           {/* Recently learned */}
           <div className="knows-card">
             <h3 className="knows-card__title">{isTh ? 'เพิ่งเรียนรู้' : 'Recently learned'}</h3>
-            {learnedLoading ? (
+
+            {/* P3.3 Memory search input */}
+            <div style={{ marginBottom: 12 }}>
+              <input
+                type="search"
+                placeholder={isTh ? 'ค้นหาความจำ...' : 'Search memories...'}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  border: '1px solid var(--color-border)',
+                  background: 'var(--color-bg-tertiary)',
+                  color: 'var(--color-text-primary)',
+                  fontSize: 14,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                aria-label={isTh ? 'ค้นหาความจำ' : 'Search memories'}
+              />
+              {isSearching && (
+                <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginTop: 4 }}>
+                  {isTh ? `ค้นหา: "${debouncedQuery}" — พบ ${searchResultsCount} ผล` : `Searching "${debouncedQuery}" — ${searchResultsCount} results`}
+                </div>
+              )}
+            </div>
+
+            {searchLoading && isSearching ? (
+              <div className="twin-profile__loading"><span className="spinner" /></div>
+            ) : isSearching && searchResults.length === 0 ? (
+              <p className="knows-empty">
+                {isTh ? 'ไม่พบความจำที่ตรงกับการค้นหา' : 'No memories found matching your search.'}
+              </p>
+            ) : isSearching ? (
+              <ul className="learned-list">
+                {searchResults.map((m: any) => (
+                  <li key={m.id} className="learned-item">
+                    <div className="learned-item__body">
+                      <p className="learned-item__content">{m.content}</p>
+                      <span className="learned-item__meta">
+                        {worldLabel(m.worldId, isTh)}
+                        {m.createdAt ? ` · ${formatDate(new Date(m.createdAt), isTh)}` : ''}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      className="forget-btn"
+                      onClick={() => handleForget(m.id)}
+                      aria-label={isTh ? 'ลืมความจำนี้' : 'Forget this memory'}
+                      title={isTh ? 'ลืม' : 'Forget'}
+                    >
+                      🗑
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : learnedLoading ? (
               <div className="twin-profile__loading"><span className="spinner" /></div>
             ) : recentlyLearned.length === 0 ? (
               <p className="knows-empty">

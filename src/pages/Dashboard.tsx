@@ -18,6 +18,7 @@ import { TodaySection } from '../components/today/TodaySection'; // §5.2 Dynami
 import { NarrativeHook } from '../components/story/NarrativeHook'; // §51 Layer 3
 import { CurrentChapter } from '../components/story/CurrentChapter'; // §51 Layer 2
 import { AppShell } from '../components/layout/AppShell';
+import UserAvatar from '../components/account/UserAvatar';
 import '../styles/dashboard.css';
 
 interface DecisionLog {
@@ -105,6 +106,27 @@ const Dashboard: React.FC = () => {
               >
                 {isTh ? 'ไปต่อยัง Worlds →' : 'Continue to Worlds →'}
               </button>
+            </div>
+          )}
+
+          {/* User avatar + name — P3 avatar-on-dashboard */}
+          {userId && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '0 4px' }}>
+              <UserAvatar
+                displayName={session?.user?.user_metadata?.full_name || session?.user?.email || 'User'}
+                size="md"
+                userId={userId}
+                twinId={twin?.id}
+                onClick={() => navigate('/menu')}
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {session?.user?.user_metadata?.full_name || session?.user?.email || 'User'}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>
+                  {lifecycleStatus === 'TWIN_ALIVE' ? (isTh ? 'Twin พร้อมแล้ว' : 'Twin ready') : lifecycleStatus === 'WORLD_ACTIVE' ? (isTh ? 'กำลังใช้งาน' : 'Active') : (isTh ? 'กำลังเริ่มต้น' : 'Getting started')}
+                </div>
+              </div>
             </div>
           )}
 

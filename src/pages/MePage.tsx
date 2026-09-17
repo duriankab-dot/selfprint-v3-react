@@ -15,7 +15,9 @@ import { AppShell } from '../components/layout/AppShell';
 import { useAuth } from '../context/AuthContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTwin } from '../context/TwinContext';
 import { BigStory } from '../components/story/BigStory'; // §51 Layer 1
+import UserAvatar from '../components/account/UserAvatar';
 
 // label ต่อ tier
 const TIER_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
@@ -53,6 +55,7 @@ export default function MePage() {
   const email = user?.email || '';
   const tier = subscription?.tier || 'free';
   const tierInfo = TIER_LABELS[tier] ?? TIER_LABELS.free;
+  const { twin } = useTwin();
 
   const SECTIONS: MenuSection[] = isTh ? [
     {
@@ -225,19 +228,12 @@ export default function MePage() {
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}>
           {/* Avatar */}
-          <div style={{
-            width: 60,
-            height: 60,
-            borderRadius: '50%',
-            background: 'color-mix(in srgb, var(--color-accent-primary) 18%, transparent)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 26,
-            flexShrink: 0,
-          }}>
-            {displayName.charAt(0).toUpperCase()}
-          </div>
+          <UserAvatar
+            displayName={displayName}
+            size="lg"
+            userId={user?.id}
+            twinId={twin?.id}
+          />
 
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{

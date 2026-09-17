@@ -486,6 +486,7 @@ supabase db push           # ✅ PASSED (17 ก.ย. 2026) — migrations 038/03
 | 2026-09-16T23:5x | AI Agent | **FINAL CLOSURE ROUND:** fix P0 (engines 13-16 twin_id), nova-stream user.id+CORS, SICE tests 16/16, restore+wired Upload UI, Compare wiring, AI insight SLA (migration 039), ลบ TwinChat orphan, เปลี่ยนชื่อ 033 ซ้ำ, เพิ่ม route aliases — **1050/1050 tests, build/lint/typecheck ทั้งหมดผ่าน** — CODE CLOSURE 100% |
 | 2026-09-17T08:xx | AI Agent | **DB PUSH COMPLETION:** supabase db push ผ่านแล้ว — migrations 038/039/040 apply สำเร็จ; V01 migration sequence resolved; AD02 migration breakpoint fixed; UPDATE all docs (033a→040, external ops 3→2); verification run (build/test/lint/typecheck ผ่าน) |
 | 2026-09-17T08:30 | AI Agent | **FINAL CLOSURE COMPLETE:** ทุก external ops เสร็จแล้ว — J03/V01/V04 → CLOSED, BLOCKED-EXTERNAL 3→0, closure 120/120 = 100%; verification run (build ✅, test 1050/1050 ✅, lint ✅, typecheck ✅, supabase db push ✅) |
+| 2026-09-17T16:3x | AI Agent | **P3 ITEMS COMPLETE:** Avatar (UserAvatar + Dashboard/MePage), Image resize (browser canvas 512×512 WebP/JPEG 85% ~200KB), Memory search (debounced twin_memories in TwinProfile); verification run (build ✅, test 1050/1050 ✅, lint ✅, typecheck ✅); PRODUCT CLOSURE 100% |
 
 ---
 
@@ -498,9 +499,10 @@ supabase db push           # ✅ PASSED (17 ก.ย. 2026) — migrations 038/03
 5. **Upload/Compare/SLA เป็นของจริง** — ไม่ใช่ placeholder: FileUploadUI upload จริงผ่าน Storage, DecisionCompare เปรียบเทียบจริง, SLA วัด latency/freshness/coverage จริง
 6. **External blockers ทั้งหมดแก้แล้ว** — Storage bucket สร้างแล้ว, migration sequence resolve แล้ว, staging DNS แก้แล้ว (17 ก.ย. 2026)
 7. **lib/intelligence เป็น DEPRECATED-by-decision จริง** — layer มีโมดูลที่ SICE ไม่มี (ไม่ใช่ 1:1 swap); deprecation notice + migration path documented
-8. **Documentation ซื่อสัตย์** — ทุกสถานะเทียบกับโค้ดจริง + ผล test จริง ไม่美化
-9. **No Bite Me Baby interference** — งานทั้งหมดอยู่ใน `selfprint-v3-react` repo
-10. **supabase db push ผ่านจริง** — migrations 038/039/040 apply สำเร็จ; sequence breakpoint resolved (17 ก.ย. 2026)
+8. **P3 items เสร็จแล้ว** — UserAvatar (Dashboard/MePage), Image resize pipeline (browser canvas), Memory search (TwinProfile) (17 ก.ย. 2026)
+9. **Documentation ซื่อสัตย์** — ทุกสถานะเทียบกับโค้ดจริง + ผล test จริง ไม่美化
+10. **No Bite Me Baby interference** — งานทั้งหมดอยู่ใน `selfprint-v3-react` repo
+11. **supabase db push ผ่านจริง** — migrations 038/039/040 apply สำเร็จ; sequence breakpoint resolved (17 ก.ย. 2026)
 
 ---
 
@@ -517,15 +519,22 @@ DB Push: ✅ PASSED (migrations 038/039/040 apply สำเร็จ; sequence r
 P0 items: 0
 P1 items: 0
 P2 items: 0
+P3 items: 0 (avatar, image resize, memory search — ทั้งหมดเสร็จแล้ว 17 ก.ย. 2026)
 DEPRECATED-by-decision: 1 (lib/intelligence — complementary client layer, documented)
 BLOCKED-EXTERNAL: 0 actions
+
+KEY IMPLEMENTATIONS (17 ก.ย. 2026):
+- UserAvatar component: src/components/account/UserAvatar.tsx (Dashboard + MePage integration)
+- Image resize pipeline: src/lib/storage/imageProcessor.ts (browser canvas 512×512 WebP/JPEG 85% ~200KB)
+- Memory search: TwinProfile.tsx debounced search over twin_memories with ilike filter
+- FileUploadService updated with image processing before upload
 
 Key decisions / state:
 - SICE 16 engines: registered, compiling, per-engine tested (16/16) — twin_id resolve ผ่าน twins.user_id
 - API surface ≥12: allowed (Cloudflare, ไม่มี cap)
 - Rate-limit: 4 API handlers ใช้ user.id (twin, twin-stream, nova, nova-stream)
 - CORS: origin allowlist บน twin/nova/twin-stream/nova-stream/og
-- Upload UI: wired ใน TwinProfile — bucket สร้างแล้วผ่าน supabase db push
+- Upload UI: wired ใน TwinProfile + image resize pipeline — bucket สร้างแล้วผ่าน supabase db push
 - Compare: wired ใน DecisionDashboard (bilingual)
 - AI insight SLA: wired + cache table (migration 039)
 - TwinChat.tsx หน้าเก่า: ลบแล้ว (ใช้ ImmersiveTwinChat)
@@ -533,6 +542,7 @@ Key decisions / state:
 - Route aliases: /twin-birth → /core-awakening, /twin/:id → /twin-profile, /twin/patterns → /intelligence
 - supabase db push ผ่านแล้ว 17 ก.ย. 2026 — sequence breakpoint resolved, storage bucket created
 - External blockers ทั้งหมดแก้แล้ว (bucket, migration, DNS) — 17 ก.ย. 2026
+- P3 items ทั้งหมดเสร็จแล้ว (avatar, image resize, memory search) — 17 ก.ย. 2026
 - No Bite Me Baby interference
 ```
 
