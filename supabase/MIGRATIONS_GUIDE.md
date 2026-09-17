@@ -8,8 +8,9 @@ This document explains how to run Supabase migrations for the staging environmen
 
 - **Supabase Project:** `selfprint-staging` (`vkjwqrjflxztcctmyzgh`)
 - **Region:** Northeast Asia (Seoul) | `ap-northeast-2`
-- **Database Status:** Migrations 001-020 applied, 021-035 need re-run after fixes
+- **Database Status:** ✅ Migrations 001-040 applied successfully via supabase db push (17 ก.ย. 2026)
 - **Migration Files:** 35 SQL files in `supabase/migrations/`
+- **Sequence Breakpoint:** ✅ RESOLVED — supabase db push ผ่านแล้ว (เดิมหยุดที่ 011)
 
 ## Prerequisites
 
@@ -235,12 +236,10 @@ After all migrations are applied:
 - Migration 021 (world_preferences) was **rewritten** on 2026-09-14 to be fully idempotent
 - Migration 030 (phase_a_extended_schema) was **fixed** on 2026-09-14 with `DROP TRIGGER IF EXISTS`
 - Migration 031 (world_stats_fixes) was **updated** on 2026-09-14 with DO block guards
-- Migration 033 (user_lifecycle_table) was **fixed** on 2026-09-14 with `DROP TRIGGER IF EXISTS`
 - Migration 035 (forensic_consolidation) was **verified** — already had DO block guards
 - Migration 035 is a safety net that creates any missing tables and fixes FK relationships
-- Never run `DROP TABLE` or `TRUNCATE` — these migrations are designed to be safe to re-run
-- Always backup before running migrations on production (not applicable to staging)
-- Migration 035 is a safety net that creates any missing tables and fixes FK relationships
+- ~~Migration 033 (user_lifecycle_table)~~ **DELETED 17 ก.ย. 2026** (duplicate), replaced by `040_create_user_lifecycle_table.sql` (real table)
+- **17 ก.ย. 2026:** supabase db push ผ่านแล้ว — migrations 038/039/040 apply สำเร็จ; sequence breakpoint at 011 resolved
 - Never run `DROP TABLE` or `TRUNCATE` — these migrations are designed to be safe to re-run
 - Always backup before running migrations on production (not applicable to staging)
 

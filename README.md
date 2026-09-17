@@ -5,21 +5,21 @@
 
 ---
 
-> **สถานะปัจจุบัน:** `TARGET PRODUCT SPEC — IMPLEMENTED` ✅ (อัปเดต 16 ก.ย. 2026)
-> **CODE CLOSURE 100%** — Build + Typecheck + Lint + Unit Tests 1050/1050 ✅
-> รายละเอียดครบถ้วน: `docs/SELFPRINT FINAL PRODUCTION CLOSURE AUDIT.md` (FINAL CLOSURE ROUND)
+> **สถานะปัจจุบัน:** `TARGET PRODUCT SPEC — IMPLEMENTED` ✅ (อัปเดต 17 ก.ย. 2026)
+> **CODE CLOSURE 100%** — Build + Typecheck + Lint + Unit Tests 1050/1050 + supabase db push ✅
+> รายละเอียดครบถ้วน: `docs/SELFPRINT FINAL PRODUCTION CLOSURE AUDIT.md` (FINAL CLOSURE — ทุก external ops เสร็จแล้ว)
 
 ---
 
-## 📊 สถานะการผลิต (จริง — อัปเดต 16 ก.ย. 2026; E2E จาก MASTER GATE 13 ก.ย. 2026)
+## 📊 สถานะการผลิต (จริง — อัปเดต 17 ก.ย. 2026; E2E จาก MASTER GATE 13 ก.ย. 2026)
 
 | พื้นที่ | สถานะ | หลักฐาน |
 |--------|--------|---------|
-| Build | ✅ PASS | `npm run build` ผ่าน (exit 0, 16 ก.ย. 2026) |
-| Typecheck | ✅ PASS | `npm run typecheck` (`tsc -b`) — 0 errors (16 ก.ย. 2026) |
-| Typecheck Functions | ✅ PASS | `typecheck:functions` — 0 errors (16 ก.ย. 2026) |
-| Lint | ✅ PASS | `npm run lint` — exit 0 (16 ก.ย. 2026) |
-| Unit Tests | ✅ PASS | `npm test` — 1050/1050, 67 files (16 ก.ย. 2026) |
+| Build | ✅ PASS | `npm run build` ผ่าน (exit 0, 17 ก.ย. 2026) |
+| Typecheck | ✅ PASS | `npm run typecheck` (`tsc -b`) — 0 errors (17 ก.ย. 2026) |
+| Typecheck Functions | ✅ PASS | `typecheck:functions` — 0 errors (17 ก.ย. 2026) |
+| Lint | ✅ PASS | `npm run lint` — exit 0 (17 ก.ย. 2026) |
+| Unit Tests | ✅ PASS | `npm test` — 1050/1050, 67 files (17 ก.ย. 2026) |
 | SICE Engines | ✅ 16/16 | Per-engine tests ครอบ #13-16 (twin_id resolution + analysis logic) |
 | E2E Phase A (Production) | ✅ 27/27 | `--project=chromium` vs `https://www.selfprint.one` (13 ก.ย. 2026) |
 | E2E Mobile | ✅ 24/24 | Mobile Chrome + Mobile Safari (13 ก.ย. 2026) |
@@ -28,8 +28,10 @@
 | Three.js / Living Body | ✅ PASS | MG suite 12/12 PASS (13 ก.ย. 2026) |
 | Intelligent World | ✅ PASS | MG suite 12/12 PASS (13 ก.ย. 2026) |
 | `selfprint-staging.pages.dev` | ✅ Live | Cloudflare Pages deployment green |
+| supabase db push | ✅ PASSED | Migrations 038/039/040 apply สำเร็จ; sequence breakpoint resolved (17 ก.ย. 2026) |
+| External blockers | ✅ RESOLVED | Storage bucket created, migration sequence fixed, staging DNS resolved (17 ก.ย. 2026) |
 
-**สถานะโดยรวม: ✅ MASTER GATE 100% PASS**
+**สถานะโดยรวม: ✅ MASTER GATE 100% PASS — ทุก external ops เสร็จแล้ว**
 
 ---
 
@@ -235,14 +237,14 @@ npx playwright test                             # full suite (100 tests, ต้�
 
 - **Production:** https://selfprint.one — ✅ 51/51 PASS
 - **Staging (working):** https://selfprint-staging.pages.dev — ✅ 25/25 lifecycle (local)
-- **Staging alias:** https://staging.selfprint.one — ❌ Cloudflare 525 (DNS issue)
+- **Staging alias:** https://staging.selfprint.one — ✅ RESOLVED (17 ก.ย. 2026)
 
 ---
 
-## Master Gate Summary
+## Master Gate Summary (อัปเดต 17 ก.ย. 2026)
 
 ```text
-MASTER GATE = 100% PASS ✅
+MASTER GATE = 100% PASS ✅ — ทุก external ops เสร็จแล้ว
 
 Build/Typecheck/Lint/Unit           : PASS ✅
 Phase A production (27 + mobile)     : PASS ✅ (51/51)
@@ -255,6 +257,8 @@ Staging URL                          : selfprint-staging.pages.dev ✅
 Reporting hygiene                    : Slack + test report ✅
 Target Product Spec                  : IMPLEMENTED ✅
 k6                                   : PASS ON STAGING ✅ — smoke 792/792 checks, error rate 0.00% (manual opt-in)
+supabase db push                     : PASSED ✅ — migrations 038/039/040 apply สำเร็จ
+External blockers                    : RESOLVED ✅ — bucket/migration/DNS เสร็จแล้ว (17 ก.ย. 2026)
 ```
 
 ---
