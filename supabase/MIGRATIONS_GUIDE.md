@@ -9,7 +9,7 @@ This document explains how to run Supabase migrations for the staging environmen
 - **Supabase Project:** `selfprint-staging` (`vkjwqrjflxztcctmyzgh`)
 - **Region:** Northeast Asia (Seoul) | `ap-northeast-2`
 - **Database Status:** Migrations 001-020 applied, 021-035 need re-run after fixes
-- **Migration Files:** 33 SQL files in `supabase/migrations/`
+- **Migration Files:** 35 SQL files in `supabase/migrations/`
 
 ## Prerequisites
 
@@ -114,11 +114,13 @@ After cleanup and reordering (Session 2026-09-13):
 | 26 | `031_world_stats_fixes.sql` | ✅ FIXED | DO block guards (v2026-09-14) |
 | 27 | `032_twin_learning_profiles.sql` | ✅ FIXED | ADD DROP INDEX IF EXISTS (v2026-09-14) |
 | 28 | `033_community_insights.sql` | ✅ Idempotent | DO blocks for safety |
-| 29 | `033_create_user_lifecycle_table.sql` | ✅ FIXED | ADD DROP TRIGGER IF EXISTS (v2026-09-14) |
-| 30 | `034_twin_full_analysis.sql` | ✅ No changes needed | ALTER TABLE only |
-| 31 | `035_forensic_consolidation_2026-09-03.sql` | ✅ VERIFIED | DO block guards present |
-| 32 | `036_twin_visual_dna.sql` | ✅ Idempotent | DROP POLICY before CREATE |
-| 33 | `037_onboarding_checkpoints.sql` | ✅ Idempotent | DROP POLICY before CREATE |
+| 29 | `034_twin_full_analysis.sql` | ✅ No changes needed | ALTER TABLE only |
+| 30 | `035_forensic_consolidation_2026-09-03.sql` | ✅ VERIFIED | DO block guards present |
+| 31 | `036_twin_visual_dna.sql` | ✅ Idempotent | DROP POLICY before CREATE |
+| 32 | `037_onboarding_checkpoints.sql` | ✅ Idempotent | DROP POLICY before CREATE |
+| 33 | `038_storage_profiles_bucket.sql` | ✅ Idempotent | Storage bucket + RLS |
+| 34 | `039_decision_insights_cache.sql` | ✅ Idempotent | Insights cache table |
+| 35 | `040_create_user_lifecycle_table.sql` | ✅ New (real) | Replaces deleted `033_create_user_lifecycle_table.sql` (duplicate) — supabase db push ผ่านแล้ว |
 
 ### Deleted Files (NO-OP / Deprecated)
 - ~~`003_core_awakening_ceremony.sql`~~ — Replaced by 029
@@ -126,7 +128,8 @@ After cleanup and reordering (Session 2026-09-13):
 - ~~`008_notifications.sql`~~ — Replaced by 030
 - ~~`20260812000002_fix_decision_logs_uuid.sql`~~ — Empty file
 - ~~`033_add_lifecycle_state.sql`~~ — Deprecated
-- ~~`034_create_user_lifecycle_table.sql`~~ — Replaced by 033_create_user_lifecycle_table.sql
+- ~~`034_create_user_lifecycle_table.sql`~~ — Replaced by `033_create_user_lifecycle_table.sql` (deprecated), then replaced by `040_create_user_lifecycle_table.sql` (real)
+- ~~`033_create_user_lifecycle_table.sql`~~ — DELETED 17 ก.ย. 2026 (duplicate), replaced by `040_create_user_lifecycle_table.sql`
 
 ## Verification
 

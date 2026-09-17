@@ -25,7 +25,7 @@ MASTER GATE — 100% PASS ✅  (14 Sep 2026)
 - ✅ Phase B CI (GitHub Actions): **63/100 PASS / 0 FAIL / 30 SKIP** — **GREEN**
 - ✅ MG suite (`master-gate.spec.ts`): **12/12 PASS**
 - ✅ k6 load tests: **K6V3-FIX-001 DEPLOYED** (14 ก.ย. 2026) — twin/twin-stream 429 ถูก handler แปลงเป็น 500 → propagate 429 เป็น 429 + rate limiter IP-based → user-based + staging rate limit elevation — deploy แล้ว load_error_rate 3.8-8.6% (transient OpenRouter API issues: model unavailable/quota exceeded — ไม่ใช่ code bug) — **code fixes ถูกต้องแล้ว** รอ OpenRouter stabilize — ดู K6V2-FIX-001 + K6SLO-001 + K6V3-FIX-001)
-- ✅ Supabase migrations: **ALL 33 FILES IDEMPOTENT** (fixed 021/030/031/032/033)
+- ✅ Supabase migrations: **ALL 35 FILES IDEMPOTENT** (fixed 021/030/031/032, supabase db push ผ่านแล้ว)
 
 ---
 
@@ -43,10 +43,10 @@ MASTER GATE — 100% PASS ✅  (14 Sep 2026)
 
 ### Migration Structure
 
-- **Total files:** 33 (after cleanup)
-- **Deleted:** 003, 006, 008, 20260812000002 (NO-OP/empty)
+- **Total files:** 35 (after cleanup, including 038/039/040)
+- **Deleted:** 003, 006, 008, 20260812000002, ~~`033_create_user_lifecycle_table.sql`~~ (NO-OP/empty/duplicate)
 - **Renamed:** 026↔028, 036, 037 (numerical order)
-- **New:** 026_consolidate_phase_a_schema, 028_create_twin_complete_function, 033_create_user_lifecycle_table
+- **New:** 026_consolidate_phase_a_schema, 028_create_twin_complete_function, 038_storage_profiles_bucket, 039_decision_insights_cache, 040_create_user_lifecycle_table (real table replacing deleted 033)
 
 ### Documentation Updated
 

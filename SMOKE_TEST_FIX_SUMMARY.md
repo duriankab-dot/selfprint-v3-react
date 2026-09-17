@@ -33,7 +33,7 @@ Error: Missing auth env vars: SUPABASE_URL, SUPABASE_ANON_KEY, and TEST_PASSWORD
 
 #### 5. สร้าง `supabase/MIGRATIONS_GUIDE.md` (new file)
 - คู่มือละเอียดสำหรับ run migrations
-- 36 migration files ใน `supabase/migrations/`
+- 35 migration files ใน `supabase/migrations/`
 
 #### 6. อัพเดทเอกสาร
 - `loadtests/README.md` — อัพเดท status และ prerequisites
@@ -82,13 +82,8 @@ Error: Missing auth env vars: SUPABASE_URL, SUPABASE_ANON_KEY, and TEST_PASSWORD
 
 **ผลลัพธ์:** ✅ Bulletproof — ตรวจสอบ column existence จริงก่อน add
 
-#### 033_create_user_lifecycle_table.sql — Trigger Fix
-**ปัญหาเดิม:** `CREATE TRIGGER` ล้มเหลวเพราะ trigger มีอยู่แล้ว
-
-**การแก้ไข:**
-- เพิ่ม `DROP TRIGGER IF EXISTS user_lifecycle_update_timestamp ON user_lifecycle` ก่อน `CREATE TRIGGER`
-
-**ผลลัพธ์:** ✅ Safe to run multiple times
+#### 033_create_user_lifecycle_table.sql (DEPRECATED) — Trigger Fix → DELETED 17 ก.ย. 2026
+**หมายเหตุ:** ไฟล์นี้ถูกสร้างใหม่เป็น `040_create_user_lifecycle_table.sql` (real table) — supabase db push ผ่านแล้ว
 
 #### 035_forensic_consolidation.sql — Verified (No Changes Needed)
 **สถานะ:** ทุก CREATE/DROP POLICY อยู่ใน DO blocks พร้อม EXCEPTION handling แล้ว
@@ -146,13 +141,15 @@ node run-migrations.cjs
    - `029_phase_a_core_schema.sql`
    - `030_phase_a_extended_schema.sql`
    - `031_world_stats_fixes.sql` (แก้ไขแล้ว)
-   - `032_twin_learning_profiles.sql`
-   - `033_community_insights.sql`
-   - `033_create_user_lifecycle_table.sql`
-   - `034_twin_full_analysis.sql`
-   - `035_forensic_consolidation_2026-09-03.sql` (verified)
-   - `036_twin_visual_dna.sql`
-   - `037_onboarding_checkpoints.sql`
+    - `032_twin_learning_profiles.sql`
+    - `033_community_insights.sql`
+    - `034_twin_full_analysis.sql`
+    - `035_forensic_consolidation_2026-09-03.sql` (verified)
+    - `036_twin_visual_dna.sql`
+    - `037_onboarding_checkpoints.sql`
+    - `038_storage_profiles_bucket.sql`
+    - `039_decision_insights_cache.sql`
+    - `040_create_user_lifecycle_table.sql`
 4. Paste และ Run ทีละไฟล์
 5. ดู logs หลังรันแต่ละไฟล์เพื่อตรวจสอบ success/failure
 
@@ -217,7 +214,7 @@ Error rate: 0.00%
 - `supabase/migrations/021_world_preferences.sql` — Fully idempotent rewrite
 - `supabase/migrations/030_phase_a_extended_schema.sql` — ADD DROP TRIGGER IF EXISTS
 - `supabase/migrations/031_world_stats_fixes.sql` — DO block guards added
-- `supabase/migrations/033_create_user_lifecycle_table.sql` — ADD DROP TRIGGER IF EXISTS
+- `supabase/migrations/033_create_user_lifecycle_table.sql` — (DELETED 17 ก.ย. 2026 → replaced by `040_create_user_lifecycle_table.sql`)
 
 ### Migration Files Verified (No Changes)
 - `supabase/migrations/035_forensic_consolidation_2026-09-03.sql` — Already idempotent
@@ -242,8 +239,8 @@ Error rate: 0.00%
 - `036_twin_visual_dna.sql` (จาก 20260825_004)
 - `037_onboarding_checkpoints.sql` (จาก 20260826_001)
 
-### Migration Files Made Idempotent (23 ไฟล์)
-- 001, 002, 004, 007, 010, 011, 012, 013, 015, 016, 018, 019, 020, 021, 024, 025, 026, 029, 030, 031, 032, 033_community_insights, 033_create_user_lifecycle_table, 036, 037
+### Migration Files Fixed (23 ไฟล์)
+- 001, 002, 004, 007, 010, 011, 012, 013, 015, 016, 018, 019, 020, 021, 024, 025, 026, 029, 030, 031, 032, 033_community_insights, 036, 037
 
 ## Notes
 

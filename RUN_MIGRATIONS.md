@@ -9,7 +9,7 @@
 
 ### Step 2: Copy & Run ทุก Migration File
 
-**Migration files มี 33 ไฟล์** (หลัง cleanup) — ต้อง run เรียงลำดับ (001 → 037)
+**Migration files มี 35 ไฟล์** (หลัง cleanup) — ต้อง run เรียงลำดับ (001 → 040)
 
 #### Method A: Copy ทุกไฟล์แล้ว paste พร้อมกัน (เร็วที่สุด)
 
@@ -107,11 +107,13 @@ supabase db push
 | 29 | `031_world_stats_fixes.sql` | ✅ **FIXED** (v2026-09-14) |
 | 30 | `032_twin_learning_profiles.sql` | ✅ Idempotent |
 | 31 | `033_community_insights.sql` | ✅ Idempotent |
-| 32 | `033_create_user_lifecycle_table.sql` | ✅ **FIXED** (v2026-09-14) |
-| 33 | `034_twin_full_analysis.sql` | ✅ No changes |
-| 34 | `035_forensic_consolidation_2026-09-03.sql` | ✅ Verified |
-| 35 | `036_twin_visual_dna.sql` | ✅ Idempotent |
-| 36 | `037_onboarding_checkpoints.sql` | ✅ Idempotent |
+| 32 | `034_twin_full_analysis.sql` | ✅ No changes |
+| 33 | `035_forensic_consolidation_2026-09-03.sql` | ✅ Verified |
+| 34 | `036_twin_visual_dna.sql` | ✅ Idempotent |
+| 35 | `037_onboarding_checkpoints.sql` | ✅ Idempotent |
+| 36 | `038_storage_profiles_bucket.sql` | ✅ Idempotent |
+| 37 | `039_decision_insights_cache.sql` | ✅ Idempotent |
+| 38 | `040_create_user_lifecycle_table.sql` | ✅ New (real) |
 
 ### Deleted Files (NO-OP / Deprecated)
 - ~~`003_core_awakening_ceremony.sql`~~ — Replaced by 029_phase_a_core_schema.sql
@@ -120,6 +122,7 @@ supabase db push
 - ~~`20260812000002_fix_decision_logs_uuid.sql`~~ — Empty file
 - ~~`033_add_lifecycle_state.sql`~~ — Deprecated
 - ~~`034_create_user_lifecycle_table.sql`~~ — Replaced by 033_create_user_lifecycle_table.sql
+- ~~`033_create_user_lifecycle_table.sql`~~ — DELETED 17 ก.ย. 2026 (duplicate), replaced by `040_create_user_lifecycle_table.sql`
 
 ## Troubleshooting
 
