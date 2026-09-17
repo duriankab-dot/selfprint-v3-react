@@ -1,0 +1,206 @@
+﻿-- ============================================
+-- Bite Me Baby â?" Supabase Migration v3.1
+-- Pre-order System + Full Database Integration
+-- ============================================
+-- à,£à,±à,T SQL à,Tà,µà1%à1ƒà,T Supabase SQL Editor:
+-- https://ivkdfognyiwjcmrhcnwz.supabase.co/editor
+-- ============================================
+
+-- ============================================
+-- 1. EXTENSIONS
+-- ============================================
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+
+-- ============================================
+-- 2. TYPES (ENUMS)
+-- ============================================
+CREATE TYPE order_status AS ENUM (
+  'pending', 'confirmed', 'preparing', 'ready_for_dispatch',
+  'dispatched', 'in_transit', 'arrived', 'delivered',
+  'cancelled', 'failed'
+);
+
+CREATE TYPE payment_status AS ENUM (
+  'pending', 'paid', 'refund', 'partially_refunded'
+);
+
+CREATE TYPE payment_method AS ENUM (
+  'promptpay_qr', 'credit_card', 'cash_on_delivery'
+);
+
+CREATE TYPE delivery_method AS ENUM (
+  'self_delivery', 'grab_rider', 'linemen_rider', 'foodpanda_rider'
+);
+
+CREATE TYPE round_period AS ENUM (
+  'morning', 'midday', 'evening'
+);
+
+CREATE TYPE ingredient_status AS ENUM (
+  'in_stock', 'low_stock', 'out_of_stock'
+);
+
+CREATE TYPE product_category_slug AS ENUM (
+  'dish', 'rice', 'curry', 'drink', 'dessert'
+);
+
+-- ============================================
+-- 3. TABLES
+-- ============================================
+
+-- 3.1 Product Categories (à,«à,¡à,à,"à,«à,¡à,1à1^)
+CREATE TABLE product_categories (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug product_category_slug NOT NULL UNIQUE,
+  icon TEXT DEFAULT '',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3.2 Delivery Rounds (à,£à,-à,sà,ªà1^à,╪)
+CREATE TABLE delivery_rounds (
+  id TEXT PRIMARY KEY,
+  round_key round_period NOT NULL,
+  display_name TEXT NOT NULL,
+  cutoff_time TIME NOT NULL,
+  delivery_start TIME NOT NULL,
+  delivery_end TIME NOT NULL,
+  max_capacity INTEGER NOT NULL DEFAULT 100,
+  current_count INTEGER NOT NULL DEFAULT 0,
+  date DATE NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'closed', 'cancelled')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3.3 Products (à1?à,¡à,Tà,1)
+CREATE TABLE products (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+  category_id TEXT NOT NULL REFERENCES product_categories(id),
+  image_url TEXT DEFAULT '',
+  is_available BOOLEAN NOT NULL DEFAULT true,
+  is_featured BOOLEAN NOT NULL DEFAULT false,
+  is_preorder BOOLEAN NOT NULL DEFAULT false,
+  prep_minutes INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  delivery_round_id TEXT REFERENCES delivery_rounds(id),
+  scheduled_date DATE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_products_category ON products(category_id);
+CREATE INDEX idx_products_preorder ON products(is_preorder) WHERE is_preorder = true;
+CREATE INDEX idx_products_featured ON products(is_featured) WHERE is_featured = true;
+CREATE INDEX idx_products_available ON products(is_available) WHERE is_available = true;
+CREATE INDEX idx_products_scheduled ON products(scheduled_date);
+
+CREATE INDEX idx_delivery_rounds_date ON delivery_rounds(date);
+CREATE INDEX idx_delivery_rounds_status ON delivery_rounds(status);
+
+-- 3.4 Orders (à,,à,3à,ªà,±à1^à,╪à,<à,·à1%à,-)
+CREATE TABLE orders (
+  id TEXT PRIMARY KEY,
+  order_number TEXT NOT NULL UNIQUE,
+  customer_id TEXT REFERENCES auth.users(id),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  delivery_round_id TEXT NOT NULL REFERENCES delivery_rounds(id),
+  status order_status NOT NULL DEFAULT 'pending',
+  delivery_method delivery_method NOT NULL DEFAULT 'self_delivery',
+  pickup_latitude NUMERIC(10, 7),
+  pickup_longitude NUMERIC(10, 7),
+  dropoff_latitude NUMERIC(10, 7),
+  dropoff_longitude NUMERIC(10, 7),
+  dropoff_detail TEXT NOT NULL DEFAULT '',
+  is_outside_self_zone BOOLEAN NOT NULL DEFAULT false,
+  subtotal NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  delivery_fee NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  service_fee NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  discount_amount NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  tax_amount NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  total_amount NUMERIC(10, 2) NOT NULL,
+  payment_status payment_status NOT NULL DEFAULT 'pending',
+  payment_method payment_method NOT NULL DEFAULT 'promptpay_qr',
+  special_instructions TEXT DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_orders_customer ON orders(customer_id);
+CREATE INDEX idx_orders_number ON orders(order_number);
+CREATE INDEX idx_orders_status ON orders(status);
+CREATE INDEX idx_orders_round ON orders(delivery_round_id);
+CREATE INDEX idx_orders_created ON orders(created_at);
+
+-- 3.5 Order Items (à,£à,²à,¢à,?à,²à,£à1ƒà,Tà,,à,3à,ªà,±à1^à,╪à,<à,·à1%à,-)
+CREATE TABLE order_items (
+  id TEXT PRIMARY KEY,
+  order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  product_id TEXT NOT NULL REFERENCES products(id),
+  quantity INTEGER NOT NULL DEFAULT 1 CHECK (quantity > 0),
+  unit_price NUMERIC(10, 2) NOT NULL,
+  customizations JSONB DEFAULT '{}',
+  special_request TEXT DEFAULT '',
+  item_total NUMERIC(10, 2) NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_order_items_order ON order_items(order_id);
+CREATE INDEX idx_order_items_product ON order_items(product_id);
+
+-- 3.6 Inventory (à,à,±à,à,-à,,à,"à,'à,s)
+CREATE TABLE inventory (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,
+  unit TEXT NOT NULL DEFAULT 'piece',
+  current_stock NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  min_stock NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  max_stock NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  unit_price NUMERIC(10, 2) NOT NULL DEFAULT 0,
+  supplier_name TEXT DEFAULT '',
+  supplier_phone TEXT DEFAULT '',
+  status ingredient_status NOT NULL DEFAULT 'in_stock',
+  last_restocked_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_inventory_category ON inventory(category);
+CREATE INDEX idx_inventory_status ON inventory(status);
+
+-- 3.7 Pre-order Votes (à1,à,«à,à,à1?à,¡à,Tà,1)
+CREATE TABLE preorder_votes (
+  id TEXT PRIMARY KEY,
+  product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  customer_id TEXT REFERENCES auth.users(id),
+  vote_count INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE(product_id, customer_id)
+);
+
+CREATE INDEX idx_preorder_votes_product ON preorder_votes(product_id);
+
+-- 3.8 Users (à,oà,1à1%à1ƒà,Sà1% â?" à1ƒà,Sà1% Supabase Auth + profile)
+CREATE TABLE profiles (
+  id TEXT PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT,
+  phone TEXT,
+  name TEXT,
+  role TEXT NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin')),
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  avatar_url TEXT DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX idx_profiles_email ON profiles(email);
+CREATE INDEX idx_profiles_phone ON profiles(phone);
+CREATE INDEX idx_profiles_role ON profiles(role);

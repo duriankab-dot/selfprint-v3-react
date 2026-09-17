@@ -39,7 +39,7 @@ MASTER GATE — 100% PASS ✅  (14 Sep 2026)
 | `030_phase_a_extended_schema.sql` | Trigger conflict | ADD DROP TRIGGER IF EXISTS |
 | `031_world_stats_fixes.sql` | Column duplicate | DO block guard |
 | `032_twin_learning_profiles.sql` | Index missing IF NOT EXISTS | ADD DROP INDEX IF EXISTS |
-| `033_create_user_lifecycle_table.sql` | Trigger conflict | ADD DROP TRIGGER IF EXISTS |
+| `033_create_user_lifecycle_table.sql` (DELETED) | Trigger conflict | DELETED 17 ก.ย. 2026 → replaced by `040_create_user_lifecycle_table.sql` — supabase db push ผ่านแล้ว |
 
 ### Migration Structure
 
