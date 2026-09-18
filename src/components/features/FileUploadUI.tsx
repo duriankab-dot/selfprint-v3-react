@@ -14,7 +14,7 @@
  * Thai/English labels via LanguageContext.
  */
 
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { uploadProfilePicture, deleteProfilePicture } from '../../lib/storage/FileUploadService';
 
@@ -44,6 +44,18 @@ export const FileUploadUI: React.FC<FileUploadUIProps> = ({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // SYNC-FIX (UPLOAD-03): currentUrl arrives asynchronously (TwinProfile's
+  // profilePicture query resolves AFTER this component mounts with null).
+  // The useState initializer runs only once, so without this effect a persisted
+  // avatar URL would never reach the preview state. Keep the pending-upload
+  // case intact: a running upload owns the preview until it completes/fails.
+  const uploadingRef = useRef(uploading);
+  uploadingRef.current = uploading;
+  useEffect(() => {
+    if (uploadingRef.current) return;
+    setPreview(currentUrl || null);
+  }, [currentUrl]);
 
   const defaultLabel = isTh ? 'อัปโหลดรูปโปรไฟล์' : 'Upload Profile Picture';
 

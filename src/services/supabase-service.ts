@@ -177,6 +177,17 @@ export async function saveDecision(
 /**
  * บันทึก decision แบบเต็ม (สำหรับ DecisionForm)
  * ใช้สำหรับบันทึกการตัดสินใจพร้อมค่า confidence
+ *
+ * SCHEMA-CONTRACT (18 ก.ย. 2026): decision_log (migrations 001 + 035) has NO
+ * `title` / `expected_outcome` columns — the table stores decisions as
+ * `decision_text` + `context` + `confidence` (CHECK 0..1). Mapping applied
+ * here:
+ *   form.title           → decision_log.decision_text
+ *   form.context         → decision_log.context
+ *   form.confidence 0-100 → decision_log.confidence 0.0-1.0  (DB CHECK 0..1)
+ * `expected_outcome` has no supported column in this table's product model and
+ * is intentionally not persisted (DecisionForm carries it back through the
+ * success payload for same-session display). No DB/RLS change required/made.
  */
 export async function saveDecisionForm(
   userId: string,
@@ -192,10 +203,9 @@ export async function saveDecisionForm(
       .from('decision_log')
       .insert({
         user_id: userId,
-        title: data.title,
+        decision_text: data.title,
         context: data.context,
-        expected_outcome: data.expectedOutcome,
-        confidence: data.confidence,
+        confidence: Math.min(1, Math.max(0, data.confidence / 100)),
       })
       .select('id')
       .single();
@@ -214,6 +224,14 @@ export async function saveDecisionForm(
 
 /**
  * ดึง user decisions จาก decision_logs
+ *
+ * SCHEMA-CONTRACT (18 ก.ย. 2026): SELECT only columns that exist on
+ * decision_log (migrations 001 + 035). Normalized back into the DecisionLogger
+ * UI shape:
+ *   decision_log.decision_text → title
+ *   decision_log.context       → context
+ *   decision_log.confidence (0..1) → confidence (0-100 UI scale)
+ *   expectedOutcome            → '' (no such column on decision_log)
  */
 export async function getUserDecisions(
   userId: string,
@@ -226,7 +244,7 @@ export async function getUserDecisions(
   try {
     const { data, error } = await supabase
       .from('decision_log')
-      .select('id, title, context, expected_outcome, confidence, created_at')
+      .select('id, decision_text, context, confidence, created_at')
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
@@ -238,10 +256,10 @@ export async function getUserDecisions(
 
     return (data || []).map(row => ({
       id: row.id,
-      title: row.title,
-      context: row.context,
-      expectedOutcome: row.expected_outcome,
-      confidence: row.confidence ?? 0,
+      title: row.decision_text ?? '',
+      context: row.context ?? '',
+      expectedOutcome: '',
+      confidence: row.confidence == null ? 0 : Math.round(row.confidence * 100),
       createdAt: row.created_at,
     }));
   } catch (err) {

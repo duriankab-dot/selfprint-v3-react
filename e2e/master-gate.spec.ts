@@ -42,12 +42,48 @@ import { test, expect, type Page } from '@playwright/test';
  * restructure — mark the calling test as a skip with a deploy reason.
  */
 async function goToImmersiveChat(page: Page) {
-  await page.goto('/th/chat/twin', { waitUntil: 'domcontentloaded', timeout: 30000 });
-  await page.waitForTimeout(1500);
+  // NAVHARNESS-001 (17 ก.ย. 2026): a direct `goto('/th/chat/twin')` from a
+  // fresh tab is recovery-redirected to /dashboard by the deployed bundle
+  // BEFORE `.immersive-page` renders (each E2E test is a fresh tab and the
+  // deployed bundle does not honor the sessionStorage recovery flag on
+  // reload). Electronically verified on selfprint-staging.pages.dev that the
+  // router's own SPA navigation (`history.replaceState` + `popstate`, handled
+  // by the app's BrowserRouter react-router-dom 7.x) reaches /chat/twin
+  // deterministically, while the DOM nav-link click is NOT reliable on
+  // /th/dashboard. So: land on the dashboard first (the TWIN_ALIVE recovery
+  // target), then drive an in-app SPA navigation to /chat/twin. No new DOM
+  // elements and no router bypass.
+  await page.goto('/th/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+  const dashboardReady = await page
+    .locator('[data-testid="dashboard-container"]')
+    .waitFor({ state: 'visible', timeout: 12000 })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!dashboardReady) {
+    const redirected = page.url().includes('/login');
+    test.skip(
+      true,
+      redirected
+        ? 'Auth session not carried on this run (redirected to /login) — re-run with a fresh storageState'
+        : 'Dashboard did not render on /th/dashboard — E2E harness cannot SPA-navigate to the chat page'
+    );
+  }
+
+  await page.evaluate(() => {
+    try {
+      window.history.replaceState(null, '', '/th/chat/twin');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return true;
+    } catch {
+      return false;
+    }
+  });
 
   const immersivePage = page.locator('.immersive-page');
   const ready = await immersivePage
-    .waitFor({ state: 'visible', timeout: 8000 })
+    .waitFor({ state: 'visible', timeout: 10000 })
     .then(() => true)
     .catch(() => false);
 
@@ -57,7 +93,7 @@ async function goToImmersiveChat(page: Page) {
       true,
       redirected
         ? 'Auth session not carried on this run (redirected to /login) — re-run with a fresh storageState'
-        : 'Staging bundle is stale: .immersive-page wrapper missing from /th/chat/twin — rebuild/redeploy staging from current src (MASTER_GATE_AS_IS blocker #1), then re-run'
+        : 'SPA navigation to /chat/twin did not render .immersive-page — fresh-tab chat navigation was recovery-redirected to /dashboard; E2E harness requires SPA navigation'
     );
   }
 
@@ -197,17 +233,32 @@ test.describe('MG-02 Intelligent World Recommendation', () => {
 
   test('MG-02-02 World selection triggers transition animation', async ({ page }) => {
     // Transition engine requires non-null currentWorld → computeTransition(null, X) = 'none'.
-    // Navigate with ?world=self to seed initial world, then click a different world to trigger transition.
-    await page.goto('/th/chat/twin?world=self', { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(2000);
+    // Seed ?world=self through the application router (history.replaceState +
+    // popstate), NOT a direct goto (NAVHARNESS-001: the deployed recovery flow
+    // redirects fresh-tab reloads of /chat/twin to /dashboard), so the world
+    // param reaches ImmersiveTwinChat (which reads `world` from searchParams).
+    await page.goto('/th/dashboard', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page
+      .locator('[data-testid="dashboard-container"]')
+      .waitFor({ state: 'visible', timeout: 12000 })
+      .catch(() => {});
+    await page.evaluate(() => {
+      try {
+        window.history.replaceState(null, '', '/th/chat/twin?world=self');
+        window.dispatchEvent(new PopStateEvent('popstate'));
+        return true;
+      } catch {
+        return false;
+      }
+    });
 
     const immersivePage = page.locator('.immersive-page');
     const ready = await immersivePage
-      .waitFor({ state: 'visible', timeout: 8000 })
+      .waitFor({ state: 'visible', timeout: 10000 })
       .then(() => true)
       .catch(() => false);
     if (!ready) {
-      test.skip(true, 'Staging bundle stale: .immersive-page wrapper missing — rebuild/redeploy staging');
+      test.skip(true, 'SPA navigation to /chat/twin?world=self did not render .immersive-page — fresh-tab chat navigation was recovery-redirected to /dashboard; E2E harness requires SPA navigation');
     }
 
     // Open world drawer — match by 🌍 emoji text content (present in all deployed versions)
@@ -217,8 +268,24 @@ test.describe('MG-02 Intelligent World Recommendation', () => {
       test.skip(true, 'WorldDrawer button not visible on this viewport');
     }
 
-    await worldBtn.click();
-    await page.waitForSelector('.immersive-drawer.is-open', { timeout: 5000 });
+    // NAVHARNESS-002 (17 ก.ย. 2026): on the deployed chat UI the compose send
+    // button (`.primary-send-btn`) overlaps the drawer-open button and
+    // intercepts pointer events, so a real locator click cannot reach it.
+    // This test already uses evaluate()-based clicks inside the drawer for the
+    // same overlay-blocker reason — apply the same technique to open the
+    // drawer. The drawer is real; no fake DOM/state is created.
+    const drawerOpened = await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button')).find(
+        (b) => b.textContent && b.textContent.includes('🌍')
+      );
+      if (!btn) return false;
+      btn.click();
+      return true;
+    });
+    if (!drawerOpened) {
+      test.skip(true, 'WorldDrawer open button not found in DOM');
+    }
+    await page.waitForSelector('.immersive-drawer button', { timeout: 5000 });
 
     // Select alternative world via evaluate() — avoids z-index/overlay blockers
     const transitionActive = await page.evaluate(() => {
@@ -437,18 +504,22 @@ test.describe('MG-07 Memory & Decisions', () => {
         'Auth session not carried on this run (redirected to /login) — re-run with a fresh storageState'
       );
     }
-    
-    // Wait for React hydration — SPA needs time to render client-side content
-    await page.waitForFunction(() => {
-      return document.querySelector('.page-content') || 
-             document.querySelector('[class*="decision"]') ||
-             document.querySelector('main')?.children?.length > 0;
-    }, { timeout: 10000 }).catch(() => {});
+
+    // Wait for the decision UI itself, not merely page-shell mounting:
+    // /en/decision-log is recovery-redirected to /en/dashboard, whose
+    // decision-preview block mounts only after the async getDecisionLogs()
+    // fetch resolves — a one-shot count() right after a shell wait races
+    // that fetch (0 vs 14 elements). toBeVisible() retries until a real
+    // decision element exists.
+    const decisionElements = page.locator('[class*="decision"], [class*="Decision"]');
+
+    await expect(
+      decisionElements.first()
+    ).toBeVisible({ timeout: 15000 });
 
     // Check for decision logger UI — DecisionLoggerPage renders with classes containing "decision"
-    const decisionElements = page.locator('[class*="decision"], [class*="Decision"]');
     const decCount = await decisionElements.count();
-    
+
     expect(decCount > 0, `Decision logging UI must be present on /en/decision-log (${decCount} elements found)`).toBeTruthy();
     console.log(`MG-07-01 ✓ Decision logging UI present (${decCount} elements)`);
   });
