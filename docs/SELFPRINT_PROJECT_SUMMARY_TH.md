@@ -53,9 +53,9 @@ k6                                   : REMOVED FROM MASTER GATE — NOT A PASS
 ## REMOVED FROM MASTER GATE
 
 ### B. k6 load tests — REMOVED FROM MASTER GATE — NOT A PASS
-- Files not implemented (`loadtest-smoke.js`, `loadtest.js`)
+- Files exist + real run PASS on staging (smoke 792/792, Node 70/70; 14 ก.ย.)
 - Decision: removed per constraint policy ("implement real tests or remove")
-- Workflow has opt-in jobs but no test files → always skip
+- Manual opt-in — real tests run (NOT a Master Gate criterion)
 
 ## Commands
 

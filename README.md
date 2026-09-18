@@ -26,7 +26,7 @@
 | E2E Phase B staging (Final) | ✅ 38/0/11 | `chromium-staging` vs `selfprint-staging.pages.dev` (18 ก.ย. 2026 07:22 UTC) — 0 FAIL, 11 skips inventoried |
 | E2E Phase B staging (pre-window) | ⚠️ transient | 06:26 UTC run: 35/7/7 — 7 FAIL ทุกตัวผ่านใน run ถัดมา (environment window, ไม่ reproduce) |
 | Auth pipeline (staging) | ✅ ทำงาน | REST login → inject → reload → storageState (13 ก.ย. 2026) |
-| Three.js / Living Body | ✅ PASS | MG suite 12/12 PASS (13 ก.ย. 2026); MG coverage ปัจจุบัน = 3/11 executed + 4 chat-route preconditions documented |
+| Three.js / Living Body | ✅ PASS | MG suite 12/12 PASS (13 ก.ย. 2026); MG coverage ปัจจุบัน = 7/11 PASS + 4 chat-precondition skips (18 ก.ย. run B) |
 | Intelligent World | ✅ PASS | MG suite 12/12 PASS (13 ก.ย. 2026) |
 | `selfprint-staging.pages.dev` | ✅ Live | Cloudflare Pages deployment green |
 | supabase db push | ✅ PASSED | Migrations 038/039/040 apply สำเร็จ; sequence breakpoint resolved (17 ก.ย. 2026) |
@@ -172,8 +172,8 @@ npx playwright test                             # full suite (100 tests, ต้�
 | `auth.spec.ts` (Phase A) | Production auth flows | 7/7 ✅ |
 | `critical-journey.spec.ts` (Phase A) | Crucial journeys | 8/8 ✅ |
 | `lifecycle.spec.ts` (Phase B) | staging public pages | 25/25 ✅ |
-| `master-gate.spec.ts` (Phase B) | MG suite | 12/12 ✅ (fallback assertions) |
-| `twin.spec.ts` (Phase B) | Twin creation | 0/5 ⏸ (feature not implemented) |
+| `master-gate.spec.ts` (Phase B) | MG suite | 7/11 PASS + 4 chat-precondition skips (run 18 ก.ย.) |
+| `twin.spec.ts` (Phase B) | Twin creation | 4/5 ✅ (TWIN-05 = honest FNI skip; TWIN-01..04 PASS via SPA harness) |
 | `decision.spec.ts` (Phase B) | Decisions | 4/5 ✅ (DECISION-04 = honest FNI skip) |
 | `upload.spec.ts` (Phase B) | Uploads | 4/5 ✅ (UPLOAD-05 = honest FNI skip) |
 | `world-visual.spec.ts` (Phase B) | Worlds | 5/7 ✅ (WORLD-04 timing-guard skip, WORLD-06 out-of-scope skip) |
@@ -253,7 +253,7 @@ Phase B staging (final run)          : PASS [OK] (38/0/11, 18 Sep 2026)
 Auth pipeline                        : PASS [OK]
 CI E2E                               : GREEN [OK] (13 Sep 2026 snapshot)
 Skipped coverage                     : INVENTORIED [OK] (11/11 evidence-backed)
-MG suite                             : 3/11 executed + 4 chat preconditions documented (honest)
+MG suite                             : 7/11 PASS + 4 chat preconditions documented (honest)
 Staging URL                          : selfprint-staging.pages.dev [OK]
 Reporting hygiene                    : Slack + test report [OK]
 Target Product Spec                  : IMPLEMENTED [OK]

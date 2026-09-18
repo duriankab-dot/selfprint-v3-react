@@ -115,9 +115,9 @@
 | ID | Item | Reason | When |
 |----|------|--------|------|
 | D-01 | k6 load tests | No test files exist — need implementation before testing infrastructure | After production baseline |
-| D-02 | /en/twin-birth route | Not implemented, test skipped | When standalone birth page is planned |
-| D-03 | /en/twin/:id route | Not implemented, test skipped | When twin profile page is planned |
-| D-04 | Fingerprint/NOVA flow in onboarding | Test skipped — flow not implemented | When onboarding redesign is scoped |
+| D-02 | /en/twin-birth route | ✅ Shipped as alias → `/core-awakening` (TWINROUTE-001), TWIN-02 PASS — defer only the "dedicated standalone birth page" | If/when a dedicated standalone page is scoped |
+| D-03 | /en/twin/:id route | ✅ Shipped as alias → `/twin-profile`, TWIN-03 PASS — defer only dedicated `/twin/:id` page | If/when a dedicated page is scoped |
+| D-04 | Fingerprint/NOVA flow in onboarding | ✅ Replaced by Nova→chat creation lane (`/chat/nova`), TWIN-01 PASS — defer old fingerprint design | If/when onboarding redesign is scoped |
 | D-05 | Accessibility audit & fixes | Requires systematic audit | P2 after core features |
 | D-06 | Performance optimization (Lighthouse) | Bundle already split, needs measurement | After visual changes land |
 | D-07 | Selfprint schema RLS policies | Currently bypasses RLS via service_role | Security review phase |

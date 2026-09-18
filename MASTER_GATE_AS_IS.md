@@ -76,6 +76,25 @@ MASTER GATE CLOSURE : CLOSED
 
 ---
 
+## Phase B Twin Creation — forensic evidence (18 ก.ย. 2026)
+
+Audit scope: code + E2E + README + live staging (evidence-only; no product change).
+
+| Question | Evidence |
+|---|---|
+| `/twin-birth` route? | Alias only: `App.tsx:216` `/twin-birth → LangRedirect → /core-awakening` (TWINROUTE-001: dedicated page removed in build-fix; functionality lives at `/core-awakening`). Live probe: `/th/twin-birth` → `/th/core-awakening` ✓ |
+| Twin creation component? | Real: `NovaChat` (`/chat/nova` + `NovaProvider`/NovaContext), `NovaConversation`, `NovaAvatar`, `CoreAwakening` (`/core-awakening` + `HologramBirth` canvas + `CoreAwakeningService`), `Onboarding`, `TwinProfilePage` |
+| POST/create Twin API? | **None exists** (functions/api has only `nova.ts`/`nova-stream.ts`/`twin.ts` — all AI chat). Creation is **client-side**: `TwinSupabaseService.createTwinInDatabase()` → Supabase `twins` INSERT, invoked by `CoreAwakeningService.ts:372` during the awakening/birth flow. Old `/api/twins POST` genuinely absent (documented as not asserted) |
+| UI flow works? | Yes via SPA: fresh TWIN run 13:02 UTC → **TWIN-01/02/03/04 PASS** (Nova→chat lane · HologramBirth 17.0fps · profile 6 sections · decision insight); TWIN-05 honest FNI skip |
+| Live staging vs source? | Fresh-tab authed probe (18 ก.ย.): `core-awakening` renders h1 “⚡ ฝาแฝดของคุณกำลังตื่น”; `/twin-birth`, `/chat/nova`, `/twin/:id`, `/chat/twin` **all redirect → `/th/core-awakening`** = lifecycle status **AWAKENING** → `useRecoveryRoute` (AWAKENING → `/core-awakening`). **Supersedes** the older “recovery → dashboard” (TWIN_ALIVE-era) understanding; SPA navigation (harness flag) bypasses it — matches E2E passing |
+| E2E skips? | TWIN-01 skipped in run B (= beforeEach dashboard 10s timing guard, load-dependent); TWIN-05 static FNI. TWIN-02/03/04 executed & pass |
+| README? | Row corrected: `twin.spec.ts · Twin creation · 4/5 ✅` (was stale “0/5 feature not implemented”) |
+| MASTER_GATE_AS_IS | This section |
+
+Product change: **none** — no defect proven; flows functional (creation is client-side by architecture; tests pass via SPA harness).
+
+---
+
 ## History (кратко, dated)
 
 - **2026-09-17** — 19 PASS / 0 FAIL / 30 SKIP; evidence re-audit; skip classification 修正 (stale-bundle claims เป็นเท็จ — deployed bundle มี элемент 모두; 실제 원인 = recovery redirect / timing guard)

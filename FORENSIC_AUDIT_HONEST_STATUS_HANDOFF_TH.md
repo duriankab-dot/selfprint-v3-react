@@ -67,7 +67,7 @@ LIFE-05/LIFE-09/LIFE-12/LIFE-13 — public-page контракты; WORLD-05 —
 
 ## SKIP audit (21/49 — все категория A или честный runtime-precondition)
 
-- **Declared (фича реально отсутствует в src):** DECISION-03 (`/en/twin/patterns`), DECISION-04 (AI-backend SLA), DECISION-05 (Export CSV/JSON), TWIN-01 (fingerprint→NOVA), TWIN-02 (`/en/twin-birth`), TWIN-03 (`/en/twin/:id`+POST), TWIN-05 (standalone Twin UI), UPLOAD-01..05 (upload UI нет), LIFE-15 (дублирует SK-05).
+- **Declared (фича реально отсутствует в src) — UPDATE 18 ก.ย. 2026:** เหลือ 4: DECISION-04 (AI-backend SLA), TWIN-05 (standalone Twin UI), UPLOAD-05 (crop/edit), LIFE-15 (дублирует SK-05).  **Superseded (теперь реализовано/алиасы, tests PASS):** DECISION-03 (/twin/patterns → /intelligence), DECISION-05 (Export CSV/JSON ships in DecisionDashboard — PASS), TWIN-01 (Nova→chat lane — PASS), TWIN-02 (/twin-birth → /core-awakening — PASS), TWIN-03 (/twin/:id → /twin-profile — PASS), UPLOAD-01..04 (upload UI live — PASS)
 - **Runtime honest (конвертированы):** DECISION-01, TWIN-04, WORLD-01/02/03/04/06/07 — в этом конкретном прогоне элемент/фича не доступны (session/load) → SKIP с reason, никогда fake PASS.
 
 ## Осталось

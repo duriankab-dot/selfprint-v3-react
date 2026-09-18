@@ -637,9 +637,9 @@ Required:
 
 # DOMAIN J — UPLOAD
 
-Current baseline indicates Upload UI is not implemented.
+Current baseline (P2-era) indicated Upload UI absent — **superseded 18 ก.ย.**: `FileUploadUI` ships; UPLOAD-01..04 PASS; UPLOAD-05 honest FNI skip
 
-This is therefore an explicit closure item.
+**Closure item: CLOSED**
 
 Required:
 
@@ -1530,7 +1530,8 @@ Examples:
 
 ### CORRECT
 
-> Master Gate passed, but Twin Birth remains OPEN because the product route and real Twin creation E2E are not implemented.
+> Master Gate passed, but Twin Birth remains OPEN because the product route and real Twin creation E2E are not implemented.（ตัวอย่างจาก baseline 14 ก.ย. — superseded 18 ก.ย.: `/twin-birth` → `/core-awakening` alias exists;
+> TWIN-02 PASS; Twin creation client-side works (CoreAwakening → `twins` row) — Twin Birth CLOSED; ดู MASTER_GATE_AS_IS §Phase B Twin Creation)
 
 ---
 

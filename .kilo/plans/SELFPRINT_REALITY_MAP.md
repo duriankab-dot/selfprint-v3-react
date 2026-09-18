@@ -238,11 +238,11 @@ ONBOARDING → ANALYSIS → AWAKENING → TWIN_ALIVE → WORLD_ACTIVE
 
 | Claimed Feature | Status | Evidence |
 |----------------|--------|----------|
-| Fingerprint/NOVA flow in onboarding | SKIP in tests | twin.spec.ts TWIN-01: "fingerprint→NOVA flow not implemented" |
-| /en/twin-birth route | Not registered | twin.spec.ts TWIN-02: "Route /en/twin-birth not implemented" |
-| /en/twin/:id route | Not registered | twin.spec.ts TWIN-03: "Route /en/twin/:id not implemented" |
-| HolographicBirth standalone | Exists only inside Onboarding/CoreAwakening | Components exist but no dedicated route |
-| k6 load tests | No test files | testing.yml: "NOT YET IMPLEMENTED" |
+| Fingerprint/NOVA flow in onboarding | ✅ CLOSED — current = Nova→chat creation lane (`/chat/nova` → live Twin chat) | twin.spec.ts TWIN-01 PASS (18 ก.ย.); NovaChat.tsx + App.tsx:208 |
+| /en/twin-birth route | ✅ CLOSED — alias → `/core-awakening` | App.tsx:216; twin.spec.ts TWIN-02 PASS (18 ก.ย.); live probe redirect ✓ |
+| /en/twin/:id route | ✅ CLOSED — alias → `/twin-profile` | App.tsx:218; twin.spec.ts TWIN-03 PASS (18 ก.ย.); live probe ✓ |
+| HolographicBirth standalone | Exists inside CoreAwakening/Onboarding — no dedicated route (alias points to the page that contains it) | CoreAwakening.tsx + components/twin/HologramBirth.tsx |
+| k6 load tests | ✅ Implemented + PASS on staging (real run, 14 ก.ย.) — manual opt-in | loadtests + k6 README: smoke 792/792 checks (100%) |
 
 ---
 

@@ -95,22 +95,22 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 - ใช้ `selfprint-staging.pages.dev` แทนได้
 
 ### C. k6 load tests — REMOVED FROM MASTER GATE
-- Files not implemented (`loadtest-smoke.js`, `loadtest.js`)
+- Files exist + real staging run PASS (14 ก.ย.: smoke 792/792, Node 70/70)
 - Decision: removed per constraint policy ("implement real tests or remove")
-- Workflow has opt-in jobs but no test files → always skip
+- Manual opt-in (workflow_dispatch) — real tests run (NOT a Master Gate criterion)
 
 ---
 
-## SKIP audit (30/100 — honest)
+## SKIP audit (current — 11 skips, complete inventory, 18 ก.ย. 2026)
 
-| Category | Count | Reason |
-|----------|-------|--------|
-| Route not implemented | 12 | `/en/twin/patterns`, `/en/twin-birth`, `/en/twin/:id`, `/api/og` (LIFE-15) |
-| Feature not implemented | 8 | Upload UI, Export CSV/JSON, AI insight SLA, Compare feature |
-| Session not persisted | 7 | Redirected to login on `/en/decision-log`, `/en/decisions`, `/en/worlds` |
-| Testid missing | 3 | `[data-testid="decision-form"]`, `[data-testid="world-tile"]`, `[data-testid="world-detail"]` |
+| Class | Count | Reason |
+|-------|-------|--------|
+| STATIC — FEATURE-NOT-IMPLEMENTED / VALID-SKIP | 5 | DECISION-04, TWIN-05, UPLOAD-05, WORLD-06, LIFE-15 (duplicate of SK-05) |
+| CONDITIONAL — chat-route precondition (recovery redirect) | 4 | MG-01-02, MG-02-01, MG-05-02, MG-06-02 |
+| CONDITIONAL — beforeEach dashboard 10s timing guard | 2 | TWIN-01, WORLD-04 |
+| Invalid | 0 | — |
 
-**All skips have honest reasons — no fake PASS, no hidden failures.**
+**All skips have honest, evidence-backed reasons — no fake PASS, no hidden failures. Full 11-row inventory: `MASTER_GATE_AS_IS.md`.**
 
 ---
 
