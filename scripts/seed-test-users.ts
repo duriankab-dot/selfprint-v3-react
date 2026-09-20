@@ -199,6 +199,40 @@ async function seedTwin(userId: string, user: (typeof TEST_USERS)[number]): Prom
   console.log(`  ${error ? `⚠️  Twin warning: ${error.message}` : `✅ Twin ready: ${user.name}`}`);
 }
 
+// LIFECYCLE-SYNC-001 (20 ก.ย. 2026): keep user_lifecycle consistent with the
+// seeded Twin. Phase B E2E depends on useRecoveryRoute landing an authenticated
+// seed user on /dashboard (TWIN_ALIVE). If a previous E2E run created the twin
+// but failed AFTER the twins INSERT and BEFORE the setTwinCreated() upsert,
+// lifecycle stays AWAKENING while a twin row already exists — and
+// useRecoveryRoute (AWAKENING → /core-awakening) then rewrites /dashboard to
+// /core-awakening, which makes the dashboard-container gate in beforeEach /
+// spaNavTo (NAVHARNESS-001) never mount. CI TWIN-01/02 failures traced back to
+// exactly this stale state (forensic 20 ก.ย. 2026). This sync makes the seed
+// deterministic: every active user whose twin exists is TWIN_ALIVE too.
+async function syncLifecycle(userId: string, user: (typeof TEST_USERS)[number]): Promise<void> {
+  if (user.stage !== 'active') return;
+  const twin = await supabase
+    .from('twins')
+    .select('id')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (twin.error || !twin.data) return; // no Twin → leave lifecycle to the app (ONBOARDING)
+  const { error } = await supabase
+    .from('user_lifecycle')
+    .upsert(
+      {
+        user_id: userId,
+        twin_id: twin.data.id,
+        status: 'TWIN_ALIVE',
+        twin_created_at: new Date().toISOString(),
+        last_activity_at: new Date().toISOString(),
+        resumed_at: new Date(),
+      },
+      { onConflict: 'user_id' },
+    );
+  console.log(`  ${error ? `⚠️  Lifecycle warning: ${error.message}` : `✅ Lifecycle TWIN_ALIVE: ${user.name}`}`);
+}
+
 // --- Main ------------------------------------------------------------------
 
 async function main(): Promise<void> {
@@ -221,6 +255,7 @@ async function main(): Promise<void> {
     if (userId) {
       await upsertProfile(userId, user);
       await seedTwin(userId, user);
+      await syncLifecycle(userId, user);
       successCount++;
     } else {
       failCount++;
