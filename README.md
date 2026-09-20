@@ -14,9 +14,10 @@
 | Typecheck (functions) | ✅ PASS | `npm run typecheck:functions` — ผ่าน 19 ก.ย. 2026 หลังเปลี่ยน tsconfig.functions.json เป็น `module esnext + moduleResolution bundler + moduleDetection force` (tooling-only fix; runtime ถูก build ด้วย esbuild/bundler semantics บน CF Pages อยู่แล้ว) |
 | Lint | ✅ PASS | `npm run lint` (oxlint) — exit 0 (warnings only) |
 | Unit / Integration Tests | ✅ PASS | `npm test` — **1050/1050** (67 files) |
-| E2E Phase B staging (final) | ✅ 38 / 0 / 11 | `chromium-staging` vs selfprint-staging.pages.dev (18 ก.ย. 2026 07:22 UTC) — 0 FAIL · 11 skips inventoried (MASTER_GATE_AS_IS.md) |
-| E2E Phase A production | ✅ 51/51 | `--project=chromium` + mobile vs selfprint.one |
+| E2E Phase B staging (final) | ✅ 95 / 0 / 5 | full suite (Phase A + B, 100 tests) แบบ CI-parity: workers=1 + retries=1 vs selfprint-staging.pages.dev (20 ก.ย. 2026 19:04 ICT) — 0 FAIL · 0 flaky |
+| E2E Phase A production | ✅ 51/51 | `--project=chromium` + mobile vs selfprint.one (20 ก.ย. 2026 re-verified: chromium 27/27) |
 | Master Gate | ✅ **CLOSED** | 38 PASS / 0 FAIL / 11 SKIP — policy-valid inventory |
+| CI (GitHub Actions) | ✅ FIXED → GREEN (local proof) | root cause ของ run #406 (16 FAIL): workflow ไม่ส่ง `STAGING_URL` เข้า E2E job → `global-setup.ts` fallback ไป `staging.selfprint.one` (HTTP 522) → storageState ไร้ session — fix: เพิ่ม `STAGING_URL: https://selfprint-staging.pages.dev` ใน env ของ step "Run E2E Tests"; local CI-parity run ยืนยัน 95 PASS / 0 FAIL (20 ก.ย. 2026) — รอ push เพื่อยืนยันบน GitHub Actions |
 | Supabase migrations | ✅ 35 files | ล่าสุด `040_create_user_lifecycle_table.sql` |
 
 > **Master Gate ≠ product-completeness.** ตัวเลข Master Gate เป็น test metric แยกต่างหาก

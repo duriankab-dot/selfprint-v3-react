@@ -1,21 +1,40 @@
 # SELFPRINT — MASTER GATE AS-IS STATE
 
-**Date:** 2026-09-18 — FINAL EVIDENCE CLOSURE (overwrite ของ snapshot เดิมทั้งหมด)
-**HEAD:** 3858efb — P3 items complete / PRODUCT CLOSURE 100%
+**Date:** 2026-09-20 — CI RUN #406 FORENSIC CLOSURE (overwrite ของ snapshot 18 ก.ย. 2026)
+**HEAD:** bce9a57 — Fix test user (seed lifecycle sync) + workflow STAGING_URL fix
 
 ---
 
 ## Status
 
 ```
-TEST SUITE RESULT   : 38 PASS / 0 FAIL / 11 SKIP (49 total) — FULL STAGING RUN 18 ก.ย. 2026 07:22 UTC
-FAIL-BLOCKERS       : CLEARED — 7 transient FAIL จาก run 06:26 UTC ทุกตัวผ่านใน 07:22 UTC run; ไม่ reproduce
-SKIP INVENTORY      : COMPLETE — 11/11 audited (หลักฐาน = run 07:22 annotations + code skip 조건)
-MG-07-01            : PASS ทั้งสอง run — ไม่เป็น blocker
-MASTER GATE CLOSURE : CLOSED
+TEST SUITE RESULT   : 95 PASS / 0 FAIL / 5 SKIP (100 total, Phase A+B) — CI-PARITY RUN 20 ก.ย. 2026 19:04 ICT
+CI RUN #406         : 16 FAIL (deterministic 2/2 attempts) — ROOT CAUSE FOUND & FIXED (ไม่ใช่ product/E2E bug)
+ROOT CAUSE          : .github/workflows/testing.yml ไม่ส่ง STAGING_URL เข้า E2E job
+                      → global-setup.ts:72 fallback ไป 'https://staging.selfprint.one' (HTTP 522 — host ตาย)
+                      → storageState ถูกฉีดลง origin ที่ตาย → chromium-staging tests วิ่งไร้ session
+                      → data-gated UI (decision/world/upload/twin) ไม่ render ทั้ง 16 tests
+FIX                 : เพิ่ม STAGING_URL: https://selfprint-staging.pages.dev ใน env ของ step "Run E2E Tests"
+CI-PARITY PROOF     : local run ด้วย env ชุดเดียวกับ workflow หลังแก้ (ไม่มี .env.e2e.staging)
+                      → 95 PASS / 0 FAIL / 5 SKIP / 0 flaky (workers=1 + retries=1 เทียบเท่า GitHub Actions)
+SEED STATE          : vkjwqrjflxztcctmyzgh.supabase.co — 5/5 active users TWIN_ALIVE + twin_id=SET (query จริง 20 ก.ย.)
+                      ยืนยันว่า app bundle ที่ deploy ชี้ DB ตัวนี้ (single Supabase URL in all 112 chunks)
+MASTER GATE CLOSURE : CLOSED (ยืนยันซ้ำใน CI-parity run — MG ทุกตัว PASS ยกเว้น static skips)
 ```
 
-**เงื่อนไขเปิดครบ:** 0 FAIL ✓ + 11-skip inventory ครบ ✓ → Master Gate ถือว่า **ปิด** (ตามข้อกำหนด 18 ก.ย. 2026)
+### สรุปหลักฐาน root cause (run #406, commit bce9a57)
+
+| หลักฐาน | ค่า CI | ค่า CI-parity local (หลัง fix) |
+|---|---|---|
+| MG-05-01 | heading: true, canvas: 0 (intro phase = ไร้ session) | **canvas: 1, visible: true** (มี session) |
+| MG-07-01 decision elements | 2 | **14** |
+| TWIN-01 | URL ค้าง /chat/nova (ไม่ redirect → /chat/twin) | PASS — redirect สำเร็จ |
+| DECISION-01 | FAIL line 127 (tab-create ไม่มา) | PASS |
+| login | OK (secrets ถูกต้องทั้งชุด — ไม่ต้องเปลี่ยน secret) | OK |
+
+**การจำแนก:** CI/ENVIRONMENT BUG — workflow provisioning; PRODUCT BUG = NO; E2E BUG = NO
+(16 failures = cascade เดียวจาก session ขาด, ไม่ใช่ 16 bugs; ผ่านการหักล้างข้อสรุป
+"Phase B UI ไม่ได้ deploy" ด้วยการ crawl bundle จริง 112 chunks — markers ครบทุก contract)
 
 ---
 
