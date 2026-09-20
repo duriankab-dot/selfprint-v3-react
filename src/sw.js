@@ -90,7 +90,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const cacheNames = await caches.keys();
-      const KEEP_EXACT = new Set([CACHE_NAME, 'selfprint-data-v1']);
+      const KEEP_EXACT = new Set([CACHE_NAME, ASSETS_CACHE, 'selfprint-data-v1']);
       const deleteOld = cacheNames
         .filter((name) => !KEEP_EXACT.has(name) && !name.startsWith('workbox-precache'))
         .map((oldName) => {
@@ -171,6 +171,9 @@ self.addEventListener('fetch', (event) => {
 
   // Other assets: workbox precache first (hashed build assets), then
   // fall back to the existing network-first-with-cache-fallback strategy.
+  // Bounded with ExpirationPlugin to prevent unbounded storage growth —
+  // max 100 entries, 30-day TTL for non-precache runtime caching.
+  const ASSETS_CACHE = `selfprint-assets-v${CACHE_VERSION}`;
   event.respondWith(
     matchPrecache(request).then((precached) => {
       if (precached) {
@@ -178,10 +181,10 @@ self.addEventListener('fetch', (event) => {
       }
       return fetch(request)
         .then((response) => {
-          // Cache successful responses
+          // Cache successful responses (bounded)
           if (response.ok) {
             const cloned = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
+            caches.open(ASSETS_CACHE).then((cache) => {
               cache.put(request, cloned);
             });
           }

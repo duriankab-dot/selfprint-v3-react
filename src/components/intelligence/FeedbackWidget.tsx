@@ -11,7 +11,7 @@ import type { FeedbackType } from '@/lib/intelligence/types';
 import { IntelligenceError } from '@/lib/intelligence/types';
 import { Button } from '@/components/primitives/Button';
 import { Card } from '@/components/primitives/Card';
-import { Alert } from '@/components/composites/Alert';
+import { Alert } from '@/components/primitives/Alert';
 
 /**
  * Props for FeedbackWidget

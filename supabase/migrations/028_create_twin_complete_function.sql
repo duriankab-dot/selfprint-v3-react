@@ -19,6 +19,11 @@ DECLARE
   v_now TIMESTAMP WITH TIME ZONE;
   v_result JSONB;
 BEGIN
+  -- AUTHGUARD-001: Prevent IDOR — caller must be the owner of p_user_id
+  IF p_user_id <> auth.uid() THEN
+    RAISE EXCEPTION 'Unauthorized: cannot create twin for another user';
+  END IF;
+
   v_now := NOW();
 
   -- 1. Create Twin record

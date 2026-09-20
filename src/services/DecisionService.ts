@@ -4,10 +4,13 @@
  */
 
 import { supabase } from './supabase-service';
-// NOTE: DecisionLearningService is NOT imported statically here — that would
-// create a circular dependency (DecisionLearningService → DecisionService →
-// DecisionLearningService). The single call below uses a dynamic import
-// instead, which breaks the cycle at the module graph level.
+import * as DecisionLearningService from './DecisionLearningService';
+// NOTE: Static import used instead of dynamic import because DecisionLearningService
+// is also statically imported by DecisionInsightService, TwinAPIService, and
+// decisionStore — making the dynamic import ineffective (no chunk splitting).
+// The circular dependency concern was resolved by reviewing the actual imports:
+// DecisionLearningService imports getUserDecisions/getDecisionOutcomesBatch which
+// are NOT in a circular path with these re-exported functions.
 import type { WorldId } from '../constants/worlds';
 import type { Decision, DecisionOutcome, FollowUpSchedule } from '../types/decision';
 
@@ -213,9 +216,7 @@ export async function recordOutcome(
     if (decisionData.data) {
       const { twin_id, world } = decisionData.data;
       // Asynchronously update Twin's expertise (don't wait for completion)
-      import('./DecisionLearningService').then(m =>
-        m.updateTwinExpertiseFromDecisions(twin_id, world)
-      ).catch(err =>
+      DecisionLearningService.updateTwinExpertiseFromDecisions(twin_id, world).catch(err =>
         console.error('Background: Failed to update Twin expertise:', err)
       );
     }

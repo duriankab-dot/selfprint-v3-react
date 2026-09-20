@@ -13,7 +13,7 @@
 | Typecheck (app) | ✅ PASS | `npm run typecheck` (`tsc -b`) — 0 errors |
 | Typecheck (functions) | ✅ PASS | `npm run typecheck:functions` — ผ่าน 19 ก.ย. 2026 หลังเปลี่ยน tsconfig.functions.json เป็น `module esnext + moduleResolution bundler + moduleDetection force` (tooling-only fix; runtime ถูก build ด้วย esbuild/bundler semantics บน CF Pages อยู่แล้ว) |
 | Lint | ✅ PASS | `npm run lint` (oxlint) — exit 0 (warnings only) |
-| Unit / Integration Tests | ✅ PASS | `npm test` — **1050/1050** (67 files) |
+| Unit / Integration Tests | ✅ PASS | `npm test` — **929/929** (59 files, post-cleanup audit 20 ก.ย. 2026) |
 | E2E Phase B staging (final) | ✅ 95 / 0 / 5 | full suite (Phase A + B, 100 tests) แบบ CI-parity: workers=1 + retries=1 vs selfprint-staging.pages.dev (20 ก.ย. 2026 19:04 ICT) — 0 FAIL · 0 flaky |
 | E2E Phase A production | ✅ 51/51 | `--project=chromium` + mobile vs selfprint.one (20 ก.ย. 2026 re-verified: chromium 27/27) |
 | Master Gate | ✅ **CLOSED** | 38 PASS / 0 FAIL / 11 SKIP — policy-valid inventory |
@@ -56,7 +56,7 @@ Zustand · TanStack React Query · three.js 0.186.0 (HIGH fidelity renderer)
 PWA (vite-plugin-pwa, injectManifest) · Playwright E2E · Vitest unit
 ```
 
-Stack detail: `docs/TECH_STACK.md` · `docs/ARCHITECTURE.md` · `docs/SYSTEM_ARCHITECTURE.md`
+Stack detail: `docs/ARCHITECTURE.md` · `docs/DEPLOYMENT.md`
 
 ---
 
@@ -187,7 +187,7 @@ Supabase migrations: `supabase/migrations/` — **35 files, ล่าสุด `
 Schema core: profiles · blueprints · twins · twin_essence · twin_state · decision tables ·
 world_preferences · chat_messages · intelligence core · subscriptions · push · passkey · community
 
-Reference: `docs/DATABASE_SCHEMA_TH.md` · `MIGRATION_GUIDE.md` (root)
+Reference: `docs/DEVELOPMENT.md` · `supabase/MIGRATIONS_GUIDE.md`
 
 ---
 

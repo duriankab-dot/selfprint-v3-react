@@ -1,3 +1,11 @@
+# Security headers (CF Pages)
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.selfprint.one https://*.supabase.co https://openrouter.ai https://sentry.io wss://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self';
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)
+
 # Cache blog articles (30 days)
 /blog/*.md
   Cache-Control: public, max-age=2592000, immutable
@@ -10,6 +18,22 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# Default: no cache (SPA shell)
+# Cache icons (1 year - immutable)
+/icons/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache audio files (1 year - immutable)
+/audio/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# OG images (30 days - immutable)
+/og-*.jpg
+  Cache-Control: public, max-age=2592000, immutable
+
+# Manifest (revalidate daily)
+/manifest.json
+  Cache-Control: public, max-age=86400, must-revalidate
+
+# Default: no cache for SPA shell, private for authenticated API responses
 /*
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: private, max-age=0, must-revalidate

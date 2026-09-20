@@ -23,7 +23,7 @@ import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilde
 import DecisionForm from './DecisionForm';
 import DecisionList from './DecisionList';
 import DecisionAnalytics from './DecisionAnalytics';
-import { Alert } from '@/components/composites/Alert';
+import { Alert } from '@/components/primitives/Alert';
 import './decision-logger.css';
 
 // ============================================================================

@@ -26,7 +26,7 @@ import MemoryList from '@/components/intelligence/MemoryList';
 import FeedbackSummary from '@/components/intelligence/FeedbackSummary';
 import { PatternDisplay } from '@/components/intelligence/PatternDisplay';
 import { MemoryManager } from '@/lib/intelligence/MemoryManager';
-import { Alert } from '@/components/composites/Alert';
+import { Alert } from '@/components/primitives/Alert';
 import type { PersonalMemory } from '@/lib/intelligence/types';
 
 // ============================================================================
