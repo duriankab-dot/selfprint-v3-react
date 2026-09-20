@@ -197,7 +197,7 @@ npm run dev -- --port 3000  # Use different port
 ## **📚 Next Steps**
 
 - **Architecture Overview** → See `docs/ARCHITECTURE.md`
-- **API Documentation** → See `docs/API.md`
+- **API Documentation** → See `docs/API_REFERENCE.md` (current path-routing surface) / `docs/API.md` for service-level helpers
 - **Deployment Guide** → See `docs/DEPLOYMENT.md`
 - **Security & CVEs** → See `docs/SECURITY.md`
 

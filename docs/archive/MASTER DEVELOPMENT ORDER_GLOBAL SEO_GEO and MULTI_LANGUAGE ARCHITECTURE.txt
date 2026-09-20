@@ -1,0 +1,162 @@
+ 📑 MASTER DEVELOPMENT ORDER: GLOBAL SEO/GEO & MULTI-LANGUAGE ARCHITECTURE
+**Project:** SELFPRINT — Living Personal Intelligence Platform (selfprint-v3-react)
+**Status:** High Priority Update (Phase 2026 Optimization)
+**Core Objective:** ปรับปรุงโครงสร้างระบบฝั่งหน้าบ้าน (Public Pages) เพื่อรองรับระบบค้นหาดั้งเดิม (Google SEO) และระบบค้นหาปัญญาประดิษฐ์ยุคใหม่ (Generative Engine Optimization - GEO) ปรับแต่งแนวทางการสื่อสารระดับสากล (Global Market) และแยกโครงสร้างภาษาแบบสมบูรณ์ โดยยังคงรักษา Tech Stack เดิม (React 18 + Vite + Tailwind CSS + Supabase)
+
+---
+
+## 🧭 1. CONCEPTUAL ALIGNMENT & POSITIONING (SINGLE SOURCE OF TRUTH)
+โปรดทำความเข้าใจทิศทางและปรัชญาของโปรดักต์ร่วมกันก่อนเริ่มแก้ไขโค้ด:
+*   **เป้าหมายตลาด**: แย่งชิงส่วนแบ่งผู้ใช้งานจากกลุ่มตลาดความเชื่อ/ดูดวง (ความต้องการที่พึ่งทางใจและตัวช่วยตัดสินใจ) ทั้งในไทยและต่างประเทศ
+*   **ข้อห้ามเด็ดขาด**: ห้ามใช้ศัพท์แสงทางโหราศาสตร์ ไสยศาสตร์ หรือคำว่า "ดูดวง" บนหน้าเว็บสาธารณะเด็ดขาด
+*   **การวางคำจำกัดความใหม่ (Scientific Positioning)**:
+    *   เปลี่ยน "วันเวลาสถานที่เกิด" ➡️ **"Initial State Matrix"** (สภาวะเริ่มต้นของระบบตัวตน/พิมพ์เขียวพฤติกรรม)
+    *   เปลี่ยน "Insight" ➡️ **"Behavioral Pattern Recognition & Future Simulation"** (การประมวลผลสถิติและแบบจำลองอนาคต)
+    *   เปลี่ยน "HUB world" ➡️ **"12 Hub Worlds & Neural Matrix"** (มิติโครงสร้างชีวิตมนุษย์ 12 ด้าน)
+*   **จุดยืนสากล**: วางตัวเป็น **"Living Personal Intelligence Platform"** ที่ใช้สถาปัตยกรรม **12 SICE Core Engines** ในการประมวลผลเพื่อเพิ่มศักยภาพการตัดสินใจและการรับรู้ตนเอง (Decision Intelligence & Self-Awareness)
+
+---
+
+## 🌐 2. ARCHITECTURE UPDATE: MULTI-LANGUAGE URL ROUTING (GEO SEO Fix)
+ห้ามใช้ Client-side script สลับภาษาบน URL เดียวกันเด็ดขาด (เพราะบอท AI/Google จะมองไม่เห็นอีกภาษา) ให้ปรับเปลี่ยนระบบ Routing หน้าแรกและหน้าสาธารณะ (Public Pages) แยกตาม Sub-directory ดังนี้:
+
+### โครงสร้างพิกัด URL ย่อย:
+*   `selfprint.one/en` ➡️ หน้าแรกและเนื้อหาเวอร์ชันภาษาอังกฤษ (Default สำหรับ Global Market เน้นศัพท์เทคและจิตวิทยาชั้นสูง)
+*   `selfprint.one/th` ➡️ หน้าแรกและเนื้อหาเวอร์ชันภาษาไทย (เน้นอินไซต์ดักกลุ่มคนชอบดูดวง แต่แปลงเป็นภาษาเทคโนโลยีและสถิติ)
+*   `selfprint.one/robots.txt` ➡️ ต้องตั้งค่าให้บอท AI คลานเข้าได้เสมอ ห้ามเขียนคำสั่งบล็อก `GPTBot`, `ClaudeBot`, `PerplexityBot`
+*   **ข้อระวัง**: ห้ามเขียนโค้ด Force Auto-Redirect ตาม IP หรือ Browser Language แบบแข็งทื่อ เพราะจะทำให้บอทจากสหรัฐฯ คลานไม่ถึงหน้าภาษาไทย (`/th`) ให้ใช้ระบบสลับภาษาผ่าน Navigation Bar แทน และฝังแท็ก `hreflang` เพื่อระบุภาษาให้เสิร์ชเอนจินรับทราบ
+
+---
+
+## 🛠️ 3. CORE TECHNICAL TASKS (STEP-BY-STEP IMPLEMENTATION)
+
+### ➡️ TASK 3.1: ติดตั้งและฝัง Dynamic Meta Tags (SEO/GEO Headers)
+ติดตั้งแพ็กเกจ `react-helmet-async` ในโปรเจกต์ และเพิ่มคอมโพเนนต์จัดการหัวเว็บไซต์แยกตามภาษา
+
+**ตัวอย่างโค้ดสำหรับหน้าภาษาอังกฤษ (`/en` Landing Page):**
+```tsx
+import { Helmet } from 'react-helmet-async';
+
+// วางไว้บนสุดในส่วน return ของ Component /en
+<Helmet>
+  <title>SELFPRINT | Living Personal Intelligence Platform & AI Twin</title>
+  <meta name="description" content="Stop guessing your life trajectory. Synchronize your Initial State Matrix with 12 SICE Core Engines to build an interactive AI Digital Twin. Simulate decisions and detect blind spots." />
+  <meta name="keywords" content="AI Twin, Personal Intelligence, Decision Intelligence, Behavioral AI, Self-Discovery App, 12 SICE Engine" />
+  <meta property="og:title" content="SELFPRINT | Initialize Your AI Digital Twin in 2 Minutes" />
+  <meta property="og:description" content="Compute your behavior patterns to simulate future scenarios and hack your life with zero astrology jargon." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://selfprint.one" />
+</Helmet>
+```
+
+**ตัวอย่างโค้ดสำหรับหน้าภาษาไทย (`/th` Landing Page):**
+```tsx
+import { Helmet } from 'react-helmet-async';
+
+// วางไว้บนสุดในส่วน return ของ Component /th
+<Helmet>
+  <title>SELFPRINT | แพลตฟอร์มสร้าง AI Twin ภาษาไทย ช่วยคิดและตัดสินใจชีวิต</title>
+  <meta name="description" content="เลิกเดาทิศทางของชีวิต ให้ระบบ Living AI ภาษาไทยและเครื่องมือวิเคราะห์ระดับสูงช่วยคิดและตัดสินใจเพื่อคุณ สังเคราะห์พิมพ์เขียวพฤติกรรมเพื่อปิดจุดบอดชีวิตอย่างแม่นยำ" />
+  <meta name="keywords" content="AI Twin ภาษาไทย, สร้างฝาแฝด AI, ระบบช่วยตัดสินใจ,  AI ภาษาไทย, แพลตฟอร์มพัฒนาตัวเอง, สถิติพฤติกรรมมนุษย์, ค้นหาตัวเอง, AI ดูดวง" />
+  <meta property="og:title" content="SELFPRINT | สร้าง AI Digital Twin ของคุณฟรีใน 2 นาที" />
+  <meta property="og:description" content="ประมวลผลสภาวะเริ่มต้น (Initial State) ผนวกระบบ 12 SICE เพื่อสร้างแบบจำลองอนาคตที่แม่นยำ ป้องกันความผิดพลาดระดับบุคคล" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://selfprint.one" />
+</Helmet>
+```
+
+---
+
+### ➡️ TASK 3.2: ฝังข้อมูลโครงสร้างเชิงลึก (JSON-LD Local & Software Schema)
+เพื่อดันอันดับบน AI Search (GEO) และ Google Maps ในฐานะนวัตกรรมที่ออกแบบมาเพื่อผู้ประกอบการและนักคิด ให้ฝังบล็อกสคริปต์ JSON-LD นี้ไว้ภายใต้โครงสร้างหลักของหน้าสาธารณะ (ปรับเปลี่ยนฟิลด์ที่ตั้ง/ภาษาตามเส้นทาง URL)
+
+```tsx
+<script type="application/ld+json">
+  {JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "SELFPRINT",
+    "operatingSystem": "All",
+    "applicationCategory": "BusinessApplication",
+    "description": "The world's first Living Personal Intelligence Platform driven by 12 SICE Core Engines to simulate future decisions and eliminate cognitive blind spots.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "provider": {
+      "@type": "OnlineBusiness",
+      "name": "SELFPRINT Global",
+      "image": "https://selfprint.one",
+      "targetPopulation": "Entrepreneurs, Tech Founders, Decision Makers, Growth Seekers"
+    }
+  })}
+</script>
+```
+
+---
+
+### ➡️ TASK 3.3: สร้างหน้าเว็บเปรียบเทียบคู่แข่งระดับโลก (Competitive Framework Section)
+สร้างและเปิดหน้าเว็บตารางเปรียบเทียบนี้ให้เป็น **Public Page** (คนทั่วไปและบอทสามารถเข้าถึงได้โดยไม่ต้องล็อกอิน) เพื่อบลัฟคู่แข่งสายจิตวิทยา สายประมวลผลดวงดาว และบิ๊กเทคอย่างเป็นวิทยาศาสตร์
+
+```jsx
+// ตัวอย่างโครงสร้างเนื้อหาตารางที่ต้องนำไปเขียนคอมโพเนนต์ (Tailwind CSS)
+export function CompetitorTable() {
+  return (
+    <div className="overflow-x-auto my-10">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead>
+          <tr className="bg-gray-50">
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dimension</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-blue-600 uppercase tracking-wider font-bold">SELFPRINT (12 SICE)</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">16 Personalities / MBTI</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">The Pattern / Co-Star</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Static AI Clones (Delphi)</th>
+          </tr>
+        </thead>
+        <tbody className="bg-white divide-y divide-gray-200">
+          <tr>
+            <td className="px-6 py-4 font-medium">Data Architecture</td>
+            <td className="px-6 py-4 text-blue-600 font-semibold">12 Hub Worlds & Neural Matrix</td>
+            <td className="px-6 py-4">Static 4-Axis Questionnaire</td>
+            <td className="px-6 py-4">Astrological Coordinates</td>
+            <td className="px-6 py-4">Past Documents / Static Knowledge</td>
+          </tr>
+          <tr>
+            <td className="px-6 py-4 font-medium">Core Engine Type</td>
+            <td className="px-6 py-4 text-blue-600 font-semibold">Interactive Living Platform</td>
+            <td className="px-6 py-4">Static Text (One-time test)</td>
+            <td className="px-6 py-4">One-way Content Delivery</td>
+            <td className="px-6 py-4">Information Retrieval (Q&A)</td>
+          </tr>
+          <tr>
+            <td className="px-6 py-4 font-medium">Primary Objective</td>
+            <td className="px-6 py-4 text-blue-600 font-semibold">Decision Intelligence & Simulations</td>
+            <td className="px-6 py-4">Identify Personality Labels</td>
+            <td className="px-6 py-4">Entertainment & Mental Solace</td>
+            <td className="px-6 py-4">Automation & Task Delegations</td>
+          </tr>
+          <tr>
+            <td className="px-6 py-4 font-medium">Behavioral Sync</td>
+            <td className="px-6 py-4 text-blue-600 font-semibold">Real-time Pattern Detector (12 SICE)</td>
+            <td className="px-6 py-4">None (No daily tracking)</td>
+            <td className="px-6 py-4">None (No behavioral input)</td>
+            <td className="px-6 py-4">Requires manual file re-upload</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+```
+
+---
+
+### ➡️ TASK 3.4: จัดทำจุดจอดรถข้อมูลและเปิดระบบ Insight Sharing
+1.  **เปิดการทำงานของ Public Insight Sharing (FR-06 / GM-02)**: ตรวจสอบให้มั่นใจว่าเมื่อผู้ใช้กดแชร์หน้าสรุปผลพฤติกรรม (Insight Card) ตัวแอปต้องทำการแปลงหน้าผลลัพธ์เหล่านั้นให้ออกมาเป็นโครงสร้าง Dynamic Public URL ที่ปลอดภัย (เช่น `selfprint.one/share/insight-xxx`) และตั้งค่าเปิดทางให้บอทของ AI Search เข้ามาอ่านสถิติภาพรวมนี้เพื่อนำไปทำสถิติอ้างอิงบนโลกออนไลน์ได้
+2.  **อัปเกรดแผนผังเว็บบล็อกสาธารณะ**: แตกโฟลเดอร์สำหรับหน้าข้อมูลเปิด (Public Pages) เพื่อเป็นที่อยู่ให้คีย์เวิร์ดของแต่ละมิติชีวิต เช่น `selfprint.one/worlds/wealth` (มิติการเงินพฤติกรรม) หรือ `selfprint.one/worlds/identity`
+3. ตั้งค่า Prerendering บน Vite: เพื่อไม่ให้เกิดปัญหาหน้าเว็บว่างเปล่าในสายตาบอท (Empty Client-Side JavaScript) ให้ติดตั้งปลั๊กอินประเภท Prerendering (เช่น vite-plugin-prerender) เพื่อบังคับให้ระบบแปลงหน้าแรก หน้าตารางเปรียบเทียบ และหน้า FAQ ออกมาเป็นไฟล์ index.html สำเร็จรูปที่มีข้อความตัวอักษรครบถ้วนตั้งแต่ตอน Build บน Vercel Production
+4. 🤖 4. AI CRAWLER OPTIMIZATION: FILE LLMS.TXTสร้างไฟล์ชื่อ llms.txt ไว้ในโฟลเดอร์ public/ (เข้าถึงผ่าน https://selfprint.one) เพื่อให้โมเดล AI ยุคใหม่ (Claude, ChatGPT, Perplexity, DeepSeek) วิ่งเข้ามาสูบสรุปเนื้อหาโครงสร้างโปรเจกต์ภาษาอังกฤษไปตอบผู้ใช้ทั่วโลกได้ทันทีโดยไม่ต้องรัน JavaScript หลังบ้าน
+
+```markdownSelfprint — Living Personal Intelligence PlatformThe ultimate decision-intelligence infrastructure using SelfPrint (AI Guide) to help users build their interactive AI Twin.Core Philosophical PositioningNot Astrology / No Astro Jargon: We translate initial state parameters into cognitive and behavioral science statistics.Scientific Blueprint: Uses the initial state matrix (birth data coordinate inputs) combined with 12 SICE (Selfprint Intelligence Core Engines) to model human behavioral frameworks.Competitive Edge vs CompetitorsOver MBTI / 16 Personalities: Selfprint is a Living Platform that grows with real-time user reflection and behavioral updates, unlike static personality tests.Over The Pattern / Co-Star: Offers an Interactive Digital Twin Chat interface (TWIN Chat) for proactive simulation and scenario testing, rather than one-way automated analysis reports.Over Delphi / Productivity AI Clones: Serves as a Decision Infrastructure focused on identifying cognitive blind spots and future pattern simulations, rather than simple information retrieval or routine task automations.System Architecture & NavigationPublic Domain: /en (Global Core Page), /th (Thai Target Page)Today (Daily Dashboard): Dynamically tracked engagement hub.Explore: Conversational self-discovery pathways.TWIN: The primary node for core awakening and digital twin real-time dialog.Activities: Experiential practice, behavior logging, and pattern reflection matrix.
+

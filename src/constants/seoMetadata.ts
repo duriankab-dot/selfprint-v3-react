@@ -41,14 +41,17 @@ export const SEO_METADATA: Record<string, PageMetadata> = {
       title: 'SELFPRINT | Your Living Personal Intelligence Platform & AI Twin',
       description: "Stop guessing your life. SELFPRINT's 12 SICE Core Engines analyze behavioral patterns, detect blind spots, and evolve your AI Twin in real-time. Start free.",
       keywords: ['AI twin', 'personal intelligence platform', 'decision making AI', 'behavioral pattern analysis', 'SELFPRINT', 'MBTI alternative'],
-      // OGSTATIC-001: เดิมชี้ไป /api/og ซึ่งคืน text/html ไม่ใช่รูป → preview พังทุกช่อง
+      // OGSTATIC-001: page og:image = static JPG (public/) — ไม่ต้องพึ่ง /api/og.
+      // (ไปบรรทัดนี้ /api/og ยังอยู่ — functions/api/og.ts — คืน HTML ไว้สำหรับ
+      // social-preview + SK-05 e2e; metadata ใช้ static file แทน เพื่อ figure
+      // scrapers เชิได้รูปโดยไม่ต้อง call edge endpoint)
       ogImage: '/og-default-en.jpg',
     },
     th: {
       title: 'SELFPRINT | สร้าง AI Twin ภาษาไทย — วิเคราะห์ชีวิต ไม่ใช่ดูดวง',
       description: 'เลิกเดาทิศทาง ให้ SELFPRINT วิเคราะห์ 12 มิติชีวิตด้วย AI Twin ที่เรียนรู้จากคุณจริงๆ ตรวจจับ Blind Spots และช่วยตัดสินใจแม่น ทดลองฟรี',
       keywords: ['AI Twin ไทย', 'วิเคราะห์ชีวิต', 'ตัดสินใจด้วย AI', 'SELFPRINT', 'ดูดวงด้วย AI', 'พัฒนาตัวเอง', 'behavioral AI ไทย'],
-      // OGSTATIC-001 — ดูคอมเมนต์ฝั่ง en
+      // OGSTATIC-001 (TH) — static JPG เช่นกัน (ดูคอมเมนต์ฝั่ง en; /api/og ยังอยู่สำหรับ preview+SK-05)
       ogImage: '/og-default-th.jpg',
     },
   },

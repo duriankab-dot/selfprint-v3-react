@@ -38,13 +38,13 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 | 1 | CI E2E Green | 63 PASS / 7 FAIL | 63 PASS / 0 FAIL | LIFE-01 typo fixed + staging URL default updated |
 | 2 | Functional Gate Green | MG suite 7/12 | MG suite 12/12 PASS | Staging URL fixed → all lifecycle tests pass |
 | 3 | Skipped Coverage | 30 tests skipped | Documented | Skip audit table in reports (honest reasons) |
-| 4 | k6 Execution | Files missing | Documented | k6 not implemented yet; opt-in via workflow_dispatch |
+| 4 | k6 Execution | Files missing | REMOVED from gate (implement-or-remove policy) | Scripts เดิมใช้ global `fetch` (k6 ไม่มี) → เขียนใหม่ pure k6 API (K6V2-FIX-001) + staging env (sb_secret_ + OPENROUTER key) + SLO จาก measurement จริง (K6SLO-001) → **รันจริงผ่าน staging: smoke 792/792 checks, error rate 0.00% (14 ก.ย. 2026)** — ยังเป็น manual opt-in (`workflow_dispatch`) ไม่ใช่ gate criteria |
 
 ## REMOVED FROM MASTER GATE
 
-| # | Gate | เหตุผล |
-|---|------|--------|
-| k6 | REMOVED FROM MASTER GATE — NOT A PASS | No test files exist; constraint policy: implement or remove |
+| # | Gate | เหตุผล/สถานะ |
+|---|------|--------------|
+| k6 | REMOVED FROM MASTER GATE — NOT A PASS | Baseline: scripts broken (global fetch, import errors) ตาม policy implement-or-remove → remove ออกจาก gate. หลังแก้ (14 ก.ย.): **scripts มีจริง + staging real run PASS** (smoke 792/792 checks, Node 70/70) — ยัง manual opt-in, ไม่ใช่ gate criteria |
 
 ---
 

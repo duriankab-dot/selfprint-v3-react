@@ -144,7 +144,7 @@ git commit -m "LANDING VERIFICATION: vitest + build + lint pass"
 
 - **ห้ามอ้างว่าทำเสร็จ ถ้ายังไม่ได้ verify** — "แก้แล้ว" ≠ "เสร็จ" ถ้ายังไม่ได้รันเทสต์/ตรวจจริง
 - **`FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` คือ source of truth** — ถ้าเอกสารอื่นขัดแย้ง ให้เชื่อไฟล์นี้
-- เอกสารที่เชื่อได้มีแค่: `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` · `docs/Experience Architecture v2.md` · `docs/PLAN_TRACKS_TH.md` · `README.md` · `CLAUDE.md` · `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md`
+- เอกสารที่เชื่อได้มีแค่ (current source of truth): `README.md` (root) · `MASTER_GATE_AS_IS.md` · `MASTER_GATE_EVIDENCE.md` · `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` · `docs/SELFPRINT MASTER PRODUCT SPEC & 100% CLOSURE BOOK.md` · `docs/SELFPRINT_STATUS_HONEST_TH.md` · `docs/README.md` (index) — เอกสารก่อน 18 ก.ย. 2026 ที่ย้ายไป `docs/archive/` ถือเป็น historical อ้างอิงด้วยวันที่เท่านั้น
 - ถ้าอัปเดตสถานะ ต้องระบุ **วันที่ + หลักฐานการวัดจริง** (เช่น "1037/1037 tests ผ่าน 5 ก.ย. 2026")
 - ห้ามเขียน "PRODUCTION READY" หรือ "100% verified" — ยังไม่จริงจนกว่าจะครบ 4 เงื่อนไขใน forensic หัวข้อ 8.6
 
@@ -178,4 +178,4 @@ git commit -m "LANDING VERIFICATION: vitest + build + lint pass"
   ~~apply migration 035~~ ✅ done · 1. deploy Edge Functions (12 functions; verify Supabase dashboard) · 2. แก้/ตัดสินใจ passkey flow · 3. ตัดสินใจ voice route
 - ⚠️ มี stub/mock ค้าง: VoiceChat, VoiceInput, VoiceOutput, AdvancedAnalytics, SentryService, CommunityPage, ExplorePage, DecisionDashboard, structuredData, soundscape-manifest — ดู forensic หัวข้อ 8.5
 
-**อ่านก่อนเริ่มทุกครั้ง:** `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` → `docs/PLAN_TRACKS_TH.md` → `CLAUDE.md` → `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` (ก่อน Track C)
+**อ่านก่อนเริ่มทุกครั้ง:** `README.md` → `MASTER_GATE_AS_IS.md` → `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` → `docs/SELFPRINT_STATUS_HONEST_TH.md` (เอกสารที่ collect ก่อน 18 ก.ย. 2026 → `docs/archive/`)

@@ -15,12 +15,14 @@
  *   FALLBACK → div + gradient, zero motion
  *   LOW      → CSS keyframes only (cheap orb, no SVG)
  *   MEDIUM   → SVG + CSS var pipeline (today's TwinPresence, full detail)
- *   HIGH     → reserved, not implemented — PHASE0 §"ข้อสรุปตรง ๆ" decided
- *              against WebGL for now (three.js ~350kB gzip vs. current
- *              ~250kB gzip initial bundle isn't justified without real
- *              Lighthouse/WebPageTest numbers to argue from). The facade
- *              renders MEDIUM for a 'HIGH' classification until that
- *              renderer exists.
+ *   HIGH     → Three.js WebGL (TwinThreeRenderer) + SVG intelligence layer
+ *              (TwinPresence) — implemented in src/components/twin/Twin.tsx
+ *              HIGH branch + src/components/twin/TwinThreeRenderer.tsx.
+ *              NOTE: replaced the earlier "reserved, not implemented"
+ *              annotation (PHASE0 §"ข้อสรุปตรง ๆ") — WebGL renderer ships.
+ *              See also Twin.tsx HIGH branch (render TwinThreeRenderer)
+ *              and TwinThreeRenderer's WebGL->SVG fallback when WebGL is
+ *              unavailable on a HIGH-classified device.
  */
 import { useEffect, useState } from 'react';
 
@@ -55,7 +57,7 @@ function classify(): TwinFidelity {
     return 'LOW';
   }
 
-  // Strong desktop-class device — reserved for a future HIGH renderer.
+  // Strong desktop-class device — HIGH tier (Three.js via TwinThreeRenderer).
   if (!coarsePointer && cores >= 8 && (memory === undefined || memory >= 8)) {
     return 'HIGH';
   }

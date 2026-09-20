@@ -1,22 +1,64 @@
 # API REFERENCE
 
-**Version:** 1.0  
-**Status:** Production Ready  
-**Last Updated:** 2026-08-18
+**Version:** 1.2 (Updated 19 ก.ย. 2026 — CF Pages routing + reconciliation note)
+**Status:** Production Ready (current architecture)
+**Last Updated:** 2026-09-19
+
+---
+
+## ⚠️ API COUNT RECONCILIATION (19 ก.ย. 2026)
+
+Current implementation exposes **14 verified endpoints/modules**:
+
+- 7 dedicated functions: `/api/twin`, `/api/twin-stream`, `/api/nova`,
+  `/api/nova-stream`, `/api/og`, `/api/autonomy-log`, `/api/metrics`
+- 7 catch-all module routes: `notifications`, `twin-evolution`, `sice`,
+  `stripe`, `profile`, `blueprint` (KNOWN_MODULES) + exact `/api/share`
+
+Current spec (DOMAIN W) ยังระบุ **"API surface = 12 — LOCKED"** เป็น architectural
+constraint เดิมของ unified-design — architecture reconciliation ยัง pending
+(ดู README.md "API count reconciliation"). เอกสารนี้จึงแสดง implementation ที่
+verify แล้ว 14 ตัวโดยไม่ปิดบัง spec constraint 12
 
 ---
 
 ## 📋 OVERVIEW
 
-Selfprint API consists of **12 consolidated endpoints** routed through a unified serverless handler (`api/unified-handler.ts`). All endpoints use query parameter routing: `?module=<module>&action=<action>`.
+Selfprint API runs on **Cloudflare Pages Functions** with a **path-based catch-all router**
+(`functions/api/[[route]].ts`), which internally rewrites each request to the unified handler
+(`api/unified-handler.ts`) and passes `?module=<module>&action=<action>` — the scheme that was
+introduced on Vercel is preserved but the external contract is now `/api/<module>/<action>`
+(e.g. `GET /api/notifications/list?userId=...`) rather than `/api/unified-handler?module=...`.
 
-**Base URL:** `https://www.selfprint.one/api/unified-handler`
+**Base URL:** `https://www.selfprint.one` (production) · `https://selfprint-staging.pages.dev` (staging)
 
-**Authentication:** Passkey (WebAuthn) + Session cookies + Supabase RLS
+**Dedicated functions (outside the catch-all, matched first by CF Pages):**
+
+| Endpoint | Handler |
+|----------|---------|
+| `/api/twin` | `functions/api/twin.ts` |
+| `/api/twin-stream` | `functions/api/twin-stream.ts` |
+| `/api/nova` | `functions/api/nova.ts` |
+| `/api/nova-stream` | `functions/api/nova-stream.ts` |
+| `/api/og` | `functions/api/og.ts` |
+| `/api/autonomy-log` | `functions/api/autonomy-log.ts` |
+| `/api/metrics` | `functions/api/metrics.ts` |
+
+**Catch-all router modules (KNOWN_MODULES):** `notifications` · `twin-evolution` · `sice` ·
+`stripe` · `profile` · `blueprint` — plus exact path `/api/share`.
+
+**Authentication:** Passkey (WebAuthn) + Session (Supabase) + Bearer (getAuthHeaders) + Supabase RLS
+
+> เอกสารอ้างอิง API ทั้งหมด : `README.md` → "API Surface" section เป็น source of truth;
+> ด้านล่างเป็นรายละเอียด schema/response ของ unified modules.
 
 ---
 
-## 🔑 API MODULES (12 Endpoints)
+## 🔑 API MODULES (12-API Lock Constraint)
+
+The product spec (SELFPRINT MASTER PRODUCT SPEC & 100% CLOSURE BOOK) enforces a
+**maximum API surface of 12**; dedicated functions + catch-all modules must fit within
+that ceiling. Current implemented surface: 7 dedicated + 6 catch-all modules + share.
 
 ### 1. **Notifications Module**
 **Endpoint:** `?module=notifications&action=<action>`

@@ -309,8 +309,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
   const lang = (language === 'th' ? 'th' : 'en') as 'th' | 'en';
   const story = STORY[lang];
   const seo = SEO_COPY[lang][segment] ?? SEO_COPY[lang]['default'];
-  // OGSTATIC-001: /api/og คืน HTML ไม่ใช่รูป (และตอนนี้ถูกลบทิ้งแล้ว)
-  // ใช้ไฟล์ .jpg static ขนาด 1200×630 ใน public/ แทน — absolute URL เสมอ
+  // OGSTATIC-001: page <meta og:image> ใช้ static .jpg (public/, 1200×630,
+  // absolute URL) ตาม design ทั้งนี้ /api/og ยังมีอยู่ (functions/api/og.ts)
+  // สำหรับ social-preview HTML และครอบด้วย SK-05 (smoke.spec.ts) — คนละจุด
   const ogUrl = `https://selfprint.one/og-default-${lang}.jpg`;
 
   // Scroll-triggered animation state

@@ -1,0 +1,1451 @@
+# FINAL DEVELOPMENT DIRECTIVE
+
+## SELFPRINT V3 — FULL SYSTEM COMPLETION 100%
+
+### คำสั่งพัฒนาระบบให้สมบูรณ์ครบทุกส่วน พร้อม Architecture Lock สำหรับ API + Edge
+
+**Repository:** `duriankab-dot/selfprint-v3-react`
+**Production:** `selfprint.one`
+**Source of Truth:** `SELFPRINT_PROJECT_CODEX v2.0`
+**สถานะเป้าหมาย:** FULL IMPLEMENTATION — 100% END-TO-END
+
+---
+
+# 1. PURPOSE OF THIS DIRECTIVE
+
+คำสั่งฉบับนี้มีวัตถุประสงค์เพื่อให้ AI Development Team ดำเนินการ **ปิด Gap ของ SELFPRINT V3 ทั้งระบบจนสมบูรณ์ 100%**
+
+ไม่ใช่การเพิ่ม feature ทีละเล็กทีละน้อย
+
+ไม่ใช่การสร้าง UI แล้วถือว่า feature เสร็จ
+
+ไม่ใช่การสร้าง service แล้วถือว่า system complete
+
+ไม่ใช่การสร้าง API เพิ่มเพื่อแก้ปัญหาแต่ละ module
+
+และไม่ใช่การประกาศ 100% จากจำนวนไฟล์หรือจำนวน checklist ที่ทำเสร็จ
+
+เป้าหมายคือ:
+
+> **FULL FUNCTIONAL + FULL INTEGRATION + FULL PERSISTENCE + FULL TESTING + FULL PRODUCTION VERIFICATION**
+
+---
+
+# 2. SOURCE OF TRUTH
+
+ให้ยึด:
+
+`SELFPRINT_PROJECT_CODEX v2.0`
+
+เป็น Product Source of Truth
+
+Codex ระบุ Selfprint เป็น Personal Intelligence Platform และกำหนดแกนสำคัญ ได้แก่:
+
+* Self Print / Nova
+* AI Twin
+* Core Awakening
+* 12 SICE
+* Decision Tracking
+* 12 Intelligence Worlds
+* Twin + World Integration
+* Production Quality
+
+Repository ปัจจุบันเองก็ระบุ Codex v2.0 เป็น Source of Truth และกำหนด developer path ผ่าน Codex → Reading List → Execution Checklist → Gap Map
+
+---
+
+# 3. 🔴 ARCHITECTURE LOCK — API
+
+## ห้ามเพิ่ม API เกิน Architecture ที่กำหนด
+
+นี่เป็น **NON-NEGOTIABLE CONSTRAINT**
+
+### ห้ามทำ:
+
+```text
+SICE 1 → สร้าง API ใหม่
+SICE 2 → สร้าง API ใหม่
+SICE 3 → สร้าง API ใหม่
+...
+SICE 12 → สร้าง API ใหม่
+```
+
+หรือ:
+
+```text
+Feature ใหม่
+→ สร้าง endpoint ใหม่ทุกครั้ง
+```
+
+หรือ:
+
+```text
+Service ใหม่
+→ เพิ่ม API package ใหม่
+```
+
+## ห้ามเพิ่ม API Package / Endpoint เกินโครงสร้าง 12 API ที่กำหนดไว้ของโปรเจกต์
+
+**ห้ามสร้าง API architecture ใหม่โดยพลการ**
+
+ก่อนสร้าง endpoint ใด ๆ ต้องตรวจสอบก่อนว่า functionality สามารถ:
+
+1. ใช้ API เดิม
+2. รวมเข้ากับ API เดิม
+3. ส่งต่อให้ Edge Function
+4. ใช้ shared service
+5. ใช้ existing business-domain endpoint
+
+ได้หรือไม่
+
+ถ้าได้:
+
+> **ห้ามสร้าง API ใหม่**
+
+---
+
+# 4. SUPABASE EDGE FUNCTIONS = INTELLIGENCE EXECUTION LAYER
+
+ให้ใช้ architecture ปัจจุบันที่รวมความสามารถเข้ากับ Edge เป็นหลัก
+
+แนวทาง:
+
+```text
+React
+  ↓
+Existing API Layer
+  ↓
+Supabase Edge Function
+  ↓
+Orchestrator
+  ├── SICE 1
+  ├── SICE 2
+  ├── SICE 3
+  ├── ...
+  └── SICE 12
+  ↓
+Cross-Engine Synthesis
+  ↓
+AI Output
+  ↓
+Supabase PostgreSQL
+```
+
+**12 SICE ≠ 12 APIs**
+
+12 SICE คือ Intelligence Engines
+
+ไม่ใช่ Network Endpoints
+
+Codex ระบุ 12 SICE ในฐานะ orchestration architecture ที่รับ input → ประมวลผล → synthesis → fine-tuning → Personal Intelligence Output
+
+---
+
+# 5. API GOVERNANCE RULE
+
+ก่อนเพิ่มหรือแก้ API ทุกครั้ง AI Dev ต้องตอบคำถาม:
+
+```text
+1. API นี้มีอยู่แล้วหรือไม่?
+2. Existing API รองรับ functionality นี้หรือไม่?
+3. สามารถรวม business logic เข้า Edge Function ได้หรือไม่?
+4. สามารถใช้ existing service ได้หรือไม่?
+5. สามารถ reuse existing endpoint ได้หรือไม่?
+6. เหตุใดจึงจำเป็นต้องสร้าง endpoint ใหม่?
+7. หากสร้างใหม่ API count จะเป็นเท่าใด?
+```
+
+ถ้าไม่สามารถตอบได้:
+
+> **ห้ามสร้าง API**
+
+---
+
+# 6. API PACKAGE LOCK
+
+ห้ามเพิ่ม dependency/package ที่เกี่ยวกับ API architecture โดยไม่จำเป็น
+
+โดยเฉพาะ:
+
+* API framework ใหม่
+* API gateway ใหม่
+* REST framework ใหม่
+* RPC framework ใหม่
+* GraphQL layer ใหม่
+* microservice layer ใหม่
+
+ห้ามเปลี่ยน architecture จาก:
+
+```text
+Existing API + Edge
+```
+
+ไปเป็น:
+
+```text
+หลาย API
+หลาย service
+หลาย gateway
+หลาย backend
+```
+
+เพียงเพราะต้องการทำ feature ใหม่
+
+---
+
+# 7. FULL CODEBASE AUDIT
+
+ก่อน implementation รอบนี้ต้องตรวจทั้ง repository:
+
+```text
+src/
+api/
+server/
+supabase/
+scripts/
+docs/
+database/
+migrations/
+services/
+contexts/
+hooks/
+components/
+pages/
+routes/
+prompts/
+tests/
+e2e/
+deployment/
+configuration/
+```
+
+Repository ปัจจุบันมีทั้ง `api`, `server`, `src`, `supabase`, `scripts` และเอกสารจำนวนมากอยู่แล้ว ดังนั้นต้องตรวจของเดิมก่อนสร้างของใหม่
+
+---
+
+# 8. ห้ามสร้างของซ้ำ
+
+ก่อนสร้าง:
+
+* component
+* service
+* API
+* Edge Function
+* context
+* hook
+* database table
+* prompt
+* route
+
+ต้องค้นหาของเดิมก่อน
+
+ถ้ามี:
+
+```text
+Existing
+↓
+Audit
+↓
+Repair
+↓
+Integrate
+↓
+Complete
+```
+
+ไม่ใช่:
+
+```text
+Existing
+↓
+สร้าง V2
+↓
+สร้าง V3
+↓
+สร้าง V4
+```
+
+---
+
+# 9. STATUS DEFINITIONS
+
+ใช้เพียง 5 สถานะ:
+
+### DONE
+
+ทำงานจริงครบ End-to-End และผ่าน verification
+
+### PARTIAL
+
+มี implementation แต่ยังขาด functionality หรือ integration
+
+### MISSING
+
+ยังไม่มี implementation
+
+### BROKEN
+
+มี implementation แต่ทำงานผิด
+
+### BLOCKED
+
+มี dependency ภายนอกที่ยังไม่พร้อม
+
+**ห้ามใช้คำว่า COMPLETE หากเป็น PARTIAL**
+
+---
+
+# 10. CORE AWAKENING — COMPLETE 100%
+
+ต้องปิดทั้งหมด:
+
+```text
+Final Self Print Analysis
+↓
+Readiness
+↓
+Awakening Ceremony
+↓
+Visual Birth
+↓
+Twin Initialization
+↓
+Naming
+↓
+SICE Initialization
+↓
+Twin Profile Persistence
+↓
+Memory Initialization
+↓
+Evolution Stage
+↓
+Database Persistence
+↓
+Analytics
+↓
+Transition
+↓
+Twin Experience
+```
+
+ต้องลบ implementation ที่ยังเป็น TODO / simulated persistence / fake success
+
+โดยเฉพาะ:
+
+* SICE integration
+* Supabase persistence
+* Twin profile creation
+* database updates
+* notification
+
+ต้องทำจริง
+
+---
+
+# 11. 12 SICE — FULL IMPLEMENTATION
+
+ต้องมีครบ 12:
+
+```text
+1. Personal Context Builder
+2. Pattern Detector
+3. Insight Engine
+4. AI Feedback Loop
+5. Twin State Engine
+6. Experience Engine
+7. Environment Engine
+8. Badge Engine
+9. Behavioral Forecast Engine
+10. Future Self Engine
+11. Memory Manager
+12. Decision Intelligence Engine
+```
+
+Codex กำหนด 12 engines นี้ไว้เป็น intelligence architecture หลัก
+
+---
+
+# 12. 12 SICE ORCHESTRATION — ห้ามทำแค่ Selector
+
+ต้องไม่ใช้วิธี:
+
+```text
+weights
+↓
+keyword
+↓
+Top 5
+↓
+return result
+```
+
+แล้วถือว่า 12 SICE ทำงาน
+
+ต้องเป็น:
+
+```text
+User Input
+↓
+Context Preparation
+↓
+12 SICE Processing
+↓
+Engine Outputs
+↓
+Cross-Engine Synthesis
+↓
+Conflict Resolution
+↓
+Feedback Calibration
+↓
+Personal Intelligence
+↓
+Persistence
+```
+
+แต่ละ engine ต้องมี:
+
+* input
+* processing
+* output
+* orchestration
+* error handling
+* persistence ที่จำเป็น
+* test
+
+---
+
+# 13. 12 SICE ต้องทำงานผ่าน Existing API + Edge
+
+ไม่สร้าง API ต่อ engine
+
+ให้:
+
+```text
+Existing API
+↓
+Edge Function
+↓
+SICE Orchestrator
+↓
+12 Engines
+↓
+Synthesis
+```
+
+นี่คือ architecture ที่ต้องรักษา
+
+---
+
+# 14. TWIN — COMPLETE
+
+ต้องตรวจ:
+
+* Twin creation
+* Twin identity
+* Twin profile
+* Twin memory
+* Twin state
+* Twin evolution
+* Twin settings
+* Twin chat
+* Twin persistence
+* Twin AI
+* Twin feedback
+* Twin learning
+
+Nova/Self Print และ Twin ต้องแยก entity ตาม Codex และ repository ระบุ Nova เป็น AI Guide ส่วน Twin เกิดหลัง Core Awakening
+
+---
+
+# 15. TWIN EVOLUTION — 5 STAGES
+
+ต้องครบ:
+
+```text
+Seed
+↓
+Awakening
+↓
+Growing
+↓
+Advanced
+↓
+Complete
+```
+
+และต้องมี:
+
+* progression
+* unlock condition
+* persistence
+* database synchronization
+* UI
+* animation
+* user activity influence
+* decision influence
+* SICE influence
+* tests
+
+---
+
+# 16. 12 INTELLIGENCE WORLDS
+
+ต้องครบ:
+
+```text
+SELF
+MIND
+RELATIONSHIP
+LOVE
+CAREER
+WEALTH
+LIFE
+GROWTH
+DECISION
+PURPOSE
+WELLBEING
+FUTURE
+```
+
+Codex กำหนด 12 Worlds เป็น intelligence environments และกำหนด expertise ของแต่ละ World
+
+ต้องตรวจทุก World:
+
+* route
+* UI
+* context
+* expertise
+* prompt
+* SICE
+* memory
+* insight
+* learning
+* persistence
+* mobile
+* tests
+
+---
+
+# 17. TWIN + WORLD INTEGRATION
+
+ต้องทำให้:
+
+```text
+Same Twin
++
+Different World
+=
+Different Expertise Context
+```
+
+ตัวอย่าง:
+
+```text
+SELF
+→ Identity Expert
+
+CAREER
+→ Career Strategist
+
+WEALTH
+→ Wealth Intelligence
+
+DECISION
+→ Decision Strategist
+
+FUTURE
+→ Future Strategist
+```
+
+Twin identity ต้องคงเดิม
+
+สิ่งที่เปลี่ยน:
+
+* context
+* expertise
+* prompt
+* intelligence
+* recommendations
+
+---
+
+# 18. WORLD-AWARE AI
+
+ทุกครั้งที่ Twin สนทนาใน World ต้องรู้:
+
+```text
+Current World
+World Expertise
+User Context
+Relevant Memory
+Relevant Decisions
+SICE Outputs
+```
+
+ห้ามมีเพียง UI เปลี่ยนชื่อ World แต่ AI ยังตอบด้วย prompt เดิม
+
+---
+
+# 19. DECISION TRACKING — FULL LOOP
+
+ต้องครบ:
+
+```text
+Decision
+↓
+Initial Confidence
+↓
+Expected Outcome
+↓
+30 Days
+↓
+90 Days
+↓
+180 Days
+↓
+365 Days
+↓
+Actual Outcome
+↓
+Outcome Score
+↓
+Prediction Accuracy
+↓
+Pattern Detection
+↓
+Decision Intelligence
+↓
+Future Recommendation
+```
+
+Codex ระบุ Decision Tracking เป็น USP และต้องติดตาม 30/90/180/365 พร้อมเรียนรู้จากผลลัพธ์
+
+---
+
+# 20. DECISION AUTOMATION
+
+ต้องตรวจให้ครบ:
+
+* scheduling
+* persistence
+* due date
+* pending state
+* completed state
+* notification
+* reflection
+* outcome
+* score
+* learning
+* recommendation
+
+ห้ามมีเพียง `DecisionLogger`
+
+---
+
+# 21. DECISION INTELLIGENCE
+
+ข้อมูลจาก Decision Tracking ต้องกลับเข้าสู่ intelligence system:
+
+```text
+Decision History
+↓
+Pattern
+↓
+SICE
+↓
+Personal Model
+↓
+Recommendation
+```
+
+ระบบต้องสามารถใช้ประวัติการตัดสินใจเพื่อปรับคำแนะนำในอนาคต
+
+---
+
+# 22. MEMORY SYSTEM
+
+ต้องตรวจ:
+
+* memory creation
+* memory retrieval
+* relevance
+* persistence
+* privacy
+* user isolation
+* Twin access
+* World context
+* Decision context
+* feedback updates
+
+ห้ามใช้ memory จำลองใน production
+
+---
+
+# 23. FEEDBACK LOOP
+
+ต้องรองรับ:
+
+```text
+AI Output
+↓
+User Feedback
+↓
+Feedback Storage
+↓
+Model Adjustment
+↓
+Future Output Improvement
+```
+
+ห้ามมีเพียงปุ่ม feedback ที่บันทึกข้อมูลแต่ไม่มีผลต่อ intelligence
+
+---
+
+# 24. PERSONAL INTELLIGENCE
+
+ต้องพิสูจน์ว่า output ไม่ใช่ generic AI response
+
+ต้องใช้:
+
+```text
+User Context
++
+Memory
++
+Patterns
++
+Decision History
++
+Feedback
++
+SICE
++
+World
++
+Twin State
+```
+
+เพื่อสร้าง Personal Intelligence
+
+---
+
+# 25. CONTENT HUB
+
+ต้องทำให้ครบตาม Codex:
+
+* Content Hub
+* Blog
+* Article detail
+* categories
+* SEO
+* metadata
+* structured content
+* responsive
+* production content
+* 36 articles
+
+Codex ระบุ 36 articles เป็น SEO foundation
+
+---
+
+# 26. SOCIAL PROOF
+
+ต้องมี production-ready:
+
+* testimonials
+* case studies
+* trust signals
+* landing integration
+
+ห้ามใช้ placeholder เป็น production content
+
+---
+
+# 27. MONETIZATION
+
+ตรวจ End-to-End:
+
+```text
+Pricing
+↓
+Plan
+↓
+Checkout
+↓
+Payment
+↓
+Webhook
+↓
+Subscription
+↓
+Entitlement
+↓
+Feature Access
+↓
+Renewal
+↓
+Cancellation
+```
+
+ต้องทดสอบ success และ failure paths
+
+---
+
+# 28. PRIVACY + SECURITY
+
+ต้องตรวจ:
+
+* Auth
+* Authorization
+* RLS
+* user isolation
+* API protection
+* Edge authorization
+* secret protection
+* storage permissions
+* session handling
+* data deletion
+* privacy controls
+* sensitive data exposure
+
+---
+
+# 29. DATABASE
+
+ทุก feature ต้องตรวจ:
+
+```text
+UI
+↔
+Service
+↔
+Edge/API
+↔
+Database
+```
+
+ห้ามมี:
+
+* UI state อย่างเดียว
+* localStorage อย่างเดียว
+* fake persistence
+* mock database
+* simulated success
+
+หาก feature ต้อง persist ข้อมูล ต้อง persist จริง
+
+---
+
+# 30. ERROR HANDLING
+
+ทุก production operation ต้องมี:
+
+* loading
+* success
+* empty
+* error
+* retry
+* timeout
+* unauthorized
+* expired session
+* network failure
+* database failure
+* AI failure
+
+ห้าม silently fail
+
+---
+
+# 31. MOBILE + DESKTOP
+
+ตรวจทุก core flow:
+
+```text
+Landing
+Onboarding
+Self Print
+Analysis
+Awakening
+Twin
+Worlds
+Decision
+Activities
+Profile
+Pricing
+Privacy
+```
+
+ต้องใช้งานได้จริงบน mobile และ desktop
+
+---
+
+# 32. TESTING
+
+ต้องมี:
+
+* Unit
+* Integration
+* E2E
+* API/Edge tests
+* Database tests
+* Critical flow regression
+
+Codex กำหนด coverage >80% และ Production Ready ต้องผ่าน TypeScript, lint, build, Lighthouse และ deployment criteria
+
+---
+
+# 33. PRODUCTION QUALITY GATE
+
+ก่อนประกาศ 100% ต้องผ่าน:
+
+```text
+TypeScript
+✓
+
+Lint
+✓
+
+Unit Tests
+✓
+
+Integration Tests
+✓
+
+E2E
+✓
+
+Database
+✓
+
+API
+✓
+
+Edge Functions
+✓
+
+Security
+✓
+
+Mobile
+✓
+
+Desktop
+✓
+
+Performance
+✓
+
+Production Build
+✓
+
+Deployment
+✓
+```
+
+และ:
+
+* TypeScript errors = 0
+* lint errors = 0
+* tests pass
+* coverage >80%
+* Lighthouse >90
+* production build pass
+* monitoring active
+
+---
+
+# 34. TODO / STUB / MOCK AUDIT
+
+ต้องค้นหาทั้ง repository:
+
+```text
+TODO
+FIXME
+placeholder
+mock
+fake
+temporary
+stub
+simulation
+console.log
+hard-coded
+return null
+return []
+return true
+not implemented
+```
+
+ทุกจุดต้อง classify:
+
+```text
+VALID
+DEVELOPMENT ONLY
+PRODUCTION BUG
+MISSING IMPLEMENTATION
+```
+
+Production-related item ต้องถูกปิดทั้งหมด
+
+---
+
+# 35. DOCUMENTATION GOVERNANCE
+
+ห้ามมีเอกสารหลายฉบับประกาศสถานะ 100% คนละความหมาย
+
+โดยเฉพาะ:
+
+`P0_STATUS.md`
+
+ต้องแยกให้ชัดว่า:
+
+```text
+P0 CLEANUP STATUS
+≠
+P0 PRODUCT IMPLEMENTATION STATUS
+≠
+PROJECT 100% STATUS
+```
+
+การที่ cleanup 49/49 เสร็จ **ไม่ถือว่า Product 100%**
+
+---
+
+# 36. MASTER GAP MATRIX
+
+AI Dev ต้อง maintain ตารางเดียว:
+
+| Module         | UI | Logic | API | Edge | DB | AI | Tests | E2E | Status |
+| -------------- | -- | ----- | --- | ---- | -- | -- | ----- | --- | ------ |
+| Self Print     |    |       |     |      |    |    |       |     |        |
+| Core Awakening |    |       |     |      |    |    |       |     |        |
+| Twin           |    |       |     |      |    |    |       |     |        |
+| Evolution      |    |       |     |      |    |    |       |     |        |
+| SICE 1–12      |    |       |     |      |    |    |       |     |        |
+| Decision       |    |       |     |      |    |    |       |     |        |
+| Worlds 1–12    |    |       |     |      |    |    |       |     |        |
+| Memory         |    |       |     |      |    |    |       |     |        |
+| Feedback       |    |       |     |      |    |    |       |     |        |
+| Content        |    |       |     |      |    |    |       |     |        |
+| Social Proof   |    |       |     |      |    |    |       |     |        |
+| Monetization   |    |       |     |      |    |    |       |     |        |
+| Privacy        |    |       |     |      |    |    |       |     |        |
+| Production QA  |    |       |     |      |    |    |       |     |        |
+
+---
+
+# 37. API MASTER INVENTORY
+
+ต้องจัดทำรายการ API ปัจจุบันทั้งหมดก่อนแก้ไข
+
+สำหรับแต่ละ API ระบุ:
+
+```text
+API NAME
+PATH
+PURPOSE
+CALLERS
+EDGE FUNCTION
+DATABASE
+AUTH
+STATUS
+```
+
+แล้วล็อกจำนวน API ตาม architecture
+
+### กฎ:
+
+> **ห้ามเพิ่ม API เพียงเพื่อให้ feature หนึ่งทำงาน**
+
+ให้ใช้:
+
+```text
+Existing API
++
+Existing Service
++
+Edge Function
++
+Shared Logic
+```
+
+ก่อนเสมอ
+
+---
+
+# 38. EDGE MASTER INVENTORY
+
+ต้องจัดทำรายการ Edge Functions ทั้งหมด:
+
+```text
+Function
+Purpose
+Inputs
+Outputs
+Called By
+SICE
+Database
+Auth
+Status
+```
+
+แล้วจัด orchestration ให้เหมาะสม
+
+ห้ามสร้าง Edge Function ซ้ำซ้อนสำหรับ business logic เดียวกัน
+
+---
+
+# 39. FINAL IMPLEMENTATION ORDER
+
+ให้ดำเนินการตาม dependency ไม่ใช่ตามความง่าย:
+
+### PHASE A — Architecture Lock
+
+1. Audit API
+2. Audit Edge
+3. Audit DB
+4. Audit services
+5. Freeze architecture
+
+### PHASE B — Intelligence Core
+
+6. 12 SICE
+7. SICE Orchestrator
+8. Cross-SICE Synthesis
+9. Memory
+10. Feedback
+11. Personal Intelligence
+
+### PHASE C — Twin
+
+12. Core Awakening
+13. Twin initialization
+14. Twin persistence
+15. Evolution
+16. Twin Intelligence
+
+### PHASE D — Worlds
+
+17. 12 Worlds
+18. World context
+19. World expertise
+20. World prompts
+21. Twin ↔ World integration
+
+### PHASE E — Decision Intelligence
+
+22. Decision
+23. Follow-ups
+24. Automation
+25. Outcomes
+26. Learning
+27. Recommendation
+
+### PHASE F — Product Completion
+
+28. Content Hub
+29. 36 articles
+30. Social Proof
+31. Monetization
+32. Privacy
+
+### PHASE G — Production
+
+33. Security
+34. Testing
+35. E2E
+36. Performance
+37. Deployment
+38. Final regression
+
+---
+
+# 40. IMPORTANT — ห้ามทำงานแบบ "หัวข้อละนิด"
+
+จากนี้ห้าม:
+
+```text
+SICE 10%
+Decision 10%
+World 10%
+Twin 10%
+```
+
+แล้วเรียกว่า progress
+
+ให้ทำ:
+
+```text
+MODULE
+↓
+IMPLEMENT
+↓
+INTEGRATE
+↓
+TEST
+↓
+VERIFY
+↓
+DONE
+↓
+NEXT MODULE
+```
+
+---
+
+# 41. MODULE DONE RULE
+
+Module ใดจะขึ้น `DONE` ได้ ต้องผ่าน:
+
+```text
+Frontend
+✓
+Backend/Edge
+✓
+Database
+✓
+AI Logic
+✓
+Persistence
+✓
+Security
+✓
+Error Handling
+✓
+Responsive
+✓
+Unit Test
+✓
+Integration Test
+✓
+E2E
+✓
+Production Verification
+✓
+```
+
+ถ้าขาดแม้แต่หนึ่ง:
+
+> `PARTIAL`
+
+---
+
+# 42. FINAL REPORT FORMAT
+
+ทุกครั้งที่ส่งงานต้องรายงาน:
+
+```text
+MODULE:
+STATUS:
+
+IMPLEMENTED:
+- ...
+
+FILES CHANGED:
+- ...
+
+API USED:
+- ...
+
+API ADDED:
+- NONE / รายการ
+
+EDGE USED:
+- ...
+
+DATABASE:
+- ...
+
+SICE:
+- ...
+
+TESTS:
+- ...
+
+E2E:
+- ...
+
+VERIFICATION:
+- ...
+
+REMAINING:
+- ...
+```
+
+ถ้า `REMAINING` ไม่ใช่ `NONE`
+
+ห้ามเขียน:
+
+> COMPLETE
+
+---
+
+# 43. FINAL ACCEPTANCE
+
+SELFPRINT V3 จะถือว่า:
+
+# 🟢 100% COMPLETE
+
+ต่อเมื่อทุกข้อผ่าน:
+
+### Product
+
+* [ ] Self Print/Nova complete
+* [ ] Core Awakening complete
+* [ ] AI Twin complete
+* [ ] Twin Evolution complete
+* [ ] 12 SICE complete
+* [ ] SICE orchestration complete
+* [ ] Personal Intelligence complete
+* [ ] Memory complete
+* [ ] Feedback Loop complete
+* [ ] Decision Tracking complete
+* [ ] 30/90/180/365 complete
+* [ ] Decision Intelligence complete
+* [ ] 12 Worlds complete
+* [ ] Twin ↔ World complete
+* [ ] Content Hub complete
+* [ ] 36 articles complete
+* [ ] Social Proof complete
+* [ ] Monetization complete
+* [ ] Privacy complete
+
+### Architecture
+
+* [ ] Existing API architecture preserved
+* [ ] API count remains within locked limit
+* [ ] No unnecessary API package added
+* [ ] Edge architecture used for intelligence orchestration
+* [ ] No duplicate service
+* [ ] No duplicate endpoint
+* [ ] No duplicate business logic
+
+### Engineering
+
+* [ ] No critical TODO
+* [ ] No production stub
+* [ ] No production mock
+* [ ] No fake persistence
+* [ ] No broken route
+* [ ] No broken API
+* [ ] No broken Edge Function
+* [ ] No broken database operation
+* [ ] Zero TypeScript errors
+* [ ] Zero lint errors
+* [ ] Tests pass
+* [ ] Coverage >80%
+* [ ] E2E pass
+* [ ] Security verified
+* [ ] Mobile verified
+* [ ] Desktop verified
+* [ ] Lighthouse >90
+* [ ] Production build pass
+* [ ] Deployment verified
+* [ ] Monitoring verified
+
+---
+
+# 44. FINAL COMMAND TO AI DEVELOPMENT TEAM
+
+**DO NOT JUST ADD MORE CODE.**
+
+**DO NOT CREATE MORE API TO SOLVE EVERY PROBLEM.**
+
+**DO NOT CREATE DUPLICATE SERVICES.**
+
+**DO NOT MARK PARTIAL WORK AS COMPLETE.**
+
+**DO NOT USE UI EXISTENCE AS PROOF OF IMPLEMENTATION.**
+
+**DO NOT USE FILE COUNT AS PROOF OF COMPLETION.**
+
+**DO NOT USE CLEANUP STATUS AS PRODUCT COMPLETION.**
+
+ให้ใช้หลัก:
+
+```text
+AUDIT
+↓
+REUSE
+↓
+INTEGRATE
+↓
+IMPLEMENT
+↓
+PERSIST
+↓
+TEST
+↓
+VERIFY
+↓
+DONE
+```
+
+และโดยเฉพาะ:
+
+```text
+12 SICE
+≠
+12 APIs
+```
+
+ให้ใช้:
+
+```text
+Existing API
+↓
+Edge
+↓
+SICE Orchestrator
+↓
+12 Intelligence Engines
+↓
+Cross-SICE Synthesis
+↓
+Personal Intelligence
+```
+
+**API architecture เป็นข้อจำกัดที่ล็อกไว้แล้ว ห้ามขยายเพราะความสะดวกของ Developer**
+
+---
+
+# FINAL OBJECTIVE
+
+เป้าหมายเดียวของรอบนี้คือ:
+
+# SELFPRINT V3
+
+# FULL SYSTEM
+
+# 100% END-TO-END
+
+# PRODUCTION READY
+
+ไม่ใช่:
+
+> "มี foundation แล้ว"
+
+ไม่ใช่:
+
+> "UI พร้อมแล้ว"
+
+ไม่ใช่:
+
+> "เหลือแค่ minor fixes"
+
+และไม่ใช่:
+
+> "P0 cleanup 100%"
+
+แต่ต้องเป็น:
+
+> **ทุก requirement ตาม Codex ทำงานจริง เชื่อมกันจริง เก็บข้อมูลจริง ผ่านการทดสอบจริง และพร้อมใช้งาน Production จริง**
+
+**ONE CODEBASE.
+ONE SOURCE OF TRUTH.
+ONE API ARCHITECTURE.
+EDGE-ORCHESTRATED INTELLIGENCE.
+ONE MASTER GAP MATRIX.
+ONE DEFINITION OF DONE.
+100% COMPLETION.**

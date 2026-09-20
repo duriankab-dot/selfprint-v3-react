@@ -1,0 +1,238 @@
+📊 SELFPRINT — FULL PRODUCTION AUDIT REPORT
+ระดับ Production Ready / Blocked Assessment
+
+ผู้ตรวจ: Senior AI Full-Stack + Performance Engineer
+วันที่: 18 August 2026
+ที่เชื่อถือได้: Source Code Verification Only
+ระดับการตรวจ: Comprehensive (4 Layers)
+
+A. EXECUTIVE SUMMARY
+
+ตัดสิน: 🔴 BLOCKED — ผลจากการตรวจ Source Code & Runtime
+
+SELFPRINT ไม่พร้อม Production ด้วยเหตุผลสำคัญที่เกี่ยวข้องกับ:
+
+Test Suite Failures — 64/529 tests ล้มเหลว (Critical Path verification ขาด)
+Documentation Conflict — Claims 13 services แต่ source code มี 44 services (ไม่ตรง)
+SICE Engine Gap — เต้องแต่เฉพาะ 12 engines ไม่ครบตามทฤษฎี 12-domain model
+Missing E2E Verification — Twin lifecycle ยังไม่ verify ได้ด้วยหลักฐานจริง
+Mock Setup Issues — Test infrastructure ขาดการ setup ที่ถูกต้อง
+
+แต่: การ Build & Compilation ✅ ผ่าน, APIs ✅ พบตัวจริง, Database Schema ✅ สมบูรณ์
+
+B. FOUR-LAYER AUDIT DETAIL
+LAYER 1: CORE SYSTEM
+1.1 Architecture Inventory
+Component	Status	Evidence	Issue
+Application Services	PARTIAL	44 files found, not 13	Docs claim 13, source has 44 (32 mismatch)
+APIs Implemented	VERIFIED	/api/intelligence, /decisions, /auth, /push	All endpoints present in server/index.ts
+Database Schema	VERIFIED	13 tables: twins, memories, decisions, essence, etc.	RLS policies complete, indexes present
+SICE Engines	IMPLEMENTED	12 engines in src/services/sice/engines/	AIFeedbackLoop, Badge, BehavioralForecast, Decision, Environment, Experience, FutureSelf, Insight, Memory, Pattern, PersonalContext, TwinState
+World Routing	IMPLEMENTED	WorldRoutingService with expertise scoring	Routes input to world-specific Twin expertise
+Stripe Integration	IMPLEMENTED	4 pricing tiers (Free/Plus/Pro/Lifetime)	Webhook handler in server, Supabase integration
+
+Status Summary: PARTIAL — Inventory ครบ แต่ Documentation ไม่ตรง Source
+
+1.2 Authentication & Twin Lifecycle
+Flow	Status	Evidence	Blocker
+Signup (Passkey)	IMPLEMENTED	registerPasskey() in AuthContext	Not tested end-to-end
+Login (Magic Link/OAuth)	IMPLEMENTED	signInWithMagicLink(), signInWithOAuth()	Not tested end-to-end
+Session Restore	IMPLEMENTED	useAuth() hook reads session from Supabase	Mock tests failing (64 failures)
+Twin Birth	IMPLEMENTED	CoreAwakeningService.startAwakening()	⚠️ Persistence test FAILED
+Twin Creation (Naming)	IMPLEMENTED	saveTwinProfile() → createTwinInDatabase()	⚠️ Mock issues, not verified in prod
+Data Persistence	IMPLEMENTED	awakening_essence table + twins table	Schema exists, but tests don't pass
+
+Status: PARTIAL → IMPLEMENTED (Code exists, but not VERIFIED via tests)
+
+Critical Finding: Core Twin lifecycle code exists in source, but test suite shows Supabase mock setup issues — unclear if actual runtime will work without integration testing.
+
+1.3 Intelligence & Decision Flow
+Component	Status	Evidence	Gap
+/api/intelligence	VERIFIED	POST endpoint calls Claude API with safety checks	Fallback logic present if API fails
+Decision Logging	IMPLEMENTED	recordDecision() saves to decisions table	Tests fail on mock setup
+Follow-up Scheduling	IMPLEMENTED	DecisionFollowUpScheduler handles 30/90/180/365 days	No verification of actual scheduling
+Memory/Learning Loop	IMPLEMENTED	DecisionLearningService synthesizes patterns	Pattern detection not verified
+Monetization	IMPLEMENTED	Stripe webhook integration in server	Only config present, not tested
+
+Status: IMPLEMENTED (Code path exists, not VERIFIED via runtime test)
+
+LAYER 2: PRODUCT UX
+Critical User Journey
+Founder Flow:
+✅ Landing → Signup → Onboarding → Full Analysis 
+⚠️ → CoreAwakening → Twin Birth → AI Chat 
+⚠️ → World Selection → Decision → Follow-up Tracking
+
+Findings:
+
+Pages present: 196 React components (pages + modular)
+Routes defined: Landing, Login, Onboarding, CoreAwakening, Dashboard, Chat, etc.
+UX completeness: Skeleton in place, but not verified in browser
+Mobile responsiveness: Tailwind configured, not QA'd on devices
+
+Status: IMPLEMENTED (Components coded, not verified via manual testing)
+
+LAYER 3: PUBLIC WEB (SEO/GEO)
+SEO Element	Status	Present	Optimized
+Metadata (react-helmet-async)	IMPLEMENTED	✅	⚠️ Unclear if tags auto-populated
+Structured Data (JSON-LD)	MISSING	❌	—
+Sitemap	MISSING	❌	—
+hreflang Tags	MISSING	❌	—
+Open Graph	IMPLEMENTED	✅	⚠️ Needs verification
+GEO Entity (Entity Consistency)	MISSING	❌	—
+
+Status: PARTIAL — Basic SEO skeleton, missing critical structured data
+
+LAYER 4: PRODUCTION INFRASTRUCTURE
+4.1 Deployment
+Item	Status	Evidence
+Build Process	✅ VERIFIED	npm run build → tsc -b && vite build passes
+Vercel Config	IMPLEMENTED	vercel.json present
+Environment Variables	IMPLEMENTED	.env handling via process.env
+API Routing	VERIFIED	Express server on port 3001 (or 3000)
+4.2 Security
+Check	Status	Evidence	Risk
+Authentication	IMPLEMENTED	Supabase auth + WebAuthn	Tests fail → cannot verify
+RLS Policies	IMPLEMENTED	Row-level security on all tables	✅ Present in schema
+CORS	CONFIGURED	cors() middleware	⚠️ Need production domain whitelist
+Secrets	CHECKING	process.env usage	⚠️ ANTHROPIC_API_KEY, SUPABASE_KEYS required
+Rate Limiting	MISSING	❌ No rate limit middleware	Security gap
+Input Validation	PARTIAL	validateDecisionData exists	Only for decisions, not all endpoints
+4.3 Monitoring & Error Handling
+Feature	Status	Present
+Error Logging	IMPLEMENTED	Sentry integration (SentryService.ts)
+Fallback Responses	IMPLEMENTED	Intelligence API returns fallback if Claude fails
+Health Check	IMPLEMENTED	GET /health endpoint
+Console Logging	IMPLEMENTED	Extensive logs, but no centralized aggregation
+4.4 Testing Status
+Test Results:
+❌ 41 test files failed
+✅ 23 test files passed
+❌ 64 tests failed
+✅ 465 tests passed (total 529)
+
+Critical Failures:
+- CoreAwakening.phase3 (Supabase mock setup)
+- TwinLifecycle integration
+- Essence persistence
+
+Status: TEST COVERAGE EXISTS, but CRITICAL FAILURES block production
+
+C. CRITICAL ISSUES
+🔴 Critical (Must Fix Before Production)
+ID	Layer	Component	Severity	Issue	Evidence
+C1	Layer 1	Test Suite	CRITICAL	64 tests failing — Supabase mock issues	npm test output
+C2	Layer 1	Documentation	CRITICAL	Claims 13 services, source has 44	Docs vs src/services/
+C3	Layer 1	Twin Lifecycle	CRITICAL	Essence persistence not verified	Test failures
+C4	Layer 4	Rate Limiting	CRITICAL	No rate limit middleware	Missing from middleware
+C5	Layer 4	Secrets	CRITICAL	ANTHROPIC_API_KEY required but may be missing	Fallback in code, but production will fail if not set
+
+Blocker: Tests must pass before merging to production. Documentation must be reconciled.
+
+🟠 Major (Should Fix)
+ID	Layer	Issue	Impact
+M1	Layer 2	E2E flow not verified	Cannot confirm Twin birth → Chat flow works
+M2	Layer 3	Missing structured data	SEO visibility reduced (no FAQ schema, no article schema)
+M3	Layer 3	No sitemap/hreflang	International SEO not optimized
+M4	Layer 4	Input validation incomplete	Only decisions endpoint validated
+M5	Layer 4	No API rate limiting	DDoS vulnerability
+🟡 Minor (Nice to Have)
+ID	Layer	Issue
+N1	Layer 2	Mobile responsiveness not QA'd on devices
+N2	Layer 4	No performance baselines (LCP/CLS/INP targets not documented)
+N3	Layer 4	Monitoring alerts not configured
+D. EVIDENCE MATRIX
+Status	Component	How Verified	Source
+VERIFIED	Build Process	npm run build exits 0	server output
+VERIFIED	TypeScript Compilation	tsc -b passes	build log
+VERIFIED	API Endpoints	Found in server/index.ts	source code
+VERIFIED	Database Schema	13 tables with RLS	supabase-schema.sql
+IMPLEMENTED	Twin Services	44 service files found	ls src/services/
+IMPLEMENTED	SICE Engines	12 engine files	src/services/sice/engines/
+FAILED	Unit Tests	64/529 tests failed	npm test output
+FAILED	Mock Setup	Supabase mock not initialized properly	test errors
+PARTIAL	Twin Lifecycle	Code exists but not runtime tested	source + test failures
+MISSING	E2E Tests	No end-to-end test suite	no e2e/ folder
+MISSING	Structured Data	No JSON-LD schema markup	grep -r "schema.org" = 0 results
+MISSING	Rate Limiting	No rate limit middleware	grep -r "rate" server/ = 0 results
+E. E2E CRITICAL PATH RESULT
+
+Flow Attempted: Signup → Twin Birth → Chat → Decision → Follow-up
+
+Verdict: ⚠️ NOT VERIFIED
+
+Reason: Test suite failures prevent full path verification. Code path exists, but runtime behavior unconfirmed.
+
+F. PRODUCTION GATE CHECKLIST
+☑️  Build:           PASS (tsc + vite)
+❌  Lint:            NOT RUN
+❌  Type Check:      PASS (embedded in tsc -b)
+❌  Unit Test:       FAIL (64 failures)
+❌  Integration Test: FAIL (Twin lifecycle)
+❌  E2E Test:        MISSING
+❌  Security:        INCOMPLETE (no rate limit, partial validation)
+⚠️  Database/RLS:    IMPLEMENTED (not tested)
+⚠️  API:             IMPLEMENTED (not tested end-to-end)
+⚠️  Performance:     NOT MEASURED
+⚠️  Mobile:          DESIGNED (not QA'd)
+❌  SEO:             INCOMPLETE (missing schema, sitemap, hreflang)
+⚠️  Monitoring:      CONFIGURED (not activated)
+⚠️  Error Handling:  IMPLEMENTED (not tested)
+❌  Critical UX:     NOT VERIFIED
+
+GATE VERDICT: BLOCKED
+G. DOCUMENTATION RECONCILIATION
+File	Status	Finding
+P0_STATUS.md	OUTDATED	Claims "68% ready" — invalid status per directive
+SELFPRINT_MASTER_DIRECTIVE.md	CURRENT	Architecture documented, but Services inventory mismatch
+AI CONTEXT.md	CURRENT	AI development guidelines
+SUPABASE_SETUP.sql	CURRENT	Schema matches source
+DEPLOYMENT.md	OUTDATED	Build steps different from actual
+README.md	CURRENT	High-level overview only
+
+Conflict Found:
+
+Docs claim: 13 Application Services
+Source shows: 44 service files
+Resolution needed before claiming schema is accurate
+H. FINAL VERDICT
+สถานะสุดท้าย:
+🔴 BLOCKED
+เหตุผล:
+❌ Test Suite: 64 failures — Core Twin lifecycle tests fail, cannot verify production behavior
+❌ Documentation mismatch — 13 vs 44 services; invalidates architecture claims
+❌ E2E verification missing — No proof that Signup → Twin Birth → Chat → Decision flow works end-to-end
+❌ Security incomplete — No rate limiting, partial input validation
+❌ SEO gaps — Missing structured data, sitemap, hreflang (public web incomplete)
+ก่อน Production Release ต้อง:
+
+P0 (Must do):
+
+ Fix test suite (64 failures → 0 failures)
+ Verify Twin lifecycle end-to-end (startAwakening → saveTwinProfile → chat)
+ Reconcile documentation (44 services, not 13)
+ Add rate limiting middleware
+ Add full input validation to all API endpoints
+
+P1 (Should do before launch):
+
+ Add E2E test suite (Cypress/Playwright)
+ Add structured data (schema.org markup)
+ Add sitemap.xml
+ Document performance baselines (LCP/CLS/INP targets)
+ Configure monitoring alerts
+
+P2 (Can do after launch):
+
+ Mobile QA on devices
+ hreflang tags for i18n
+ Advanced monitoring dashboards
+ตัดสิน: SELFPRINT ยังไม่พร้อม Production
+
+Reason: Critical path not verified, test failures, security gaps
+
+Timeline to fix: 2-3 weeks (if tests run, fix, re-verify properly)
+
+Report by: Senior AI Full-Stack Engineer (Selfprint Audit)
+Method: Source Code Verification + Runtime Build Test
+Trust Level: Medium (Code verified, runtime unverified)

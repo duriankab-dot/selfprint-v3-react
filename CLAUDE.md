@@ -7,9 +7,11 @@
 | ไฟล์ | ใช้ทำอะไร |
 |------|----------|
 | `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` | สถานะจริงปัจจุบันของโปรเจกต์ · อะไรแก้แล้ว อะไรยังเปิดอยู่ |
-| `docs/PLAN_TRACKS_TH.md` | แผนงาน Track A (บั๊ก) / B (Phase 0 forensic) / C (visual redesign) + กฎที่ยังใช้กับงานใหม่ |
-| `docs/PHASE0_VISUAL_PERF_FORENSIC_TH.md` | รายงาน Phase 0 (ปิดแล้ว) — เก็บไว้เป็น reference ตัวเลข baseline |
+| `README.md` / `MASTER_GATE_AS_IS.md` | สถานะปัจจุบัน + 11-skip inventory (18 ก.ย. 2026) |
+| `docs/SELFPRINT_STATUS_HONEST_TH.md` |สถานะ honest (TH) ล่าสุด — 38/0/11 CLOSED |
 | ไฟล์นี้ | context ถาวร: สถาปัตยกรรม, คำสั่ง, เกร็ดที่ต้องรู้ก่อนแตะโค้ด, โซนห้ามแตะ |
+
+**เอกสารก่อน 18 ก.ย. 2026 (Phase plans, PRD, audits) ถูกย้ายเป็น historical ที่ `docs/archive/` — ใช้เมื่อต้องการอ้างอิงอดีตเท่านั้น ไม่ใช่สถานะปัจจุบัน.**
 
 **Current repo state = source of truth เสมอ** — ห้าม cache สมมติฐานจากเอกสาร ต้อง verify จากโค้ดจริงก่อนเชื่อ
 
@@ -30,9 +32,9 @@ Code-first, ecosystem thinking, production-focused. ตอบภาษาไท�
 | Term | Meaning |
 |------|---------|
 | **SELFPRINT** | Personal Intelligence Platform |
-| **SICE** | 12-engine intelligence orchestration (client-side) |
+| **SICE** | 16-engine intelligence orchestration (client-side, `src/services/sice/SICEOrchestrator.ts`) |
 | **CF Pages** | Cloudflare Pages — production runtime |
-| **Track A / B / C** | บั๊กค้าง / Phase 0 forensic / visual redesign (ทั้ง 3 ปิดครบแล้ว — ดู `docs/PLAN_TRACKS_TH.md`) |
+| **Track A / B / C** | บั๊กค้าง / Phase 0 forensic / visual redesign (ทั้ง 3 ปิดครบแล้ว — อ้างอิงประวัติที่ `docs/archive/PHASE_*` / `docs/archive/PLAN_TRACKS_TH.md`) |
 | **P0 / P1 / P2** | Priority (P0 = drop everything) |
 
 ---

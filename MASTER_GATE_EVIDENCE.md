@@ -54,14 +54,14 @@ Detail rows: MASTER_GATE_AS_IS.md (SKIP INVENTORY table, 11/11 rows with file:li
 
 ## Evidence (historical — verified, dated)
 
-### Evidence 1 — Static gates
+### Evidence 1 — Static gates (historical snapshot; re-verify on HEAD)
 | Command | Result |
 |---|---|
-| `npm run typecheck` | PASS (`tsc -b`) |
-| `npm run typecheck:functions` | PASS |
-| `npm run build` | PASS |
-| `npm run lint` | PASS (oxlint, warnings only) |
-| `npm test` | PASS — 1042/1042 (17 ก.ย. 2026 snapshot; 1050/1050 per README) |
+| `npm run typecheck` | PASS (`tsc -b`) — re-verified 19 ก.ย. 2026 |
+| `npm run typecheck:functions` | **PASS ณ snapshot — re-run 19 ก.ย. 2026 บน HEAD `a13da4a` = FAIL (5 errors)** — unified-handler.ts:245,355 (`supabaseUrl` protected) + `src/lib/supabase/client.ts:52-57` (`import.meta` in CommonJS); ต้องแก้แยกก่อนอ้าง PASS อีก |
+| `npm run build` | PASS — re-verified 19 ก.ย. 2026 |
+| `npm run lint` | PASS (oxlint, warnings only) — re-verified 19 ก.ย. 2026 |
+| `npm test` | PASS — 1050/1050 (69 files; re-verified 19 ก.ย. 2026) |
 
 ### Evidence 2 — Test discovery
 `npx playwright test --list` → 100 tests / 9 files (chromium 27 · chromium-staging 49 · Mobile Chrome 12 · Mobile Safari 12)

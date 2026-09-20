@@ -34,8 +34,19 @@
   "compilerOptions": {
     "target": "es2023",
     "lib": ["ES2023", "DOM"],
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    // RESOLUTION-NEXT-001 (19 ก.ย. 2026): เดิม "module": "nodenext" +
+    // "moduleResolution": "nodenext" ทำให้ functions program เห็น
+    // supabase-js เป็น 2 type-instances (ESM import / CJS require → dual
+    // exports ของ @supabase/supabase-js v2.112.x) → TS2345 ที่
+    // api/unified-handler.ts:245,355 และทำให้ src/lib/supabase/client.ts
+    // (ใช้ import.meta.env สำหรับ Vite) ถูกตีเป็น CJS → TS1470 ทั้งหมด
+    // ทดลองจริงบน tsconfig.exp (--noEmit) แล้วผ่าน 0 errors: module esnext
+    // + moduleResolution bundler + moduleDetection force — ตรงกับความจริงที่
+    // CF Pages Functions build ด้วย esbuild (bundler semantics) และสอดคล้อง
+    // กับ tsconfig.app.json ที่ frontend client.ts (import.meta.env) ผ่านอยู่แล้ว
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
     // TSFN-ENV-001 (8 ก.ย. 2026): PushScheduler.ts / DecisionFollowUpNotifier.ts /
     // NotificationAnalytics.ts (imported transitively via api/unified-handler.ts)
     // import src/lib/supabase/client.ts, which reads `import.meta.env` — not
