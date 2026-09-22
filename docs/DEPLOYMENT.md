@@ -11,7 +11,7 @@
 - Node.js 18+
 - Supabase account (PostgreSQL)
 - GitHub repository access
-- Vercel account (for hosting)
+- Cloudflare account (Pages hosting) — migration จาก Vercel เสร็จสิ้น (ห้ามใช้ Vercel ต่อ)
 
 ---
 
@@ -216,9 +216,15 @@ WHERE twin_id = 'LATEST_TWIN_ID';
 
 ---
 
-## 6. Production Deployment (Vercel)
+## 6. Production & Staging Deployment (Cloudflare Pages)
+
+> **Vercel ถูกถอดออกแล้ว (ก.ย. 2026)** — ห้ามใช้ Vercel ต่อ
 
 ### 6.1 Connect GitHub
+
+> **Node Runtime แยกสองชั้น:** project ใช้ Node 22 (`node-version: '22'` สำหรับ `npm ci/build/test`) · GitHub Actions runtime ของ action target node20 กำลังแก้เป็น node24 native (bump v4→v5/v6/v7) — ไม่ใช่การเปลี่ยน project Node version
+
+## 6.1 Connect GitHub
 
 ```bash
 # Push to GitHub first
@@ -227,16 +233,18 @@ git commit -m "Phase A: Production ready"
 git push origin master
 ```
 
-### 6.2 Deploy to Cloudflare Pages
+ผลลัพธ์ (อัตโนมัติ):
+- **Production** (`https://selfprint.one`): Cloudflare Pages Git integration — auto-deploy บน push (build settings อยู่ที่ Dashboard)
+- **Staging** (`https://selfprint-staging.pages.dev`): deployed อัตโนมัติโดย CI job `deploy-staging`
+  (`.github/workflows/testing.yml`) — build จาก commit เดียวกับ run (env `VITE_SUPABASE_*` จาก secrets)
+  → `npx wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash $GITHUB_SHA`
+  → verify HTTP 200 → E2E staging เริ่มต่อ
+
+### 6.2 Manual CLI (debug fallback เท่านั้น)
 
 ```bash
-# Via Cloudflare Dashboard (recommended)
-# 1. Go to: https://dash.cloudflare.com/to/xxx/pages/projects/selfprint-staging
-# 2. Click "Create deployment" or push to GitHub for auto-deploy
-
-# Via Cloudflare CLI (optional)
-# npm install -g wrangler
-# wrangler pages deploy dist/ --project-name selfprint-staging
+# CI เป็น single source of truth — manual deploy อาจถูกทับด้วย deploy ถัดไปของ CI
+npx wrangler pages deploy dist --project-name selfprint-staging
 ```
 
 ### 6.3 Set Production Environment Variables
@@ -416,7 +424,7 @@ WHERE relname = 'twin_visual_dna';
 - [ ] Cross-user isolation verified
 - [ ] Performance baseline met
 - [ ] No console errors
-- [ ] GitHub commit → Vercel deploys
+- [ ] GitHub commit → Cloudflare Pages deploys (production: Pages Git integration · staging: CI job `deploy-staging`)
 
 **Status:** Ready for production ✅
 

@@ -17,7 +17,7 @@
 | E2E Phase B staging (final) | ✅ 95 / 0 / 5 | full suite (Phase A + B, 100 tests) แบบ CI-parity: workers=1 + retries=1 vs selfprint-staging.pages.dev (20 ก.ย. 2026 19:04 ICT) — 0 FAIL · 0 flaky |
 | E2E Phase A production | ✅ 51/51 | `--project=chromium` + mobile vs selfprint.one (20 ก.ย. 2026 re-verified: chromium 27/27) |
 | Master Gate | ✅ **CLOSED** | 38 PASS / 0 FAIL / 11 SKIP — policy-valid inventory |
-| CI (GitHub Actions) | ✅ FIXED → GREEN (local proof) | root cause ของ run #406 (16 FAIL): workflow ไม่ส่ง `STAGING_URL` เข้า E2E job → `global-setup.ts` fallback ไป `staging.selfprint.one` (HTTP 522) → storageState ไร้ session — fix: เพิ่ม `STAGING_URL: https://selfprint-staging.pages.dev` ใน env ของ step "Run E2E Tests"; local CI-parity run ยืนยัน 95 PASS / 0 FAIL (20 ก.ย. 2026) — รอ push เพื่อยืนยันบน GitHub Actions |
+| CI (GitHub Actions) | ✅ **GREEN — run #411 (e730cd7, 22 ก.ย. 2026)** | Unit 1050/1050 · Deploy Staging success · E2E Tests success · Report success. Pipeline: push master → `deploy-staging` (build exact commit ด้วย `VITE_SUPABASE_*` จาก secrets → `wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash=$SHA`) → `e2e-tests` (`needs: deploy-staging` — ไม่เริ่มก่อน deploy ของ commit เดียวกันสำเร็จ). History: #406 STAGING_URL fix (20 ก.ย.) · #409/รุ่น #411 staging 17-FAIL root cause = CI build ไม่มี VITE env (CI-BUILD-ENV-001 → แก้ใน `e730cd7`) · **Runtime:** project Node 22 (`node-version: '22'`) · GitHub Actions runtime node24 native (bump v4→v5/v6/v7 ในรอบ maintenance นี้) · **Annotation:** ยังเหลือ warning "Node.js 20 is deprecated" ของ actions v4 (เป็น deprecation warning ไม่ใช่ test failure; กำลังแก้ด้วย bump action major version) + notice ubuntu-latest → Ubuntu 26 (ไม่แตะรอบนี้) + Slack `exit code 3` failure annotation (known behavior ตาม `.github/secrets-setup.md`) |
 | Supabase migrations | ✅ 35 files | ล่าสุด `040_create_user_lifecycle_table.sql` |
 
 > **Master Gate ≠ product-completeness.** ตัวเลข Master Gate เป็น test metric แยกต่างหาก
@@ -200,7 +200,7 @@ Reference: `docs/DATABASE_SCHEMA_TH.md` · `MIGRATION_GUIDE.md` (root)
 | E2E staging | `npm run test:e2e:staging` | requires `.env.e2e.staging` |
 | k6 load | `k6 run loadtests/…` | **manual only** (`workflow_dispatch`); staging PASS 792/792 checks (14 ก.ย. 2026) — ไม่ใช่ Master Gate criteria |
 
-Playwright config: `playwright.config.ts` — projects `chromium` (Phase A), `chromium-staging` (Phase B, 4 workers), mobile.
+Playwright config: `playwright.config.ts` — projects `chromium` (Phase A), `chromium-staging` (Phase B), mobile × 2 — workers: `undefined` (local) / `1` (CI); retries: `0` (local) / `1` (CI).
 
 ## Master Gate
 
@@ -224,11 +224,13 @@ MASTER GATE = CLOSED
 
 ## Deployment
 
-- **Production:** https://selfprint.one — Cloudflare Pages (Dashboard config build)
-- **Staging:** https://selfprint-staging.pages.dev — active E2E target
-- **Staging alias:** https://staging.selfprint.one
-- Deployment: Cloudflare Pages (Dashboard build settings; `wrangler.toml` เป็น config พื้นฐาน, nodejs_compat ผ่าน Dashboard Compatibility flags)
-- k6 ต้องการ env: `SUPABASE_SERVICE_ROLE_KEY` (sb_secret_) + `OPENROUTER_API_KEY`
+- **Production:** https://selfprint.one — Cloudflare Pages (Dashboard config build, Git-connected)
+- **Staging:** https://selfprint-staging.pages.dev — **auto-deploy จาก CI** (job `deploy-staging`); active E2E target
+- **Staging alias (dead):** https://staging.selfprint.one — Cloudflare 525 (DNS issue; ไม่ใช้)
+- **Staging deploy flow:** push master → CI builds exact commit (`VITE_SUPABASE_*` จาก secrets) → `wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --branch <ref> --commit-hash <sha>` → verify alias HTTP 200 → `e2e-tests` เริ่มต่อ (needs: deploy-staging)
+- Deployment config: Cloudflare Pages (Dashboard build settings; `wrangler.toml` เป็น config พื้นฐาน, nodejs_compat ผ่าน Dashboard Compatibility flags)
+- CI secrets ที่ต้องมี (repo-level Actions): `CLOUDFLARE_API_TOKEN` · `CLOUDFLARE_ACCOUNT_ID` · `VITE_SUPABASE_URL` · `VITE_SUPABASE_ANON_KEY` (+ E2E_*/TEST/PRODUCTION_URL/SLACK) — ดู `.github/secrets-setup.md`
+- k6 ต้องการ env (manual runs): `SUPABASE_SERVICE_ROLE_KEY` (sb_secret_) + `OPENROUTER_API_KEY`
 
 ## Operational Commands
 

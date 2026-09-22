@@ -5,6 +5,21 @@
 
 ---
 
+## UPDATE 2026-09-22 — CI GREEN + STAGING DEPLOY AUTOMATION
+
+| Metric | Value |
+|---|---|
+| CI run **#411** (`e730cd7`) | ✅ **ALL GREEN** — Unit 1050/1050 · Deploy Staging success · E2E Tests success · Report success |
+| Staging deploy | deterministic: push master → `deploy-staging` (checkout `ref=github.sha` → `npm ci` → `npm run build` env `VITE_SUPABASE_*` → `npx wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --branch <ref> --commit-hash <sha>`) → verify alias HTTP 200 |
+| e2e-tests | `needs: deploy-staging` — staging E2E ไม่เริ่มก่อน deploy ของ commit เดียวกันสำเร็จ |
+| Provenance | deployment carry commit hash (`--commit-hash` → Pages UI) + CI log `deployed_commit=<sha>`; run SHA = deploy SHA = E2E target SHA |
+| Root cause (run #409 / pre-#411 staging fails) | **CI-BUILD-ENV-001**: bundle ที่ build ใน GitHub Actions ขาด `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (secrets ไม่ถูกส่งเข้าขั้นตอน Build) → runtime "Missing Supabase credentials" → **17/17 chromium-staging FAIL** (deterministic, ไม่ใช่ flaky/product bug). Fix: inject secrets เข้า Build step (`e730cd7`) |
+| Staging fingerprint @ 22 ก.ย. | `index-C4BGZAuK.js` + `chunk-supabase-lazy-DE4LoEXw.js` = ตรงกับ local build ที่มี creds — ใกล้เคียง byte-identical |
+| CI/ENV vs PRODUCT | CI/ENVIRONMENT (missing build env) — PRODUCT BUG = NO; E2E BUG = NO |
+| Annotations | ⚠️ **ยังมี:** warning "Node.js 20 is deprecated" ของ actions v4 (เป็น deprecation warning ไม่ใช่ test failure — กำลังแก้ด้วย bump action major version ในรอบ maintenance นี้) + notice ubuntu-latest → Ubuntu 26 (ไม่แตะรอบนี้) + Slack `exit code 3` failure annotation (known behavior) — **ห้ามเขียนว่า CI "100% ผ่านทุกอย่าง"** |
+
+---
+
 ## Status
 
 ```

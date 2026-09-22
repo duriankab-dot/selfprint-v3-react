@@ -1,6 +1,7 @@
 # SELFPRINT PROJECT SUMMARY — ภาษาไทย
 
 **อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
+**อัปเดต 22 ก.ย. 2026 — CI GREEN + STAGING DEPLOY AUTOMATION:** run #411 (`e730cd7`) = ALL GREEN (Unit 1050/1050 · Deploy Staging success · E2E success · Report success); staging deploy = อัตโนมัติจาก CI job `deploy-staging` — build จาก commit เดียวกัน (env `VITE_SUPABASE_*` จาก GitHub secrets) → `wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash $SHA` → verify HTTP 200 → E2E เริ่มต่อ. ตารางด้านล่างเป็น ณ 13 ก.ย. (ประวัติ) — อ้างอิงล่าสุด: `README.md` (Current Status) · `MASTER_GATE_AS_IS.md` (UPDATE 2026-09-22). **Annotation:** ยังเหลือ warning "Node.js 20 is deprecated" ของ actions v4 (deprecation warning ไม่ใช่ test failure — กำลังแก้ด้วย bump action major version) |
 
 ## Project
 

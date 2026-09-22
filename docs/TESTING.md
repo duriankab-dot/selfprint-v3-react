@@ -84,6 +84,7 @@
 | Job | คำอธิบาย |
 |-----|----------|
 | `unit-tests` | `npm ci` → `npm test` |
+| `deploy-staging` | `npm ci` → `npm run build` (env `VITE_SUPABASE_*` จาก secrets) → `npx wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash $SHA` → verify alias HTTP 200 |
 | `e2e-tests` | `npm ci` → `npx playwright install --with-deps chromium webkit` → `npm run test:e2e` (พร้อม `STAGING_URL` และ secrets) |
 | `smoke-test` | k6 smoke — manual only (`workflow_dispatch` + `test_type=load`) |
 | `full-load-test` | k6 full — manual only (`workflow_dispatch` + `test_type=full`) |
@@ -91,6 +92,13 @@
 
 **หมายเหตุ:** `report-results` ขึ้นกับ `unit-tests` และ `e2e-tests` เท่านั้น;
 k6 jobs เป็น manual-only และต้องไม่ block reporting
+
+### Runtime & Annotations
+
+- **Project Node version:** 22 (`node-version: '22'` สำหรับ `npm ci/build/test`)
+- **GitHub Actions runtime:** target node20 อยู่ (actions v4) — กำลังแก้ด้วย bump action major version เป็น node24 native: `checkout@v5`, `setup-node@v5`, `upload-artifact@v6`, `download-artifact@v7` (อ้างอิง release notes ทางการ)
+- **Annotation ที่เหลืออยู่ (ไม่ใช่ failure):** warning "Node.js 20 is deprecated" ของ actions v4 (เป็น deprecation warning ไม่ใช่ test failure; กำลังแก้); notice ubuntu-latest → Ubuntu 26 migration (ไม่แตะรอบนี้); Slack `exit code 3` failure annotation (curl exit 3 — known behavior ตาม `.github/secrets-setup.md`, `continue-on-error: true` ไม่ล้ม job)
+- **ห้ามเขียนว่า CI "100% ผ่านทุกอย่าง"** — jobs GREEN แต่ยังมี annotation เหล่านี้
 
 ### Performance Targets (ระบุในขั้น Generate Report ของ CI)
 

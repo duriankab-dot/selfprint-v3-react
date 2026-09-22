@@ -2,6 +2,8 @@
 
 **อัปเดต:** 13 กันยายน 2026 — MASTER GATE 100% PASS ✅
 
+**อัปเดต 22 ก.ย. 2026 — CI GREEN + STAGING AUTOMATION:** run #411 (`e730cd7`) = ALL GREEN (Unit 1050/1050 · Deploy Staging success · E2E success · Report success). Staging deploy = CI job `deploy-staging` (build exact commit + `--commit-hash` → verify HTTP 200) — manual wrangler = fallback เฉพาะ debug. `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` ต้องมีเป็น GitHub secrets (repo-level Actions; CI-BUILD-ENV-001) — `.github/secrets-setup.md`. **Annotation:** ยังเหลือ warning "Node.js 20 is deprecated" ของ actions v4 (deprecation warning ไม่ใช่ test failure — กำลังแก้ด้วย bump action major version รอบ maintenance นี้) |
+
 ---
 
 ## ✅ MASTER GATE criteria — สถานะล่าสุด (13 ก.ย. 2026)
@@ -28,6 +30,7 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 | 12 Sep CI | 63 / 7 / 30 | CI: 1 typo + 6 staging 525 |
 | 13 Sep 00:17 **local** | **25 / 0 / 24** | **lifecycle.spec.ts ALL PASS** |
 | 13 Sep CI | **63 / 0 / 30** | **CI GREEN** |
+| 22 Sep CI #411 (`e730cd7`) | ✅ **GREEN** | Unit 1050/1050 · Deploy Staging · E2E success — staging auto-deploy (deploy-staging) + VITE env fix |
 
 ---
 
@@ -51,8 +54,9 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 ## ✅ Root causes ที่แก้แล้ว
 
 ### 1. Credentials ใน deployed bundle
-- `selfprint-staging` — Cloudflare Pages (Git Provider = No)
-- VITE_* ต้องอยู่ใน LOCAL build env
+- `selfprint-staging` — Cloudflare Pages (Git Provider = No, direct-upload)
+- VITE_* ต้องเป็น build-time env: เดิมต้องอยู่ใน LOCAL build env (`.env.production` git-ignored)
+- หลัง staging automation (22 ก.ย. 2026): CI build รับจาก GitHub secrets `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY` (ค่าตรงกับ `.env.production`) — CI-BUILD-ENV-001: ถ้า secret ว่าง → bundle runtime-error "Missing Supabase credentials" (deterministic 17/17 fails; fix ใน `e730cd7`)
 - หลังแก้: bundle มี `HAS_URL=true HAS_KEY=true`
 
 ### 2. Living Twin visual layer height:0 (MG-01)
@@ -118,6 +122,7 @@ LIFE-05 ?mode=quick                 : ✅ PASS
 
 ```powershell
 npm run build                          # tsc -b && vite build
+# (CI deploy-staging = default staging deploy; คอมมานด์ถัดไป = manual fallback/emergency เท่านั้น)
 npx wrangler pages deploy dist --project-name selfprint-staging --branch master
 npm run test:e2e:staging               # full staging suite
 npx playwright test --project=chromium-staging lifecycle.spec.ts   # isolated lifecycle

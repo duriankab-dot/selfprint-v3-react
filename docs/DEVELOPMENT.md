@@ -12,8 +12,8 @@
 
 ## Prerequisites
 
-- **Node.js 22** — CI ใช้ `actions/setup-node` ที่ `node-version: '22'`
-  (`.github/workflows/testing.yml`)
+- **Node.js 22** — CI ใช้ `actions/setup-node` ที่ `node-version: '22'` (`.github/workflows/testing.yml`)
+- **Action Runtime:** GitHub Actions target node20 อยู่ (actions v4) — กำลังแก้ด้วย bump action major version เป็น node24 native: `checkout@v5`, `setup-node@v5`, `upload-artifact@v6`, `download-artifact@v7` (อ้างอิง release notes ทางการ) — ไม่ใช่การเปลี่ยน project Node version
 - **npm** — dependency ถูก lock ไว้ที่ `package-lock.json` (CI ใช้ `npm ci`)
 - **Supabase project** — URL รูปแบบ `https://<project-ref>.supabase.co`
   (ดู `.env.example`)

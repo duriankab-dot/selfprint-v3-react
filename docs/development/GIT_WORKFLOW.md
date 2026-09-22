@@ -242,41 +242,20 @@ git branch -d feature/your-feature-name
 
 ---
 
-## 🧪 CI/CD Pipeline
+## 🧪 CI/CD Pipeline (`.github/workflows/testing.yml`)
 
-### GitHub Actions (Automated Checks)
+Trigger: push ไป `master`/`main`/`develop` หรือ `workflow_dispatch`
 
-Every PR automatically runs:
+| Job | คำอธิบาย |
+|-----|----------|
+| `unit-tests` | `npm ci` → `npm test` (Vitest) |
+| `deploy-staging` | `npm ci` → `npm run build` (env `VITE_SUPABASE_*` จาก secrets) → `npx wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash $SHA` → verify alias HTTP 200 |
+| `e2e-tests` | `needs: deploy-staging` · `npm ci` → Playwright install → `npm run test:e2e` (staging E2E ไม่เริ่มก่อน deploy ของ commit เดียวกันสำเร็จ) |
+| `smoke-test` | k6 smoke — manual only (`workflow_dispatch` + `test_type=load`) |
+| `full-load-test` | k6 full — manual only (`workflow_dispatch` + `test_type=full`) |
+| `report-results` | `needs: [unit-tests, e2e-tests]` — ดาวน์โหลด artifacts สร้าง report |
 
-1. **Linting**
-   - ESLint for code style
-   - Prettier for formatting
-   ```bash
-   npm run lint
-   ```
-
-2. **Type Checking**
-   - TypeScript compiler
-   ```bash
-   npm run type-check
-   ```
-
-3. **Tests**
-   - Unit tests with Vitest
-   - Coverage report
-   ```bash
-   npm run test:ci
-   ```
-
-4. **Build Verification**
-   - Full production build
-   - Bundle size check
-   ```bash
-   npm run build
-   ```
-
-**If CI fails:**
-- Fix locally
+**Action Runtime:** project Node 22 (`node-version: '22'`) · GitHub Actions target node20 กำลังแก้เป็น node24 native (bump v4→v5/v6/v7) · **Annotation ที่เหลืออยู่:** warning "Node.js 20 is deprecated" ของ actions v4 (deprecation warning ไม่ใช่ test failure) · Slack `exit code 3` (known behavior, `continue-on-error`) · ubuntu-latest → Ubuntu 26 notice (ไม่แตะรอบนี้)
 - Push new commit (don't force-push main)
 - CI will re-run automatically
 
