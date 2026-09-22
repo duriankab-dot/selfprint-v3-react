@@ -11,7 +11,7 @@ import { IntelligenceError } from '@/lib/intelligence/types';
 import { Button } from '@/components/primitives/Button';
 import { Input } from '@/components/primitives/Input';
 import { Card } from '@/components/primitives/Card';
-import { Alert } from '@/components/primitives/Alert';
+import { Alert } from '@/components/composites/Alert';
 
 /**
  * Props for MemoryRecorder component

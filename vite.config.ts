@@ -45,18 +45,16 @@ export default defineConfig({
     },
   },
   build: {
-    emptyOutDir: true,
+    emptyOutDir: false,
 
     // CHUNK-SPLIT-001: warn when any single chunk exceeds 500 KB (unminified).
     // Pages are already lazy-loaded via React.lazy() in App.tsx.
     //
-    // VENDOR-THREE-001 (20 ก.ย. 2026): three.js was incorrectly falling into
-    // vendor-misc (~555 KB raw / 140 KB gzip) because the previous cleanup
-    // deleted the vendor-three manualChunks branch while package.json still
-    // listed "three": "0.186.0" and TwinThreeRenderer.tsx still imports it.
-    // Added explicit vendor-three group to prevent three from being pulled
-    // into the entry graph via tslib/react-fast-compare co-location.
-    // Only loaded when HIGH fidelity rendering is actually used.
+    // DEADDEP-001 (3 ก.ย. 2026): คอมเมนต์เดิมตรงนี้อธิบาย vendor-three ว่าเป็น
+    // chunk ใหญ่สุด ~350 KB — แต่ตรวจแล้วไม่มีไฟล์ไหนใน src/ import 'three' เลย
+    // สักบรรทัด chunk นั้นจึงไม่เคยถูกสร้างขึ้นจริง (ยืนยันจาก build output)
+    // ลบทั้ง dependency, @types/three และ manualChunks branch ออกแล้ว
+    // chunk ที่ใหญ่จริงคือ chunk-intelligence (345 KB raw / 87 KB gzip)
     chunkSizeWarningLimit: 500,
 
     rollupOptions: {
@@ -176,29 +174,6 @@ export default defineConfig({
               name: 'decision-services',
               test: /[\\/]src[\\/]services[\\/](DecisionService|DecisionLearningService|FollowUpScheduler)\.ts/,
               priority: 90,
-            },
-            // VENDOR-THREE-002: three.js must NOT fall into vendor-misc. Without
-            // this group, the entire ~555 KB three library gets pulled into the
-            // entry graph because vendor-supabase and vendor-helmet statically
-            // import tiny co-located deps (tslib, react-fast-compare) from the
-            // catch-all misc chunk. Three is only used by TwinThreeRenderer
-            // which is lazy-loaded on HIGH fidelity path only.
-            {
-              name: 'vendor-three',
-              test: /[\\/]node_modules[\\/]three[\\/]/,
-              priority: 95,
-            },
-            // Keep tslib and helmet micro-deps isolated so they don't drag
-            // vendor-misc into the entry closure.
-            {
-              name: 'vendor-tslib',
-              test: /[\\/]node_modules[\\/]tslib[\\/]/,
-              priority: 100,
-            },
-            {
-              name: 'vendor-shallow-equal',
-              test: /[\\/]node_modules[\\/](react-fast-compare|shallowequal|hoist-non-react-statics)[\\/]/,
-              priority: 100,
             },
             // 9. All remaining node_modules → one shared vendor-misc chunk
             //    (lodash, date-fns, tiny utilities, etc.)

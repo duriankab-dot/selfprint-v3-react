@@ -1,55 +1,26 @@
 # SELFPRINT — MASTER GATE AS-IS STATE
 
-**Date:** 2026-09-20 — POST-CLOSURE ENGINEERING AUDIT + CI RUN #406 FORENSIC CLOSURE
-**HEAD:** eb26e59 — Post-closure engineering audit implementation
-**Previous HEAD:** bce9a57 — Fix test user (seed lifecycle sync) + workflow STAGING_URL fix
+**Date:** 2026-09-20 — CI RUN #406 FORENSIC CLOSURE (overwrite ของ snapshot 18 ก.ย. 2026)
+**HEAD:** bce9a57 — Fix test user (seed lifecycle sync) + workflow STAGING_URL fix
 
 ---
 
 ## Status
 
 ```
-TEST SUITE RESULT   : 929/929 PASS (59 files, post-cleanup audit 20 ก.ย. 2026)
-                      (เดิม 1050/1050 — ลดลงเพราะลบ orphan test files ที่อ้างอิง deleted services)
-CI RUN #406         : 16 FAIL → FIXED (STAGING_URL env injection)
+TEST SUITE RESULT   : 95 PASS / 0 FAIL / 5 SKIP (100 total, Phase A+B) — CI-PARITY RUN 20 ก.ย. 2026 19:04 ICT
+CI RUN #406         : 16 FAIL (deterministic 2/2 attempts) — ROOT CAUSE FOUND & FIXED (ไม่ใช่ product/E2E bug)
 ROOT CAUSE          : .github/workflows/testing.yml ไม่ส่ง STAGING_URL เข้า E2E job
+                      → global-setup.ts:72 fallback ไป 'https://staging.selfprint.one' (HTTP 522 — host ตาย)
+                      → storageState ถูกฉีดลง origin ที่ตาย → chromium-staging tests วิ่งไร้ session
+                      → data-gated UI (decision/world/upload/twin) ไม่ render ทั้ง 16 tests
 FIX                 : เพิ่ม STAGING_URL: https://selfprint-staging.pages.dev ใน env ของ step "Run E2E Tests"
-MASTER GATE         : CLOSED (38 PASS / 0 FAIL / 11 SKIP)
-Post-Closure Audit  : COMPLETE — P0 security fixes (IDOR RPC guards, passkey disabled),
-                      P1 performance (three.js bundle isolation, emptyOutDir, N+1 badge queries),
-                      security hardening (CSP headers, bounded SW cache),
-                      cleanup 30+ dead files, archive 30+ outdated docs, rewrite 6 target docs
+CI-PARITY PROOF     : local run ด้วย env ชุดเดียวกับ workflow หลังแก้ (ไม่มี .env.e2e.staging)
+                      → 95 PASS / 0 FAIL / 5 SKIP / 0 flaky (workers=1 + retries=1 เทียบเท่า GitHub Actions)
+SEED STATE          : vkjwqrjflxztcctmyzgh.supabase.co — 5/5 active users TWIN_ALIVE + twin_id=SET (query จริง 20 ก.ย.)
+                      ยืนยันว่า app bundle ที่ deploy ชี้ DB ตัวนี้ (single Supabase URL in all 112 chunks)
+MASTER GATE CLOSURE : CLOSED (ยืนยันซ้ำใน CI-parity run — MG ทุกตัว PASS ยกเว้น static skips)
 ```
-
-### Post-Closure Engineering Audit Findings (20 ก.ย. 2026)
-
-| Category | Severity | Finding | Status |
-|----------|----------|---------|--------|
-| Security | P0 CRITICAL | IDOR via SECURITY DEFINER RPC (`create_twin_complete`, `optimize_twin_creation`) | ✅ Fixed — auth.uid() guard added |
-| Security | P0 CRITICAL | Passkey registration without authentication | ✅ Fixed — endpoints disabled (503) |
-| Performance | P1 CRITICAL | Three.js 555 KB on entry critical path | ✅ Fixed — vendor-three chunk group added |
-| Performance | P1 CRITICAL | PWA precache 10.45 MB (emptyOutDir: false) | ✅ Fixed — emptyOutDir: true |
-| Performance | P1 CRITICAL | N+1: 24 sequential Supabase requests on WorldProvider mount | ✅ Fixed — single batched query |
-| Code Quality | P1 | INEFFECTIVE_DYNAMIC_IMPORT DecisionLearningService | ✅ Fixed — static import |
-| Code Quality | P1 | SW message listener memory leak in main.tsx | ✅ Fixed — cleanup handler added |
-| Build | P1 | Deprecated inlineDynamicImports option | ✅ Fixed — removed from config |
-| Security | P2 | Missing CSP/security headers | ✅ Fixed — public/_headers updated |
-| Security | P2 | Unbounded SW runtime cache | ✅ Fixed — versioned cache name |
-| Cleanup | P2 | 30+ dead/orphan files tracked in git | ✅ Deleted |
-| Docs | P2 | 30+ outdated/historical docs at root/docs/ | ✅ Archived to docs/archive/ |
-| Docs | P2 | 5 competing sources of truth | ✅ Consolidated to 3 canonical docs |
-
-### Known Deferred Items (post-audit)
-
-| Item | Severity | Why |
-|------|----------|-----|
-| `personal_context` vs `personal_contexts` split-brain | P1 | Requires DB migration — separate task |
-| `AICreationSequence.tsx:96` insert into non-existent columns | P0 | Wrong columns (context_data, initialized_at) — no-op |
-| Consent persistence silently fails | P2 | PrivacyCenter consent upsert result discarded |
-| ~60+ wildcard `.select('*')` across services | P2 | Should specify columns explicitly |
-| Batch updates in AIFeedbackLoop.ts (per-row UPDATE) | P2 | Should use `.in('id', ids)` |
-| Composite indexes for hot query shapes | P2 | `(twin_memories(twin_id,world_id,created_at DESC))` etc. |
-| Upgrade major deps (stripe@22, typescript@7, vitest@5) | P3 | Breaking changes — scheduled maintenance window |
 
 ### สรุปหลักฐาน root cause (run #406, commit bce9a57)
 
@@ -149,7 +120,6 @@ Product change: **none** — no defect proven; flows functional (creation is cli
 - **2026-09-18 04:40** — Diagnostic run (degraded window): 33 PASS / 6 FAIL / 10 SKIP; MG-07-01 stall evidence captured (request pending >15s)
 - **2026-09-18 06:26** — Clean run: 35 PASS / 7 FAIL / 7 SKIP → 7-transient-FAIL investigation → no repro
 - **2026-09-18 07:22** — **FINAL clean run: 38 PASS / 0 FAIL / 11 SKIP** → 11-skip inventory complete → MASTER GATE CLOSED
-- **2026-09-20** — POST-CLOSURE ENGINEERING AUDIT COMPLETE — P0/P1 security & performance fixes applied, 30+ dead files deleted, 30+ outdated docs archived, 6 target docs rewritten. Test suite: 929/929 PASS (59 files). All validations pass.
 
 ---
 

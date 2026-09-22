@@ -60,14 +60,8 @@ if ('serviceWorker' in navigator) {
       })
 
     // Forward SW messages to app (SW_UPDATED, SYNC_JOURNAL, etc.)
-    const handleSwMessage = (event: MessageEvent) => {
+    navigator.serviceWorker.addEventListener('message', (event) => {
       window.dispatchEvent(new CustomEvent('sw-message', { detail: event.data }))
-    }
-    navigator.serviceWorker.addEventListener('message', handleSwMessage)
-
-    // Cleanup SW message listener on page unload to prevent accumulation
-    window.addEventListener('beforeunload', () => {
-      navigator.serviceWorker.removeEventListener('message', handleSwMessage)
     })
   })
 }

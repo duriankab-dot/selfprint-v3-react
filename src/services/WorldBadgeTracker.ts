@@ -108,10 +108,7 @@ export class WorldBadgeTracker {
   }
 
   /**
-   * Get all world achievements for user — SINGLE QUERY optimization.
-   * Replaces the previous N+1 pattern (12 sequential queries) with one
-   * batched query that fetches all unlocked badges at once and groups
-   * them client-side by world_id.
+   * Get all world achievements for user
    */
   static async getAllWorldAchievements(
     userId: string
@@ -131,52 +128,20 @@ export class WorldBadgeTracker {
       'future',
     ];
 
-    // Single batched query — replaces 12 sequential requests
-    let allUnlockedRows: Array<{ badge_id: string; world_id: string }> = [];
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('unlocked_badges')
-        .select('badge_id, world_id')
-        .eq('user_id', userId);
-      if (!error && data) {
-        allUnlockedRows = data as any;
-      } else if (error) {
-        console.error('Failed to fetch unlocked badges:', error);
-      }
-    }
-
-    // Group by world_id client-side
-    const groupedByWorld = new Map<string, string[]>();
-    for (const row of allUnlockedRows) {
-      const w = row.world_id as WorldId;
-      if (!groupedByWorld.has(w)) groupedByWorld.set(w, []);
-      groupedByWorld.get(w)!.push(row.badge_id);
-    }
-
     const achievements: Record<WorldId, WorldBadgeProgress> = {} as Record<
       WorldId,
       WorldBadgeProgress
     >;
 
     for (const worldId of worlds) {
-      const unlockedBadges = groupedByWorld.get(worldId) || [];
-      const allBadges = getWorldBadges(worldId);
-      const totalPoints = calculateWorldPoints(worldId, unlockedBadges);
-
-      achievements[worldId] = {
-        worldId,
-        unlockedBadges,
-        totalPoints,
-        nextBadges: allBadges.filter((b) => !unlockedBadges.includes(b.id)),
-      };
+      achievements[worldId] = await this.getWorldBadges(userId, worldId);
     }
 
     return achievements;
   }
 
   /**
-   * Calculate total points across all worlds — uses getAllWorldAchievements
-   * which now fetches all data in a single query.
+   * Calculate total points across all worlds
    */
   static async getTotalWorldPoints(userId: string): Promise<number> {
     const achievements = await this.getAllWorldAchievements(userId);

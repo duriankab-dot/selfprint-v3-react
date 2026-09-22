@@ -2,15 +2,16 @@
 
 ## ⚠️ อ่านก่อนเริ่มงานทุกครั้ง
 
-เอกสารที่เชื่อได้มี **3 ไฟล์เท่านั้น**
+เอกสารที่เชื่อได้มี **4 ไฟล์เท่านั้น**
 
 | ไฟล์ | ใช้ทำอะไร |
 |------|----------|
-| `README.md` / `MASTER_GATE_AS_IS.md` | สถานะปัจจุบัน + 11-skip inventory + post-closure audit findings (20 ก.ย. 2026) |
+| `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` | สถานะจริงปัจจุบันของโปรเจกต์ · อะไรแก้แล้ว อะไรยังเปิดอยู่ |
+| `README.md` / `MASTER_GATE_AS_IS.md` | สถานะปัจจุบัน + 11-skip inventory (18 ก.ย. 2026) |
+| `docs/SELFPRINT_STATUS_HONEST_TH.md` |สถานะ honest (TH) ล่าสุด — 38/0/11 CLOSED |
 | ไฟล์นี้ | context ถาวร: สถาปัตยกรรม, คำสั่ง, เกร็ดที่ต้องรู้ก่อนแตะโค้ด, โซนห้ามแตะ |
-| `docs/ARCHITECTURE.md` | สถาปัตยกรรมปัจจุบัน (React 19, CF Pages, chunk splitting) |
 
-**เอกสารทั้งหมดที่ถูก archive ไว้ที่ `docs/archive/` — เป็น historical reference เท่านั้น ไม่ใช่สถานะปัจจุบัน.**
+**เอกสารก่อน 18 ก.ย. 2026 (Phase plans, PRD, audits) ถูกย้ายเป็น historical ที่ `docs/archive/` — ใช้เมื่อต้องการอ้างอิงอดีตเท่านั้น ไม่ใช่สถานะปัจจุบัน.**
 
 **Current repo state = source of truth เสมอ** — ห้าม cache สมมติฐานจากเอกสาร ต้อง verify จากโค้ดจริงก่อนเชื่อ
 
@@ -51,20 +52,17 @@ CF Pages (selfprint.one) ← auto-deploy จาก master
   └── functions/api/[[route]].ts     → catch-all → api/unified-handler.ts
         รู้จักแค่ 7 module: notifications | twin-evolution | sice |
                            stripe | profile | blueprint | share
-        นอกเหนือจากนั้น = JSON 404 (ไม่ fallback ไป index.html)
+        นอกเหนือจากนี้ = JSON 404 (ไม่ fallback ไป index.html)
 
   api/ = ไม่ใช่ route source — เข้าถึงได้เพราะ functions/ import เข้ามา
   api/_utils/verify-user.ts + api/unified-handler.ts เท่านั้นที่ยัง live
   api/unified-handler.ts มี @ts-nocheck ทั้งไฟล์โดยตั้งใจ (Supabase types ไม่ตรง schema — runtime ถูกต้อง)
 
 Supabase Edge Functions (deploy แยกผ่าน CLI ไม่อยู่ใน build ของ CF):
-  auth-register-passkey / auth-verify-passkey — DISABLED (PASSKEY-DISABLED-001)
-  ฟังก์ชันอื่นๆ ใน supabase/functions/ — JWT บังคับครบทุกตัวแล้ว (SEC-02)
+  13 ฟังก์ชันใน supabase/functions/ — JWT บังคับครบทุกตัวแล้ว (SEC-02)
 
 DB: Supabase — migration กระจาย 3 โฟลเดอร์ CLI apply แค่ supabase/migrations/
     schema หลัก: selfprint.* (ไม่ใช่ public schema)
-    RLS: ทุกตาราง user-data เปิดใช้งานแล้ว (035 forensic consolidation)
-    AUTHGUARD-001: create_twin_complete / optimize_twin_creation มี auth.uid() guard แล้ว
 ```
 
 Vercel ถูกลบออกหมดแล้ว — `.vercel/`, `vercel.json`, `api/{twin,nova,og,metrics}.ts` เก่า, `@vercel/*` deps
@@ -74,13 +72,13 @@ Vercel ถูกลบออกหมดแล้ว — `.vercel/`, `vercel.jso
 ```powershell
 npm install
 npm run dev
-npm run build                 # tsc -b && vite build (emptyOutDir: true)
-npm test                      # vitest — 59 files 929 tests (post-cleanup audit)
+npm run build                 # tsc -b && vite build
+npm test                      # vitest — 67 ไฟล์ 1042 tests
 npm run lint                  # oxlint
 npm run typecheck:functions   # typecheck functions/ + api/
 ```
 
-สถานะ gate ปัจจุบัน + สรุปงานที่เหลือจริง → ดู `MASTER_GATE_AS_IS.md`
+สถานะ gate ปัจจุบัน + สรุปงานที่เหลือจริง → ดู `FORENSIC_AUDIT_HONEST_STATUS_HANDOFF_TH.md` (ไม่ซ้ำที่นี่)
 
 ---
 
@@ -90,10 +88,11 @@ npm run typecheck:functions   # typecheck functions/ + api/
   เช็คขนาด `@rolldown/binding-*` ต้อง ~19.9 MB · `lightningcss-*` ~10 MB ·
   `@oxlint/binding-*` ~16 MB ถ้าเล็กกว่ามาก ให้ `rm -rf node_modules && npm install` ใหม่
 - **`functions/` เท่านั้นที่ deploy** — `api/` เข้าถึงได้เพราะ `[[route]].ts` import เข้ามา
-- **Passkey subsystem ถูก disable แล้ว** (`PASSKEY-DISABLED-001`) — จนกว่า rebuild ด้วย `@simplewebauthn/server`
+- **`src/lib/intelligence/*` กับ `src/services/sice/engines/*` เป็น fork คนละตัวจริงๆ**
+  ทั้งคู่ live คนละ implementation เชื่อมทางเดียวผ่าน `SICEBridge.ts` — **ห้ามลบฝั่งไหนทิ้งเพราะคิดว่าซ้ำ**
 - **`personal_context` (เอกพจน์) ≠ `personal_contexts` (พหูพจน์)** คนละตาราง คนละคอลัมน์ ทั้งคู่ใช้งานจริง
   ตัวเอกพจน์มี `context_type/title/description/inferred_from/confidence/ai_evidence` (migration 010)
-  ตัวพหูพจน์ผูกกับ `awakening_essence` มี `id/user_id/awakening_essence_id/timestamps` (migration 026)
+  ตัวพหูพจน์ผูกกับ `awakening_essence` มี `context_data/initialized_at` (migration 028 + 035)
 - **`selfprint.users_profiles.id` เป็น surrogate key** ไม่ใช่ auth uid — ต้อง query ด้วย `.eq('user_id', userId)` เสมอ
 - **บทความบล็อก (`/blog/:slug`) ไม่มี lang prefix โดยตั้งใจ** (URL สั้น + SEO) ต่างจากหน้า public อื่นที่มีทั้ง `/en/x` และ `/th/x`
   — อย่าใส่ `langPrefix` เวลาสร้าง canonical/URL ของบทความ
@@ -103,14 +102,12 @@ npm run typecheck:functions   # typecheck functions/ + api/
   ยังใช้งานจริง (`DecisionLogger.tsx`) — อย่าลบเพราะดูเหมือนซ้ำกับตัวที่ root
 - **`import.meta.env[name]` (dynamic bracket access) ไม่ถูก Vite inline ตอน build** — ต้องใช้ literal
   `import.meta.env.VITE_FOO` เท่านั้น ทุกจุดที่อ่าน env
-- **Alert component ย้ายจาก `components/composites/Alert` → `components/primitives/Alert`** (composites/ ถูกลบไปแล้ว)
 
 ## โซนห้ามแตะ (ต้องถามก่อนเสมอ)
-- `.env*`, secret ทุกชนิด
+- `.env*`, `KEY/`, secret ทุกชนิด
 - `supabase/migrations/*` ที่ apply ไป production แล้ว
 - SICE / AI pipeline / Zustand business state / Auth / lifecycle / routing core
 - rename NOVA ในโค้ด (label ที่ user เห็นเปลี่ยนเป็น SELFPRINT ได้ แต่ internal code ห้ามแตะ)
-- Passkey endpoints — ยัง disabled อยู่จนกว่า rebuild เสร็จ
 
 ---
-Full glossary: `docs/ARCHITECTURE.md`
+Full glossary: `memory/`
