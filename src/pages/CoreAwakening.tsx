@@ -5,7 +5,7 @@ import '../styles/core-awakening.css';
  * Intro → Birth (animation) → Naming → Celebration → Complete
  */
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '../context/AuthContext';
 import { useLifecycleStore } from '../store/lifecycleStore';
@@ -73,6 +73,15 @@ export default function CoreAwakening() {
   const currentAnalysis = useAnalysisStore((state) => state.currentAnalysis);
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const setTwinCreated = useLifecycleStore((state) => state.setTwinCreated);
+  // LIFECYCLE-RACE-001: the arrival effect below (LIFE-001) reads the lifecycle
+  // status, but that status is loaded ASYNC — until loadLifecycle() resolves,
+  // the store still holds its default 'ONBOARDING'. Reading it early made a
+  // fresh /core-awakening mount write transitionTo('AWAKENING') over a real
+  // TWIN_ALIVE status (a downgrade). Subscribe to the load state so the effect
+  // waits for the real status instead of the in-flight default.
+  const lifecycleStatus = useLifecycleStore((state) => state.status);
+  const lifecycleLoading = useLifecycleStore((state) => state.isLoading);
+  const lifecycleError = useLifecycleStore((state) => state.error);
 
   const [phase, setPhase] = useState<Phase>('intro');
   const [error, setError] = useState<string | null>(null);
@@ -200,17 +209,30 @@ export default function CoreAwakening() {
   // WORLD_ACTIVE). Without this guard, a user landing here via stale URL/back
   // button — before the global recovery redirect fires — would have their
   // lifecycle silently reset backwards.
+  //
+  // LIFECYCLE-RACE-001: fire at most once per user per mount. transitionTo()
+  // flips `isLoading` on the store, which re-runs this effect once the load
+  // state settles — without this guard the effect would write in a loop.
+  const arrivalTransitionStartedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!session?.user?.id) return;
-    const currentStatus = useLifecycleStore.getState().status;
-    if (currentStatus === 'TWIN_ALIVE' || currentStatus === 'WORLD_ACTIVE') return;
+    const userId = session?.user?.id;
+    if (!userId) return;
+    // LIFECYCLE-RACE-001: wait until loadLifecycle() has resolved before
+    // reading the real status. While it is in flight the store still holds
+    // its default 'ONBOARDING', and writing from that default downgraded a
+    // real TWIN_ALIVE status. When the load FAILED the real status is unknown
+    // — do not write either, mirroring useRecoveryRoute's CLOCK-SKEW guard.
+    if (lifecycleLoading || lifecycleError) return;
+    if (arrivalTransitionStartedFor.current === userId) return;
+    if (lifecycleStatus === 'TWIN_ALIVE' || lifecycleStatus === 'WORLD_ACTIVE') return;
+    arrivalTransitionStartedFor.current = userId;
 
     // ONBOARDING-LOOP-001: retries on transient failure; non-blocking for
     // the ceremony itself (arrival bookkeeping, not a user-gated action) —
     // if it still fails after retries, setTwinCreated() below (which sets
     // status straight to TWIN_ALIVE, not conditioned on AWAKENING) can
     // still recover a correct final status, so this is logged, not fatal.
-    withLifecycleRetry(() => transitionTo(session.user.id, 'AWAKENING')).then((ok) => {
+    withLifecycleRetry(() => transitionTo(userId, 'AWAKENING')).then((ok) => {
       if (!ok) {
         console.error(
           'Failed to transition lifecycle to AWAKENING after retries:',
@@ -218,8 +240,7 @@ export default function CoreAwakening() {
         );
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id]);
+  }, [session?.user?.id, lifecycleStatus, lifecycleLoading, lifecycleError, transitionTo]);
 
   const handleIntroComplete = () => {
     setPhase('birth');
