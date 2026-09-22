@@ -67,6 +67,14 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          # CI-BUILD-ENV-001: the direct-upload staging bundle must be built
+          # with the same VITE_* values the local build uses (git-ignored
+          # .env.production). Without them Vite inlines undefined and the
+          # deployed app fails at runtime with "Missing Supabase credentials"
+          # (17 chromium-staging failures, run 35696182804).
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages (selfprint-staging)
