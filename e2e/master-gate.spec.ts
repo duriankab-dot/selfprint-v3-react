@@ -386,19 +386,29 @@ test.describe('MG-05 Canonical Twin Continuity', () => {
       );
     }
 
-    // GUARD: Check if user has no Twin ("Your Twin hasn't awakened yet")
-    const notAwakened = page.locator('h1').filter({ hasText: /awakened|ตื่น/ }).first();
-    const notAwakenedVisible = await notAwakened
-      .waitFor({ state: 'visible', timeout: 5000 })
-      .then(() => true)
-      .catch(() => false);
-    if (notAwakenedVisible) {
-      test.skip(true, 'Signed-in user has no Twin — page shows "Your Twin hasn\'t awakened yet". Seed a Twin for the test user (seed-test-users.ts) then re-run.');
+    // GUARD: Check if recovery redirected to dashboard (wrong lifecycle for this test)
+    const dashboardRedirected = page.url().includes('/dashboard');
+    if (dashboardRedirected) {
+      test.fail(
+        `Recovery redirected AWAKENING user to /dashboard — lifecycle may not be AWAKENING. Final URL: ${page.url()}`
+      );
     }
+
+    // Wait for React hydration — page must have actual content
+    await page.waitForFunction(
+      () => document.body && document.body.innerText.trim().length > 10,
+      undefined,
+      { timeout: 15000 }
+    );
 
     // Core Awakening starts in 'intro' phase (no canvas). Canvas mounts during
     // 'birth' phase via <Twin variant="birth"> → HologramBirth (canvas 2D).
     // Assert the page actually loaded by verifying intro content OR a canvas.
+    // For AWAKENING lifecycle users (no Twin yet), the intro heading is shown.
+    // For users who have already clicked "Watch the awakening", the canvas appears.
+    // The "Your Twin hasn't awakened yet" message indicates wrong lifecycle state
+    // (e.g., ONBOARDING), not a valid AWAKENING state — but we don't skip on it
+    // because the assertion below will fail appropriately if that message appears.
     const heading = page.locator('h1').first();
     const headingVisible = await heading.isVisible({ timeout: 5000 }).catch(() => false);
 

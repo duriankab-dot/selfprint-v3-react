@@ -79,6 +79,7 @@ const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 
 const TEST_USERS = [
   { email: 'test-phase-b@selfprint.one', name: 'Test User Phase B', stage: 'active' },
+  { email: 'test-phase-awakening@selfprint.one', name: 'Test User Phase Awakening', stage: 'awakening' },
   { email: 'test-voice@selfprint.one', name: 'Test Voice User', stage: 'onboarding_voice' },
   { email: 'test-twin@selfprint.one', name: 'Test Twin User', stage: 'active' },
   { email: 'tech-buddy@selfprint.one', name: 'Tech Buddy', stage: 'active' },
@@ -89,6 +90,7 @@ const TEST_USERS = [
 /** Password for each test user — read from env (E2EPW-001: never hardcode). */
 const TEST_PASSWORD_ENV: Record<string, string> = {
   'test-phase-b@selfprint.one': 'E2E_TEST_PASSWORD',
+  'test-phase-awakening@selfprint.one': 'E2E_AWAKENING_PASSWORD',
   'test-voice@selfprint.one': 'E2E_VOICE_PASSWORD',
   'test-twin@selfprint.one': 'E2E_TWIN_PASSWORD',
   'tech-buddy@selfprint.one': 'E2E_TECHBUDDY_PASSWORD',
@@ -233,6 +235,26 @@ async function syncLifecycle(userId: string, user: (typeof TEST_USERS)[number]):
   console.log(`  ${error ? `⚠️  Lifecycle warning: ${error.message}` : `✅ Lifecycle TWIN_ALIVE: ${user.name}`}`);
 }
 
+// LIFECYCLE-AWAKENING-001 (23 ก.ย. 2026): seed user for MG-05-01 Birth Ceremony test.
+// This user must have lifecycle = AWAKENING (not TWIN_ALIVE) so that
+// /core-awakening page renders the birth phase (HologramBirth canvas) instead
+// of being recovery-redirected to /dashboard.
+async function syncAwakeningLifecycle(userId: string, user: (typeof TEST_USERS)[number]): Promise<void> {
+  if (user.stage !== 'awakening') return;
+  const { error } = await supabase
+    .from('user_lifecycle')
+    .upsert(
+      {
+        user_id: userId,
+        status: 'AWAKENING',
+        last_activity_at: new Date().toISOString(),
+        resumed_at: new Date(),
+      },
+      { onConflict: 'user_id' },
+    );
+  console.log(`  ${error ? `⚠️  Lifecycle warning: ${error.message}` : `✅ Lifecycle AWAKENING: ${user.name}`}`);
+}
+
 // --- Main ------------------------------------------------------------------
 
 async function main(): Promise<void> {
@@ -256,6 +278,7 @@ async function main(): Promise<void> {
       await upsertProfile(userId, user);
       await seedTwin(userId, user);
       await syncLifecycle(userId, user);
+      await syncAwakeningLifecycle(userId, user);
       successCount++;
     } else {
       failCount++;

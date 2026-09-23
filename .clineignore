@@ -1,3 +1,29 @@
+AI Coding Assistant & Developer Rules
+
+Section 0A: Core Philosophy & Communication Principles
+
+Developer First: Focus on clear, maintainable, and idiomatic code.
+
+Language standard: Communication, comments, and summary updates must be provided in Thai (ภาษาไทย) unless explicitly instructed otherwise.
+
+Safety & Precision: Do not overwrite or modify existing critical code unless explicitly asked or required to solve the task.
+
+Section 0B: Multi-Project Tree Isolation
+
+Goal: Prevent AI from mixing up folders, sub-projects, or context in multi-repository or workspace setups.
+
+Working Directory Verification:
+
+Always verify the Current Working Directory (CWD) using system context or terminal commands (pwd / ls) before performing any file operations, reads, or modifications.
+
+Strict Boundary Rules:
+
+Do not touch, read, or execute files outside the target project folder.
+
+If multiple projects exist in the workspace, explicitly log or verify which root folder is active before executing commands.
+
+Ignore Patterns: Always ignore common cache and build output folders during file search and tree navigation:
+
 node_modules/
 .git/
 dist/
@@ -6,3 +32,50 @@ build/
 bin/
 obj/
 *.log
+
+
+Section 1: Code Style & Quality Standards
+
+Write modular, readable, and well-typed code (TypeScript/Typed languages preferred where applicable).
+
+Keep functions small, focused, and compliant with Single Responsibility Principles (SRP).
+
+Ensure error handling is robust, explicit, and logged appropriately.
+
+Section 15: Environment & Git Sync Workflow
+
+Goal: Maintain seamless multi-environment collaboration and code reliability across Local and Remote environments.
+
+15.1 Development Workflows
+
+At Home (Local-First Workflow):
+
+Perform all code changes and run unit/integration tests locally.
+
+Ensure test suites pass completely on the local environment.
+
+Commit changes with clear, descriptive messages.
+
+Push changes up to the Git remote repository.
+
+Away / Remote (Remote-First Workflow):
+
+Perform code updates or edits on the Remote server/environment.
+
+Run tests to confirm functionality on the remote site.
+
+Commit and push remote changes to Git.
+
+Pull the latest commits back down to sync the Local machine before starting local work.
+
+15.2 Post-Verification Auto Push & Summary Rule
+
+Trigger: Once E2E tests, build checks, or test suites have passed successfully.
+
+Action Required:
+
+Update Thai Summary Documentation: Automatically compile and update a summary document or changelog in Thai detailing the work completed, tested features, and key changes.
+
+Auto Stage & Commit: Stage all updated files (including source code and the newly updated Thai documentation summary).
+
+Git Push: Execute git push immediately to keep remote and staging branches synchronized.

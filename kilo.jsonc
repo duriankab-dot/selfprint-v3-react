@@ -1,19 +1,23 @@
 {
   "$schema": "https://kilo.ai",
-  
-  // กำหนดสิทธิ์การเข้าถึงเครื่องมือ (Tool Permissions)
-  "permissions": {
-    "edit": [
-      // อนุญาตให้แก้ไขไฟล์แผนงานและสถานะตามกฎในไฟล์ Master Rules
-      { "action": "allow", "pattern": "plans/*.md" },
-      { "action": "allow", "pattern": ".kilo/plans/*.md" },
-      { "action": "allow", "pattern": "AI_WORK_STATE.md" },
-      { "action": "allow", "pattern": "AI_ENTRYPOINT.md" }
-    ]
+
+  // กำหนดสิทธิ์การใช้งาน Tools และการแก้ไขไฟล์
+  "tools": {
+    "edit": {
+      "allow": [
+        "plans/*.md",
+        ".kilo/plans/*.md",
+        "AI_WORK_STATE.md",
+        "AI_ENTRYPOINT.md"
+      ]
+    }
   },
 
-  // ผูกไฟล์กฎระเบียบที่คุณแนบมา เพื่อให้ AI อ่านและเชื่อฟังทุกครั้งก่อนเริ่มงาน
+  // ผูกไฟล์กฎระเบียบและไฟล์ที่จำเป็น เพื่อให้ AI อ่านตาม BOOTSTRAP ORDER ก่อนเริ่มงานเสมอ
   "instructions": [
-    "UNIVERSAL_MASTER_AI_RULES.md"
+    "AI_ENTRYPOINT.md",
+    ".clinerules",
+    "UNIVERSAL_MASTER_AI_RULES.md",
+    "AI_WORK_STATE.md"
   ]
 }
