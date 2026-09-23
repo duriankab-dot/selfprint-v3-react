@@ -142,6 +142,7 @@ jobs:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
           E2E_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
           E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          E2E_AWAKENING_PASSWORD: ${{ secrets.E2E_AWAKENING_PASSWORD }}
           # ROOT-CAUSE-FIX (20 ก.ย. 2026): global-setup.ts ต้องใช้ STAGING_URL
           # เพื่อฉีด auth session ลง origin เดียวกับที่ chromium-staging tests
           # รัน (selfprint-staging.pages.dev) — ถ้าไม่ส่งมา global-setup จะ
