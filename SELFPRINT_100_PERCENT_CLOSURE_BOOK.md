@@ -1,8 +1,8 @@
 # SELFPRINT — 100% CLOSURE BOOK (TH)
 
-**วันที่:** 23 กันยายน 2026
-**HEAD:** `d3c37f4e125e14b663a1a0659b25539390373d3d` (master, working tree clean)
-**สถานะ:** PRODUCT IMPLEMENTATION COMPLETE — READY FOR PRODUCT OWNER RELEASE DECISION
+**วันที่:** 23 กันยายน 2026 (ปรับครั้งที่ 2 — หลัง forensic CI #416)
+**HEAD:** `4dc8ccb` (docs) + E2E flaky fix ใน working tree (รอ commit)
+**สถานะ:** PRODUCT IMPLEMENTATION COMPLETE — READY FOR PRODUCT OWNER RELEASE DECISION (เงื่อนไข: E2E gate ต้องกลับมา stable บน CI ก่อน)
 **เอกสารอ้างอิงหลัก:** `SELFPRINT_CURRENT_STATE.md` · `SELFPRINT_100_GATE_EVIDENCE.md` · `SELFPRINT_PRODUCT_REALITY_MAP.md`
 
 ---
@@ -37,15 +37,22 @@ SELFPRINT ถือว่า **Product Complete** เมื่อครบทั
 
 ```text
 PRODUCT IMPLEMENTATION : 36/36 core features implemented (ไม่มี 🔴 MISSING)
-MASTER GATE            : 12 tests — ทั้งหมดผ่านใน CI ล่าสุด (MG-05-01 ย้ายไป fixture AWAKENING)
-E2E                    : 100 tests ใน 5 projects — CI GREEN (retries=1)
+MASTER GATE            : 12 tests — ทั้งหมดผ่านใน CI (MG-05-01 ใช้ fixture AWAKENING)
+E2E                    : 100 tests ใน 5 projects — ⚠️ GATE ไม่ STABLE (ผ่าน/พังสลับจาก flaky tests)
 UNIT                   : 1050/1050 (67 files)
-CI                     : ALL GREEN — Unit ✅ · Deploy Staging ✅ · E2E ✅ · Report ✅ · k6 SKIPPED (manual)
+CI                     : unit+deploy+report = ทำงานถูกต้องทุก run · E2E = FLAKY (รายละเอียด §4)
 DEPLOYMENT             : Staging = selfprint-staging.pages.dev (auto, --commit-hash) · Production = selfprint.one
 SECURITY               : RLS public.* ✅ · selfprint.* = service_role ผ่าน API (documented design)
 ACTUAL PRODUCT GAPS    : 0
-RELEASE BLOCKERS       : 0
+RELEASE BLOCKERS       : 0 (product) — E2E flakiness เป็น TEST-ONLY issue ที่ต้องปิดก่อน release commit
 ```
+
+**E2E flaky inventory (พิสูจน์ด้วย reproduce จริง — GATE_EVIDENCE §4.2):**
+
+| Test | สาเหตุ | สถานะ |
+|------|--------|-------|
+| UPLOAD-04 | state pollution (avatar persist → preview mode) | **แก้แล้ว** (waitForUploadReady) — รอ CI verify |
+| MG-07-01 / TWIN-04 / WORLD-01 | timing/data-dependent | known intermittent — ยังไม่แก้ |
 
 **การคำนวณเปอร์เซ็นต์ (objective):**
 
@@ -90,9 +97,9 @@ Denominator = 36 core features ที่ trace ได้จาก code จริ
 เอกสารนี้ **ไม่** อ้างว่า:
 
 1. ❌ k6 "PASS" ใน CI ล่าสุด — จริง ๆ = **SKIPPED (manual `workflow_dispatch` เท่านั้น)**; หลักฐานผ่านล่าสุดคือ staging run 14 ก.ย. 2026 (smoke 792/792 checks, error 0.00%)
-2. ❌ Accessibility ผ่าน audit — D-05 deferred ตาม spec, ยังไม่มี systematic audit
-3. ❌ Performance ผ่าน audit — D-06 deferred; มีเพียง FPS วัดจริง (TWIN-02 ~17.5fps headless, WORLD-05 27fps)
-4. ❌ E2E 100% ไร้ flake — มี 3 test ที่ timeout เป็นระยะ (MG-07-01, TWIN-04, WORLD-01) แต่ CI retries=1 ทำให้ gate ยัง GREEN
+2. ❌ E2E gate "GREEN" — **หลักฐานจริง: ไม่ stable** (#413 RED · #415 GREEN · #416 RED บน code เดียวกัน) — สาเหตุที่พิสูจน์ = flaky test (UPLOAD-04 แก้แล้ว · MG-07-01/TWIN-04/WORLD-01 ยังไม่แก้) ไม่ใช่ product defect
+3. ❌ Accessibility ผ่าน audit — D-05 deferred ตาม spec, ยังไม่มี systematic audit
+4. ❌ Performance ผ่าน audit — D-06 deferred; มีเพียง FPS วัดจริง (TWIN-02 ~17.5fps headless, WORLD-05 27-32fps)
 5. ❌ Tailwind ถูก compile — utility classes จำนวนมากไม่มีผล; UI ทำงานด้วย custom CSS (tracked P0-1, ไม่ใช่ release blocker เพราะ UI ที่ user เห็น verified ผ่าน E2E)
 6. ❌ selfprint.* schema มี RLS — โดย design ใช้ service_role ผ่าน API layer (P1-1, deferred ตาม spec row)
 
@@ -145,6 +152,8 @@ Denominator = 36 core features ที่ trace ได้จาก code จริ
 | k6 scripts broken | ปิด (K6V2-FIX-001, 14 ก.ย.) |
 | migration sequence breakpoint 011 | ปิด (forensic consolidation 035) |
 | staging service key revoked | ปิด (rotate ผ่าน wrangler 14 ก.ย.) |
+| UPLOAD-04 flaky (state pollution) | **แก้แล้วใน working tree** (waitForUploadReady) — รอ commit + CI verify |
+| MG-07-01 / TWIN-04 / WORLD-01 intermittent | **ยังเปิด** — timing/data-dependent, ไม่ใช่ product gap, ต้อง forensic แยกต่อ |
 
 ---
 

@@ -46,7 +46,10 @@ KEY/
 test-results/
 playwright-report/
 blob-report/
-e2e/.auth/user.json
+# SEC (23 ก.ย. 2026): ทั้งโฟลเดอร์ — storageState มี session token ของ test account
+# (user.json = TWIN_ALIVE, user-awakening.json = AWAKENING จาก Phase 5.11)
+# user-awakening.json เคยหลุดเข้า tracking เพราะกฎเดิมครอบแค่ user.json
+e2e/.auth/
 
 # Stray temp file — sandbox couldn't delete it (fuse-mount unlink bug),
 # safe to delete by hand on Windows whenever convenient

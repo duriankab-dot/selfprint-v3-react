@@ -51,18 +51,57 @@ Mobile Safari               12  (smoke)
 
 ---
 
-## 4. GATE ที่ 4 — CI RUN ล่าสุด (HEAD d3c37f4)
+## 4. GATE ที่ 4 — CI RUNS (หลักฐานจาก GitHub API จริง — ปรับปรุง 23 ก.ย. ครั้งที่ 2)
 
-```text
-✅ Unit Tests (Vitest)                  PASS   ~1m
-✅ Deploy Staging (Cloudflare Pages)    PASS   47s   (build ด้วย VITE_SUPABASE_* secrets → wrangler --commit-hash)
-✅ E2E Tests (Playwright)               PASS   5m   (retries=1, workers=1)
-✅ Generate Test Report                 PASS
-⏭️ Load Test - Smoke (k6)              SKIPPED (manual workflow_dispatch เท่านั้น)
-⏭️ Load Test - Full (k6)               SKIPPED (manual workflow_dispatch เท่านั้น)
-```
+| Run | Commit | ผล | ระยะ | สาเหตุที่พิสูจน์ได้ |
+|-----|--------|-----|------|---------------------|
+| #413 | `874abcd` | ❌ RED | 7m9s | E2E stage fail (test-level ไม่สอบจาก env นี้ — artifacts ต้องใช้ GitHub auth) |
+| #414 | `66e6b72` | ❌ RED | 3 attempts | `E2E_AWAKENING_PASSWORD` ไม่ถึง CI → globalSetup throw (แก้ด้วย `d3c37f4`) |
+| #415 | `d3c37f4` | ✅ GREEN | 6m45s | — |
+| #416 | `4dc8ccb` (docs-only) | ❌ RED | 7m4s | **UPLOAD-04 flaky** — พิสูจน์ด้านล่าง · unit ✅ deploy ✅ E2E ❌ (exit 1) |
 
 **Secret wiring ณ HEAD (testing.yml e2e-tests job):** `E2E_SUPABASE_URL` · `E2E_SUPABASE_ANON_KEY` · `E2E_TEST_PASSWORD` · `E2E_AWAKENING_PASSWORD` · `STAGING_URL` · `TEST_EMAIL/PASSWORD`
+
+### 4.1 Forensic CI #416 — ทำไม docs-only commit ถึง RED
+
+```text
+ขั้น OBSERVE (GitHub API, anonymous — repo public):
+  jobs: Deploy Staging SUCCESS (47s) · Unit SUCCESS · E2E Tests FAILURE (exit 1)
+        · Report SUCCESS · k6 SKIPPED ×2
+  annotations: "Process completed with exit code 1" (step Run E2E Tests)
+  artifacts (test-results / playwright-report) ต้องใช้ GitHub auth จึงเปิดได้
+  → env นี้เข้าไม่ได้ (กฎ no-credential-extraction) → ใช้การ reproduce แทน
+
+ขั้น ISOLATE:
+  diff #415→#416 = 4 ไฟล์ .md เท่านั้น → test behavior ต้องเหมือนกัน
+  reproduce ในเครื่อง (CI parity: workers=1 retries=1 staging เดียวกัน):
+  42 P / 1 F — UPLOAD-04 ล้ม 2 attempt ติดกัน (12s timeout รอ .file-upload-dropzone)
+
+ขั้น PROVE (page snapshot จาก error-context.md):
+  /th/twin-profile ณ ขณะ fail แสดง preview mode (img Preview + เปลี่ยนรูป/ลบรูป)
+  ไม่มี .file-upload-dropzone ใน DOM — เพราะ UPLOAD-03 อัปโหลด avatar ถาวร
+  FileUploadUI.tsx:152-187 = ternary preview ? preview-mode : dropzone
+  currentUrl resolve แบบ async (SYNC-FIX) → การรอแต่ dropzone = race กับ URL resolution
+  → อธิบาย #415 PASS / #416 FAIL บน test code เดียวกันครบถ้วน
+  = TEST-ONLY BUG (state pollution) — ไม่ใช่ product defect และไม่เกี่ยว docs commit
+
+ขั้น FIX + VERIFY:
+  e2e/upload.spec.ts: waitForUploadReady() รอ `.file-upload-dropzone, .file-upload-preview`
+  (input[type=file] มีอยู่เสมอ → semantics เดิม, assertion ทุกตัวคงเดิม)
+  ผล: upload suite 4 P / 1 S สองรอบติดกัน (32.2s, 28.2s) · UPLOAD-04 = 143ms, 64ms (จำกัด 5s)
+  สถานะ: แก้แล้วใน working tree — ต้อง commit และให้ CI run จริงปิด gate
+```
+
+### 4.2 Flaky inventory ที่พิสูจน์ (อัปเดต)
+
+| Test | หลักฐานว่า flaky | สถานะ |
+|------|------------------|-------|
+| UPLOAD-04 | #416 CI fail + reproduce ล้ม 2 attempts + snapshot | **แก้แล้ว** (รอ CI verify) |
+| MG-07-01 | local run 23 ก.ย. เช้า (ล้ม 1 ครั้ง) | known intermittent — ยังไม่แก้ |
+| TWIN-04 | local run 23 ก.ย. เช้า (ล้ม 1 ครั้ง) | known intermittent — ยังไม่แก้ |
+| WORLD-01 | local run 23 ก.ย. เช้า (ล้ม 1 ครั้ง) | known intermittent — ยังไม่แก้ |
+
+**ข้อควรระวังที่ซื่อสัตย์:** retries=1 ของ CI "ช่วย" flaky test ได้เฉพาะเมื่อล้มไม่เกิน 1 ครั้ง — UPLOAD-04 #416 ล้มทั้ง 2 attempt จึงทำ run ตก ทุกครั้งที่เห็น CI แดง ให้ตรวจ artifact/replicate ก่อนสรุปเสมอ ห้ามสรุปจากชื่อ commit
 
 ---
 
@@ -190,6 +229,11 @@ RLS:  public.* ทุกตาราง user-scoped มี policy auth.uid() = u
 API:  unified-handler verifyUser อ่าน user จาก JWT (ไม่รับ user_id จาก body — NOTIFAUTH-001 ปิดแล้ว)
 Unit: P0-B_SECURITY_VERIFICATION.test.ts อยู่ใน 1050 unit tests
 ข้อจำกัด (documented): selfprint.* schema ไม่มี RLS — เข้าผ่าน service_role + verifyUser (P1-1, deferred ตาม spec)
+SEC พบ/แก้ 23 ก.ย. 2026: e2e/.auth/user-awakening.json (storageState มี session token)
+  หลุดเข้า tracking เพราะ .gitignore เดิมครอบแค่ user.json → แก้: .gitignore = e2e/.auth/
+  ทั้งโฟลเดอร์ + git rm --cached (untrack ไม่ลบไฟล์) — ไฟล์ยัง regenerate โดย global-setup
+  หมายเหตุ: token เป็นของ staging test account เท่านั้น (ความเสี่ยงต่ำ) แต่ session token
+  ไม่ควรอยู่ใน git ตามหลักการ — ปิดจุดนี้ก่อนถือว่า secret hygiene เรียบร้อย
 ```
 
 ---

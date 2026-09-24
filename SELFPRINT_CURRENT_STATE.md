@@ -1,9 +1,9 @@
 # SELFPRINT — CURRENT STATE (TH)
 
-**Snapshot ณ:** 23 กันยายน 2026
-**HEAD:** `d3c37f4e125e14b663a1a0659b25539390373d3d`
-**Branch:** `master` · **Working tree:** clean
-**CI ล่าสุด:** ALL GREEN — 6 successful / 2 skipped (k6 smoke + k6 full = SKIPPED ตาม design)
+**Snapshot ณ:** 23 กันยายน 2026 (แก้ครั้งที่ 2 — หลัง forensic CI #416)
+**HEAD:** `4dc8ccb77f679679c2df3ca2b30e018d98c0e129` (docs commit) + E2E flaky fix (ยังไม่ commit ณ จุดเขียน)
+**Branch:** `master`
+**CI:** ⚠️ **UNSTABLE — ไม่ใช่ GREEN คงที่** (run #415 GREEN · run #416 RED — รายละเอียด §A.1)
 
 ---
 
@@ -11,19 +11,53 @@
 
 | รายการ | ค่า |
 |--------|-----|
-| HEAD SHA | `d3c37f4e125e14b663a1a0659b25539390373d3d` |
-| Commit message | "Fix work flow e2e" (เพิ่ม `E2E_AWAKENING_PASSWORD: ${{ secrets.E2E_AWAKENING_PASSWORD }}` ใน e2e-tests job) |
-| Working tree | clean — ไม่มี uncommitted change |
-| CI run ล่าสุด | ✅ Deploy Staging PASS (47s) · E2E Tests PASS (5m) · Report PASS · Unit PASS (1m) · k6 Full SKIPPED · k6 Smoke SKIPPED |
-| Staging | https://selfprint-staging.pages.dev — deploy จาก commit เดียวกับ run (`--commit-hash` provenance) |
-| Production | https://www.selfprint.one — Cloudflare Pages Git-connected |
+| HEAD SHA | `4dc8ccb` (docs-only: 4 ไฟล์ .md ภาษาไทย — ไม่มี code/test/config) |
+| Working tree | มี E2E flaky fix (e2e/upload.spec.ts) รอ commit |
+| Deploy Staging (run #416) | ✅ PASS — docs commit build+deploy ได้ปกติ (47s ระดับเดิม) |
+| Unit Tests (run #416) | ✅ PASS |
+| E2E Tests (run #416) | ❌ **FAIL (exit code 1)** — ไม่ใช่เพราะ docs commit (ดู §A.1) |
+| k6 | ⏭️ SKIPPED (manual `workflow_dispatch` เท่านั้น) |
 
-**Commit chain ที่เกี่ยวข้องกับ Phase 5.11:**
+### A.1 สาเหตุจริงของ CI #416 (forensic แล้ว — ไม่ใช่การเดา)
+
+```text
+หลักฐาน:
+1. Commit 4dc8ccb เปลี่ยนเฉพาะ .md 4 ไฟล์ → test code เหมือน run #415 ทุกไบต์
+2. GitHub API jobs: unit ✅ · deploy-staging ✅ · E2E Tests ❌ (step "Run E2E Tests", exit 1)
+3. Reproduce ในเครื่อง (CI parity: workers=1, retries=1, staging เดียวกัน):
+   42 PASS / 1 FAIL — UPLOAD-04 ล้ม 2 attempt ติดกัน
+   (MG-07-01, TWIN-04, WORLD-01 รอบนี้ผ่านหมด)
+4. Page snapshot ตอน UPLOAD-04 fail: /th/twin-profile แสดง "มีรูปแล้ว"
+   (img Preview + ปุ่ม เปลี่ยนรูป/ลบรูป) — .file-upload-dropzone ไม่มีใน DOM
+
+ROOT CAUSE (test-only): UPLOAD-03 อัปโหลด avatar ถาวร → FileUploadUI สลับ
+จาก dropzone เป็น preview mode → UPLOAD-04 ที่รอแต่ dropzone จึง race กับ
+async avatar URL resolution: บาง run จับ dropzone ทัน (ผ่าน) บาง run ไม่ทัน (พัง)
+= อธิบาย #415 PASS / #416 FAIL บน test code เดียวกันอย่างครบถ้วน
+
+FIX (test-only, ไม่ลด assertion): waitForUploadReady() รอทั้งสอง state
+(dropzone หรือ preview) — input[type=file] มีอยู่เสมอ → semantics เดิมครบ
+พิสูจน์แล้ว: upload suite ผ่าน 2 รอบติดกัน (32.2s, 28.2s)
+```
+
+### A.1.1 CI run history ที่เกี่ยวข้อง
+
+| Run | Commit | ผล | สาเหตุ |
+|-----|--------|-----|--------|
+| #413 | `874abcd` | ❌ RED (7m9s) | E2E stage (รายละเอียด test-level ไม่มี log ให้ตรวจจาก env นี้) |
+| #414 | `66e6b72` | ❌ RED (attempt 3) | E2E_AWAKENING_PASSWORD ไม่ถึง CI (แก้ด้วย d3c37f4) |
+| #415 | `d3c37f4` | ✅ GREEN | — |
+| #416 | `4dc8ccb` | ❌ RED | UPLOAD-04 flaky (state pollution — **แก้แล้วใน fix นี้**) |
+
+**ข้อสรุปที่ซื่อสัตย์:** E2E gate **ไม่ stable** — ผ่าน/พังสลับกันจาก flaky tests ไม่ใช่ความเปลี่ยนแปลงของ code
+
+**Commit chain Phase 5.11:**
 
 ```text
 d3c37f4  Fix work flow e2e                        ← E2E_AWAKENING_PASSWORD → CI env
 66e6b72  Phase 5.11 execution mapping (MG-05-01)  ← grepInvert + awakening project + combined global setup
 874abcd  Fix src_pages_CoreAwakening_tsx          ← lifecycle-race guard (ห้าม downgrade TWIN_ALIVE)
+4dc8ccb  Phase 6 SSOT docs (ภาษาไทย)               ← เอกสารเท่านั้น ไม่แตะ code
 ```
 
 ---
@@ -53,7 +87,23 @@ heading: true ("⚡ ฝาแฝดของคุณกำลังตื่น
 PASS REASON: headingVisible (intro phase ของ AWAKENING user — ไม่มี recovery redirect)
 ```
 
-**chromium-staging local full run (23 ก.ย.):** 33 PASS / 3 FAIL / 12 SKIP — FAIL 3 ตัว = timing/data dependency (MG-07-01, TWIN-04, WORLD-01), CI retries=1 ทำให้ gate GREEN
+**chromium-staging local CI-parity runs (23 ก.ย. — 2 รอบ):**
+
+| Run | ผล | Flaky test ที่ล้ม |
+|-----|-----|-------------------|
+| เช้า | 33 P / 3 F / 12 S | MG-07-01, TWIN-04, WORLD-01 (timing/data) |
+| บ่าย (หลังพบ #416 red) | 42 P / 1 F / 5 S | **UPLOAD-04** (state pollution — พิสูจน์ root cause แล้ว) |
+
+**UPLOAD suite หลัง fix:** 4 P / 0 F / 1 S สองรอบติดกัน (UPLOAD-04 วัด 143ms, 64ms — threshold 5s)
+
+**สรุป flaky set ที่พิสูจน์ด้วย evidence:**
+
+| Test | ลักษณะ | สถานะ |
+|------|--------|-------|
+| UPLOAD-04 | state pollution (avatar persist → preview mode) | **แก้แล้ว** (waitForUploadReady) — รอ verify ด้วย CI run จริง |
+| MG-07-01 | data-dependent timeout (getDecisionLogs) | known intermittent — ยังไม่แก้ |
+| TWIN-04 | timing timeout (decision → insight) | known intermittent — ยังไม่แก้ |
+| WORLD-01 | timing timeout (worlds container) | known intermittent — ยังไม่แก้ |
 
 ---
 
@@ -158,7 +208,8 @@ Prerequisites ถ้าจะรัน: BASE_URL + SUPABASE_URL + ANON_KEY + TES
 
 ## J. สรุปสถานะเดียว
 
-> **SELFPRINT Product Implementation Complete (36/36) · Actual Product Gap = 0 · Release Blocker = 0 ·
-> งานที่เหลือคือ verification/documentation/operations ตามรายการ §E–§G และ product decision ของเจ้าของ**
+> **SELFPRINT Product Implementation Complete (36/36) · Actual Product Gap = 0 ·
+> Product Release Blocker = 0 แต่ E2E gate ยัง UNSTABLE (flaky: UPLOAD-04 แก้แล้ว-รอ CI verify,
+> MG-07-01/TWIN-04/WORLD-01 ยังไม่แก้) — ต้อง commit fix + ให้ CI run จริงยืนยันก่อนถือว่า gate เขียวขาว**
 
-**FINAL STATUS: READY FOR PRODUCT OWNER RELEASE DECISION**
+**FINAL STATUS: READY FOR PRODUCT OWNER RELEASE DECISION** (เงื่อนไข: E2E gate ต้องกลับมา stable บน CI ก่อน release commit จริง)

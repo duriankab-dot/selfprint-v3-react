@@ -144,6 +144,17 @@ Seed: scripts/seed-test-users.ts (TEST_USERS 7 ราย — stage: active×5, a
 
 Vitest: 1050 tests / 67 files
 k6: loadtests/ (manual workflow_dispatch)
+
+⚠️ CI E2E gate = ไม่ STABLE (พิสูจน์แล้ว):
+  #413 RED · #415 GREEN · #416 RED — code เดียวกัน (docs-only diff ระหว่าง #415/#416)
+  สาเหตุที่พิสูจน์ = flaky test ไม่ใช่ product:
+    UPLOAD-04  — state pollution: UPLOAD-03 persist avatar → FileUploadUI สลับเป็น
+                 preview mode → การรอแต่ dropzone race กับ async currentUrl
+                 → แก้แล้วด้วย waitForUploadReady() (รอทั้งสอง state, assertion คงเดิม)
+                 upload suite ผ่าน 2 รอบติดกัน (32.2s, 28.2s)
+    MG-07-01 / TWIN-04 / WORLD-01 — timing/data-dependent (ล้มเป็นครั้งคราว, retries=1
+                 ช่วยได้เมื่อล้ม ≤1 attempt; UPLOAD-04 ใน #416 ล้มทั้ง 2 → run ตก)
+  กฎ: เห็น CI แดง → ตรวจ artifact/replicate ก่อนสรุป — ห้ามสรุปจากชื่อ commit
 ```
 
 ---
@@ -173,7 +184,9 @@ Seed test-phase-b: TWIN_ALIVE + personal_context ว่าง → twinState=awak
 Historical ปิดแล้ว   : CI #406 STAGING_URL · CI-BUILD-ENV-001 · MG-05-01 redirect ·
                        E2E_AWAKENING_PASSWORD CI wiring · lifecycle downgrade ·
                        typecheck:functions · k6 scripts · migration 011 breakpoint ·
-                       staging service key
+                       staging service key · UPLOAD-04 flaky (state pollution — แก้
+                       waitForUploadReady, รอ CI verify)
+ยังเปิด (test-only) : MG-07-01 · TWIN-04 · WORLD-01 — intermittent timing, แยก forensic ต่อ
 ```
 
 ---

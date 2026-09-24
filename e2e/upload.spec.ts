@@ -108,6 +108,33 @@ function makePngBytes(): Buffer {
 
 const PNG_FIXTURE = makePngBytes();
 
+/**
+ * UPLOAD-STATE-FIX (23 ก.ย. 2026) — root cause of CI run #416 UPLOAD-04 failure.
+ *
+ * FileUploadUI renders TWO valid states (src/components/features/FileUploadUI.tsx:152-187):
+ *   - `.file-upload-dropzone`  when NO avatar exists (preview === null)
+ *   - `.file-upload-preview`   when an avatar IS persisted (preview === currentUrl)
+ *
+ * `currentUrl` resolves ASYNCHRONOUSLY after mount (SYNC-FIX effect), so the
+ * dropzone is only visible during a short window before the profile-picture
+ * query resolves. UPLOAD-03 intentionally persists an avatar across reloads,
+ * so any later test waiting ONLY for the dropzone races that async resolution
+ * and is order-dependent: it passes when it catches the pre-resolution window
+ * and fails when the URL resolves first (exactly the intermittency between
+ * CI #415 PASS and #416 FAIL on identical test code).
+ *
+ * The hidden `input[type="file"]` exists in BOTH states (FileUploadUI.tsx:144-150),
+ * so setInputFiles works regardless. Contract unchanged: we still require the
+ * real upload UI to be mounted before interacting; we simply accept both
+ * legitimate render states instead of racing one of them.
+ */
+async function waitForUploadReady(page: Page): Promise<void> {
+  await page
+    .locator('.file-upload-dropzone, .file-upload-preview')
+    .first()
+    .waitFor({ state: 'visible', timeout: 12000 });
+}
+
 // BEFORE-EACH-GATE-001: auth/session sanity — deployed dashboard must render.
 test.beforeEach(async ({ page }) => {
   await page.goto('/en/dashboard', { waitUntil: 'load' });
@@ -138,8 +165,7 @@ test('UPLOAD-01 Upload profile picture — select → preview → confirm → ve
   }
 
   const fileInput = page.locator('input[type="file"]');
-  const dropzone = page.locator('.file-upload-dropzone');
-  await dropzone.waitFor({ state: 'visible', timeout: 12000 });
+  await waitForUploadReady(page);
 
   // Select a real image through the actual file input.
   await fileInput.setInputFiles({
@@ -173,8 +199,7 @@ test('UPLOAD-02 Image validation — rejects invalid formats', async ({ page }) 
   }
 
   const fileInput = page.locator('input[type="file"]');
-  const dropzone = page.locator('.file-upload-dropzone');
-  await dropzone.waitFor({ state: 'visible', timeout: 12000 });
+  await waitForUploadReady(page);
 
   // Invalid type: a text file must be rejected by the real validator.
   await fileInput.setInputFiles({
@@ -207,8 +232,7 @@ test('UPLOAD-03 Uploaded picture persists — reload shows same picture', async 
   }
 
   const fileInput = page.locator('input[type="file"]');
-  const dropzone = page.locator('.file-upload-dropzone');
-  await dropzone.waitFor({ state: 'visible', timeout: 12000 });
+  await waitForUploadReady(page);
 
   await fileInput.setInputFiles({
     name: 'persist.png',
@@ -255,8 +279,7 @@ test('UPLOAD-04 Upload performance — large image < 5s', async ({ page }) => {
   }
 
   const fileInput = page.locator('input[type="file"]');
-  const dropzone = page.locator('.file-upload-dropzone');
-  await dropzone.waitFor({ state: 'visible', timeout: 12000 });
+  await waitForUploadReady(page);
 
   // Measure the actual upload pipeline duration (select → upload done).
   const t0 = Date.now();
