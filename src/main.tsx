@@ -36,7 +36,12 @@ const queryClient = new QueryClient({
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/sw.js', { scope: '/' })
+      // SW-MODULE-001 (24 ก.ย. 2026): sw.js ถูก build เป็น ES module
+      // (vite-plugin-pwa strategies:'injectManifest', format "es") แต่เคย
+      // register แบบ classic script → "Uncaught SyntaxError: Unexpected
+      // token 'export' (at sw.js)" ทุก load และ SW สถานะ redundant
+      // → ต้องประกาศ type:'module' ไม่งั้น PWA/precaching พังทั้งระบบ
+      .register('/sw.js', { scope: '/', type: 'module' })
       .then((registration) => {
         // Listen for SW updates — notify user to reload
         registration.addEventListener('updatefound', () => {

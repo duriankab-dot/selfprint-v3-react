@@ -162,6 +162,25 @@ test.describe('Critical Journey — Landing to Auth', () => {
     expect(landingTime, `Landing took ${landingTime}ms`).toBeLessThan(6000);
     console.log('CJ-06 ✓ Performance acceptable');
   });
+
+  // AUDIO-CRASH-001 (24 ก.ย. 2026): ปุ่ม 🎵 บน NavBar เปิด AudioSettings
+  // ซึ่งเรียก useAudio() — บน public/marketing pages เดิมไม่มี AudioProvider
+  // → throw → ErrorBoundary กลืนทั้งหน้า ("เกิดข้อผิดพลาดที่ไม่คาดคิด")
+  // ผู้ใช้จริงเจอหน้าตายทันทีที่คลิกปุ่มเพลง — test นี้กัน regression
+  test('CJ-07 Audio settings opens on landing without crashing', async ({ page }) => {
+    await page.goto('/th', { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+    const audioBtn = page.locator('button[aria-label="Open audio settings"]').first();
+    await expect(audioBtn).toBeVisible({ timeout: 10000 });
+    await audioBtn.click();
+
+    // ห้ามพังไปที่ ErrorBoundary
+    await expect(page.locator('text=เกิดข้อผิดพลาดที่ไม่คาดคิด')).toHaveCount(0);
+
+    // แผงตั้งค่าเสียงต้องเปิดได้จริง
+    await expect(page.locator('.audio-settings-modal').first()).toBeVisible({ timeout: 5000 });
+    console.log('CJ-07 ✓ Audio settings opens without crash');
+  });
 });
 
 test.describe('Critical Journey — Mobile', () => {

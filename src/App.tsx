@@ -30,6 +30,9 @@ const WorldProvider = lazy(() =>
 );
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+// AUDIO-CRASH-001: static import (ไม่ lazy) เพื่อใช้ใน skip-branch ของ
+// ConditionalPrivateProviders — ห้าม suspend ตอน first paint ของ landing
+import { AudioProvider as StaticAudioProvider } from './context/AudioContext';
 const ExperienceProvider = lazy(() =>
   import('./context/ExperienceContext').then((m) => ({ default: m.ExperienceProvider }))
 );
@@ -341,12 +344,16 @@ function ConditionalPrivateProviders({ children }: { children: React.ReactNode }
   const auth = useContext(AuthContext);
   const skip = !auth?.session && MARKETING_PATH_RE.test(window.location.pathname);
   if (skip) {
-    // No session on a marketing route: children contains only
-    // ConditionalTwinEvolution (self-guards on session) + <Routes> — the
-    // overlays below (ContextualPopup/TwinEvolutionSceneWrapper) would call
-    // usePopup()/useEvolution() without their providers and crash, so they
-    // render exclusively inside the mounted stack.
-    return <>{children}</>;
+    // AUDIO-CRASH-001 (24 ก.ย. 2026): public/marketing pages ยังต้องมี
+    // AudioProvider ตัวเดียว — NavBar มีปุ่ม 🎵 (AudioSettingsButton) ที่เปิด
+    // AudioSettings ซึ่งเรียก useAudio() ทันทีตอน mount ถ้าไม่มี provider
+    // → throw "useAudio must be used within AudioProvider" → ErrorBoundary
+    // กลืนทั้งหน้า (ผู้ใช้คลิกปุ่มเพลงบน landing แล้วเห็น
+    // "เกิดข้อผิดพลาดที่ไม่คาดคิด" = หน้าตายทั้งหน้า)
+    // AudioContext เป็น state จาก localStorage ล้วน ปลอดภัยบน public pages
+    // (ส่วน AI/Hub/World/Subscription/Experience ยัง skip เหมือนเดิม —
+    //  hook เหล่านั้น throw ถ้าไม่มี provider และหน้า marketing ไม่ใช้)
+    return <StaticAudioProvider>{children}</StaticAudioProvider>;
   }
   return (
     // PRVLAZY-001: providers are now React.lazy — Suspense with fallback=null.
