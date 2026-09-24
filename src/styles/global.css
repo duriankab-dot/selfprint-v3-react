@@ -82,14 +82,22 @@ body {
   color: var(--color-text-primary);
   background-color: var(--color-bg-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
-  filter: saturate(var(--saturation, 100%)) brightness(var(--brightness, 100%));
-  opacity: var(--opacity-bg, 1);
-  /* THAITYPE-001 (7 ก.ย. 2026, Phase 5.3): long-word safety net — a single
-     unbroken run (long URL, email, compound token) that doesn't fit its
-     container now wraps instead of overflowing/clipping it. Does not
-     affect normal Thai text: the browser's own Thai line-breaking already
-     finds syllable-cluster boundaries well before this rule would ever
-     need to fire mid-word. */
+  /* SCROLL-BUG-001 (24 ก.ย. 2026): ถอด `filter` และ `opacity` ออกจาก body
+     สาเหตุที่พิสูจน์แล้ว (causal proof บน deployed staging,
+     scripts/scroll-diagnostic7.mjs): `filter` ใดๆ และ `opacity < 1` บน body
+     ทำให้ body กลายเป็น containing block ของ `position: fixed` descendants
+     (CSS spec เหมือนกับ transform) → BottomNav / FloatingSelfprintChat /
+     NavBar(fixed) ถูกยึดกับกล่อง body (สูงเท่าเอกสารทั้งหน้า 5886px) แทน
+     viewport → บน dashboard (สูง 2443px, viewport 844px): sp-bottomnav
+     วาดที่ y=2382 (ใต้จอ 2.8 จอ) = nav หลักและปุ่มแชทลอยมองไม่เห็น,
+     NavBar หน้า landing เลื่อนหายไปกับเนื้อหา = ผู้ใช้เห็นหน้า "ตาย"
+     พอเซ็ต filter:none + opacity:1 ทันที → bottomnav y=783 (ขอบล่างจอพอดี)
+     mood-themes.css ยังกำหนด --saturation/--brightness/--opacity-bg อยู่
+     (ปลอดภัย — ไม่มีผล visual ถ้าไม่มี consumer), mood ยังเปลี่ยนธีมผ่าน
+     --accent-* / --mood-bg-* เหมือนเดิม ส่วน mood tint (saturation/brightness/
+     opacity) ถูกถอดออกเพื่อไม่ให้พัง fixed positioning อีก
+     ห้ามใส่ filter/opacity/transform/perspective/will-change บน html/body
+     ในอนาคต จะทำให้ fixed chrome ของแอปพังซ้ำแบบเดิม */
   overflow-wrap: break-word;
 }
 
