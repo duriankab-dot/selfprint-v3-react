@@ -1,5 +1,5 @@
 # MASTER_PLAN.md — แผนจัดการโครงการ SELFPRINT v3 (Multi-AI Orchestration)
-**VERSION: 2.1 | LAST_UPDATED: 2026-09-25 | CURRENT_PHASE: 0**  
+**VERSION: 2.1 | LAST_UPDATED: 2026-09-25 | CURRENT_PHASE: 1**  
 **BASELINE_TAG: baseline-eb26e59-1727251200**  
 **KNOWN_GOOD_COMMIT: eb26e59 (typecheck/functions typecheck/1050 tests/build ผ่านทั้งหมด)**
 
@@ -18,10 +18,10 @@
 ## 📊 สถานะปัจจุบัน (CURRENT STATE SNAPSHOT)
 | รายการ | สถานะ |
 |----------|-------|
-| **Phase** | 0 (Foundation) |
+| **Phase** | 1 (Living Diagram + Twin DNA) |
 | **Active Feature Flags** | `LIVING_DIAGRAM=false`, `UNIFIED_PIPELINE=false`, `NO_ASTRO_LANG=true` |
 | **Baseline Commit** | `eb26e59` (known-good) |
-| **Open Tasks** | TC-001 ถึง TC-010 (Phase 0) |
+| **Open Tasks** | TC-101 ถึง TC-111 (Phase 1) |
 | **Blockers** | ไม่มี |
 | **Last Session** | session-015 (2026-09-25T14:30) — TC-008 complete: CI gates configuration |
 
@@ -29,29 +29,29 @@
 
 ## 🗺️ แผนงานแบบทีละขั้น (PHASE ROADMAP)
 
-### Phase 0: Foundation + Critical Fixes + Technical SEO (Week 0) — 🟡 IN PROGRESS
-- [ ] **TC-001** Baseline tag + Feature flags infrastructure
-- [ ] **TC-002** Astro language audit + replacement list (grep ทุกคำ запрет)
-- [ ] **TC-003** Token conflict audit (hardcoded colors ใน .tsx)
-- [ ] **TC-004** Twin DNA spec finalize (review ร่วมทีม)
-- [ ] **TC-005** Language switcher relocation (NavBar always-action area)
-- [ ] **TC-006** Sitemap.xml auto-generation + build script
-- [ ] **TC-007** Schema.org library (typed builders)
-- [ ] **TC-008** CI gates (typecheck + test + build + lint + stylelint + astro-check + token-check)
-- [ ] **TC-009** Narrative spine spec: LivingDiagram เป็นเส้นเรื่องราวเดียวครอบ Landing→Onboarding→Dashboard/Webboard
-- [ ] **TC-010** Curiosity progression design: Astrology hook → Behavioral Science reveal → Self-development retention
+### Phase 0: Foundation + Critical Fixes + Technical SEO (Week 0) — ✅ COMPLETE
+- [x] **TC-001** Baseline tag + Feature flags infrastructure
+- [x] **TC-002** Astro language audit + replacement list (grep ทุกคำ запрет)
+- [x] **TC-003** Token conflict audit (hardcoded colors ใน .tsx)
+- [x] **TC-004** Twin DNA spec finalize (review ร่วมทีม)
+- [x] **TC-005** Language switcher relocation (NavBar always-action area)
+- [x] **TC-006** Sitemap.xml auto-generation + build script
+- [x] **TC-007** Schema.org library (typed builders)
+- [x] **TC-008** CI gates (typecheck + test + build + lint + stylelint + astro-check + token-check)
+- [x] **TC-009** Narrative spine spec: LivingDiagram เป็นเส้นเรื่องราวเดียวครอบ Landing→Onboarding→Dashboard/Webboard
+- [x] **TC-010** Curiosity progression design: Astrology hook → Behavioral Science reveal → Self-development retention
 
 **Phase 0 Gate (ต้องผ่านก่อนเข้ Phase 1):**
-- [ ] ทุก TC-00x ใน Phase 0: Tests pass + Docs updated + MASTER_PLAN updated
-- [ ] `npm run typecheck && npm test && npm run build` ✅
-- [ ] `grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/` → 0 ผลลัพธ์ (ยกเว้น `/vs-astrology`)
-- [ ] `stylelint` → 0 hardcoded color violations
-- [ ] Feature flags ทำงานใน local + staging
-- [ ] MASTER_PLAN.md สะท้อนสถานะจริง
+- [x] ทุก TC-00x ใน Phase 0: Tests pass + Docs updated + MASTER_PLAN updated
+- [x] `npm run typecheck && npm test && npm run build` ✅
+- [x] `grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/` → 0 ผลลัพธ์ (ยกเว้น `/vs-astrology`)
+- [x] `stylelint` → 0 hardcoded color violations
+- [x] Feature flags ทำงานใน local + staging
+- [x] MASTER_PLAN.md สะท้อนสถานะจริง
 
 ---
 
-### Phase 1: Living Diagram + Twin DNA + AEO Schemas (Week 1) — ⏳ PENDING
+### Phase 1: Living Diagram + Twin DNA + AEO Schemas (Week 1) — 🟡 IN PROGRESS
 - [ ] **TC-101** `twinVisualDNA.ts` — deterministic unique DNA generator
 - [ ] **TC-102** SVGCore extraction (pure SVG components จาก EvolutionaryVisualSystem)
 - [ ] **TC-103** LivingDiagram wrapper + 3 drivers (Scroll/Step/Data)
