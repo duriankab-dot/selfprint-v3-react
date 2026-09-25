@@ -1,35 +1,61 @@
-# Selfprint SEO Configuration
+# SELFPRINT — robots.txt
+# Generated automatically
+
 User-agent: *
-Allow: /
-Allow: /en/
 Allow: /th/
-Allow: /share/
-Allow: /compare
-Allow: /llms.txt
-
-# Disallow private areas
-Disallow: /admin/
+Allow: /en/
+Disallow: /th/dashboard
+Disallow: /en/dashboard
+Disallow: /th/worlds
+Disallow: /en/worlds
+Disallow: /th/chat
+Disallow: /en/chat
+Disallow: /th/twin
+Disallow: /en/twin
+Disallow: /th/twin-profile
+Disallow: /en/twin-profile
+Disallow: /th/twin/settings
+Disallow: /en/twin/settings
+Disallow: /th/twin/personality
+Disallow: /en/twin/personality
+Disallow: /th/intelligence
+Disallow: /en/intelligence
+Disallow: /th/analysis
+Disallow: /en/analysis
+Disallow: /th/brief
+Disallow: /en/brief
+Disallow: /th/badges
+Disallow: /en/badges
+Disallow: /th/settings
+Disallow: /en/settings
+Disallow: /th/explore
+Disallow: /en/explore
+Disallow: /th/activities
+Disallow: /en/activities
+Disallow: /th/me
+Disallow: /en/me
+Disallow: /th/voice
+Disallow: /en/voice
+Disallow: /th/life-hubs
+Disallow: /en/life-hubs
+Disallow: /th/decisions
+Disallow: /en/decisions
+Disallow: /th/decision-log
+Disallow: /en/decision-log
+Disallow: /th/menu
+Disallow: /en/menu
+Disallow: /th/core-awakening
+Disallow: /en/core-awakening
+Disallow: /th/chat/nova
+Disallow: /en/chat/nova
+Disallow: /th/chat/twin
+Disallow: /en/chat/twin
+Disallow: /th/tarot
+Disallow: /en/tarot
+Disallow: /th/palmistry
+Disallow: /en/palmistry
+Disallow: /th/community
+Disallow: /en/community
 Disallow: /api/
-Disallow: /*.json$
 
-# Allow AI crawlers for indexing
-User-agent: GPTBot
-Allow: /
-
-User-agent: ClaudeBot
-Allow: /
-
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 1
-
-# Sitemap location
 Sitemap: https://selfprint.one/sitemap.xml
-Sitemap: https://selfprint.one/sitemap-th.xml

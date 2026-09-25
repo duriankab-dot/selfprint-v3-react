@@ -23,7 +23,8 @@
     "e2e:resume-only": "ts-node scripts/e2e-with-supabase.ts --resume-only",
     "e2e:pause-only": "ts-node scripts/e2e-with-supabase.ts --pause-only",
     "weekly:resume": "ts-node scripts/weekly-supabase-resume.ts",
-    "seed:test-users": "ts-node scripts/seed-test-users.ts"
+    "seed:test-users": "ts-node scripts/seed-test-users.ts",
+    "sitemap": "tsx scripts/generate-sitemap.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

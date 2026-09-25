@@ -23,7 +23,7 @@
 | **Baseline Commit** | `eb26e59` (known-good) |
 | **Open Tasks** | TC-001 ถึง TC-010 (Phase 0) |
 | **Blockers** | ไม่มี |
-| **Last Session** | session-012 (2026-09-25T13:30) — TC-005 complete: language switcher relocation |
+| **Last Session** | session-013 (2026-09-25T13:45) — TC-006 complete: sitemap generator |
 
 ---
 
@@ -128,7 +128,7 @@
 | TC-003 | Token conflict audit | 0 | P0 | 1 ชม. | [x] token-violations.txt [x] token-fix-list.csv [x] MASTER_PLAN updated |
 | TC-004 | Twin DNA spec finalize | 0.5 | P0 | 2 ชม. | [x] TWIN_DNA_SPEC.md [x] team review [x] MASTER_PLAN updated |
 | TC-005 | Language switcher relocation | 0 | P1 | 1 ชม. | [x] NavBar.tsx updated [x] LanguageSwitcher compact variant [x] MASTER_PLAN updated |
-| TC-006 | Sitemap generator | 0 | P1 | 2 ชม. | [ ] generate-sitemap.ts [ ] build script [ ] public/sitemap.xml [ ] MASTER_PLAN updated |
+| TC-006 | Sitemap generator | 0 | P1 | 2 ชม. | [x] generate-sitemap.ts [x] build script [x] public/sitemap.xml [x] MASTER_PLAN updated |
 | TC-007 | Schema.org library | 0 | P1 | 3 ชม. | [ ] schemas.ts (typed builders) [ ] tests [ ] MASTER_PLAN updated |
 | TC-008 | CI gates configuration | 0 | P0 | 2 ชม. | [ ] phase-gate.yml [ ] pre-push hook [ ] validate scripts [ ] MASTER_PLAN updated |
 | TC-009 | Narrative spine spec | 0 | P0 | 2 ชม. | [ ] LIVING_DIAGRAM_SPEC.md [ ] MASTER_PLAN updated |
