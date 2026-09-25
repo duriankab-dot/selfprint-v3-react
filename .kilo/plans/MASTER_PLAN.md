@@ -23,7 +23,7 @@
 | **Baseline Commit** | `eb26e59` (known-good) |
 | **Open Tasks** | TC-001 ถึง TC-010 (Phase 0) |
 | **Blockers** | ไม่มี |
-| **Last Session** | session-010 (2026-09-25T13:00) — TC-003 complete: token audit + fix list |
+| **Last Session** | session-011 (2026-09-25T13:15) — TC-004 complete: Twin DNA spec |
 
 ---
 
@@ -126,7 +126,7 @@
 | TC-001 | Baseline tag + Feature flags infra | 0 | P0 | 30 นาที | [x] git tag [x] featureFlags.ts [x] env vars [x] MASTER_PLAN updated |
 | TC-002 | Astro language audit + replace list | 0 | P0 | 1 ชม. | [x] astro-audit.txt [x] replacement-map.csv [x] MASTER_PLAN updated |
 | TC-003 | Token conflict audit | 0 | P0 | 1 ชม. | [x] token-violations.txt [x] token-fix-list.csv [x] MASTER_PLAN updated |
-| TC-004 | Twin DNA spec finalize | 0.5 | P0 | 2 ชม. | [ ] TWIN_DNA_SPEC.md [ ] team review [ ] MASTER_PLAN updated |
+| TC-004 | Twin DNA spec finalize | 0.5 | P0 | 2 ชม. | [x] TWIN_DNA_SPEC.md [x] team review [x] MASTER_PLAN updated |
 | TC-005 | Language switcher relocation | 0 | P1 | 1 ชม. | [ ] NavBar.tsx updated [ ] LanguageSwitcher compact variant [ ] MASTER_PLAN updated |
 | TC-006 | Sitemap generator | 0 | P1 | 2 ชม. | [ ] generate-sitemap.ts [ ] build script [ ] public/sitemap.xml [ ] MASTER_PLAN updated |
 | TC-007 | Schema.org library | 0 | P1 | 3 ชม. | [ ] schemas.ts (typed builders) [ ] tests [ ] MASTER_PLAN updated |
