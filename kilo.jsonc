@@ -1,7 +1,5 @@
 {
   "$schema": "https://kilo.ai",
-
-  // กำหนดสิทธิ์การใช้งาน Tools และการแก้ไขไฟล์
   "tools": {
     "edit": {
       "allow": [
@@ -12,8 +10,6 @@
       ]
     }
   },
-
-  // ผูกไฟล์กฎระเบียบและไฟล์ที่จำเป็น เพื่อให้ AI อ่านตาม BOOTSTRAP ORDER ก่อนเริ่มงานเสมอ
   "instructions": [
     "AI_ENTRYPOINT.md",
     ".clinerules",
