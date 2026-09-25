@@ -131,7 +131,7 @@ const ACTIVITY_CATEGORIES: ActivityCategory[] = [
     emoji: '🔍',
     labelTh: 'ค้นพบ',
     labelEn: 'Discover',
-    color: '#8B5CF6',
+    color: 'var(--color-accent-purple)',
     activities: [
       {
         id: 'tarot',
@@ -188,7 +188,7 @@ const ACTIVITY_CATEGORIES: ActivityCategory[] = [
     emoji: '⚖️',
     labelTh: 'ตัดสินใจ',
     labelEn: 'Decide',
-    color: '#F59E0B',
+    color: 'var(--color-accent-amber)',
     activities: [
       {
         id: 'decision-coach',
@@ -223,7 +223,7 @@ const ACTIVITY_CATEGORIES: ActivityCategory[] = [
     emoji: '🤝',
     labelTh: 'เชื่อมต่อ',
     labelEn: 'Connect',
-    color: '#10B981',
+    color: 'var(--color-accent-emerald)',
     activities: [
       {
         id: 'community',
@@ -278,7 +278,7 @@ const ACTIVITY_CATEGORIES: ActivityCategory[] = [
     emoji: '🌱',
     labelTh: 'เติบโต',
     labelEn: 'Grow',
-    color: '#06B6D4',
+    color: 'var(--color-accent-cyan)',
     activities: [
       {
         id: 'view-badges',
@@ -344,7 +344,7 @@ const ACTIVITY_CATEGORIES: ActivityCategory[] = [
     emoji: '☀️',
     labelTh: 'ประจำวัน',
     labelEn: 'Daily',
-    color: '#EF4444',
+    color: 'var(--color-accent-red)',
     activities: [
       {
         id: 'morning-intention',
@@ -514,7 +514,7 @@ export default function ExplorePage() {
             padding: 24,
             marginBottom: 20,
             backdropFilter: 'blur(var(--glass-blur, 12px))',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 2px 8px var(--color-shadow), inset 0 1px 0 var(--color-border-light)',
           }}>
             <div style={{ textAlign: 'center', marginBottom: 4 }}>
               {/* Pattern ID badge แทน ☯ emoji */}
@@ -630,7 +630,7 @@ export default function ExplorePage() {
             padding: 24,
             marginBottom: 20,
             backdropFilter: 'blur(var(--glass-blur, 12px))',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 2px 8px var(--color-shadow), inset 0 1px 0 var(--color-border-light)',
           }}>
             <div style={{ fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 8 }}>
               {isTh ? 'คำถามประจำวัน' : "Today's question"}
@@ -677,7 +677,7 @@ export default function ExplorePage() {
                       background: 'var(--color-accent-primary)',
                       border: 'none',
                       borderRadius: 12,
-                      color: '#fff',
+                      color: 'var(--color-text-on-accent)',
                       fontSize: 14,
                       fontWeight: 600,
                       cursor: 'pointer',

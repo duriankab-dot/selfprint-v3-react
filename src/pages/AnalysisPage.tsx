@@ -648,8 +648,8 @@ const AnalysisPage: React.FC = () => {
                   })()}
                 </p>
                 {analysisNarrative && (
-                  <div className="analysis__narrative-section" style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'rgba(59,130,246,0.05)', borderRadius: '0.5rem', borderLeft: '3px solid rgb(59,130,246)' }}>
-                    <h3 style={{ marginTop: 0, fontSize: '0.95rem', fontWeight: 600, color: 'rgb(59,130,246)' }}>
+                  <div className="analysis__narrative-section" style={{ marginTop: '1.5rem', padding: '1rem', backgroundColor: 'var(--color-info-bg)', borderRadius: '0.5rem', borderLeft: '3px solid var(--color-info)' }}>
+                    <h3 style={{ marginTop: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--color-info)' }}>
                       📖 {isTh ? 'ผลการวิเคราะห์ส่วนตัว' : 'Personal Analysis'}
                     </h3>
                     <p style={{ margin: '0.75rem 0 0 0', lineHeight: 1.6, fontSize: '0.95rem' }}>{analysisNarrative}</p>

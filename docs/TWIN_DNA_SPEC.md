@@ -1,6 +1,23 @@
 # TWIN_DNA_SPEC.md — Twin Visual DNA Specification
-**VERSION: 1.0 | LAST_UPDATED: 2026-09-25**  
-**RELATED: TC-004, TC-101, TC-107, TC-108, LIVING_DIAGRAM_SPEC.md**
+**VERSION: 1.1 | LAST_UPDATED: 2026-09-25**  
+**RELATED: TC-004, TC-101, TC-107, TC-108, LIVING_DIAGRAM_SPEC.md**  
+**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1) — ดูส่วน "IMPLEMENTATION STATUS" ด้านล่าง**
+
+---
+
+## ✅ IMPLEMENTATION STATUS (เฟส 1 — 2026-09-25)
+
+| Task | ไฟล์จริง | สถานะ |
+|------|----------|--------|
+| TC-101 DNA generator | `src/lib/twinVisualDNA.ts` + `src/lib/hash.ts` (mulberry32 + hashString) | ✅ เสร็จ — tests 8/8 ผ่าน (`src/lib/__tests__/twinVisualDNA.test.ts`) |
+| Persistence | `saveTwinDNA()` / `loadTwinDNA()` — localStorage key `selfprint_twin_dna` | ✅ เสร็จ |
+| CSS helpers | `dnaPrimaryColor()` / `dnaAccentColor()` / `dnaSoftColor()` — hsl เท่านั้น (ไม่มี hex ใน component) | ✅ เสร็จ |
+| DNA refine v2 | `refineTwinDNA(dna, { dominantSICE, topBlindSpot })` — ยิงจาก SICEOrchestrator ตอน onboarding submit | ✅ เสร็จ (Onboarding.tsx) |
+| Avatar | `src/components/living/TwinDNAAvatar.tsx` — ใช้ที่ TwinProfilePage (flag `LIVING_DIAGRAM`) | ✅ เสร็จ |
+| WorldEnvironment theme | อ่าน DNA accentHue → overlay มุมโลก (flag `LIVING_DIAGRAM`) | ✅ เสร็จ |
+| Landing DNA seed | DOB + `sp_visitor_id` (anonymous) → DNA เดิมเสมอสำหรับคนเดิม | ✅ เสร็จ (LandingPage.tsx) |
+
+หมายเหตุ: ทุกสีที่ derive จาก DNA เป็น `hsl/hsla` จาก hue เท่านั้น — ไฟล์ใหม่ทั้งหมดผ่าน token gate (`check:tokens`) เพราะไม่มี hex/rgb literal
 
 ---
 

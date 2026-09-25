@@ -87,8 +87,8 @@ export class ErrorBoundary extends Component<Props, State> {
           padding: '2rem',
           textAlign: 'center',
           fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
-          background: '#0b0d17',
-          color: '#e8eaf2',
+          background: 'var(--color-bg-primary)',
+          color: 'var(--color-text-primary)',
         }}
       >
         <h1 style={{ fontSize: '1.25rem', fontWeight: 600, margin: 0 }}>
@@ -118,8 +118,8 @@ export class ErrorBoundary extends Component<Props, State> {
               borderRadius: '999px',
               border: 'none',
               cursor: 'pointer',
-              background: '#6c5ce7',
-              color: '#fff',
+              background: 'var(--color-accent-primary)',
+              color: 'var(--color-text-on-accent)',
               fontSize: '0.95rem',
             }}
           >
@@ -131,10 +131,10 @@ export class ErrorBoundary extends Component<Props, State> {
             style={{
               padding: '0.6rem 1.4rem',
               borderRadius: '999px',
-              border: '1px solid rgba(232,234,242,0.3)',
+              border: '1px solid var(--color-border-light)',
               cursor: 'pointer',
               background: 'transparent',
-              color: '#e8eaf2',
+              color: 'var(--color-text-primary)',
               fontSize: '0.95rem',
             }}
           >

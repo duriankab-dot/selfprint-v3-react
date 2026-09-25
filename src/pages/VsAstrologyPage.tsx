@@ -11,6 +11,25 @@ import { AppShell } from '@/components/layout/AppShell';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate } from '@/hooks/useLangNavigate';
+// TC-207: FAQ schema for the comparison page (AEO)
+import { FAQPage } from '@/lib/schemas';
+
+// ─── TC-207: FAQ data (comparison Q&A) ──────────────────────────────────────
+
+const VS_FAQ_TH = [
+  {
+    q: { th: 'SELFPRINT ใช้วันเกิดวิเคราะห์เหมือนดูดวงหรือไม่?', en: 'Does SELFPRINT read your birth chart like astrology?' },
+    a: { th: 'วัน/เวลา/สถานที่เกิดใช้เป็น seed กำหนด DNA ของ Twin เท่านั้น — การวิเคราะห์เป็นการวิเคราะห์พฤติกรรม 12 มิติจากการตัดสินใจและคำตอบของคุณจริง', en: 'Birth date/time/place only seeds your Twin\'s DNA — the analysis runs 12 behavioral dimensions from your real decisions and answers' },
+  },
+  {
+    q: { th: 'แม่นยำกว่าดูดวงอย่างไร?', en: 'Why is it more accurate than astrology?' },
+    a: { th: 'เพราะวิเคราะห์จากข้อมูลพฤติกรรมจริงของคุณและเรียนรู้เพิ่มทุกครั้งที่คุณใช้งาน ส่วนดูดวงอิงตำราทั่วไปที่ตีความได้หลายทาง', en: 'It analyzes your actual behavioral data and keeps learning with every use, while horoscope readings rely on general interpretations' },
+  },
+  {
+    q: { th: 'SELFPRINT ทำนายอนาคตได้ไหม?', en: 'Can SELFPRINT predict my future?' },
+    a: { th: 'ไม่มีการทำนายโชคชะตา — SELFPRINT จำลองผลลัพธ์จากรูปแบบการตัดสินใจที่มีหลักฐาน ช่วยให้คุณเลือกทางเองอย่างมีข้อมูล', en: 'No fortune prediction — SELFPRINT simulates outcomes from evidence-based decision patterns so you can choose with data' },
+  },
+];
 
 // ─── Comparison table data ───────────────────────────────────────────────────
 
@@ -127,6 +146,16 @@ export default function VsAstrologyPage() {
           description: c.meta.desc,
           inLanguage: lang,
         }}
+        additionalScripts={[
+          // TC-207: FAQ schema — comparison Q&A (Rich Results eligible)
+          {
+            type: 'application/ld+json',
+            content: JSON.stringify(FAQPage({
+              inLanguage: lang === 'th' ? 'th-TH' : 'en-US',
+              questions: lang === 'th' ? VS_FAQ_TH : VS_FAQ_TH,
+            })),
+          },
+        ]}
       />
 
       <AppShell>
@@ -174,6 +203,32 @@ export default function VsAstrologyPage() {
             {c.heroSub}
           </p>
         </section>
+
+        {/* TC-207: Disclaimer Banner — ชัดเจนว่านี่คือ behavioral science */}
+        <div
+          role="note"
+          aria-label={lang === 'th' ? 'คำชี้แจง' : 'Disclaimer'}
+          style={{
+            margin: '0 auto',
+            maxWidth: 900,
+            marginTop: 'clamp(24px,4vw,40px)',
+            padding: '14px 20px',
+            borderRadius: 12,
+            border: '1px solid var(--color-border)',
+            background: 'var(--color-bg-secondary)',
+            display: 'flex',
+            gap: 10,
+            alignItems: 'flex-start',
+          }}
+          data-testid="vs-astrology-disclaimer"
+        >
+          <span aria-hidden="true" style={{ fontSize: 16 }}>ℹ️</span>
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: 'var(--color-text-secondary)' }}>
+            {lang === 'th'
+              ? 'หน้านี้เปรียบเทียบระหว่าง SELFPRINT กับการดูดวงเพื่ออธิบายความต่างอย่างตรงไปตรงมา — SELFPRINT วิเคราะห์พฤติกรรมจากข้อมูลของคุณเอง (Behavioral Science / Decision Intelligence) ไม่ใช่การทำนายโชคชะตา และไม่มีคุณสมบัติทางการแพทย์ จิตเวช หรือการเงิน'
+              : 'This page compares SELFPRINT with astrology honestly — SELFPRINT analyzes your behavior from your own data (Behavioral Science / Decision Intelligence), not fortune prediction, and is not medical, psychiatric or financial advice.'}
+          </p>
+        </div>
 
         {/* Comparison table */}
         <section style={{

@@ -146,7 +146,7 @@ export function PWAInstallPrompt() {
             aria-label={isTh ? 'ติดตั้งแอป' : 'Install app'}
             style={{
               background: 'var(--color-accent-primary)',
-              color: '#fff',
+              color: 'var(--color-text-on-accent)',
               border: 'none',
               borderRadius: 10,
               padding: '8px 14px',

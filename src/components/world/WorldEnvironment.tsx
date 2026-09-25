@@ -35,6 +35,9 @@ import type { CSSProperties } from 'react';
 import { WORLDS, DEEP_INTELLIGENT_BLUE, type WorldId, type WorldArchetype } from '../../constants/worlds';
 import { useAudio } from '../../context/AudioContext';
 import { useEnvironment } from '../../context/EnvironmentContext';
+// TC-108: Twin DNA theme accent — flag-gated (VITE_FEATURE_LIVING_DIAGRAM)
+import { isFeatureEnabled } from '../../lib/featureFlags';
+import { loadTwinDNA } from '../../lib/twinVisualDNA';
 
 interface WorldEnvironmentProps {
   worldId: WorldId;
@@ -275,6 +278,14 @@ export function WorldEnvironment({ worldId, position = 'fixed' }: WorldEnvironme
   const audio = useAudio();
   const animate = !audio.state.reduceMotion;
 
+  // TC-108: DNA-driven ambient accent — the user's Twin hues tint the world
+  // background when LIVING_DIAGRAM is on. No DNA (pre-onboarding) → no change.
+  const dnaAccentHue = useMemo(() => {
+    if (!isFeatureEnabled('LIVING_DIAGRAM')) return null;
+    const dna = loadTwinDNA();
+    return dna ? dna.accentHue : null;
+  }, []);
+
   // EnvironmentContext computes against WorldContext.currentWorld (set by
   // WorldDetail.tsx's recordWorldVisit()) — real-time-of-day + real-mood
   // driven, not this component re-deriving anything on its own.
@@ -298,12 +309,13 @@ export function WorldEnvironment({ worldId, position = 'fixed' }: WorldEnvironme
       filter: lightingFilter,
       transition: 'filter 800ms ease',
       background: `
+        ${dnaAccentHue !== null ? `radial-gradient(ellipse at 82% 18%, hsla(${Math.round(dnaAccentHue)}, 80%, 60%, 0.10) 0%, transparent 45%),` : ''}
         radial-gradient(ellipse at 50% 40%, ${hexToRgba(world.color, 0.16)} 0%, transparent 55%),
         linear-gradient(160deg, ${DEEP_INTELLIGENT_BLUE} 0%, #060F26 100%),
         linear-gradient(${bgTint}, ${bgTint})
       `,
     }),
-    [world.color, position, lightingFilter, bgTint]
+    [world.color, position, lightingFilter, bgTint, dnaAccentHue]
   );
 
   // Motion speed now reflects real state instead of fixed durations —

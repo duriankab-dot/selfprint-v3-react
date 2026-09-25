@@ -22,9 +22,9 @@ import UserAvatar from '../components/account/UserAvatar';
 // label ต่อ tier
 const TIER_LABELS: Record<string, { label: string; emoji: string; color: string }> = {
   free: { label: 'Free', emoji: '🌱', color: 'var(--color-text-secondary)' },
-  plus: { label: 'Plus', emoji: '⭐', color: '#8B5CF6' },
+  plus: { label: 'Plus', emoji: '⭐', color: 'var(--color-accent-purple)' },
   pro: { label: 'Pro', emoji: '💎', color: 'var(--color-accent-primary)' },
-  lifetime: { label: 'Lifetime', emoji: '♾️', color: '#F59E0B' },
+  lifetime: { label: 'Lifetime', emoji: '♾️', color: 'var(--color-accent-amber)' },
 };
 
 interface MenuSection {

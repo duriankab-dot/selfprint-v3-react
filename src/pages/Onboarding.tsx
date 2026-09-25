@@ -27,6 +27,8 @@ import { useUserStore } from '@/store/userStore';
 import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { getSeoMetadata } from '@/constants/seoMetadata';
+// TC-110: QAPage schema — Nova conversation (AEO)
+import { onboardingQAPageSchema } from '@/lib/aeoSchemas';
 import type { InitialDisciplines } from '@/lib/astrology';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter';
 // ONBLAZY-001 (9 ก.ย. 2026): this page used to `import { supabase }` for a
@@ -47,6 +49,11 @@ import {
   calculateSICEEngineScore,
   calculateAnalysisDepth,
 } from '@/services/DynamicValueCalculator';
+// TC-105: LivingDiagram integration — flag-gated (VITE_FEATURE_LIVING_DIAGRAM)
+import { isFeatureEnabled } from '@/lib/featureFlags';
+import LivingDiagram from '@/components/living/LivingDiagram';
+import { saveTwinDNA, refineTwinDNA, loadTwinDNA } from '@/lib/twinVisualDNA';
+import type { TwinVisualDNA, SICEKey } from '@/lib/twinVisualDNA';
 
 // The standalone Express backend (server/, POST /api/intelligence) that this
 // Phase 2: Call Supabase Edge Function astrovera-edge (Claude via OpenRouter)
@@ -306,6 +313,17 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     place?: string;
   } | null>(null);
   const [analysisProfile, setAnalysisProfile] = useState<AnalysisResponse | null>(null);
+
+  // TC-105: Twin DNA — deterministic from birth data + user, refined at v2
+  // (dominant SICE) after the SICE result step completes.
+  const [twinDna, setTwinDna] = useState<TwinVisualDNA | null>(() =>
+    isFeatureEnabled('LIVING_DIAGRAM') ? loadTwinDNA() : null,
+  );
+  useEffect(() => {
+    if (!isFeatureEnabled('LIVING_DIAGRAM') || !birthData?.dob) return;
+    setTwinDna(saveTwinDNA(birthData, session?.user?.id || 'anon'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [birthData?.dob]);
 
   // GAP-2: Quick Analysis → Full Journey data continuity (COMPLETE HANDOFF)
   // P1 FIX: If the user completed a Quick Analysis (AnalysisPage → analysisStore) before
@@ -574,6 +592,25 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       };
 
       setAnalysisProfile(blended);
+
+      // TC-105: refine DNA to v2 — dominant SICE engine + top blind spot
+      if (isFeatureEnabled('LIVING_DIAGRAM')) {
+        setTwinDna((prev) => {
+          if (!prev) return prev;
+          const topEngine = [...siceResult.results]
+            .sort((a, b) => (b?.confidence ?? 0) - (a?.confidence ?? 0))[0]
+            ?.engineName?.toLowerCase();
+          const siceKeys: SICEKey[] = [
+            'self', 'mind', 'decisions', 'purpose', 'career', 'wealth',
+            'life', 'growth', 'relationships', 'love', 'health', 'future',
+          ];
+          const dominant = siceKeys.find((k) => topEngine?.includes(k));
+          return refineTwinDNA(prev, {
+            ...(dominant ? { dominantSICE: dominant } : {}),
+            topBlindSpot: pi.warningsOrCautions?.[0],
+          });
+        });
+      }
 
       // Accuracy reflects SICE engine success count + personal intelligence confidence
       const accuracy = Math.min(
@@ -860,6 +897,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
           keywords={seoData.keywords?.join(', ')}
           ogImage={seoData.ogImage}
           canonicalUrl={`/${language}/onboarding`}
+          additionalScripts={[
+            // TC-110: QAPage — Nova conversation Q&A (Rich Results eligible)
+            {
+              type: 'application/ld+json',
+              content: JSON.stringify(onboardingQAPageSchema(isTh ? 'th-TH' : 'en-US')),
+            },
+          ]}
         />
       )}
       <main
@@ -979,6 +1023,13 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
       {step === 'ai-creation' && (
         <div style={{ paddingTop: '0' }}>
           <AICreationSequence onComplete={handleAICreationComplete} />
+          {/* TC-105: LivingDiagram StepDriver — the Twin taking shape while
+              the creation sequence plays (flag-gated) */}
+          {isFeatureEnabled('LIVING_DIAGRAM') && (
+            <div style={{ maxWidth: 380, margin: '0 auto 32px', height: 320 }}>
+              <LivingDiagram mode="onboarding" dna={twinDna ?? undefined} step={2} isTh={isTh} />
+            </div>
+          )}
         </div>
       )}
 

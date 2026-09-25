@@ -12,13 +12,15 @@
  * Reduced-motion safe.
  */
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { DailyBriefEngine } from '@/lib/intelligence/DailyBriefEngine';
 import { DailyInsightsList } from './DailyInsightsList';
 import type { DailyBrief as DailyBriefData, BriefObservation } from '@/lib/intelligence/DailyBriefEngine';
+// TC-211: Twin output → citable AIContentBlock JSON-LD (GEO)
+import { briefToAIContentBlocks } from '@/lib/aeoSchemas';
 
 // ============================================================================
 // TTS helpers (§22 — Adaptive Voice)
@@ -70,8 +72,9 @@ function ObservationCard({ obs, index, active, isTh }: ObservationCardProps) {
     >
       <div className="brief-obs-icon">{CATEGORY_ICON[obs.category] ?? '●'}</div>
       <div className="brief-obs-content">
-        <p className="brief-obs-headline">{obs.headline}</p>
-        <p className="brief-obs-detail">{obs.detail}</p>
+        {/* data-brief-* anchors = Speakable cssSelector targets (TC-211) */}
+        <p className="brief-obs-headline" data-brief-headline="true">{obs.headline}</p>
+        <p className="brief-obs-detail" data-brief-insight="true">{obs.detail}</p>
         {obs.confidence > 0 && obs.evidenceCount > 0 && (
           <span className="brief-obs-confidence">
             {isTh
@@ -109,6 +112,28 @@ export function DailyBrief() {
     enabled: !!userId,
     staleTime: 1000 * 60 * 30, // 30 min — brief doesn't change mid-session
   });
+
+  // TC-211: inject per-observation AIContentBlock JSON-LD so every insight
+  // is citable by AI engines (GEO). Cleaned up on unmount / brief change.
+  useEffect(() => {
+    if (!brief) return;
+    const el = document.createElement('script');
+    el.id = 'sp-daily-brief-jsonld';
+    el.type = 'application/ld+json';
+    el.textContent = JSON.stringify(
+      briefToAIContentBlocks(
+        brief.observations.map((o) => ({
+          headline: { th: o.headline, en: o.headline },
+          body: { th: o.detail, en: o.detail },
+        })),
+        isTh ? 'th-TH' : 'en-US',
+      ),
+    );
+    document.head.appendChild(el);
+    return () => {
+      document.getElementById('sp-daily-brief-jsonld')?.remove();
+    };
+  }, [brief, isTh]);
 
   const handleListen = useCallback(() => {
     if (!brief) return;

@@ -493,7 +493,7 @@ export default function ImmersiveTwinChat() {
                 padding: '14px 32px',
                 borderRadius: 12,
                 border: 'none',
-                background: '#6366f1',
+                background: 'var(--color-accent-primary)',
                 color: 'white',
                 fontWeight: 700,
                 fontSize: '1rem',
@@ -591,7 +591,7 @@ export default function ImmersiveTwinChat() {
                 variant="presence"
                 primaryArchetype={twin.primaryArchetype}
                 secondaryArchetype={twin.secondaryArchetype}
-                worldColor={currentWorld ? (WORLDS[currentWorld]?.color ?? '#22D3EE') : '#22D3EE'}
+                worldColor={currentWorld ? (WORLDS[currentWorld]?.color ?? 'var(--color-accent-cyan)') : 'var(--color-accent-cyan)'}
                 seedKey={session.user.id ?? twin.id}
                 maturityScore={twin.maturityScore}
               />
@@ -648,8 +648,8 @@ export default function ImmersiveTwinChat() {
                               padding: '4px 12px',
                               borderRadius: 16,
                               fontSize: 12,
-                              border: msg.selectedChoice === option ? '1.5px solid #6366f1' : '1px solid var(--color-border)',
-                              background: msg.selectedChoice === option ? '#6366f1' : 'var(--color-bg-primary)',
+border: msg.selectedChoice === option ? '1.5px solid var(--color-accent-primary)' : '1px solid var(--color-border)',
+  background: msg.selectedChoice === option ? 'var(--color-accent-primary)' : 'var(--color-bg-primary)',
                               color: msg.selectedChoice === option ? 'white' : 'var(--color-text-secondary)',
                               cursor: 'pointer',
                             }}
@@ -698,9 +698,9 @@ export default function ImmersiveTwinChat() {
                 <div className="flex justify-start">
                   <div className="immersive-message immersive-message--twin">
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: '#6366f1' }} />
-                      <div className="w-2 h-2 rounded-full animate-bounce delay-100" style={{ background: '#6366f1' }} />
-                      <div className="w-2 h-2 rounded-full animate-bounce delay-200" style={{ background: '#6366f1' }} />
+                      <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'var(--color-accent-primary)' }} />
+                      <div className="w-2 h-2 rounded-full animate-bounce delay-100" style={{ background: 'var(--color-accent-primary)' }} />
+                      <div className="w-2 h-2 rounded-full animate-bounce delay-200" style={{ background: 'var(--color-accent-primary)' }} />
                     </div>
                   </div>
                 </div>

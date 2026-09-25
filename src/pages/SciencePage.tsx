@@ -41,7 +41,7 @@ export default function SciencePage() {
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`
-          .sci-hero { background: linear-gradient(135deg, #0f172a 0%, var(--color-bg-secondary) 100%); padding: 80px 24px 60px; text-align: center; border-bottom: 1px solid var(--color-border); }
+          .sci-hero { background: linear-gradient(135deg, var(--color-surface-dark) 0%, var(--color-bg-secondary) 100%); padding: 80px 24px 60px; text-align: center; border-bottom: 1px solid var(--color-border); }
           .sci-hero h1 { font-size: clamp(26px,4.5vw,44px); font-weight: 900; letter-spacing: -0.02em; margin: 0 0 16px; }
           .sci-hero p { font-size: 17px; color: var(--color-text-secondary); max-width: 600px; margin: 0 auto; line-height: 1.7; }
           .sci-section { max-width: 860px; margin: 0 auto; padding: 56px 24px 0; }

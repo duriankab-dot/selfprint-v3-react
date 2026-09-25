@@ -27,6 +27,11 @@ import { Link } from 'react-router-dom';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useTheme } from '@/context/ThemeContext';
 import EvolutionaryVisualSystem from '@/components/landing/EvolutionaryVisualSystem';
+// TC-104: LivingDiagram integration — flag-gated (VITE_FEATURE_LIVING_DIAGRAM)
+import { isFeatureEnabled } from '@/lib/featureFlags';
+import LivingDiagram from '@/components/living/LivingDiagram';
+import { saveTwinDNA, loadTwinDNA } from '@/lib/twinVisualDNA';
+import type { TwinVisualDNA } from '@/lib/twinVisualDNA';
 import TodayBioEnvironmentReport from '@/components/landing/TodayBioEnvironmentReport';
 import IntroSummary from '@/components/landing/IntroSummary';
 import QuickSummary from '@/components/landing/QuickSummary';
@@ -35,6 +40,8 @@ import { Footer } from '@/components/layout/Footer';
 import { calculateInitialDisciplines } from '@/lib/astrology.js';
 import { buildFallbackResponse } from '@/lib/astrovera-adapter.js';
 import { generateFAQSchema } from '@/lib/intro-summary.js';
+// TC-109: HowTo + Speakable WebPage (AEO) — alongside the existing FAQ schema
+import { landingHowToSchema, landingSpeakableWebPage } from '@/lib/aeoSchemas';
 
 // ─── Story copy (display) ─────────────────────────────────────────────────────
 
@@ -331,6 +338,10 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
 
   // ── Landing Page Quick Input DOB + Results State ───────────────────────────
   const [submittedDob, setSubmittedDob] = useState<string | null>(null);
+  // TC-104: Twin DNA (deterministic per visitor + DOB) for LivingDiagram
+  const [twinDNA, setTwinDNA] = useState<TwinVisualDNA | null>(() =>
+    isFeatureEnabled('LIVING_DIAGRAM') ? loadTwinDNA() : null,
+  );
   const [landingDisciplines, setLandingDisciplines] = useState(() => {
     const saved = localStorage.getItem('landing_disciplines');
     if (saved) {
@@ -384,6 +395,19 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
 
     // Save to userStore
     useUserStore.getState().updateProfile({ birthDate: dob });
+
+    // TC-104: deterministic DNA per visitor — same DOB + visitor id = same Twin
+    if (isFeatureEnabled('LIVING_DIAGRAM')) {
+      let visitorId = '';
+      try {
+        visitorId = localStorage.getItem('sp_visitor_id') ?? '';
+        if (!visitorId) {
+          visitorId = `visitor-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+          localStorage.setItem('sp_visitor_id', visitorId);
+        }
+      } catch { /* storage unavailable */ }
+      setTwinDNA(saveTwinDNA({ dob }, visitorId || 'anon'));
+    }
 
     // Calculate disciplines + analysis
     const disciplines = calculateInitialDisciplines(dob);
@@ -462,7 +486,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         title={seo.seoTitle}
         description={seo.seoDesc}
         keywords={lang === 'th'
-          ? 'แบบทดสอบจิตวิทยา, วิเคราะห์พฤติกรรม, ดูดวงพฤติกรรม, AI Twin, ฝาแฝดดิจิทัล, SELFPRINT, 12 มิติ, ทำนายนิสัย, AI ดูดวง, Blind Spots'
+          // TC-206: behavioral framing — no fortune-telling terms in production meta
+          ? 'แบบทดสอบจิตวิทยา, วิเคราะห์พฤติกรรม, วิเคราะห์นิสัย AI, AI Twin, ฝาแฝดดิจิทัล, SELFPRINT, 12 มิติ, ถอดรหัสนิสัย, Decision Intelligence, Blind Spots'
           : 'AI twin, digital twin, behavioral analysis, SELFPRINT, SICE engines, blind spots, personal intelligence, decision AI'}
         ogImage={ogUrl}
         ogType="website"
@@ -489,6 +514,19 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             type: 'application/ld+json',
             content: generateFAQSchema(),
           },
+          // TC-109: HowTo — "สร้าง AI Twin ใน 2 นาที" (Rich Results eligible)
+          {
+            type: 'application/ld+json',
+            content: JSON.stringify(landingHowToSchema(lang === 'th' ? 'th-TH' : 'en-US')),
+          },
+          // TC-109: Speakable WebPage — voice-assistant readable hero copy
+          {
+            type: 'application/ld+json',
+            content: JSON.stringify(landingSpeakableWebPage(
+              lang === 'th' ? 'th-TH' : 'en-US',
+              `https://selfprint.one/${lang}/`,
+            )),
+          },
         ]}
       />
 
@@ -511,8 +549,8 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
         .hero-scroll{animation:sp-bounce 2.2s ease-in-out infinite}
         .sp-s2-enter{transition:opacity .6s ease,transform .6s ease}
         .sp-s3-enter{transition:opacity .7s ease,transform .7s ease}
-        .sp-cta-btn{transition:transform .2s,box-shadow .2s;box-shadow:0 0 14px rgba(91,92,235,0.35),0 4px 20px rgba(91,92,235,0.25);will-change:transform,box-shadow}
-        .sp-cta-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 32px rgba(91,92,235,0.75),0 8px 32px rgba(91,92,235,0.5)!important}
+        .sp-cta-btn{transition:transform .2s,box-shadow .2s;box-shadow:0 0 14px color-mix(in srgb, var(--color-accent-primary) 35%, transparent),0 4px 20px color-mix(in srgb, var(--color-accent-primary) 25%, transparent);will-change:transform,box-shadow}
+        .sp-cta-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 32px color-mix(in srgb, var(--color-accent-primary) 75%, transparent),0 8px 32px color-mix(in srgb, var(--color-accent-primary) 50%, transparent)!important}
         .sp-cta-btn:hover .sp-cta-arrow{transform:translateX(5px)}
         .sp-cta-arrow{display:inline-block;transition:transform .3s ease}
         @media(max-width:700px){
@@ -713,7 +751,16 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             >
               <div style={{ width: '100%', maxWidth: '480px' }}>
                 {visualNear && (
-                  <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
+                  isFeatureEnabled('LIVING_DIAGRAM') ? (
+                    <LivingDiagram
+                      mode="landing"
+                      dna={twinDNA ?? undefined}
+                      containerRef={s2VisualRef}
+                      isTh={lang === 'th'}
+                    />
+                  ) : (
+                    <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
+                  )
                 )}
               </div>
             </div>

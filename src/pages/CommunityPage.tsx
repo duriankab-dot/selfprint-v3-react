@@ -208,7 +208,7 @@ export default function CommunityPage() {
                   }}
                 />
                 {composeError && (
-                  <p style={{ fontSize: 12, color: 'var(--color-accent-danger, #ef4444)', margin: '8px 0 0' }}>
+                  <p style={{ fontSize: 12, color: 'var(--color-error)', margin: '8px 0 0' }}>
                     {composeError}
                   </p>
                 )}
@@ -242,7 +242,7 @@ export default function CommunityPage() {
                       padding: '10px 20px',
                       fontSize: 14,
                       fontWeight: 600,
-                      color: '#fff',
+                      color: 'var(--color-text-on-accent)',
                       cursor: posting ? 'default' : 'pointer',
                       opacity: posting ? 0.7 : 1,
                     }}
@@ -414,7 +414,7 @@ export default function CommunityPage() {
               onClick={() => navigate('/login')}
               style={{
                 background: 'var(--color-accent-primary)',
-                color: '#fff',
+                color: 'var(--color-text-on-accent)',
                 border: 'none',
                 borderRadius: 12,
                 padding: '12px 28px',

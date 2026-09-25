@@ -46,7 +46,7 @@ export default function AboutPage() {
           .about-value-card h3 { font-size: 16px; font-weight: 700; margin: 0 0 8px; }
           .about-value-card p { font-size: 14px; line-height: 1.6; color: var(--color-text-secondary); margin: 0; }
           .about-cta { text-align: center; margin-top: 60px; padding: 0 24px; }
-          .about-cta-btn { display: inline-block; padding: 16px 36px; background: var(--color-accent-primary); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
+          .about-cta-btn { display: inline-block; padding: 16px 36px; background: var(--color-accent-primary); color: var(--color-text-on-accent); border: none; border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
           .about-cta-btn:hover { opacity: 0.88; }
         `}</style>
 

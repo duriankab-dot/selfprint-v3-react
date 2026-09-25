@@ -33,6 +33,31 @@
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
+  /* Status Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+  --color-info-bg: color-mix(in srgb, var(--color-info) 5%, transparent);
+
+  /* Text on colored surfaces (buttons on accent bg) — TC-208 */
+  --color-text-on-accent: #FFFFFF;
+  --color-text-on-dark: rgba(255, 255, 255, 0.75);
+  --color-surface-dark: #0F172A;
+
+  /* Elevation + borders (light layer) — TC-208 */
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-border-light: rgba(255, 255, 255, 0.3);
+
+  /* World accent palette (ExplorePage/ImmersiveTwinChat) — TC-208:
+     literal colors ย้ายจาก component เข้า token layer เพื่อหน้าจอเดิม
+     เหมือนเดิม แต่ไม่มี hardcoded colors ใน .tsx อีกต่อไป */
+  --color-accent-purple: #8B5CF6;
+  --color-accent-amber: #F59E0B;
+  --color-accent-emerald: #10B981;
+  --color-accent-cyan: #06B6D4;
+  --color-accent-red: #EF4444;
+
   /* Hub Accent Colors (default = Identity) — สีธีมแรกตาม SELFPRINT_V4_LANDING_WITH_12HUBS.html (--primary) */
   --color-accent-primary: #5B5CEB;
   --color-accent-primary-hover: #7477FF;

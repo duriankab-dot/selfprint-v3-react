@@ -20,6 +20,15 @@ import { CurrentChapter } from '../components/story/CurrentChapter'; // §51 Lay
 import { AppShell } from '../components/layout/AppShell';
 import UserAvatar from '../components/account/UserAvatar';
 import '../styles/dashboard.css';
+// TC-106: LivingDiagram DataDriver — flag-gated (VITE_FEATURE_LIVING_DIAGRAM)
+import { isFeatureEnabled } from '../lib/featureFlags';
+import LivingDiagram from '../components/living/LivingDiagram';
+import { loadTwinDNA } from '../lib/twinVisualDNA';
+import type { TwinVisualDNA } from '../lib/twinVisualDNA';
+// TC-111: SoftwareApplication schema (AEO)
+import { dashboardSoftwareApplicationSchema } from '../lib/aeoSchemas';
+// TC-205: unified pipeline — LivingDiagram ← twinStore.current
+import { useTwinStore } from '../store/twinStore';
 
 interface DecisionLog {
   id: string;
@@ -50,6 +59,38 @@ const Dashboard: React.FC = () => {
   const lifecycleStatus = useLifecycleStore((state) => state.status);
   const seoData = getSeoMetadata('dashboard', language);
 
+  // TC-106: LivingDiagram data — DNA + 12 SICE scores + confidence proxy.
+  // scores มาจาก onboarding_sice_snapshot (persisted ตอน handleFinetuneSubmit);
+  // confidence proxy = twin.maturityScore/100 (0..1); version จาก DNA.
+  const [dnaScores, setDnaScores] = useState<number[] | null>(null);
+  useEffect(() => {
+    if (!isFeatureEnabled('LIVING_DIAGRAM')) return;
+    try {
+      const raw = localStorage.getItem('onboarding_sice_snapshot');
+      if (!raw) return;
+      const snap = JSON.parse(raw) as { scores?: { engineName: string; score: number }[] };
+      if (!Array.isArray(snap.scores) || snap.scores.length === 0) return;
+      const scores = Array.from({ length: 12 }, (_, i) => {
+        const s = snap.scores?.[i]?.score;
+        return typeof s === 'number' ? Math.max(0, Math.min(1, s / 100)) : 0.5;
+      });
+      setDnaScores(scores);
+    } catch { /* corrupted snapshot — defaults remain */ }
+  }, []);
+
+  const livingDna: TwinVisualDNA | undefined = isFeatureEnabled('LIVING_DIAGRAM')
+    ? loadTwinDNA() ?? undefined
+    : undefined;
+  const livingConfidence = twin ? Math.max(0, Math.min(1, (twin.maturityScore ?? 30) / 100)) : undefined;
+
+  // TC-205: UNIFIED_PIPELINE on → twinStore.current (UnifiedAnalysis) leads:
+  // scores/confidence/version มาจาก mergeLayers จริง ไม่ใช่ localStorage proxy
+  const pipelineOn = isFeatureEnabled('UNIFIED_PIPELINE');
+  const storeCurrent = useTwinStore((s) => s.current);
+  const diagramScores = storeCurrent?.scores ?? dnaScores ?? undefined;
+  const diagramConfidence = pipelineOn && storeCurrent ? storeCurrent.confidence : livingConfidence;
+  const diagramVersion = pipelineOn && storeCurrent ? storeCurrent.version : livingDna?.version;
+
   // APPSHELL-002 FIX: Dashboard only needs the 3 most recent decision logs
   // for the preview strip below — the full filterable/exportable log now
   // lives on IntelligenceHub.tsx (see "Deep Intelligence" link below).
@@ -75,6 +116,16 @@ const Dashboard: React.FC = () => {
           keywords={seoData.keywords?.join(', ')}
           ogImage={seoData.ogImage}
           canonicalUrl={`/${language}/dashboard`}
+          additionalScripts={[
+            // TC-111: SoftwareApplication — dashboard feature surface (AEO)
+            {
+              type: 'application/ld+json',
+              content: JSON.stringify(dashboardSoftwareApplicationSchema(
+                language === 'th' ? 'th-TH' : 'en-US',
+                `https://selfprint.one/${language}/dashboard`,
+              )),
+            },
+          ]}
         />
       )}
       <AppShell>
@@ -155,6 +206,21 @@ const Dashboard: React.FC = () => {
               to "does my Twin exist?" on two screens. Only render once a real
               Twin is loaded. */}
           {twin && <LivingTwin maturityScore={twin.maturityScore ?? 30} />}
+
+          {/* TC-106: LivingDiagram DataDriver — same narrative diagram as
+              landing/onboarding, now driven by real SICE scores (flag-gated) */}
+          {isFeatureEnabled('LIVING_DIAGRAM') && (
+            <div style={{ maxWidth: 420, margin: '0 auto 24px', height: 360 }}>
+              <LivingDiagram
+                mode="dashboard"
+                dna={livingDna ?? undefined}
+                scores={diagramScores}
+                confidence={diagramConfidence}
+                version={diagramVersion}
+                isTh={isTh}
+              />
+            </div>
+          )}
 
           {/* Layer 3: MICRO STORY — today's single most important beat (§51) */}
           <NarrativeHook />

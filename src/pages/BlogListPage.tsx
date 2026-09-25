@@ -363,7 +363,7 @@ export default function BlogListPage() {
                 style={{
                   padding: '14px 32px',
                   background: 'var(--color-accent-primary)',
-                  color: '#fff',
+                  color: 'var(--color-text-on-accent)',
                   border: 'none',
                   borderRadius: '12px',
                   fontWeight: 800,
@@ -431,7 +431,7 @@ export default function BlogListPage() {
       >
         <style>{`
           .blog-card { background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: 18px; padding: 28px; cursor: pointer; transition: all 0.2s; }
-          .blog-card:hover { border-color: var(--color-accent-primary); transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+          .blog-card:hover { border-color: var(--color-accent-primary); transform: translateY(-4px); box-shadow: 0 8px 24px var(--color-shadow); }
           .blog-cat { display: inline-block; background: color-mix(in srgb,var(--color-accent-primary) 12%,transparent); color: var(--color-accent-primary); border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
         `}</style>
 

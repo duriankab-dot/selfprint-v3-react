@@ -92,7 +92,7 @@ export default function FeatureMenu() {
           <style>{`
             .sp-feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
             .sp-feature-card { transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s; }
-            .sp-feature-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); border-color: var(--color-accent-primary) !important; }
+            .sp-feature-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px var(--color-shadow); border-color: var(--color-accent-primary) !important; }
           `}</style>
 
           <div className="sp-feature-grid">

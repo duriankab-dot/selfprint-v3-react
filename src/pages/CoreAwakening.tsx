@@ -421,7 +421,7 @@ export default function CoreAwakening() {
               top: '20px',
               right: '20px',
               background: 'transparent',
-              border: '1px solid rgba(255,255,255,0.3)',
+              border: '1px solid var(--color-border-light)',
               borderRadius: '8px',
               /* CONTRAST-001: was rgba(255,255,255,0.5) — white at 50%
                  alpha over the slate-900→blue-900 gradient here resolves to
@@ -429,7 +429,7 @@ export default function CoreAwakening() {
                  below the WCAG AA 4.5:1 minimum for normal-size text. This
                  was one of the Lighthouse contrast findings called out on
                  CoreAwakening specifically. Bumped to 0.75 (~5.4:1). */
-              color: 'rgba(255,255,255,0.75)',
+              color: 'var(--color-text-on-dark)',
               fontSize: '13px',
               padding: '6px 14px',
               cursor: 'pointer',

@@ -53,7 +53,7 @@ export default function ContactPage() {
           .contact-field label { display: block; font-size: 13px; font-weight: 600; color: var(--color-text-secondary); margin-bottom: 6px; }
           .contact-field input, .contact-field textarea { width: 100%; box-sizing: border-box; background: var(--color-bg-secondary); border: 1px solid var(--color-border); border-radius: 10px; padding: 10px 14px; font-size: 14px; color: var(--color-text-primary); outline: none; transition: border-color 0.2s; resize: vertical; }
           .contact-field input:focus, .contact-field textarea:focus { border-color: var(--color-accent-primary); }
-          .contact-submit { width: 100%; padding: 12px; background: var(--color-accent-primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
+          .contact-submit { width: 100%; padding: 12px; background: var(--color-accent-primary); color: var(--color-text-on-accent); border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; }
           .contact-submit:hover { opacity: 0.88; }
           .contact-success { text-align: center; padding: 32px; background: color-mix(in srgb,var(--color-accent-primary) 10%,transparent); border: 1px solid color-mix(in srgb,var(--color-accent-primary) 30%,transparent); border-radius: 14px; }
           .contact-success h3 { font-size: 18px; font-weight: 800; margin: 0 0 8px; }

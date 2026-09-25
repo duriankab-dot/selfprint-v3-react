@@ -218,7 +218,7 @@ export default function DecisionDashboard() {
           <div className="dd-sla">
             <h2>{isTh ? 'คุณภาพบทวิเคราะห์ (SLA)' : 'Insight SLA'}</h2>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              <span className="dd-sla__item" style={{ color: sla.fresh ? '#10b981' : '#f59e0b' }}>
+              <span className="dd-sla__item" style={{ color: sla.fresh ? 'var(--color-success)' : 'var(--color-warning)' }}>
                 {sla.fresh ? '●' : '◐'} {isTh ? 'สดใหม่' : 'Fresh'}: {sla.fresh ? (isTh ? 'ใช่' : 'Yes') : (isTh ? 'เก่าเกิน 24 ชม.' : 'stale > 24h')}
               </span>
               <span className="dd-sla__item">
