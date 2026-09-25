@@ -7,6 +7,8 @@
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { useLanguage } from '@/context/LanguageContext';
+// TC-307: TechArticle + ScholarlyArticle citations (AEO/GEO)
+import { scienceTechArticleSchema } from '@/lib/aeoSchemas';
 
 const SICE_DIMENSIONS = [
   { id: '01', nameTh: 'ตัวตน', en: 'Identity Core', descTh: 'รูปแบบการรับรู้และนิยามตัวเองของคุณ — เสาหลักที่ทุกมิติอื่นอ้างอิง', descEn: 'How you perceive and define yourself — the anchor every other dimension refers back to' },
@@ -38,6 +40,7 @@ export default function SciencePage() {
           ? 'ค้นพบว่า SELFPRINT ใช้วิทยาศาสตร์พฤติกรรม Behavioral Economics และ 12 SICE Engines อย่างไรเพื่อวิเคราะห์ตัวตนได้แม่นยำกว่าการดูดวง'
           : 'Discover how SELFPRINT uses behavioral science, behavioral economics, and 12 SICE Engines to analyze who you are more accurately than a horoscope'}
         canonicalUrl={isTh ? '/th/science' : '/en/science'}
+        schema={scienceTechArticleSchema(isTh ? 'th-TH' : 'en-US')}
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`

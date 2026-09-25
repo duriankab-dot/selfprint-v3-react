@@ -19,7 +19,7 @@ import type { SubscriptionTier } from '@/context/SubscriptionContext';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
 import { getSeoMetadata } from '@/constants/seoMetadata';
-import { generatePricingSchema, type PricingPlan } from '@/lib/structuredData';
+import { pricingProductSchema, pricingAggregateRating } from '@/lib/aeoSchemas';
 import { formatCurrency } from '@/config/currencyConfig';
 import type { CurrencyCode } from '@/config/currencyConfig';
 import '../styles/pricing.css';
@@ -168,40 +168,14 @@ export default function PricingPage() {
   const { tier: currentTier, startCheckout, managePlan, canUpgrade } = usePricing();
   const { language } = useLanguage();
   const isTh = language === 'th';
-  const seoData = getSeoMetadata('pricing', language);
+const seoData = getSeoMetadata('pricing', language);
 
-  // Generate pricing schema for search engines
-  const pricingPlans: PricingPlan[] = [
-    {
-      name: 'Free',
-      price: 0,
-      priceCurrency: 'USD',
-      billingDuration: 'P1M',
-      description: 'Discover yourself with basic Twin conversation',
-    },
-    {
-      name: 'Plus',
-      price: 9.99,
-      priceCurrency: 'USD',
-      billingDuration: 'P1M',
-      description: 'Know yourself deeper with enhanced insights',
-    },
-    {
-      name: 'Pro',
-      price: 18.99,
-      priceCurrency: 'USD',
-      billingDuration: 'P1M',
-      description: 'Navigate yourself with advanced analytics',
-    },
-    {
-      name: 'Lifetime',
-      price: 199,
-      priceCurrency: 'USD',
-      billingDuration: 'P1Y',
-      description: 'Own your Twin forever with lifetime access',
-    },
-  ];
-  const pricingSchema = generatePricingSchema(pricingPlans);
+  // TC-308: Product + Offer + AggregateRating (AEO/GEO) — replaces the old
+  // generatePricingSchema approach with typed builders from ./lib/aeoSchemas.
+  const pricingSchema = {
+    ...pricingProductSchema(isTh ? 'th-TH' : 'en-US'),
+    aggregateRating: pricingAggregateRating(),
+  };
 
   const handleCTA = async (plan: typeof PLANS[number]) => {
     if (plan.tier === 'free') {

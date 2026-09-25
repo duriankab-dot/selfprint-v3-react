@@ -1,22 +1,26 @@
 /**
- * LivingDiagram.tsx — TC-103: Narrative spine wrapper around SVGCore.
+ * LivingDiagram.tsx — TC-103 + TC-301/302/303: Narrative spine wrapper.
  *
  * One diagram, three drivers (เส้นเรื่องราวเดียวครอบ Landing → Onboarding →
  * Dashboard ตาม LIVING_DIAGRAM_SPEC):
- *   - landing:    ScrollDriver — scroll progress จาก containerRef (rAF-batched,
- *                 pattern เดียวกับ EvolutionaryVisualSystem เดิม)
+ *   - landing:    ScrollDriver — scroll progress จาก containerRef (rAF-batched)
  *   - onboarding: StepDriver — step index → discrete phase reveal
  *   - dashboard:  DataDriver — progress=1 + scores/confidence จาก twinStore/DNA
  *
- * Safety: mount gating (IntersectionObserver, EVISUAL-IDLE-001 pattern),
- * prefers-reduced-motion → static full render ไม่มี loop, flag-gated ที่ caller.
+ * TC-301: mobileSheet prop renders a SICE summary bottom sheet + sticky shell
+ *   on phones (CSS media query), all modes.
+ * TC-302: mount gating (IntersectionObserver), reduced-motion → static,
+ *   aspect-ratio container (no CLS), contain: layout style paint.
+ * TC-303: role="section" + aria-label on the shell, toggle button with
+ *   aria-expanded/aria-controls, sheet panel with proper region semantics.
  */
 
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, RefObject } from 'react';
 import SVGCore, { SICE_LABELS_TH, SICE_LABELS_EN } from './SVGCore';
 import type { TwinVisualDNA } from '../../lib/twinVisualDNA';
-import { dnaPrimaryColor, dnaAccentColor } from '../../lib/twinVisualDNA';
+import { dnaPrimaryColor, dnaAccentColor, dnaSoftColor } from '../../lib/twinVisualDNA';
+import './living-diagram.css';
 
 export type LivingDiagramMode = 'landing' | 'onboarding' | 'dashboard';
 
@@ -38,6 +42,8 @@ export interface LivingDiagramProps {
   style?: CSSProperties;
   /** TC-205: twin version badge (v1/v2/v3) แสดงเมื่อ mode=dashboard */
   version?: number;
+  /** TC-301: render SICE summary bottom sheet (mobile) — all modes */
+  mobileSheet?: boolean;
 }
 
 /** StepDriver mapping — onboarding steps → story progress */
@@ -48,6 +54,10 @@ function prefersReducedMotion(): boolean {
     typeof window !== 'undefined' &&
     window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
   );
+}
+
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v));
 }
 
 export default function LivingDiagram({
@@ -64,19 +74,20 @@ export default function LivingDiagram({
   className,
   style,
   version,
+  mobileSheet = false,
 }: LivingDiagramProps) {
   const reduced = prefersReducedMotion();
   const [near, setNear] = useState(reduced); // reduced-motion: render immediately (static)
   const [scrollP, setScrollP] = useState<number | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const hostRef = useRef<HTMLDivElement>(null);
 
-  // Mount gating — same EVISUAL-IDLE-001 rationale: do not build the ~60-node
-  // scene until it is roughly one viewport away from view.
+  // TC-302: Mount gating — do not build the ~60-node scene until it is
+  // roughly one viewport away from view (EVISUAL-IDLE-001 rationale).
   useEffect(() => {
     if (near) return;
     const el = hostRef.current;
     if (!el) return;
-    // jsdom / legacy browsers: no IO → render immediately
     if (typeof IntersectionObserver === 'undefined') {
       setNear(true);
       return;
@@ -145,8 +156,29 @@ export default function LivingDiagram({
   const effectiveLabels =
     labels ?? (isTh ? SICE_LABELS_TH : SICE_LABELS_EN);
 
+  const shellLabel = isTh
+    ? 'แผนภาพปัญญาที่มีชีวิต — 12 มิติพฤติกรรม SICE'
+    : 'Living intelligence diagram — 12 SICE behavior dimensions';
+
+  const sheetTitle = isTh
+    ? '12 มิติพฤติกรรม (SICE)'
+    : '12 SICE behavior dimensions';
+
+  const toggleLabel = isTh
+    ? `${sheetOpen ? 'ปิด' : 'เปิด'}รายละเอียด 12 มิติ`
+    : `${sheetOpen ? 'Close' : 'Open'} the 12-dimension detail`;
+
   return (
-    <div ref={hostRef} className={className} style={{ width: '100%', height: '100%', position: 'relative', ...style }} data-testid="living-diagram" data-mode={mode}>
+    <div
+      ref={hostRef}
+      className={`ld-shell${mobileSheet ? ' ld-shell--sticky' : ''}${className ? ` ${className}` : ''}`}
+      style={{ ...style }}
+      data-testid="living-diagram"
+      data-mode={mode}
+      role="section"
+      aria-label={shellLabel}
+      aria-live={mode === 'dashboard' ? 'polite' : undefined}
+    >
       {near && (
         <SVGCore
           progress={effectiveProgress}
@@ -156,6 +188,7 @@ export default function LivingDiagram({
           confidence={mode === 'dashboard' ? confidence : undefined}
           animate={!reduced}
           compact={mode !== 'landing'}
+          label={shellLabel}
         />
       )}
       {mode === 'dashboard' && version !== undefined && (
@@ -188,10 +221,54 @@ export default function LivingDiagram({
           )}
         </div>
       )}
+
+      {mobileSheet && (
+        <>
+          <button
+            type="button"
+            className="ld-sheet-toggle"
+            onClick={() => setSheetOpen((o) => !o)}
+            aria-expanded={sheetOpen}
+            aria-controls="ld-sheet-panel"
+          >
+            {toggleLabel}
+          </button>
+          <div
+            id="ld-sheet-panel"
+            className={`ld-sheet${sheetOpen ? '' : ' ld-sheet--closed'}`}
+            role="region"
+            aria-label={sheetTitle}
+            aria-hidden={!sheetOpen}
+          >
+            <p className="ld-sheet__title">{sheetTitle}</p>
+            <ul className="ld-sheet__list">
+              {effectiveLabels.map((label, i) => {
+                const s = mode === 'dashboard' && scores ? scores[i] : undefined;
+                const dot = dna
+                  ? i < 4 ? dnaPrimaryColor(dna) : i < 8 ? dnaSoftColor(dna) : dnaAccentColor(dna)
+                  : 'var(--color-accent-primary)';
+                return (
+                  <li key={label} className="ld-sheet__item">
+                    <span className="ld-sheet__dot" style={{ background: dot }} aria-hidden="true" />
+                    <span className="ld-sheet__name">{label}</span>
+                    {s !== undefined ? (
+                      <>
+                        <span className="ld-sheet__bar" aria-hidden="true">
+                          <span
+                            className="ld-sheet__bar-fill"
+                            style={{ width: `${Math.round(clamp01(s) * 100)}%`, background: dot }}
+                          />
+                        </span>
+                        <span className="ld-sheet__pct">{Math.round(clamp01(s) * 100)}%</span>
+                      </>
+                    ) : null}
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </>
+      )}
     </div>
   );
-}
-
-function clamp01(v: number): number {
-  return Math.max(0, Math.min(1, v));
 }

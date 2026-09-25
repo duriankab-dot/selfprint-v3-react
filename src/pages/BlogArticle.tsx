@@ -18,6 +18,8 @@ import { useParams, Link } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import { useLanguage } from '@/context/LanguageContext';
 import { MetaTagManager } from '@/components/MetaTagManager';
+// TC-306: BlogPosting (AEO/GEO) — replaces the hand-rolled Article schema
+import { blogPostingSchema } from '@/lib/aeoSchemas';
 
 interface ArticleMetadata {
   id: string;
@@ -37,32 +39,17 @@ interface Article extends ArticleMetadata {
   content: string;
 }
 
-/** Build Article JSON-LD for GEO / AEO */
+/** Build BlogPosting JSON-LD for GEO / AEO — TC-306 */
 function buildArticleSchema(article: Article, isTh: boolean) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    'headline': article.title,
-    'description': article.excerpt,
-    'keywords': article.keywords.join(', '),
-    'datePublished': article.date,
-    'dateModified': article.date,
-    'inLanguage': isTh ? 'th' : 'en',
-    'author': { '@type': 'Organization', 'name': 'SELFPRINT', 'url': 'https://selfprint.one' },
-    'publisher': {
-      '@type': 'Organization',
-      'name': 'SELFPRINT',
-      'logo': { '@type': 'ImageObject', 'url': 'https://selfprint.one/icons/icon-512x512.png' },
-    },
-    'mainEntityOfPage': {
-      '@type': 'WebPage',
-      '@id': `https://selfprint.one/blog/${article.slug}`,
-    },
-    'speakable': {
-      '@type': 'SpeakableSpecification',
-      'cssSelector': ['h1', '.article-excerpt'],
-    },
-  };
+  return blogPostingSchema({
+    title: { th: article.title, en: article.title },
+    excerpt: { th: article.excerpt, en: article.excerpt },
+    url: `https://selfprint.one/blog/${article.slug}`,
+    date: article.date,
+    author: article.author || 'SELFPRINT',
+    keywords: article.keywords,
+    inLanguage: isTh ? 'th-TH' : 'en-US',
+  });
 }
 
 export default function BlogArticle() {

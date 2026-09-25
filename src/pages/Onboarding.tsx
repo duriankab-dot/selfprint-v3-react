@@ -1027,7 +1027,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
               the creation sequence plays (flag-gated) */}
           {isFeatureEnabled('LIVING_DIAGRAM') && (
             <div style={{ maxWidth: 380, margin: '0 auto 32px', height: 320 }}>
-              <LivingDiagram mode="onboarding" dna={twinDna ?? undefined} step={2} isTh={isTh} />
+              <LivingDiagram mode="onboarding" dna={twinDna ?? undefined} step={2} isTh={isTh} mobileSheet />
             </div>
           )}
         </div>

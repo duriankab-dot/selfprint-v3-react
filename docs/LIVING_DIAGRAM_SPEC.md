@@ -1,7 +1,7 @@
 # LIVING_DIAGRAM_SPEC.md — สเปคเส้นเรื่องราว LivingDiagram
-**VERSION: 1.0 | LAST_UPDATED: 2026-09-25**  
-**เกี่ยวข้อง: TC-102, TC-103, TC-104, TC-105, TC-106, TC-205, TWIN_DNA_SPEC.md, UNIFIED_PIPELINE_SPEC.md**  
-**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1) — flag-gated ด้วย `VITE_FEATURE_LIVING_DIAGRAM`**
+**VERSION: 1.1 | LAST_UPDATED: 2026-09-25**  
+**เกี่ยวข้อง: TC-102, TC-103, TC-104, TC-105, TC-106, TC-205, TC-301, TC-302, TC-303, TC-304, TC-305, TWIN_DNA_SPEC.md, UNIFIED_PIPELINE_SPEC.md**  
+**สถานะ: IMPLEMENTED สมบูรณ์ (เฟส 1-3) — EVS ถูกลบ (TC-304), rollout 100% default (TC-305), mobile sheet + a11y (TC-301/303)**
 
 ---
 

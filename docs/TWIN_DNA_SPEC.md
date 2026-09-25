@@ -1,7 +1,7 @@
 # TWIN_DNA_SPEC.md — Twin Visual DNA Specification
 **VERSION: 1.1 | LAST_UPDATED: 2026-09-25**  
-**RELATED: TC-004, TC-101, TC-107, TC-108, LIVING_DIAGRAM_SPEC.md**  
-**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1) — ดูส่วน "IMPLEMENTATION STATUS" ด้านล่าง**
+**RELATED: TC-004, TC-101, TC-107, TC-108, TC-304, TC-305, LIVING_DIAGRAM_SPEC.md**  
+**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1-3) — ดูส่วน "IMPLEMENTATION STATUS" ด้านล่าง; EVS ถูกลบ (TC-304) และ DNA เป็นค่าเริ่มต้นของ Landing (rollout 100%, TC-305)**
 
 ---
 

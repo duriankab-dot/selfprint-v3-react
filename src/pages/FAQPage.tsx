@@ -10,7 +10,8 @@ import type { FAQ } from '../constants/faqs';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { useLanguage } from '../context/LanguageContext';
 import { getSeoMetadata } from '../constants/seoMetadata';
-import { generateFAQSchema } from '../lib/structuredData';
+// TC-309: dual FAQPage + QAPage schema (AEO/GEO)
+import { faqDualSchema } from '../lib/aeoSchemas';
 import '../styles/faq-page.css';
 
 export default function FAQPage() {
@@ -29,12 +30,13 @@ export default function FAQPage() {
     answer: isTh ? faq.answer : faq.answerEn,
   }));
 
-  // Prepare FAQ data for schema (first 5 FAQs for rich results)
-  const faqSchemaData = localizedFAQs.slice(0, 5).map((faq) => ({
-    question: faq.question,
-    answer: faq.answer,
+  // TC-309: dual schema (FAQPage + QAPage) using bilingual Q&A pairs —
+  // ทั้ง 5 ข้อแรก (Rich Results eligible) ผ่าน MetaTagManager.additionalScripts
+  const bilingualFAQs = displayedFAQs.slice(0, 5).map((faq) => ({
+    q: { th: faq.question, en: faq.questionEn },
+    a: { th: faq.answer, en: faq.answerEn },
   }));
-  const faqSchema = faqSchemaData.length > 0 ? generateFAQSchema(faqSchemaData) : undefined;
+  const dualSchemas = faqDualSchema(bilingualFAQs, isTh ? 'th-TH' : 'en-US');
 
   return (
     <>
@@ -45,7 +47,10 @@ export default function FAQPage() {
           keywords={seoData.keywords?.join(', ')}
           ogImage={seoData.ogImage}
           canonicalUrl={`/${language}/faq`}
-          schema={faqSchema}
+          additionalScripts={[
+            { type: 'application/ld+json', content: JSON.stringify(dualSchemas.faq) },
+            { type: 'application/ld+json', content: JSON.stringify(dualSchemas.qa) },
+          ]}
         />
       )}
       <div className="faq-page">

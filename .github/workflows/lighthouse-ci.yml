@@ -1,0 +1,66 @@
+name: Lighthouse CI (Phase 3)
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Nightly against the staging alias — 0:30 UTC
+    - cron: '30 0 * * *'
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'lighthouserc.json'
+
+env:
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Run Lighthouse CI against staging
+        # TC-312: thresholds from MASTER_PLAN Phase 3 gate —
+        # Perf >= 90, A11y >= 95, Best Practices >= 90, SEO >= 95.
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://selfprint-staging.pages.dev/th/
+            https://selfprint-staging.pages.dev/th/science
+            https://selfprint-staging.pages.dev/th/pricing
+          configPath: ./lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: false
+
+      - name: Notify Slack - Lighthouse
+        if: always() && env.SLACK_WEBHOOK != ''
+        continue-on-error: true
+        run: |
+          curl --globoff -X POST "${{ env.SLACK_WEBHOOK }}" \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "text": "Lighthouse CI",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Lighthouse CI*\n*Status:* ${{ job.status }}\n*Ref:* ${{ github.ref_name }}"
+                  }
+                }
+              ]
+            }'

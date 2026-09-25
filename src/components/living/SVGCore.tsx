@@ -53,6 +53,8 @@ export interface SVGCoreProps {
   animate?: boolean;
   /** Hide the bottom engine caption (embedded contexts) */
   compact?: boolean;
+  /** TC-303: accessible name for screen readers (default: English) */
+  label?: string;
 }
 
 const DEFAULT_DNA: TwinVisualDNA = {
@@ -103,6 +105,7 @@ export default function SVGCore({
   confidence,
   animate = true,
   compact = false,
+  label = 'Living intelligence diagram — 12 SICE behavior dimensions',
 }: SVGCoreProps) {
   const p = cl01(progress);
 
@@ -134,7 +137,8 @@ export default function SVGCore({
       viewBox="0 0 480 520"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
+      role="img"
+      aria-label={label}
       style={{ width: '100%', height: '100%', display: 'block' }}
       data-testid="living-svg-core"
       data-progress={p.toFixed(3)}

@@ -6,6 +6,8 @@
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { useLanguage } from '@/context/LanguageContext';
+// TC-310: Organization + Person schemas (E-E-A-T / AEO-GEO)
+import { aboutSchemas } from '@/lib/aeoSchemas';
 
 export default function AboutPage() {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ export default function AboutPage() {
     { icon: '🤝', title: 'Accessible to everyone', desc: 'Core features are free forever — no paywall blocking self-understanding' },
   ];
 
+  const schemas = aboutSchemas(isTh ? 'th-TH' : 'en-US');
+
   return (
     <>
       <MetaTagManager
@@ -32,6 +36,10 @@ export default function AboutPage() {
           ? 'SELFPRINT คือแพลตฟอร์มวิทยาศาสตร์พฤติกรรมที่สร้าง AI Twin ฝาแฝดเฉพาะบุคคล โดยอ้างอิงจาก 12 มิติพฤติกรรม ไม่ใช่โหราศาสตร์ดวงชะตา'
           : 'SELFPRINT is a behavioral-science platform that builds a personalized AI Twin from 12 behavioral dimensions — not astrology'}
         canonicalUrl={isTh ? '/th/about' : '/en/about'}
+        additionalScripts={[
+          { type: 'application/ld+json', content: JSON.stringify(schemas.org) },
+          { type: 'application/ld+json', content: JSON.stringify(schemas.person) },
+        ]}
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`

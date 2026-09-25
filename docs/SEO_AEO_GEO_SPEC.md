@@ -1,7 +1,7 @@
 # SEO_AEO_GEO_SPEC.md — สเปคการค้นหาและ AI-Readiness
-**VERSION: 1.0 | LAST_UPDATED: 2026-09-25**  
-**เกี่ยวข้อง: TC-109, TC-110, TC-111, TC-206, TC-207, TC-209, TC-210, TC-211**  
-**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1-2)**
+**VERSION: 1.1 | LAST_UPDATED: 2026-09-25**  
+**เกี่ยวข้อง: TC-109, TC-110, TC-111, TC-206, TC-207, TC-209, TC-210, TC-211, TC-306, TC-307, TC-308, TC-309, TC-310, TC-311, TC-312**  
+**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 1-3) — ครอบคลุมทุกหน้าแล้ว + Lighthouse CI thresholds (TC-312)**
 
 ---
 

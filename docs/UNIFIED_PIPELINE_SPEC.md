@@ -1,7 +1,7 @@
 # UNIFIED_PIPELINE_SPEC.md — สเปค Pipeline เดียว v1→v2→v3
-**VERSION: 1.0 | LAST_UPDATED: 2026-09-25**  
-**เกี่ยวข้อง: TC-201, TC-202, TC-203, TC-204, TC-205, TC-209, TC-210, LIVING_DIAGRAM_SPEC.md**  
-**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส 2) — flag-gated ด้วย `VITE_FEATURE_UNIFIED_PIPELINE`**
+**VERSION: 1.1 | LAST_UPDATED: 2026-09-25**  
+**เกี่ยวข้อง: TC-201, TC-202, TC-203, TC-204, TC-205, TC-209, TC-210, TC-305, LIVING_DIAGRAM_SPEC.md**  
+**สถานะ: IMPLEMENTED เสร็จสมบูรณ์ (เฟส  ั2-3) — rollout 100% default (TC-305; rollback =ตั้ง env เป็น false**
 
 ---
 

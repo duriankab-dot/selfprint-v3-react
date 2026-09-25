@@ -1,0 +1,130 @@
+/* living-diagram.css — TC-301/302/303: mobile sticky + bottom sheet + perf */
+
+.ld-shell {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  /* TC-302: explicit aspect ratio prevents CLS while the SVG fetches/mounts */
+  aspect-ratio: 480 / 520;
+  contain: layout style paint;
+}
+
+/* TC-301: on phones the diagram sticks to the top while its section scrolls */
+@media (max-width: 768px) {
+  .ld-shell--sticky {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+}
+
+/* TC-303: reduced-motion users get a concise, static summary instead of the
+   animated scene loop — the SVG stays, but no keyframes run (SVGCore animates
+   only when `animate` is true and we pass animate={false} below). */
+
+.ld-sheet-toggle {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 30;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-radius: var(--radius-md, 8px);
+  padding: 8px 12px;
+  font-size: var(--font-size-body-small, 12px);
+  font-weight: var(--font-weight-semibold, 600);
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+}
+
+.ld-sheet-toggle:focus-visible {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+.ld-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 65%;
+  overflow-y: auto;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
+  border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+  box-shadow: var(--shadow-lg);
+  padding: 16px;
+  z-index: 25;
+  transform: translateY(0);
+  transition: transform 240ms var(--easing-primary, ease);
+}
+
+.ld-sheet--closed {
+  transform: translateY(105%);
+  pointer-events: none;
+}
+
+.ld-sheet__title {
+  margin: 0 0 12px;
+  font-size: var(--font-size-h5, 14px);
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--color-text-primary);
+}
+
+.ld-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ld-sheet__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: var(--font-size-body-base, 14px);
+  color: var(--color-text-primary);
+}
+
+.ld-sheet__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.ld-sheet__name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ld-sheet__pct {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+.ld-sheet__bar {
+  flex: none;
+  width: 64px;
+  height: 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.ld-sheet__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* TC-303: keep interactive sheet content reachable for reduced-motion users
+   (no animation, plain show/hide) */
+@media (prefers-reduced-motion: reduce) {
+  .ld-sheet {
+    transition: none;
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["https://selfprint-staging.pages.dev/th/", "https://selfprint-staging.pages.dev/th/science", "https://selfprint-staging.pages.dev/th/pricing"],
+      "numberOfRuns": 1,
+      "settings": {
+        "chromeFlags": "--no-sandbox --headless"
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.9 }],
+        "categories:accessibility": ["error", { "minScore": 0.95 }],
+        "categories:best-practices": ["error", { "minScore": 0.9 }],
+        "categories:seo": ["error", { "minScore": 0.95 }]
+      }
+    },
+    "upload": {
+      "target": "filesystem",
+      "outputDir": "lighthouse-ci"
+    }
+  }
+}

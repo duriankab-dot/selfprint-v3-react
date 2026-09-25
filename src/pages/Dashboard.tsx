@@ -218,6 +218,7 @@ const Dashboard: React.FC = () => {
                 confidence={diagramConfidence}
                 version={diagramVersion}
                 isTh={isTh}
+                mobileSheet
               />
             </div>
           )}

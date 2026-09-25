@@ -26,8 +26,8 @@ import { useTwin } from '@/context/TwinContext';
 import { Link } from 'react-router-dom';
 import { useLifecycleStore } from '@/store/lifecycleStore';
 import { useTheme } from '@/context/ThemeContext';
-import EvolutionaryVisualSystem from '@/components/landing/EvolutionaryVisualSystem';
-// TC-104: LivingDiagram integration — flag-gated (VITE_FEATURE_LIVING_DIAGRAM)
+// TC-104/TC-304: LivingDiagram replaces EvolutionaryVisualSystem (dead code
+// removed after 100% rollout — flag no longer falls back to the legacy SVG)
 import { isFeatureEnabled } from '@/lib/featureFlags';
 import LivingDiagram from '@/components/living/LivingDiagram';
 import { saveTwinDNA, loadTwinDNA } from '@/lib/twinVisualDNA';
@@ -751,16 +751,13 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
             >
               <div style={{ width: '100%', maxWidth: '480px' }}>
                 {visualNear && (
-                  isFeatureEnabled('LIVING_DIAGRAM') ? (
-                    <LivingDiagram
-                      mode="landing"
-                      dna={twinDNA ?? undefined}
-                      containerRef={s2VisualRef}
-                      isTh={lang === 'th'}
-                    />
-                  ) : (
-                    <EvolutionaryVisualSystem containerRef={s2VisualRef} isTh={lang === 'th'} />
-                  )
+                  <LivingDiagram
+                    mode="landing"
+                    dna={twinDNA ?? undefined}
+                    containerRef={s2VisualRef}
+                    isTh={lang === 'th'}
+                    mobileSheet
+                  />
                 )}
               </div>
             </div>

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import SVGCore, { SICE_LABELS_TH, SICE_LABELS_EN } from '../SVGCore';
 import LivingDiagram from '../LivingDiagram';
 import TwinDNAAvatar from '../TwinDNAAvatar';
@@ -128,5 +128,49 @@ describe('TC-107 TwinDNAAvatar', () => {
     const r2 = render(<TwinDNAAvatar dna={DNA_B} />);
     expect(r2.container.querySelector('svg')?.outerHTML).not.toBe(html1);
     r2.unmount();
+  });
+});
+
+describe('TC-301/303 LivingDiagram — mobile sheet + a11y', () => {
+  it('mobileSheet: toggle button toggles the SICE summary sheet', () => {
+    const r = render(<LivingDiagram mode="dashboard" mobileSheet scores={Array(12).fill(0.5)} />);
+    const host = r.container.querySelector('[data-testid="living-diagram"]') as unknown as HTMLElement;
+    const toggle = r.container.querySelector('.ld-sheet-toggle') as unknown as HTMLButtonElement;
+    expect(toggle).toBeTruthy();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBe('ld-sheet-panel');
+
+    const sheet = r.container.querySelector('#ld-sheet-panel') as unknown as HTMLElement;
+    expect(sheet.textContent).toContain('12 SICE');
+    expect(sheet.getAttribute('aria-hidden')).toBe('true');
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(sheet.getAttribute('aria-hidden')).toBe('false');
+    r.unmount();
+  });
+
+  it('mobileSheet: dashboard lists all 12 labels with score percentages', () => {
+    const scores = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1, 0.2, 0.3];
+    const r = render(<LivingDiagram mode="dashboard" mobileSheet scores={scores} />);
+    const sheet = r.container.querySelector('#ld-sheet-panel') as unknown as HTMLElement;
+    fireEvent.click(r.container.querySelector('.ld-sheet-toggle') as unknown as HTMLButtonElement);
+    for (const lbl of ['Self', 'Mind', 'Decisions', 'Future']) {
+      expect(sheet.textContent).toContain(lbl);
+    }
+    expect(sheet.textContent).toContain('100%');
+    expect(sheet.textContent).toContain('10%');
+    r.unmount();
+  });
+
+  it('a11y: shell role="section" + SVG role="img" (no aria-hidden)', () => {
+    const r = render(<LivingDiagram mode="landing" progress={0.5} />);
+    const host = r.container.querySelector('[data-testid="living-diagram"]') as unknown as HTMLElement;
+    expect(host.getAttribute('role')).toBe('section');
+    const svg = r.container.querySelector('[data-testid="living-svg-core"]') as unknown as SVGSVGElement;
+    expect(svg.getAttribute('role')).toBe('img');
+    expect(svg.getAttribute('aria-label')).toBeTruthy();
+    expect(svg.getAttribute('aria-hidden')).toBeNull();
+    r.unmount();
   });
 });

@@ -6,6 +6,8 @@
 import { useState } from 'react';
 import { MetaTagManager } from '@/components/MetaTagManager';
 import { useLanguage } from '@/context/LanguageContext';
+// TC-311: ContactPage + LocalBusiness schemas (E-E-A-T / AEO-GEO)
+import { contactSchemas } from '@/lib/aeoSchemas';
 
 export default function ContactPage() {
   const { language } = useLanguage();
@@ -26,6 +28,8 @@ export default function ContactPage() {
     setSent(true);
   };
 
+  const schemas = contactSchemas(isTh ? 'th-TH' : 'en-US');
+
   return (
     <>
       <MetaTagManager
@@ -34,6 +38,10 @@ export default function ContactPage() {
           ? 'ติดต่อทีม SELFPRINT สำหรับคำถาม ข้อเสนอแนะ หรือปัญหาการใช้งาน'
           : 'Contact the SELFPRINT team with questions, feedback, or issues'}
         canonicalUrl={isTh ? '/th/contact' : '/en/contact'}
+        additionalScripts={[
+          { type: 'application/ld+json', content: JSON.stringify(schemas.contact) },
+          { type: 'application/ld+json', content: JSON.stringify(schemas.localBusiness) },
+        ]}
       />
       <main style={{ minHeight: '100vh', background: 'var(--color-bg-primary)', color: 'var(--color-text-primary)', padding: '0 0 80px' }}>
         <style>{`

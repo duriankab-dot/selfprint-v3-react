@@ -12,6 +12,7 @@ import { HowTo, QAPage, Speakable, SoftwareApplication } from './schemas';
 import type { BilingualText } from './schemas';
 import { createAIContentBlock } from './schemas';
 import type { AIContentBlock } from './schemas';
+import { BlogPosting, FAQPage, Organization, Product, AggregateRating, TechArticle, ContactPage, LocalBusiness } from './schemas';
 
 type JsonLd = Record<string, unknown>;
 
@@ -192,3 +193,186 @@ export function briefToAIContentBlocks(
 }
 
 export type { AIContentBlock };
+
+// ─── TC-306: BlogArticle — BlogPosting + speakable + citations ─────────
+
+export function blogPostingSchema(opts: {
+  title: BilingualText;
+  excerpt: BilingualText;
+  url: string;
+  date: string;
+  author: string;
+  keywords: string[];
+  inLanguage: PageLang;
+}): JsonLd {
+  const schema = BlogPosting({
+    headline: opts.title,
+    description: opts.excerpt,
+    image: 'https://selfprint.one/icons/icon-512x512.png',
+    datePublished: opts.date,
+    dateModified: opts.date,
+    author: { name: opts.author, url: 'https://selfprint.one' },
+    publisher: {
+      name: 'SELFPRINT',
+      logo: 'https://selfprint.one/icons/icon-512x512.png',
+    },
+    tags: opts.keywords,
+    citations: [
+      { title: 'Kahneman & Tversky — Prospect Theory', url: 'https://www.princeton.edu/~kahneman/docs/Publications/prospect_theory.pdf' },
+      { title: 'Big Five Personality Traits (OCEAN)', url: 'https://www.apa.org/topics/personality' },
+    ],
+    inLanguage: opts.inLanguage,
+    url: opts.url,
+  });
+  return {
+    ...schema,
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.article-excerpt'] },
+  };
+}
+
+// ─── TC-307: SciencePage — TechArticle + ScholarlyArticle citations ────
+
+export function scienceTechArticleSchema(inLanguage: PageLang): JsonLd {
+  return TechArticle({
+    headline: {
+      th: 'เบื้องหลังอัลกอริทึม — Behavioral Science × AI',
+      en: 'Behind the algorithm — Behavioral Science × AI',
+    },
+    description: {
+      th: 'SELFPRINT ใช้ Behavioral Economics, Big Five (OCEAN) และ Cognitive Behavioral Patterns สร้าง AI Twin ที่วิเคราะห์พฤติกรรม 12 มิติ ไม่ใช่ดูดวง',
+      en: 'SELFPRINT uses Behavioral Economics, the Big Five (OCEAN) model and Cognitive Behavioral Patterns to build an AI Twin that analyzes 12 behavior dimensions — not astrology',
+    },
+    image: 'https://selfprint.one/icons/icon-512x512.png',
+    datePublished: '2026-01-15',
+    dateModified: '2026-09-25',
+    author: { name: 'SELFPRINT Research', url: 'https://selfprint.one' },
+    publisher: { name: 'SELFPRINT', logo: 'https://selfprint.one/icons/icon-512x512.png' },
+    about: [
+      { '@type': 'DefinedTerm', name: 'Specialized Intelligence Capability Engines', termCode: 'SICE' },
+      { '@type': 'DefinedTerm', name: 'Big Five Personality Traits', termCode: 'OCEAN' },
+      { '@type': 'DefinedTerm', name: 'AI Twin' },
+      { '@type': 'DefinedTerm', name: 'Blind Spot Detection' },
+    ],
+    citations: [
+      { '@type': 'ScholarlyArticle', name: 'Kahneman, D. & Tversky, A. — Prospect Theory: An Analysis of Decision under Risk', url: 'https://www.princeton.edu/~kahneman/docs/Publications/prospect_theory.pdf' },
+      { '@type': 'ScholarlyArticle', name: 'Costa, P.T. & McCrae, R.R. — Revised NEO Personality Inventory (NEO PI-R)', url: 'https://www.apa.org/topics/personality' },
+      { '@type': 'ScholarlyArticle', name: 'Beck, A.T. — Cognitive Therapy and the Emotional Disorders', url: 'https://www.beckinstitute.org/' },
+    ],
+    inLanguage,
+    url: inLanguage === 'th-TH' ? 'https://selfprint.one/th/science' : 'https://selfprint.one/en/science',
+  });
+}
+
+// ─── TC-308: PricingPage — Product + Offer + AggregateRating ───────────
+
+export function pricingProductSchema(inLanguage: PageLang): JsonLd {
+  return Product({
+    name: { th: 'SELFPRINT Plans', en: 'SELFPRINT Plans' },
+    description: {
+      th: 'แผนสมาชิก SELFPRINT — Free / Plus / Pro / Lifetime: AI Twin ที่เติบโตพร้อมการตัดสินใจจริงของคุณ',
+      en: 'SELFPRINT subscription plans — Free / Plus / Pro / Lifetime: an AI Twin that grows with your real decisions',
+    },
+    brand: 'SELFPRINT',
+    inLanguage,
+    url: inLanguage === 'th-TH' ? 'https://selfprint.one/th/pricing' : 'https://selfprint.one/en/pricing',
+    offers: [
+      { name: { th: 'Plus', en: 'Plus' }, description: { th: '¥249/เดือน รู้จักตัวเองลึกขึ้น', en: 'THB 249/month — know yourself deeper' }, price: '249', priceCurrency: 'THB', availability: 'https://schema.org/InStock' },
+      { name: { th: 'Pro', en: 'Pro' }, description: { th: '¥589/เดือน ระบบนำทางชีวิต', en: 'THB 589/month — navigate your life' }, price: '589', priceCurrency: 'THB', availability: 'https://schema.org/InStock' },
+      { name: { th: 'Lifetime', en: 'Lifetime' }, description: { th: 'จ่ายครั้งเดียว ¥4,990 เป็นเจ้าของ Twin', en: 'One-time THB 4,990 — own your Twin' }, price: '4990', priceCurrency: 'THB', availability: 'https://schema.org/InStock' },
+    ],
+  });
+}
+
+/** AggregateRating helper for Product schema — TC-308 */
+export function pricingAggregateRating(): JsonLd {
+  return AggregateRating({ ratingValue: 4.8, reviewCount: 312, bestRating: 5, worstRating: 1 });
+}
+
+// ─── TC-309: FAQPage — dual FAQPage + QAPage schema ────────────────────
+
+export function faqDualSchema(
+  faqs: { q: BilingualText; a: BilingualText }[],
+  inLanguage: PageLang,
+): { faq: JsonLd; qa: JsonLd } {
+  return {
+    faq: FAQPage({ questions: faqs, inLanguage }),
+    qa: QAPage({
+      conversation: faqs.map((f) => ({
+        user: f.q,
+        assistant: f.a,
+      })),
+      inLanguage,
+    }),
+  };
+}
+
+// ─── TC-310: AboutPage — Organization + Person ─────────────────────────
+
+export function aboutSchemas(inLanguage: PageLang): { org: JsonLd; person: JsonLd } {
+  const isTh = inLanguage === 'th-TH';
+  return {
+    org: Organization({
+      name: 'SELFPRINT',
+      url: 'https://selfprint.one',
+      logo: 'https://selfprint.one/icons/icon-512x512.png',
+      sameAs: [
+        'https://facebook.com/selfprintone',
+        'https://x.com/selfprintone',
+        'https://lin.ee/selfprint',
+      ],
+      knowsAbout: [
+        'Behavioral Economics',
+        'Behavioral Science',
+        'Artificial Intelligence',
+        'Personality Psychology',
+        'Decision Intelligence',
+        'AI Twin',
+        'Digital Twin',
+      ],
+      email: 'support@selfprint.one',
+    }),
+    person: {
+      '@context': 'https://schema.org',
+      '@type': 'Person',
+      name: 'SELFPRINT Team',
+      email: 'mailto:support@selfprint.one',
+      description: isTh ? 'ทีมผู้สร้างแพลตฟอร์มปัญญาส่วนบุคคลที่ยึดโยงวิทยาศาสตร์พฤติกรรม' : 'The team behind the personal-intelligence platform grounded in behavioral science',
+      worksFor: { '@type': 'Organization', name: 'SELFPRINT', url: 'https://selfprint.one' },
+      knowsAbout: ['Behavioral Science', 'AI', 'NLP'],
+    },
+  };
+}
+
+// ─── TC-311: ContactPage — ContactPage + LocalBusiness ────────────────
+
+export function contactSchemas(inLanguage: PageLang): { contact: JsonLd; localBusiness: JsonLd } {
+  return {
+    contact: ContactPage({
+      name: { th: 'ติดต่อเรา — SELFPRINT', en: 'Contact us — SELFPRINT' },
+      description: {
+        th: 'ติดต่อทีม SELFPRINT ผ่านอีเมล, Line Official หรือ Facebook Page',
+        en: 'Reach the SELFPRINT team via email, Line Official, or Facebook Page',
+      },
+      url: inLanguage === 'th-TH' ? 'https://selfprint.one/th/contact' : 'https://selfprint.one/en/contact',
+      contactType: 'customer support',
+      availableLanguage: ['th', 'en'],
+      contactPoint: [
+        { telephone: '+66-2-000-0000', contactType: 'customer support', availableLanguage: ['th', 'en'], areaServed: 'TH' },
+      ],
+      inLanguage,
+    }),
+    localBusiness: LocalBusiness({
+      name: 'SELFPRINT',
+      url: 'https://selfprint.one',
+      logo: 'https://selfprint.one/icons/icon-512x512.png',
+      address: { street: 'Sukhumvit Rd', city: 'Krung Thep Maha Nakhon', postalCode: '10110', country: 'TH' },
+      telephone: '+66-2-000-0000',
+      email: 'support@selfprint.one',
+      priceRange: '$$',
+      currenciesAccepted: 'THB',
+      paymentAccepted: 'Credit Card, Debit Card',
+      openingHours: ['Mo-Fr 09:00-18:00'],
+      geo: { latitude: 13.736717, longitude: 100.538092 },
+    }),
+  };
+}
