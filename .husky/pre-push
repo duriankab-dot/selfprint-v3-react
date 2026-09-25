@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running pre-push validation..."
+
+npm run validate:all
+
+if [ $? -ne 0 ]; then
+  echo "❌ Pre-push validation failed. Push aborted."
+  exit 1
+fi
+
+echo "✅ Pre-push validation passed"

@@ -1,0 +1,73 @@
+name: Phase Gate Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      phase:
+        type: choice
+        description: 'Phase to validate'
+        required: true
+        options:
+          - '0'
+          - '1'
+          - '2'
+          - '3'
+
+jobs:
+  phase-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test -- --run
+
+      - name: Build
+        run: npm run build
+
+      - name: Astro Language Check
+        run: |
+          if grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/ --include="*.tsx" --include="*.ts" | grep -v "vs-astrology" | grep -v "lib/astrology" | grep -v "lib/intro-summary" | grep -v "config/nova-prompts" | grep -v "config/twin-prompts" | grep -v "constants/faqs" | grep -v "constants/seoMetadata" | grep -v "constants/worlds" | grep -v "lib/ArchetypeScoreEngine" | grep -v "lib/astrology" | grep -v "lib/astrovera-adapter" | grep -v "services/CoreAwakeningService" | grep -v "services/VisualDNAService" | grep -v "types/badges"; then
+            echo "❌ Astrology language found in non-allowed files"
+            exit 1
+          fi
+          echo "✅ Astrology language check passed"
+
+      - name: Token Compliance Check
+        run: |
+          if grep -rn "#[0-9a-fA-F]\{6\}\|rgb(" src/ --include="*.tsx" | grep -v "node_modules" | grep -v ".test." | grep -v ".stories."; then
+            echo "❌ Hardcoded colors found in source files"
+            exit 1
+          fi
+          echo "✅ Token compliance check passed"
+
+      - name: MASTER_PLAN Sync Check
+        run: node .ai/scripts/validate-master-plan.js
+
+      - name: Lighthouse CI (Phase 1+)
+        if: github.event.inputs.phase != '0'
+        run: |
+          npm install -g @lhci/cli
+          lhci autorun --collect.numberOfRuns=1 --upload.target=temporary-public-storage
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}

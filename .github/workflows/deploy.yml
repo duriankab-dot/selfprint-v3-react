@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Target environment'
+        required: true
+        options:
+          - 'staging'
+          - 'production'
+
+jobs:
+  deploy-staging:
+    if: github.event.inputs.environment == 'staging' || (github.event.push && github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages (Staging)
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: selfprint-staging
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
+
+  deploy-production:
+    if: github.event.inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages (Production)
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: selfprint
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          branch: master
+
+  rollback:
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify rollback
+        run: echo "Deployment failed — manual rollback may be needed"
+        # Feature flags allow instant rollback: set VITE_FEATURE_*=false in CF dashboard

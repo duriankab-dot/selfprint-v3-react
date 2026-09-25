@@ -23,7 +23,7 @@
 | **Baseline Commit** | `eb26e59` (known-good) |
 | **Open Tasks** | TC-001 ถึง TC-010 (Phase 0) |
 | **Blockers** | ไม่มี |
-| **Last Session** | session-014 (2026-09-25T14:00) — TC-007 complete: Schema.org library |
+| **Last Session** | session-015 (2026-09-25T14:30) — TC-008 complete: CI gates configuration |
 
 ---
 
@@ -130,7 +130,7 @@
 | TC-005 | Language switcher relocation | 0 | P1 | 1 ชม. | [x] NavBar.tsx updated [x] LanguageSwitcher compact variant [x] MASTER_PLAN updated |
 | TC-006 | Sitemap generator | 0 | P1 | 2 ชม. | [x] generate-sitemap.ts [x] build script [x] public/sitemap.xml [x] MASTER_PLAN updated |
 | TC-007 | Schema.org library | 0 | P1 | 3 ชม. | [x] schemas.ts (typed builders) [x] tests [x] MASTER_PLAN updated |
-| TC-008 | CI gates configuration | 0 | P0 | 2 ชม. | [ ] phase-gate.yml [ ] pre-push hook [ ] validate scripts [ ] MASTER_PLAN updated |
+| TC-008 | CI gates configuration | 0 | P0 | 2 ชม. | [x] phase-gate.yml [x] pre-push hook [x] validate scripts [x] MASTER_PLAN updated |
 | TC-009 | Narrative spine spec | 0 | P0 | 2 ชม. | [ ] LIVING_DIAGRAM_SPEC.md [ ] MASTER_PLAN updated |
 | TC-010 | Curiosity progression design | 0 | P0 | 2 ชม. | [ ] CURIOSITY_PROGRESSION.md [ ] MASTER_PLAN updated |
 

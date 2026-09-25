@@ -24,7 +24,15 @@
     "e2e:pause-only": "ts-node scripts/e2e-with-supabase.ts --pause-only",
     "weekly:resume": "ts-node scripts/weekly-supabase-resume.ts",
     "seed:test-users": "ts-node scripts/seed-test-users.ts",
-    "sitemap": "tsx scripts/generate-sitemap.ts"
+    "sitemap": "tsx scripts/generate-sitemap.ts",
+    "validate:all": "npm run typecheck && npm run lint && npm test && npm run build",
+    "validate:phase-0": "npm run validate:all && npm run check:astro && npm run check:tokens",
+    "validate:phase-1": "npm run validate:all && npm run lighthouse:ci",
+    "check:astro": "node .ai/scripts/check-astro-language.cjs",
+    "check:tokens": "node .ai/scripts/check-hardcoded-colors.cjs",
+    "check:master-plan": "node .ai/scripts/validate-master-plan.cjs",
+    "pre-commit": "npm run validate:all",
+    "pre-push": "npm run validate:all"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
