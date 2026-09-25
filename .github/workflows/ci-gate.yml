@@ -18,7 +18,10 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # NODE-22-001: ต้องตรงกับ testing.yml (Node 22) — Node 20 ทำให้
+          # jsdom@30 → undici ล้มด้วย "webidl.util.markAsUncloneable is not a
+          # function" ทุก worker (71 test files start ไม่ขึ้น)
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -37,17 +40,11 @@ jobs:
         run: npm run build
 
       - name: Astro Language Check
-        run: |
-          if grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/ --include="*.tsx" --include="*.ts" | grep -v "vs-astrology" | grep -v "lib/astrology" | grep -v "lib/intro-summary" | grep -v "config/nova-prompts" | grep -v "config/twin-prompts" | grep -v "constants/faqs" | grep -v "constants/seoMetadata" | grep -v "constants/worlds" | grep -v "lib/ArchetypeScoreEngine" | grep -v "lib/astrology" | grep -v "lib/astrovera-adapter" | grep -v "services/CoreAwakeningService" | grep -v "services/VisualDNAService" | grep -v "types/badges"; then
-            echo "❌ Astrology language found in non-allowed files"
-            exit 1
-          fi
-          echo "✅ Astrology language check passed"
+        # CI gate ต้องรัน script เดียวกับ local (.ai/scripts) — raw grep เดิมมี
+        # allow-list ไม่ตรงกับ script ทำให้ false failure บนไฟล์ที่ allowed อยู่แล้ว
+        run: npm run check:astro
 
       - name: Token Compliance Check
-        run: |
-          if grep -rn "#[0-9a-fA-F]\{6\}\|rgb(" src/ --include="*.tsx" | grep -v "node_modules" | grep -v ".test." | grep -v ".stories."; then
-            echo "❌ Hardcoded colors found in source files"
-            exit 1
-          fi
-          echo "✅ Token compliance check passed"
+        # ใช้ script เดียวกับ local: ไฟล์ใน fix-list (Phase 0 audit) ได้รับยกเว้น
+        # ตามแผนย้ายทีละ batch — raw grep เดิม flag ทุกไฟล์รวม fix-list
+        run: npm run check:tokens

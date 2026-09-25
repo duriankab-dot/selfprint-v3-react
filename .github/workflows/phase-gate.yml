@@ -27,7 +27,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          # NODE-22-001: ต้องตรงกับ testing.yml (Node 22) — Node 20 ทำให้
+          # jsdom@30 → undici ล้มทุก worker
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -46,23 +48,16 @@ jobs:
         run: npm run build
 
       - name: Astro Language Check
-        run: |
-          if grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/ --include="*.tsx" --include="*.ts" | grep -v "vs-astrology" | grep -v "lib/astrology" | grep -v "lib/intro-summary" | grep -v "config/nova-prompts" | grep -v "config/twin-prompts" | grep -v "constants/faqs" | grep -v "constants/seoMetadata" | grep -v "constants/worlds" | grep -v "lib/ArchetypeScoreEngine" | grep -v "lib/astrology" | grep -v "lib/astrovera-adapter" | grep -v "services/CoreAwakeningService" | grep -v "services/VisualDNAService" | grep -v "types/badges"; then
-            echo "❌ Astrology language found in non-allowed files"
-            exit 1
-          fi
-          echo "✅ Astrology language check passed"
+        # ใช้ script เดียวกับ local (.ai/scripts) — allow-list ตรงกัน
+        run: npm run check:astro
 
       - name: Token Compliance Check
-        run: |
-          if grep -rn "#[0-9a-fA-F]\{6\}\|rgb(" src/ --include="*.tsx" | grep -v "node_modules" | grep -v ".test." | grep -v ".stories."; then
-            echo "❌ Hardcoded colors found in source files"
-            exit 1
-          fi
-          echo "✅ Token compliance check passed"
+        # ใช้ script เดียวกับ local — fix-list ได้รับยกเว้นตามแผน TC-208
+        run: npm run check:tokens
 
       - name: MASTER_PLAN Sync Check
-        run: node .ai/scripts/validate-master-plan.js
+        # แก้ path: ไฟล์จริงคือ validate-master-plan.cjs (เดิมอ้าง .js → ไม่มีไฟล์)
+        run: npm run check:master-plan
 
       - name: Lighthouse CI (Phase 1+)
         if: github.event.inputs.phase != '0'
