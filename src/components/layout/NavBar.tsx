@@ -236,10 +236,11 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <AudioSettingsButton />
+          {/* NEW: Language Switcher compact variant — always visible */}
+          <LanguageSwitcher variant="compact" style={{ marginLeft: '4px' }} />
         </div>
 
         <div className="sp-navbar-desktop-action" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <LanguageSwitcher />
           {rightSlot || authAction}
         </div>
 
@@ -311,7 +312,6 @@ export function NavBar({ rightSlot, position = 'sticky' }: NavBarProps) {
               (.sp-navbar-always-action) so they no longer need the
               hamburger open to be found. */}
           <div style={{ marginTop: '8px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-            <LanguageSwitcher />
             {rightSlot || authAction}
           </div>
         </div>
