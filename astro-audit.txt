@@ -1,0 +1,256 @@
+﻿
+src\pages\AboutPage.tsx:18:    { icon: '🌱', title: 'เติบโตต่อเนื่อง', desc: 'AI Twin เรียนรู้และเติบโตไปพร้อมคุณ 
+ไม่ใช่ snapshot ดูดวงอย่างเดียวที่ตายตัว' },
+src\pages\AboutPage.tsx:32:          ? 'SELFPRINT คือแพลตฟอร์มวิทยาศาสตร์พฤติกรรมที่สร้าง AI Twin ฝาแฝดเฉพาะบุคคล 
+โดยอ้างอิงจาก 12 มิติพฤติกรรม ไม่ใช่โหราศาสตร์ดวงชะตา'
+src\pages\AboutPage.tsx:33:          : 'SELFPRINT is a behavioral-science platform that builds a personalized AI Twin 
+from 12 behavioral dimensions — not astrology'}
+src\pages\AboutPage.tsx:58:            : 'A behavioral-science platform built on the belief that everyone deserves to 
+understand themselves through data — not astrology'}</p>
+src\pages\AnalysisPage.tsx:518:            {/* ── Top Summary ── astrology-style narrative from SICE synthesis */}
+src\pages\BlogArticle.tsx:326:                      ? 'ให้ AI Twin ของคุณวิเคราะห์พฤติกรรม 12 มิติ — ฟรี ไม่ต้องดูดวง'
+src\pages\BlogArticle.tsx:327:                      : 'Let your AI Twin analyze 12 behavioral dimensions — free, no 
+astrology involved'}
+src\pages\BlogListPage.tsx:76:    excerpt: 'เจาะลึกทำไมบางช่วงชีวิตทำอะไรก็ติดขัด 
+และวิธีแก้ด้วยดาต้าพฤติกรรมแทนการดูดวง',
+src\pages\BlogListPage.tsx:80:      'บางช่วงชีวิตรู้สึกว่าทำอะไรก็ไม่ราบรื่น — ธุรกิจสะดุด ความสัมพันธ์ขัดแย้ง 
+การเงินติดปัญหา คนส่วนใหญ่มักโทษดวง "ราหูกลับ" หรือ "ดาวเสาร์แทรก" แต่วิทยาศาสตร์พฤติกรรมมีคำอธิบายที่แม่นยำกว่านั้น',
+src\pages\BlogListPage.tsx:83:      'ไม่ต้องรอดาวย้าย แค่รู้ว่าจุดบอดของตัวเองอยู่ที่ไหน คุณแก้ได้ทันที AI Twin ของ 
+SELFPRINT ออกแบบมาเพื่อชี้จุดนั้นโดยเฉพาะ',
+src\pages\BlogListPage.tsx:112:      'ความเครียดไม่ได้เกิดขึ้นเพราะโชคร้าย 
+แต่เกิดจากช่องว่างระหว่างสิ่งที่คุณเป็นกับสิ่งที่สถานการณ์ต้องการ ยิ่งช่องว่างนั้นกว้างเท่าไร 
+ความเครียดยิ่งรุนแรงขึ้นเท่านั้น',
+src\pages\BlogListPage.tsx:123:    { q: 'SELFPRINT คืออะไร?', a: 'SELFPRINT คือ Personal Intelligence Platform ที่ใช้ 
+AI วิเคราะห์พฤติกรรมใน 12 มิติ สร้าง AI Twin (ฝาแฝดดิจิทัล) เฉพาะตัวคุณ 
+เพื่อช่วยตัดสินใจและพัฒนาตัวเองได้แม่นยำกว่าการดูดวง' },
+src\pages\BlogListPage.tsx:125:    { q: 'SELFPRINT ต่างจากการดูดวงอย่างไร?', a: 'การดูดวงใช้วันเกิดทำนายอนาคต 
+SELFPRINT ใช้วิทยาศาสตร์พฤติกรรม 12 มิติวิเคราะห์รูปแบบการตัดสินใจ จุดแข็ง และจุดบอดของคุณจริงๆ 
+ผลลัพธ์คือคำแนะนำที่ปรับได้และวัดผลได้' },
+src\pages\BlogListPage.tsx:411:          : 'Free articles on behavioral science, AI Twins, and understanding yourself 
+through data — not horoscopes'}
+src\pages\CommunityPage.tsx:389:            title={isTh ? 'เปิดเซียมซี' : 'Draw a fortune stick'}
+src\pages\CoreAwakening.tsx:26:import { calculateInitialDisciplines } from '../lib/astrology';
+src\pages\CoreAwakening.tsx:120:      westernZodiac: disciplines.westernZodiac,
+src\pages\CoreAwakening.tsx:121:      chineseZodiac: disciplines.chineseZodiac,
+src\pages\LandingPage.tsx:12: * Visual:       scientific icons only — no astrology/fortune-telling icons
+src\pages\LandingPage.tsx:35:import { calculateInitialDisciplines } from '@/lib/astrology.js';
+src\pages\LandingPage.tsx:89:      sub: 'Not destiny, not beliefs — but behavioral science. Create an AI Twin that 
+warns you, reveals blind spots, and guides your decisions in work, love and life.',
+src\pages\LandingPage.tsx:127:type Segment = 'th-self' | 'mbti' | 'tech' | 'astrology' | 'default';
+src\pages\LandingPage.tsx:137:      seoTitle: 'SELFPRINT | สร้าง AI Twin ภาษาไทย - ช่วยตัดสินใจชีวิต (ไม่ใช่ดูดวง)',
+src\pages\LandingPage.tsx:148:    astrology: {
+src\pages\LandingPage.tsx:149:      seoTitle: 'SELFPRINT vs ดูดวง AI — ต่างกันอย่างไร? | SELFPRINT',
+src\pages\LandingPage.tsx:150:      seoDesc: 'ต้องการเข้าใจตัวเอง? SELFPRINT วิเคราะห์พฤติกรรมจริง ไม่ใช่โชคชะตา — 
+แม่นกว่าเพราะเรียนรู้จากคุณ',
+src\pages\LandingPage.tsx:154:      seoDesc: 'เปลี่ยนข้อมูลพฤติกรรมให้กลายเป็น AI Twin ฝาแฝดดิจิทัล 
+ปลดล็อกพิมพ์เขียวพฤติกรรม 12 มิติ ชี้ชัดทุก Blind Spot เพื่อนำทางชีวิต การงาน และความรัก แม่นยำกว่าการดูดวงทั่วไป',
+src\pages\LandingPage.tsx:170:    astrology: {
+src\pages\LandingPage.tsx:171:      seoTitle: 'SELFPRINT vs Astrology AI — What\'s the Difference? | SELFPRINT',
+src\pages\LandingPage.tsx:172:      seoDesc: 'Looking to understand yourself? SELFPRINT analyzes real behavior — not 
+destiny. More accurate because it learns from you.',
+src\pages\LandingPage.tsx:195:    else if (ref === 'astrology') seg = 'astrology';
+src\pages\LandingPage.tsx:465:          ? 'แบบทดสอบจิตวิทยา, วิเคราะห์พฤติกรรม, ดูดวงพฤติกรรม, AI Twin, ฝาแฝดดิจิทัล, 
+SELFPRINT, 12 มิติ, ทำนายนิสัย, AI ดูดวง, Blind Spots'
+src\pages\LandingPage.tsx:481:          description: 'An AI-powered behavioral analysis platform that creates a 
+digital twin based on 12 SICE intelligence engines, outperforming traditional astrology and personality quizzes.',
+src\pages\Onboarding.test.tsx:139:          screen.getByText(/ผมจะไม่ทำนายดวง/)
+src\pages\Onboarding.tsx:27:import { calculateInitialDisciplines, getLifePathProfile } from '@/lib/astrology';
+src\pages\Onboarding.tsx:30:import type { InitialDisciplines } from '@/lib/astrology';
+src\pages\Onboarding.tsx:478:  // blueprint from real numerology/zodiac, not placeholder data.
+src\pages\Onboarding.tsx:522:    // FullAnalysis instead of relying solely on astrology fallback.
+src\pages\PalmistryPage.tsx:5: * กรอบ: วิเคราะห์ลักษณะมือสัมพันธ์กับบุคลิกภาพ (ไม่ใช่การดูดวง)
+src\pages\PrivacyCenter.tsx:156:      setExportStatus({ state: 'success', message: isTh ? '✅ ดาวน์โหลดข้อมูลสำเร็จ' : 
+'✅ Data downloaded successfully' });
+src\pages\PrivacyCenter.tsx:392:                  {isTh ? 'ดาวน์โหลดข้อมูลทั้งหมดที่เราเก็บไว้เกี่ยวกับคุณเป็นไฟล์ 
+JSON' : 'Download everything we have on you as a JSON file'}
+src\pages\PrivacyCenter.tsx:411:                    : (isTh ? '⬇ ดาวน์โหลดข้อมูล' : '⬇ Download data')}
+src\pages\SciencePage.tsx:38:          ? 'ค้นพบว่า SELFPRINT ใช้วิทยาศาสตร์พฤติกรรม Behavioral Economics และ 12 SICE 
+Engines อย่างไรเพื่อวิเคราะห์ตัวตนได้แม่นยำกว่าการดูดวง'
+src\pages\SciencePage.tsx:39:          : 'Discover how SELFPRINT uses behavioral science, behavioral economics, and 12 
+SICE Engines to analyze who you are more accurately than a horoscope'}
+src\pages\SciencePage.tsx:75:              : 'When behavioral science joins forces with AI — why SELFPRINT reads you 
+more accurately than a horoscope'}
+src\pages\SciencePage.tsx:90:              ? 'แทนที่จะใช้วันเดือนปีเกิดหรือตำแหน่งดาว ระบบของเราวัดสิ่งที่วัดได้จริง — 
+รูปแบบการตัดสินใจ การตอบสนองต่อสถานการณ์ และพฤติกรรมที่แสดงออกในชีวิตประจำวัน'
+src\pages\TarotPage.tsx:5: * กรอบ: การอ่านสัญลักษณ์ทางจิตวิทยา (ไม่ใช่การดูดวง)
+src\pages\TarotPage.tsx:162:    nameEn: 'Wheel of Fortune',
+src\pages\TarotPage.tsx:438:                  ไม่ใช่การทำนาย — แต่เป็นการตั้งคำถามกับตัวเอง
+src\pages\VsAstrologyPage.tsx:2: * VsAstrologyPage.tsx
+src\pages\VsAstrologyPage.tsx:3: * Bridge content page: SELFPRINT vs Astrology/ดูดวง
+src\pages\VsAstrologyPage.tsx:5: * Target segment: Horoscope-curious users who land from "AI ดูดวง" / fortune-telling 
+queries
+src\pages\VsAstrologyPage.tsx:7: * Route: /th/vs-astrology, /en/vs-astrology
+src\pages\VsAstrologyPage.tsx:26:  sections: { q: string; astrology: string; selfprint: string }[];
+src\pages\VsAstrologyPage.tsx:31:      title: 'SELFPRINT vs ดูดวง AI — ต่างกันอย่างไร? | SELFPRINT',
+src\pages\VsAstrologyPage.tsx:32:      desc: 'ดูดวง AI กับ SELFPRINT ต่างกันอย่างไร? SELFPRINT ใช้สถิติพฤติกรรมจริง 
+ไม่ใช่โชคชะตา — แม่นกว่าเพราะเรียนรู้จากคุณจริงๆ',
+src\pages\VsAstrologyPage.tsx:35:    title: 'SELFPRINT vs Co-Star, ดูดวง AI — ตัดสินใจอย่างไร?',
+src\pages\VsAstrologyPage.tsx:36:    hero: 'ถ้าคุณมาที่นี่เพราะคิดว่า Co-Star หรือ "ดูดวง AI" 
+เป็นคำตอบ\nคุณกำลังจะได้รับสิ่งที่ดีกว่ามาก',
+src\pages\VsAstrologyPage.tsx:37:    heroSub: 'SELFPRINT ไม่ใช่ดูดวง ไม่ใช่ horoscope AI เหมือน Co-Star — 
+แต่ตอบคำถามเดียวกัน:\n"ฉันเป็นคนแบบไหน? ควรทำอะไรต่อไป?" — แต่ตรงมากขึ้น',
+src\pages\VsAstrologyPage.tsx:41:        astrology: 'ตำแหน่งดาว ณ วันเกิด — 
+ข้อมูลเดียวกันสำหรับทุกคนที่เกิดวันเดียวกัน',
+src\pages\VsAstrologyPage.tsx:46:        astrology: 'ทำนายทั่วไป — ตีความได้หลายแบบ ใช้ได้กับหลายคน',
+src\pages\VsAstrologyPage.tsx:51:        astrology: 'คำทำนายอนาคต ดวงประจำวัน/สัปดาห์/เดือน',
+src\pages\VsAstrologyPage.tsx:56:        astrology: 'ดวงเปลี่ยนได้ แต่ตัวตนตาม "ราศี" คงที่',
+src\pages\VsAstrologyPage.tsx:61:        astrology: 'ตอบได้ แต่ในแบบที่ต้องตีความเอง',
+src\pages\VsAstrologyPage.tsx:66:    closing: 'ถ้าคุณชอบดูดวงเพราะมันช่วยให้เข้าใจตัวเองและรู้สึกมีทิศทาง SELFPRINT 
+ทำสิ่งเดียวกัน — แต่แม่นกว่า เพราะมาจากพฤติกรรมจริงของคุณ ไม่ใช่ดาวบนฟ้า',
+src\pages\VsAstrologyPage.tsx:70:      title: 'SELFPRINT vs Astrology AI — What\'s the Difference? | SELFPRINT',
+src\pages\VsAstrologyPage.tsx:71:      desc: 'How is SELFPRINT different from horoscope AI? SELFPRINT uses real 
+behavioral statistics — not fate. More accurate because it actually learns from you.',
+src\pages\VsAstrologyPage.tsx:74:    title: 'Astrology AI vs SELFPRINT',
+src\pages\VsAstrologyPage.tsx:75:    hero: 'If you landed here searching for "AI horoscope"\nyou\'re about to get 
+something far more powerful',
+src\pages\VsAstrologyPage.tsx:76:    heroSub: 'SELFPRINT isn\'t astrology — but it answers the same question:\n"Who am 
+I? What should I do next?"',
+src\pages\VsAstrologyPage.tsx:80:        astrology: 'Star positions at birth — same data for everyone born the same 
+day',
+src\pages\VsAstrologyPage.tsx:85:        astrology: 'General predictions — interpretable many ways, applicable to many 
+people',
+src\pages\VsAstrologyPage.tsx:90:        astrology: 'Future predictions, daily/weekly/monthly horoscopes',
+src\pages\VsAstrologyPage.tsx:95:        astrology: 'Your sign never changes — only the daily transits shift',
+src\pages\VsAstrologyPage.tsx:100:        astrology: 'Yes, but requires personal interpretation',
+src\pages\VsAstrologyPage.tsx:105:    closing: 'If you like astrology because it helps you understand yourself and 
+feel direction — SELFPRINT does the same thing, but more accurately, because it\'s grounded in your actual behavioral 
+patterns, not stars.',
+src\pages\VsAstrologyPage.tsx:111:export default function VsAstrologyPage() {
+src\pages\VsAstrologyPage.tsx:122:        canonicalUrl={`/${lang}/vs-astrology`}
+src\pages\VsAstrologyPage.tsx:196:                    🔮 {lang === 'th' ? 'ดูดวง / Horoscope AI' : 'Astrology / 
+Horoscope AI'}
+src\pages\VsAstrologyPage.tsx:210:                      {row.astrology}
+src\pages\VsAstrologyPage.tsx:239:            onClick={() => navigate('/onboarding?ref=astrology')}
+src\config\nova-prompts.ts:10:// TROJAN-BRIDGE STRATEGY: Many users arrive from fortune-telling / "ดูดวง AI" intent.
+src\config\nova-prompts.ts:18:- Welcome users with warmth — many arrived hoping for fortune-telling or life direction. 
+Honor that intent.
+src\config\nova-prompts.ts:33:- Validate the fortune-telling curiosity: "The reason horoscopes feel compelling is real 
+— we all want clarity about direction."
+src\config\nova-prompts.ts:40:- "คุณมาที่นี่เพราะอยากรู้ทิศทาง — ผมจะให้สิ่งที่แม่นกว่าดวงดาว"
+src\config\nova-prompts.ts:41:- "ดูดวงบอกคุณว่า 'โชคดี' — แต่ไม่ได้บอกว่าต้องทำอะไร SELFPRINT บอกได้"
+src\config\nova-prompts.ts:48:- You do NOT make fortune-telling predictions ("you will succeed", "คุณจะ...")
+src\config\nova-prompts.ts:53:can be truly personalized and accurate — more useful than any horoscope.
+src\config\nova-prompts.ts:62:บางคนเคยลองดูดวง บางคนลอง MBTI แต่ยังไม่เจอคำตอบที่รู้สึกว่า "ใช่"
+src\config\nova-prompts.ts:64:ผมจะไม่ทำนาย — แต่ผมจะช่วยให้คุณ เห็นรูปแบบที่ซ่อนอยู่ในตัวคุณ ด้วยข้อมูลจริง
+src\config\nova-prompts.ts:71:Some have tried horoscopes. Some tried personality tests. None of it felt quite right.
+src\config\nova-prompts.ts:73:I won't tell your fortune. But I will help you see the behavioral patterns you've been 
+living inside — using real data, not predictions.
+src\config\twin-prompts.ts:45:- Never use fortune-telling language ("you will...", "คุณจะ...") — instead use 
+behavioral forecasting language ("based on your pattern, when X happens you tend to...")
+src\constants\faqs.ts:28:      'SELFPRINT is a behavioral-analysis AI platform that builds your own "digital twin" (AI 
+Twin), grounded in 12 specialized intelligence engines (SICE) — not astrology or belief.\n\nThe system learns from the 
+real you, and helps surface blind spots that get in the way of decisions about life, work, and relationships.',
+src\constants\faqs.ts:65:    id: 'selfprint-vs-astrology',
+src\constants\faqs.ts:67:    question: 'SELFPRINT ต่างจากการดูดวงอย่างไร?',
+src\constants\faqs.ts:69:      'การดูดวงอ้างอิงจากดาวหรือวันเกิด SELFPRINT อ้างอิงจากพฤติกรรมจริง — การตัดสินใจ 
+รูปแบบความคิด และปฏิกิริยาของคุณในชีวิต\n\nผลลัพธ์จึงแม่นยำกว่า เพราะเรียนรู้จากคุณโดยตรง และเปลี่ยนแปลงไปพร้อมกับคุณ 
+ไม่ใช่ตัดสินจากวันเดือนปีเกิดที่ตายตัว',
+src\constants\faqs.ts:70:    questionEn: 'How is SELFPRINT different from astrology?',
+src\constants\faqs.ts:72:      'Astrology is based on stars or birth dates. SELFPRINT is based on your real behavior — 
+your decisions, thinking patterns, and reactions in everyday life.\n\nThe results are more accurate because the system 
+learns directly from you and changes as you change, instead of judging you by a fixed birth date.',
+src\constants\faqs.ts:167:    question: 'มีแอปให้ดาวน์โหลดหรือไม่?',
+src\constants\seoMetadata.ts:51:      title: 'SELFPRINT | สร้าง AI Twin ภาษาไทย — วิเคราะห์ชีวิต ไม่ใช่ดูดวง',
+src\constants\seoMetadata.ts:53:      keywords: ['AI Twin ไทย', 'วิเคราะห์ชีวิต', 'ตัดสินใจด้วย AI', 'SELFPRINT', 
+'ดูดวงด้วย AI', 'พัฒนาตัวเอง', 'behavioral AI ไทย'],
+src\constants\worldPersonalities.ts:136:    encouragement: 'Your decisions shape your destiny',
+src\constants\worlds.ts:659:        'ความอุดมสมบูรณ์ถ้ามองแค่ในมุมกรอบความคิดอย่างเดียว 
+อาจเลื่อนลอยไปเป็นแค่ความหวังลมๆ แล้งๆ แต่ถ้ามองเป็นระบบ มันจะจับต้องได้จริง — 
+ความมั่งคั่งที่ยั่งยืนมาจากกระแสที่ทำซ้ำได้ เช่น แหล่งรายได้ นิสัย และความสัมพันธ์ที่สร้างคุณค่าต่อเนื่อง 
+ไม่ใช่จากโชคดีครั้งเดียว',
+src\constants\worlds.ts:846:        'นี่ไม่ใช่การพยายามทำนายอนาคตให้แม่นยำสมบูรณ์แบบ เพราะเป็นไปไม่ได้อยู่แล้ว 
+แต่คือการไม่ต้องแปลกใจกับผลกระทบขั้นที่สองที่ย้อนกลับไปดูแล้วชัดเจนมาตลอด ใช้เวลาไม่กี่นาทีวางแผนล่วงหน้า 
+ช่วยประหยัดเวลาแก้ปัญหาทีหลังได้เป็นเดือน',
+src\constants\worlds.ts:1012:        'ลองบรรยายวันอังคารธรรมดาวันหนึ่งในอีกห้าปีข้างหน้าอย่างละเอียด — คุณตื่นที่ไหน 
+ชั่วโมงแรกเป็นอย่างไร ใครอยู่รอบตัวคุณ ความเจาะจงแบบนี้แหละที่ทำให้วิสัยทัศน์ใช้งานได้จริง 
+ส่วนแรงบันดาลใจเป็นแค่ผลพลอยได้',
+src\lib\ArchetypeScoreEngine.ts:9: *  2. Western Zodiac (Sun Sign)               0.12
+src\lib\ArchetypeScoreEngine.ts:12: *  5. Chinese Zodiac                          0.07
+src\lib\ArchetypeScoreEngine.ts:17: * 10. Thai Astrology นพเคราะห์               0.05
+src\lib\ArchetypeScoreEngine.ts:65:  westernZodiac?: string;
+src\lib\ArchetypeScoreEngine.ts:66:  chineseZodiac?: string;
+src\lib\ArchetypeScoreEngine.ts:130:const ZODIAC_MAP: Record<string, ScoreMap> = {
+src\lib\ArchetypeScoreEngine.ts:145:const CHINESE_ZODIAC_MAP: Record<string, ScoreMap> = {
+src\lib\ArchetypeScoreEngine.ts:255:// Astronomical helpers (ported from astrovera-v2 + astrology.ts)
+src\lib\ArchetypeScoreEngine.ts:494:// Fixed sciences (numerology, Chinese zodiac, I Ching) stay at 1.0.
+src\lib\ArchetypeScoreEngine.ts:507:    case 'westernZodiac': return 1.00;
+src\lib\ArchetypeScoreEngine.ts:508:    case 'chineseZodiac': return 1.00;
+src\lib\ArchetypeScoreEngine.ts:554:    westernZodiac:0.10,
+src\lib\ArchetypeScoreEngine.ts:557:    chineseZodiac:0.06,
+src\lib\ArchetypeScoreEngine.ts:579:    westernZodiac:!!input.westernZodiac,
+src\lib\ArchetypeScoreEngine.ts:582:    chineseZodiac:!!input.chineseZodiac,
+src\lib\ArchetypeScoreEngine.ts:617:  // 2. Western Zodiac (Sun Sign)
+src\lib\ArchetypeScoreEngine.ts:618:  if (avail.westernZodiac && input.westernZodiac) {
+src\lib\ArchetypeScoreEngine.ts:619:    const m = ZODIAC_MAP[input.westernZodiac];
+src\lib\ArchetypeScoreEngine.ts:620:    if (m) { addWeighted(scores, m, effectiveW.westernZodiac / totalW); 
+sciencesUsed.push('Western Astrology'); }
+src\lib\ArchetypeScoreEngine.ts:625:    const m = ZODIAC_MAP[input.moonSign];
+src\lib\ArchetypeScoreEngine.ts:635:  // 5. Chinese Zodiac
+src\lib\ArchetypeScoreEngine.ts:636:  if (avail.chineseZodiac && input.chineseZodiac) {
+src\lib\ArchetypeScoreEngine.ts:637:    const m = CHINESE_ZODIAC_MAP[input.chineseZodiac];
+src\lib\ArchetypeScoreEngine.ts:638:    if (m) { addWeighted(scores, m, effectiveW.chineseZodiac / totalW); 
+sciencesUsed.push('Chinese Zodiac'); }
+src\lib\ArchetypeScoreEngine.ts:694:      if (m) { addWeighted(scores, m, effectiveW.thaiPlanet / totalW); 
+sciencesUsed.push('Thai Astrology (นพเคราะห์)'); }
+src\lib\astrology.ts:2: * astrology.ts
+src\lib\astrology.ts:4: * Deterministic numerology / zodiac calculations derived from a real birth
+src\lib\astrology.ts:11: * - Western Zodiac: exact, unambiguous (date-range lookup).
+src\lib\astrology.ts:12: * - Chinese/Thai Zodiac + Bazi Year Element: use the well-known anchor that
+src\lib\astrology.ts:21:  westernZodiac: string;
+src\lib\astrology.ts:22:  chineseZodiac: string;
+src\lib\astrology.ts:123:// Path, both zodiacs, Bazi element, Prototype Core) is not a real signal
+src\lib\astrology.ts:274:// Western Zodiac
+src\lib\astrology.ts:277:const WESTERN_ZODIAC_STARTS: Array<{ sign: string; month: number; day: number }> = [
+src\lib\astrology.ts:292:export function calculateWesternZodiac(rawDob: string): string {
+src\lib\astrology.ts:299:  for (const entry of WESTERN_ZODIAC_STARTS) {
+src\lib\astrology.ts:308:// Chinese / Thai Zodiac + Bazi Year Element
+src\lib\astrology.ts:312:const ZODIAC_ANIMALS = [
+src\lib\astrology.ts:332:export function calculateChineseZodiac(dob: string): string {
+src\lib\astrology.ts:335:  return ZODIAC_ANIMALS[index];
+src\lib\astrology.ts:353:  // live in src/lib/intelligence/ and do NOT import astrology.ts, so this is safe.
+src\lib\astrology.ts:361:    westernZodiac: calculateWesternZodiac(safeDob),
+src\lib\astrology.ts:362:    chineseZodiac: calculateChineseZodiac(safeDob),
+src\lib\astrology.ts:393:// only. No Sanskrit or fortune-telling terms leak to the UI layer.
+src\lib\astrology.ts:484:  // ── External Attraction Vector (โชคลาภ / ดัชนีแรงดึงดูด)
+src\lib\astrovera-adapter.ts:17:import { calculateInitialDisciplines, getLifePathProfile, isValidBirthDate } from 
+'./astrology.js';
+src\lib\astrovera-adapter.ts:31:// Prototype Core (astrology.ts) uses capitalized English names (Hero,
+src\lib\astrovera-adapter.ts:205:  // 0.6 when the birth date is real (Life Path/Zodiac/Prototype Core all
+src\lib\intro-summary.ts:4: * Chronopsychology Narrative Generator — translates Vedic astrology / Panchang
+src\lib\intro-summary.ts:7: * STRICT RULES: No fortune-telling terms allowed in output.
+src\lib\intro-summary.ts:12: *   โชคลาภ → External Attraction Vector
+src\lib\intro-summary.ts:17:import type { InitialDisciplines } from './astrology.js';
+src\lib\intro-summary.ts:27:ดูดวง, โชคชะตา, พระเวท, มูเตลู, ราหู, ดวงตก, ดวงดี, แม่นๆ, หมอดู, ราศี, เทวดา, 
+เคราะห์กรรม, ศัตรู, เจ้ากรรมนายเวร, ลาภลอย, เนื้อคู่
+src\lib\intro-summary.ts:33:• โชคลาภ / เงินทองวิ่งเข้าหา ➡️ ดัชนีแรงดึงดูดวัตถุและโอกาสภายนอก (External Attraction 
+Vector)
+src\lib\intro-summary.ts:42:  'ดูดวง', 'โชคชะตา', 'พระเวท', 'มูเตลู', 'ราหู', 'ดวงตก', 'ดวงดี',
+src\lib\intro-summary.ts:43:  'แม่นๆ', 'หมอดู', 'ราศี', 'เทวดา', 'เคราะห์กรรม', 'ศัตรู',
+src\lib\intro-summary.ts:48:  'fortune telling', 'destiny', 'vedic', 'superstition', 'rahu',
+src\lib\intro-summary.ts:49:  'bad luck', 'good luck', 'predictor', 'zodiac sign', 'deity',
+src\lib\worldSystemPromptBuilder.ts:85:Inspire confidence in their ability to shape their destiny.`,
+src\services\CoreAwakeningService.ts:11:import { calculateInitialDisciplines } from '../lib/astrology';
+src\services\CoreAwakeningService.ts:325:    // via ArchetypeScoreEngine — weighted fusion of Numerology, Western 
+Zodiac,
+src\services\CoreAwakeningService.ts:326:    // Moon Sign, Natal Element, Chinese Zodiac, BaZi, Nakshatra, Human 
+Design,
+src\services\CoreAwakeningService.ts:332:      westernZodiac: disciplines.westernZodiac,
+src\services\CoreAwakeningService.ts:335:      chineseZodiac: disciplines.chineseZodiac,
+src\services\VisualDNAService.ts:8: * - Birth date (via astrology calculations)
+src\types\badges.ts:128:      id: 'self-destiny',
+src\types\badges.ts:130:      name: 'Destiny Creator',
+src\types\badges.ts:568:      id: 'career-destiny-fulfiller',
+src\types\badges.ts:570:      name: 'Destiny Fulfiller',
+src\types\badges.ts:572:      description: 'Fulfill your professional destiny',
+src\types\badges.ts:1008:      id: 'decision-destiny',
+src\types\badges.ts:1010:      name: 'Destiny Decider',
+src\types\badges.ts:1012:      description: 'Shape your destiny through choices',
+src\types\badges.ts:1118:      id: 'purpose-destiny-incarnate',
+src\types\badges.ts:1120:      name: 'Destiny Incarnate',
+src\types\badges.ts:1122:      description: 'Become your destiny',
+src\types\badges.ts:1311:      id: 'future-destiny-designer',
+src\types\badges.ts:1313:      name: 'Destiny Designer',
+src\types\badges.ts:1315:      description: 'Design your destiny',
+src\types\badges.ts:1333:      description: 'Master time and destiny',
+
+

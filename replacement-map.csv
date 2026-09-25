@@ -1,0 +1,128 @@
+file,line,thai_term,english_term,replacement_th,replacement_en,context,allowed
+src\pages\AboutPage.tsx,18,ดูดวง,astrology,"การทายท่วงทั่วไป","generic horoscope","AI Twin เรียนรู้และเติบโต... ไม่ใช่ snapshot ดูดวงอย่างเดียว",no
+src\pages\AboutPage.tsx,32,โหราศาสตร์,astrology,"วิทยาศาสตร์พฤติกรรม","behavioral science","ไม่ใช่โหราศาสตร์ดวงชะตา",no
+src\pages\AboutPage.tsx,33,astrology,astrology,"วิทยาศาสตร์พฤติกรรม","behavioral science","not astrology",no
+src\pages\AboutPage.tsx,58,astrology,astrology,"วิทยาศาสตร์พฤติกรรม","behavioral science","not astrology",no
+src\pages\AnalysisPage.tsx,518,astrology,astrology,"SICE synthesis","SICE synthesis","comment: astrology-style narrative",no
+src\pages\BlogArticle.tsx,326,ดูดวง,astrology,"การทายท่วง","astrology","ฟรี ไม่ต้องดูดวง",no
+src\pages\BlogArticle.tsx,327,astrology,astrology,"การทายท่วง","astrology","no astrology involved",no
+src\pages\BlogListPage.tsx,76,ดูดวง,astrology,"การทายท่วง","astrology","แทนการดูดวง",no
+src\pages\BlogListPage.tsx,80,ดวง,astrology,"ดวง","stars/fate","โทษดวง ราหูกลับ/ดาวเสาร์",no
+src\pages\BlogListPage.tsx,83,ดาว,astrology,"ดาว","stars","รอดาวย้าย",no
+src\pages\BlogListPage.tsx,112,โชคร้าย,fortune,"โชคร้าย","bad luck","โชคร้าย vs ช่องว่างพฤติกรรม",no
+src\pages\BlogListPage.tsx,123,ดูดวง,astrology,"การทายท่วง","astrology/horoscope","แม่นยำกว่าการดูดวง",no
+src\pages\BlogListPage.tsx,125,ดูดวง,astrology,"การทายท่วง","astrology","SELFPRINT ต่างจากการดูดวง",no
+src\pages\BlogListPage.tsx,411,horoscopes,horoscopes,"การทายท่วง","horoscopes","not horoscopes",no
+src\pages\CommunityPage.tsx,389,เปิดเซียมซี,fortune telling,"การสุ่มบัตร","fortune telling","UI label: Draw a fortune stick",yes
+src\pages\CoreAwakening.tsx,26,astrology,astrology,"SICE calculations","SICE calculations","import from lib/astrology",no
+src\pages\CoreAwakening.tsx,120,westernZodiac,zodiac,"westernZodiac (SICE)","westernZodiac (SICE)","field name",no
+src\pages\CoreAwakening.tsx,121,chineseZodiac,zodiac,"chineseZodiac (SICE)","chineseZodiac (SICE)","field name",no
+src\pages\LandingPage.tsx,12,astrology/fortune-telling,astrology,"SICE icons","SICE icons","comment: no astrology icons",no
+src\pages\LandingPage.tsx,35,astrology,astrology,"SICE calculations","SICE calculations","import from lib/astrology",no
+src\pages\LandingPage.tsx,89,destiny/beliefs,astrology,"destiny/beliefs","destiny/beliefs","Not destiny, not beliefs",no
+src\pages\LandingPage.tsx,127,astrology,astrology,"segment: astrology","segment: astrology","SEO segment key",yes
+src\pages\LandingPage.tsx,137,ดูดวง,astrology,"การทายท่วง","astrology/horoscope","SEO title: ไม่ใช่ดูดวง",no
+src\pages\LandingPage.tsx,148,astrology,astrology,"segment: astrology","segment: astrology","SEO segment key",yes
+src\pages\LandingPage.tsx,149,ดูดวง,astrology,"การทายท่วง","horoscope","SEO: vs ดูดวง AI",no
+src\pages\LandingPage.tsx,150,โชคชะตา,fortune,"โชคชะตา","fate/destiny","SEO: ไม่ใช่โชคชะตา",no
+src\pages\LandingPage.tsx,154,ดูดวง,astrology,"การทายท่วง","horoscope","SEO: แม่นยำกว่าการดูดวง",no
+src\pages\LandingPage.tsx,170,astrology,astrology,"segment: astrology","segment: astrology","SEO segment key",yes
+src\pages\LandingPage.tsx,171,horoscope AI,horoscope AI,"horoscope AI","horoscope AI","SEO: vs Astrology AI",yes
+src\pages\LandingPage.tsx,172,destiny,astrology,"destiny","destiny","SEO: not destiny",no
+src\pages\LandingPage.tsx,195,astrology,astrology,"segment: astrology","segment: astrology","SEO segment key",yes
+src\pages\LandingPage.tsx,465,ดูดวงพฤติกรรม/ทำนายนิสัย/AI ดูดวง,astrology,"วิเคราะห์พฤติกรรม/ทำนายพฤติกรรม","behavioral analysis","keywords meta",no
+src\pages\LandingPage.tsx,481,astrology,astrology,"SICE engines","SICE engines","JSON-LD: outperforming astrology",no
+src\pages\Onboarding.test.tsx,139,ทำนายดวง,fortune telling,"ทำนายดวง","fortune telling","test assertion",yes
+src\pages\Onboarding.tsx,27,astrology,astrology,"SICE calculations","SICE calculations","import from lib/astrology",no
+src\pages\Onboarding.tsx,30,astrology,astrology,"SICE types","SICE types","import type",no
+src\pages\Onboarding.tsx,478,numerology/zodiac,astrology,"numerology/zodiac","numerology/zodiac","comment: blueprint from real",no
+src\pages\Onboarding.tsx,522,astrology,astrology,"astrology fallback","astrology fallback","comment: FullAnalysis instead",no
+src\pages\PalmistryPage.tsx,5,ดูดวง,astrology,"การทายท่วง","astrology","comment: ไม่ใช่การดูดวง",no
+src\pages\SciencePage.tsx,38,ดูดวง,astrology,"การทายท่วง","horoscope","แม่นยำกว่าการดูดวง",no
+src\pages\SciencePage.tsx,39,horoscope,horoscope,"horoscope","horoscope","more accurately than a horoscope",no
+src\pages\SciencePage.tsx,75,horoscope,horoscope,"horoscope","horoscope","more accurately than a horoscope",no
+src\pages\SciencePage.tsx,90,ดาว,astrology,"ดาว/ตำแหน่งดาว","stars/positions","แทนวันเดือนปีเกิดหรือตำแหน่งดาว",no
+src\pages\TarotPage.tsx,5,ดูดวง,astrology,"การทายท่วง","astrology","comment: ไม่ใช่การดูดวง",no
+src\pages\TarotPage.tsx,162,Wheel of Fortune,tarot,"Wheel of Fortune (tarot)","Wheel of Fortune (tarot)","tarot card name",yes
+src\pages\TarotPage.tsx,438,การทำนาย,fortune telling,"การทำนาย","fortune telling","comment: ไม่ใช่การทำนาย",yes
+src\pages\VsAstrologyPage.tsx,*,*,*,*,*,*,yes
+src\config\nova-prompts.ts,10,fortune-telling/dowsing,fortune telling,"ดูดวง/ทำนาย","fortune telling","comment: TROJAN-BRIDGE",yes
+src\config\nova-prompts.ts,18,fortune-telling,fortune telling,"ดูดวง/ทำนาย","fortune telling","comment: arrived hoping for",yes
+src\config\nova-prompts.ts,33,horoscopes,horoscopes,"horoscopes","horoscopes","comment: horoscopes feel compelling",yes
+src\config\nova-prompts.ts,40,ดวงดาว,stars/fate,"ดวงดาว","stars","ดวงดาว vs พฤติกรรม",yes
+src\config\nova-prompts.ts,41,ดูดวง,astrology,"ดูดวง","horoscope","ดูดวงบอก... vs SELFPRINT",yes
+src\config\nova-prompts.ts,48,fortune-telling,fortune telling,"ทำนายโชค","fortune telling","rule: NO fortune-telling",yes
+src\config\nova-prompts.ts,53,horoscope,horoscope,"horoscope","horoscope","more useful than any horoscope",yes
+src\config\nova-prompts.ts,62,ดูดวง,astrology,"ดูดวง","horoscope/astrology","บางคนเคยลองดูดวง",yes
+src\config\nova-prompts.ts,64,ทำนาย,fortune telling,"ทำนาย","predict","ผมจะไม่ทำนาย",yes
+src\config\nova-prompts.ts,71,horoscopes,horoscopes,"horoscopes","horoscopes","Some have tried horoscopes",yes
+src\config\nova-prompts.ts,73,fortune,fortune,"ทำนายโชค","fortune","I won't tell your fortune",yes
+src\config\twin-prompts.ts,45,fortune-telling,fortune telling,"ทำนายโชค","fortune telling","rule: NO fortune-telling language",yes
+src\constants\faqs.ts,28,astrology,astrology,"astrology or belief","astrology or belief","not astrology or belief",no
+src\constants\faqs.ts,67,ดูดวง,astrology,"การทายท่วง","astrology","SELFPRINT ต่างจากการดูดวง",no
+src\constants\faqs.ts,69,ดาว/วันเกิด,stars/birth date,"ดาว/วันเกิด","stars/birth date","อ้างอิงจากดาวหรือวันเกิด",no
+src\constants\faqs.ts,70,astrology,astrology,"astrology","astrology","How is SELFPRINT different from astrology?",no
+src\constants\faqs.ts,72,stars/birth dates,stars/birth dates,"ดาว/วันเกิด","stars/birth dates","based on stars or birth dates",no
+src\constants\seoMetadata.ts,51,ดูดวง,astrology,"การทายท่วง","horoscope","SEO title: ไม่ใช่ดูดวง",no
+src\constants\seoMetadata.ts,53,ดูดวงด้วย AI,AI horoscope,"วิเคราะห์ด้วย AI","AI analysis","keywords: ดูดวงด้วย AI",no
+src\constants\worlds.ts,659,โชคดีครั้งเดียว,lucky once,"โชคดีครั้งเดียว","one-time luck","ความมั่งคั่งที่ยั่งยืน",no
+src\constants\worlds.ts,846,ทำนายอนาคต,predict future,"ทำนายอนาคต","predict future","ไม่ใช่การพยายามทำนายอนาคต",no
+src\constants\worlds.ts,1012,วิสัยทัศน์,vision,"วิสัยทัศน์","vision","ลองบรรยาย... ในอีกห้าปี",no
+src\lib\ArchetypeScoreEngine.ts,9,Western Zodiac,zodiac,"Western Zodiac (SICE weight 0.12)","Western Zodiac (SICE weight 0.12)","weight comment",no
+src\lib\ArchetypeScoreEngine.ts,12,Chinese Zodiac,zodiac,"Chinese Zodiac (SICE weight 0.07)","Chinese Zodiac (SICE weight 0.07)","weight comment",no
+src\lib\ArchetypeScoreEngine.ts,17,Thai Astrology นพเคราะห์,Thai astrology,"Thai Astrology นพเคราะห์ (SICE weight 0.05)","Thai Astrology (SICE weight 0.05)","weight comment",no
+src\lib\ArchetypeScoreEngine.ts,65,westernZodiac,zodiac,"westernZodiac","westernZodiac","field",no
+src\lib\ArchetypeScoreEngine.ts,66,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","field",no
+src\lib\ArchetypeScoreEngine.ts,130,ZODIAC_MAP,zodiac map,"ZODIAC_MAP","ZODIAC_MAP","constant name",no
+src\lib\ArchetypeScoreEngine.ts,145,CHINESE_ZODIAC_MAP,zodiac map,"CHINESE_ZODIAC_MAP","CHINESE_ZODIAC_MAP","constant name",no
+src\lib\ArchetypeScoreEngine.ts,255,Astronomical helpers,astronomical,"Astronomical helpers","Astronomical helpers","comment",no
+src\lib\ArchetypeScoreEngine.ts,494,Fixed sciences,fixed sciences,"Fixed sciences","Fixed sciences","comment",no
+src\lib\ArchetypeScoreEngine.ts,507,westernZodiac,zodiac,"westernZodiac","westernZodiac","switch case",no
+src\lib\ArchetypeScoreEngine.ts,508,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","switch case",no
+src\lib\ArchetypeScoreEngine.ts,554,westernZodiac,zodiac,"westernZodiac","westernZodiac","weight",no
+src\lib\ArchetypeScoreEngine.ts,557,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","weight",no
+src\lib\ArchetypeScoreEngine.ts,579,westernZodiac,zodiac,"westernZodiac","westernZodiac","flag",no
+src\lib\ArchetypeScoreEngine.ts,582,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","flag",no
+src\lib\ArchetypeScoreEngine.ts,617,Western Zodiac,zodiac,"Western Zodiac","Western Zodiac","comment",no
+src\lib\ArchetypeScoreEngine.ts,618,westernZodiac,zodiac,"westernZodiac","westernZodiac","if condition",no
+src\lib\ArchetypeScoreEngine.ts,619,westernZodiac,zodiac,"westernZodiac","westernZodiac","map access",no
+src\lib\ArchetypeScoreEngine.ts,620,Western Astrology,western astrology,"Western Astrology","Western Astrology","sciencesUsed",no
+src\lib\ArchetypeScoreEngine.ts,625,moonSign,moon sign,"moonSign","moonSign","field",no
+src\lib\ArchetypeScoreEngine.ts,635,Chinese Zodiac,chinese zodiac,"Chinese Zodiac","Chinese Zodiac","comment",no
+src\lib\ArchetypeScoreEngine.ts,636,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","if condition",no
+src\lib\ArchetypeScoreEngine.ts,637,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","map access",no
+src\lib\ArchetypeScoreEngine.ts,638,Chinese Zodiac,chinese zodiac,"Chinese Zodiac","Chinese Zodiac","sciencesUsed",no
+src\lib\ArchetypeScoreEngine.ts,694,Thai Astrology,Thai astrology,"Thai Astrology (นพเคราะห์)","Thai Astrology","sciencesUsed",no
+src\lib\astrology.ts,*,*,*,*,*,*,yes
+src\lib\astrovera-adapter.ts,17,astrology,astrology,"SICE calculations","SICE calculations","import",no
+src\lib\astrovera-adapter.ts,31,astrology,astrology,"Prototype Core (SICE)","Prototype Core","comment",no
+src\lib\astrovera-adapter.ts,205,astrology,astrology,"SICE fallback","SICE fallback","comment",no
+src\lib\intro-summary.ts,4,astrology,astrology,"Chronopsychology Narrative","Chronopsychology Narrative","comment: Vedic astrology",yes
+src\lib\intro-summary.ts,7,fortune-telling,fortune telling,"fortune-telling","fortune telling","comment: STRICT RULES",yes
+src\lib\intro-summary.ts,12,โชคลาภ,fortune,"External Attraction Vector","External Attraction Vector","mapping",yes
+src\lib\intro-summary.ts,17,astrology,astrology,"SICE types","SICE types","import type",no
+src\lib\intro-summary.ts,27,ดูดวง/โชคชะตา/พระเวท/มูเตลู/ราหู/ดวงตก/ดวงดี/แม่นๆ/หมอดู/ราศี/เทวดา/เคราะห์กรรม/ศัตรู/เจ้ากรรมนายเวร/ลาภลอย/เนื้อคู่,astrology terms,"วิเคราะห์พฤติกรรม terms","behavioral analysis terms","blocked terms list",yes
+src\lib\intro-summary.ts,33,โชคลาภ/เงินทองวิ่งเข้าหา,fortune,"External Attraction Vector","External Attraction Vector","mapping",yes
+src\lib\intro-summary.ts,42,ดูดวง/โชคชะตา/พระเวท/มูเตลู/ราหู/ดวงตก/ดวงดี/แม่นๆ/หมอดู/ราศี/เทวดา/เคราะห์กรรม/ศัตรู/เจ้ากรรมนายเวร/ลาภลอย/เนื้อคู่,astrology terms,"blocked terms","blocked terms","blocked terms list",yes
+src\lib\intro-summary.ts,43,fortune telling/destiny/vedic/superstition/rahu/bad luck/good luck/predictor/zodiac sign/deity,astrology terms,"blocked terms","blocked terms","blocked terms list",yes
+src\lib\worldSystemPromptBuilder.ts,85,destiny,destiny,"destiny","destiny","prompt: shape their destiny",no
+src\services\CoreAwakeningService.ts,11,astrology,astrology,"SICE calculations","SICE calculations","import",no
+src\services\CoreAwakeningService.ts,325,Western Zodiac/Moon Sign/Natal Element/Chinese Zodiac/BaZi/Nakshatra/Human Design,astrology sciences,"SICE sciences","SICE sciences","comment: weighted fusion",no
+src\services\CoreAwakeningService.ts,332,westernZodiac,zodiac,"westernZodiac","westernZodiac","field",no
+src\services\CoreAwakeningService.ts,335,chineseZodiac,zodiac,"chineseZodiac","chineseZodiac","field",no
+src\services\VisualDNAService.ts,8,astrology,astrology,"SICE calculations","SICE calculations","comment",no
+src\types\badges.ts,128,destiny,destiny,"destiny","destiny","badge id",no
+src\types\badges.ts,130,Destiny,Destiny,"Destiny","Destiny","badge name",no
+src\types\badges.ts,568,destiny,destiny,"destiny","destiny","badge id",no
+src\types\badges.ts,570,Destiny,Destiny,"Destiny","Destiny","badge name",no
+src\types\badges.ts,572,destiny,destiny,"destiny","destiny","badge description",no
+src\types\badges.ts,1008,destiny,destiny,"destiny","destiny","badge id",no
+src\types\badges.ts,1010,Destiny,Destiny,"Destiny","Destiny","badge name",no
+src\types\badges.ts,1012,destiny,destiny,"destiny","destiny","badge description",no
+src\types\badges.ts,1118,destiny,destiny,"destiny","destiny","badge id",no
+src\types\badges.ts,1120,Destiny,Destiny,"Destiny","Destiny","badge name",no
+src\types\badges.ts,1122,destiny,destiny,"destiny","destiny","badge description",no
+src\types\badges.ts,1311,destiny,destiny,"destiny","destiny","badge id",no
+src\types\badges.ts,1313,Destiny,Destiny,"Destiny","Destiny","badge name",no
+src\types\badges.ts,1315,Destiny,Destiny,"Destiny","Destiny","badge description",no
+src\types\badges.ts,1333,destiny,destiny,"destiny","destiny","badge description",no

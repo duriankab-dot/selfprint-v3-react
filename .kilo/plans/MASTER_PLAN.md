@@ -23,7 +23,7 @@
 | **Baseline Commit** | `eb26e59` (known-good) |
 | **Open Tasks** | TC-001 ถึง TC-010 (Phase 0) |
 | **Blockers** | ไม่มี |
-| **Last Session** | session-008 (2026-09-25T12:30) — TC-001 complete: baseline tag + feature flags infra |
+| **Last Session** | session-009 (2026-09-25T12:45) — TC-002 complete: astro audit + replacement map |
 
 ---
 
@@ -124,7 +124,7 @@
 | ID | Title | Phase | Priority | Estimate | DoD Checklist |
 |----|-------|-------|----------|----------|---------------|
 | TC-001 | Baseline tag + Feature flags infra | 0 | P0 | 30 นาที | [x] git tag [x] featureFlags.ts [x] env vars [x] MASTER_PLAN updated |
-| TC-002 | Astro language audit + replace list | 0 | P0 | 1 ชม. | [ ] astro-audit.txt [ ] replacement-map.csv [ ] MASTER_PLAN updated |
+| TC-002 | Astro language audit + replace list | 0 | P0 | 1 ชม. | [x] astro-audit.txt [x] replacement-map.csv [x] MASTER_PLAN updated |
 | TC-003 | Token conflict audit | 0 | P0 | 1 ชม. | [ ] token-violations.txt [ ] fix-list.csv [ ] MASTER_PLAN updated |
 | TC-004 | Twin DNA spec finalize | 0.5 | P0 | 2 ชม. | [ ] TWIN_DNA_SPEC.md [ ] team review [ ] MASTER_PLAN updated |
 | TC-005 | Language switcher relocation | 0 | P1 | 1 ชม. | [ ] NavBar.tsx updated [ ] LanguageSwitcher compact variant [ ] MASTER_PLAN updated |
