@@ -1,0 +1,154 @@
+﻿
+src\components\ErrorBoundary.tsx:90:          background: '#0b0d17',
+src\components\ErrorBoundary.tsx:91:          color: '#e8eaf2',
+src\components\ErrorBoundary.tsx:121:              background: '#6c5ce7',
+src\components\ErrorBoundary.tsx:122:              color: '#fff',
+src\components\ErrorBoundary.tsx:134:              border: '1px solid rgba(232,234,242,0.3)',
+src\components\ErrorBoundary.tsx:137:              color: '#e8eaf2',
+src\components\PWAInstallPrompt.tsx:149:              color: '#fff',
+src\pages\AboutPage.tsx:49:          .about-cta-btn { display: inline-block; padding: 16px 36px; background: 
+var(--color-accent-primary); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; 
+cursor: pointer; transition: opacity 0.2s; }
+src\pages\AnalysisPage.tsx:651:                  <div className="analysis__narrative-section" style={{ marginTop: 
+'1.5rem', padding: '1rem', backgroundColor: 'rgba(59,130,246,0.05)', borderRadius: '0.5rem', borderLeft: '3px solid 
+rgb(59,130,246)' }}>
+src\pages\AnalysisPage.tsx:652:                    <h3 style={{ marginTop: 0, fontSize: '0.95rem', fontWeight: 600, 
+color: 'rgb(59,130,246)' }}>
+src\pages\BlogListPage.tsx:366:                  color: '#fff',
+src\pages\BlogListPage.tsx:434:          .blog-card:hover { border-color: var(--color-accent-primary); transform: 
+translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+src\pages\CommunityPage.tsx:211:                  <p style={{ fontSize: 12, color: 'var(--color-accent-danger, 
+#ef4444)', margin: '8px 0 0' }}>
+src\pages\CommunityPage.tsx:245:                      color: '#fff',
+src\pages\CommunityPage.tsx:417:                color: '#fff',
+src\pages\ContactPage.tsx:56:          .contact-submit { width: 100%; padding: 12px; background: 
+var(--color-accent-primary); color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; 
+cursor: pointer; transition: opacity 0.2s; }
+src\pages\CoreAwakening.tsx:107:  // '#3b82f6' for every user. primaryArchetype is deterministic from
+src\pages\CoreAwakening.tsx:147:  // Force dark body background for ceremony page — body defaults to #FFFFFF
+src\pages\CoreAwakening.tsx:424:              border: '1px solid rgba(255,255,255,0.3)',
+src\pages\CoreAwakening.tsx:426:              /* CONTRAST-001: was rgba(255,255,255,0.5) — white at 50%
+src\pages\CoreAwakening.tsx:432:              color: 'rgba(255,255,255,0.75)',
+src\pages\DecisionDashboard.tsx:221:              <span className="dd-sla__item" style={{ color: sla.fresh ? '#10b981' 
+: '#f59e0b' }}>
+src\pages\ExplorePage.tsx:134:    color: '#8B5CF6',
+src\pages\ExplorePage.tsx:191:    color: '#F59E0B',
+src\pages\ExplorePage.tsx:226:    color: '#10B981',
+src\pages\ExplorePage.tsx:281:    color: '#06B6D4',
+src\pages\ExplorePage.tsx:347:    color: '#EF4444',
+src\pages\ExplorePage.tsx:517:            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 
+0.05)',
+src\pages\ExplorePage.tsx:633:            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 
+0.05)',
+src\pages\ExplorePage.tsx:680:                      color: '#fff',
+src\pages\FeatureMenu.tsx:95:            .sp-feature-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px 
+rgba(0,0,0,0.08); border-color: var(--color-accent-primary) !important; }
+src\pages\ImmersiveTwinChat.tsx:496:                background: '#6366f1',
+src\pages\ImmersiveTwinChat.tsx:594:                worldColor={currentWorld ? (WORLDS[currentWorld]?.color ?? 
+'#22D3EE') : '#22D3EE'}
+src\pages\ImmersiveTwinChat.tsx:651:                              border: msg.selectedChoice === option ? '1.5px solid 
+#6366f1' : '1px solid var(--color-border)',
+src\pages\ImmersiveTwinChat.tsx:652:                              background: msg.selectedChoice === option ? 
+'#6366f1' : 'var(--color-bg-primary)',
+src\pages\ImmersiveTwinChat.tsx:689:                        <span className="text-xs" style={{ color: '#10B981', 
+fontWeight: 600 }}>
+src\pages\ImmersiveTwinChat.tsx:701:                      <div className="w-2 h-2 rounded-full animate-bounce" 
+style={{ background: '#6366f1' }} />
+src\pages\ImmersiveTwinChat.tsx:702:                      <div className="w-2 h-2 rounded-full animate-bounce 
+delay-100" style={{ background: '#6366f1' }} />
+src\pages\ImmersiveTwinChat.tsx:703:                      <div className="w-2 h-2 rounded-full animate-bounce 
+delay-200" style={{ background: '#6366f1' }} />
+src\pages\LandingPage.tsx:514:        .sp-cta-btn{transition:transform .2s,box-shadow .2s;box-shadow:0 0 14px 
+rgba(91,92,235,0.35),0 4px 20px rgba(91,92,235,0.25);will-change:transform,box-shadow}
+src\pages\LandingPage.tsx:515:        .sp-cta-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 0 32px 
+rgba(91,92,235,0.75),0 8px 32px rgba(91,92,235,0.5)!important}
+src\pages\Login.tsx:32:    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 
+2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/>
+src\pages\Login.tsx:33:    <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 
+0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/>
+src\pages\Login.tsx:34:    <path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 
+8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/>
+src\pages\Login.tsx:35:    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 
+8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58Z" fill="#EA4335"/>
+src\pages\Login.tsx:220:    color: 'var(--color-error, #E24B4A)',
+src\pages\MePage.tsx:25:  plus: { label: 'Plus', emoji: '⭐', color: '#8B5CF6' },
+src\pages\MePage.tsx:27:  lifetime: { label: 'Lifetime', emoji: '♾️', color: '#F59E0B' },
+src\pages\MePage.tsx:228:          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+src\pages\MePage.tsx:289:            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 
+0.05)',
+src\pages\MePage.tsx:307:                color: '#fff',
+src\pages\MePage.tsx:338:              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 
+0.05)',
+src\pages\PalmistryPage.tsx:442:                color: canAnalyze ? '#fff' : 'var(--color-text-secondary)',
+src\pages\PalmistryPage.tsx:524:                  color: '#fff',
+src\pages\SciencePage.tsx:44:          .sci-hero { background: linear-gradient(135deg, #0f172a 0%, 
+var(--color-bg-secondary) 100%); padding: 80px 24px 60px; text-align: center; border-bottom: 1px solid 
+var(--color-border); }
+src\pages\SciencePage.tsx:65:          .sci-cta-btn { display: inline-block; padding: 14px 32px; background: 
+var(--color-accent-primary); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 800; 
+cursor: pointer; transition: opacity 0.2s; }
+src\pages\TarotPage.tsx:454:                color: '#fff',
+src\pages\TarotPage.tsx:515:                    color: '#fff',
+src\pages\WorldDetail.tsx:183:              <BackButton fallbackTo="/worlds" style={{ color: 'rgba(255,255,255,0.85)' 
+}} />
+src\pages\WorldDetail.tsx:192:                  border: '1px solid rgba(255,255,255,0.2)',
+src\pages\WorldDetail.tsx:194:                  color: 'rgba(255,255,255,0.65)',
+src\pages\WorldDetail.tsx:225:                border: '1px solid rgba(255,255,255,0.25)',
+src\pages\WorldDetail.tsx:227:                color: 'rgba(255,255,255,0.75)',
+src\pages\WorldDetail.tsx:288:                        style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid 
+rgba(255,255,255,0.15)' }}
+src\pages\WorldsHub.tsx:70:              just a line of copy. Self world's own color (#22D3EE) is used
+src\__tests__\Avatars.test.tsx:41:    // QA-02: jsdom's CSS serialiser normalises hex colours to rgb(), so the
+src\__tests__\Avatars.test.tsx:42:    // #ffd700 written in NovaAvatar.tsx:38 comes back as rgb(255, 215, 0) —
+src\__tests__\Avatars.test.tsx:46:    expect(avatar?.getAttribute('style')).toMatch(/rgb\(255,\s*215,\s*0\)|#ffd700/i);
+src\constants\twinStages.ts:199:  1: { primary: '#6b7280', secondary: '#9ca3af' },    // Gray (forming)
+src\constants\twinStages.ts:200:  2: { primary: '#3b82f6', secondary: '#60a5fa' },    // Blue (learning)
+src\constants\twinStages.ts:201:  3: { primary: '#8b5cf6', secondary: '#a78bfa' },    // Purple (understanding)
+src\constants\twinStages.ts:202:  4: { primary: '#ec4899', secondary: '#f472b6' },    // Pink (wisdom)
+src\constants\twinStages.ts:203:  5: { primary: '#fbbf24', secondary: '#fcd34d' },    // Gold (enlightened)
+src\constants\worlds.ts:69:export const DEEP_INTELLIGENT_BLUE = '#0A1A3F';
+src\constants\worlds.ts:95:    color: '#22D3EE', // Cyan
+src\constants\worlds.ts:111:    color: '#A855F7', // Electric Violet
+src\constants\worlds.ts:127:    color: '#67E8F9', // Soft Cyan
+src\constants\worlds.ts:143:    color: '#8B5CF6', // Violet
+src\constants\worlds.ts:159:    color: '#B8C0CC', // Silver
+src\constants\worlds.ts:175:    color: '#E8B33D', // Gold (used as a limited secondary accent per directive §9)
+src\constants\worlds.ts:191:    color: '#4A90E2', // Azure
+src\constants\worlds.ts:207:    color: '#10B981', // Emerald (restrained, per directive §11)
+src\constants\worlds.ts:223:    color: '#B6E3FF', // Ice Blue
+src\constants\worlds.ts:239:    color: '#6366F1', // Indigo
+src\constants\worlds.ts:255:    color: '#14B8A6', // Teal (soft accent, per directive §14)
+src\constants\worlds.ts:271:    color: '#EAF4FF', // Blue-White
+src\lib\astrology.ts:62:  /** Circadian Color Alignment hex value (e.g. "#8FBC8F") */
+src\lib\astrology.ts:397:  { nameTh: 'ทองแดง Copper', hex: '#B87333' },    // Sunday / Sun
+src\lib\astrology.ts:398:  { nameTh: 'สีฟ้า Sky Blue', hex: '#87CEEB' },    // Monday / Moon
+src\lib\astrology.ts:399:  { nameTh: 'เขียวใบไม้ Sage Green', hex: '#8FBC8F' }, // Tuesday / Mars
+src\lib\astrology.ts:400:  { nameTh: 'เหลืองมะนาว Lemon Yellow', hex: '#FFF44F' }, // Wednesday / Mercury
+src\lib\astrology.ts:401:  { nameTh: 'ม่วงลาเวนเดอร์ Lavender', hex: '#E6E6FA' }, // Thursday / Jupiter
+src\lib\astrology.ts:402:  { nameTh: 'น้ำเงินเข้ม Navy Indigo', hex: '#4B0082' }, // Friday / Venus
+src\lib\astrology.ts:403:  { nameTh: 'เทาเข้ม Charcoal Grey', hex: '#36454F' },  // Saturday / Saturn
+src\lib\intro-summary.ts:71:      hex: disciplines.dailyCircadianColorHex ?? '#8FBC8F',
+src\services\CoreAwakeningService.ts:857:    const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+src\services\VisualDNAService.ts:58:    innocent: '#FFE5B4',
+src\services\VisualDNAService.ts:59:    explorer: '#4A90E2',
+src\services\VisualDNAService.ts:60:    sage: '#8E44AD',
+src\services\VisualDNAService.ts:61:    everyman: '#95A5A6',
+src\services\VisualDNAService.ts:62:    lover: '#E91E63',
+src\services\VisualDNAService.ts:63:    jester: '#FF9800',
+src\services\VisualDNAService.ts:64:    hero: '#E74C3C',
+src\services\VisualDNAService.ts:65:    outlaw: '#2C3E50',
+src\services\VisualDNAService.ts:66:    magician: '#9B59B6',
+src\services\VisualDNAService.ts:67:    caregiver: '#3498DB',
+src\services\VisualDNAService.ts:68:    creator: '#E67E22',
+src\services\VisualDNAService.ts:69:    ruler: '#F39C12',
+src\services\VisualDNAService.ts:70:    strategic_warrior: '#D32F2F',
+src\services\VisualDNAService.ts:71:    benevolent_leader: '#F57C00',
+src\services\VisualDNAService.ts:72:    visionary_artist: '#7B1FA2',
+src\services\VisualDNAService.ts:73:    wandering_rebel: '#00695C',
+src\services\VisualDNAService.ts:74:    warm_flirt: '#E91E63',
+src\services\VisualDNAService.ts:75:    relatable_neighbor: '#5C85D6',
+src\services\VisualDNAService.ts:78:  const primaryColor = archetypeColors[params.primaryArchetype] || '#3498DB';
+src\services\VisualDNAService.ts:327:  const rgb = hexToRgb(hex);
+src\services\VisualDNAService.ts:342:function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+
+

@@ -1,0 +1,41 @@
+file,line,hardcoded_color,token_suggestion,priority,notes
+src\components\ErrorBoundary.tsx,90,'#0b0d17',var(--color-bg-primary),P1,dark background
+src\components\ErrorBoundary.tsx,91,'#e8eaf2',var(--color-text-primary),P1,text color
+src\components\ErrorBoundary.tsx,121,'#6c5ce7',var(--color-accent-primary),P1,button background
+src\components\ErrorBoundary.tsx,122,'#fff',var(--color-text-on-accent),P1,button text
+src\components\ErrorBoundary.tsx,134,'rgba(232,234,242,0.3)',var(--color-border),P1,border
+src\components\ErrorBoundary.tsx,137,'#e8eaf2',var(--color-text-secondary),P1,text
+src\components\PWAInstallPrompt.tsx,149,'#fff',var(--color-text-on-accent),P1,button text
+src\pages\AboutPage.tsx,49,'#fff',var(--color-text-on-accent),P1,button text in style tag
+src\pages\AnalysisPage.tsx,651,'rgba(59,130,246,0.05)',var(--color-info-bg),P2,info background
+src\pages\AnalysisPage.tsx,652,'rgb(59,130,246)',var(--color-info),P2,info border/text
+src\pages\BlogListPage.tsx,366,'#fff',var(--color-text-on-accent),P1,button text
+src\pages\BlogListPage.tsx,434,'rgba(0,0,0,0.1)',var(--color-shadow),P2,shadow
+src\pages\CommunityPage.tsx,211,'var(--color-accent-danger, #ef4444)',var(--color-error),P1,fallback hardcoded
+src\pages\CommunityPage.tsx,245,'#fff',var(--color-text-on-accent),P1,button text
+src\pages\CommunityPage.tsx,417,'#fff',var(--color-text-on-accent),P1,button text
+src\pages\ContactPage.tsx,56,'#fff',var(--color-text-on-accent),P1,button text in style tag
+src\pages\CoreAwakening.tsx,107,'#3b82f6',var(--color-info),P2,comment reference
+src\pages\CoreAwakening.tsx,147,'#FFFFFF',var(--color-bg-primary),P2,comment reference
+src\pages\CoreAwakening.tsx,424,'rgba(255,255,255,0.3)',var(--color-border-light),P1,border
+src\pages\CoreAwakening.tsx,426,'rgba(255,255,255,0.5)',var(--color-text-secondary),P1,comment: CONTRAST-001
+src\pages\CoreAwakening.tsx,432,'rgba(255,255,255,0.75)',var(--color-text-primary),P1,text
+src\pages\DecisionDashboard.tsx,221,'#10b981'/'#f59e0b',var(--color-success)/var(--color-warning),P1,inline conditional
+src\pages\ExplorePage.tsx,134,'#8B5CF6',var(--color-accent-purple),P1,world color
+src\pages\ExplorePage.tsx,191,'#F59E0B',var(--color-accent-amber),P1,world color
+src\pages\ExplorePage.tsx,226,'#10B981',var(--color-accent-emerald),P1,world color
+src\pages\ExplorePage.tsx,281,'#06B6D4',var(--color-accent-cyan),P1,world color
+src\pages\ExplorePage.tsx,347,'#EF4444',var(--color-accent-red),P1,world color
+src\pages\ExplorePage.tsx,517,'rgba(0,0,0,0.1)/rgba(255,255,255,0.05)',var(--color-shadow)/var(--color-border-light),P2,shadow
+src\pages\ExplorePage.tsx,633,'rgba(0,0,0,0.1)/rgba(255,255,255,0.05)',var(--color-shadow)/var(--color-border-light),P2,shadow
+src\pages\ExplorePage.tsx,680,'#fff',var(--color-text-on-accent),P1,button text
+src\pages\FeatureMenu.tsx,95,'rgba(0,0,0,0.08)',var(--color-shadow),P2,shadow
+src\pages\ImmersiveTwinChat.tsx,496,'#6366f1',var(--color-accent-primary),P1,background
+src\pages\ImmersiveTwinChat.tsx,594,'#22D3EE',var(--color-accent-cyan),P1,world color fallback
+src\pages\ImmersiveTwinChat.tsx,651,'#6366f1',var(--color-accent-primary),P1,border
+src\pages\LandingPage.tsx,*,*,*,*,*
+src\pages\Onboarding.tsx,*,*,*,*,*
+src\pages\PalmistryPage.tsx,*,*,*,*,*
+src\pages\SciencePage.tsx,*,*,*,*,*
+src\pages\TarotPage.tsx,*,*,*,*,*
+src\pages\VsAstrologyPage.tsx,*,*,*,*,*
