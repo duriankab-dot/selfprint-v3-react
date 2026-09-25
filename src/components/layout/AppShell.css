@@ -60,8 +60,10 @@
   max-width: 100%;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
-  /* Prevent horizontal overflow at shell level */
-  overflow-x: hidden;
+  /* TOUCH-SCROLL-001: clip (ไม่ใช่ hidden) — hidden ทำให้ชั้นนี้กลายเป็น
+     scroll container และดัก touch scroll บนมือถือ/PWA (desktop wheel ยัง
+     ผ่าน) — รายละเอียดใน global.css TOUCH-SCROLL-001 */
+  overflow-x: clip;
 }
 
 /* ── Desktop nav rail offset (≥1024px) ──────────────────────────────────────
@@ -112,7 +114,10 @@
   max-width: 100%;
   min-width: 0;
   overflow-y: auto;
-  overflow-x: hidden;
+  /* TOUCH-SCROLL-001: clip (ไม่ใช่ hidden) — กัน horizontal โดยไม่สร้าง
+     scroll container ที่ดัก touch scroll ของมือถือ/PWA (x=clip + y=auto
+     เป็น combo ที่ถูกต้องตาม spec) */
+  overflow-x: clip;
   padding: 16px;
   padding-bottom: 72px; /* Space for BottomNav on mobile */
   /* Ensure children can never force horizontal overflow */

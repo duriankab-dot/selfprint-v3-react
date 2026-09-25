@@ -39,7 +39,7 @@
    ยังขยายเกิน box แม่
    แก้:
    1. box-sizing: border-box ทุก element รวม pseudo elements
-   2. html/body ล็อก max-width 100vw + overflow-x: hidden เพื่อกัน
+   2. html/body ล็อก max-width 100vw + overflow-x: clip เพื่อกัน
       horizontal scroll / screen breaking ระดับหน้า
    3. min-width: 0 บน flex/grid children (ดู flex-width-guard ด้านล่าง)
    ══════════════════════════════════════════════════════════════════════ */
@@ -54,7 +54,14 @@
 html,
 body {
   max-width: 100vw;
-  overflow-x: hidden;
+  /* TOUCH-SCROLL-001 (25 ก.ย. 2026): clip ไม่ใช่ hidden — hidden ทำให้
+     overflow-y คำนวณเป็น auto → html/body กลายเป็น scroll container
+     ที่ scroll ภายในไม่ได้ (height โตตาม content) → touch scroll บน
+     มือถือ/PWA ติดกับดักชั้นนี้แล้วตาย ส่วน desktop (wheel) ทะลุขึ้น
+     viewport ได้ = อาการ "desktop scroll ได้ แต่มือถือ/PWA ไม่ได้"
+     clip กัน horizontal เหมือนกันแต่ไม่สร้าง scroll container
+     (causal proof: deployed touchY=0 → overflow:visible touchY=585) */
+  overflow-x: clip;
 }
 
 html {
