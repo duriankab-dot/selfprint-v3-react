@@ -57,7 +57,7 @@ interface DetectedPattern {
   is_strength: boolean;
 }
 
-interface ClaudePatternResponse {
+interface AIPatternResponse {
   patterns: DetectedPattern[];
   summary: string;
 }
@@ -174,33 +174,47 @@ ${messagesSummary}
 ตรวจพบ 3-7 รูปแบบที่มีนัยสำคัญ ไม่ใช่ทุกอย่างที่เห็น`;
 
     // Call OpenRouter (OpenAI-compatible chat completions)
-    const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openRouterKey}`,
-        'HTTP-Referer': 'https://selfprint.app',
-        'X-Title': 'SelfPrint',
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-sonnet',
-        max_tokens: 2000,
-        temperature: 0.7,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-      }),
-    });
+    // MODEL-SWITCH-001 (25 ก.ย. 2026): nemotron primary → qwen3.7-flash fallback
+    // (claude ยกเลิก — ห้ามใช้)
+    const AI_MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'qwen/qwen3.7-flash'];
+    let aiData: { choices?: Array<{ message?: { content?: string } }> } | null = null;
+    let lastAiError: Error | null = null;
+    for (const model of AI_MODELS) {
+      const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${openRouterKey}`,
+          'HTTP-Referer': 'https://selfprint.app',
+          'X-Title': 'SelfPrint',
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 2000,
+          temperature: 0.7,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+        }),
+      });
 
-    if (!aiRes.ok) {
-      throw new Error(`OpenRouter API error: ${aiRes.status}`);
+      if (!aiRes.ok) {
+        lastAiError = new Error(`OpenRouter API error: ${aiRes.status}`);
+        continue;
+      }
+
+      aiData = await aiRes.json();
+      break;
     }
 
-    const aiData = await aiRes.json();
+    if (!aiData) {
+      throw lastAiError ?? new Error('AI unavailable');
+    }
+
     const rawText = aiData.choices?.[0]?.message?.content || '{}';
 
-    let parsed: ClaudePatternResponse;
+    let parsed: AIPatternResponse;
     try {
       const jsonMatch = rawText.match(/\{[\s\S]*\}/);
       parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : { patterns: [], summary: '' };

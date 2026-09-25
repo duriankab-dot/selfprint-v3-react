@@ -203,30 +203,44 @@ ${recentActivity}
 สร้าง Daily Brief ภาษาไทย กระชับ อบอุ่น personal`;
 
     // 5. Generate with OpenRouter (OpenAI-compatible chat completions)
-    const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${openRouterKey}`,
-        'HTTP-Referer': 'https://selfprint.app',
-        'X-Title': 'SelfPrint',
-      },
-      body: JSON.stringify({
-        model: 'anthropic/claude-3.5-haiku', // Haiku for speed
-        max_tokens: 300,
-        temperature: 0.8,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-      }),
-    });
+    // MODEL-SWITCH-001 (25 ก.ย. 2026): nemotron primary → qwen3.7-flash fallback
+    // (claude ยกเลิก — ห้ามใช้)
+    const AI_MODELS = ['nvidia/nemotron-3-ultra-550b-a55b:free', 'qwen/qwen3.7-flash'];
+    let aiData: { choices?: Array<{ message?: { content?: string } }> } | null = null;
+    let lastAiError: Error | null = null;
+    for (const model of AI_MODELS) {
+      const aiRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${openRouterKey}`,
+          'HTTP-Referer': 'https://selfprint.app',
+          'X-Title': 'SelfPrint',
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 300,
+          temperature: 0.8,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt },
+          ],
+        }),
+      });
 
-    if (!aiRes.ok) throw new Error(`OpenRouter API error: ${aiRes.status}`);
-    const aiData = await aiRes.json();
+      if (!aiRes.ok) {
+        lastAiError = new Error(`OpenRouter API error: ${aiRes.status}`);
+        continue;
+      }
+
+      aiData = await aiRes.json();
+      break;
+    }
+
+    if (!aiData) throw lastAiError ?? new Error('AI unavailable');
     const briefText = aiData.choices?.[0]?.message?.content?.trim() || '';
 
-    if (!briefText) throw new Error('Empty response from Claude');
+    if (!briefText) throw new Error('Empty response from AI');
 
     // 6. Cache in DB (upsert for today)
     await supabase

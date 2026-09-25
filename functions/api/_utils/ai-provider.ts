@@ -7,7 +7,7 @@
  * https://openrouter.ai/api/v1/chat/completions.
  *
  * Model slugs must use OpenRouter's `vendor/model-name` format,
- * e.g. `anthropic/claude-3.5-haiku`.
+ * e.g. `nvidia/nemotron-3-ultra-550b-a55b:free`.
  */
 
 interface CallAIOptions {

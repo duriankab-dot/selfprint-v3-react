@@ -14,7 +14,8 @@
  *   their decision patterns, archetype, and memories deeply. NOT a generic
  *   chatbot — responds as someone who knows them intimately.
  *
- * MODEL STRATEGY: claude-3-5-sonnet (deeper reasoning for behavioral insight)
+ * MODEL STRATEGY (MODEL-SWITCH-001, 25 ก.ย. 2026): nvidia nemotron-3-ultra (free)
+ *   → fallback qwen3.7-flash → qwen-plus → deepseek-chat (claude ยกเลิก — ห้ามใช้)
  *   Override via TWIN_MODEL_ID env var.
  *
  * PARAMETERS (from TwinAPIService.ts):
@@ -36,7 +37,6 @@ interface Env {
   OPENROUTER_API_KEY?: string;
   AI_PROVIDER?: string;
   TWIN_MODEL_ID?: string;
-  CLAUDE_MODEL_ID?: string;
   TWIN_RATE_LIMIT?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
@@ -151,9 +151,16 @@ export async function onRequest(context: PagesContext): Promise<Response> {
     }
 
     // Twin uses priority-based model routing (C-06): cheap capable models first
-    // Env override: TWIN_MODEL_ID → default: deepseek-chat (reasoning) → qwen-plus
-    const model = env.TWIN_MODEL_ID || 'deepseek/deepseek-chat';
-    const fallbackChain = ['deepseek/deepseek-chat', 'qwen/qwen-plus', 'anthropic/claude-3.5-haiku'];
+    // MODEL-SWITCH-001 (25 ก.ย. 2026): primary = nvidia nemotron-3-ultra (free)
+    //   fallback: qwen3.7-flash → qwen-plus → deepseek-chat (claude ยกเลิก — ห้ามใช้)
+    // Env override: TWIN_MODEL_ID → default: nemotron (reasoning) → qwen flash
+    const model = env.TWIN_MODEL_ID || 'nvidia/nemotron-3-ultra-550b-a55b:free';
+    const fallbackChain = [
+      'nvidia/nemotron-3-ultra-550b-a55b:free',
+      'qwen/qwen3.7-flash',
+      'qwen/qwen-plus',
+      'deepseek/deepseek-chat',
+    ];
 
     let lastError: Error | null = null;
     let content: string | null = null;

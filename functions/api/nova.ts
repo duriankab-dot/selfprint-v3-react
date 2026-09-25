@@ -13,8 +13,9 @@
  * WHO: Nova is a universal guide — not personal to any one user. She is the
  *   initial voice of SELFPRINT: curious, warm, socratic.
  *
- * MODEL STRATEGY: claude-3.5-haiku via OpenRouter (fast + responsive for conversational flow)
- *   Override via NOVA_MODEL_ID env var. (ANTHROPIC_API_KEY → OPENROUTER_API_KEY)
+ * MODEL STRATEGY (MODEL-SWITCH-001, 25 ก.ย. 2026): nvidia nemotron-3-ultra (free)
+ *   → fallback qwen3.7-flash → qwen-plus → deepseek-chat (claude ยกเลิก — ห้ามใช้)
+ *   Override via NOVA_MODEL_ID env var.
  *
  * PARAMETERS (from NovaAPIService.ts):
  *   temperature: 0.7   — measured, consistent, socratic (not too creative)
@@ -35,7 +36,6 @@ interface Env {
   OPENROUTER_API_KEY?: string;
   AI_PROVIDER?: string;
   NOVA_MODEL_ID?: string;
-  CLAUDE_MODEL_ID?: string;
   NOVA_RATE_LIMIT?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
@@ -136,10 +136,16 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       return json({ error: 'messages[] is required' }, 400, corsHeaders);
     }
 
-    // Nova uses priority-based model routing (C-06): free/cheap first, quality fallback
-    // Env override: NOVA_MODEL_ID → default chain: qwen-plus → deepseek-chat → claude-haiku
-    const model = env.NOVA_MODEL_ID || 'qwen/qwen-plus';
-    const fallbackChain = ['qwen/qwen-plus', 'deepseek/deepseek-chat', 'anthropic/claude-3.5-haiku'];
+    // MODEL-SWITCH-001 (25 ก.ย. 2026): primary = nvidia nemotron-3-ultra (free)
+    //   fallback: qwen3.7-flash → qwen-plus → deepseek-chat (claude ยกเลิก — ห้ามใช้)
+    // Env override: NOVA_MODEL_ID → default chain: nemotron → qwen flash → ...
+    const model = env.NOVA_MODEL_ID || 'nvidia/nemotron-3-ultra-550b-a55b:free';
+    const fallbackChain = [
+      'nvidia/nemotron-3-ultra-550b-a55b:free',
+      'qwen/qwen3.7-flash',
+      'qwen/qwen-plus',
+      'deepseek/deepseek-chat',
+    ];
 
     let lastError: Error | null = null;
     let content: string | null = null;

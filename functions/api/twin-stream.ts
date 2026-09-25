@@ -13,7 +13,8 @@
  * be reachable without a valid Bearer token derived from the
  * authenticated Supabase session — never trust query/body userId.
  *
- * MODEL STRATEGY: claude-3-5-sonnet (deeper reasoning for behavioral insight)
+ * MODEL STRATEGY (MODEL-SWITCH-001, 25 ก.ย. 2026): nvidia nemotron-3-ultra (free)
+ *   → fallback qwen3.7-flash (claude ยกเลิก — ห้ามใช้)
  *   Override via TWIN_MODEL_ID env var.
  *
  * Request:
@@ -34,7 +35,6 @@ interface Env {
   OPENROUTER_API_KEY?: string;
   AI_PROVIDER?: string;
   TWIN_MODEL_ID?: string;
-  CLAUDE_MODEL_ID?: string;
   TWIN_RATE_LIMIT?: string;
   SUPABASE_URL?: string;
   SUPABASE_SERVICE_ROLE_KEY?: string;
@@ -130,16 +130,35 @@ export async function onRequest(context: PagesContext): Promise<Response> {
       );
     }
 
-    const model = env.TWIN_MODEL_ID || 'deepseek/deepseek-chat';
+    // MODEL-SWITCH-001 (25 ก.ย. 2026): primary = nvidia nemotron-3-ultra (free)
+    // single-level fallback → qwen3.7-flash เมื่อ primary stream ล้มเหลว
+    // (สอดคล้องกับ fallback contract ของ twin.ts ฝั่ง non-streaming)
+    const model = env.TWIN_MODEL_ID || 'nvidia/nemotron-3-ultra-550b-a55b:free';
+    const fallbackModel = env.TWIN_MODEL_ID ? null : 'qwen/qwen3.7-flash';
 
-    // ── Stream response (SSE) ────────────────────────────────────────────
-    const stream = await getOpenRouterStream(env, {
-      model,
-      system,
-      messages,
-      temperature,
-      max_tokens,
-    });
+    let stream: ReadableStream<Uint8Array>;
+    try {
+      stream = await getOpenRouterStream(env, {
+        model,
+        system,
+        messages,
+        temperature,
+        max_tokens,
+      });
+    } catch (err) {
+      if (!fallbackModel) throw err;
+      console.warn(
+        '[twin-stream] Primary model failed — falling back to qwen3.7-flash:',
+        err instanceof Error ? err.message : err
+      );
+      stream = await getOpenRouterStream(env, {
+        model: fallbackModel,
+        system,
+        messages,
+        temperature,
+        max_tokens,
+      });
+    }
 
     // Transform OpenRouter SSE → client-friendly SSE
     const encoder = new TextEncoder();
