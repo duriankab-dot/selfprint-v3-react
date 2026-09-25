@@ -1,5 +1,5 @@
 # UNIVERSAL MASTER AI RULES & GUIDELINES
-# Version: 2.0
+# Version: 3.0 (2026 Updated)
 # Universal for: Cline, Kilo Code, Roo Code, Cursor, Continue and similar coding agents
 
 > PURPOSE
