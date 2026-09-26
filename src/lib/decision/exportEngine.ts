@@ -89,7 +89,8 @@ export function toShareableLink(decisions: Decision[]): ExportResult {
   }
 
   try {
-    const json = toJSON(decisions.slice(0, 5), { version: '1.0' });
+    const now = new Date().toISOString();
+    const json = toJSON(decisions.slice(0, 5), { exportedAt: now, version: '1.0' });
     const encoded = encodeURIComponent(json);
     
     // Truncate if too long for safe URL embedding
@@ -108,6 +109,7 @@ export function toShareableLink(decisions: Decision[]): ExportResult {
  */
 export function fromShareableLink(url: string): Decision[] | null {
   try {
+    const now = new Date().toISOString();
     const parsed = new URL(url);
     const data = parsed.searchParams.get('data');
     if (!data) return null;
@@ -119,13 +121,16 @@ export function fromShareableLink(url: string): Decision[] | null {
     
     return payload.decisions.map((d) => ({
       id: crypto.randomUUID ? crypto.randomUUID() : d.id,
-      question: d.question,
+      twinId: d.twinId || '',
       world: d.world,
+      question: d.question,
+      options: d.options || [],
       twinRecommendation: d.twinRecommendation,
       userChoice: d.userChoice,
-      options: d.options,
-      context: d.context,
       chosenAt: d.chosenAt,
+      context: d.context,
+      createdAt: d.createdAt || now,
+      updatedAt: d.updatedAt || now,
     }));
   } catch {
     return null;

@@ -5,7 +5,7 @@
  * Survives page reload and tab restore.
  */
 
-import { loadTwinDNA as loadRawDNA, saveTwinDNA as saveRawDNA, type TwinVisualDNA } from '@/lib/twinVisualDNA';
+import { type TwinVisualDNA } from '@/lib/twinVisualDNA';
 
 const DNA_METADATA_KEY = 'sp_twin_dna_metadata';
 
@@ -51,7 +51,8 @@ export function saveDNAMetadata(dna: TwinVisualDNA, meta: Partial<DNAMetadata>):
       ...meta,
     };
 
-    saveRawDNA(dna);
+    // Save DNA directly to localStorage (saveTwinDNA generates new DNA, we want to save existing)
+    localStorage.setItem('selfprint_twin_dna', JSON.stringify(dna));
     localStorage.setItem(DNA_METADATA_KEY, JSON.stringify({ dna, meta: fullMeta }));
   } catch {
     // non-fatal
@@ -61,16 +62,26 @@ export function saveDNAMetadata(dna: TwinVisualDNA, meta: Partial<DNAMetadata>):
 /**
  * Upgrade DNA from v1 → v2 or v2 → v3 based on evolution triggers.
  */
-export function upgradeDNAIfNeeded(dna: TwinVisualDNA | null, trigger: 'sice' | 'decision' | 'manual'): TwinVisualDNA | null {
+export async function upgradeDNAIfNeeded(dna: TwinVisualDNA | null, trigger: 'sice' | 'decision' | 'manual'): Promise<TwinVisualDNA | null> {
   if (!dna) return null;
 
   if (dna.version < 2 && trigger === 'sice') {
     // Vite dynamic import to avoid pulling SICE into entry bundle
-    return import('@/lib/twinVisualDNA').then(m => m.upgradeTwinDNA(dna)).catch(() => dna);
+    try {
+      const { upgradeTwinDNA } = await import('@/lib/twinVisualDNA');
+      return upgradeTwinDNA(dna);
+    } catch {
+      return dna;
+    }
   }
 
   if (dna.version < 3 && trigger === 'decision') {
-    return import('@/lib/twinVisualDNA').then(m => m.upgradeTwinDNA(dna)).catch(() => dna);
+    try {
+      const { upgradeTwinDNA } = await import('@/lib/twinVisualDNA');
+      return upgradeTwinDNA(dna);
+    } catch {
+      return dna;
+    }
   }
 
   return dna;

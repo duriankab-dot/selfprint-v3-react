@@ -26,7 +26,7 @@ interface UseWorldReturn {
 
 export function useWorld(): UseWorldReturn {
   const { session } = useAuth();
-  const { twin } = useTwin();
+  const { twin, currentWorld: contextCurrentWorld } = useTwin();
   const params = useParams<{ worldId?: string }>();
   const [searchParams] = useSearchParams();
 
@@ -41,7 +41,7 @@ export function useWorld(): UseWorldReturn {
   const resolvedWorldId: WorldId | null = 
     worldIdFromUrl || 
     worldIdFromQuery || 
-    (twin.currentWorld as WorldId | null) || 
+    contextCurrentWorld || 
     null;
 
   const world = resolvedWorldId ? (WORLDS[resolvedWorldId] ?? null) : null;

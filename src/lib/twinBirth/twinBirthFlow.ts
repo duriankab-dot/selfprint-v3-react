@@ -14,15 +14,11 @@
  */
 
 import { supabase } from '@/lib/supabase/client';
-import type { WorldId } from '@/constants/worlds';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '@/services/CoreAwakeningService';
 import { useLifecycleStore } from '@/store/lifecycleStore';
-import { useUserStore } from '@/store/userStore';
 import { useAnalysisStore } from '@/store/analysisStore';
-import { useTwin } from '@/context/TwinContext';
-import { useAIContext } from '@/context/AIContext';
-import { generateTwinDNA, refineTwinDNA, type BirthInput } from '@/lib/twinVisualDNA';
-import { saveTwinDNA, loadTwinDNA } from '@/lib/twinVisualDNA';
+import { type BirthInput } from '@/lib/twinVisualDNA';
+import { saveTwinDNA } from '@/lib/twinVisualDNA';
 import { calculateArchetypes } from '@/lib/ArchetypeScoreEngine';
 import { calculateInitialDisciplines } from '@/lib/astrology';
 
@@ -131,8 +127,7 @@ export async function executeBirthFlow(
       .catch((err) => console.error('Background awakening failed:', err));
 
     // Step 2: Generate initial DNA
-    const dna = generateTwinDNA(birthInput, userId);
-    await saveTwinDNA(dna);
+    await saveTwinDNA(birthInput, userId);
 
     // Step 3: Initialize twin
     const result = await initializeTwin(userId, twinName, essenceId, birthInput.dob, currentAnalysis);
@@ -158,7 +153,6 @@ export async function executeBirthFlow(
       birthDate: birthInput.dob,
       twinId: result.twinId,
       error: null,
-      completedAt: new Date().toISOString(),
     });
 
     return { success: true, twinId: result.twinId };
@@ -173,7 +167,6 @@ export async function executeBirthFlow(
       birthDate: birthInput.dob,
       twinId: null,
       error: errorMsg,
-      completedAt: null,
     });
     return { success: false, message: errorMsg };
   }

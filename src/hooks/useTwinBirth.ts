@@ -48,7 +48,7 @@ export function useTwinBirth() {
     }
 
     // Check if twin already exists (skip birth flow)
-    checkExistingTwin(userId).then(({ exists, twinId }) => {
+    checkExistingTwin(userId).then(({ exists, twinId: _twinId }) => {
       if (exists) {
         // Twin exists — no need to show birth flow
         clearBirthState();

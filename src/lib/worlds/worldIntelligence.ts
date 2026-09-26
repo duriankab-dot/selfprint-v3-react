@@ -116,19 +116,22 @@ export async function getAllWorldsIntelligence(
  */
 async function calculateAdviceConfidence(twinId: string, worldId: WorldId): Promise<number> {
   try {
+    // First fetch decision IDs for this world
+    const { data: decisions } = await supabase
+      .from('decision_log')
+      .select('id')
+      .eq('twin_id', twinId)
+      .eq('world', worldId);
+
+    const decisionIds = decisions?.map(d => d.id) ?? [];
+    if (decisionIds.length === 0) return 50; // neutral default
+
     const { data: outcomes } = await supabase
       .from('decision_outcomes')
       .select('impact')
-      .in('decision_id', (async () => {
-        const { data: decisions } = await supabase
-          .from('decision_log')
-          .select('id')
-          .eq('twin_id', twinId)
-          .eq('world', worldId);
-        return decisions?.map(d => d.id) ?? [];
-      })());
+      .in('decision_id', decisionIds);
 
-    if (!outcomes || outcomes.length === 0) return 50; // neutral default
+    if (!outcomes || outcomes.length === 0) return 50;
 
     const positive = outcomes.filter(o => o.impact === 'positive').length;
     return Math.round((positive / outcomes.length) * 100);
