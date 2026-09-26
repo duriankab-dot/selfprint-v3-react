@@ -1,19 +1,24 @@
 {
-  "$schema": "https://kilo.ai",
-  "tools": {
-    "edit": {
-      "allow": [
-        "plans/*.md",
-        ".kilo/plans/*.md",
-        "AI_WORK_STATE.md",
-        "AI_ENTRYPOINT.md"
-      ]
-    }
-  },
+  "$schema": "https://app.kilo.ai/config.json",
+
   "instructions": [
-    "AI_ENTRYPOINT.md",
-    ".clinerules",
-    "UNIVERSAL_MASTER_AI_RULES.md",
-    "AI_WORK_STATE.md"
-  ]
+    "../AI_ENTRYPOINT.md",
+    "../UNIVERSAL_MASTER_AI_RULES.md",
+    "../AI_WORK_STATE.md"
+  ],
+
+  "permission": {
+    "read": "allow",
+
+    "edit": {
+      "AI_WORK_STATE.md": "allow",
+      "AI_ENTRYPOINT.md": "allow",
+      "plans/*.md": "allow",
+      ".kilo/plans/*.md": "allow",
+      "*": "allow"
+    },
+
+    "bash": "ask",
+    "webfetch": "ask"
+  }
 }

@@ -141,6 +141,8 @@ const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
 const TwinBirthPage = lazy(() => import('./pages/TwinBirthPage'));
 const TwinPatternsPage = lazy(() => import('./pages/TwinPatternsPage'));
 const TwinProfileDetailPage = lazy(() => import('./pages/TwinProfileDetailPage'));
+// Phase 5: TC-503 — Memory Insights page
+const MemoryInsightsPage = lazy(() => import('./pages/MemoryInsightsPage'));
 
 // Blog pages
 const BlogArticle = lazy(() => import('./pages/BlogArticle'));
@@ -242,6 +244,8 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/life-hubs', element: <LifeHubsPage /> },
     { path: '/decisions', element: <DecisionDashboard /> },
     { path: '/decision-log', element: <DecisionLoggerPage /> },
+    // Phase 5: TC-503 — Memory Insights page (protected)
+    { path: '/memory-insights', element: <ProtectedRoute><MemoryInsightsPage /></ProtectedRoute> },
     { path: '/faq', element: <FAQPage /> },
     { path: '/vs-astrology', element: <VsAstrologyPage /> },
     { path: '/menu', element: <FeatureMenu /> },

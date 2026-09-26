@@ -33,6 +33,11 @@
   --color-error: #EF4444;
   --color-info: #3B82F6;
 
+  /* Evolution Version Colors — TC-502/504 */
+  --color-version-1: #6366f1;  /* indigo - Landing */
+  --color-version-2: #8b5cf6;  /* violet - Onboarding */
+  --color-version-3: #10b981;  /* emerald - Living */
+
   /* Status Colors */
   --color-success: #10B981;
   --color-warning: #F59E0B;

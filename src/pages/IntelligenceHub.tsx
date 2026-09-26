@@ -30,6 +30,7 @@ import {
 import { detectPatterns, type TrendPoint } from '../lib/patternDetection';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTwin } from '../context/TwinContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { getSeoMetadata } from '../constants/seoMetadata';
 import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
@@ -46,6 +47,8 @@ import IntelligencePanel from '../components/dashboard/IntelligencePanel';
 import FutureSelfPanel from '../components/dashboard/FutureSelfPanel';
 import { DecisionCard, LifePackCarousel, ForecastWidget } from '../components/dashboard/IntelligencePanels';
 import { AppShell } from '../components/layout/AppShell';
+import { MemoryPanel } from '../components/livingTwin/MemoryPanel';
+import { EvolutionVisualization } from '../components/evolution/EvolutionVisualization';
 import '../styles/dashboard.css';
 
 interface Insights {
@@ -84,6 +87,7 @@ const IntelligenceHub: React.FC = () => {
   const userId = session?.user?.id || '';
   const { language } = useLanguage();
   const isTh = language === 'th';
+  const { twin } = useTwin();
   const seoData = getSeoMetadata('dashboard', language);
 
   const { data: personalContext = null } = useQuery({
@@ -307,6 +311,66 @@ const IntelligenceHub: React.FC = () => {
             <div className="p2-panels-row">
               <LifePackCarousel context={personalContext} />
               <ForecastWidget context={personalContext} />
+            </div>
+          </div>
+
+          {/* Phase 5: Dashboard Panels - Decision, World, Memory */}
+          <div className="p2-intelligence-grid" style={{ marginTop: 32 }}>
+            <h2 className="p2-section-title">📊 {isTh ? 'แผงควบคุม' : 'Dashboard Panels'}</h2>
+            <div className="p2-panels-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+              <div className="dashboard-panel">
+                <h3 style={{ marginBottom: 12 }}>{isTh ? '📝 การตัดสินใจ' : '📝 Decisions'}</h3>
+                <p style={{ opacity: 0.7, marginBottom: 12, fontSize: 14 }}>
+                  {isTh ? 'ติดตามและวิเคราะห์การตัดสินใจทั้งหมด' : 'Track and analyze all decisions'}
+                </p>
+                <button
+                  className="dashboard-panel__link"
+                  onClick={() => navigate('/decisions')}
+                >
+                  {isTh ? 'เปิด Decision Dashboard →' : 'Open Decision Dashboard →'}
+                </button>
+              </div>
+              <div className="dashboard-panel">
+                <h3 style={{ marginBottom: 12 }}>{isTh ? '🌍 โลก 12 โลก' : '🌍 12 Worlds'}</h3>
+                <p style={{ opacity: 0.7, marginBottom: 12, fontSize: 14 }}>
+                  {isTh ? 'สำรวจโลกทั้ง 12 พร้อม Twin intelligence' : 'Explore all 12 worlds with Twin intelligence'}
+                </p>
+                <button
+                  className="dashboard-panel__link"
+                  onClick={() => navigate('/worlds')}
+                >
+                  {isTh ? 'เปิด Worlds Hub →' : 'Open Worlds Hub →'}
+                </button>
+              </div>
+              <div className="dashboard-panel">
+                <h3 style={{ marginBottom: 12 }}>{isTh ? '🧠 ความทรงจำ' : '🧠 Memories'}</h3>
+                <p style={{ opacity: 0.7, marginBottom: 12, fontSize: 14 }}>
+                  {isTh ? 'ดู Memory ทั้งหมดพร้อม relevance scoring' : 'View all memories with relevance scoring'}
+                </p>
+                <button
+                  className="dashboard-panel__link"
+                  onClick={() => navigate('/memory-insights')}
+                >
+                  {isTh ? 'เปิด Memory Insights →' : 'Open Memory Insights →'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Twin Memory & Evolution */}
+          <div className="p2-intelligence-grid" style={{ marginTop: 32 }}>
+            <h2 className="p2-section-title">{isTh ? '🧠 Twin Memory & Evolution' : '🧠 Twin Memory & Evolution'}</h2>
+            <div className="p2-panels-row" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+              {twin?.id && (
+                <>
+                  <div className="dashboard-panel">
+                    <MemoryPanel twinId={twin.id} maxItems={8} showForget={false} />
+                  </div>
+                  <div className="dashboard-panel">
+                    <EvolutionVisualization twinId={twin.id} showTriggers={true} showVersionDiff={true} maxEvents={10} />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

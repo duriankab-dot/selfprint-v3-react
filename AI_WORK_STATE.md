@@ -1,99 +1,40 @@
 # AI WORK STATE
-# Version: 1.0
-# Purpose: Compact operational state ledger for AI coding agents.
-#
-# RULE:
-# This file records CURRENT PROJECT STATE.
-# It is NOT a replacement for project specifications or documentation.
-# Keep it factual, compact, and updated after meaningful work.
-#
-# IMPORTANT:
-# - Do not use this file to turn FAIL into PASS.
-# - Do not remove unresolved failures merely to make the project look clean.
-# - This file is an evidence/state ledger, not a completion mechanism.
-# - Do not duplicate large documentation here.
-# - Completed + VERIFIED work should not be repeated without new evidence.
 
+Version: 1.0
+Project: Selfprint
+Last Updated: 2026-09-26
 
-===============================================================================
-MANDATORY AI BOOTSTRAP
-===============================================================================
+---
 
-Every AI session MUST load, in this order, before substantial work:
+## 1. CURRENT TASK
 
-1. AI_ENTRYPOINT.md (if present)
+Task ID:
+P0-CURRENT
+
+Status:
+IN_PROGRESS
+
+Objective:
+Maintain and complete Selfprint toward verified production readiness.
+
+---
+
+## 2. SESSION BOOTSTRAP
+
+Before substantial work, every AI agent MUST read:
+
+1. AI_ENTRYPOINT.md
 2. UNIVERSAL_MASTER_AI_RULES.md
 3. AI_WORK_STATE.md
 
-BOOTSTRAP STATUS:
-- AI_ENTRYPOINT loaded: YES / NO / N/A
-- UNIVERSAL_MASTER_AI_RULES loaded: YES / NO
-- AI_WORK_STATE loaded: YES / NO
-- Bootstrap complete: YES / NO
+Then inspect only the relevant project specification,
+source files, tests, runtime evidence, and changed files.
 
-RULE:
-Do not begin project modifications until Bootstrap complete = YES.
+---
 
-If these files are already present in current context and unchanged, do not
-reload them solely for repetition. Reuse the existing context.
+## 3. CURRENT SOURCE OF TRUTH
 
-===============================================================================
-PROJECT IDENTITY
-===============================================================================
-
-Project:
-Repository:
-Current Branch:
-Last Known Commit:
-Last Inspected Commit:
-Files Changed Since Last Inspection:
-Tests Run Since Last Inspection:
-Environment:
-Deployment Target:
-
-===============================================================================
-CURRENT TASK
-===============================================================================
-
-Task ID:
-Phase:
-Status: NOT_STARTED | IN_PROGRESS | PASS | FAIL | BLOCKED | UNVERIFIED | DEFERRED
-
-Objective:
-Scope:
-
-Started:
-Last Updated:
-
-===============================================================================
-CURRENT STATE
-===============================================================================
-
-What is known to be working:
-
-What is currently failing:
-
-What is currently unverified:
-
-What is blocked:
-
-Known risks:
-
-===============================================================================
-LOCKED CONSTRAINTS
-===============================================================================
-
-List only constraints that are actually locked by the project owner.
-
-- 
-- 
-- 
-
-===============================================================================
-SOURCE OF TRUTH
-===============================================================================
-
-Default hierarchy:
+Use this hierarchy unless the project explicitly overrides it:
 
 1. Actual Code
 2. Database / Migration
@@ -101,232 +42,180 @@ Default hierarchy:
 4. Tests / Runtime Evidence
 5. Documentation
 
-Project-specific override (if explicitly approved):
+If sources disagree:
 
-===============================================================================
-REQUIREMENT TRACEABILITY
-===============================================================================
+DOC DRIFT must be reported.
 
-Use stable IDs for important requirements.
+Never modify documentation merely to make implementation appear complete.
 
-| ID | Requirement | Implementation | Verification | Evidence | Status |
-|----|-------------|----------------|--------------|----------|--------|
-|    |             |                |              |          |        |
+---
 
-Status values:
-PASS / FAIL / PARTIAL / UNVERIFIED / BLOCKED / DEFERRED / NOT_STARTED
+## 4. CURRENT PROJECT STATE
 
-===============================================================================
-ACTIVE WORK
-===============================================================================
+### Architecture
 
-Current Task:
-Current Hypothesis:
-Current Attempt: 0 / 1 / 2
+- Platform: Selfprint
+- Deployment architecture: Cloudflare
+- AI provider: OpenRouter
+- Model selection: model may be selected/configured through OpenRouter
+- SICE architecture: 16 engines
+- User-facing AI characters: 2
+- Backend AI calculations/processing must follow the current project architecture
+- Do not reintroduce obsolete architecture from older project versions
 
-Planned Action:
-Expected Verification:
+### Important Locked Context
 
-===============================================================================
-ATTEMPT LOG
-===============================================================================
+- Cloudflare is the current deployment direction.
+- Do NOT restore the old 12-API/Vercel limitation as a project requirement.
+- SICE = 16 engines is the current architecture.
+- Do NOT reduce SICE to 12 engines.
+- Existing skipped tests must remain explicitly identified as SKIPPED/UNVERIFIED.
+- OpenRouter-related k6 limitations must not be falsely reported as PASS.
+- Documentation must follow implementation and verification evidence.
 
-ATTEMPT 1
-- Problem:
-- Root-cause hypothesis:
-- Files changed:
-- Fix:
-- Verification command/test:
-- Exact result:
-- Status:
+---
 
-ATTEMPT 2
-- Why Attempt 1 failed:
-- Alternative hypothesis:
-- Files changed:
-- Fix:
-- Verification command/test:
-- Exact result:
-- Status:
+## 5. TASK CONTINUITY
 
-If Attempt 2 fails:
-STOP.
-Do not add Attempt 3.
-Use the Mandatory Halt Report.
+Before creating a new task:
 
-===============================================================================
-VERIFICATION LEDGER
-===============================================================================
+1. Search this file for an existing related Task ID.
+2. Continue the existing task if it is still active.
+3. Do not create duplicate implementation tracks.
+4. Do not repeat verified work without new evidence.
 
-Record only meaningful checks.
+---
 
-| Check | Command / Method | Result | Date/Session | Evidence/Notes |
-|-------|------------------|--------|--------------|----------------|
-| Typecheck | | | | |
-| Lint | | | | |
-| Build | | | | |
-| Unit | | | | |
-| Integration | | | | |
-| E2E | | | | |
-| API/Edge | | | | |
-| Database | | | | |
-| Security/Auth/RLS | | | | |
-| UI/Mobile | | | | |
+## 6. STATUS DEFINITIONS
 
-IMPORTANT:
-- SKIPPED is not PASS.
-- NOT RUN is not PASS.
-- MOCKED is not production proof.
+Use only:
 
-===============================================================================
-SKIPPED / UNVERIFIED TEST REGISTER
-===============================================================================
+- NOT_STARTED
+- IN_PROGRESS
+- PASS
+- FAIL
+- BLOCKED
+- UNVERIFIED
+- DEFERRED
 
-| Test/Check | Status | Reason | Impact | Temporary/Permanent | Follow-up |
-|------------|--------|--------|--------|--------------------|-----------|
-|            |        |        |        |                    |           |
+Never use:
 
-===============================================================================
-FILES & CHANGE TRACKING
-===============================================================================
+- COMPLETE without verification
+- 100% without evidence
+- PRODUCTION READY without passing applicable gates
 
-Files already inspected:
-- 
+---
 
-Files changed in current task:
-- 
+## 7. CURRENT BLOCKERS
 
-Files changed since last inspection:
-- 
+Record only verified blockers.
 
-Files that must NOT be reread unless changed or required for verification:
-- 
+Example:
 
-Relevant dependencies/interfaces:
-- 
+### BLOCKER-001
+Status: OPEN
+Area: k6 / OpenRouter
+Description:
+OpenRouter API behavior prevents the affected k6 verification from being treated as production PASS.
 
-===============================================================================
-KNOWN FAILURES / BLOCKERS
-===============================================================================
+Required action:
+Resolve or explicitly document the verification limitation.
 
-| ID | Failure/Blocker | Evidence | Impact | Attempt | Next Action |
-|----|------------------|----------|--------|---------|-------------|
-|    |                  |          |        |         |             |
+---
 
-===============================================================================
-DOCUMENTATION DRIFT
-===============================================================================
+## 8. KNOWN UNVERIFIED / SKIPPED TESTS
 
-If code/runtime and documentation disagree, record it here.
+| Test | Status | Reason | Impact | Follow-up |
+|---|---|---|---|---|
+| OpenRouter k6 verification | UNVERIFIED | Provider/API constraint | Load verification incomplete | Re-run when environment supports it |
 
-| Item | Actual State | Documentation Claim | Required Action | Status |
-|------|--------------|---------------------|-----------------|--------|
-|      |              |                     |                 |        |
+Do not convert SKIPPED or UNVERIFIED into PASS without actual evidence.
 
-RULE:
-Documentation changes do not resolve implementation failures.
+---
 
-===============================================================================
-DUPLICATE WORK PROTECTION
-===============================================================================
+## 9. LAST INSPECTED STATE
 
-Existing related tasks:
-- 
+Last inspected commit:
 
-Tasks already completed + verified:
-- 
+[UPDATE WITH ACTUAL COMMIT]
 
-Do not recreate:
-- 
+Last verification:
 
-Reason to revisit completed work (only if applicable):
-- Regression / requirement change / dependency change / environment change
+[UPDATE WITH ACTUAL COMMANDS / RESULTS]
 
-===============================================================================
-SESSION HANDOFF
-===============================================================================
+Files changed since inspection:
 
+[UPDATE]
+
+Known failures:
+
+[UPDATE]
+
+---
+
+## 10. ACTIVE TASKS
+
+### TASK
+ID:
+Status:
+Objective:
+Files:
+Verification:
+Remaining:
+
+---
+
+## 11. COMPLETED VERIFIED WORK
+
+Only record work that has actual evidence.
+
+### TASK
+ID:
+Result:
+Evidence:
+Verification:
+Commit:
+
+---
+
+## 12. SESSION HANDOFF
+
+At the end of every substantial session update:
+
+Task ID:
+Status:
+Objective:
 Completed:
-- 
-
 Verified:
-- 
-
 Failed:
-- 
-
 Blocked:
-- 
-
 Files Changed:
-- 
-
 Tests / Commands Run:
-- 
-
 Known Risks:
-- 
-
 Next Exact Action:
-- 
 
-User Decision Required:
-- NONE / <specific decision>
+---
 
-===============================================================================
-PRODUCTION READINESS SNAPSHOT
-===============================================================================
+## 13. ANTI-GAMING RULE
 
-This is a snapshot, not a substitute for actual evidence.
+This file is an evidence ledger.
 
-[ ] Requirements closed
-[ ] Typecheck
-[ ] Lint
-[ ] Build
-[ ] Unit tests
-[ ] Integration tests
-[ ] E2E
-[ ] API/Edge/runtime
-[ ] Database/persistence
-[ ] Security/auth/RLS/user isolation
-[ ] Critical UI/mobile flows
-[ ] No critical blockers
-[ ] Documentation synchronized
+Never change:
 
-Overall:
-NOT PRODUCTION READY / PRODUCTION READY
+FAIL → PASS
+UNVERIFIED → PASS
+SKIPPED → PASS
 
-IMPORTANT:
-`PRODUCTION READY` is permitted only when the applicable gates have actual
-supporting evidence. Do not tick boxes to make the status look complete.
+unless new verification evidence exists.
 
-===============================================================================
-COMPACT SESSION START CHECKLIST
-===============================================================================
+Never modify requirements merely to match implementation.
 
-[ ] Read current task
-[ ] Read known blockers
-[ ] Check last inspected commit
-[ ] Check changed files
-[ ] Reuse verified context
-[ ] Avoid duplicate work
-[ ] Identify exact next action
+---
 
-===============================================================================
-COMPACT SESSION END CHECKLIST
-===============================================================================
+## 14. NEXT EXACT ACTION
 
-[ ] Record what changed
-[ ] Record actual verification
-[ ] Record failures/blockers
-[ ] Record attempt number
-[ ] Record next exact action
-[ ] Update documentation only if state changed and evidence supports it
-[ ] Leave no misleading PASS/COMPLETE claim
+[AI MUST UPDATE THIS AFTER EACH SUBSTANTIAL SESSION]
 
-===============================================================================
-FINAL RULE
-===============================================================================
+---
 
-DO NOT MAKE THE PROJECT LOOK COMPLETE.
-MAKE THE PROJECT ACTUALLY COMPLETE — OR CLEARLY REPORT WHY IT IS NOT.
+# END OF AI WORK STATE

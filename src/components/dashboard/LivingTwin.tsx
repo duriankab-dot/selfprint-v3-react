@@ -17,7 +17,7 @@
  * No mocks. No hardcoding.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -26,6 +26,9 @@ import type { TwinState, TwinStateEngine } from '@/lib/intelligence/TwinStateEng
 import { Twin } from '@/components/twin/Twin';
 import { useTwinIdentity } from '@/hooks/useTwinIdentity';
 import { ShareButton } from '@/components/viral/ShareButton';
+import { MemoryPanel } from '@/components/livingTwin/MemoryPanel';
+import { EvolutionTimeline } from '@/components/livingTwin/EvolutionTimeline';
+import { InsightCards } from '@/components/livingTwin/InsightCards';
 import '../../styles/living-twin.css';
 
 // ============================================================================
@@ -99,6 +102,11 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
   // TWIN-CONSISTENCY-001: real archetype (shape/color identity), same source
   // WorldDetail.tsx reads for TwinPresence — see below.
   const { twin } = useTwin();
+
+  // Expandable sections state
+  const [showMemory, setShowMemory] = useState(false);
+  const [showEvolution, setShowEvolution] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
 
   // PHASE0-TWIN-FACADE-001: evolutionStage/glowMult/glowOpacity used to be
   // computed here word-for-word identically to TwinPresence.tsx (both
@@ -258,6 +266,50 @@ const LivingTwin: React.FC<LivingTwinProps> = ({ maturityScore }) => {
           unreachable dead code even though the backend was still fully wired. */}
       <div className="living-twin__share">
         <ShareButton />
+      </div>
+
+      {/* Phase 5: Memory, Evolution, Insights panels */}
+      <div className="living-twin__panels">
+        <div className="living-twin__panel-toggle">
+          <button
+            className={`living-twin__btn living-twin__btn--outline ${showMemory ? 'active' : ''}`}
+            onClick={() => setShowMemory(!showMemory)}
+            style={{ marginRight: 8 }}
+          >
+            🧠 {isTh ? 'ความทรงจำ' : 'Memories'}
+          </button>
+          <button
+            className={`living-twin__btn living-twin__btn--outline ${showEvolution ? 'active' : ''}`}
+            onClick={() => setShowEvolution(!showEvolution)}
+            style={{ marginRight: 8 }}
+          >
+            📈 {isTh ? 'วิวัฒนาการ' : 'Evolution'}
+          </button>
+          <button
+            className={`living-twin__btn living-twin__btn--outline ${showInsights ? 'active' : ''}`}
+            onClick={() => setShowInsights(!showInsights)}
+          >
+            💡 {isTh ? 'ข้อมูลเชิงลึก' : 'Insights'}
+          </button>
+        </div>
+
+        {showMemory && twin?.id && (
+          <div className="living-twin__panel-content">
+            <MemoryPanel twinId={twin.id} maxItems={5} showForget={false} />
+          </div>
+        )}
+
+        {showEvolution && twin?.id && (
+          <div className="living-twin__panel-content">
+            <EvolutionTimeline twinId={twin.id} maxEvents={8} />
+          </div>
+        )}
+
+        {showInsights && (
+          <div className="living-twin__panel-content">
+            <InsightCards maxInsights={4} maxBlindSpots={3} />
+          </div>
+        )}
       </div>
     </div>
   );
