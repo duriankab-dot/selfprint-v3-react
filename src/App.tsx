@@ -137,6 +137,10 @@ const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const VsAstrologyPage = lazy(() => import('./pages/VsAstrologyPage'));
+// Phase 4: TC-401 — dedicated Twin Birth + Patterns pages (replaces alias redirects)
+const TwinBirthPage = lazy(() => import('./pages/TwinBirthPage'));
+const TwinPatternsPage = lazy(() => import('./pages/TwinPatternsPage'));
+const TwinProfileDetailPage = lazy(() => import('./pages/TwinProfileDetailPage'));
 
 // Blog pages
 const BlogArticle = lazy(() => import('./pages/BlogArticle'));
@@ -211,14 +215,14 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/chat/nova', element: <NovaProvider><NovaChat /></NovaProvider> }, // NOVAPROV-001
     { path: '/chat/twin', element: <TwinChat /> },
     { path: '/twin', element: <LangRedirect to="/chat/twin" /> },
-    // TWINROUTE-001 (16 ก.ย. 2026): dedicated /twin-birth, /twin/:id and
-    // /twin/patterns pages were removed in the build-fix round (they had
-    // broken component props). Their functionality lives at /core-awakening,
-    // /twin-profile and /intelligence — add alias redirects so old deep links
-    // (and the audit's B06/B07/B08 items) resolve instead of 404ing.
-    { path: '/twin-birth', element: <LangRedirect to="/core-awakening" /> },
-    { path: '/twin/patterns', element: <LangRedirect to="/intelligence" /> },
-    { path: '/twin/:id', element: <LangRedirect to="/twin-profile" /> },
+    // Phase 4: TC-401 — real Twin Birth ceremony page (replaces old /core-awakening alias)
+    // CoreAwakening still exists for legacy /core-awakening route compatibility
+    { path: '/twin-birth', element: <TwinBirthPage /> },
+    // Legacy alias: /core-awakening still routes to CoreAwakening (original birth flow)
+    { path: '/core-awakening', element: <CoreAwakening /> },
+    // Phase 4: TC-401 — twin behavioral patterns analysis page
+    { path: '/twin/patterns', element: <ProtectedRoute><TwinPatternsPage /></ProtectedRoute> },
+    { path: '/twin/:id', element: <ProtectedRoute><TwinProfileDetailPage /></ProtectedRoute> },
     { path: '/dashboard', element: <Dashboard /> },
     { path: '/intelligence', element: <IntelligenceHub /> },
     { path: '/analysis', element: <AnalysisPage /> },

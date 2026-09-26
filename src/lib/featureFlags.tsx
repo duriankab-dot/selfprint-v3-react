@@ -67,6 +67,21 @@ const FLAGS = {
     ENV.VITE_FEATURE_UNIFIED_PIPELINE_ROLLOUT ?? '100',
   ),
   NO_ASTRO_LANG: ENV.VITE_FEATURE_NO_ASTRO_LANG !== 'false',
+  // Phase 4: Twin Birth flow — dedicated /twin-birth route replaces alias
+  TWIN_BIRTH: rolloutEnabled(
+    ENV.VITE_FEATURE_TWIN_BIRTH,
+    ENV.VITE_FEATURE_TWIN_BIRTH_ROLLOUT ?? '100',
+  ),
+  // Phase 4: Decision Intelligence — compare/export with AI insight SLA
+  DECISION_INTELLIGENCE: rolloutEnabled(
+    ENV.VITE_FEATURE_DECISION_INTELLIGENCE,
+    ENV.VITE_FEATURE_DECISION_INTELLIGENCE_ROLLOUT ?? '100',
+  ),
+  // Phase 4: Worlds v2 — visual tiles + detail with Twin integration
+  WORLDS_V2: rolloutEnabled(
+    ENV.VITE_FEATURE_WORLDS_V2,
+    ENV.VITE_FEATURE_WORLDS_V2_ROLLOUT ?? '100',
+  ),
 } as const;
 
 export type FeatureFlagName = keyof typeof FLAGS;

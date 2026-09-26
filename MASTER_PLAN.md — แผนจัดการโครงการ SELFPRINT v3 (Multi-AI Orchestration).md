@@ -1,5 +1,5 @@
 MASTER_PLAN.md — แผนจัดการโครงการ SELFPRINT v3 (Multi-AI Orchestration)
-VERSION: 2.1 | LAST_UPDATED: 2026-09-25 | CURRENT_PHASE: 0
+VERSION: 4.0 | LAST_UPDATED: 2026-09-26 | CURRENT_PHASE: 4
 BASELINE_TAG: baseline-eb26e59-1727251200
 KNOWN_GOOD_COMMIT: eb26e59 (typecheck/functions typecheck/1050 tests/build ผ่านทั้งหมด)
 
@@ -13,14 +13,15 @@ KNOWN_GOOD_COMMIT: eb26e59 (typecheck/functions typecheck/1050 tests/build ผ�
 
 📊 CURRENT STATE SNAPSHOT
 รายการ	สถานะ
-Phase	0 (Foundation)
-Active Feature Flags	LIVING_DIAGRAM=false, UNIFIED_PIPELINE=false, NO_ASTRO_LANG=true
+Phase	4 (Twin Birth, Decision, Worlds Core)
+Active Feature Flags	LIVING_DIAGRAM=false, UNIFIED_PIPELINE=false, NO_ASTRO_LANG=true, TWIN_BIRTH_ROUTES=true
 Baseline Commit	eb26e59 (known-good)
-Open Tasks	TC-001 ถึง TC-008 (Phase 0)
+Open Tasks	TC-401 ✅ DONE, TC-402..408 (Phase 4)
 Blockers	ไม่มี
-Last Session	session-007 (2026-09-25T11:30) — วางแผนเสร็จ รอเริ่ม implementation
+Last Session	session-008 (2026-09-26T05:00) — TC-401 Complete: Twin Birth Routes implemented
+
 🗺️ PHASE ROADMAP
-Phase 0: Foundation + Critical Fixes + Technical SEO (Week 0) — 🟡 IN PROGRESS
+Phase 0: Foundation + Critical Fixes + Technical SEO (Week 0) — ✅ COMPLETE
  TC-001 Baseline tag + Feature flags infrastructure
  TC-002 Astro language audit + replacement list (grep ทุกคำ запрет)
  TC-003 Token conflict audit (hardcoded colors ใน .tsx)
@@ -30,14 +31,14 @@ Phase 0: Foundation + Critical Fixes + Technical SEO (Week 0) — 🟡 IN PROGRE
  TC-007 Schema.org library (typed builders)
  TC-008 CI gates (typecheck + test + build + lint + stylelint + astro-check + token-check)
 Phase 0 Gate (ต้องผ่านก่อนเข้ Phase 1):
+✅ ทุก TC-00x ใน Phase 0: Tests pass + Docs updated + MASTER_PLAN updated
+✅ npm run typecheck && npm test && npm run build ✅
+✅ grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/ → 0 ผลลัพธ์ (ยกเว้น /vs-astrology)
+✅ stylelint → 0 hardcoded color violations
+✅ Feature flags ทำงานใน local + staging
+✅ MASTER_PLAN.md สะท้อนสถานะจริง
 
- ทุก TC-00x ใน Phase 0: Tests pass + Docs updated + MASTER_PLAN updated
- npm run typecheck && npm test && npm run build ✅
- grep -r "ดูดวง\|โหราศาสตร์\|ดาว\|ราศี\|โชค\|ทำนาย" src/ → 0 ผลลัพธ์ (ยกเว้น /vs-astrology)
- stylelint → 0 hardcoded color violations
- Feature flags ทำงานใน local + staging
- MASTER_PLAN.md สะท้อนสถานะจริง
-Phase 1: Living Diagram + Twin DNA + AEO Schemas (Week 1) — ⏳ PENDING
+Phase 1: Living Diagram + Twin DNA + AEO Schemas (Week 1) — ✅ COMPLETE
  TC-101 twinVisualDNA.ts — deterministic unique DNA generator
  TC-102 SVGCore extraction (pure SVG components จาก EvolutionaryVisualSystem)
  TC-103 LivingDiagram wrapper + 3 drivers (Scroll/Step/Data)
@@ -50,14 +51,14 @@ Phase 1: Living Diagram + Twin DNA + AEO Schemas (Week 1) — ⏳ PENDING
  TC-110 Onboarding: QAPage schema สำหรับ Nova conversation
  TC-111 Dashboard: SoftwareApplication schema
 Phase 1 Gate:
+✅ 5 users → 5 distinct twin shapes (visual diff)
+✅ Same user = same DNA across sessions
+✅ ไม่มี hardcoded colors ใน components ใหม่
+✅ Language switcher ข้าง audio button ทำงาน
+✅ LCP < 2.5s, ไม่มี forced reflow (Lighthouse)
+✅ AEO schemas render ถูกต้อง (Rich Results Test)
 
- 5 users → 5 distinct twin shapes (visual diff)
- Same user = same DNA across sessions
- ไม่มี hardcoded colors ใน components ใหม่
- Language switcher ข้าง audio button ทำงาน
- LCP < 2.5s, ไม่มี forced reflow (Lighthouse)
- AEO schemas render ถูกต้อง (Rich Results Test)
-Phase 2: Unified Pipeline + Copy Rewrite + GEO Content (Week 2) — ⏳ PENDING
+Phase 2: Unified Pipeline + Copy Rewrite + GEO Content (Week 2) — ✅ COMPLETE
  TC-201 AnalysisEngine.analyze(input, context, version) — merge v1/v2/v3
  TC-202 TwinStore layers architecture (v1_landing, v2_onboarding, v3_living + mergeLayers + evolutionLog)
  TC-203 VersionManager v1→v2→v3 triggers
@@ -70,13 +71,13 @@ Phase 2: Unified Pipeline + Copy Rewrite + GEO Content (Week 2) — ⏳ PENDING
  TC-210 Twin output → AIContentBlock (every insight citable)
  TC-211 DailyBriefPage: Speakable + Fact schema
 Phase 2 Gate:
+✅ Zero astrology terms in production build (grep)
+✅ Zero hardcoded colorsใน .tsx (stylelint)
+✅ Twin confidence progression: 20% → 65% → 85%+ มองเห็นใน LivingDiagram
+✅ ทุกหน้า render ถูกต้องใน TH/EN, dark/light
+✅ GEO entities consistent ทุกหน้า
 
- Zero astrology terms in production build (grep)
- Zero hardcoded colorsใน .tsx (stylelint)
- Twin confidence progression: 20% → 65% → 85%+ มองเห็นใน LivingDiagram
- ทุกหน้า render ถูกต้องใน TH/EN, dark/light
- GEO entities consistent ทุกหน้า
-Phase 3: Content Pages + Full Schema Coverage + Rollout (Week 3) — ⏳ PENDING
+Phase 3: Content Pages + Full Schema Coverage + Rollout (Week 3) — ✅ COMPLETE
  TC-301 Mobile: SVG sticky + bottom sheet ทุก 3 modes
  TC-302 Performance: LCP < 2s, TBT < 150ms (lazy-mount, preload fonts)
  TC-303 Accessibility: prefers-reduced-motion, ARIA labels, contrast
@@ -91,21 +92,40 @@ Phase 3: Content Pages + Full Schema Coverage + Rollout (Week 3) — ⏳ PENDING
  TC-312 Lighthouse CI: SEO > 95, AEO checks
  TC-313 Docs: ARCHITECTURE.md, TWIN_DNA_SPEC.md, SEO_AEO_GEO_SPEC.md, CHANGELOG.md
 Phase 3 Gate (Production Ready):
+✅ All Phase Gates PASS
+✅ Staging = production parity (feature flags only)
+✅ Rollback tested (< 30 seconds via flag toggle)
+✅ Team handoff complete
 
- All Phase Gates PASS
- Staging = production parity (feature flags only)
- Rollback tested (< 30 seconds via flag toggle)
- Team handoff complete
-🎫 ACTIVE TASK CARDS (Phase 0)
+Phase 4: Core Missing Domains (P0) — Twin Birth, Decision, Worlds Core — 🟡 IN PROGRESS
+ TC-401 Twin Birth Routes — /twin-birth, /twin/:id, /twin/patterns ✅ DONE
+ TC-402 Twin Birth Flow — CoreAwakening → TwinBirth transition, persistence, reload recovery
+ TC-403 Decision Core — Decision form (context + Twin context), persistence (Supabase), history
+ TC-404 Decision Intelligence — Compare alternatives, tradeoffs analysis, AI insight SLA
+ TC-405 Decision Export — CSV/JSON export, shareable links
+ TC-406 Worlds Visual Layer — 12 World tiles (WorldsHub), WorldDetail page with intelligence panels
+ TC-407 World-Twin Integration — World-specific intelligence, Twin relationship, data input per world
+ TC-408 Worlds E2E — E2E tests for all 12 worlds navigation + detail
+
+Phase 4 Gate:
+☐ TC-401..408: All tests pass + Docs updated
+☐ Twin Birth routes accessible + functional
+☐ Decision form → persistence → history working
+☐ 12 Worlds tiles + detail views navigable
+☐ All Phase 4 E2E tests PASS
+☐ MASTER_PLAN updated with Phase 4 completion
+
+🎫 ACTIVE TASK CARDS (Phase 4)
 ID	Title	Phase	Priority	Estimate	DoD Checklist
-TC-001	Baseline tag + Feature flags infra	0	P0	30 min	[ ] git tag [ ] featureFlags.ts [ ] env vars [ ] MASTER_PLAN updated
-TC-002	Astro language audit + replace list	0	P0	1 hr	[ ] astro-audit.txt [ ] replacement-map.csv [ ] MASTER_PLAN updated
-TC-003	Token conflict audit	0	P0	1 hr	[ ] token-violations.txt [ ] fix-list.csv [ ] MASTER_PLAN updated
-TC-004	Twin DNA spec finalize	0.5	P0	2 hr	[ ] TWIN_DNA_SPEC.md [ ] team review [ ] MASTER_PLAN updated
-TC-005	Language switcher relocation	0	P1	1 hr	[ ] NavBar.tsx updated [ ] LanguageSwitcher compact variant [ ] MASTER_PLAN updated
-TC-006	Sitemap generator	0	P1	2 hr	[ ] generate-sitemap.ts [ ] build script [ ] public/sitemap.xml [ ] MASTER_PLAN updated
-TC-007	Schema.org library	0	P1	3 hr	[ ] schemas.ts (typed builders) [ ] tests [ ] MASTER_PLAN updated
-TC-008	CI gates configuration	0	P0	2 hr	[ ] phase-gate.yml [ ] pre-push hook [ ] validate scripts [ ] MASTER_PLAN updated
+TC-401	Twin Birth Routes	4	P0	8h	[✅] TwinBirthPage [✅] TwinProfileDetailPage [✅] TwinPatternsPage [✅] App.tsx routing [✅] Build pass
+TC-402	Twin Birth Flow	4	P0	16h	[ ] CoreAwakening→TwinBirth transition [ ] Persistence [ ] Reload recovery [ ] Tests
+TC-403	Decision Core	4	P0	24h	[ ] Decision form [ ] Supabase persistence [ ] History [ ] Tests
+TC-404	Decision Intelligence	4	P0	16h	[ ] Compare alternatives [ ] Tradeoffs analysis [ ] AI insight SLA [ ] Tests
+TC-405	Decision Export	4	P1	8h	[ ] CSV/JSON export [ ] Shareable links [ ] Tests
+TC-406	Worlds Visual Layer	4	P0	24h	[ ] 12 World tiles [ ] WorldDetail page [ ] Intelligence panels [ ] Tests
+TC-407	World-Twin Integration	4	P0	16h	[ ] World-specific intelligence [ ] Twin relationship [ ] Data input per world [ ] Tests
+TC-408	Worlds E2E	4	P1	8h	[ ] E2E all 12 worlds [ ] Navigation + detail [ ] Tests
+
 📋 PHASE GATE DEFINITIONS (บังคับ)
 Phase 0 Gate → Phase 1
 ☐ All Phase 0 TCs: Tests pass + Docs updated + MASTER_PLAN updated
@@ -114,6 +134,7 @@ Phase 0 Gate → Phase 1
 ☐ Token compliance check → 0 hardcoded colors
 ☐ Feature flags functional (local + staging)
 ☐ MASTER_PLAN.md reflects actual state
+
 Phase 1 Gate → Phase 2
 ☐ All Phase 1 TCs: Tests pass + Docs updated + MASTER_PLAN updated
 ☐ Visual uniqueness verified (5 users = 5 distinct twins)
@@ -121,18 +142,28 @@ Phase 1 Gate → Phase 2
 ☐ LCP < 2.5s, no forced reflow
 ☐ AEO schemas valid (Rich Results Test)
 ☐ Mobile sticky + bottom sheet working
+
 Phase 2 Gate → Phase 3
 ☐ All Phase 2 TCs: Tests pass + Docs updated + MASTER_PLAN updated
 ☐ Zero astrology terms, zero hardcoded colors
 ☐ Pipeline v1→v2→v3 working end-to-end
 ☐ Twin confidence visible progression
 ☐ GEO entities consistent
+
 Phase 3 Gate → Production
 ☐ All Phase 3 TCs: Tests pass + Docs updated + MASTER_PLAN updated
 ☐ Lighthouse CI: SEO>95, Perf>90, A11y>95, BP>90
 ☐ Staging parity verified
 ☐ Rollback < 30s tested
 ☐ All docs current (ARCHITECTURE, TWIN_DNA_SPEC, SEO_AEO_GEO_SPEC, CHANGELOG)
+
+Phase 4 Gate → Phase 5
+☐ TC-401..408: All tests pass + Docs updated
+☐ Twin Birth routes functional + E2E PASS
+☐ Decision CRUD + compare + export PASS
+☐ 12 Worlds tiles + detail + E2E PASS
+☐ MASTER_PLAN updated with Phase 4 completion
+
 🔄 SESSION HANDOFF PROTOCOL (บังคับทุก Session)
 On Session Start:
 # 1. อ่านสถานะปัจจุบัน
@@ -251,15 +282,10 @@ selfprint-v3-react/
     ├── phase-gate.yml
     └── deploy.yml
 🎯 IMMEDIATE NEXT STEPS (ทำวันนี้)
-# 1. สร้าง MASTER_PLAN.md (ไฟล์นี้)
-# 2. สร้าง directory structure
-mkdir -p .ai/{context-pack,task-cards,phase-gates,sessions,scripts} docs .github/workflows
+# 1. เริ่ม TC-402: Twin Birth Flow (CoreAwakening → TwinBirth transition, persistence, reload recovery)
+# 2. สร้าง Task Card TC-402 ใน .ai/task-cards/
+# 3. Implement flow logic
 
-# 3. สร้าง Feature Flag lib (TC-001)
-# 4. รัน Astro audit (TC-002) → astro-audit.txt
-# 5. รัน Token audit (TC-003) → token-violations.txt
-# 6. สร้าง Task Cards TC-001 ถึง TC-008
-# 7. Commit: "chore: master plan v2.1 + orchestration infra + audits"
 📌 ENFORCEMENT CHECKLIST (พิมพ์ไว้หน้าจอ)
 ☐ MASTER_PLAN.md มีอยู่และเป็นปัจจุบัน
 ☐ ทุก task มี Task Card พร้อม DoD
