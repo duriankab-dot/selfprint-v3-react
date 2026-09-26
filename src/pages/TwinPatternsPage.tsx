@@ -250,7 +250,7 @@ export default function TwinPatternsPage() {
           <div className="prose dark:prose-invert max-w-none text-gray-600 dark:text-gray-400">
             <p>
               {isTh
-                ? 'Behavioral Patterns คือรูปแบบพฤติกรรมที่ Twin เรียนรู้จากข้อมูลจริงของคุณ — ไม่ใช่การทำนายหรือดูดวง แต่เป็นการวิเคราะห์จากการตัดสินใจ การกระทำ และผลลัพธ์จริงในแต่ละโลกแห่งชีวิต 12 มิติ'
+                ? 'Behavioral Patterns คือรูปแบบพฤติกรรมที่ Twin เรียนรู้จากข้อมูลจริงของคุณ — ไม่ใช่การคาดเดาอนาคตหรือศิลปะลึกลับ แต่เป็นการวิเคราะห์จากข้อตัดสินใจ การกระทำ และผลลัพธ์จริงในแต่ละโลกแห่งชีวิต 12 มิติ'
                 : 'Behavioral Patterns are patterns Twin learns from your real data — not predictions or astrology, but analysis from your actual decisions, actions, and outcomes across 12 Worlds of Life.'}
             </p>
             <ul className="list-disc list-inside mt-4 space-y-2">
