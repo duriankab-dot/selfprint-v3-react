@@ -24,7 +24,7 @@ test.describe('Core Web Vitals', () => {
     { url: '/th/blog', name: 'Blog List', lcpThreshold: 2500 },
   ];
 
-  for (const pageConfig of pages) {
+  pages.forEach((pageConfig) => {
     test(`${pageConfig.name}: LCP < ${pageConfig.lcpThreshold}ms`, async ({ page }) => {
       await page.goto(pageConfig.url);
       
