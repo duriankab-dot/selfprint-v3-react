@@ -1027,18 +1027,23 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
           </div>
         </section>
 
-        {/* ════════════════════════════════════════════════════════════ */}
-        {/* POST-SCREEN SECTIONS — Visible after birth data submission   */}
+{/* ═══════════════════════════════════════════════════════════ */}
+        {/* POST-SCREEN SECTIONS — Birth data input FIRST, then results */}
         {/* Layout order:                                                */}
-        {/*   [1] TodayBioEnvironmentReport  (first hook / daily refresh)*/}
-        {/*   [2] IntroSummary               (3-paragraph identity article)*/}
-        {/*   [3] QuickSummary               (6-section card + social share)*/}
-        {/*   [4] BirthDataInput             (Quick Input DOB form)       */}
-        {/* ════════════════════════════════════════════════════════════ */}
+        {/*   [1] BirthDataInput             (Quick Input DOB form)       */}
+        {/*   [2] TodayBioEnvironmentReport  (first hook / daily refresh)*/}
+        {/*   [3] IntroSummary               (3-paragraph identity article)*/}
+        {/*   [4] QuickSummary               (6-section card + social share)*/}
+        {/* ═══════════════════════════════════════════════════════════ */}
         <div style={{ maxWidth: '720px', margin: '0 auto', padding: 'clamp(32px, 5vw, 64px) clamp(16px, 3vw, 32px)' }}>
-          {/* TodayBioEnvironmentReport — placed FIRST as the "first hook" */}
+          {/* BirthDataInput — Quick Input DOB first (always visible) */}
+          <BirthDataInput
+            onComplete={(dob: string) => handleBirthDataSubmit(dob)}
+          />
+
+          {/* Analysis Results — appear BELOW the input after DOB submission */}
           {submittedDob && landingDisciplines && landingAnalysis && (
-            <>
+            <div style={{ marginTop: '40px' }}>
               <TodayBioEnvironmentReport
                 birthDate={submittedDob}
                 compact
@@ -1049,16 +1054,9 @@ export default function LandingPage({ onStartOnboarding }: LandingPageProps) {
                 analysis={landingAnalysis}
                 birthDate={submittedDob}
               />
-            </>
-          )}
-
-          {/* BirthDataInput — Quick Input DOB at bottom */}
-            <div style={{ marginTop: '40px' }}>
-              <BirthDataInput
-                onComplete={(dob: string) => handleBirthDataSubmit(dob)}
-              />
             </div>
-          </div>
+          )}
+        </div>
 
           {/* Footer — restored (R-01) */}
           <Footer />
