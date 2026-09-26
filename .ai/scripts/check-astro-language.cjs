@@ -15,6 +15,7 @@ const ALLOWED_PATTERNS = [
   'constants/seoMetadata',
   'constants/worlds',
   'lib/ArchetypeScoreEngine',
+  'lib/aeoSchemas',
   'lib/astrovera-adapter',
   'lib/intelligence',
   'services/CoreAwakeningService',
