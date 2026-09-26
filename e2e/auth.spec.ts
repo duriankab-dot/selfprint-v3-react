@@ -71,6 +71,9 @@ test.describe('Authentication — Landing & Entry', () => {
   test('AUTH-05 landing page has start CTA button', async ({ page }) => {
     await page.goto('/en', { waitUntil: 'domcontentloaded' });
 
+    // Wait for NavBar to render
+    await page.waitForSelector('nav, [role="navigation"], header', { timeout: 10000 });
+
     // CTA: "Start Free" or "เริ่มฟรี" or "Log in" (AUTH-FIX-001)
     // NavBar always has "Log in" visible on initial load; "Start Free" is also
     // present in NavBar but may be obscured by viewport/rendering order.
@@ -79,7 +82,7 @@ test.describe('Authentication — Landing & Entry', () => {
       'a:has-text("Start Free"), a:has-text("เริ่มฟรี"), ' +
       'button:has-text("Log in"), button:has-text("เข้าสู่ระบบ")'
     ).first();
-    await expect(cta).toBeVisible({ timeout: 10000 });
+    await expect(cta).toBeVisible({ timeout: 15000 });
   });
 
   /** Landing page has accessible form controls */

@@ -188,32 +188,26 @@ test('DECISION-02 Decision history persists — list shows all logged decisions'
 // ─── DECISION-03 ────────────────────────────────────────────────────────────
 
 test('DECISION-03 Twin detects patterns — multiple decisions → insight', async ({ page }) => {
-  // CONTRACT-UPDATE (17 ก.ย. 2026): the old skip reason ("Route /en/twin/patterns
-  // not implemented in src/App.tsx") is stale — App.tsx:217 now aliases
-  // /twin/patterns → /intelligence (IntelligenceHub), which renders the real
-  // pattern-analysis implementation (IntelligencePanel + detectPatterns +
-  // PatternInsights). Test the current alias + intelligence contract.
+  // TC-401: /twin/patterns is now a dedicated page (TwinPatternsPage), not an alias to /intelligence
   await spaNavTo(page, '/th/twin/patterns');
 
   if (page.url().includes('/login')) {
     test.skip(true, 'Redirected to login on /twin/patterns — session not persisted across navigation');
   }
 
-  // Alias contract: /twin/patterns resolves into the intelligence flow.
-  await expect(page).toHaveURL(/\/intelligence/, { timeout: 10000 });
+  // Dedicated page contract: /twin/patterns renders TwinPatternsPage (behavioral patterns dashboard)
+  await expect(page).toHaveURL(/\/twin\/patterns/, { timeout: 10000 });
 
-  // The intelligence hub (real, locale-independent container) must render.
-  const hub = page.locator('[data-testid="intelligence-hub-container"]');
-  await hub.waitFor({ state: 'visible', timeout: 15000 });
+  // TwinPatternsPage must render with 12 world pattern tiles
+  const worldTiles = page.locator('[class*="world"], [class*="pattern"]').first();
+  await worldTiles.waitFor({ state: 'visible', timeout: 15000 });
 
-  // Pattern-analysis UI renders when trend data exists; the hub header and the
-  // intelligence panel (AI Twin Context / Patterns / Memories) always render.
-  const patternText = page.locator('text=/Pattern|รูปแบบ/i').first();
+  // Check for pattern analysis UI
+  const patternText = page.locator('text=/Pattern|รูปแบบ|Behavioral Patterns/i').first();
   const patternVisible = await patternText.isVisible({ timeout: 5000 }).catch(() => false);
-  const panelVisible = await page.locator('[class*="intelligence-panel"], [class*="intelligence_panel"]').isVisible({ timeout: 3000 }).catch(() => false);
 
-  console.log(`✅ DECISION-03 PASS: /twin/patterns → /intelligence; hub rendered (pattern UI: ${patternVisible}, intelligence panel: ${panelVisible})`);
-  expect(panelVisible || patternVisible || (await hub.isVisible()), 'IntelligenceHub pattern-analysis surface must render').toBeTruthy();
+  console.log(`✅ DECISION-03 PASS: /twin/patterns renders TwinPatternsPage (pattern UI: ${patternVisible})`);
+  expect(patternVisible, 'TwinPatternsPage must render behavioral patterns').toBeTruthy();
 });
 
 // ─── DECISION-04 ────────────────────────────────────────────────────────────

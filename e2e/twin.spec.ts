@@ -127,19 +127,15 @@ test('TWIN-01 Twin creation journey — Nova entry continues into the live Twin 
 });
 
 test('TWIN-02 Birth experience — HologramBirth renders and animates', async ({ page }) => {
-  // CONTRACT-UPDATE (17 ก.ย. 2026): old premise "Route /en/twin-birth not
-  // implemented" is stale — App.tsx:216 aliases /twin-birth → /core-awakening,
-  // whose intro CTA ("Watch the awakening") triggers the <Twin variant="birth">
-  // phase (HologramBirth canvas). FPS is measured with requestAnimationFrame,
-  // not claimed.
+  // TC-401: /twin-birth is now a dedicated page (TwinBirthPage), not an alias to /core-awakening
   await spaNavTo(page, '/th/twin-birth');
 
   if (page.url().includes('/login')) {
     test.skip(true, 'Redirected to login on /twin-birth — session not persisted across navigation');
   }
 
-  // Alias contract: /twin-birth resolves into the Core Awakening birth page.
-  await expect(page).toHaveURL(/\/core-awakening/, { timeout: 10000 });
+  // Dedicated page contract: /twin-birth renders TwinBirthPage (Core Awakening ceremony)
+  await expect(page).toHaveURL(/\/twin-birth/, { timeout: 10000 });
 
   const introHeading = page.locator('h1');
   await introHeading.waitFor({ state: 'visible', timeout: 10000 });
@@ -176,11 +172,7 @@ test('TWIN-02 Birth experience — HologramBirth renders and animates', async ({
 });
 
 test('TWIN-03 Twin persists in DB — profile route loads the same Twin', async ({ page }) => {
-  // CONTRACT-UPDATE (17 ก.ย. 2026): old premise "/en/twin/:id and /api/twins
-  // POST not implemented" is partially stale — App.tsx:218 aliases /twin/:id →
-  // /twin-profile, which loads the authenticated Twin's persisted record
-  // (avatar upload, knowledge, stats). The /api/twins POST endpoint is
-  // genuinely absent and is NOT asserted here.
+  // TC-401: /twin/:id is now a dedicated page (TwinProfileDetailPage), not an alias to /twin-profile
   const twinId = '9cc73c11-8861-499d-91c8-8f127aab51cb';
   await spaNavTo(page, `/th/twin/${twinId}`);
 
@@ -188,22 +180,21 @@ test('TWIN-03 Twin persists in DB — profile route loads the same Twin', async 
     test.skip(true, 'Redirected to login on /twin/:id — session not persisted across navigation');
   }
 
-  // Alias contract: /twin/:id resolves into the Twin Profile page.
-  await expect(page).toHaveURL(/\/twin-profile/, { timeout: 10000 });
+  // Dedicated page contract: /twin/:id renders TwinProfileDetailPage
+  await expect(page).toHaveURL(new RegExp(`/twin/${twinId}`), { timeout: 10000 });
 
-  const profileTitle = page.locator('.twin-profile__title');
+  const profileTitle = page.locator('h2, .twin-profile__title').first();
   await profileTitle.waitFor({ state: 'visible', timeout: 12000 });
 
   // Persistence contract: the profile renders sections backed by the stored
-  // Twin record (file input = avatar persistence surface; section titles =
-  // knowledge/stats data render).
+  // Twin record (avatar, knowledge, stats).
   const fileInput = page.locator('input[type="file"]');
   const inputCount = await fileInput.count();
-  const sectionCount = await page.locator('.section-title').count();
+  const sectionCount = await page.locator('h3, .section-title').count();
 
   expect(inputCount, 'Twin profile avatar persistence surface must render').toBeGreaterThanOrEqual(1);
   expect(sectionCount, 'Twin profile must render its stored-data sections').toBeGreaterThanOrEqual(1);
-  console.log(`✅ TWIN-03 PASS: /twin/:id → /twin-profile; Twin profile loaded (avatar input: ${inputCount}, data sections: ${sectionCount})`);
+  console.log(`✅ TWIN-03 PASS: /twin/${twinId} renders TwinProfileDetailPage (avatar input: ${inputCount}, data sections: ${sectionCount})`);
 });
 
 test('TWIN-04 Twin learns from decisions — decision → Twin insight', async ({ page }) => {
