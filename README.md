@@ -13,11 +13,11 @@
 | Typecheck (app) | ✅ PASS | `npm run typecheck` (`tsc -b`) — 0 errors |
 | Typecheck (functions) | ✅ PASS | `npm run typecheck:functions` — ผ่าน 19 ก.ย. 2026 หลังเปลี่ยน tsconfig.functions.json เป็น `module esnext + moduleResolution bundler + moduleDetection force` (tooling-only fix; runtime ถูก build ด้วย esbuild/bundler semantics บน CF Pages อยู่แล้ว) |
 | Lint | ✅ PASS | `npm run lint` (oxlint) — exit 0 (warnings only) |
-| Unit / Integration Tests | ✅ PASS | `npm test` — **1050/1050** (67 files) |
+| Unit / Integration Tests | ✅ PASS | `npm test` — **1102/1102** (67–72 files) |
 | E2E Phase B staging (final) | ✅ 95 / 0 / 5 | full suite (Phase A + B, 100 tests) แบบ CI-parity: workers=1 + retries=1 vs selfprint-staging.pages.dev (20 ก.ย. 2026 19:04 ICT) — 0 FAIL · 0 flaky |
 | E2E Phase A production | ✅ 51/51 | `--project=chromium` + mobile vs selfprint.one (20 ก.ย. 2026 re-verified: chromium 27/27) |
 | Master Gate | ✅ **CLOSED** | 38 PASS / 0 FAIL / 11 SKIP — policy-valid inventory |
-| CI (GitHub Actions) | ✅ **GREEN — run #411 (e730cd7, 22 ก.ย. 2026)** | Unit 1050/1050 · Deploy Staging success · E2E Tests success · Report success. Pipeline: push master → `deploy-staging` (build exact commit ด้วย `VITE_SUPABASE_*` จาก secrets → `wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash=$SHA`) → `e2e-tests` (`needs: deploy-staging` — ไม่เริ่มก่อน deploy ของ commit เดียวกันสำเร็จ). History: #406 STAGING_URL fix (20 ก.ย.) · #409/รุ่น #411 staging 17-FAIL root cause = CI build ไม่มี VITE env (CI-BUILD-ENV-001 → แก้ใน `e730cd7`) · **Runtime:** project Node 22 (`node-version: '22'`) · GitHub Actions runtime node24 native (bump v4→v5/v6/v7 ในรอบ maintenance นี้) · **Annotation:** ยังเหลือ warning "Node.js 20 is deprecated" ของ actions v4 (เป็น deprecation warning ไม่ใช่ test failure; กำลังแก้ด้วย bump action major version) + notice ubuntu-latest → Ubuntu 26 (ไม่แตะรอบนี้) + Slack `exit code 3` failure annotation (known behavior ตาม `.github/secrets-setup.md`) |
+| CI (GitHub Actions) | ✅ **GREEN — run #411 (e730cd7, 22 ก.ย. 2026)** | Unit 1102/1102 · Deploy Staging success · E2E Tests success · Report success. Pipeline: push master → `deploy-staging` (build exact commit ด้วย `VITE_SUPABASE_*` จาก secrets → `wrangler@4.131.2 pages deploy dist --project-name selfprint-staging --commit-hash=$SHA`) → `e2e-tests` (`needs: deploy-staging` — ไม่เริ่มก่อน deploy ของ commit เดียวกันสำเร็จ). History: #406 STAGING_URL fix (20 ก.ย.) · #409/รุ่น #411 staging 17-FAIL root cause = CI build ไม่มี VITE env (CI-BUILD-ENV-001 → แก้ใน `e730cd7`) · **Runtime:** project Node 22 (`node-version: '22'`) · GitHub Actions runtime node24 native (bump v4→v5/v6/v7 ในรอบ maintenance นี้) · **Annotation:** ยังเหลือ warning "Node.js 20 is deprecated" ของ actions v4 (เป็น deprecation warning ไม่ใช่ test failure; กำลังแก้ด้วย bump action major version) + notice ubuntu-latest → Ubuntu 26 (ไม่แตะรอบนี้) + Slack `exit code 3` failure annotation (known behavior ตาม `.github/secrets-setup.md`) |
 | Supabase migrations | ✅ 35 files | ล่าสุด `040_create_user_lifecycle_table.sql` |
 
 > **Master Gate ≠ product-completeness.** ตัวเลข Master Gate เป็น test metric แยกต่างหาก
@@ -51,7 +51,7 @@ Onboarding → SICE blueprint → Core Awakening (birth ceremony)
 ```text
 React 19 + TypeScript (strict) · Vite · Tailwind v4 · react-router v7
 Supabase (Postgres + Auth + Storage) · Cloudflare Pages Functions
-OpenRouter (AI model routing, cost-aware: qwen → deepseek → claude fallback)
+OpenRouter (AI model routing, cost-aware: nemotron → qwen → deepseek fallback; claude explicitly forbidden per MODEL-SWITCH-001)
 Zustand · TanStack React Query · three.js 0.186.0 (HIGH fidelity renderer)
 PWA (vite-plugin-pwa, injectManifest) · Playwright E2E · Vitest unit
 ```
@@ -109,7 +109,7 @@ Cloudflare Pages Functions (จาก current code — `functions/api/`):
 | Endpoint group | Handler | Note |
 |----------------|---------|------|
 | `/api/*` (module routes) | `[[route]].ts` → `api/unified-handler.ts` | KNOWN_MODULES: `notifications` `twin-evolution` `sice` `stripe` `profile` `blueprint` + exact `/api/share` |
-| `/api/twin` | `functions/api/twin.ts` | Twin chat (Claude/OpenRouter, world-aware) |
+| `/api/twin` | `functions/api/twin.ts` | Twin chat (OpenRouter with nemotron/qwen/deepseek chain, world-aware) |
 | `/api/twin-stream` | `functions/api/twin-stream.ts` | streaming |
 | `/api/nova` | `functions/api/nova.ts` | Nova chat |
 | `/api/nova-stream` | `functions/api/nova-stream.ts` | streaming |
@@ -195,7 +195,7 @@ Reference: `docs/DATABASE_SCHEMA_TH.md` · `MIGRATION_GUIDE.md` (root)
 
 | Suite | Command | Result (verified) |
 |-------|---------|-------------------|
-| Unit / Integration (Vitest) | `npm test` | **1050/1050** · 67 files |
+| Unit / Integration (Vitest) | `npm test` | **1102/1102** · 67–72 files |
 | E2E full (Playwright) | `npm run test:e2e` | multi-project (Phase A smoke + Phase B staging) |
 | E2E staging | `npm run test:e2e:staging` | requires `.env.e2e.staging` |
 | k6 load | `k6 run loadtests/…` | **manual only** (`workflow_dispatch`); staging PASS 792/792 checks (14 ก.ย. 2026) — ไม่ใช่ Master Gate criteria |
@@ -240,7 +240,7 @@ npm run dev                  # local dev (vite)
 npm run typecheck            # tsc -b
 npm run typecheck:functions  # PASS (19 ก.ย. 2026 — esnext/bundler)
 npm run lint                 # oxlint
-npm test                     # vitest 1050/1050
+npm test                     # vitest 1102/1102
 npm run build                # tsc -b && vite build
 npm run test:e2e             # playwright full
 npm run test:e2e:staging     # staging Phase B (ต้อง .env.e2e.staging)

@@ -23,7 +23,7 @@
 
 ```text
 Command : npm test
-Result  : 1050/1050 PASS · 67 files
+Result  : 1102/1102 PASS · 67–72 files
 Scope   : DecisionService · FollowUpScheduler · SICE engines · P0-B security ·
           P0-C observability · Phase E integration · TwinEvolution · Worlds ·
           nova-prompts · AIContext · E2E_CRITICAL_PATH (unit-level) ฯลฯ

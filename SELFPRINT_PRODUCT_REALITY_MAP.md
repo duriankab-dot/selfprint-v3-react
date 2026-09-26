@@ -15,11 +15,11 @@
 | Router | react-router-dom 7 (BrowserRouter, `/en` `/th` prefix) |
 | State | Zustand 5 + TanStack React Query |
 | Database | Supabase (`vkjwqrjflxztcctmyzgh` staging, ap-northeast-2) |
-| AI | OpenRouter (model router: qwen → deepseek → claude fallback) |
+| AI | OpenRouter (model router: nemotron → qwen → deepseek; claude explicitly forbidden per MODEL-SWITCH-001) |
 | Runtime | Cloudflare Pages + Pages Functions (nodejs_compat) |
 | Auth | Supabase Auth — OAuth Google/Apple · Magic Link · Passkey/WebAuthn |
 | Payments | Stripe (checkout · portal · webhook) |
-| Testing | Vitest (1050 unit) · Playwright (100 E2E, 5 projects) · k6 (manual) |
+| Testing | Vitest (1102/1102 unit) · Playwright (100 E2E, 5 projects) · k6 (manual) |
 | 3D | Three.js 0.186 (HIGH fidelity tier เท่านั้น) |
 | PWA | vite-plugin-pwa + injectManifest (src/sw.js) |
 
@@ -142,7 +142,7 @@ globalSetup = e2e/global-setup-combined.ts
   → auth test-phase-awakening (AWAKENING) → e2e/.auth/user-awakening.json
 Seed: scripts/seed-test-users.ts (TEST_USERS 7 ราย — stage: active×5, awakening×1, onboarding_voice×1)
 
-Vitest: 1050 tests / 67 files
+Vitest: 1102/1102 tests / 67–72 files
 k6: loadtests/ (manual workflow_dispatch)
 
 ⚠️ CI E2E gate = ไม่ STABLE (พิสูจน์แล้ว):

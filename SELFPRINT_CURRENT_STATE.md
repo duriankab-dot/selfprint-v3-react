@@ -76,7 +76,7 @@ npx playwright test --list → Total: 100 tests in 9 files
 | Mobile Safari              | 12    | smoke                                     |
 ```
 
-**Unit:** `npm test` = 1050/1050 (67 files) — อ้างอิงผล verified ล่าสุด
+**Unit:** `npm test` = 1102/1102 (67–72 files) — อ้างอิงผล verified ล่าสุด
 
 **MG-05-01 isolated run (23 ก.ย. 2026):**
 

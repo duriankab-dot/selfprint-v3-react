@@ -39,7 +39,7 @@ SELFPRINT ถือว่า **Product Complete** เมื่อครบทั
 PRODUCT IMPLEMENTATION : 36/36 core features implemented (ไม่มี 🔴 MISSING)
 MASTER GATE            : 12 tests — ทั้งหมดผ่านใน CI (MG-05-01 ใช้ fixture AWAKENING)
 E2E                    : 100 tests ใน 5 projects — ⚠️ GATE ไม่ STABLE (ผ่าน/พังสลับจาก flaky tests)
-UNIT                   : 1050/1050 (67 files)
+UNIT                   : 1102/1102 (67–72 files)
 CI                     : unit+deploy+report = ทำงานถูกต้องทุก run · E2E = FLAKY (รายละเอียด §4)
 DEPLOYMENT             : Staging = selfprint-staging.pages.dev (auto, --commit-hash) · Production = selfprint.one
 SECURITY               : RLS public.* ✅ · selfprint.* = service_role ผ่าน API (documented design)
