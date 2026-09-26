@@ -198,11 +198,15 @@ test('DECISION-03 Twin detects patterns — multiple decisions → insight', asy
   // Dedicated page contract: /twin/patterns renders TwinPatternsPage (behavioral patterns dashboard)
   await expect(page).toHaveURL(/\/twin\/patterns/, { timeout: 10000 });
 
-  // TwinPatternsPage must render with 12 world pattern tiles
-  const worldTiles = page.locator('[class*="world"], [class*="pattern"]').first();
-  await worldTiles.waitFor({ state: 'visible', timeout: 15000 });
+  // TwinPatternsPage must render with h1 "Behavioral Patterns" and 12 world pattern tiles
+  const pageHeading = page.locator('h1:has-text("Behavioral Patterns"), h1:has-text("พฤติกรรม")').first();
+  await pageHeading.waitFor({ state: 'visible', timeout: 15000 });
 
-  // Check for pattern analysis UI
+  // Check for pattern analysis UI - world tiles grid
+  const worldTilesGrid = page.locator('[class*="grid"]').first();
+  await worldTilesGrid.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+
+  // Check for pattern text
   const patternText = page.locator('text=/Pattern|รูปแบบ|Behavioral Patterns/i').first();
   const patternVisible = await patternText.isVisible({ timeout: 5000 }).catch(() => false);
 

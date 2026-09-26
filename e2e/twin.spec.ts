@@ -173,6 +173,7 @@ test('TWIN-02 Birth experience — HologramBirth renders and animates', async ({
 
 test('TWIN-03 Twin persists in DB — profile route loads the same Twin', async ({ page }) => {
   // TC-401: /twin/:id is now a dedicated page (TwinProfileDetailPage), not an alias to /twin-profile
+  // TwinProfileDetailPage is a display-only page (no avatar upload) — shows Twin DNA avatar, archetype, birth data
   const twinId = '9cc73c11-8861-499d-91c8-8f127aab51cb';
   await spaNavTo(page, `/th/twin/${twinId}`);
 
@@ -183,18 +184,27 @@ test('TWIN-03 Twin persists in DB — profile route loads the same Twin', async 
   // Dedicated page contract: /twin/:id renders TwinProfileDetailPage
   await expect(page).toHaveURL(new RegExp(`/twin/${twinId}`), { timeout: 10000 });
 
-  const profileTitle = page.locator('h2, .twin-profile__title').first();
+  // TwinProfileDetailPage renders h1 "Twin Profile" / "โปรไฟล์ Twin" and TwinDNAAvatar
+  const profileTitle = page.locator('h1:has-text("Twin Profile"), h1:has-text("โปรไฟล์ Twin")').first();
   await profileTitle.waitFor({ state: 'visible', timeout: 12000 });
 
-  // Persistence contract: the profile renders sections backed by the stored
-  // Twin record (avatar, knowledge, stats).
-  const fileInput = page.locator('input[type="file"]');
-  const inputCount = await fileInput.count();
-  const sectionCount = await page.locator('h3, .section-title').count();
+  // Check for Twin DNA avatar (SVG or canvas from TwinDNAAvatar component)
+  const dnaAvatar = page.locator('svg, canvas').first();
+  const avatarVisible = await dnaAvatar.isVisible({ timeout: 10000 }).catch(() => false);
 
-  expect(inputCount, 'Twin profile avatar persistence surface must render').toBeGreaterThanOrEqual(1);
-  expect(sectionCount, 'Twin profile must render its stored-data sections').toBeGreaterThanOrEqual(1);
-  console.log(`✅ TWIN-03 PASS: /twin/${twinId} renders TwinProfileDetailPage (avatar input: ${inputCount}, data sections: ${sectionCount})`);
+  // Check for archetype display (DNA & Archetype section)
+  const archetypeSection = page.locator('text=/DNA & Archetype|DNA.*Archetype/i').first();
+  const archetypeVisible = await archetypeSection.isVisible({ timeout: 10000 }).catch(() => false);
+
+  // Check for birth data section
+  const birthDataSection = page.locator('text=/ข้อมูลการเกิด|Birth Data/i').first();
+  const birthDataVisible = await birthDataSection.isVisible({ timeout: 10000 }).catch(() => false);
+
+  expect(avatarVisible, 'TwinProfileDetailPage must render Twin DNA avatar').toBeTruthy();
+  expect(archetypeVisible, 'TwinProfileDetailPage must render DNA & Archetype section').toBeTruthy();
+  expect(birthDataVisible, 'TwinProfileDetailPage must render Birth Data section').toBeTruthy();
+  
+  console.log(`✅ TWIN-03 PASS: /twin/${twinId} renders TwinProfileDetailPage (avatar: ${avatarVisible}, archetype: ${archetypeVisible}, birthData: ${birthDataVisible})`);
 });
 
 test('TWIN-04 Twin learns from decisions — decision → Twin insight', async ({ page }) => {
