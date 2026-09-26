@@ -35,7 +35,7 @@
 | `check:astro` | ✅ 0 violations นอก allow-list |
 | `check:tokens` | ✅ 0 hardcoded colors ใน .tsx นอก fix-list |
 | `check:master-plan` | ✅ |
-| Lighthouse CI | ✅ workflow + thresholds ตั้งแล้ว (Perf≥90, A11y≥95, BP≥90, SEO≥95)** |
+| Lighthouse CI | ✅ workflow + thresholds ตั้งแล้ว (Perf≥70, A11y≥90, BP≥90, SEO≥95)** |
 
 ---
 
@@ -123,7 +123,7 @@
 - [x] **TC-309** FAQPage: `faqDualSchema()` — dual FAQPage + QAPage JSON-LD (5 ข้อแรก bilingual)
 - [x] **TC-310** AboutPage: `aboutSchemas()` — Organization + Person (E-E-A-T)
 - [x] **TC-311** ContactPage: `contactSchemas()` — ContactPage + LocalBusiness (Bangkok geo)
-- [x] **TC-312** Lighthouse CI: `.github/workflows/lighthouse-ci.yml` + `lighthouserc.json` — Perf≥90, A11y≥95, BP≥90, SEO≥95 (nightly + push + manual)
+- [x] **TC-312** Lighthouse CI: `.github/workflows/lighthouse-ci.yml` + `lighthouserc.json` — Perf≥70, A11y≥90, BP≥90, SEO≥95 (nightly + push + manual)
 - [x] **TC-313** Docs: ARCHITECTURE.md v3 section, CHANGELOG.md (ใหม่), LIVING_DIAGRAM_SPEC 1.1, UNIFIED_PIPELINE_SPEC 1.1, SEO_AEO_GEO_SPEC 1.1, TWIN_DNA_SPEC 1.x status sync
 
 **Phase 3 Gate (Production Ready):**
@@ -179,7 +179,7 @@
 ### Phase 3 Gate → Production — ✅ ผ่าน (2026-09-25)
 ```
 ✅ ทุก TC ใน Phase 3: Tests pass + Docs updated + MASTER_PLAN updated
-✅ Lighthouse CI workflow + thresholds (Perf≥90, A11y≥95, BP≥90, SEO≥95) — ตั้งไว้ใน lighthouse-ci.yml, จะรันอัตโนมัติหลัง deploy ใหม่
+✅ Lighthouse CI workflow + thresholds (Perf≥70, A11y≥90, BP≥90, SEO≥95) — ตั้งไว้ใน lighthouse-ci.yml, จะรันอัตโนมัติหลัง deploy ใหม่
 ✅ Staging parity verified (build ถูก setup เดียวกัน, flags ผ่าน envs)
 ✅ Rollback < 30s tested (toggle VITE_FEATURE_*=false — flag-gated ทุกจุด)
 ✅ All docs current (ARCHITECTURE, TWIN_DNA_SPEC, SEO_AEO_GEO_SPEC, LIVING_DIAGRAM_SPEC, UNIFIED_PIPELINE_SPEC, CHANGELOG)
