@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getAllWorlds } from '../constants/worlds';
 import { supabase } from '../services/supabase-service';
 import { ProvenanceStrip } from '../components/story/ProvenanceStrip';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface WorldPattern {
   worldId: string;
@@ -18,6 +19,14 @@ interface WorldPattern {
 }
 
 export default function TwinPatternsPage() {
+  return (
+    <ErrorBoundary>
+      <TwinPatternsPageInner />
+    </ErrorBoundary>
+  );
+}
+
+function TwinPatternsPageInner() {
   const navigate = useNavigate();
   const { session } = useAuth();
   const { twin, loading: twinLoading } = useTwin();

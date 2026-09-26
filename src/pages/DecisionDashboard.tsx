@@ -18,9 +18,10 @@ import DecisionForm from '../components/features/DecisionForm';
 import { DecisionCompare } from '../components/features/DecisionCompare';
 import { AppShell } from '@/components/layout/AppShell';
 import { exportDecisionLogs } from '../services/supabase-service';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import '../styles/decision-dashboard.css';
 
-export default function DecisionDashboard() {
+function DecisionDashboardInner() {
   const { session } = useAuth();
   const { language } = useLanguage();
   const isTh = language === 'th';
@@ -264,5 +265,13 @@ export default function DecisionDashboard() {
         </div>
       </div>
     </AppShell>
+  );
+}
+
+export default function DecisionDashboard() {
+  return (
+    <ErrorBoundary>
+      <DecisionDashboardInner />
+    </ErrorBoundary>
   );
 }

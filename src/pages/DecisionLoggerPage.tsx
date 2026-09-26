@@ -13,13 +13,16 @@
 import React from 'react';
 import DecisionLogger from '@/components/features/DecisionLogger';
 import { AppShell } from '@/components/layout/AppShell';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import './decision-logger-page.css';
 
 export const DecisionLoggerPage: React.FC = () => {
   return (
     <AppShell>
       <main className="decision-logger-page page-content">
-        <DecisionLogger />
+        <ErrorBoundary>
+          <DecisionLogger />
+        </ErrorBoundary>
       </main>
     </AppShell>
   );
