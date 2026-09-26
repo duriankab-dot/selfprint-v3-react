@@ -23,7 +23,7 @@
 | **Baseline Commit** | `eb26e59` (known-good) + เฟส 1-2 ต่อยอดแบบ flag-gated |
 | **Open Tasks** | ไม่มี — เฟส 1-3 ทั้งหมด COMPLETE (TC-301..313 ✅) |
 | **Blockers** | ไม่มี |
-| **Last Session** | session-016 (2026-09-25) — เฟส 1+2 implementation เสร็จ + ทดสอบผ่าน 1093/1093 |
+| **Last Session** | session-017 (2026-09-26) — เฟส 3 เสร็จ + ทดสอบ 1102/1102 + docs sync + CI green |
 
 ### ผลตรวจรอบสุดท้าย (เฟส 1+2+3 completion)
 | การตรวจ | ผล |
