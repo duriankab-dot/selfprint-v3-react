@@ -126,8 +126,8 @@ ImmersiveTwinChat (RV-01 4 invocation sites :375,410,421,429) · TwinBirthPage (
 - **`src/sw.js` (B8)** — post-UO-7: install:70 · activate:93 · fetch:114 · push:209 · notificationclick:248 · notificationclose:279 · message:286 (SKIP_WAITING) — ไม่มี sync listener · build = injectManifest → `dist/sw.js` (precache 1,509 entries)
 - **`supabase/functions/` (B6)** — 13 directories ใน repo (account-delete · auth-registration-options · auth-register-passkey · auth-authentication-options · auth-verify-passkey · auth-rate-limit · account-recovery · send-push · pattern-detect · memory-manager · daily-brief · astrovera-edge · data-export) — **8 deployed = VERIFIED ACTIVE ตาม owner attestation (RV-05 ปิด)**
 
-### 2.11 TEST-ONLY 9 = VERIFIED TEST INFRASTRUCTURE (Owner decision D3/S1)
-SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImprovementService · FollowUpScheduler (2 test suites) · TwinAvatar · JsonLdSchemas · VisualStateEngine · worldRecommender — production importer = **ศูนย์ทุกไฟล์** (import map 27 ก.ย.) + **bundle proof: 0 occurrences ใน `dist/assets/*.js`** — คงไว้รักษา vitest baseline 1,102
+### 2.11 TEST-ONLY 9 + DC-11 = VERIFIED TEST INFRASTRUCTURE (10 รายการ — Owner decisions D3/S1 + UO-8, 27 ก.ย.)
+SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImprovementService · FollowUpScheduler (2 test suites) · TwinAvatar · JsonLdSchemas · VisualStateEngine · worldRecommender · **+ DC-11 group (`services/world-routing/WorldRoutingService.ts` + `WorldContextAdapter.ts`, consumer = `WorldContextAdapter.test.ts:11-12` ~16 tests — Owner decision 27 ก.ย. ต่อจากการที่ stop rule พบ test-consumer)** — production importer = **ศูนย์ทุกไฟล์** (import map 27 ก.ย.) + **bundle proof: 0 occurrences ใน `dist/assets/*.js`** — คงไว้รักษา vitest baseline 1,102
 
 ---
 
@@ -141,7 +141,7 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 
 **มาตรฐานการลบ (ต้องครบ):** zero-consumer proof repo-wide → owner approval → ลบ → `tsc -b` + `vitest run` ≥1,102 → build verify → ledger log → commit เฉพาะเมื่อ Owner อนุมัติ
 
-**Candidates ที่เหลือ:** **DC-11** — `WorldRoutingService.ts` + `WorldContextAdapter.ts` (zero production callers; SICEOrchestrator instantiation ตาย `WorldRoutingService.ts:67`) — รอ Owner เปิด dead-code batch
+**Candidates ที่เหลือ:** ไม่มี — **DC-11 ถูก re-classify เป็น VERIFIED TEST INFRASTRUCTURE** (Owner decision 27 ก.ย. · UO-8 CLOSED — zero production callers + test-supported + tree-shaken proof; รายละเอียด Ledger §15.1)
 
 ---
 
@@ -185,6 +185,7 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 | UO-5 (primitives/index.ts barrel) | CLOSED — VERIFIED ACTIVE |
 | UO-6 (audio/index.ts barrel — Dashboard.tsx:15) | CLOSED — VERIFIED ACTIVE |
 | UO-7 (sw.js journal machinery) | **CLOSED** — machinery removed `6ae88bd` (D2) |
+| UO-8 (DC-11 test-consumer discovery) | **CLOSED** — stop rule พบ `WorldContextAdapter.test.ts:11-12` import ทั้งสองไฟล์ → Owner เลือก S1 re-classify → VERIFIED TEST INFRASTRUCTURE (27 ก.ย.) |
 
 ---
 
@@ -207,6 +208,7 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 | `tsc -b` | 0 errors | ✅ ทุก batch ตั้งแต่ Batch 5 → UO-7 ต่อเนื่อง |
 | `vitest run` | ≥1,102 tests / 72 files | ✅ 1,102/1,102 — baseline คงเดิมข้ามการลบ/wiring ทั้งหมด |
 | `vite build` + PWA injectManifest | build ผ่าน · `dist/sw.js` compile | ✅ client 647 modules · precache 1,509 entries (คำเตือนเดิม §6.3: chunk >500kB + INEFFECTIVE_DYNAMIC_IMPORT ×2 — ไม่ใช่ error) |
+| `npm run typecheck:functions` + `npx wrangler pages functions build --outdir /tmp/functions-out` | **CF Pages functions compile ผ่าน** — gate ใหม่จากบทเรียน CFBUILDFIX-001 (api/ อยู่นอก vite/tsconfig graph + @ts-nocheck — local pipeline เดิมมองไม่เห็น) | ✅ "Compiled Worker successfully" (wrangler 4.131.2, 27 ก.ย.) — **ต้องรันทุกครั้งที่แตะ `api/` หรือ `functions/`** |
 | Bundle proofs | TEST-ONLY 9 = 0 occurrences ใน `dist/assets/*.js` · `dist/sw.js` zero journal refs | ✅ พิสูจน์ 27 ก.ย. |
 | Git | commit เฉพาะเมื่อ Owner อนุมัติ · **ห้าม Push โดยไม่มีคำสั่ยืนยัน** | ✅ ทุก commit ใน cycle นี้ผ่าน owner approval |
 

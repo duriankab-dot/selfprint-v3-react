@@ -386,4 +386,50 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **PHASE 12 OFFICIALLY CLOSED (Owner, 27 ก.ย. 2026) — PHASE 13 OPEN (Boundary Mapping & Verification) + PHASE 14 DRAFTED (Master Audit Specification, PROPOSAL) — Remote Push = HOLD**
+---
+
+## 15. PHASE 14 FOLLOW-UP — OPEN ITEMS EXECUTION LOG (27 ก.ย. 2026)
+
+### 15.1 DC-11 — STOP RULE TRIGGERED · ลบถูกระงับ · **UO-8 REGISTERED**
+- **คำสั่ง Owner:** ลบ `WorldRoutingService.ts` + `WorldContextAdapter.ts` พร้อม verification pipeline
+- **หลักฐานใหม่ขัดข้อสันนิษฐาน §10:** `src/services/__tests__/WorldContextAdapter.test.ts:11-12` **import ทั้งสองไฟล์** (239 ไลน์, ~16 `it()` — นับอยู่ใน baseline 1,102/72 files); `TwinChat.world-routing.e2e.test.ts` ไม่ import (แค่ชื่อหัวข้อ — import `constants/worlds`)
+- การลบ = (a) ลบแหล่งอย่างเดียว → tsc/vitest **FAIL** หรือ (b) ลบรวม test → baseline **ต่ำกว่า 1,102** — ขัดเกณฑ์ pipeline ที่ Owner กำหนดเอง
+- **การดำเนินการ: ไม่ลบ — ระงับ + UO-8** · tree-shaking proof: `WorldRouting|WorldContextAdapter` = **0 occurrences ใน `dist/assets/*.js`** (27 ก.ย.)
+- **Owner decision (27 ก.ย.): S1 Re-classify — DC-11 → VERIFIED TEST INFRASTRUCTURE** (zero production callers + tree-shaking 0 occurrences ใน prod bundle + baseline 1,102/1,102 รักษา 100% ไม่มี regression) — **ไม่ลบไฟล์ใด** (ทั้ง source และ test คงเป็น test-supporting artifacts) · **UO-8 → CLOSED** · ลงทะเบียนแล้วใน Master Spec §2.11/§3/§6
+
+### 15.2 Comment/Docblock Fixes — EXECUTED (comment-only ×6, ตาม §10 item 5)
+- `sice/engines/FutureSelfEngine.ts:3` — "Wrapper…" → standalone fork (no import; E1-C1 verified)
+- `Onboarding.tsx:541` — "12 engines" → **16 engines**
+- `supabase-service.ts:13-20` — saveMessage live ผ่าน NovaChat.tsx:16,90,121; getChatHistory ไม่มี in-app caller ตั้งแต่ `cc38ff0`
+- `supabase-service.ts:271-274` — useChat เดิมถูกลบแล้ว + RV-03 doctrine
+- `functions/api/autonomy-log.ts:17-18, 41` — caller เดิมถูกลบ (`cc38ff0`) + external callers ปฏิเสธไม่ได้ (RV-03)
+- `global-webapi-types.d.ts:30` — useJournalQueue ถูกลบแล้ว; declaration คงไว้ (Web API surface)
+
+### 15.3 E4 Runtime Reproduction Script — PREPARED (⛔ ห้ามรันจน Owner สั่ง)
+- `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` — self-contained in-memory simulation (ไม่ import app code, ไม่ติด Supabase) · 4 scenarios (undefined reads / confidence 0-1 vs 0-100 / throw risk) · **env-guard `E4_APPROVED_BY_OWNER=yes`** — exit 1 ถ้าไม่มีการอนุมัติ · **ยังไม่รัน** ตามข้อบังคับ
+
+### 15.4 CF Dashboard Checklist — CREATED (documentation-only)
+- `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` — owner-side evidence collection สำหรับปิด RV-02/RV-03 (เก็บคู่ deploy ถัดไป + re-attest SHA ตาม RV-07 discipline)
+
+### 15.5 Push — **EXECUTED ตามคำยืนยันของ Owner (27 ก.ย.)**
+- **Owner ยืนยันเป็นลายลักษณ์อักษร:** ปลด HOLD, push 8 commits (range `54ee3610` → `0aeeab2`), ห้ามยุ่ง bitemebaby
+- **ผล:** `git push origin master` → **`54ee361..0aeeab2 master -> master`** — fast-forward 8 commits สะอาด ไม่มี divergence · ยืนยัน remote head ด้วย `git ls-remote` = `0aeeab21badd91854b93d08fa9682b63f2f98d6a` · local master = up to date with origin/master · **bitemebaby ไม่ถูกแตะ** (ไม่มี ref ดังกล่าวบน origin นี้)
+- **สถานะถัดไป (Sync Deploy Protocol — ตามคำสั่ง Owner):** ถ้า CF Pages auto-deploy จาก master → (1) เก็บ Cloudflare Dashboard Logs ตาม checklist §15.4 เพื่อพิจารณาปิด RV-02/RV-03 · (2) **Owner re-attest production SHA ใหม่** (คาด `0aeeab2`) ตาม Master Spec §10 ก่อนปรับสถานะ RV-07 ใน Ledger
+
+### 15.6 Pipeline Results (หลัง comment-only edits)
+- `tsc -b` ✅ 0 errors · `vitest run` ✅ **1,102/1,102 (72 files)** — baseline คงเดิม
+
+### 15.7 สถานะ Commit
+- การเปลี่ยนแปลงทั้งหมดของรอบนี้ (comment fixes ×6 + script + checklist doc + ledger) **ยังไม่ commit** — รอ Owner อนุมัติ (ข้อเสนอ: `chore(phase14): docblock corrections per master spec §10 + E4 reproduction script (not run) + CF dashboard checklist`)
+
+---
+
+### 15.8 CF PAGES BUILD FAILURE — FIXED (CFBUILDFIX-001, 27 ก.ย. 2026)
+- **อาการ (Owner รายงาน):** CF Pages build ล้ม — `Could not resolve ../src/services/NotificationAnalytics.js` ใน `api/unified-handler.ts`
+- **สาเหตุราก:** `src/services/NotificationAnalytics.ts` ถูกลบใน Batch 5 (`4bc4a96` — VERIFIED DEAD ตาม Phase 9/M6) แต่ consumer 3 จุด (`trackNotificationSent` :254, `trackNotificationRead` :293, `trackDecisionOutcome` :337-345) ใน `api/unified-handler.ts` **รอดจากการ scan เพราะ `api/` อยู่นอก graph ของ vite/tsconfig + ไฟล์มี `@ts-nocheck` ทั้งไฟล์** — local pipeline จึงไม่เคยจับได้; CF deploy ก่อนหน้าสำเร็จเพราะยังอยู่ที่ `54ee361` (ไฟล์ยังมีอยู่บน remote จนถึง push วันนี้)
+- **แก้ไข (ตามคำสั่ง Owner):** ลบ dead import + 3 call sites (fire-and-forget analytics) ออกจาก `api/unified-handler.ts` — `PushScheduler` / `DecisionFollowUpNotifier` คงเดิม (ไฟล์ยังอยู่) — behavior อื่นของ handler คงเดิมทุกอย่าง
+- **หมายเหตุต่อ classification:** NotificationAnalytics มี consumer จริงใน api-graph ที่ Phase 9 (scan เฉพาะ src/) มองข้าม — การลบคงอยู่ตามคำสั่ง Owner ปัจจุบัน; analytics writes จะหยุดเมื่อ deploy ใหม่เข้า production
+- **Pipeline ใหม่ (mandate ของ Owner — ต้องผ่านทุกขั้นก่อน commit/push):** `npm run typecheck` ✅ 0 errors (repo ไม่มี script `check` — ใช้ `typecheck` แทนตามเจตนา) · `npm run typecheck:functions` ✅ · `npm test -- --run` ✅ **1,102/1,102 (72 files)** · **`npx wrangler pages functions build --outdir /tmp/functions-out` ✅ "Compiled Worker successfully"** (wrangler 4.131.2)
+---
+
+🛑 **CFBUILDFIX-001 FIXED — CF PAGES FUNCTIONS BUILD GATE GREEN (wrangler "Compiled Worker successfully") + PIPELINE GREEN (typecheck ✅ / typecheck:functions ✅ / vitest 1,102 ✅) — COMMIT + PUSH ดำเนินการตามคำสั่ง Owner — รอ Sync Deploy Protocol: dashboard logs (RV-02/03) + Production SHA re-attestation**

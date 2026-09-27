@@ -1,6 +1,8 @@
 /**
  * SICE #10: FutureSelfEngine
- * Wrapper for existing FutureSelfEngine from lib/intelligence
+ * Standalone implementation — same domain as lib/intelligence/FutureSelfEngine
+ * but an independent fork (no import between layers; SICEBridge is the only
+ * cross-layer seam). Verified 27 ก.ย. 2026 (E1-C1 boundary map).
  * Helps user envision and work toward future goals
  */
 

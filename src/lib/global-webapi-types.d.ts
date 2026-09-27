@@ -27,7 +27,9 @@ declare global {
     SpeechRecognition?: new () => SpeechRecognitionInstance;
     webkitSpeechRecognition?: new () => SpeechRecognitionInstance;
     /**
-     * Feature-detect Background Sync support (used by useJournalQueue).
+     * Feature-detect Background Sync support. (Original consumer
+     * useJournalQueue was removed in phase 11 batch 7, commit cc38ff0;
+     * declaration kept — Web API surface, not app code.)
      */
     SyncManager?: typeof SyncManagerImpl;
   }

@@ -12,12 +12,13 @@ export { supabase };
 
 // CHATMESSAGES-003 FIX: 'chat_messages' doesn't exist in production (same
 // root cause as CHATMESSAGES-001/002 — verified against a live pg_tables
-// dump). saveMessage()/getChatHistory() are still called from NovaChat.tsx
-// and features/chat/hooks/useChat.ts (both live, routed pages) — every call
-// was silently 404'ing. Rerouted both to twin_memories, resolving twin_id
+// dump). saveMessage() is still called from NovaChat.tsx:16,90,121 (live,
+// routed page); getChatHistory() has had no in-app caller since
+// features/chat/hooks/useChat.ts was removed in phase 11 batch 7
+// (commit cc38ff0). Calls were rerouted to twin_memories, resolving twin_id
 // from userId first. Keeping the exact same function signatures so none of
-// the 3 call sites need to change. mood/autonomyLevel aren't columns on
-// twin_memories — dropped (non-critical, wasn't read back by any caller).
+// the remaining call sites need to change. mood/autonomyLevel aren't columns
+// on twin_memories — dropped (non-critical, wasn't read back by any caller).
 
 async function resolveTwinId(userId: string): Promise<string | null> {
   const { data } = await supabase
@@ -271,7 +272,9 @@ export async function getUserDecisions(
 // saveAutonomyLog() (client-side, direct decision_log insert) เคยอยู่ตรงนี้
 // — ลบแล้ว 2026-08-09 เพราะย้ายไปเขียนผ่าน /api/autonomy-log แทน (server-side,
 // verify JWT ก่อนเขียนเสมอ ปิดช่องโหว่ trust-client-user_id เดิม) ดู
-// src/features/chat/hooks/useChat.ts + api/autonomy-log.ts
+// api/autonomy-log.ts — in-app caller เดิมคือ src/features/chat/hooks/useChat.ts
+// (ถูกลบแล้วใน phase 11 batch 7, commit cc38ff0; external callers ปฏิเสธไม่ได้ —
+// RV-03 REMAINS UNPROVEN ตาม PHASE_14_MASTER_AUDIT_SPECIFICATION_TH.md §5)
 
 /**
  * Phase 7: ดึง dashboard insights (stats)

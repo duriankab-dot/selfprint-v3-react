@@ -14,14 +14,16 @@
  *     user_id, bypassing RLS entirely. Now: verifyUser() + user id taken
  *     from the token only, never from the body.
  *  2. PAYLOAD CONTRACT MISMATCH. The handler required
- *     { userId, twinId, autonomyLevel } but the only caller
- *     (src/features/chat/hooks/useChat.ts:160) sends
+ *     { userId, twinId, autonomyLevel } but the only in-app caller
+ *     (src/features/chat/hooks/useChat.ts:160 — REMOVED in phase 11
+ *     batch 7, commit cc38ff0) sends
  *     { hub, mood, autonomy_level, confidence, hesitation,
  *       response_time_ms, message_length, response_length }.
  *     Every real request therefore returned 400. The client's shape is the
  *     correct one — it matches decision_log exactly (see migration
  *     supabase/migrations/001_decision_log_autonomy_tracking.sql:15-36), so
  *     the handler was aligned to the client rather than the reverse.
+ *     External callers cannot be denied — RV-03 REMAINS UNPROVEN.
  *  3. WRONG TABLE. It wrote to `autonomy_signals`, which is created only by
  *     migrations/autonomy_signals_table.sql — a file in the orphaned
  *     /migrations directory that the Supabase CLI never applies, and which
@@ -38,7 +40,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { verifyUser } from '../../api/_utils/verify-user.js';
 
-/** Shape actually sent by src/features/chat/hooks/useChat.ts:166-175. */
+/** Shape sent by the original in-app caller src/features/chat/hooks/useChat.ts:166-175 (removed in phase 11 batch 7, commit cc38ff0). */
 interface AutonomySignalPayload {
   hub?: string;
   mood?: string;

@@ -8,14 +8,17 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { scheduleNotification } from '../src/services/PushScheduler.js';
 import { scheduleDecisionFollowUps } from '../src/services/DecisionFollowUpNotifier.js';
-import {
-  trackNotificationSent,
-  trackNotificationRead,
-  trackDecisionOutcome,
-} from '../src/services/NotificationAnalytics.js';
 import Stripe from 'stripe';
 import { verifyUser, getSupabaseAdmin, type VerifiedUser, type Env } from './_utils/verify-user.js';
 import { rateLimitMiddleware, tooManyRequestsResponse } from './_utils/rate-limit.js';
+
+// CFBUILDFIX-001 (27 ก.ย. 2026): ลบ import ของ src/services/NotificationAnalytics.js
+// (trackNotificationSent / trackNotificationRead / trackDecisionOutcome) — ไฟล์นั้น
+// ถูกลบใน phase 11 batch 5 (commit 4bc4a96 — VERIFIED DEAD ตาม Phase 9/M6) แต่ consumer
+// 3 จุดในไฟล์นี้รอดจากการ scan เพราะ api/ อยู่นอก graph ของ vite/tsconfig และไฟล์นี้
+// มี @ts-nocheck ทั้งไฟล์ → Cloudflare Pages functions build ล้ม ("Could not resolve
+// ../src/services/NotificationAnalytics.js") ตัด import + 3 call sites (fire-and-forget
+// analytics) ออก — behavior อื่นของ handler คงเดิมทุกอย่าง
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -251,7 +254,8 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           );
         }
 
-        await trackNotificationSent(result.notificationId, userId, type);
+        // CFBUILDFIX-001: trackNotificationSent() ถูกตัดออก (see header note)
+
         return Response.json({
           success: true,
           data: { notificationId: result.notificationId, status: 'scheduled' },
@@ -289,9 +293,7 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           });
         }
 
-        if (userId) {
-          await trackNotificationRead(notificationId, userId);
-        }
+        // CFBUILDFIX-001: trackNotificationRead() ถูกตัดออก (see header note)
 
         return Response.json({ success: true, message: 'Marked as read' } as ApiResponse);
       }
@@ -333,17 +335,7 @@ async function handleNotifications(request: Request, action: string, url: URL, e
           });
         }
 
-        if (twinId) {
-          await trackDecisionOutcome(
-            decisionId,
-            userId,
-            twinId,
-            outcome as any,
-            decisionText || '',
-            followUpDay,
-            notes
-          );
-        }
+        // CFBUILDFIX-001: trackDecisionOutcome() ถูกตัดออก (see header note)
 
         if (!followUpDay) {
           await scheduleDecisionFollowUps(

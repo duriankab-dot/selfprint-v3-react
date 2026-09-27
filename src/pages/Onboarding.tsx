@@ -538,7 +538,7 @@ export default function Onboarding({ onComplete }: OnboardingProps) {
     // ── SICE → Full Analysis integration (Phase 1) ──────────────────────
     // Call SICEOrchestrator so personalIntelligence.insights flow into
     // FullAnalysis instead of relying solely on astrology fallback.
-    // The orchestrator runs 12 rule-based engines in parallel and returns
+    // The orchestrator runs 16 rule-based engines in parallel and returns
     // synthesis + personal intelligence — all deterministic from userContext.
     let siceResult: OrchestratorResult | null = null;
     try {
