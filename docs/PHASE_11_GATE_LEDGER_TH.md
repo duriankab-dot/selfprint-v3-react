@@ -439,7 +439,7 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **PUSH HOLD (27 ก.ย. 12:15 — ตามคำสั่ง Owner) · Production SHA b8b656c ATTESTED + Window Rule (≥30 วัน) เริ่มนับ 27 ก.ย. · UO-2/RV-06 A/B EXECUTED: src/sw.js = PWA entry (ขาดแล้ว build พัง) + src/package.json "type":"commonjs" เปลี่ยนโครงสร้าง emission จริง (+110 chunks) — ข้อเสนอ: ไม่ลบ รอ Owner ยืนยัน classification (RV-06 คง UNPROVEN) · SLOT deploy ID + dashboard logs: รอ Owner — commits ล่าสุด local เท่านั้น**
+🛑 **PUSH HOLD ล็อคต่อเนื่อง (27 ก.ย. 12:15 → เสริม 12:47 — commits ถัดไป local เท่านั้น) · master = origin @ `18716af` ✅ · Production SHA b8b656c ATTESTED + Window Rule (≥30 วัน) นับจาก 27 ก.ย. — ช่วงรอ: deploy ID + dashboard logs (รอ Owner ตาม closure checklist) + UO-2 classification decision (ข้อเสนอ: ไม่ลบ — RV-06 คง UNPROVEN) · E4: HOLD · Watchers อัตโนมัติ: Lighthouse Nightly 0:30 UTC**
 
 - **ผล run #14 (c50a537, numberOfRuns 3 — median): SUCCESS ✅ (11:32:26, ~2m21s)** — Lighthouse CI กลับมาเขียว; ยืนยันการวินิจฉัยว่าเป็น measurement flake ไม่ใช่ code regression · เกณฑ์ 0.7 ผ่านด้วย median 3 runs
 
@@ -465,4 +465,5 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
   - **Citation ที่มาการบริโภค:** `vite.config.ts:9,16-26,34` — `VitePWA` strategies `injectManifest` + `filename: 'sw.js'` (comment PWA-PHASE2-001, 7 ก.ย. 2026) — sw entry = `src/sw.js` · `src/package.json` มีผลผ่าน **Node module-resolution** (`"type": "commonjs"`) ต่อไฟล์ .js ใต้ src/ จำนวน 8 ไฟล์ (`src/sw.js` + `src/lib/astrovera-brain/*.js` 7 ไฟล์) — **สมมติฐาน §2.1 ได้รับการยืนยันด้วย evidence จริงแล้ว**
 - **ข้อเสนอ (รอ Owner ตัดสิน — ห้ามสรุป classification เอง):** evidence ชี้ว่าทั้ง `src/sw.js` (PWA entry — ขาดแล้ว build พัง) และ `src/package.json` (`type: commonjs` เปลี่ยนโครงสร้าง emission จริง) **ไม่ใช่ straggler** — ข้อเสนอ: **ไม่ลบ** · การยกเป็น VERIFIED ACTIVE ให้ Owner ตัดสิน (pattern เดียวกับ UO-3..UO-6) — **UO-2 คง OPEN จนกว่า Owner จะปิด · RV-06 คงสถานะ UNPROVEN ตามจริงจนกว่าจะมี owner decision**
 - **คำสั่ง 3 — Dashboard Logs Verification & PUSH HOLD:** ฝั่ง Owner จะเก็บ logs ตาม `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` และกรอก SLOT ถัดไป — ฝั่ง Agent: **Push Protocol กลับสู่ HOLD มีผลแล้วตั้งแต่ 12:15 UTC** — commits รอบนี้ (เอกสาร + evidence) อยู่ **local เท่านั้น** จนกว่าจะมีคำสั่งฉบับใหม่
+- **เสริม (27 ก.ย. 2026, 12:47):** Owner สั่ง push `18716af` ขึ้น origin/master (รอบนี้ push ได้โดยคำสั่งตรง) — push เสร็จ `b8b656c..18716af` fast-forward ไม่มี divergence · **master = origin @ `18716af` ยืนยันแล้ว** · **Push Protocol ล็อค HOLD ต่อเนื่อง** — commits ถัดไปอยู่ local เท่านั้น จนกว่าจะมีคำสั่งฉบับใหม่ · สถานะ: **ช่วงรอนับ Window Rule (≥30 วัน นับจาก 27 ก.ย. 2026, deploy จาก SHA b8b656c)** + รอ Owner: deploy ID จาก dashboard → SLOT §15.10, dashboard logs → SLOT §15.10 ถัดไป, UO-2 classification decision
 
