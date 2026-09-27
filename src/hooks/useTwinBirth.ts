@@ -62,16 +62,16 @@ export function useTwinBirth() {
    */
   const setPhase = useCallback((phase: BirthPhase) => {
     setBirthState(prev => ({ ...prev, phase, error: null }));
-    saveBirthState(birthState);
-  }, [birthState]);
+    saveBirthState({ ...birthState, phase, userId: session?.user?.id ?? null });
+  }, [birthState, session?.user?.id]);
 
   /**
    * Set twin name during naming phase.
    */
   const setTwinName = useCallback((name: string) => {
     setBirthState(prev => ({ ...prev, twinName: name }));
-    saveBirthState(birthState);
-  }, [birthState]);
+    saveBirthState({ ...birthState, twinName: name, userId: session?.user?.id ?? null });
+  }, [birthState, session?.user?.id]);
 
   /**
    * Record first insight from awakening.
@@ -86,8 +86,8 @@ export function useTwinBirth() {
    */
   const setTwinCreated = useCallback((twinId: string) => {
     setBirthState(prev => ({ ...prev, twinId, phase: 'celebration' }));
-    saveBirthState(birthState);
-  }, [birthState]);
+    saveBirthState({ ...birthState, twinId, phase: 'celebration', userId: session?.user?.id ?? null });
+  }, [birthState, session?.user?.id]);
 
   /**
    * Mark birth as complete and clear saved state.

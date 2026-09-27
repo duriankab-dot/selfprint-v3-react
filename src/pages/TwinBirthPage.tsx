@@ -19,6 +19,9 @@ import { Twin } from '../components/twin/Twin';
 import { TwinNaming } from '../components/twin/TwinNaming';
 import { ProvenanceStrip } from '../components/story/ProvenanceStrip';
 import { startAwakening, initializeTwin, celebrateTwinAwakening } from '../services/CoreAwakeningService';
+import { useTwinBirth } from '../hooks/useTwinBirth';
+import { loadTwinDNA } from '../lib/twinVisualDNA';
+import { saveDNAMetadata } from '../lib/twinBirth/dnaPersistence';
 import { supabase } from '../services/supabase-service';
 import { calculateInitialDisciplines } from '../lib/astrology';
 import { calculateArchetypes } from '../lib/ArchetypeScoreEngine';
@@ -60,6 +63,11 @@ export default function TwinBirthPage() {
   const [essenceId, setEssenceId] = useState<string | undefined>(undefined);
   const [firstInsight, setFirstInsight] = useState<string | undefined>(undefined);
   const [firstInsightPatternCount, setFirstInsightPatternCount] = useState<number | undefined>(undefined);
+
+  // W2-WIRE (Batch 6, E5=Wire): TwinBirth ceremony state/recovery ผ่าน useTwinBirth
+  // — delegate persistence/recovery; awakening/initialize ยังผ่าน CoreAwakeningService (SSOT)
+  // Trigger = user-action เท่านั้น (mount เป็น read-only recovery check)
+  const birth = useTwinBirth();
 
   const birthArchetype = useMemo(() => {
     const disciplines = calculateInitialDisciplines(birthDate);
@@ -144,6 +152,7 @@ export default function TwinBirthPage() {
 
   const handleIntroComplete = () => {
     setPhase('birth');
+    birth.setPhase('birth-animation'); // W2-WIRE: persist ceremony state (user-action trigger)
 
     if (session?.user?.id) {
       startAwakening(session.user.id)
@@ -179,6 +188,7 @@ export default function TwinBirthPage() {
         lang: language === 'th' ? 'th-TH' : 'en-US',
       });
       primeCelebrationAudio();
+      birth.setTwinName(twinName); // W2-WIRE: persist naming (user-action trigger)
 
       const result = await initializeTwin(session.user.id, twinName, essenceId, birthDate, currentAnalysis);
 
@@ -186,10 +196,18 @@ export default function TwinBirthPage() {
         throw new Error(result.message || 'Failed to create Twin');
       }
 
+      // W2-WIRE: dnaPersistence retained — invoked under the CoreAwakeningService-driven birth path
+      // (saveDNAMetadata เป็น localStorage-side, non-fatal ภายใน try/catch ของมันเอง)
+      const dna = loadTwinDNA();
+      if (dna) {
+        saveDNAMetadata(dna, { userId: session.user.id, twinId: result.twinId });
+      }
+
       hydrateTwin(session.user.id, result.twin);
       setTwinAwakened(true, twinName);
       setFirstInsight(result.firstInsight);
       setFirstInsightPatternCount(result.patternCount);
+      birth.setTwinCreated(result.twinId); // W2-WIRE: record twin creation → celebration
 
       const twinCreatedOk = await withLifecycleRetry(() =>
         setTwinCreated(session.user.id, result.twinId!)
@@ -210,6 +228,7 @@ export default function TwinBirthPage() {
 
       setTimeout(() => {
         setPhase('complete');
+        birth.completeBirth(); // W2-WIRE: clear persisted birth state on completion
         navigate('/brief', { replace: true });
       }, 4000);
     } catch (err) {
