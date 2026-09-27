@@ -225,15 +225,30 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 
 ---
 
-## §10 Open Items & Handoff Summary
+## §10 Open Items & Handoff Summary (อัพเดท 27 ก.ย. — รอบ post-cycle: push → CFBUILDFIX-001 → CI stabilize)
 
-1. **UO-2** — RV-06 A/B build (authorized) — รอคำสั่ง Owner
-2. **Remote Push** — 8 commits บน local master (`4bc4a96`, `6c77750`, `cc38ff0`, `daa96ae`, `1f20894`, `6ae88bd`, `811961e` + commit เอกสารฉบับเต็มนี้) — รอคำสั่งอย่างเป็นทางการ
-3. **Production Deployment Sync** — deploy ครั้งถัดไปต้อง: re-attest production SHA ใหม่ + เก็บ CF dashboard logs เพื่อพิจารณาปิด RV-02/RV-03
-4. **DC-11 dead-code batch** — `WorldRoutingService.ts` + `WorldContextAdapter.ts` (zero production callers) — เมื่อ Owner เปิด
-5. **Docblock/comment fixes (comment-only, รอ batch ที่อนุญาต):** `sice/engines/FutureSelfEngine.ts:3` ("wrapper" ล้าสมัย) · `Onboarding.tsx:541` ("12 engines" → 16) · `supabase-service.ts:15-16,274` (getChatHistory residue) · `functions/api/autonomy-log.ts:18,41` · `global-webapi-types.d.ts:30`
-6. **E4 runtime reproduction** — script เขียนได้เมื่อสั่ง; ห้ามรันจน Owner อนุมัติ
-7. **TEST-ONLY registration** — ลงทะเบียน VERIFIED TEST INFRASTRUCTURE แล้ว (§2.11) — bundle proof ควรรี-verify หลัง build ใหญ่ถัดไป
+### กำลังค้าง (PENDING — ทุกข้อเป็น Owner gate)
+
+| # | งานค้าง | สถานะ | สิ่งที่รอจาก Owner |
+|---|---------|-------|--------------------|
+| 1 | **UO-2** — RV-06 A/B build | OPEN (authorized) | คำสั่งเริ่มงาน A/B build |
+| 2 | **E4** — PCB runtime reproduction | Script เตรียมพร้อม `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` (env-guard `E4_APPROVED_BY_OWNER=yes` — **ห้ามรันจนกว่าสั่ง**) | คำสั่งเริ่มรัน script |
+| 3 | **Production SHA re-attestation** — deploy จาก `251ff87` + push ต่อเนื่อง (`c50a537` CI fix · `c96ce9b` docs) | รอรับรอง | แถลงรับรอง production SHA จาก CF dashboard |
+| 4 | **Sync Deploy Protocol** — dashboard logs เพื่อพิจารณาปิด RV-02/RV-03 | รอหลักฐาน | เก็บ logs ตาม `CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` |
+| 5 | **TC-312 threshold discrepancy** — comment ใน `lighthouse-ci.yml:37-38` อ้าง MASTER_PLAN Phase 3 "Perf >= 90, A11y >= 95" แต่ config จริง = perf 0.7 / a11y 0.9 / bp 0.9 / seo 0.95 | OPEN | ตัดสินว่า 0.7 คือเกณฑ์ตั้งใจ หรือกลับ 0.9 (ถ้ากลับ 0.9 → ต้องมี perf batch จริง เช่น code-split `vendor-misc` 555 kB — Agent จัด proposal รออนุมัติ scope) |
+| 6 | **TEST-ONLY bundle proof re-verify** — TEST-ONLY 9 = 0 occurrences ใน `dist/assets` (พิสูจน์ 27 ก.ย.) | Routine | รี-verify หลัง build ใหญ่ถัดไป |
+
+### ปิดแล้วตั้งแต่ฉบับก่อน (CLOSED — พร้อม commit)
+
+| # | งาน | ผล | Commit |
+|---|-----|-----|--------|
+| 1 | Remote Push | `54ee361`→`0aeeab2` (8 commits) → `251ff87` → `c50a537` → `c96ce9b` — **master = origin** | push 3 รอบตามคำสั่ง |
+| 2 | DC-11 removal batch | Re-classified VERIFIED TEST INFRASTRUCTURE (S1) — UO-8 CLOSED — **ห้ามลบ** (`WorldContextAdapter.test.ts:11-12` import คู่) | Ledger §15.1 |
+| 3 | Docblock/comment fixes ×6 | แก้ครบ — comment-only | `251ff87` |
+| 4 | E4 script เตรียม | เขียนเสร็จ + env-guard (ค้างข้อ 2 = เฉพาะการ "รัน") | `251ff87` |
+| 5 | CFBUILDFIX-001 — CF Pages build fail | dead import `NotificationAnalytics` + 3 call sites ลบ — wrangler gate ✅ "Compiled Worker successfully" | `251ff87` |
+| 6 | Lighthouse CI flake — perf 0.69 vs 0.70 | วินิจฉัย = single-run flake (run #11 ✅ @ `54ee361` · run #12 ❌ @ docs-only `0aeeab2` · run #13 ❌ @ `251ff87` — bundle ไม่เปลี่ยน) → แก้ `numberOfRuns 1→3` (median, เกณฑ์คงเดิม) → **run #14 SUCCESS ✅ (Owner ยืนยัน "โอเคผ่านแล้ว")** | `c50a537` · Ledger §15.9 |
+| 7 | TEST-ONLY registration | ลงทะเบียนแล้ว (§2.11, 10 รายการ) | Ledger §15.1 |
 
 ---
 

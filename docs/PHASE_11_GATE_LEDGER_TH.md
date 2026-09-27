@@ -439,6 +439,7 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **LIGHTHOUSE CI — SINGLE-RUN FLAKE วินิจฉัยแล้ว (run #11 success @54ee361 · run #12 failure @docs-only 0aeeab2 · run #13 failure @251ff87 — page bundle ไม่เปลี่ยน) — แก้ด้วย numberOfRuns 3 (median, เกณฑ์ 0.7 คงเดิม) — commit c50a537 pushed · workflow re-run กำลังทำงาน — รอ Owner: (1) ยืนยันเกณฑ์ gate (config 0.7 vs comment TC-312 อ้าง MASTER_PLAN 0.9), (2) ผล median — ถ้า <0.70 ต้อง perf batch จริง (code-split vendor-misc 555 kB)**
+🛑 **CI GREEN — LIGHTHOUSE run #14 SUCCESS (numberOfRuns 3 median — Owner ยืนยัน "โอเคผ่านแล้ว") · CFBUILDFIX-001 FIXED (wrangler ✅) · PIPELINE GREEN (typecheck ✅ / typecheck:functions ✅ / vitest 1,102 ✅) — master = origin (`c96ce9b`) — ค้างเฉพาะ Owner gates: Production SHA re-attestation + dashboard logs (RV-02/03) + TC-312 เกณฑ์ 0.7-vs-0.9 + UO-2 A/B + E4 รัน script (Master Spec §10 อัพเดท 27 ก.ย.)**
 
-- **?? run #14 (c50a537, numberOfRuns 3 � median): SUCCESS ? (11:32:26, ~2m21s)** � Lighthouse CI ???????????; ???????????????????????? measurement flake ?????? code regression � ????? 0.7 ???????? median 3 runs
+- **ผล run #14 (c50a537, numberOfRuns 3 — median): SUCCESS ✅ (11:32:26, ~2m21s)** — Lighthouse CI กลับมาเขียว; ยืนยันการวินิจฉัยว่าเป็น measurement flake ไม่ใช่ code regression · เกณฑ์ 0.7 ผ่านด้วย median 3 runs
+
