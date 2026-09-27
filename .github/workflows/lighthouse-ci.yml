@@ -34,8 +34,12 @@ jobs:
         run: npm ci
 
       - name: Run Lighthouse CI against staging
-        # TC-312: thresholds from MASTER_PLAN Phase 3 gate —
-        # Perf >= 90, A11y >= 95, Best Practices >= 90, SEO >= 95.
+        # TC-312: thresholds live in ./lighthouserc.json —
+        # Perf >= 0.7 (70), A11y >= 0.9 (90), Best Practices >= 0.9 (90), SEO >= 0.95 (95).
+        # Owner decision (27 Sep 2026): keep Perf >= 0.7 as the stable CI/CD baseline —
+        # the historical MASTER_PLAN Phase 3 wording "Perf >= 90, A11y >= 95" is superseded;
+        # raising to 0.9 would require a real perf-optimization batch (e.g. code-split
+        # vendor-misc ~555 kB) — not approved for this phase.
         uses: treosh/lighthouse-ci-action@v12
         with:
           urls: |

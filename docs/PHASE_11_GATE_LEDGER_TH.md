@@ -439,7 +439,17 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **CI GREEN — LIGHTHOUSE run #14 SUCCESS (numberOfRuns 3 median — Owner ยืนยัน "โอเคผ่านแล้ว") · CFBUILDFIX-001 FIXED (wrangler ✅) · PIPELINE GREEN (typecheck ✅ / typecheck:functions ✅ / vitest 1,102 ✅) — master = origin (`c96ce9b`) — ค้างเฉพาะ Owner gates: Production SHA re-attestation + dashboard logs (RV-02/03) + TC-312 เกณฑ์ 0.7-vs-0.9 + UO-2 A/B + E4 รัน script (Master Spec §10 อัพเดท 27 ก.ย.)**
+🛑 **SYNC DEPLOY PROTOCOL: INITIATED (27 ก.ย. 2026, 12:07 — Owner ปลด HOLD Push Protocol) — TC-312: คงเกณฑ์ 0.7 + comment/citation แก้แล้ว · UO-2 A/B: STANDBY & PREPARE · E4: HOLD (STATIC MODE) — กำลังรัน pipeline (typecheck / typecheck:functions / vitest) ก่อน push สร้าง Production SHA ใหม่ — Window Rule (≥30 วัน) RV-02/03 เริ่มนับเมื่อ deploy จาก SHA ใหม่เสร็จ (Slot §15.10 รอกรอก)**
 
 - **ผล run #14 (c50a537, numberOfRuns 3 — median): SUCCESS ✅ (11:32:26, ~2m21s)** — Lighthouse CI กลับมาเขียว; ยืนยันการวินิจฉัยว่าเป็น measurement flake ไม่ใช่ code regression · เกณฑ์ 0.7 ผ่านด้วย median 3 runs
+
+### 15.10 OWNER DIRECTIVES — 5 GATES ACKNOWLEDGED + SYNC DEPLOY PROTOCOL INITIATED (27 กันยายน 2026, 11:58 / 12:07)
+
+- **TC-312 (Master Spec §10 #5) — RESOLVED:** Owner ตัดสิน **คงเกณฑ์ config จริงที่ 0.7** (perf 0.7 / a11y 0.9 / bp 0.9 / seo 0.95) — rationale: 0.7 สะท้อน baseline ที่เสถียรของ CI/CD โดยไม่เพิ่ม flakiness โดยไม่จำเป็น — ห้ามปรับกลับ 0.9 เพื่อหลีกเลี่ยง code-splitting batch ใหญ่โดยไม่จำเป็นใน phase นี้ · comment `lighthouse-ci.yml:37-38` + citation `CHANGELOG.md:20` แก้ให้ตรง config จริง (commit ฉบับนี้)
+- **UO-2 / RV-06 A/B Build (Master Spec §10 #1) — STANDBY & PREPARE:** อนุมัติเตรียม pre-requisites + config ในส่วนที่ไม่ต้องใช้ Permission เพิ่มเติม; Signal เริ่มกระบวนการ Build หลัง Production SHA re-attestation เรียบร้อย
+- **E4 (Master Spec §10 #2) — HOLD (STATIC MODE):** ห้ามรัน `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` จนกว่าจะมีคำสั่ง `E4_APPROVED_BY_OWNER=yes` แยกต่างหากอย่างเป็นทางการ — ดำเนินรายการ 1–3 ให้เสร็จก่อน
+- **SYNC DEPLOY PROTOCOL: INITIATED (27 ก.ย. 2026, 12:07):** Owner ปลด HOLD กระบวนการ Push Protocol อย่างเป็นทางการ — สร้าง Production SHA ใหม่เพื่อเริ่มต้นนับ Window Rule (≥30 วัน) ของ RV-02/RV-03
+- **SLOT — Production SHA ใหม่:** [รอกรอก — ผล push + CF Pages production deploy รอบนี้ · ผู้รับรอง: Owner จาก dashboard (deploy ID)]
+- **SLOT — RV-02/RV-03 dashboard logs:** [รอ Owner เก็บตาม `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` — กรอง path /api/metrics + /api/autonomy-log · นับ traffic ตั้งแต่ Production SHA ใหม่ ≥30 วัน · สถานะ: OPEN]
+- **SLOT — Lighthouse CI Nightly Watcher:** พร้อมรันอัตโนมัติ 0:30 UTC (cron `30 0 * * *`) @ `selfprint-staging.pages.dev` (3 URLs, numberOfRuns 3 median, เกณฑ์ 0.7/0.9/0.9/0.95 ตาม decision) — ยืนยันโดย Owner acknowledgment (11:58)
 

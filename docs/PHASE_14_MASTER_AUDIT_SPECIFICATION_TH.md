@@ -231,11 +231,11 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 
 | # | งานค้าง | สถานะ | สิ่งที่รอจาก Owner |
 |---|---------|-------|--------------------|
-| 1 | **UO-2** — RV-06 A/B build | OPEN (authorized) | คำสั่งเริ่มงาน A/B build |
-| 2 | **E4** — PCB runtime reproduction | Script เตรียมพร้อม `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` (env-guard `E4_APPROVED_BY_OWNER=yes` — **ห้ามรันจนกว่าสั่ง**) | คำสั่งเริ่มรัน script |
-| 3 | **Production SHA re-attestation** — deploy จาก `251ff87` + push ต่อเนื่อง (`c50a537` CI fix · `c96ce9b` docs) | รอรับรอง | แถลงรับรอง production SHA จาก CF dashboard |
-| 4 | **Sync Deploy Protocol** — dashboard logs เพื่อพิจารณาปิด RV-02/RV-03 | รอหลักฐาน | เก็บ logs ตาม `CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` |
-| 5 | **TC-312 threshold discrepancy** — comment ใน `lighthouse-ci.yml:37-38` อ้าง MASTER_PLAN Phase 3 "Perf >= 90, A11y >= 95" แต่ config จริง = perf 0.7 / a11y 0.9 / bp 0.9 / seo 0.95 | OPEN | ตัดสินว่า 0.7 คือเกณฑ์ตั้งใจ หรือกลับ 0.9 (ถ้ากลับ 0.9 → ต้องมี perf batch จริง เช่น code-split `vendor-misc` 555 kB — Agent จัด proposal รออนุมัติ scope) |
+| 1 | **UO-2** — RV-06 A/B build | STANDBY & PREPARE (27 ก.ย.) — ตรวจ pre-requisites + config ให้พร้อม · Signal เริ่ม build **หลัง SHA re-attestation เสร็จ** | — |
+| 2 | **E4** — PCB runtime reproduction | Script เตรียมพร้อม `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` · ⛔ **HOLD — STATIC MODE** (27 ก.ย.): ห้ามรันจนกว่ามีคำสั่ง `E4_APPROVED_BY_OWNER=yes` แยกต่างหากอย่างเป็นทางการ | คำสั่งแยกต่างหาก |
+| 3 | **Production SHA re-attestation** — **SYNC DEPLOY PROTOCOL: INITIATED** (27 ก.ย. 12:07 — Owner ปลด HOLD): push รอบนี้สร้าง Production SHA ใหม่ (SLOT Ledger §15.10) | INITIATED | รับรอง SHA + deploy ID จาก CF dashboard หลัง deploy เสร็จ |
+| 4 | **Sync Deploy Protocol** — dashboard logs เพื่อพิจารณาปิด RV-02/RV-03 | รอหลักฐาน — **Window Rule (≥30 วัน) เริ่มนับเมื่อ deploy จาก Production SHA ใหม่เสร็จ** | เก็บ logs ตาม `CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` |
+| 5 | **TC-312 threshold discrepancy** — comment `lighthouse-ci.yml:37-38` + citation `CHANGELOG.md:20` อ้างเกณฑ์เก่าไม่ตรง config | ✅ **RESOLVED — Owner decision (27 ก.ย.): คงเกณฑ์ config จริงที่ 0.7** (perf 0.7 / a11y 0.9 / bp 0.9 / seo 0.95) · comment + citation แก้ให้ตรง config จริง + rationale แล้ว | ไม่มี (ปิด) — การยกเป็น 0.9 เป็น perf-batch candidate รอบถัดไปเท่านั้น |
 | 6 | **TEST-ONLY bundle proof re-verify** — TEST-ONLY 9 = 0 occurrences ใน `dist/assets` (พิสูจน์ 27 ก.ย.) | Routine | รี-verify หลัง build ใหญ่ถัดไป |
 
 ### ปิดแล้วตั้งแต่ฉบับก่อน (CLOSED — พร้อม commit)

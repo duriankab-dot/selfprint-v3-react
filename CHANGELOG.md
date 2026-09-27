@@ -17,7 +17,7 @@ All notable changes to SELFPRINT v3.
 - **TC-309** FAQPage: `faqDualSchema()` emits both FAQPage and QAPage JSON-LD for the first 5 bilingual Q&As.
 - **TC-310** AboutPage: `aboutSchemas()` = Organization (sameAs + knowsAbout) + Person.
 - **TC-311** ContactPage: `contactSchemas()` = ContactPage (contactPoint th/en) + LocalBusiness (Bangkok geo).
-- **TC-312** Lighthouse CI: `.github/workflows/lighthouse-ci.yml` + `lighthouserc.json` (Perf≥90, A11y≥95, Best Practices≥90, SEO≥95; nightly `0 30 * * *` + on source push + manual).
+- **TC-312** Lighthouse CI: `.github/workflows/lighthouse-ci.yml` + `lighthouserc.json` (Perf≥70, A11y≥90, Best Practices≥90, SEO≥95; nightly `30 0 * * *` + on source push + manual — citation corrected to match config, owner decision 27 Sep 2026: keep Perf≥70 as stable CI/CD baseline).
 - **TC-313** Docs: `ARCHITECTURE.md` v3 section, `CHANGELOG.md` (this file), specs synced (LIVING_DIAGRAM_SPEC / UNIFIED_PIPELINE_SPEC / SEO_AEO_GEO_SPEC / TWIN_DNA_SPEC), MASTER_PLAN v3.0.
 
 ### Phase 2 (Week 2) — Unified pipeline + copy + GEO (in `fbaea9a`)
