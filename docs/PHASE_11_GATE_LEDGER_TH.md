@@ -338,4 +338,52 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **PHASE 11 OFFICIALLY CLOSED (Owner, 27 ก.ย. 2026) — PHASE 12 OPEN (Consolidation & Architectural Boundaries) — Remote Push = HOLD จนกว่าจบ Phase 12 หรือได้รับคำสั่งอย่างเป็นทางการ**
+---
+
+## 13. PHASE 12 — OWNER DECISIONS (D1-D4) + UO-7 MICRO-BATCH EXECUTION LOG (27 ก.ย. 2026)
+
+### 13.1 Owner decisions ที่ลงนาม
+| Decision | เนื้อหา | ผลสถานะ canonical |
+|----------|---------|--------------------|
+| D1 — E1 Convergence | **C1 Boundary Formalization (Zero Code Change)** — SICEBridge = SSOT Seam เดียว, คง dual-layer โดยไม่แตะ code/logic | E1 gate: **ปิดด้วย C1** — C2/C3 ไม่ execute จน Owner สั่งใหม่ (`PHASE_12_E1_CONVERGENCE_DESIGN_TH.md` §6) |
+| D2 — UO-7 | **อนุมัติลบ journal-sync machinery 4 บล็อก** (sw.js:57, 204-209, 215-228, 312-314) ใน micro-batch แยก | UO-7 → **CLOSED** (ดู §13.2) |
+| D3 — TEST-ONLY 9 | **S1 — Re-classify เป็น VERIFIED TEST INFRASTRUCTURE** (Keep + Document) | TEST-ONLY gate: **ปิด** — ไม่มี Batch 8 removal (ตาราง import map + bundle proof ใน `PHASE_12_DECISION_PROPOSALS_TH.md`) |
+| D4 — RV-01 / UO-1 | **Re-classify RV-01 → VERIFIED ACTIVE (STATIC)** — 4 invocation sites (ImmersiveTwinChat.tsx:375, 410, 421, 429) | RV-01: **ปิด** · UO-1: **CLOSED** — Note: Audio Playback Runtime ขึ้นกับ Browser AudioContext / User Gesture (ทดสอบจริงเท่านั้น) |
+
+### 13.2 UO-7 micro-batch — sw.js execution log
+- ลบ 4 บล็อก: `SYNC_TAG` (เดิม sw.js:57) · `sync` listener (เดิม 204-209) · `syncJournalQueue()` (เดิม 211-228) · `TRIGGER_SYNC` handler (เดิม 312-314)
+- **คงไว้ 100%:** push (Master Direction §26-27), precache/fetch (workbox + Supabase data cache), notification click/close routing, SKIP_WAITING message handler
+- เพิ่มหมายเหตุ UO-7 ใน header docblock ของ sw.js (comment-only, อ้างอิง `cc38ff0`)
+- Diff: `src/sw.js` **+6/−31** — ไฟล์เดียวเท่านั้น
+- **ยังไม่ commit — รอ Owner อนุมัติ (ข้อเสนอ message: `chore(phase12): UO-7 — remove dead journal-sync machinery from sw.js`)**
+
+### 13.3 Verification results (pipeline ตามข้อบังคับ Owner)
+| ขั้น | ผล |
+|------|-----|
+| `tsc -b` | ✅ 0 errors |
+| `vitest run` | ✅ **1,102/1,102 (72 files)** — baseline คงเดิม |
+| `vite build` | ✅ client 647 modules (6.95s) · **PWA injectManifest: `src/sw.js` compile → `dist/sw.js` สำเร็จ, precache 1509 entries, 0 error** (คำเตือนเดิมตาม §6.3 คงอยู่: chunk >500kB + INEFFECTIVE_DYNAMIC_IMPORT ×2 — ไม่เกี่ยวกับ UO-7) |
+| TEST-ONLY bundle check | ✅ 9 module names = **0 การเกิดขึ้นใน `dist/assets/*.js`** — tree-shaking พิสูจน์จริง (S1 evidence-backed) |
+| `dist/sw.js` (built) | ✅ zero references: journal / SYNC_TAG / SYNC_JOURNAL / TRIGGER_SYNC |
+
+### 13.4 Docs committed ตามคำสั่ง Owner
+- **SHA:** `1f20894` — `docs(phase12): record E1 convergence design C1 and owner decisions for UO-7, TEST-ONLY 9, and RV-01` (2 files, +218)
+
+### 13.5 สถานะ UO registry หลังปิด
+- UO-1 → **CLOSED** (RV-01 VERIFIED ACTIVE STATIC) · UO-2 → เปิดคงเหลือ (RV-06 A/B build — authorized, จะรันเมื่อ Owner สั่ง) · UO-3..UO-6 → ปิดแล้ว (VERIFIED ACTIVE) · UO-7 → **CLOSED** (machinery removed)
+
+---
+
+---
+
+## 14. PHASE 12 OFFICIALLY CLOSED — PHASE 13 / PHASE 14 OPENED (Owner, 27 ก.ย. 2026)
+
+- **UO-7 micro-batch committed ตามอนุมัติ:** `6ae88bda73b36fd7e3850520bf4458012b81c922` (`6ae88bd`) — `chore(phase12): UO-7 — remove dead journal-sync machinery from sw.js` (`src/sw.js` +6/−31)
+- **Git Local State:** master ahead of origin **6 commits** (`4bc4a96` + `6c77750` + `cc38ff0` + `daa96ae` + `1f20894` + `6ae88bd`) — **Standing Invariant: HOLD Remote Push ต่อไป จนกว่าจะได้รับคำสั่งอย่างเป็นทางการ**
+- **Owner ประกาศปิด PHASE 12 (Consolidation & Architectural Boundaries) อย่างเป็นทางการ** — ผลรวม: D1 (E1 ปิดด้วย C1) · D2 (UO-7 closed) · D3 (TEST-ONLY 9 = VERIFIED TEST INFRASTRUCTURE) · D4 (RV-01 = VERIFIED ACTIVE STATIC, UO-1 closed) — บันทึกแล้วใน §13
+- **Owner ประกาศเปิด PHASE 13 (Boundary Mapping & Verification) + PHASE 14 (Master Ledger / Master Audit Specification — FINAL MILESTONE)**
+- **งานเปิด:** PHASE 13 = `docs/PHASE_13_BOUNDARY_MAP_VERIFICATION_TH.md` (Map 8 Architectural Boundaries อย่างเป็นทางการ) · PHASE 14 = `docs/PHASE_14_MASTER_AUDIT_SPECIFICATION_TH.md` (**PROPOSAL** — ร่างโครงสร้าง SSOT Master Ledger รอ Owner อนุมัติโครงร่างก่อนเขียนฉบับเต็ม)
+
+---
+
+🛑 **PHASE 12 OFFICIALLY CLOSED (Owner, 27 ก.ย. 2026) — PHASE 13 OPEN (Boundary Mapping & Verification) + PHASE 14 DRAFTED (Master Audit Specification, PROPOSAL) — Remote Push = HOLD**
