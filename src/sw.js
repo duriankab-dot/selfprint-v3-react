@@ -11,6 +11,12 @@
  * unchanged from the old public/sw.js — nothing was removed, only the
  * precache + Supabase data-cache pieces were added.
  *
+ * UO-7 (27 ก.ย. 2026): journal background-sync machinery (SYNC_TAG,
+ * 'sync' listener, syncJournalQueue, TRIGGER_SYNC) removed — the client
+ * journal chain was deleted in phase 11 batch 7 (cc38ff0) so the
+ * machinery posted to no listener, and /api/journal-sync never shipped.
+ * Push / precache / notification handlers unchanged.
+ *
  * Design note: workbox's precache/data-cache lookups are done via
  * `matchPrecache()` / `strategy.handle()` called manually *inside* the
  * single existing 'fetch' listener below, instead of using
@@ -54,7 +60,6 @@ const DATA_CACHE_TABLES_RE = /\/rest\/v1\/(twin_memories|decision_logs|daily_bri
 // v6→v7: PWA-PHASE2-001 — workbox precache + Supabase data cache added
 const CACHE_VERSION = 7;
 const CACHE_NAME = `selfprint-v${CACHE_VERSION}`;
-const SYNC_TAG = 'journal-sync';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -200,33 +205,6 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Background Sync: sync journal queue when online
-self.addEventListener('sync', (event) => {
-  if (event.tag === SYNC_TAG) {
-    console.log('[SW] Background sync triggered');
-    event.waitUntil(syncJournalQueue());
-  }
-});
-
-/**
- * Sync journal queue
- * Called by: background sync + manual trigger from client
- */
-async function syncJournalQueue() {
-  try {
-    // Post message to all clients to trigger sync
-    const clients = await self.clients.matchAll();
-    clients.forEach((client) => {
-      client.postMessage({
-        type: 'SYNC_JOURNAL',
-        data: { timestamp: new Date().toISOString() },
-      });
-    });
-  } catch (error) {
-    console.error('[SW] Sync failed:', error);
-  }
-}
-
 // Push Notifications: Master Direction §26-27
 self.addEventListener('push', (event) => {
   console.log('[SW] Push received:', event);
@@ -308,8 +286,5 @@ self.addEventListener('notificationclose', (event) => {
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
-  }
-  if (event.data?.type === 'TRIGGER_SYNC') {
-    syncJournalQueue();
   }
 });
