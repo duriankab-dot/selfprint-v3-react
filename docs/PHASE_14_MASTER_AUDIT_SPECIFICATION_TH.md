@@ -231,9 +231,9 @@ SentimentAnalyzer · QualityMetricsService · FeedbackService · ContinuousImpro
 
 | # | งานค้าง | สถานะ | สิ่งที่รอจาก Owner |
 |---|---------|-------|--------------------|
-| 1 | **UO-2** — RV-06 A/B build | STANDBY & PREPARE (27 ก.ย.) — ตรวจ pre-requisites + config ให้พร้อม · Signal เริ่ม build **หลัง SHA re-attestation เสร็จ** | — |
+| 1 | **UO-2** — RV-06 A/B build | 🟢 **EXECUTED** (27 ก.ย. 12:15 — SIGNAL GO): evidence matrix A/B/C/D ใน Ledger §15.11 — `src/sw.js` = PWA entry (ขาดแล้ว build พัง) · `src/package.json` type:commonjs เปลี่ยนโครงสร้าง emission จริง (+110 chunks) — ข้อเสนอ: **ไม่ลบ** | ยืนยัน classification (RV-06 คง UNPROVEN จนกว่า Owner ตัดสิน — UO-2 คง OPEN) |
 | 2 | **E4** — PCB runtime reproduction | Script เตรียมพร้อม `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` · ⛔ **HOLD — STATIC MODE** (27 ก.ย.): ห้ามรันจนกว่ามีคำสั่ง `E4_APPROVED_BY_OWNER=yes` แยกต่างหากอย่างเป็นทางการ | คำสั่งแยกต่างหาก |
-| 3 | **Production SHA re-attestation** — **SYNC DEPLOY PROTOCOL: INITIATED** (27 ก.ย. 12:07 — Owner ปลด HOLD): push รอบนี้สร้าง Production SHA ใหม่ (SLOT Ledger §15.10) | INITIATED | รับรอง SHA + deploy ID จาก CF dashboard หลัง deploy เสร็จ |
+| 3 | **Production SHA re-attestation** — SHA **b8b656c** | ✅ **ATTESTED** — Owner Re-attest 27 ก.ย. 12:15 UTC · **Window Rule เริ่มนับ 27 ก.ย. 2026** (กรอก SLOT §15.10 แล้ว) | deploy ID จาก dashboard (กรอก SLOT เพิ่ม) |
 | 4 | **Sync Deploy Protocol** — dashboard logs เพื่อพิจารณาปิด RV-02/RV-03 | รอหลักฐาน — **Window Rule (≥30 วัน) เริ่มนับเมื่อ deploy จาก Production SHA ใหม่เสร็จ** | เก็บ logs ตาม `CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` |
 | 5 | **TC-312 threshold discrepancy** — comment `lighthouse-ci.yml:37-38` + citation `CHANGELOG.md:20` อ้างเกณฑ์เก่าไม่ตรง config | ✅ **RESOLVED — Owner decision (27 ก.ย.): คงเกณฑ์ config จริงที่ 0.7** (perf 0.7 / a11y 0.9 / bp 0.9 / seo 0.95) · comment + citation แก้ให้ตรง config จริง + rationale แล้ว | ไม่มี (ปิด) — การยกเป็น 0.9 เป็น perf-batch candidate รอบถัดไปเท่านั้น |
 | 6 | **TEST-ONLY bundle proof re-verify** — TEST-ONLY 9 = 0 occurrences ใน `dist/assets` (พิสูจน์ 27 ก.ย.) | Routine | รี-verify หลัง build ใหญ่ถัดไป |

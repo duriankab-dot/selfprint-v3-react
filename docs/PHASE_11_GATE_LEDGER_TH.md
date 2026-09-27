@@ -439,7 +439,7 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 
 ---
 
-🛑 **SYNC DEPLOY PROTOCOL: INITIATED (27 ก.ย. 2026, 12:07 — Owner ปลด HOLD Push Protocol) — TC-312: คงเกณฑ์ 0.7 + comment/citation แก้แล้ว · UO-2 A/B: STANDBY & PREPARE · E4: HOLD (STATIC MODE) — กำลังรัน pipeline (typecheck / typecheck:functions / vitest) ก่อน push สร้าง Production SHA ใหม่ — Window Rule (≥30 วัน) RV-02/03 เริ่มนับเมื่อ deploy จาก SHA ใหม่เสร็จ (Slot §15.10 รอกรอก)**
+🛑 **PUSH HOLD (27 ก.ย. 12:15 — ตามคำสั่ง Owner) · Production SHA b8b656c ATTESTED + Window Rule (≥30 วัน) เริ่มนับ 27 ก.ย. · UO-2/RV-06 A/B EXECUTED: src/sw.js = PWA entry (ขาดแล้ว build พัง) + src/package.json "type":"commonjs" เปลี่ยนโครงสร้าง emission จริง (+110 chunks) — ข้อเสนอ: ไม่ลบ รอ Owner ยืนยัน classification (RV-06 คง UNPROVEN) · SLOT deploy ID + dashboard logs: รอ Owner — commits ล่าสุด local เท่านั้น**
 
 - **ผล run #14 (c50a537, numberOfRuns 3 — median): SUCCESS ✅ (11:32:26, ~2m21s)** — Lighthouse CI กลับมาเขียว; ยืนยันการวินิจฉัยว่าเป็น measurement flake ไม่ใช่ code regression · เกณฑ์ 0.7 ผ่านด้วย median 3 runs
 
@@ -449,7 +449,20 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 - **UO-2 / RV-06 A/B Build (Master Spec §10 #1) — STANDBY & PREPARE:** อนุมัติเตรียม pre-requisites + config ในส่วนที่ไม่ต้องใช้ Permission เพิ่มเติม; Signal เริ่มกระบวนการ Build หลัง Production SHA re-attestation เรียบร้อย
 - **E4 (Master Spec §10 #2) — HOLD (STATIC MODE):** ห้ามรัน `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` จนกว่าจะมีคำสั่ง `E4_APPROVED_BY_OWNER=yes` แยกต่างหากอย่างเป็นทางการ — ดำเนินรายการ 1–3 ให้เสร็จก่อน
 - **SYNC DEPLOY PROTOCOL: INITIATED (27 ก.ย. 2026, 12:07):** Owner ปลด HOLD กระบวนการ Push Protocol อย่างเป็นทางการ — สร้าง Production SHA ใหม่เพื่อเริ่มต้นนับ Window Rule (≥30 วัน) ของ RV-02/RV-03
-- **SLOT — Production SHA ใหม่:** [รอกรอก — ผล push + CF Pages production deploy รอบนี้ · ผู้รับรอง: Owner จาก dashboard (deploy ID)]
+- **SLOT — Production SHA ใหม่:** **b8b656c** — ผู้รับรอง (Re-attest): Owner (27 ก.ย. 2026, 12:15 UTC) · deploy ID: [รอ Owner กรอกจาก dashboard] · **Window Rule (≥30 วัน) เริ่มนับ: 27 ก.ย. 2026** (deploy จาก SHA b8b656c — ผู้บันทึกเริ่มนับ: Owner)
 - **SLOT — RV-02/RV-03 dashboard logs:** [รอ Owner เก็บตาม `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` — กรอง path /api/metrics + /api/autonomy-log · นับ traffic ตั้งแต่ Production SHA ใหม่ ≥30 วัน · สถานะ: OPEN]
 - **SLOT — Lighthouse CI Nightly Watcher:** พร้อมรันอัตโนมัติ 0:30 UTC (cron `30 0 * * *`) @ `selfprint-staging.pages.dev` (3 URLs, numberOfRuns 3 median, เกณฑ์ 0.7/0.9/0.9/0.95 ตาม decision) — ยืนยันโดย Owner acknowledgment (11:58)
+
+### 15.11 OWNER DIRECTIVES — SHA RE-ATTESTED · UO-2 SIGNAL GO EXECUTED · PUSH HOLD (27 กันยายน 2026, 12:15)
+
+- **คำสั่ง 1 — Re-attest:** Owner รับรอง Production SHA **b8b656c** — กรอก SLOT §15.10 แล้ว (deploy ID: รอ Owner จาก dashboard) · **Window Rule (≥30 วัน) เริ่มนับ 27 ก.ย. 2026**
+- **คำสั่ง 2 — UO-2 / RV-06 A/B Build: SIGNAL GO → EXECUTED** (หลัง attestation · compliance §2.2: ห้ามลบ/แก้ tracked files — ทุกการย้ายไฟล์เกิดใน disposable worktree แยกเท่านั้น, main tree ไม่ถูกแตะ, `git status` สะอาดหลังรัน · fingerprints: `%TEMP%\uo2-fp-{a,d,wa}.txt`):
+  - **Build A (ครบทุกไฟล์ — สภาพ HEAD b8b656c, dist ล้างใหม่):** ✅ SUCCESS — **344 ไฟล์** (หมายเหตุวิธีการ: dist เดิมของ main tree สะสมไฟล์เก่า 1,696 ไฟล์ เพราะ `emptyOutDir: false` (vite.config.ts:48) — การเทียบทุกขั้นใช้ dist ล้างใหม่เท่านั้น)
+  - **Build B (ไม่มีทั้ง 3 ไฟล์):** ❌ FAIL — `[UNRESOLVED_ENTRY] Cannot resolve entry module src/sw.js` (plugin `vite-plugin-pwa:build`, hook closeBundle)
+  - **Build C (มี package.json · ไม่มี sw.js + lock):** ❌ FAIL — UNRESOLVED_ENTRY เดียวกัน → **failure ขับเคลื่อนด้วยการขาด src/sw.js โดยตรง** (ไม่ใช่ package.json)
+  - **Build D (มี sw.js + lock · ไม่มี package.json):** ✅ SUCCESS — แต่ **emission โครงสร้างต่างจริง: 454 ไฟล์ vs 344 (+110 chunks)** · `sw.js` + `index.html` ต่าง hash · chunk graph เปลี่ยน (77 A-only / 187 D-only จากชุดเทียบ A-fresh vs D, 267 chunks คงเดิม)
+  - **Determinism caveat (บันทึกกันตีความผิด):** build เดียวกัน (A-condition) สองสภาพแวดล้อม (main tree vs worktree) ให้ hash ต่างกัน 158 รายการ แต่**จำนวนไฟล์เท่ากัน (344)** — build ไม่ hash-deterministic ข้ามสภาพแวดล้อม → ชั้น evidence ที่ใช้ได้ = success/fail + จำนวนไฟล์/โครงสร้าง emission ไม่ใช่ hash เดี่ยว
+  - **Citation ที่มาการบริโภค:** `vite.config.ts:9,16-26,34` — `VitePWA` strategies `injectManifest` + `filename: 'sw.js'` (comment PWA-PHASE2-001, 7 ก.ย. 2026) — sw entry = `src/sw.js` · `src/package.json` มีผลผ่าน **Node module-resolution** (`"type": "commonjs"`) ต่อไฟล์ .js ใต้ src/ จำนวน 8 ไฟล์ (`src/sw.js` + `src/lib/astrovera-brain/*.js` 7 ไฟล์) — **สมมติฐาน §2.1 ได้รับการยืนยันด้วย evidence จริงแล้ว**
+- **ข้อเสนอ (รอ Owner ตัดสิน — ห้ามสรุป classification เอง):** evidence ชี้ว่าทั้ง `src/sw.js` (PWA entry — ขาดแล้ว build พัง) และ `src/package.json` (`type: commonjs` เปลี่ยนโครงสร้าง emission จริง) **ไม่ใช่ straggler** — ข้อเสนอ: **ไม่ลบ** · การยกเป็น VERIFIED ACTIVE ให้ Owner ตัดสิน (pattern เดียวกับ UO-3..UO-6) — **UO-2 คง OPEN จนกว่า Owner จะปิด · RV-06 คงสถานะ UNPROVEN ตามจริงจนกว่าจะมี owner decision**
+- **คำสั่ง 3 — Dashboard Logs Verification & PUSH HOLD:** ฝั่ง Owner จะเก็บ logs ตาม `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` และกรอก SLOT ถัดไป — ฝั่ง Agent: **Push Protocol กลับสู่ HOLD มีผลแล้วตั้งแต่ 12:15 UTC** — commits รอบนี้ (เอกสาร + evidence) อยู่ **local เท่านั้น** จนกว่าจะมีคำสั่งฉบับใหม่
 

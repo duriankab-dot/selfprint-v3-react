@@ -42,6 +42,6 @@
 
 ## 5. เงื่อนไขห้ามหลุด (Post-cycle discipline)
 
-- **Push Protocol** ทุกครั้ง: รอบนี้ push ได้โดยคำสั่งตรง — รอบถัดไปกลับสู่ HOLD จนกว่าจะมีคำสั่งอย่างเป็นทางการ
+- **Push Protocol: ⛔ HOLD มีผลแล้วตั้งแต่ 27 ก.ย. 12:15 UTC (ตามคำสั่ง Owner) — ห้าม push จนกว่าจะมีคำสั่งฉบับใหม่; commits หลังจุดนี้อยู่ local เท่านั้น** (รอบนี้ push ได้โดยคำสั่งตรง — เสร็จสิ้นที่ b8b656c)
 - **Deploy ใหม่ = clean window ใหม่**: ตรวจ production SHA ใหม่ + re-attest ตาม RV-07 discipline ก่อนเริ่มสร้าง staging snapshot ใหม่
 - **ไม่มี permission ฝั่ง CF dashboard** ฝั่ง Agent — Credentials ทั้งหมดใช้ได้เฉพาะ Owner ตาม Doctrine §1–2
