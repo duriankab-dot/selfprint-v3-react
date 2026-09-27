@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "url": ["https://selfprint-staging.pages.dev/th/", "https://selfprint-staging.pages.dev/th/science", "https://selfprint-staging.pages.dev/th/pricing"],
-      "numberOfRuns": 1,
+      "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --headless"
       }
