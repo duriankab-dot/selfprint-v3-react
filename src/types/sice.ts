@@ -5,6 +5,7 @@
  */
 
 import type { WorldId } from '../constants/worlds';
+import type { CanonicalPersonalContext } from '@/types/personalContext';
 
 export interface SICEInput {
   userId: string;
@@ -12,6 +13,8 @@ export interface SICEInput {
   conversationHistory?: Array<{ role: string; content: string }>;
   currentWorld?: WorldId; // Which of 12 Worlds active
   metadata?: Record<string, unknown>;
+  /** Pre-computed canonical context — when provided, engine #1 skips direct DB queries */
+  canonicalContext?: CanonicalPersonalContext;
 }
 
 export interface SICEOutput {

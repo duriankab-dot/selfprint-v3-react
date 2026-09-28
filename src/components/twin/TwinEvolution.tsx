@@ -21,13 +21,12 @@
  */
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { TwinStateEngine } from '@/lib/intelligence/TwinStateEngine';
 import type { TwinState, TwinStateResult } from '@/lib/intelligence/TwinStateEngine';
-import PersonalContextBuilder from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import { supabase } from '@/services/supabase-service';
 
 // ─── State metadata ──────────────────────────────────────────────────────────
@@ -84,15 +83,9 @@ export function TwinEvolution({}: TwinEvolutionProps) {
   const { language } = useLanguage();
   const isTh = language === 'th';
 
-  // PersonalContextBuilder instance (stable across renders)
-  const builderRef = useRef(new PersonalContextBuilder());
-
   // Shared cache key matches rest of app
-  const { data: personalContext } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () =>
-      userId ? builderRef.current.getContext(userId) : Promise.resolve(null),
-    enabled: !!userId,
+  const { data: personalContext } = usePersonalContextLib({
+    userId: userId ?? '',
     staleTime: 60_000,
   });
 

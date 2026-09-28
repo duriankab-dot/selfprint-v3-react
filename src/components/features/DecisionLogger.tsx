@@ -19,7 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { getUserDecisions } from '@/services/supabase-service';
 import { DecisionIntelligenceEngine } from '@/lib/intelligence/DecisionIntelligenceEngine';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import DecisionForm from './DecisionForm';
 import DecisionList from './DecisionList';
 import DecisionAnalytics from './DecisionAnalytics';
@@ -61,17 +61,14 @@ export const DecisionLogger: React.FC = () => {
   const [lastSavedDecision, setLastSavedDecision] = useState<DecisionInfo | null>(null);
 
   // Stable class instances
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const decisionEngine = useMemo(() => new DecisionIntelligenceEngine(), []);
 
   // ===================================================
   // Queries
   // ===================================================
 
-  const { data: personalContext, isLoading: contextLoading } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  const { data: personalContext, isLoading: contextLoading } = usePersonalContextLib({
+    userId,
     staleTime: 60_000,
   });
 

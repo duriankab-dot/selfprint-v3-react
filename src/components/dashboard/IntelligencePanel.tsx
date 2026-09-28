@@ -16,7 +16,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { supabase } from '@/lib/supabase/client';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { ContextDisplay } from '@/components/intelligence/ContextDisplay';
@@ -69,7 +69,6 @@ export const IntelligencePanel: React.FC = () => {
   const [lastSavedMemory, setLastSavedMemory] = useState<PersonalMemory | null>(null);
 
   // Stable class instances — created once per component mount
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
 
@@ -81,10 +80,8 @@ export const IntelligencePanel: React.FC = () => {
     data: personalContext,
     isLoading: contextLoading,
     error: contextError,
-  } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  } = usePersonalContextLib({
+    userId,
     staleTime: 30_000,
     retry: 2,
   });
@@ -146,7 +143,7 @@ export const IntelligencePanel: React.FC = () => {
           filter: `user_id=eq.${userId}`,
         },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['personalContext', userId] });
+          queryClient.invalidateQueries({ queryKey: ['personalContext', userId, 'canonical'] });
         }
       )
       .on(
@@ -398,7 +395,7 @@ export const IntelligencePanel: React.FC = () => {
                   setLastSavedMemory(memory);
                   // ✅ Invalidate queries
                   queryClient.invalidateQueries({ queryKey: ['userMemories', userId] });
-                  queryClient.invalidateQueries({ queryKey: ['personalContext', userId] });
+                  queryClient.invalidateQueries({ queryKey: ['personalContext', userId, 'canonical'] });
                   queryClient.invalidateQueries({ queryKey: ['behavioralPatterns', userId] });
                 }}
               />

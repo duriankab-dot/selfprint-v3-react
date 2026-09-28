@@ -8,6 +8,7 @@ import { SICEBase } from '../SICEBase';
 import { supabase } from '../../supabase-service';
 import type { SICEInput, SICEOutput, PersonalContext } from '../../../types/sice';
 import { getWorldPersonality } from '../../../constants/worldPersonalities';
+import { canonicalToSicePersonalContext } from '../canonicalAdapter';
 
 export class PersonalContextBuilder extends SICEBase {
   constructor() {
@@ -18,6 +19,11 @@ export class PersonalContextBuilder extends SICEBase {
     const { result, executionTime } = await this.measureExecution(async () => {
       if (!this.validateInput(input)) {
         return null;
+      }
+
+      // Phase 2A: Prefer pre-computed canonical context (avoids duplicate DB queries)
+      if (input.canonicalContext) {
+        return canonicalToSicePersonalContext(input.canonicalContext);
       }
 
       const worldPersonality = input.currentWorld

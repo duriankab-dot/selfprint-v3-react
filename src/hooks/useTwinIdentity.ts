@@ -18,13 +18,12 @@
  * entry instead of creating a second, competing one for the same data.
  */
 import { useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import type { Archetype } from '@/context/TwinContext';
 import type { WorldId } from '@/constants/worlds';
 import { getTwinVisualDNA, type TwinVisualDNA } from '@/lib/twin/twinVisualDNA';
 import { getUniqueTwinTraits, shiftHue, type TwinUniqueTraits } from '@/lib/twin/twinUniqueness';
 import { getTwinWorldContext, type TwinWorldContext } from '@/lib/twin/twinWorldContext';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import { TwinStateEngine, type TwinStateResult } from '@/lib/intelligence/TwinStateEngine';
 
 export type TwinEvolutionStage = 1 | 2 | 3 | 4;
@@ -117,13 +116,10 @@ export function useTwinIdentity({
   // / ExecutiveSummary / (previously) LivingTwin itself already use — React
   // Query dedupes/shares the cache entry across all of them, so this never
   // triggers a second fetch for a userId another component already loaded.
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const twinStateEngine = useMemo(() => new TwinStateEngine(), []);
 
-  const { data: personalContext, isLoading: isTwinStateLoading } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId as string),
-    enabled: !!userId,
+  const { data: personalContext, isLoading: isTwinStateLoading } = usePersonalContextLib({
+    userId: userId as string,
     staleTime: 60_000,
   });
 

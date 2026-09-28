@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { InsightEngine } from '@/lib/intelligence/InsightEngine';
@@ -160,7 +160,6 @@ const AnalysisPage: React.FC = () => {
   };
 
   // Stable instances
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
   const insightEngine = useMemo(() => new InsightEngine(), []);
@@ -173,10 +172,8 @@ const AnalysisPage: React.FC = () => {
     data: context,
     isLoading: ctxLoading,
     error: ctxError,
-  } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  } = usePersonalContextLib({
+    userId,
     staleTime: 30_000,
   });
 

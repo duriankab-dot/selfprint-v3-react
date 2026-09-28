@@ -32,12 +32,11 @@ import {
   useEffect,
 } from 'react';
 import type { ReactNode } from 'react';
-import { useQuery } from '@tanstack/react-query';
 
 import { useAuth } from './AuthContext';
 import { useHub } from './HubContext';
 import { useEmotion } from './EmotionContext';
-import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '../hooks/usePersonalContext';
 import { TwinStateEngine } from '../lib/intelligence/TwinStateEngine';
 import { ExperienceEngine } from '../lib/experience/ExperienceEngine';
 import type { ExperienceConfig } from '../lib/experience/ExperienceEngine';
@@ -68,15 +67,12 @@ export function ExperienceProvider({ children }: { children: ReactNode }) {
   const { mood: currentMood, updateMood, hasCheckedIn } = useEmotion();
 
   // Stable engine instances
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const twinEngine = useMemo(() => new TwinStateEngine(), []);
   const expEngine = useMemo(() => new ExperienceEngine(), []);
 
-  // Shared cache — same key as IntelligencePanel / LivingTwin / ExecutiveSummary
-  const { data: personalContext } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  // Shared cache — canonical key with lib shape selector
+  const { data: personalContext } = usePersonalContextLib({
+    userId,
     staleTime: 60_000,
   });
 

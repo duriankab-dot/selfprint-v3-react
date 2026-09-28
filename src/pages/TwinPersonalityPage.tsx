@@ -8,9 +8,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTwin } from '../context/TwinContext';
 import { useLanguage } from '../context/LanguageContext';
-import { useQuery } from '@tanstack/react-query';
-import { PersonalContextBuilder } from '../services/sice/engines/PersonalContextBuilder';
-import type { PersonalContext } from '../types/sice';
+import { usePersonalContextSice } from '@/hooks/usePersonalContext';
 import { TwinNav } from '../components/twin/TwinNav';
 import { AppShell } from '../components/layout/AppShell';
 import '../styles/twin-personality.css';
@@ -111,74 +109,58 @@ export default function TwinPersonalityPage() {
   });
   const [stages, setStages] = useState<EvolutionMilestone[]>(EVOLUTION_STAGES);
 
-  // Load personality data from PersonalContextBuilder (SICE #1)
-  const { data: personalContext, isLoading } = useQuery({
-    queryKey: ['personalContext', session?.user?.id],
-    queryFn: async () => {
-      if (!session?.user?.id) return null;
-
-      const builder = new PersonalContextBuilder();
-      const output = await builder.process({ userId: session.user.id });
-      const context = output.result as PersonalContext | null;
-
-      if (!context) return null;
-
-      // Map emotionalState string → 0-100 score
-      const moodScore: Record<string, number> = {
-        optimistic: 85,
-        focused: 78,
-        balanced: 65,
-        neutral: 55,
-        fatigued: 35,
-        anxious: 40,
-        uncertain: 45,
-      };
-      const emotionalScore = moodScore[context.emotionalState] ?? 60;
-
-      // growthMomentum — average success rate from active patterns
-      const rates = context.activePatterns
-        .map((p) => { const m = p.match(/\((\d+)%/); return m ? parseInt(m[1], 10) : null; })
-        .filter((n): n is number => n !== null);
-      const growthMomentum = rates.length > 0
-        ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length)
-        : 60;
-
-      // selfAwareness — memory depth (8 pts/memory, 30–95)
-      const selfAwareness = Math.min(95, Math.max(30, context.recentMemories.length * 8));
-
-      // adaptability — world diversity (15 pts/strength world, 40–95)
-      const adaptability = Math.min(95, 40 + context.strengthAreas.length * 15);
-
-      // mood mapping → PersonalityMetrics mood union
-      const toMood = (e: string): PersonalityMetrics['mood'] => {
-        if (['optimistic', 'excited'].includes(e)) return 'energetic';
-        if (['fatigued', 'overwhelmed', 'uncertain', 'anxious'].includes(e)) return 'reflective';
-        if (['focused', 'determined'].includes(e)) return 'contemplative';
-        return 'balanced';
-      };
-
-      return {
-        emotionalState: emotionalScore,
-        growthMomentum,
-        selfAwareness,
-        adaptability,
-        mood: toMood(context.emotionalState),
-      };
-    },
-    enabled: !!session?.user?.id,
+  // Load personality data from canonical cache with SICE shape selector
+  const { data: siceContext, isLoading } = usePersonalContextSice({
+    userId: session?.user?.id ?? '',
+    staleTime: 60_000,
   });
 
+  // Transform SICE PersonalContext to PersonalityMetrics
   useEffect(() => {
-    if (personalContext) {
-      setMetrics({
-        mood: personalContext.mood ?? 'balanced',
-        emotionalState: personalContext.emotionalState ?? 65,
-        growthMomentum: personalContext.growthMomentum ?? 72,
-        selfAwareness: personalContext.selfAwareness ?? 58,
-        adaptability: personalContext.adaptability ?? 81,
-      });
-    }
-  }, [personalContext]);
+    if (!siceContext) return;
+
+    // Map emotionalState string → 0-100 score
+    const moodScore: Record<string, number> = {
+      optimistic: 85,
+      focused: 78,
+      balanced: 65,
+      neutral: 55,
+      fatigued: 35,
+      anxious: 40,
+      uncertain: 45,
+    };
+    const emotionalScore = moodScore[siceContext.emotionalState] ?? 60;
+
+    // growthMomentum — average success rate from active patterns
+    const rates = siceContext.activePatterns
+      .map((p) => { const m = p.match(/\((\d+)%/); return m ? parseInt(m[1], 10) : null; })
+      .filter((n): n is number => n !== null);
+    const growthMomentum = rates.length > 0
+      ? Math.round(rates.reduce((a, b) => a + b, 0) / rates.length)
+      : 60;
+
+    // selfAwareness — memory depth (8 pts/memory, 30–95)
+    const selfAwareness = Math.min(95, Math.max(30, siceContext.recentMemories.length * 8));
+
+    // adaptability — world diversity (15 pts/strength world, 40–95)
+    const adaptability = Math.min(95, 40 + siceContext.strengthAreas.length * 15);
+
+    // mood mapping → PersonalityMetrics mood union
+    const toMood = (e: string): PersonalityMetrics['mood'] => {
+      if (['optimistic', 'excited'].includes(e)) return 'energetic';
+      if (['fatigued', 'overwhelmed', 'uncertain', 'anxious'].includes(e)) return 'reflective';
+      if (['focused', 'determined'].includes(e)) return 'contemplative';
+      return 'balanced';
+    };
+
+    setMetrics({
+      emotionalState: emotionalScore,
+      growthMomentum,
+      selfAwareness,
+      adaptability,
+      mood: toMood(siceContext.emotionalState),
+    });
+  }, [siceContext]);
 
   // Sync evolution stages with twin maturity score
   useEffect(() => {

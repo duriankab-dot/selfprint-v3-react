@@ -63,6 +63,13 @@ vi.mock('@/lib/intelligence/PersonalContextBuilder', () => ({
   }),
 }));
 
+// Mock canonical builder for new implementation
+vi.mock('@/lib/intelligence/CanonicalPersonalContextBuilder', () => ({
+  CanonicalPersonalContextBuilder: vi.fn().mockImplementation(function () {
+    return { getContext: getContextMock };
+  }),
+}));
+
 vi.mock('@/lib/intelligence/PatternDetector', () => ({
   PatternDetector: vi.fn().mockImplementation(function () {
     return { detectPatterns: detectPatternsMock };
@@ -134,6 +141,69 @@ const MOCK_CONTEXT = {
   modelVersion: 1,
   confidenceOverall: 0.65,
   sourceCount: 5,
+};
+
+// Canonical context shape returned by CanonicalPersonalContextBuilder.getContext()
+const MOCK_CANONICAL_CONTEXT = {
+  // Identity
+  userId: MOCK_USER_ID,
+  // Lib domain
+  values: [],
+  goals: [],
+  strengths: [],
+  blindSpots: [],
+  emotionalRange: {
+    primaryMoods: [],
+    volatility: 0.3,
+    responseToStress: 'calm',
+    emotionalTriggers: [],
+    confidence: 0.5,
+  },
+  decisionStyle: {
+    type: 'analytical' as const,
+    description: 'Analytical thinker',
+    confidence: 0.7,
+    evidence: [],
+  },
+  relationships: [],
+  confidenceOverall: 0.65,
+  sourceCount: 5,
+  lastUpdated: new Date(),
+  modelVersion: 1,
+  // SICE domain
+  emotionalState: 'balanced',
+  currentGoals: [],
+  activePatterns: [],
+  worldFocus: 'self',
+  recentMemories: [],
+  strengthAreas: [],
+  growthAreas: [],
+  worldPersonality: undefined,
+  // Bridge
+  hubsActive: [],
+  birthDate: undefined,
+  // Provenance
+  _provenance: {
+    libFields: ['userId', 'values', 'goals', 'strengths', 'blindSpots', 'emotionalRange', 'decisionStyle', 'relationships', 'confidenceOverall', 'sourceCount', 'lastUpdated', 'modelVersion', 'hubsActive'],
+    siceFields: [],
+    mergedAt: new Date().toISOString(),
+  },
+};
+
+// CanonicalBuilderResult shape returned by CanonicalPersonalContextBuilder.getContext()
+const MOCK_CANONICAL_RESULT = {
+  context: MOCK_CANONICAL_CONTEXT,
+  success: true,
+  message: 'Canonical context built successfully',
+};
+
+const MOCK_EMPTY_CANONICAL_RESULT = {
+  context: {
+    ...MOCK_CANONICAL_CONTEXT,
+    sourceCount: 0,
+  },
+  success: true,
+  message: 'Canonical context built successfully',
 };
 
 const MOCK_PATTERN = {
@@ -240,7 +310,7 @@ describe('IntelligencePanel', () => {
 
   it('shows empty state when context has no source data', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue({ ...MOCK_CONTEXT, sourceCount: 0 });
+    getContextMock.mockResolvedValue(MOCK_EMPTY_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue({ ...MOCK_ACCURACY_METRICS, totalInsights: 0, accuracy: 0 });
 
@@ -257,7 +327,7 @@ describe('IntelligencePanel', () => {
 
   it('renders ContextDisplay when personalContext is loaded', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -271,7 +341,7 @@ describe('IntelligencePanel', () => {
 
   it('renders ConfidenceIndicator with accuracy metrics in header', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -290,7 +360,7 @@ describe('IntelligencePanel', () => {
 
   it('switches to patterns tab and shows empty state when no patterns', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -311,7 +381,7 @@ describe('IntelligencePanel', () => {
 
   it('shows pattern name and insight text', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([MOCK_PATTERN]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -330,7 +400,7 @@ describe('IntelligencePanel', () => {
 
   it('switches to memories tab and renders MemoryRecorder', async () => {
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -352,7 +422,7 @@ describe('IntelligencePanel', () => {
   it('creates a Supabase channel when userId is present', async () => {
     const { supabase } = await import('@/lib/supabase/client');
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 
@@ -368,7 +438,7 @@ describe('IntelligencePanel', () => {
   it('removes Supabase channel on unmount', async () => {
     const { supabase } = await import('@/lib/supabase/client');
     useAuthMock.mockReturnValue({ session: SESSION });
-    getContextMock.mockResolvedValue(MOCK_CONTEXT);
+    getContextMock.mockResolvedValue(MOCK_CANONICAL_RESULT);
     detectPatternsMock.mockResolvedValue([]);
     getAccuracyMetricsMock.mockResolvedValue(MOCK_ACCURACY_METRICS);
 

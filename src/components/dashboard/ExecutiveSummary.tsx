@@ -23,7 +23,7 @@ import { useLangNavigate as useNavigate } from '../../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useTwin } from '@/context/TwinContext';
-import { PersonalContextBuilder } from '@/lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import { PatternDetector } from '@/lib/intelligence/PatternDetector';
 import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 import { InsightEngine } from '@/lib/intelligence/InsightEngine';
@@ -71,7 +71,6 @@ export const ExecutiveSummary: React.FC = () => {
   const KNOWLEDGE_LABEL = isTh ? KNOWLEDGE_LABEL_TH : KNOWLEDGE_LABEL_EN;
 
   // Stable instances (same pattern as IntelligencePanel — React Query dedupes calls)
-  const contextBuilder = useMemo(() => new PersonalContextBuilder(), []);
   const patternDetector = useMemo(() => new PatternDetector(), []);
   const feedbackLoop = useMemo(() => new AIFeedbackLoop(), []);
   const insightEngine = useMemo(() => new InsightEngine(), []);
@@ -80,10 +79,8 @@ export const ExecutiveSummary: React.FC = () => {
   // Queries — shared cache keys with IntelligencePanel → no duplicate fetches
   // --------------------------------------------------------------------------
 
-  const { data: context, isLoading: ctxLoading } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  const { data: context, isLoading: ctxLoading } = usePersonalContextLib({
+    userId,
     staleTime: 30_000,
   });
 

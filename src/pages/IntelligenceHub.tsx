@@ -19,7 +19,6 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import {
   getDashboardInsights,
@@ -33,7 +32,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTwin } from '../context/TwinContext';
 import { MetaTagManager } from '../components/MetaTagManager';
 import { getSeoMetadata } from '../constants/seoMetadata';
-import { PersonalContextBuilder } from '../lib/intelligence/PersonalContextBuilder';
+import { usePersonalContextLib } from '@/hooks/usePersonalContext';
 import InsightsCard from '../components/dashboard/InsightsCard';
 import DecisionLogTable from '../components/dashboard/DecisionLogTable';
 import FilterBar from '../components/dashboard/FilterBar';
@@ -79,8 +78,6 @@ interface Filters {
   endDate?: string;
 }
 
-const contextBuilder = new PersonalContextBuilder();
-
 const IntelligenceHub: React.FC = () => {
   const navigate = useNavigate();
   const { session } = useAuth();
@@ -90,10 +87,8 @@ const IntelligenceHub: React.FC = () => {
   const { twin } = useTwin();
   const seoData = getSeoMetadata('dashboard', language);
 
-  const { data: personalContext = null } = useQuery({
-    queryKey: ['personalContext', userId],
-    queryFn: () => contextBuilder.getContext(userId),
-    enabled: !!userId,
+  const { data: personalContext = null } = usePersonalContextLib({
+    userId,
     staleTime: 60_000,
   });
 
