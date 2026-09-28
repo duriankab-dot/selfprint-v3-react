@@ -38,7 +38,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { verifyUser } from '../../api/_utils/verify-user.js';
+import { verifyUser } from './_utils/verify-user.js';
 
 /** Shape sent by the original in-app caller src/features/chat/hooks/useChat.ts:166-175 (removed in phase 11 batch 7, commit cc38ff0). */
 interface AutonomySignalPayload {

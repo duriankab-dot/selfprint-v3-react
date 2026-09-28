@@ -37,7 +37,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { verifyUser } from '../../api/_utils/verify-user.js';
+import { verifyUser } from './_utils/verify-user.js';
 
 interface PerformancePayload {
   metrics?: {

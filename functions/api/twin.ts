@@ -31,7 +31,7 @@
  */
 
 import { callOpenRouter } from './_utils/ai-provider.js';
-import { verifyUser } from '../../api/_utils/verify-user.js';
+import { verifyUser } from './_utils/verify-user.js';
 
 interface Env {
   OPENROUTER_API_KEY?: string;
