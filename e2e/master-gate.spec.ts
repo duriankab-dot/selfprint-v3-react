@@ -315,7 +315,10 @@ test.describe('MG-02 Intelligent World Recommendation', () => {
 
 test.describe('MG-03 Growth Pipeline', () => {
   test('MG-03-01 Evolution tracking hook loads without errors', async ({ page }) => {
-    await page.goto('/th/chat/twin', { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // NAVHARNESS-001 FIX (MG-03): Direct `goto('/th/chat/twin')` from a fresh tab is
+    // recovery-redirected to /dashboard by the deployed bundle BEFORE .immersive-page
+    // renders. Reuse goToImmersiveChat's proven dashboard→SPA-nav pattern.
+    await goToImmersiveChat(page);
 
     // Collect JS errors
     const errors: string[] = [];
