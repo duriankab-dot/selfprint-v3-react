@@ -466,4 +466,44 @@ Batch 6 = E5 wiring (หลัง Owner เลือก W1/W2) → Batch 7 = B2 
 - **ข้อเสนอ (รอ Owner ตัดสิน — ห้ามสรุป classification เอง):** evidence ชี้ว่าทั้ง `src/sw.js` (PWA entry — ขาดแล้ว build พัง) และ `src/package.json` (`type: commonjs` เปลี่ยนโครงสร้าง emission จริง) **ไม่ใช่ straggler** — ข้อเสนอ: **ไม่ลบ** · การยกเป็น VERIFIED ACTIVE ให้ Owner ตัดสิน (pattern เดียวกับ UO-3..UO-6) — **UO-2 คง OPEN จนกว่า Owner จะปิด · RV-06 คงสถานะ UNPROVEN ตามจริงจนกว่าจะมี owner decision**
 - **คำสั่ง 3 — Dashboard Logs Verification & PUSH HOLD:** ฝั่ง Owner จะเก็บ logs ตาม `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md` และกรอก SLOT ถัดไป — ฝั่ง Agent: **Push Protocol กลับสู่ HOLD มีผลแล้วตั้งแต่ 12:15 UTC** — commits รอบนี้ (เอกสาร + evidence) อยู่ **local เท่านั้น** จนกว่าจะมีคำสั่งฉบับใหม่
 - **เสริม (27 ก.ย. 2026, 12:47):** Owner สั่ง push `18716af` ขึ้น origin/master (รอบนี้ push ได้โดยคำสั่งตรง) — push เสร็จ `b8b656c..18716af` fast-forward ไม่มี divergence · **master = origin @ `18716af` ยืนยันแล้ว** · **Push Protocol ล็อค HOLD ต่อเนื่อง** — commits ถัดไปอยู่ local เท่านั้น จนกว่าจะมีคำสั่งฉบับใหม่ · สถานะ: **ช่วงรอนับ Window Rule (≥30 วัน นับจาก 27 ก.ย. 2026, deploy จาก SHA b8b656c)** + รอ Owner: deploy ID จาก dashboard → SLOT §15.10, dashboard logs → SLOT §15.10 ถัดไป, UO-2 classification decision
+ชื่อไฟล์ log 54688d49-f96d-41e1-859d-d61e6c730928
+deploy id 54688d49-f96d-41e1-859d-d61e6c730928
 
+---
+
+### 15.12 E4 RUNTIME REPRODUCTION — EXECUTED & REPRODUCED (28 กันยายน 2026)
+
+- **Owner Approval:** `E4_APPROVED_BY_OWNER=yes` ตั้งค่าใน CF Dashboard Variables & Secrets (plain_text) · รัน local ตามคำสั่ง
+- **Script:** `scripts/E4_PCB_COLLISION_REPRODUCTION.mjs` (self-contained in-memory simulation, ไม่ติดต่อ Supabase/เครือข่าย)
+- **Execution Date:** 28 ก.ย. 2026
+- **HEAD at execution:** `76be8f4` (master = origin)
+
+#### ผลลัพธ์ (4/4 REPRODUCED):
+
+| Scenario | ผล | รายละเอียด |
+|----------|-----|------------|
+| S1 — lib.strengths หลัง SICE เขียนทับบน key เดียว | ✅ REPRODUCED | `undefined` (ไม่อยู่ใน PersonalityMetrics shape) |
+| S2 — lib.confidence scale ผิด (SICE: 0-100 vs lib: 0-1) | ✅ REPRODUCED | 62 → 6200% (UI bug: Math.round(62 * 100)) |
+| S3 — SICE.metrics หลัง lib เขียนก่อน | ✅ REPRODUCED | `undefined` (ไม่อยู่ใน PersonalContext shape) |
+| S4 — SICE.stageLabel undefined → throw risk | ✅ REPRODUCED | `.toUpperCase()` จะ throw TypeError |
+
+#### ข้อสรุปทางเทคนิค:
+**Runtime impact CONFIRMED (4/4)** — Cache-shape collision บน key `['personalContext', userId]` ก่อให้เกิด:
+- Data loss: `strengths`, `metrics` หายไป (undefined)
+- Scale mismatch: confidence 0-100 vs 0-1 → UI แสดง % ผิด (6200%)
+- Throw risk: `stageLabel` undefined → `.toUpperCase()` crash
+
+#### Next Steps (รอ Owner):
+1. E4 status: **OPEN → PENDING CLOSURE** (runtime impact proven)
+2. Fix proposal: แยก cache key (เช่น `['personalContext', userId, 'lib']` vs `['personalContext', userId, 'sice']`) หรือ merge PCB implementation
+3. ต้องมี Owner decision ก่อน apply fix (Boundary B5 = ห้ามแตะ cache key/13 creation sites โดยไม่มี approval)
+
+---
+
+### 15.13 CF DASHBOARD LOGS §15.10 — OWNER TODO (Security Boundary)
+
+> **Security Boundary (Doctrine §1–2):** Agent ไม่มีสิทธิ์นำ Credentials ไปดึง Logs จาก Cloudflare Dashboard โดยตรง — การตรวจ Dashboard Logs เป็นหน้าที่ของ Owner ตาม Checklist
+
+- **Action Required:** Owner เข้า CF Pages Dashboard → ดู deploy logs สำหรับ SHA `76be8f4` → copy deploy ID / timestamp / build SHA / URLs → กรอก SLOT §15.10 (deploy ID) และ SLOT ถัดไป (dashboard logs)
+- **Checklist:** `docs/CF_DASHBOARD_RV02_RV03_CLOSURE_CHECKLIST_TH.md`
+- **Agent Status:** รอ Owner ทำเอง — Agent จะอัพเดท Ledger หลัง Owner ให้ข้อมูล
