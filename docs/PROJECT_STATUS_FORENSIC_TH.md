@@ -1,6 +1,6 @@
 # FORENSIC AUDIT: PROJECT STATUS — สรุปสถานะโครงการ SELFPRINT v3
 
-**วันที่ตรวจ:** 26 กันยายน 2569 (2026-09-26)
+**วันที่ตรวจ:** 29 กันยายน 2569 (2026-09-29)
 **สถานะ:** ✅ PRODUCTION READY — เฟส 0-3 เสร็จสมบูรณ์
 
 ---
@@ -11,10 +11,14 @@
 
 | เมตริก | ผลลัพธ์ |
 |---------|---------|
+| **HEAD Commit** | `5c43490` (test: fix MG-03 immersive chat navigation harness) |
+| **Staging Deployed** | `76be8f4` (Master Gate 10/10 PASS, JUnit 2026-09-28 15:43) |
+| **Production Deployed** | `54ee3610` (RV-07 Owner attestation) |
 | **Phase** | 3 (COMPLETE — Production Ready) |
 | **Typecheck / Lint / Build** | ✅ PASS |
 | **Unit Tests** | ✅ 1102/1102 (72 ไฟล์) |
-| **E2E Staging (Lifecycle)** | ✅ 25/25 PASS |
+| **E2E Master Gate** | ✅ 10/10 PASS (zero skipped) |
+| **E2E Staging Lifecycle** | ✅ 25/25 PASS |
 | **Astro Language Check** | ✅ 0 violations (allow-list ครบ) |
 | **Token Compliance** | ✅ 0 hardcoded colors |
 | **MASTER_PLAN Validation** | ✅ PASS |
@@ -64,7 +68,7 @@
 
 ---
 
-## 4. Validation Results (รอบสุดท้าย 2026-09-26)
+## 4. Validation Results (รอบสุดท้าย 2026-09-28)
 
 ```text
 npm run typecheck          ✅ PASS
@@ -75,6 +79,22 @@ npm run check:astro        ✅ 0 violations (allow-list: lib/aeoSchemas เพ�
 npm run check:tokens       ✅ 0 hardcoded colors
 npm run check:master-plan  ✅ PASS
 Lighthouse CI              ✅ thresholds configured, workflow active
+```
+
+### E2E Master Gate Evidence (staging `76be8f4`)
+```
+mg-01-01 ✓ MEDIUM fidelity: SVG Twin presence layer (3 elements)
+mg-01-02 ✓ Canvas: false, Presence: true, Chat input: true, Content: true
+mg-02-01 ✓ World transition container present
+mg-02-02 ✓ World transition animation triggered
+mg-03-01 ✓ Growth pipeline loaded, no runtime errors
+mg-04-01 ✓ Chat input visible and enabled
+mg-05-02 ✓ Twin layer elements: 4
+mg-06-01 ✓ Immersive page present (1), layers: 3
+mg-06-02 ✓ World transition infrastructure present
+mg-07-01 ✓ Decision logging UI present (14 elements)
+TOTAL: 10 PASS / 0 SKIP / 0 FAIL
+Source: Downloaded JUnit XML 2026-09-28 15:43
 ```
 
 ---
@@ -118,13 +138,35 @@ Rollback < 30 วินาที ผ่าน Cloudflare/Vercel env vars
 
 | Item | Status | Workaround |
 |------|--------|------------|
-| `staging.selfprint.one` alias | Cloudflare 525 SSL | ใช้ `https://selfprint-staging.pages.dev` |
-| k6 load tests | Manual opt-in only | `workflow_dispatch` — ไม่ใช่ gate criteria |
-| Actions v4 deprecation warning | Warning only | bump major versions ใน maintenance รอบหน้า |
+| `staging.selfprint.one` alias | Cloudflare 525 SSL handshake | ใช้ `https://selfprint-staging.pages.dev` |
+| k6 load tests | Manual opt-in only (`workflow_dispatch`) | ไม่ใช่ gate criteria |
+| Actions v4 deprecation warning | Warning only | Bump major versions ใน maintenance รอบหน้า |
 
 ---
 
-## 8. Next Actions (หากมี)
+## 8. Deployment Status
+
+| Environment | URL | Commit | Status |
+|-------------|-----|--------|--------|
+| **Production** | `https://www.selfprint.one` | `54ee3610` | ✅ LIVE |
+| **Staging** | `https://selfprint-staging.pages.dev` | `76be8f4` | ✅ DEPLOYED |
+| **Next Staging** | `https://selfprint-staging.pages.dev` | `5c43490` | 🔄 QUEUED (pushed 00:41) |
+
+---
+
+## 9. Open Items (Non-blocking — รอ Owner decision)
+
+| # | Item | Status | Blocker? |
+|---|------|--------|----------|
+| 1 | **E4** PCB runtime reproduction | Script ready (`E4_PCB_COLLISION_REPRODUCTION.mjs`), HOLD | ❌ Non-blocking |
+| 2 | **RV-02/03** `/api/metrics` + `/api/autonomy-log` | UNPROVEN — need CF dashboard logs | ❌ Non-blocking |
+| 3 | **RV-04** External webhooks | NO EVIDENCE FOUND | ❌ Non-blocking |
+| 4 | **UO-2** RV-06 A/B build | Authorized, await command | ❌ Non-blocking |
+| 5 | **Production SHA re-attestation** | New SHA `b8b656c` attested 27 Sep | ❌ Non-blocking |
+
+---
+
+## 10. Next Actions (หากมี)
 
 **ไม่มี Action ค้าง** — โครงการพร้อม Production แล้ว
 
@@ -135,7 +177,7 @@ Rollback < 30 วินาที ผ่าน Cloudflare/Vercel env vars
 
 ---
 
-## 9. คำสั่งยืนยันสถานะ
+## 11. คำสั่งยืนยันสถานะ
 
 ```powershell
 npm run typecheck          # ✅

@@ -4,7 +4,7 @@
 **Document ID:** SP-MPSC-001  
 **Product:** SELFPRINT — Living Intelligence Platform  
 **Repository:** `duriankab-dot/selfprint-v3-react`  
-**Baseline Commit:** `eb26e59` (known-good) → Current: `d3d5658` (Phase 3 complete)  
+**Baseline Commit:** `eb26e59` (known-good) → Current: `5c43490` (MG-03 harness fix)  
 **Status:** ✅ **100% CLOSED — PRODUCTION READY**  
 **Closure Target:** 100% CLOSED — **ACHIEVED**  
 **Rule:** No feature may be considered complete without implementation + integration + test evidence + documentation synchronization.
@@ -93,7 +93,7 @@ Feature จะเป็น `CLOSED` ได้ต่อเมื่อผ่า�
 - C: Backend/API implemented + validation + auth + error handling
 - D: Database schema + migrations + RLS + user isolation
 - E: AI routing + structured output + failure fallback + cost awareness
-- F: Tests — Unit 1102/1102, E2E 25/25, Mobile, Critical journeys
+- F: Tests — Unit 1102/1102, E2E 25/25 lifecycle, Mobile, Critical journeys, Master Gate 10/10
 - G: Evidence — commands executed, results captured, commits identified
 - H: Documentation — specs, reality map, test matrix, routes/API/DB synced
 
@@ -166,7 +166,7 @@ Feature จะเป็น `CLOSED` ได้ต่อเมื่อผ่า�
 ### Tests
 - ✅ Unit PASS (1102/1102)
 - ✅ Integration PASS (Supabase, API)
-- ✅ E2E PASS (25/25 lifecycle)
+- ✅ E2E PASS (25/25 lifecycle + Master Gate 10/10)
 - ✅ Mobile PASS (LivingDiagram sticky + sheet)
 - ✅ Critical journeys PASS
 - ✅ No unexplained skips (all documented)
@@ -247,7 +247,7 @@ FINAL STATUS:
 
 ---
 
-## 9. EVIDENCE SUMMARY (Latest Commit: `d3d5658`)
+## 9. EVIDENCE SUMMARY (Latest Commit: `5c43490`)
 
 | Artifact | Command | Result |
 |----------|---------|--------|
@@ -259,6 +259,7 @@ FINAL STATUS:
 | Token Check | `npm run check:tokens` | PASS |
 | Plan Check | `npm run check:master-plan` | PASS |
 | E2E Lifecycle | `npm run test:e2e:staging` | 25/25 PASS |
+| E2E Master Gate | Downloaded JUnit XML | 10/10 PASS (zero skipped) |
 
 ---
 
@@ -272,6 +273,6 @@ FINAL STATUS:
 
 ---
 
-**Document Version:** 3.0 (Phase 3 Complete)  
-**Last Updated:** 26 กันยายน 2569 (2026-09-26)  
+**Document Version:** 4.0 (Consolidated from Phase 14 forensic audit)  
+**Last Updated:** 29 กันยายน 2569 (2026-09-29)  
 **Status:** ✅ **100% CLOSED — PRODUCTION READY**
