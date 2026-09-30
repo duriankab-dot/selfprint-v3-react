@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 // AUTHLAZY-002 (9 ก.ย. 2026): static `import { supabase }` here put the whole
@@ -68,25 +68,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // accurately tracked via onAuthStateChange listener. Lazy session check ensures
   // returning users get their session data without blocking the initial render.
   useEffect(() => {
-    // Phase 1: Set loading = false immediately (no auth check)
     setLoading(false);
+  }, []);
 
-    // AUTHLAZY-002: the listener + initial session check both resolve the
-    // SDK lazily; first paint is never blocked on the ~202 kB client parse.
+  useEffect(() => {
+    // C3 FIX: Guard against double-loadLifecycle — only load once per userId
+    // Using a plain Set in closure (not useRef) — safe since both callbacks
+    // fire within the same effect run; no need to persist across renders.
+    const loadedLifeCycleFor = new Set<string>();
+
     let disposed = false;
     const unsubscribeFns: Array<() => void> = [];
-    // C3 FIX: Guard against double-loadLifecycle — only load once per userId
-    const loadedLifeCycleFor = useRef<Set<string>>(new Set());
 
-    const ensureLoadedLifecycle = useCallback((userId: string) => {
+    const ensureLoadedLifecycle = (userId: string) => {
       if (!userId || disposed) return;
-      if (loadedLifeCycleFor.current.has(userId)) return;
-      loadedLifeCycleFor.current.add(userId);
+      if (loadedLifeCycleFor.has(userId)) return;
+      loadedLifeCycleFor.add(userId);
       const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
       loadLifecycle(userId).catch(err =>
         console.error('Failed to load lifecycle:', err)
       );
-    }, [disposed]);
+    };
 
     // Phase 2: Register auth state listener as soon as the (lazily loaded)
     // client exists — real-time login/logout changes stay captured.

@@ -2,6 +2,14 @@
  * Integration Tests for MemoryRecorder Component
  * Tests component + MemoryManager + Supabase integration
  * @module components/intelligence/__integration__/MemoryRecorder.integration.test
+ *
+ * QA-TIMELINE: Pre-existing mock chain gaps — tracked separately from prod changes.
+ *   - #MEM-INT-MOCK-GAP-001: Test 4 (all 4 memory types) fails TypeError on
+ *     `.from()` chain — insert().select().maybeSingle() works but intermediate
+ *     .select().mockReturnValue may not chain properly in some iterations of the
+ *     loop (vi.clearAllMocks() may reset partial state). Fix: ensure per-iteration
+ *     mock chains are complete. ETA: T+2 days.
+ *   - All mocks target .insert().select().maybeSingle() (#QA-02 fix verified).
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';

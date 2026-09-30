@@ -431,9 +431,16 @@ describe('Canonical Builder Integration', () => {
 });
 
 describe('Canonical Cache Key', () => {
+  // C1 FIX (30 ก.ย. 2026): cache key now includes currentWorld param to prevent
+  // cross-world SICE state pollution. Test updated to match new signature.
   it('generates correct canonical key', () => {
     const key = CANONICAL_PCB_CACHE_KEY('u_123');
-    expect(key).toEqual(['personalContext', 'u_123', 'canonical']);
+    expect(key).toEqual(['personalContext', 'u_123', 'canonical', 'none']);
+  });
+
+  it('includes currentWorld when provided', () => {
+    const key = CANONICAL_PCB_CACHE_KEY('u_123', 'career');
+    expect(key).toEqual(['personalContext', 'u_123', 'canonical', 'career']);
   });
 
   it('generates correct legacy key', () => {
