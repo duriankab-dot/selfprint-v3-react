@@ -24,6 +24,7 @@ describe('FeedbackWidget Integration Tests', () => {
   const mockInsightText = 'You tend to analyze problems deeply before making decisions';
 
   // Helper: Setup Supabase mock BEFORE any render
+  // Supports both INSERT paths (feedback submission) and QUERY paths (calibrateFromFeedback getUserFeedback).
   const setupSupabaseMock = (
     data: any = {
       id: 'feedback-default',
@@ -40,9 +41,45 @@ describe('FeedbackWidget Integration Tests', () => {
         single: vi.fn().mockResolvedValue({ data, error }),
       }),
     });
-    const mockFrom = vi.fn().mockReturnValue({ insert: mockInsert });
+
+    // Query builder for calibrateFromFeedback's getUserFeedback: .from('insight_feedback')
+    //   .select('*').eq('user_id', userId).order('created_at', { ascending: true })
+    // Returns array via Promise (like real PostgREST)
+    const queryBuilder: any = {};
+    ['select', 'eq', 'neq', 'order', 'limit', 'single', 'maybeSingle'].forEach(method => {
+      queryBuilder[method] = (val?: any) => {
+        if (method === 'eq' || method === 'neq') return queryBuilder;
+        return queryBuilder;
+      };
+    });
+    queryBuilder.single = vi.fn().mockResolvedValue({ data: [data], error });
+    queryBuilder.maybeSingle = vi.fn().mockResolvedValue({ data: null, error });
+    queryBuilder.then = function(onFulfilled: any, onRejected: any) {
+      return Promise.resolve({ data: [data], error }).then(onFulfilled, onRejected);
+    };
+
+    // insert builder: supports .select().single() chain (recordFeedback path)
+    const insertBuilder: any = {
+      select: () => ({
+        single: vi.fn().mockResolvedValue({ data, error }),
+        then: function(onFulfilled: any) {
+          return Promise.resolve({ data, error }).then(onFulfilled);
+        },
+      }),
+    };
+
+    // superset builder: supports both insert() and direct chaining (query path)
+    // Used for ALL tables since AIFeedbackLoop may touch behavioral_patterns, users_profiles, etc.
+    const supersetBuilder: any = Object.assign({}, queryBuilder, { insert: () => mockInsert });
+    // But insert() should return a builder with .select().single() for recordFeedback
+    supersetBuilder.insert = function(payload?: any) {
+      if (payload !== undefined) mockInsert(payload);
+      return insertBuilder;
+    };
+
+    const mockFrom = vi.fn((table: string) => supersetBuilder);
     (supabase.from as any).mockImplementation(mockFrom);
-    return { mockFrom, mockInsert };
+    return { mockFrom, mockInsert, queryBuilder };
   };
 
   const mockFeedbackResponse: InsightFeedback = {
