@@ -72,7 +72,7 @@ function useSoundscapeAudio(): {
   setVolume: (volume: number) => void;
   startDucking: () => void;
   stopDucking: () => void;
-  pool: AudioNodePool;
+  closePool: () => void;
 } {
   const poolRef = useRef<AudioNodePool>({
     ctx: null,
@@ -168,6 +168,15 @@ function useSoundscapeAudio(): {
     );
   }, []);
 
+  // SOUNDSCAPE-AUDIO-002: Close the initAudio-created AudioContext on unmount
+  const closePool = useCallback(() => {
+    safeCloseAudioContext(poolRef.current.ctx);
+    poolRef.current.ctx = null;
+    poolRef.current.mainGain = null;
+    poolRef.current.duckGain = null;
+    setIsInitialized(false);
+  }, []);
+
   return {
     isInitialized,
     initAudio: () => initAudio(),
@@ -176,7 +185,7 @@ function useSoundscapeAudio(): {
     setVolume: (volume: number) => setVolume(volume),
     startDucking: () => startDucking(),
     stopDucking: () => stopDucking(),
-    pool: poolRef.current,
+    closePool,
   };
 }
 
@@ -199,7 +208,7 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
   const audio = useAudio();
   const { language } = useLanguage();
   const isTh = language === 'th';
-  const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking } =
+  const { isInitialized, initAudio, play, stop, setVolume, startDucking, stopDucking, closePool } =
     useSoundscapeAudio();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -228,8 +237,8 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
 
   // SOUNDSCAPE-AUDIO-002: Close the initAudio-created AudioContext on unmount (A2)
   useEffect(() => {
-    return () => safeCloseAudioContext(poolRef.current.ctx);
-  }, []);
+    return closePool;
+  }, [closePool]);
 
   // ─── Sync user audio preferences ───────────────────────────────────────────
 
