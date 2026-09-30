@@ -12,7 +12,6 @@ import { InsightFeedback, FeedbackType } from '@/lib/intelligence/types';
 
 // Supabase client imported after setup.ts global mock (setup.ts handles vi.mock)
 import { supabase } from '@/lib/supabase/client';
-import { AIFeedbackLoop } from '@/lib/intelligence/AIFeedbackLoop';
 
 // Mock AIFeedbackLoop to allow Supabase mock to work
 // Don't mock the class — let real AIFeedbackLoop call mocked Supabase
@@ -47,7 +46,7 @@ describe('FeedbackWidget Integration Tests', () => {
     // Returns array via Promise (like real PostgREST)
     const queryBuilder: any = {};
     ['select', 'eq', 'neq', 'order', 'limit', 'single', 'maybeSingle'].forEach(method => {
-      queryBuilder[method] = (val?: any) => {
+      queryBuilder[method] = (_val?: any) => {
         if (method === 'eq' || method === 'neq') return queryBuilder;
         return queryBuilder;
       };
@@ -77,7 +76,7 @@ describe('FeedbackWidget Integration Tests', () => {
       return insertBuilder;
     };
 
-    const mockFrom = vi.fn((table: string) => supersetBuilder);
+    const mockFrom = vi.fn((_table: string) => supersetBuilder);
     (supabase.from as any).mockImplementation(mockFrom);
     return { mockFrom, mockInsert, queryBuilder };
   };
@@ -182,7 +181,7 @@ describe('FeedbackWidget Integration Tests', () => {
       for (const { key, label } of feedbackTypes) {
         vi.clearAllMocks();
 
-        const { mockFrom, mockInsert } = setupSupabaseMock({
+        const { mockInsert } = setupSupabaseMock({
           id: `feedback-${key}`,
           user_id: mockUserId,
           insight_id: mockInsightId,
@@ -230,7 +229,7 @@ describe('FeedbackWidget Integration Tests', () => {
      * Verifies: comment is optional field
      */
     it('should submit feedback without comment when allowComment=false', async () => {
-      const { mockFrom, mockInsert } = setupSupabaseMock({
+      const { mockInsert } = setupSupabaseMock({
         id: 'feedback-no-comment',
         user_id: mockUserId,
         insight_id: mockInsightId,

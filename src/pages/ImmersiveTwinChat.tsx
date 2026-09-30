@@ -447,6 +447,9 @@ export default function ImmersiveTwinChat() {
     }
   }, [message, messages, twin, session, currentWorld, twinProfile, language, isTh, startListening, stopListening, startThinking, stopThinking, startResponding, stopResponding]);
 
+  // ─── Hooks must be before all early returns ─────────────────────────────
+  const decisionStore = useDecisionStore();
+
   // ─── Auto-send initial message from route state ─────────────────────────
   useEffect(() => {
     if (!twin || !session?.user?.id) return;
@@ -530,7 +533,6 @@ export default function ImmersiveTwinChat() {
   }
 
   // ─── Decision handling ──────────────────────────────────────────────────
-  const decisionStore = useDecisionStore();
   const handleSaveDecision = async (messageIndex: number) => {
     if (!session.user?.id || !currentWorld) return;
     setSavingDecisionIndex(messageIndex);
