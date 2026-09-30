@@ -33,7 +33,7 @@ export function createDiscoveryPopup(
       label: 'Explore',
       onClick: () => {
         // Navigate or trigger feature
-        console.log(`[Popup] Exploring ${featureId}`);
+        if (import.meta.env.DEV) console.log(`[Popup] Exploring ${featureId}`);
       },
     },
     duration: 5000,
@@ -62,7 +62,7 @@ export function createPatternPopup(
     action: {
       label: 'Learn More',
       onClick: () => {
-        console.log(`[Popup] Viewing pattern: ${patternType}`);
+        if (import.meta.env.DEV) console.log(`[Popup] Viewing pattern: ${patternType}`);
       },
     },
     duration: 6000,
@@ -91,7 +91,7 @@ export function createMilestonePopup(
     action: {
       label: 'View Badge',
       onClick: () => {
-        console.log(`[Popup] Viewing badge: ${milestoneId}`);
+        if (import.meta.env.DEV) console.log(`[Popup] Viewing badge: ${milestoneId}`);
       },
     },
     duration: 7000, // Longer for achievements
@@ -119,7 +119,7 @@ export function createReEngagementPopup(daysSinceLastVisit: number): PopupData {
     action: {
       label: 'See Insights',
       onClick: () => {
-        console.log('[Popup] Showing re-engagement insights');
+        if (import.meta.env.DEV) console.log('[Popup] Showing re-engagement insights');
       },
     },
     duration: 8000,
@@ -217,7 +217,7 @@ export const DISCOVERY_POPUPS = {
  */
 export function logPopupMetric(popupId: string, action: 'shown' | 'clicked' | 'dismissed') {
   const timestamp = new Date().toISOString();
-  console.log(`[Popup Metric] ${popupId}: ${action} at ${timestamp}`);
+  if (import.meta.env.DEV) console.log(`[Popup Metric] ${popupId}: ${action} at ${timestamp}`);
 
   // In production, send to analytics
   // analytics.track('popup_interaction', { popupId, action, timestamp });

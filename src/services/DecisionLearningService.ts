@@ -231,7 +231,7 @@ export async function updateTwinExpertiseFromDecisions(
 
     // Update Twin's system prompt with learned patterns
     await updateTwinSystemPromptWithPatterns(twinId, world, worldPatterns);
-    console.log(`Updated Twin expertise for ${world} with ${worldPatterns.length} pattern(s)`);
+    if (import.meta.env.DEV) console.log(`Updated Twin expertise for ${world} with ${worldPatterns.length} pattern(s)`);
   } catch (err) {
     console.error('Error updating Twin expertise:', err);
   }
@@ -289,7 +289,7 @@ async function updateTwinSystemPromptWithPatterns(
       return { success: false };
     }
 
-    console.log(`✅ Updated Twin ${twinId} system prompt with ${patterns.length} learned pattern(s)`);
+    if (import.meta.env.DEV) console.log(`✅ Updated Twin ${twinId} system prompt with ${patterns.length} learned pattern(s)`);
     return { success: true };
   } catch (err) {
     console.error('Error updating Twin system prompt with patterns:', err);

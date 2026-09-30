@@ -30,7 +30,7 @@ let sentryModule: Promise<SentryModule> | null = null;
 export function initializeSentry() {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
   if (!dsn) {
-    console.warn('[ErrorTracking] VITE_SENTRY_DSN not set — Sentry disabled');
+      if (import.meta.env.DEV) console.warn('[ErrorTracking] VITE_SENTRY_DSN not set — Sentry disabled');
     return;
   }
   if (initialized) return;
@@ -87,7 +87,7 @@ export function captureMessage(
   data?: Record<string, unknown>
 ) {
   if (!initialized || !sentryModule) {
-    console.log(`[ErrorTracking:${level}] ${message}`, data);
+    if (import.meta.env.DEV) console.log(`[ErrorTracking:${level}] ${message}`, data);
     return;
   }
   void sentryModule.then((Sentry) => {

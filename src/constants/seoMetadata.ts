@@ -176,13 +176,13 @@ export const SEO_METADATA: Record<string, PageMetadata> = {
 export function validateSeoMetadata(): void {
   Object.entries(SEO_METADATA).forEach(([page, metadata]) => {
     if (!metadata.en || !metadata.th) {
-      console.warn(`SEO metadata missing for page: ${page}`);
+      if (import.meta.env.DEV) console.warn(`SEO metadata missing for page: ${page}`);
     }
     if ((metadata.en.description || '').length > 160) {
-      console.warn(`Description too long for ${page} EN: ${metadata.en.description.length} chars`);
+      if (import.meta.env.DEV) console.warn(`Description too long for ${page} EN: ${metadata.en.description.length} chars`);
     }
     if ((metadata.th.description || '').length > 160) {
-      console.warn(`Description too long for ${page} TH: ${metadata.th.description.length} chars`);
+      if (import.meta.env.DEV) console.warn(`Description too long for ${page} TH: ${metadata.th.description.length} chars`);
     }
   });
 }
@@ -193,7 +193,7 @@ export function validateSeoMetadata(): void {
 export function getSeoMetadata(page: string, language: Language) {
   const metadata = SEO_METADATA[page];
   if (!metadata) {
-    console.warn(`SEO metadata not found for page: ${page}`);
+    if (import.meta.env.DEV) console.warn(`SEO metadata not found for page: ${page}`);
     return null;
   }
   return metadata[language];

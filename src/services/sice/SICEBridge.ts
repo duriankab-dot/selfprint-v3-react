@@ -70,7 +70,7 @@ export class SICEBridge {
 
           processed++;
         } catch (err) {
-          console.warn(`Failed to bridge pattern ${sicePattern.name}:`, err);
+          if (import.meta.env.DEV) console.warn(`Failed to bridge pattern ${sicePattern.name}:`, err);
           // Continue processing other patterns
         }
       }
@@ -170,7 +170,7 @@ export class SICEBridge {
         .single();
 
       if (error) {
-        console.warn('Could not save SICE results snapshot:', error);
+        if (import.meta.env.DEV) console.warn('Could not save SICE results snapshot:', error);
         return {
           success: false,
           error: error instanceof Error ? error.message : 'Supabase insert failed',

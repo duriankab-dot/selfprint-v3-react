@@ -192,7 +192,7 @@ export class SICEOrchestrator {
 
       // Non-critical: badge bridging — fire-and-forget (badges can unlock later)
       sICEBridge.bridgeBadgeResults(orchestratorResult).catch((err) => {
-        console.warn('[SICEOrchestrator] Non-critical: Badge bridging failed:', err);
+        if (import.meta.env.DEV) console.warn('[SICEOrchestrator] Non-critical: Badge bridging failed:', err);
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -396,7 +396,7 @@ export class SICEOrchestrator {
           break;
       }
     } catch (err) {
-      console.warn(`Failed to extract themes from engine ${result.engineId}:`, err);
+        if (import.meta.env.DEV) console.warn(`Failed to extract themes from engine ${result.engineId}:`, err);
     }
 
     return themes.filter((t) => t.length > 0);
@@ -780,7 +780,7 @@ export class SICEOrchestrator {
           break;
       }
     } catch (err) {
-      console.warn(`Failed to extract insights from engine ${result.engineId}:`, err);
+        if (import.meta.env.DEV) console.warn(`Failed to extract insights from engine ${result.engineId}:`, err);
     }
 
     return insights.filter((i) => i.length > 0);
@@ -916,7 +916,7 @@ export class SICEOrchestrator {
           break;
       }
     } catch (err) {
-      console.warn(`Failed to extract recommendations from engine ${result.engineId}:`, err);
+        if (import.meta.env.DEV) console.warn(`Failed to extract recommendations from engine ${result.engineId}:`, err);
     }
 
     return recommendations.filter((r) => r.length > 0);
@@ -995,7 +995,7 @@ export class SICEOrchestrator {
           break;
       }
     } catch (err) {
-      console.warn(`Failed to extract warnings from engine ${result.engineId}:`, err);
+        if (import.meta.env.DEV) console.warn(`Failed to extract warnings from engine ${result.engineId}:`, err);
     }
 
     return warnings.filter((w) => w.length > 0);

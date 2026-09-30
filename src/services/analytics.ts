@@ -41,12 +41,12 @@ export async function logEvent(
     });
 
     if (error) {
-      console.warn('[analytics] insert failed:', error.message);
+      if (import.meta.env.DEV) console.warn('[analytics] insert failed:', error.message);
       return false;
     }
     return true;
   } catch (err) {
-    console.warn('[analytics] insert threw:', err);
+    if (import.meta.env.DEV) console.warn('[analytics] insert threw:', err);
     return false;
   }
 }
@@ -97,7 +97,7 @@ export async function getAnalyticsSummary(
       .order('created_at', { ascending: true });
 
     if (error) {
-      console.warn('[analytics] getAnalyticsSummary failed:', error.message);
+      if (import.meta.env.DEV) console.warn('[analytics] getAnalyticsSummary failed:', error.message);
       return null;
     }
 
@@ -146,7 +146,7 @@ export async function getAnalyticsSummary(
       latestArchetypeAccuracy,
     };
   } catch (err) {
-    console.warn('[analytics] getAnalyticsSummary threw:', err);
+    if (import.meta.env.DEV) console.warn('[analytics] getAnalyticsSummary threw:', err);
     return null;
   }
 }

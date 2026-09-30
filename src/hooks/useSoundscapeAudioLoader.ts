@@ -133,7 +133,7 @@ async function getCachedAudio(soundscapeId: string, audioContext: AudioContext):
       };
     });
   } catch (err) {
-    console.warn('[useSoundscapeAudioLoader] Cache read failed:', err);
+    if (import.meta.env.DEV) console.warn('[useSoundscapeAudioLoader] Cache read failed:', err);
     return null;
   }
 }
@@ -154,7 +154,7 @@ async function saveCachedAudio(soundscapeId: string, buffer: AudioBuffer): Promi
       req.onsuccess = () => resolve();
     });
   } catch (err) {
-    console.warn('[useSoundscapeAudioLoader] Cache write failed:', err);
+    if (import.meta.env.DEV) console.warn('[useSoundscapeAudioLoader] Cache write failed:', err);
   }
 }
 
@@ -201,7 +201,7 @@ async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext
   // every play.
   const cached = await getCachedAudio(soundscapeId, audioContext);
   if (cached) {
-    console.log(`[useSoundscapeAudioLoader] Using cached audio: ${soundscapeId}`);
+    if (import.meta.env.DEV) console.log(`[useSoundscapeAudioLoader] Using cached audio: ${soundscapeId}`);
     return cached.buffer;
   }
 
@@ -211,7 +211,7 @@ async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext
     for (const url of mp3Urls) {
       const buffer = await loadAudioFromMP3(url, audioContext, signal);
       if (buffer) {
-        console.log(`[useSoundscapeAudioLoader] Loaded MP3: ${url}`);
+        if (import.meta.env.DEV) console.log(`[useSoundscapeAudioLoader] Loaded MP3: ${url}`);
         await saveCachedAudio(soundscapeId, buffer);
         return buffer;
       }
@@ -219,7 +219,7 @@ async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext
   }
 
   // Fallback: synthesize ambient drone via Web Audio API
-  console.log(`[useSoundscapeAudioLoader] Synthesizing ambient drone: ${soundscapeId}`);
+  if (import.meta.env.DEV) console.log(`[useSoundscapeAudioLoader] Synthesizing ambient drone: ${soundscapeId}`);
   const buffer = await synthesizeSoundscapeBuffer(soundscapeId, audioContext);
   await saveCachedAudio(soundscapeId, buffer);
   return buffer;
@@ -234,7 +234,7 @@ function synthesizeFallbackAudio(soundscapeId: string, audioContext: AudioContex
   const duration = 30; // seconds
   const buffer = audioContext.createBuffer(2, sampleRate * duration, sampleRate);
 
-  console.warn(`[useSoundscapeAudioLoader] Drone synthesis failed, using silence for: ${soundscapeId}`);
+  if (import.meta.env.DEV) console.warn(`[useSoundscapeAudioLoader] Drone synthesis failed, using silence for: ${soundscapeId}`);
   return buffer;
 }
 

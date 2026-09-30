@@ -75,10 +75,10 @@ export function useEvolutionTracking() {
 
       if (result.evolved && result.newStage && result.previousStage) {
         await evolveTwin(twin.user_id, twinId, result.previousStage, result.newStage, metrics);
-        console.log(`[Evolution] Twin evolved from ${result.previousStage} → ${result.newStage}`);
+        if (import.meta.env.DEV) console.log(`[Evolution] Twin evolved from ${result.previousStage} → ${result.newStage}`);
       }
     } catch (err) {
-      console.warn('[EvolutionTracking] recordInteraction failed:', err);
+      if (import.meta.env.DEV) console.warn('[EvolutionTracking] recordInteraction failed:', err);
     }
   };
 
@@ -119,7 +119,7 @@ export function useEvolutionTracking() {
     // Milestone 3: 30 Reflections (Twin Evolution Scene)
     if (newCount === 30) {
       // Scene will auto-trigger from EvolutionContext
-      console.log('[Evolution] 🎬 30 reflections reached - Evolution Scene unlocking...');
+      if (import.meta.env.DEV) console.log('[Evolution] 🎬 30 reflections reached - Evolution Scene unlocking...');
     }
 
     // Optional: More milestones

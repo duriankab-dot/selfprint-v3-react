@@ -122,7 +122,7 @@ export function resolveEntryRoute(entryPath: EntryPath, lifecycleStatus: Lifecyc
   }
 
   // Fallback (should not reach here if LifecycleStatus enum is complete)
-  console.warn(
+  if (import.meta.env.DEV) console.warn(
     `[entryResolver] Unknown lifecycle status: ${lifecycleStatus}, falling back to /onboarding`
   );
   return '/onboarding';

@@ -88,7 +88,7 @@ export class PrivacyBoundaryManager {
         return this.settings;
       }
     } catch (error) {
-      console.warn('[Privacy] Failed to load settings:', error);
+      if (import.meta.env.DEV) console.warn('[Privacy] Failed to load settings:', error);
     }
 
     this.settings = this.getDefaultSettings();
@@ -310,7 +310,7 @@ export class PrivacyBoundaryManager {
         performed_at: new Date().toISOString(),
       });
 
-      console.log('[Privacy] User data deleted:', this.userId);
+      if (import.meta.env.DEV) console.log('[Privacy] User data deleted:', this.userId);
     } catch (error) {
       console.error('[Privacy] Failed to delete data:', error);
       throw error;

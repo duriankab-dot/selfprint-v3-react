@@ -55,7 +55,7 @@ export abstract class SICEBase implements ISICEEngine {
    */
   protected log(message: string, data?: unknown): void {
     if (typeof window !== 'undefined') {
-      console.log(`[SICE #${this.id} ${this.name}] ${message}`, data || '');
+      if (import.meta.env.DEV) console.log(`[SICE #${this.id} ${this.name}] ${message}`, data || '');
     }
   }
 

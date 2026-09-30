@@ -39,7 +39,7 @@ export function useContextualPopup() {
     const popup = DISCOVERY_POPUPS[featureId];
 
     if (hasShownPopup(popup.id)) {
-      console.log(`[useContextualPopup] Discovery "${featureId}" already shown`);
+      if (import.meta.env.DEV) console.log(`[useContextualPopup] Discovery "${featureId}" already shown`);
       return;
     }
 
@@ -57,7 +57,7 @@ export function useContextualPopup() {
     const popup = createPatternPopup(patternType, name, insight);
 
     if (hasShownPopup(popup.id)) {
-      console.log(`[useContextualPopup] Pattern "${patternType}" already shown`);
+      if (import.meta.env.DEV) console.log(`[useContextualPopup] Pattern "${patternType}" already shown`);
       return;
     }
 
@@ -75,7 +75,7 @@ export function useContextualPopup() {
     const popup = createMilestonePopup(achievementId, name, description);
 
     if (hasShownPopup(popup.id)) {
-      console.log(`[useContextualPopup] Milestone "${achievementId}" already shown`);
+      if (import.meta.env.DEV) console.log(`[useContextualPopup] Milestone "${achievementId}" already shown`);
       return;
     }
 

@@ -246,7 +246,7 @@ export class BadgeEngine {
 
       // Verify this is a valid lib badge
       if (!Object.keys(BADGE_DEFINITIONS).includes(libBadgeId)) {
-        console.warn(`Unknown badge ID from SICE: ${badgeId}, skipping`);
+          if (import.meta.env.DEV) console.warn(`Unknown badge ID from SICE: ${badgeId}, skipping`);
         continue;
       }
 
@@ -254,7 +254,7 @@ export class BadgeEngine {
         await this.unlock(libBadgeId);
         unlocked.push(libBadgeId);
       } catch (error) {
-        console.warn(`Failed to unlock badge ${libBadgeId}:`, error);
+          if (import.meta.env.DEV) console.warn(`Failed to unlock badge ${libBadgeId}:`, error);
         // Continue to next badge
       }
     }

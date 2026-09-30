@@ -126,7 +126,7 @@ export async function saveInsight(
   confidence: number = 0.5
 ): Promise<boolean> {
   if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
+      if (import.meta.env.DEV) console.warn('Supabase ไม่พร้อม');
     return false;
   }
 
@@ -160,7 +160,7 @@ export async function saveDecision(
   context?: string
 ): Promise<boolean> {
   if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
+      if (import.meta.env.DEV) console.warn('Supabase ไม่พร้อม');
     return false;
   }
 
@@ -204,7 +204,7 @@ export async function saveDecisionForm(
   data: { title: string; context: string; expectedOutcome: string; confidence: number }
 ): Promise<{ id: string } | null> {
   if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
+      if (import.meta.env.DEV) console.warn('Supabase ไม่พร้อม');
     return null;
   }
 
@@ -290,7 +290,7 @@ export async function getUserDecisions(
  */
 export async function getDashboardInsights(userId: string) {
   if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
+      if (import.meta.env.DEV) console.warn('Supabase ไม่พร้อม');
     return null;
   }
 
@@ -435,7 +435,7 @@ export async function getAutonomyTrend(userId: string) {
  */
 export async function exportDecisionLogs(userId: string, format: 'csv' | 'json') {
   if (!supabase) {
-    console.warn('Supabase ไม่พร้อม');
+      if (import.meta.env.DEV) console.warn('Supabase ไม่พร้อม');
     return null;
   }
 

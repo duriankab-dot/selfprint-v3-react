@@ -227,7 +227,7 @@ export function logPaymentMetric(
   metadata?: Record<string, any>
 ) {
   const timestamp = new Date().toISOString();
-  console.log(`[Payment] ${action} → ${tier} at ${timestamp}`, metadata);
+  if (import.meta.env.DEV) console.log(`[Payment] ${action} → ${tier} at ${timestamp}`, metadata);
 
   // In production: send to analytics
   // analytics.track('payment_event', { action, tier, timestamp, ...metadata });

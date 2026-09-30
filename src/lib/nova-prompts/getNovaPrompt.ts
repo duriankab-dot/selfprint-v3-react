@@ -664,7 +664,7 @@ export function getNovaPrompt(config: NovaPromptConfig): string {
 
   // Debug: log components lengths
   if (typeof window !== 'undefined' && window.__DEBUG_NOVA) {
-    console.log('🔍 Components:', {
+    if (import.meta.env.DEV) console.log('🔍 Components:', {
       basPersona: BASE_PERSONA.length,
       hubContext: (HUB_CONTEXTS[hub] || HUB_CONTEXTS.identity).length,
       moodModulation: (MOOD_MODULATIONS[mood] || MOOD_MODULATIONS.ready).length,

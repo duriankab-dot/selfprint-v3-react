@@ -65,7 +65,7 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
     // Ensure user profile exists
     const profileExists = await ensureUserProfile(userId);
     if (!profileExists) {
-      console.warn('Could not ensure user profile exists');
+      if (import.meta.env.DEV) console.warn('Could not ensure user profile exists');
       return false;
     }
 
@@ -79,7 +79,7 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
       .single();
 
     if (error || !profile?.full_analysis_completed) {
-      console.log('User has not completed Full Analysis yet');
+      if (import.meta.env.DEV) console.log('User has not completed Full Analysis yet');
       return false;
     }
 
@@ -94,7 +94,7 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
       .maybeSingle();
 
     if (existingTwin) {
-      console.log('Twin already exists for this user');
+      if (import.meta.env.DEV) console.log('Twin already exists for this user');
       return false;
     }
 
@@ -108,7 +108,7 @@ export async function checkReadyForAwakening(userId: string): Promise<boolean> {
       .maybeSingle();
 
     if (pendingEssence) {
-      console.log('Pending essence found — awakening already in progress');
+      if (import.meta.env.DEV) console.log('Pending essence found — awakening already in progress');
       return false;
     }
 
@@ -154,7 +154,7 @@ export async function startAwakening(userId: string): Promise<AwakeningResult & 
 
     // P0-B B2: Log partial engine failures for transparency
     if (orchestrationResult?.completionStatus === 'DEGRADED') {
-      console.warn(
+      if (import.meta.env.DEV) console.warn(
         `[startAwakening] DEGRADED: ${orchestrationResult.failedEngineNames.length} engine(s) failed:`,
         orchestrationResult.failedEngineNames
       );
@@ -521,7 +521,7 @@ export async function initializeTwin(
               .eq('id', personalContext.id);
           }
         } catch (contextError) {
-          console.warn('คำเตือน: ไม่สามารถ link personal context:', contextError);
+          if (import.meta.env.DEV) console.warn('คำเตือน: ไม่สามารถ link personal context:', contextError);
         }
       })(),
 
@@ -755,14 +755,14 @@ async function compensatingRollback(params: {
 
     if (deleteError) {
       twinDeleteError = deleteError.message;
-      console.error(`[compensatingRollback] Failed to delete orphaned twin ${twinId}:`, deleteError.message);
+      if (import.meta.env.DEV) console.error(`[compensatingRollback] Failed to delete orphaned twin ${twinId}:`, deleteError.message);
     } else {
       twinDeleted = true;
-      console.log(`[compensatingRollback] Deleted orphaned twin ${twinId}`);
+      if (import.meta.env.DEV) console.log(`[compensatingRollback] Deleted orphaned twin ${twinId}`);
     }
   } catch (err) {
     twinDeleteError = err instanceof Error ? err.message : String(err);
-    console.error(`[compensatingRollback] Unexpected error deleting twin ${twinId}:`, twinDeleteError);
+    if (import.meta.env.DEV) console.error(`[compensatingRollback] Unexpected error deleting twin ${twinId}:`, twinDeleteError);
   }
 
   // Step 2: Mark essence as 'failed' so it can be retried
@@ -779,14 +779,14 @@ async function compensatingRollback(params: {
 
     if (essenceError) {
       essenceUpdateError = essenceError.message;
-      console.error(`[compensatingRollback] Failed to mark essence ${essenceId} as failed:`, essenceError.message);
+      if (import.meta.env.DEV) console.error(`[compensatingRollback] Failed to mark essence ${essenceId} as failed:`, essenceError.message);
     } else {
       essenceMarkedFailed = true;
-      console.log(`[compensatingRollback] Marked essence ${essenceId} as 'failed' for retry`);
+      if (import.meta.env.DEV) console.log(`[compensatingRollback] Marked essence ${essenceId} as 'failed' for retry`);
     }
   } catch (err) {
     essenceUpdateError = err instanceof Error ? err.message : String(err);
-    console.error(`[compensatingRollback] Unexpected error updating essence ${essenceId}:`, essenceUpdateError);
+    if (import.meta.env.DEV) console.error(`[compensatingRollback] Unexpected error updating essence ${essenceId}:`, essenceUpdateError);
   }
 
   // Determine explicit recovery state
@@ -807,7 +807,7 @@ async function compensatingRollback(params: {
     message = `UNRECOVERABLE: Both rollback actions failed — twin ${twinId} orphaned, essence ${essenceId} untouched. Errors: twin=${twinDeleteError}, essence=${essenceUpdateError}. Manual intervention required.`;
   }
 
-  console.log(`[compensatingRollback] Status=${status} for user ${userId}, failed ops: ${failedOps.join(', ')}. ${message}`);
+  if (import.meta.env.DEV) console.log(`[compensatingRollback] Status=${status} for user ${userId}, failed ops: ${failedOps.join(', ')}. ${message}`);
 
   return {
     status,
@@ -971,7 +971,7 @@ export async function completeCoreAwakening(
       });
 
     if (analyticsError) {
-      console.warn('Warning: Could not log analytics:', analyticsError);
+      if (import.meta.env.DEV) console.warn('Warning: Could not log analytics:', analyticsError);
     }
 
     return {

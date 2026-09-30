@@ -209,7 +209,7 @@ export class AIFeedbackLoop {
       await this.adjustContextFromFeedback(userId, analysis);
 
       // Step 5: Log calibration event
-      console.log(`Model calibrated for user ${userId} from ${allFeedback.length} feedback items`);
+      if (import.meta.env.DEV) console.log(`Model calibrated for user ${userId} from ${allFeedback.length} feedback items`);
     } catch (error) {
       throw new IntelligenceError(`Calibration failed: ${error}`, 'CALIBRATION_FAILED');
     }

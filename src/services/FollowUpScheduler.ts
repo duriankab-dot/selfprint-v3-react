@@ -131,7 +131,7 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
     // Get the next follow-up day
     const nextDay = await getNextFollowUpDay(decisionId);
     if (!nextDay) {
-      console.log(`Decision ${decisionId} has no pending follow-ups`);
+      if (import.meta.env.DEV) console.log(`Decision ${decisionId} has no pending follow-ups`);
       return;
     }
 
@@ -155,7 +155,7 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
 
     if (notifError) {
       console.error('Error creating in-app notification:', notifError);
-    } else {
+    } else if (import.meta.env.DEV) {
       console.log(`In-app notification created for decision ${decisionId} on day ${nextDay}`);
     }
 
@@ -170,7 +170,7 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
             requireInteraction: false,
             badge: '/icons/badge.png',
           });
-          console.log(`Browser push notification sent for decision ${decisionId}`);
+          if (import.meta.env.DEV) console.log(`Browser push notification sent for decision ${decisionId}`);
         } else if (Notification.permission !== 'denied') {
           // Request permission if not yet decided
           const perm = await Notification.requestPermission();
@@ -198,7 +198,7 @@ export async function triggerFollowUp(decisionId: string): Promise<void> {
       console.warn('Could not update follow-up sent timestamp:', err);
     }
 
-    console.log(`✅ Follow-up dispatched for decision ${decisionId} (day ${nextDay})`);
+    if (import.meta.env.DEV) console.log(`✅ Follow-up dispatched for decision ${decisionId} (day ${nextDay})`);
   } catch (err) {
     console.error('Error triggering follow-up:', err);
   }
@@ -346,7 +346,7 @@ export async function runDailyFollowUpTask(): Promise<{
       }
     }
 
-    console.log(`Daily follow-up task complete: ${stats.triggered}/${stats.processed} triggered`);
+    if (import.meta.env.DEV) console.log(`Daily follow-up task complete: ${stats.triggered}/${stats.processed} triggered`);
     return stats;
   } catch (err) {
     console.error('Daily follow-up task failed:', err);

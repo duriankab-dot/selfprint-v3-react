@@ -170,7 +170,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       set({ lastActivityAt: now });
     } catch (err) {
       // Non-critical: silently fail
-      console.warn('Failed to mark activity:', err);
+      if (import.meta.env.DEV) console.warn('Failed to mark activity:', err);
     }
   },
 
@@ -222,7 +222,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
           .eq('user_id', userId);
 
         if (resumeError) {
-          console.warn('Failed to update resumed_at:', resumeError);
+          if (import.meta.env.DEV) console.warn('Failed to update resumed_at:', resumeError);
         }
 
         return {
@@ -240,7 +240,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
       // loadLifecycle() is called twice concurrently (getSession + onAuthStateChange)
       // — both see no row, both try to insert, second one gets 409 → ignoreDuplicates
       // silently skips the duplicate and we continue normally.
-      console.log(`[Lifecycle] New user ${userId}, auto-initializing as ONBOARDING`);
+      if (import.meta.env.DEV) console.log(`[Lifecycle] New user ${userId}, auto-initializing as ONBOARDING`);
 
       const { error: insertError } = await supabase
         .from('user_lifecycle')
@@ -347,7 +347,7 @@ export const useLifecycleStore = create<LifecycleStoreState>((set) => ({
           .eq('user_id', userId)
       )
       .then(({ error }) => {
-        if (error) console.warn('[Lifecycle] Failed to persist entry_path:', error.message);
+        if (error && import.meta.env.DEV) console.warn('[Lifecycle] Failed to persist entry_path:', error.message);
       })
       .catch(() => {
         // Non-critical: SDK unavailable

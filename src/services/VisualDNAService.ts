@@ -289,7 +289,7 @@ export async function getVisualDNA(
       .maybeSingle();
 
     if (error) {
-      console.warn('No Visual DNA found for Twin:', error);
+        if (import.meta.env.DEV) console.warn('No Visual DNA found for Twin:', error);
       return null;
     }
 
