@@ -3,6 +3,20 @@ import { useSubscription } from '@/context/SubscriptionContext';
 import { createCheckoutSession, createPortalSession, PRICING_PLANS, calculatePrice } from '@/services/stripeService';
 import { AuthContext } from '@/context/AuthContext';
 
+/** In-app alert wrapper — replaces native alert() for consistency */
+function showAlert(message: string) {
+  if (typeof document !== 'undefined') {
+    // Try to dispatch an event that UI components can listen for
+    window.dispatchEvent(new CustomEvent('show-toast', { detail: { type: 'error', message } }));
+  }
+  console.warn('[UI] Alert:', message);
+}
+
+// If document isn't available during SSR, no-op
+if (typeof document === 'undefined' || typeof window === 'undefined') {
+  // SSr environment — alert() will fail anyway; no-op is safe
+}
+
 /**
  * Hook for Pricing & Subscription Integration
  * § 31: Monetization
@@ -31,10 +45,7 @@ export function usePricing() {
       // accessToken ต้องมาจาก auth session เท่านั้น
       const accessToken = auth?.session?.access_token;
       if (!accessToken) {
-        console.error('[Pricing] User not authenticated, redirect to onboarding');
-        // ROUTELOOP-002 FIX: bare "/onboarding" hits the catch-all
-        const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
-        window.location.href = `${langPrefix}/onboarding`;
+        showAlert('กรุณาเข้าสู่ระบบเพื่ออัปเกรด');
         return;
       }
 
@@ -42,7 +53,7 @@ export function usePricing() {
       window.location.href = url ?? `https://checkout.stripe.com/pay/${sessionId}`;
     } catch (error) {
       console.error('[Pricing] Checkout failed:', error);
-      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      showAlert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     }
   };
 
@@ -54,10 +65,7 @@ export function usePricing() {
       // accessToken ต้องมาจาก auth session เท่านั้น
       const accessToken = auth?.session?.access_token;
       if (!accessToken) {
-        console.error('[Pricing] User not authenticated');
-        // ROUTELOOP-002 FIX: bare "/onboarding" hits the catch-all
-        const langPrefix = window.location.pathname.startsWith('/th') ? '/th' : '/en';
-        window.location.href = `${langPrefix}/onboarding`;
+        showAlert('กรุณาเข้าสู่ระบบเพื่อจัดการแผน');
         return;
       }
 
@@ -65,7 +73,7 @@ export function usePricing() {
       window.location.href = portalUrl;
     } catch (error) {
       console.error('[Pricing] Portal failed:', error);
-      alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
+      showAlert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');
     }
   };
 
