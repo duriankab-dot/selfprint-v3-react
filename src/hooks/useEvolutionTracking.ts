@@ -54,15 +54,21 @@ export function useEvolutionTracking() {
         supabase.from('feedback').select('id', { count: 'exact', head: true }).eq('twin_id', twinId),
       ]);
 
+      // SUPABASE-B-fix: Guard against DB errors on count queries — never mask failures silently
+      const messageCount = messagesResult.error ? 0 : (messagesResult.count ?? 0);
+      const patternCount = patternsResult.error ? 0 : (patternsResult.count ?? 0);
+      const memoryCount = memoriesResult.error ? 0 : (memoriesResult.count ?? 0);
+      const feedbackCount = feedbackResult.error ? 0 : (feedbackResult.count ?? 0);
+
       const createdAt = twin.created_at ? new Date(twin.created_at) : new Date();
       const daysSinceAwakening = Math.max(1, Math.floor((Date.now() - createdAt.getTime()) / 86400000));
 
       const metrics: ProgressMetrics = {
-        messageCount: messagesResult.count ?? 0,
+        messageCount,
         daysSinceAwakening,
-        patternCount: patternsResult.count ?? 0,
-        memoryCount: memoriesResult.count ?? 0,
-        feedbackCount: feedbackResult.count ?? 0,
+        patternCount,
+        memoryCount,
+        feedbackCount,
       };
 
       const result = await checkMicroEvolution(twin.user_id, twinId, metrics, twin.stage);

@@ -206,14 +206,15 @@ export async function getSubscriptionStatus(accessToken: string) {
     // Detect non-JSON response to avoid SyntaxError bubbling to console.
     const contentType = response.headers.get('content-type') ?? '';
     if (!contentType.includes('application/json')) {
-      // API not yet deployed — treat as free tier, no error
-      return { tier: 'free', status: 'active' };
+      // API not yet deployed — treat as free tier with degraded flag so UI can show warning
+      return { tier: 'free', status: 'active', degraded: true };
     }
 
     return await response.json();
   } catch (error) {
-    // Silent fallback — free tier is the safe default
-    return { tier: 'free', status: 'active' };
+    // Silent fallback — free tier is the safe default, but mark as degraded
+    console.warn('[Stripe] Subscription fetch failed, returning free tier:', error);
+    return { tier: 'free', status: 'active', degraded: true };
   }
 }
 

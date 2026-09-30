@@ -26,6 +26,24 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useSoundscapeAudioLoader } from '@/hooks/useSoundscapeAudioLoader';
 import type { SoundscapeConfig } from '@/lib/experience/SoundscapeEngine';
 
+// ─── Audio Context Cleanup ────────────────────────────────────────────────────
+
+/** Close an AudioContext safely, handling all browser states */
+function safeCloseAudioContext(ctx: AudioContext | null): void {
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'running') {
+      ctx.close();
+    } else if (ctx.state === 'suspended') {
+      ctx.close();
+    } else if (ctx.state === 'closed') {
+      // already closed — no-op
+    }
+  } catch {
+    // ignore — safe to fail silently for cleanup
+  }
+}
+
 // NOTE (i18n): soundscape.labelThai / .descriptionThai and timeOfDay.labelThai
 // come from SoundscapeEngine.ts / TimeOfDayEngine.ts — genuine Thai-only
 // data-layer content (same precedent as InsightEngine / AmbientBadge.tsx).
@@ -194,6 +212,11 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     return new AudioCtx2!();
   }, []);
 
+  // SOUNDSCAPE-AUDIO-001: Close the loader's AudioContext on unmount (A1)
+  useEffect(() => {
+    return () => safeCloseAudioContext(audioContext);
+  }, [audioContext]);
+
   // SOUNDSCAPE-SYNTH-001: useSoundscapeAudioLoader now loads real CC0 MP3s from
   // public/audio/{category}/ first (priority), falling back to Web Audio API
   // synthesis if no file is found. This buffer is the only source now.
@@ -202,6 +225,11 @@ export function SoundscapePlayer({ compact = false, className = '' }: Soundscape
     soundscapeId,
     audioContext
   );
+
+  // SOUNDSCAPE-AUDIO-002: Close the initAudio-created AudioContext on unmount (A2)
+  useEffect(() => {
+    return () => safeCloseAudioContext(poolRef.current.ctx);
+  }, []);
 
   // ─── Sync user audio preferences ───────────────────────────────────────────
 

@@ -288,7 +288,7 @@ export class PersonalContextBuilder {
       // ai_evidence (migration 010) ส่วน personal_contexts (พหูพจน์, migration 028)
       // มีแค่ id/user_id/awakening_essence_id/timestamps — เขียนลงตัวพหูพจน์จึง
       // ล้มเหลวทุกครั้งด้วย 42703 column does not exist
-      await supabase.from('personal_context').insert({
+      const { error } = await supabase.from('personal_context').insert({
         user_id: entry.userId,
         context_type: entry.contextType,
         title: entry.title,
@@ -297,6 +297,9 @@ export class PersonalContextBuilder {
         confidence: entry.confidence,
         ai_evidence: entry.aiEvidence,
       });
+      if (error) {
+        console.error('[PersonalContextBuilder] Failed to insert personal_context:', error);
+      }
     }
 
     return entries;
@@ -491,13 +494,16 @@ export class PersonalContextBuilder {
         updatedAt: new Date(),
       };
 
-      await supabase.from('behavioral_patterns').insert({
+      const { error } = await supabase.from('behavioral_patterns').insert({
         user_id: p.userId,
         pattern_name: p.patternName,
         pattern_type: p.patternType,
         confidence: p.confidence,
         description: p.description,
       });
+      if (error) {
+        console.error('[PersonalContextBuilder] Failed to insert behavioral_pattern:', error);
+      }
 
       patterns.push(p);
     }

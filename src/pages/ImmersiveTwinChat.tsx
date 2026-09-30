@@ -26,6 +26,7 @@ import { useWorld } from '@/context/WorldContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserStore } from '@/store/userStore';
 import { useAnalysisStore } from '@/store/analysisStore';
+import { useDecisionStore } from '@/store/decisionStore';
 import { WORLDS, type WorldId } from '@/constants/worlds';
 import type { Decision, DecisionOutcome } from '@/types/decision';
 import { WorldTransitionEngine } from '@/lib/visual/WorldTransitionEngine';
@@ -529,6 +530,7 @@ export default function ImmersiveTwinChat() {
   }
 
   // ─── Decision handling ──────────────────────────────────────────────────
+  const decisionStore = useDecisionStore();
   const handleSaveDecision = async (messageIndex: number) => {
     if (!session.user?.id || !currentWorld) return;
     setSavingDecisionIndex(messageIndex);
@@ -546,7 +548,11 @@ export default function ImmersiveTwinChat() {
       const options = twinMsg.options && twinMsg.options.length > 0 ? twinMsg.options : ['Accepted', 'Deferred', 'Rejected'];
       const choice = twinMsg.selectedChoice || 'Accepted';
       const decision = await DecisionService.recordDecision(session.user.id, currentWorld, userMessage, options, twinMessage, choice);
-      if (decision) setSavedDecisionIds(prev => new Set(prev).add(messageIndex));
+      if (decision) {
+        setSavedDecisionIds(prev => new Set(prev).add(messageIndex));
+        // C5 FIX: Sync decisionStore after successful save so DecisionDashboard stays fresh
+        decisionStore.addDecision(decision);
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : (isTh ? 'บันทึกการตัดสินใจไม่สำเร็จ' : 'Failed to save decision');
       console.error('Save decision error:', err);

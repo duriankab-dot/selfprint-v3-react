@@ -27,6 +27,20 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAudio } from '../context/AudioContext';
 import type { WorldId } from '../constants/worlds';
 
+// ─── Audio Context Cleanup ────────────────────────────────────────────────────
+
+/** Close an AudioContext safely, handling all browser states */
+function safeCloseAudioContext(ctx: AudioContext | null): void {
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'running' || ctx.state === 'suspended') {
+      ctx.close();
+    }
+  } catch {
+    // ignore — safe to fail silently for cleanup
+  }
+}
+
 /** Soft base frequency per world (Hz), all in a low/mid ambient range —
  *  distinct per world, none jarring. Deterministic, not randomized. */
 const WORLD_BASE_FREQUENCY: Record<WorldId, number> = {
@@ -64,18 +78,27 @@ export function useWorldAmbientTone(worldId: WorldId) {
       nodes.gain.gain.cancelScheduledValues(now);
       nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, now);
       nodes.gain.gain.linearRampToValueAtTime(0, now + 0.6);
-      const { osc1, osc2 } = nodes;
+      const { osc1, osc2, gain } = nodes;
       setTimeout(() => {
         try {
           osc1.stop();
           osc2.stop();
           osc1.disconnect();
           osc2.disconnect();
+          // SOUNDSCAPE-AUDIO-003: Disconnect gain2 (was connected but never cleaned up)
+          if ((nodes as ToneNodes & { gain2?: GainNode }).gain2) {
+            (nodes as ToneNodes & { gain2?: GainNode }).gain2!.disconnect();
+          }
+          // Disconnect main gain from destination before closing
+          gain.disconnect();
         } catch {
           // already stopped — safe to ignore
         }
+        // SOUNDSCAPE-AUDIO-004: Close the AudioContext on stop/unmount
+        safeCloseAudioContext(ctx);
       }, 650);
     }
+    ctxRef.current = null;
     nodesRef.current = null;
     setIsPlaying(false);
   }, []);

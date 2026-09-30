@@ -114,12 +114,15 @@ export default function TwinBirthPage() {
       return;
     }
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .schema('selfprint')
         .from('users_profiles')
         .select('date_of_birth, time_of_birth, place_of_birth')
         .eq('user_id', session.user.id)
         .maybeSingle();
+      if (error) {
+        console.error('[TwinBirthPage] Failed to load user profile:', error);
+      }
       if (data?.date_of_birth) {
         updateProfile({
           birthDate: String(data.date_of_birth),

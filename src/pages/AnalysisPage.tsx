@@ -17,7 +17,7 @@ import '../styles/core-awakening.css';
  */
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, QueryClient } from '@tanstack/react-query';
 import { useLangNavigate as useNavigate } from '../hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
 import { useLifecycleStore } from '@/store/lifecycleStore';
@@ -143,6 +143,7 @@ const AnalysisPage: React.FC = () => {
   const { language } = useLanguage();
   const isTh = language === 'th';
   const setAnalysis = useAnalysisStore((state) => state.setAnalysis);
+  const queryClient = new QueryClient();
   const transitionTo = useLifecycleStore((state) => state.transitionTo);
   const twinId = useLifecycleStore((state) => state.twinId);
 
@@ -299,11 +300,15 @@ const AnalysisPage: React.FC = () => {
               .eq('id', twinId)
               .then(({ error }) => {
                 if (error) console.warn('[AnalysisPage] full_analysis sync failed:', error.message);
+                else {
+                  // C2 FIX: Invalidate twin queries so TwinContext refetches fresh full_analysis
+                  queryClient.invalidateQueries({ queryKey: ['twin', twinId] });
+                }
               });
           }
         });
     }
-  }, [displayAnalysis, setAnalysis, twinId]);
+  }, [displayAnalysis, setAnalysis, twinId, queryClient]);
 
   const isLoading = ctxLoading || patLoading;
 

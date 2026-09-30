@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 // AUTHLAZY-002 (9 ก.ย. 2026): static `import { supabase }` here put the whole
@@ -75,6 +75,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // SDK lazily; first paint is never blocked on the ~202 kB client parse.
     let disposed = false;
     const unsubscribeFns: Array<() => void> = [];
+    // C3 FIX: Guard against double-loadLifecycle — only load once per userId
+    const loadedLifeCycleFor = useRef<Set<string>>(new Set());
+
+    const ensureLoadedLifecycle = useCallback((userId: string) => {
+      if (!userId || disposed) return;
+      if (loadedLifeCycleFor.current.has(userId)) return;
+      loadedLifeCycleFor.current.add(userId);
+      const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
+      loadLifecycle(userId).catch(err =>
+        console.error('Failed to load lifecycle:', err)
+      );
+    }, [disposed]);
 
     // Phase 2: Register auth state listener as soon as the (lazily loaded)
     // client exists — real-time login/logout changes stay captured.
@@ -86,12 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           (_event: string, newSession: Session | null) => {
             setSession(newSession);
 
-            // NEW: Reload lifecycle when auth state changes
+            // NEW: Reload lifecycle when auth state changes (guarded against double-load)
             if (newSession?.user?.id) {
-              const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
-              loadLifecycle(newSession.user.id).catch(err =>
-                console.error('Failed to load lifecycle:', err)
-              );
+              ensureLoadedLifecycle(newSession.user.id);
             }
           }
         );
@@ -110,12 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (disposed) return;
         setSession(data.session);
 
-        // Load lifecycle if user is authenticated
+        // Load lifecycle if user is authenticated (guarded against double-load)
         if (data.session?.user?.id) {
-          const loadLifecycle = useLifecycleStore.getState().loadLifecycle;
-          loadLifecycle(data.session.user.id).catch(err =>
-            console.error('Failed to load lifecycle:', err)
-          );
+          ensureLoadedLifecycle(data.session.user.id);
         }
       } catch (error) {
         console.error('Failed to get initial session:', error);

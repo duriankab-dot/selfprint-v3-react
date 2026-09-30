@@ -1,7 +1,21 @@
 import '../styles/twin-evolution.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAudio } from '@/context/AudioContext';
 import './TwinEvolutionScene.css';
+
+// ─── Audio Context Cleanup ────────────────────────────────────────────────────
+
+/** Close an AudioContext safely, handling all browser states */
+function safeCloseAudioContext(ctx: AudioContext | null): void {
+  if (!ctx) return;
+  try {
+    if (ctx.state === 'running' || ctx.state === 'suspended') {
+      ctx.close();
+    }
+  } catch {
+    // ignore — safe to fail silently for cleanup
+  }
+}
 
 /**
  * § 30: Twin Evolution Scene
@@ -43,10 +57,15 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const { state: audioState } = useAudio();
 
   useEffect(() => {
     if (!trigger) return;
+
+    // Reset previous audio context for new trigger
+    safeCloseAudioContext(audioCtxRef.current);
+    audioCtxRef.current = null;
 
     setIsVisible(true);
     setIsAnimating(true);
@@ -67,6 +86,10 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
   }, [trigger, audioState.soundEnabled, autoDismiss]);
 
   const handleClose = () => {
+    // SOUNDSCAPE-AUDIO-006: Close audio context early if user dismisses before playing
+    safeCloseAudioContext(audioCtxRef.current);
+    audioCtxRef.current = null;
+
     setIsAnimating(false);
 
     // Wait for animation to finish
@@ -79,18 +102,19 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
   const playCelebrationSound = () => {
     try {
       const AudioCtx = window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-      const audioContext = new AudioCtx!();
+      const ctx = new AudioCtx!();
+      audioCtxRef.current = ctx;
 
       // Ascending notes: C5, E5, G5, C6 (celebratory chord progression)
       const frequencies = [523, 659, 784, 1046];
-      const startTime = audioContext.currentTime;
+      const startTime = ctx.currentTime;
 
       frequencies.forEach((freq, index) => {
-        const osc = audioContext.createOscillator();
-        const gain = audioContext.createGain();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
 
         osc.connect(gain);
-        gain.connect(audioContext.destination);
+        gain.connect(ctx.destination);
 
         osc.frequency.value = freq;
         osc.type = 'sine';
@@ -102,6 +126,13 @@ const TwinEvolutionScene: React.FC<TwinEvolutionSceneProps> = ({
         osc.start(noteStart);
         osc.stop(noteStart + 0.3);
       });
+
+      // SOUNDSCAPE-AUDIO-005: Close AudioContext after all notes finish playing
+      const totalTime = (frequencies.length - 1) * 0.15 + 0.3;
+      setTimeout(() => {
+        safeCloseAudioContext(ctx);
+        audioCtxRef.current = null;
+      }, totalTime * 1000 + 100);
     } catch (_error) {
       // Failed to play sound
     }

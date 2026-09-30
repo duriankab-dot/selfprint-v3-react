@@ -64,11 +64,14 @@ export function AIProvider({ children }: AIProviderProps) {
         // — producing a noisy 406 in the console on every load even though
         // the catch block below already handles it gracefully. maybeSingle()
         // returns `data: null` instead, with no error, for the same case.
-        const { data: twin } = await supabase
+        const { data: twin, error } = await supabase
           .from('twins')
           .select('id, name, awakened_at')
           .eq('user_id', userId)
           .maybeSingle();
+        if (error) {
+          console.error('[AIContext] Failed to load twin status:', error);
+        }
 
         if (twin?.awakened_at) {
           // Twin is fully awakened — switch to Twin mode

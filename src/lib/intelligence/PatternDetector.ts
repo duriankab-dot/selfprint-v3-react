@@ -758,7 +758,14 @@ export class PatternDetector {
       userId: data.user_id,
       patternName: data.pattern_name,
       patternType: data.pattern_type,
-      evidencePoints: JSON.parse(data.evidence_points || '[]'),
+      evidencePoints: (() => {
+        try {
+          return JSON.parse(data.evidence_points || '[]');
+        } catch {
+          console.warn('[PatternDetector] Corrupt evidence_points for', data.id, '— returning empty array');
+          return [];
+        }
+      })(),
       frequency: data.frequency,
       lastDetected: new Date(data.last_detected),
       confidence: data.confidence,
