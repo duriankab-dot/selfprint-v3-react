@@ -38,8 +38,8 @@ export function usePricing() {
         return;
       }
 
-      const { sessionId } = await createCheckoutSession(tier, billingPeriod, accessToken);
-      window.location.href = `https://checkout.stripe.com/pay/${sessionId}`;
+      const { sessionId, url } = await createCheckoutSession(tier, billingPeriod, accessToken);
+      window.location.href = url ?? `https://checkout.stripe.com/pay/${sessionId}`;
     } catch (error) {
       console.error('[Pricing] Checkout failed:', error);
       alert('เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง');

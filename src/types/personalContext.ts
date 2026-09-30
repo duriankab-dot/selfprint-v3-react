@@ -103,8 +103,8 @@ export interface CanonicalBuilderInput {
 /**
  * Cache key factory
  */
-export const CANONICAL_PCB_CACHE_KEY = (userId: string) =>
-  ['personalContext', userId, 'canonical'] as const;
+export const CANONICAL_PCB_CACHE_KEY = (userId: string, currentWorld?: string) =>
+  ['personalContext', userId, 'canonical', currentWorld ?? 'none'] as const;
 
 /**
  * Legacy cache key (for migration/cleanup)

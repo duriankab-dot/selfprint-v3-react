@@ -114,7 +114,7 @@ describe('E4 React Query Collision Test', () => {
       expect(canonicalResult.current.data).toBeDefined();
 
       // Verify single cache entry was created
-      const cacheEntries = queryClient.getQueryCache().findAll({ queryKey: CANONICAL_PCB_CACHE_KEY('u_test') });
+      const cacheEntries = queryClient.getQueryCache().findAll({ queryKey: CANONICAL_PCB_CACHE_KEY('u_test', 'career') });
       expect(cacheEntries.length).toBe(1);
 
       // Verify the same queryFn was called only once
@@ -194,7 +194,7 @@ describe('E4 React Query Collision Test', () => {
     it('usePersonalContextLib does not use legacy key', async () => {
       setupMock();
 
-      const { result } = renderHook(() => usePersonalContextLib({ userId: 'u_test' }), { wrapper });
+      const { result } = renderHook(() => usePersonalContextLib({ userId: 'u_test', currentWorld: 'career' }), { wrapper });
       await waitFor(() => expect(result.current.data).toBeDefined());
 
       // Verify only canonical key is in cache
@@ -212,13 +212,13 @@ describe('E4 React Query Collision Test', () => {
     it('all selectors share the same underlying React Query data', async () => {
       setupMock();
 
-      const { result: libResult } = renderHook(() => usePersonalContextLib({ userId: 'u_test' }), { wrapper });
-      const { result: siceHookResult } = renderHook(() => usePersonalContextSice({ userId: 'u_test' }), { wrapper });
+      const { result: libResult } = renderHook(() => usePersonalContextLib({ userId: 'u_test', currentWorld: 'career' }), { wrapper });
+      const { result: siceHookResult } = renderHook(() => usePersonalContextSice({ userId: 'u_test', currentWorld: 'career' }), { wrapper });
       
       await waitFor(() => expect(libResult.current.data).toBeDefined());
 
       // Get the shared raw data from cache
-      const sharedKey = CANONICAL_PCB_CACHE_KEY('u_test');
+      const sharedKey = CANONICAL_PCB_CACHE_KEY('u_test', 'career');
       const sharedCacheData = queryClient.getQueryData(sharedKey) as any;
       expect(sharedCacheData).toBeDefined();
       expect(sharedCacheData.userId).toBe('u_test');
@@ -240,12 +240,12 @@ describe('E4 React Query Collision Test', () => {
       });
 
       // Now fetch canonical context
-      const { result: libResult } = renderHook(() => usePersonalContextLib({ userId: 'u_test' }), { wrapper });
+      const { result: libResult } = renderHook(() => usePersonalContextLib({ userId: 'u_test', currentWorld: 'career' }), { wrapper });
       await waitFor(() => expect(libResult.current.data).toBeDefined());
 
       // Verify they are DIFFERENT cache entries with DIFFERENT data
       const legacyEntry = queryClient.getQueryData(['personalContext', 'u_test']);
-      const canonicalEntry = queryClient.getQueryData(CANONICAL_PCB_CACHE_KEY('u_test'));
+      const canonicalEntry = queryClient.getQueryData(CANONICAL_PCB_CACHE_KEY('u_test', 'career'));
 
       expect(legacyEntry).toEqual({
         userId: 'u_test',

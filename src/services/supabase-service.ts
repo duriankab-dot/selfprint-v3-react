@@ -21,12 +21,21 @@ export { supabase };
 // on twin_memories — dropped (non-critical, wasn't read back by any caller).
 
 async function resolveTwinId(userId: string): Promise<string | null> {
-  const { data } = await supabase
-    .from('twins')
-    .select('id')
-    .eq('user_id', userId)
-    .maybeSingle();
-  return data?.id ?? null;
+  try {
+    const { data, error } = await supabase
+      .from('twins')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    if (error) {
+      console.error('[Supabase] resolveTwinId failed:', error.message);
+      return null;
+    }
+    return data?.id ?? null;
+  } catch (err) {
+    console.error('[Supabase] resolveTwinId exception:', err instanceof Error ? err.message : String(err));
+    return null;
+  }
 }
 
 /**

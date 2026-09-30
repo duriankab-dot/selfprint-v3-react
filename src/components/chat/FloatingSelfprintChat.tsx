@@ -19,6 +19,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { callSelfprintAssistant } from '@/services/NovaAPIService';
+import { useLocation } from 'react-router-dom';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -32,6 +33,7 @@ export function FloatingSelfprintChat() {
   const { session } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const isTh = language === 'th';
 
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null); // null = default bottom-right
@@ -102,7 +104,9 @@ export function FloatingSelfprintChat() {
     }
   };
 
-  if (!session?.user?.id) return null;
+  const isChatPage = location.pathname.startsWith('/chat/twin') || location.pathname.startsWith('/chat/nova');
+
+  if (!session?.user?.id || isChatPage) return null;
 
   const pos = position;
   const buttonStyle: React.CSSProperties = pos
@@ -131,7 +135,7 @@ export function FloatingSelfprintChat() {
           justifyContent: 'center',
           boxShadow: 'var(--shadow-md, 0 4px 16px rgba(0,0,0,0.25))',
           cursor: 'grab',
-          zIndex: 400,
+          zIndex: 'var(--layer-floating)',
           touchAction: 'none',
         }}
       >
@@ -153,7 +157,7 @@ export function FloatingSelfprintChat() {
             border: '1px solid var(--color-border)',
             borderRadius: 'var(--radius-xl, 16px)',
             boxShadow: 'var(--shadow-md, 0 8px 32px rgba(0,0,0,0.3))',
-            zIndex: 400,
+            zIndex: 'var(--layer-floating)',
             overflow: 'hidden',
           }}
         >

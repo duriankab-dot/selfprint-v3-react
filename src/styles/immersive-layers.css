@@ -23,12 +23,22 @@
    ============================================================================ */
 
 :root {
-  /* Layer z-index order — never change these relative values */
+   /* Layer z-index order — never change these relative values */
   --layer-world:         0;    /* WorldEnvironment background        */
   --layer-twin:          10;   /* Canonical Twin presence             */
   --layer-contextual:    20;   /* Particles, light, atmosphere        */
   --layer-primary:       30;   /* Input, send, primary controls       */
   --layer-temporary:     40;   /* Drawers, sheets, overlays           */
+
+  /* Floating overlay layers (bypasses main stack — for global widgets) */
+  --layer-floating:      400;   /* Global floating widgets (chat button) */
+  --layer-popup:         999;   /* ContextualPopups, alerts            */
+  --layer-settings:     1000;   /* Settings modals, audio panels       */
+  --layer-celebration:  9999;   /* Full-screen celebration effects     */
+
+  /* Shell navigation layer — below content, above world */
+  --layer-nav-rail:      250;   /* Left side rail on desktop           */
+  --layer-bottom-nav:    100;   /* Bottom tab bar on mobile/tablet     */
 
   /* Glass/surface tokens for overlay layers */
   --glass-bg:            rgba(15, 31, 63, 0.65);

@@ -141,6 +141,10 @@ const PopupSound: React.FC<{ popupType: string }> = ({ popupType }) => {
       osc.start(startTime);
       osc.stop(startTime + 0.1);
     });
+
+    return () => {
+      audioContext.close().catch(() => {});
+    };
   }, [popupType]);
 
   return null;

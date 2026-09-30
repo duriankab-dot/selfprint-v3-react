@@ -8,7 +8,7 @@
  * Height: 56px mobile / 64px desktop
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/context/LanguageContext';
 import type { WorldId } from '@/constants/worlds';
@@ -43,25 +43,23 @@ export function ImmersiveNavbar({
   const { language } = useLanguage();
   const isTh = language === 'th';
   const [hidden, setHidden] = useState(false);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollYRef = useRef(0);
 
-  // Auto-hide/show on scroll
+  // Auto-hide/show on scroll — ใช้ ref เพื่อไม่ให้ re-subscribe listener ทุก event
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scrolling down → hide
+      if (currentScrollY > lastScrollYRef.current && currentScrollY > 50) {
         setHidden(true);
       } else {
-        // Scrolling up → show
         setHidden(false);
       }
-      setLastScrollY(currentScrollY);
+      lastScrollYRef.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   const handleExit = useCallback(() => {
     navigate(-1);
@@ -83,7 +81,7 @@ export function ImmersiveNavbar({
         left: 0,
         right: 0,
         height: '56px',
-        zIndex: 1000,
+        zIndex: 'var(--layer-settings)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

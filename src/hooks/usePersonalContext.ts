@@ -70,7 +70,7 @@ export function usePersonalContextLib(options: UsePersonalContextLibOptions) {
   const { userId, currentWorld, enabled = true, staleTime = 60_000, retry, retryDelay } = options;
   
   return useQuery({
-    queryKey: CANONICAL_PCB_CACHE_KEY(userId),
+    queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld),
     queryFn: () => fetchCanonicalContext({ userId, currentWorld }),
     enabled: enabled && !!userId,
     staleTime,
@@ -88,7 +88,7 @@ export function usePersonalContextSice(options: UsePersonalContextSiceOptions) {
   const { userId, currentWorld, enabled = true, staleTime = 60_000, retry, retryDelay } = options;
   
   return useQuery({
-    queryKey: CANONICAL_PCB_CACHE_KEY(userId),
+    queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld),
     queryFn: () => fetchCanonicalContext({ userId, currentWorld }),
     enabled: enabled && !!userId,
     staleTime,
@@ -106,7 +106,7 @@ export function usePersonalContextEngine(options: UsePersonalContextEngineOption
   const { userId, currentWorld, enabled = true, staleTime = 60_000, retry, retryDelay } = options;
   
   return useQuery({
-    queryKey: CANONICAL_PCB_CACHE_KEY(userId),
+    queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld),
     queryFn: () => fetchCanonicalContext({ userId, currentWorld }),
     enabled: enabled && !!userId,
     staleTime,
@@ -129,7 +129,7 @@ export function usePersonalContextCanonical(options: UsePersonalContextLibOption
   const { userId, currentWorld, enabled = true, staleTime = 60_000, retry, retryDelay } = options;
   
   return useQuery({
-    queryKey: CANONICAL_PCB_CACHE_KEY(userId),
+    queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld),
     queryFn: () => fetchCanonicalContext({ userId, currentWorld }),
     enabled: enabled && !!userId,
     staleTime,
@@ -143,7 +143,7 @@ export function usePersonalContextCanonical(options: UsePersonalContextLibOption
  */
 export function useInvalidatePersonalContext() {
   const queryClient = useQueryClient();
-  return (userId: string) => queryClient.invalidateQueries({ queryKey: CANONICAL_PCB_CACHE_KEY(userId) });
+  return (userId: string, currentWorld?: string) => queryClient.invalidateQueries({ queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld) });
 }
 
 /**
@@ -151,7 +151,7 @@ export function useInvalidatePersonalContext() {
  */
 export function useRemovePersonalContext() {
   const queryClient = useQueryClient();
-  return (userId: string) => queryClient.removeQueries({ queryKey: CANONICAL_PCB_CACHE_KEY(userId) });
+  return (userId: string, currentWorld?: string) => queryClient.removeQueries({ queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld) });
 }
 
 /**
@@ -161,7 +161,7 @@ export function usePrefetchPersonalContext() {
   const queryClient = useQueryClient();
   return async (userId: string, currentWorld?: string) => {
     await queryClient.prefetchQuery({
-      queryKey: CANONICAL_PCB_CACHE_KEY(userId),
+      queryKey: CANONICAL_PCB_CACHE_KEY(userId, currentWorld),
       queryFn: () => fetchCanonicalContext({ userId, currentWorld }),
       staleTime: 60_000,
     });

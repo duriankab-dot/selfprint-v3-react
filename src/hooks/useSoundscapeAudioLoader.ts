@@ -185,9 +185,9 @@ const SOUNDSCAPE_TO_MP3: Record<string, string[]> = {
   'deep-reflection-universal': ['/audio/soundscapes/mixkit-wind-blowing-ambience-2658.mp3', '/audio/soundscapes/mixkit-slow-heartbeat-494.mp3'],
 };
 
-async function loadAudioFromMP3(url: string, audioContext: AudioContext): Promise<AudioBuffer | null> {
+async function loadAudioFromMP3(url: string, audioContext: AudioContext, signal?: AbortSignal): Promise<AudioBuffer | null> {
   try {
-    const response = await fetch(url);
+    const response = await fetch(url, { signal });
     if (!response.ok) return null;
     const arrayBuffer = await response.arrayBuffer();
     return await audioContext.decodeAudioData(arrayBuffer);
@@ -196,7 +196,7 @@ async function loadAudioFromMP3(url: string, audioContext: AudioContext): Promis
   }
 }
 
-async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext): Promise<AudioBuffer> {
+async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext, signal?: AbortSignal): Promise<AudioBuffer> {
   // Try cache first — loading from disk is cheap but not free, no reason to redo it
   // every play.
   const cached = await getCachedAudio(soundscapeId, audioContext);
@@ -209,7 +209,7 @@ async function fetchAudioBuffer(soundscapeId: string, audioContext: AudioContext
   const mp3Urls = SOUNDSCAPE_TO_MP3[soundscapeId];
   if (mp3Urls && mp3Urls.length > 0) {
     for (const url of mp3Urls) {
-      const buffer = await loadAudioFromMP3(url, audioContext);
+      const buffer = await loadAudioFromMP3(url, audioContext, signal);
       if (buffer) {
         console.log(`[useSoundscapeAudioLoader] Loaded MP3: ${url}`);
         await saveCachedAudio(soundscapeId, buffer);
@@ -263,9 +263,10 @@ export function useSoundscapeAudioLoader(soundscapeId: string | null, audioConte
       setState((prev) => ({ ...prev, isLoading: true, error: null, progress: 0 }));
 
       try {
-        abortRef.current = new AbortController();
+        const controller = new AbortController();
+        abortRef.current = controller;
 
-        const buffer = await fetchAudioBuffer(soundscapeId, audioContext);
+        const buffer = await fetchAudioBuffer(soundscapeId, audioContext, controller.signal);
 
         if (isMounted) {
           setState({
@@ -297,6 +298,7 @@ export function useSoundscapeAudioLoader(soundscapeId: string | null, audioConte
     return () => {
       isMounted = false;
       abortRef.current?.abort();
+      abortRef.current = null;
     };
   }, [soundscapeId, audioContext]);
 

@@ -70,14 +70,18 @@ async function saveTwinMemory(
 ) {
   if (!supabase) return;
   try {
-    await supabase.from('twin_memories').insert({
+    const { error } = await supabase.from('twin_memories').insert({
       twin_id: twinId,
       world_id: worldId ? worldId.toUpperCase() : 'self',
       role,
       content,
     });
-  } catch {
-    // Non-fatal
+    if (error) {
+      console.error('[ImmersiveTwinChat] saveTwinMemory failed:', error.message);
+      return;
+    }
+  } catch (err) {
+    console.error('[ImmersiveTwinChat] saveTwinMemory exception:', err instanceof Error ? err.message : String(err));
   }
 }
 
