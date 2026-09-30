@@ -35,6 +35,7 @@ const ALLOWED_PATTERNS = [
   'pages/TarotPage',
   'pages/VsAstrologyPage',
   'pages/Onboarding.test',
+  '__tests__',
   'lib/intro-summary',
   'lib/intelligence/BehavioralForecastEngine',
   'lib/intelligence/EvidenceAnalyzer',

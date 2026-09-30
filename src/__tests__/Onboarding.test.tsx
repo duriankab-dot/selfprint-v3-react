@@ -136,7 +136,7 @@ describe('Onboarding Flow', () => {
         // NovaConversation.tsx:40-41) — "ขอถามอะไรบางอย่างที่สำคัญ" no longer
         // appears anywhere in the copy.
         expect(
-          screen.getByText(/ผมจะไม่ทำนายดวง/)
+          screen.getByText(/ผมจะไม่บอกโชคชะตา/)
         ).toBeInTheDocument();
       });
     });

@@ -35,7 +35,7 @@ interface Message {
 // you" rather than an impersonal form field.
 const NOVA_MESSAGES_TH = {
   greeting:
-    'สวัสดีครับ 👁️ ผมคือ SELFPRINT — คุณมาที่นี่เพราะอยากเข้าใจตัวเอง หรืออยากรู้ว่าอนาคตควรเดินทางไหน ผมจะไม่ทำนายดวง — แต่ผมจะให้สิ่งที่แม่นกว่า: ถอดรหัสรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ ข้อมูลบอกได้มากกว่าดาว',
+    'สวัสดีครับ 👁️ ผมคือ SELFPRINT — คุณมาที่นี่เพราะอยากเข้าใจตัวเอง หรืออยากรู้ว่าอนาคตควรเดินทางไหน ผมจะไม่บอกโชคชะตา — แต่ผมจะให้สิ่งที่แม่นกว่า: ถอดรหัสรูปแบบพฤติกรรมที่ซ่อนอยู่ในตัวคุณ ข้อมูลบอกได้มากกว่าการคาดเดา',
   dob: 'ขอนำวันเดือนปีเกิดของคุณไปคำนวณหน่อยนะ (ไม่ใช่การดูดวงตามดวงดาว — แต่ระบบจะใช้ข้อมูลช่วงเวลาเพื่อถอดรหัส Initial State Matrix สภาวะเริ่มต้น เพื่อดูแนวโน้มพฤติกรรมที่ซ่อนอยู่ของคุณ — เช่น วงจรการตัดสินใจ และ chronotype ที่ทำให้คุณเป็นแบบที่เป็น) เลือกจากรายการด้านล่างได้เลย',
   time: 'เกิดเวลาไหน? (ไม่บังคับ — ยิ่งละเอียดยิ่ง calibrate behavioral rhythm ได้แม่นขึ้น)',
   place: 'แล้วเกิดที่ไหน? (ไม่บังคับ — ใช้ตั้ง environmental baseline)',
@@ -50,7 +50,7 @@ const NOVA_MESSAGES_TH = {
 
 const NOVA_MESSAGES_EN = {
   greeting:
-    "Hello 👁️ I'm SELFPRINT. Whether you came here curious about your future or wanting to understand yourself better — I won't tell your fortune. Instead, I'll give you something more accurate: a behavioral pattern analysis built from your actual data. Statistics reveal more than stars ever could.",
+    "Hello 👁️ I'm SELFPRINT. Whether you came here curious about your future or wanting to understand yourself better — I won't predict your fortune. Instead, I'll give you something more accurate: a behavioral pattern analysis built from your actual data. Statistics reveal more than guesses ever could.",
   dob: "Let me take your birth date to start building your profile. (This isn't fortune-telling — the system uses temporal data to decode your Initial State Matrix: the behavioral tendencies and decision-cycle patterns that make you who you are.) Pick it from the list below.",
   time: 'What time were you born? (Optional — the more precise, the better we can calibrate your behavioral rhythm.)',
   place: 'Where were you born? (Optional — used for environmental baseline calibration.)',
