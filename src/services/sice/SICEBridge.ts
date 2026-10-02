@@ -34,7 +34,7 @@ export class SICEBridge {
    */
   async bridgePatternResults(
     orchestratorResult: OrchestratorResult
-  ): Promise<{ success: boolean; patternsProcessed: number; error?: string }> {
+  ): Promise<{ success: boolean; patternsProcessed: number; patternsMerged?: number; error?: string }> {
     try {
       // Find PatternDetector output (engine #2)
       const patternResult = orchestratorResult.results.find((r) => r.engineId === 2);
@@ -49,11 +49,12 @@ export class SICEBridge {
 
       const detectedPatterns = (patternResult.result as DetectedPattern[]) || [];
       if (detectedPatterns.length === 0) {
-        return { success: true, patternsProcessed: 0 };
+        return { success: true, patternsProcessed: 0, patternsMerged: 0 };
       }
 
       // Convert and persist each SICE pattern
       let processed = 0;
+      let merged = 0;
       for (const sicePattern of detectedPatterns) {
         try {
           const behavioralPattern = this.convertSICEPatternToBehavioralPattern(
@@ -61,21 +62,48 @@ export class SICEBridge {
             sicePattern
           );
 
-          // Feed to lib PatternDetector for enhancement + persistence
-          await this.patternDetector.updatePattern(
+          // Dedup check: if pattern_name exists within last 7 days, merge evidence instead of duplicate
+          const existingPattern = await this.patternDetector.getPattern(
             orchestratorResult.userId,
-            behavioralPattern.patternName,
-            behavioralPattern.evidencePoints
+            behavioralPattern.patternName
           );
 
-          processed++;
+          if (existingPattern && this.isPatternRecent(existingPattern.lastDetected)) {
+            // Merge SICE evidence into existing pattern (avoids duplicate rows)
+            const updatedPattern = await this.patternDetector.updatePattern(
+              orchestratorResult.userId,
+              behavioralPattern.patternName,
+              behavioralPattern.evidencePoints
+            );
+
+            if (updatedPattern) {
+              // Recalculate confidence as average of existing + new SICE signal
+              const newConfidence = Math.min(
+                (updatedPattern.confidence + behavioralPattern.confidence) / 2,
+                1
+              );
+              await supabase
+                .from('behavioral_patterns')
+                .update({ confidence: newConfidence })
+                .eq('id', updatedPattern.id);
+              merged++;
+            }
+          } else {
+            // Feed to lib PatternDetector for new pattern creation + persistence
+            await this.patternDetector.upsertPattern(
+              orchestratorResult.userId,
+              behavioralPattern.patternName,
+              behavioralPattern.evidencePoints
+            );
+            processed++;
+          }
         } catch (err) {
           if (import.meta.env.DEV) console.warn(`Failed to bridge pattern ${sicePattern.name}:`, err);
           // Continue processing other patterns
         }
       }
 
-      return { success: true, patternsProcessed: processed };
+      return { success: true, patternsProcessed: processed, patternsMerged: merged };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Pattern bridging error:', message);
@@ -230,6 +258,15 @@ export class SICEBridge {
     if (count >= 3) return 'multiple times a week';
     if (count >= 1) return 'weekly';
     return 'occasionally';
+  }
+
+  /**
+   * Check if pattern was detected within last 7 days (for deduplication)
+   */
+  private isPatternRecent(lastDetected: Date): boolean {
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    return lastDetected >= sevenDaysAgo;
   }
 }
 

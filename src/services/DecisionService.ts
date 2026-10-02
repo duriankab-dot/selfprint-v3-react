@@ -10,6 +10,7 @@ import { supabase } from './supabase-service';
 // instead, which breaks the cycle at the module graph level.
 import type { WorldId } from '../constants/worlds';
 import type { Decision, DecisionOutcome, FollowUpSchedule } from '../types/decision';
+import { queryClient } from '../lib/query-client';
 
 /**
  * Map database snake_case fields to TypeScript camelCase
@@ -27,6 +28,7 @@ function mapDecisionRow(row: any): Decision {
     context: row.context,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    twinRecommendationQuality: row.twin_recommendation_quality,
   };
 }
 
@@ -218,6 +220,21 @@ export async function recordOutcome(
       ).catch(err =>
         console.error('Background: Failed to update Twin expertise:', err)
       );
+
+      // GAP-06: Invalidate personal context cache so updated patterns reach TwinChat
+      try {
+        if (queryClient) {
+          queryClient.invalidateQueries({
+            predicate: (q) => {
+              const key = q.queryKey as unknown[];
+              return (key[0] === 'personalContext' || Array.isArray(key[0]) && key[0][0] === 'personalContext') 
+                && key[1] === twin_id;
+            },
+          });
+        }
+      } catch {
+        // Non-fatal: stale data degrades gracefully
+      }
     }
 
     return data ? mapOutcomeRow(data) : null;

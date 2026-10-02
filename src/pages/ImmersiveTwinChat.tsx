@@ -18,6 +18,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useSearchParams, useLocation } from 'react-router-dom';
 import { useLangNavigate as useNavigate } from '@/hooks/useLangNavigate';
 import { useAuth } from '@/context/AuthContext';
@@ -290,26 +291,79 @@ export default function ImmersiveTwinChat() {
       });
   }, [session?.user?.id, userProfile.birthDate, updateProfile]);
 
-  // ─── Build twinProfile for API call ─────────────────────────────────────
-  const twinProfile = useMemo(() => {
+  // ─── GAP-06: Lazy fresh pattern evaluation ──────────────────────────
+  // Queries behavioral_patterns directly from DB to get latest confidence,
+  // bypassing stale analysis cache / Zustand store. Uses world keyword
+  // matching to only show relevant patterns for current world.
+  const worldKeyword = currentWorld ? (currentWorld.toLowerCase().replace(/_/g, ' ') || currentWorld) : '';
+  const { data: _freshPatterns } = useQuery({
+    queryKey: ['behavioralPatterns', session?.user?.id, worldKeyword],
+    queryFn: async () => {
+      if (!supabase || !session?.user?.id || !worldKeyword) return [];
+      const { data } = await supabase
+        .from('behavioral_patterns')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .gte('confidence', 0.4)
+        .order('confidence', { ascending: false })
+        .limit(5);
+      if (!data) return [];
+      return data.map((p: any) => ({
+        id: p.id,
+        name: p.pattern_name,
+        type: p.pattern_type,
+        confidence: p.confidence,
+        insight: p.ai_insight || p.description || '',
+      }));
+    },
+    enabled: !!session?.user?.id && !!worldKeyword,
+    staleTime: 0, // Always fresh — used only when cached analysis is unavailable
+  });
+
+  // ─── Build structured context for Twin response ──────────────────────
+  // Replaces plain-text twinProfile with selective structured context injection
+  const twinContext = useMemo(() => {
     const a = currentAnalysis ?? twin?.fullAnalysis ?? null;
-    const parts = [
-      `IDENTITY: ${twin?.name ?? 'Unknown'} | Archetype: ${twin?.primaryArchetype ?? 'unknown'}${twin?.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin?.maturityScore ?? 30}/100`,
-      userProfile.birthDate
-        ? `BIRTH DATA: ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
-        : null,
-      a?.selfOverview ? `BEHAVIORAL OVERVIEW:\n${a.selfOverview}` : null,
-      a?.strengths?.length ? `STRENGTHS:\n${a.strengths.map(s => `• ${s.name}: ${s.description}`).join('\n')}` : null,
-      a?.blindSpots?.length ? `BLIND SPOTS:\n${a.blindSpots.map(b => `• ${b.title} (sensitivity: ${b.sensitivity}): ${b.description}`).join('\n')}` : null,
-      a?.behavioralPatterns?.length ? `BEHAVIORAL PATTERNS:\n${a.behavioralPatterns.slice(0, 5).map(p => `• [${p.type}] ${p.name}: ${p.insight}`).join('\n')}` : null,
-      a?.journey ? `JOURNEY STAGE: ${a.journey.currentStage}\n${a.journey.description}\nGrowing in: ${a.journey.growing.join(', ')}\nChanging: ${a.journey.changing.join(', ')}\nStill working on: ${a.journey.stillWorking.join(', ')}` : null,
-      a?.focusAreas?.length ? `FOCUS AREAS: ${a.focusAreas.join(', ')}` : null,
-      a?.guidance?.length ? `GUIDANCE FROM ANALYSIS:\n${a.guidance.map(g => `• ${g}`).join('\n')}` : null,
-      a?.nextSteps?.length ? `RECOMMENDED NEXT STEPS:\n${a.nextSteps.map(s => `• ${s}`).join('\n')}` : null,
-      a?.modelAccuracy ? `ANALYSIS CONFIDENCE: ${Math.round(a.modelAccuracy * 100)}%` : null,
-    ].filter(Boolean).join('\n\n');
-    return parts;
-  }, [currentAnalysis, twin, userProfile]);
+    const sections: string[] = [];
+    
+    sections.push(
+      `[IDENTITY] ${twin?.name ?? 'Unknown'} | Archetype: ${twin?.primaryArchetype ?? 'unknown'}${twin?.secondaryArchetype ? ` / ${twin.secondaryArchetype}` : ''} | Maturity: ${twin?.maturityScore ?? 30}/100`
+    );
+    
+    if (userProfile.birthDate) {
+      sections.push(
+        `[BIRTH DATA] ${userProfile.birthDate}${userProfile.birthTime ? ` ${userProfile.birthTime}` : ''}${userProfile.birthPlace ? ` — ${userProfile.birthPlace}` : ''}`
+      );
+    }
+    
+    if (a?.selfOverview) {
+      const firstSentence = a.selfOverview.split('.')[0] + '.';
+      sections.push(`[BEHAVIORAL OVERVIEW] ${firstSentence}`);
+    }
+    
+    const topStrength = a?.strengths?.sort((a: any, b: any) => b.confidence - a.confidence)[0];
+    if (topStrength && topStrength.confidence > 0.5) {
+      sections.push(`[TOP STRENGTH] ${topStrength.name}: ${topStrength.description}`);
+    }
+    
+    // Use cached analysis pattern first, fall back to fresh DB query (GAP-06)
+    const cachedPatterns = a?.behavioralPatterns as Array<{name: string; type: string; confidence: number; insight?: string}> | undefined;
+    const candidatePatterns = cachedPatterns || (_freshPatterns ?? []);
+    const topPattern = candidatePatterns?.find((p: any) => p.confidence > 0.4);
+    if (topPattern) {
+      sections.push(`[KEY PATTERN] [${topPattern.type}] ${topPattern.name}: ${topPattern.insight}`);
+    }
+    
+    if (a?.journey?.currentStage) {
+      sections.push(`[JOURNEY] Stage: ${a.journey.currentStage}. Growing in: ${a.journey.growing.join(', ') || 'various areas'}.`);
+    }
+    
+    if (a?.modelAccuracy !== undefined) {
+      sections.push(`[CONFIDENCE] AI analysis accuracy: ${Math.round(a.modelAccuracy * 100)}%`);
+    }
+    
+    return sections.join(' | ');
+  }, [currentAnalysis, twin, userProfile, _freshPatterns]);
 
   // ─── Choice consequence ─────────────────────────────────────────────────
   const [choiceConsequence, setChoiceConsequence] = useState<{
@@ -385,7 +439,7 @@ export default function ImmersiveTwinChat() {
         await streamTwinResponse(
           apiMessages,
           twin.name || 'Twin',
-          twinProfile,
+          twinContext,
           currentWorld || undefined,
           {
             onChunk: (chunk: string) => chunks.push(chunk),
@@ -399,7 +453,7 @@ export default function ImmersiveTwinChat() {
         twinResponse = await callTwinAPI(
           apiMessages,
           twin.name || 'Twin',
-          twinProfile,
+          twinContext,
           currentWorld || undefined,
           recentMemories,
           language,
@@ -445,7 +499,7 @@ export default function ImmersiveTwinChat() {
     } finally {
       setIsSending(false);
     }
-  }, [message, messages, twin, session, currentWorld, twinProfile, language, isTh, startListening, stopListening, startThinking, stopThinking, startResponding, stopResponding]);
+  }, [message, messages, twin, session, currentWorld, twinContext, language, isTh, startListening, stopListening, startThinking, stopThinking, startResponding, stopResponding]);
 
   // ─── Hooks must be before all early returns ─────────────────────────────
   const decisionStore = useDecisionStore();

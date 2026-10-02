@@ -1,6 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// QUERY-001: Shared QueryClient — avoids duplicate instances and test bootstrap issues.
+// The singleton is defined in lib/react-query.ts so non-React code can import it
+// without triggering createRoot (which fails in jsdom during tests).
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './lib/react-query'
 import './styles/global.css'
 import App from './App.tsx'
 // ERRBOUND-001 / SENTRY-INIT-001 FIX: @sentry/react was a dependency but
@@ -12,22 +16,6 @@ import { initializeSentry } from './services/error-tracking'
 
 initializeSentry()
 
-/**
- * React Query client — shared across entire app
- * Intelligence components (IntelligencePanel, ExecutiveSummary, AnalysisPage)
- * all share the same query cache via these keys:
- *   'personalContext' | 'behavioralPatterns' | 'accuracyMetrics'
- * No duplicate Supabase fetches when multiple components mount simultaneously.
- */
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,   // 30s — avoid refetch on every focus
-      retry: 2,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
 
 // ============================================================================
 // PWA: Service Worker Registration — Master Direction §35

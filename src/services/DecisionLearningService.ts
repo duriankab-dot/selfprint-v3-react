@@ -229,11 +229,170 @@ export async function updateTwinExpertiseFromDecisions(
       }
     }
 
+    // Learn from outcomes → Update behavioral patterns (closes learning loop)
+    await updatePatternsFromOutcome(twinId, world);
+
     // Update Twin's system prompt with learned patterns
     await updateTwinSystemPromptWithPatterns(twinId, world, worldPatterns);
     if (import.meta.env.DEV) console.log(`Updated Twin expertise for ${world} with ${worldPatterns.length} pattern(s)`);
   } catch (err) {
     console.error('Error updating Twin expertise:', err);
+  }
+}
+
+/**
+ * Connect decision outcomes → behavioral patterns (GAP-02/GAP-04 remediated)
+ * When decision outcomes are recorded, update ONLY explicitly relevant behavioral patterns:
+ * - Positive outcomes → modestly boost confidence of matching patterns
+ * - Negative outcomes → modestly reduce confidence of matching patterns
+ * - Weighted average prevents runaway drift (GAP-04)
+ * - No Math.random — fully deterministic (GAP-02)
+ * - Pattern selection respects explicit metadata relationships (GAP-02)
+ *
+ * SIGNAL SEMANTICS (C1.2):
+ * - The `signal` value = net DECISION OUTCOME RATIO for this world
+ * - It is a WEAK directional indicator, NOT proof that a specific pattern exists
+ * - Example: 80% positive career outcomes does not prove "resilience" pattern is strong
+ *   (the user may have been lucky, or the stakes were low, or circumstances favored them)
+ * - The weighted average (alpha=0.1) ensures historical evidence dominates single-season signals
+ * - Max ±0.01 per-call cap prevents one outcome from creating unjustified certainty
+ *
+ * SEMANTIC BOUNDARIES (C1.3 — see LEARNING_SIGNAL_OWNERSHIP.md):
+ * - This signal measures OUTCOME QUALITY in a world, NOT decision quality or recommendation quality
+ * - It affects pattern confidence (evidence strength), NOT twinRecommendationQuality or decision outcomes
+ * - AIFeedbackLoop (immediate feedback) also writes to behavioral_patterns.confidence but without
+ *   relevance filtering — it uses larger adjustments (+0.1/−0.15) for global model accuracy calibration
+ * - Both pathways are bounded by [0,1] and dampened by weighted averaging to prevent oscillation
+ */
+async function updatePatternsFromOutcome(
+  twinId: string,
+  world: WorldId
+): Promise<void> {
+  if (!supabase) return;
+
+  try {
+    // Get decisions in this world
+    const decisions = await import('./DecisionService').then(m => m.getUserDecisions(twinId));
+    const decisionsInWorld = decisions.filter(d => d.world === world);
+
+    if (decisionsInWorld.length === 0) return;
+
+    // Batch-fetch outcomes
+    const decisionIds = decisionsInWorld.map(d => d.id);
+    const outcomesByDecision = await import('./DecisionService').then(m => m.getDecisionOutcomesBatch(decisionIds));
+
+    // Count outcome impacts across ALL decisions in this world
+    let positiveCount = 0;
+    let negativeCount = 0;
+    for (const decision of decisionsInWorld) {
+      const outcomes = outcomesByDecision.get(decision.id) || [];
+      for (const outcome of outcomes) {
+        if (outcome.impact === 'positive') positiveCount++;
+        else if (outcome.impact === 'negative') negativeCount++;
+      }
+    }
+
+    const total = positiveCount + negativeCount;
+    if (total === 0) return;
+
+    // Fetch user's behavioral patterns
+    const { data: allPatterns } = await supabase
+      .from('behavioral_patterns')
+      .select('*')
+      .eq('user_id', twinId)
+      .gte('confidence', 0);
+
+    if (!allPatterns || allPatterns.length === 0) return;
+
+    // Filter to patterns relevant to this world (GAP-02: no broadcast updates)
+    const worldKeyword = world.toLowerCase().replace(/_/g, ' ');
+    const worldLabel = world.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+
+    const relevanceMatches: Array<{ id: string; name: string; reason: string }> = [];
+    const relevanceSkipped: string[] = [];
+
+    for (const p of allPatterns) {
+      const patternNameLower = (p.pattern_name || '').toLowerCase();
+      
+      // Check explicit metadata correlation first (strongest signal)
+      const relatedValues = Array.isArray(p.related_values) ? p.related_values : [];
+      const relatedGoals = Array.isArray(p.related_goals) ? p.related_goals : [];
+      const hasExplicitMetadata = relatedValues.length > 0 || relatedGoals.length > 0;
+
+      // Check name-based correlation (weaker but acceptable for world-matching patterns)
+      const nameMatches = patternNameLower.includes(worldKeyword) || 
+                          patternNameLower.includes(world.replace(/_/g, '')) ||
+                          patternNameLower.includes(worldLabel.toLowerCase()) ||
+                          worldKeyword.includes(patternNameLower) ||
+                          worldLabel.toLowerCase().includes(patternNameLower);
+
+      if (hasExplicitMetadata || nameMatches) {
+        relevanceMatches.push({ id: p.id, name: p.pattern_name, reason: hasExplicitMetadata ? 'metadata' : 'name-match' });
+      } else {
+        relevanceSkipped.push(p.pattern_name);
+      }
+    }
+
+    if (relevanceMatches.length === 0) {
+      if (import.meta.env.DEV) console.log(`[DecisionLearning] No relevant patterns found for world=${world} (${total} outcomes, +${positiveCount}/-${negativeCount})`);
+      return;
+    }
+
+    // Compute deterministic confidence signal from aggregated outcomes
+    // positive > negative → signal toward 1 (more evidence pattern exists)
+    // negative > positive → signal toward 0 (less evidence pattern exists)
+    // mixed/even → signal = 0 (no directional evidence)
+    let signal = 0;
+    let adjustmentReason = '';
+    if (positiveCount > negativeCount) {
+      signal = (positiveCount - negativeCount) / total; // 0..~0.67 range
+      adjustmentReason = 'positive';
+    } else if (negativeCount > positiveCount) {
+      signal = 1 - ((negativeCount - positiveCount) / total); // 1..~0.33 range
+      adjustmentReason = 'negative';
+    } else {
+      // Balanced outcomes — no change, deterministic
+      if (import.meta.env.DEV) {
+        console.log(`[DecisionLearning] Balanced outcomes for ${world}, no pattern adjustment needed (+${positiveCount}/-${negativeCount})`);
+      }
+      return;
+    }
+
+    // Update only matched patterns with weighted average + cap (GAP-04)
+    let updatedCount = 0;
+    for (const match of relevanceMatches) {
+      const pattern = allPatterns.find(p => p.id === match.id);
+      if (!pattern) continue;
+
+      const oldConfidence = pattern.confidence ?? 0.5;
+      const alpha = 0.1; // Weight given to new signal vs historical confidence
+
+      // Weighted average: blend old confidence with signal to prevent runaway drift
+      const newConfidence = (1 - alpha) * oldConfidence + alpha * signal;
+
+      // Cap per-call adjustment to prevent rapid drift (GAP-04)
+      const maxAdjustment = 0.01;
+      const rawAdjustment = newConfidence - oldConfidence;
+      const cappedAdjustment = Math.max(-maxAdjustment, Math.min(maxAdjustment, rawAdjustment));
+      const finalConfidence = Math.max(0, Math.min(1, oldConfidence + cappedAdjustment));
+
+      if (Math.abs(cappedAdjustment) >= 0.001) {
+        await supabase
+          .from('behavioral_patterns')
+          .update({
+            confidence: finalConfidence,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', match.id);
+        updatedCount++;
+      }
+    }
+
+    if (import.meta.env.DEV && updatedCount > 0) {
+      console.log(`[DecisionLearning] Updated ${updatedCount}/${relevanceMatches.length} patterns for ${world} (${adjustmentReason}): +${positiveCount}/-${negativeCount}`);
+    }
+  } catch (err) {
+    console.error('[DecisionLearning] Error updating patterns from outcome:', err);
   }
 }
 

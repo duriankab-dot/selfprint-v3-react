@@ -360,6 +360,46 @@ export class PatternDetector {
     }
   }
 
+  /**
+   * Upsert pattern — create if new, merge evidence + re-analyze if exists
+   * Used by SICEBridge for genuinely new patterns detected via decision-frequency algorithm.
+   */
+  async upsertPattern(
+    userId: string,
+    patternName: string,
+    newEvidence: EvidencePoint[]
+  ): Promise<BehavioralPattern> {
+    if (!userId || !patternName || !newEvidence.length) {
+      throw new IntelligenceError('Missing required data', 'MISSING_DATA');
+    }
+
+    try {
+      const existing = await this.getPattern(userId, patternName);
+
+      if (existing) {
+        // Existing path: merge evidence + re-analyze (same as updatePattern)
+        return this.updatePattern(userId, patternName, newEvidence);
+      }
+
+      // New path: create directly (bypasses getPattern check inside updatePattern)
+      const analysis = this.analyzePatternGroup(patternName, newEvidence);
+      return this.createPatternRecord(userId, analysis);
+    } catch (error) {
+      // Race-condition safety net: if the pattern was concurrently deleted or
+      // created-then-deleted between the existence check and updatePattern()
+      // completing its internal lookup, we fall through to the create path.
+      // Only NOT_FOUND triggers this fallback; all other errors propagate.
+      if (error instanceof IntelligenceError && error.code === 'NOT_FOUND') {
+        const analysis = this.analyzePatternGroup(patternName, newEvidence);
+        return this.createPatternRecord(userId, analysis);
+      }
+      throw new IntelligenceError(
+        `Failed to upsert pattern: ${error}`,
+        'UPSERT_PATTERN_FAILED'
+      );
+    }
+  }
+
   // =========================================================================
   // PRIVATE METHODS - Real Algorithm
   // =========================================================================

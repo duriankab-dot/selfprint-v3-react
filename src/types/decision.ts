@@ -21,6 +21,7 @@ export interface Decision {
   context?: string;
   createdAt: string;
   updatedAt: string;
+  twinRecommendationQuality?: number; // 0-1: Quality of Twin's recommendation (Phase E Step 2C)
   // Compatibility fields for existing pages (populated on-demand)
   title?: string;
   description?: string;
