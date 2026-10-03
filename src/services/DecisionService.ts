@@ -440,3 +440,82 @@ export function getPendingFollowUps(decision: Decision) {
     fu => !fu.completed && fu.scheduledDate && fu.scheduledDate <= now
   );
 }
+
+/**
+ * Update Twin's recommendation quality score for a decision.
+ * Only writes when twin_recommendation_quality is NULL — preserves existing
+ * ratings (last-write-wins not allowed; user must submit a fresh rating
+ * against an unaffecte value). Guard clause prevents accidental overwrites
+ * of previously assessed ratings (Batch D / PC-constaint).
+ *
+ * Rating scale (discrete 5-point Likert):
+ *   Very unhelpful     → 0.15 ("ไม่มีประโยชน์เลย")
+ *   Somewhat unhelpful → 0.35 ("ค่อนข้างไม่มีประโยชน์")
+ *   Neutral            → 0.50 ("เป็นกลาง")
+ *   Helpful            → 0.70 ("มีประโยชน์")
+ *   Very helpful       → 0.90 ("มีประโยชน์มาก")
+ */
+
+export async function updateRecommendationQuality(
+  decisionId: string,
+  quality: number
+): Promise<boolean> {
+  if (!supabase) return false;
+
+  // Validate discrete rating values (PC-5 heuristic prevention)
+  const validValues = [0.15, 0.35, 0.50, 0.70, 0.90];
+  if (!validValues.includes(quality)) {
+    console.warn('Invalid rating value:', quality, 'Expected one of:', validValues);
+    return false;
+  }
+
+  try {
+    // Atomic guard: only update if currently NULL
+    // This protects existing ratings from being overwritten
+    const { data: existing, error: fetchErr } = await supabase
+      .from('decision_log')
+      .select('twin_recommendation_quality')
+      .eq('id', decisionId)
+      .single();
+
+    if (fetchErr) {
+      console.error('Error fetching decision:', fetchErr);
+      return false;
+    }
+
+    if (existing?.twin_recommendation_quality !== null && existing?.twin_recommendation_quality !== undefined) {
+      // Existing rating — do NOT overwrite per Batch D constraint
+      console.info('Rating already exists for decision', decisionId, ', skipping.');
+      return false;
+    }
+
+    const { error: updateErr } = await supabase
+      .from('decision_log')
+      .update({ twin_recommendation_quality: quality })
+      .eq('id', decisionId);
+
+    if (updateErr) {
+      console.error('Error updating recommendation quality:', updateErr);
+      return false;
+    }
+
+    // Invalidate personal context cache so updated patterns reach TwinChat
+    try {
+      if (queryClient) {
+        queryClient.invalidateQueries({
+          predicate: (q) => {
+            const key = q.queryKey as unknown[];
+            return key[0] === 'decision' || key[0] === 'decisions';
+          },
+        });
+      }
+    } catch {
+      // Non-fatal
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Failed to update recommendation quality:', err);
+    return false;
+  }
+}

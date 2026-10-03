@@ -133,6 +133,7 @@ const TwinProfilePage = lazy(() => import('./pages/TwinProfilePage'));
 const LifeHubsPage = lazy(() => import('./pages/LifeHubsPage'));
 const DecisionDashboard = lazy(() => import('./pages/DecisionDashboard'));
 const DecisionLoggerPage = lazy(() => import('./pages/DecisionLoggerPage'));
+const OutcomeRecordPage = lazy(() => import('./pages/OutcomeRecordPage'));
 const WorldsHub = lazy(() => import('./pages/WorldsHub'));
 const WorldDetail = lazy(() => import('./pages/WorldDetail'));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
@@ -242,8 +243,10 @@ function getLanguagePrefixedRoutes(): React.ReactElement[] {
     { path: '/voice', element: <VoiceChatPage /> },
     { path: '/twin-profile', element: <TwinProfilePage /> },
     { path: '/life-hubs', element: <LifeHubsPage /> },
+    // Phase E: Decision tracking (protected)
     { path: '/decisions', element: <DecisionDashboard /> },
     { path: '/decision-log', element: <DecisionLoggerPage /> },
+    { path: '/decision/:id/outcome', element: <OutcomeRecordPage /> },
     // Phase 5: TC-503 — Memory Insights page (protected)
     { path: '/memory-insights', element: <ProtectedRoute><MemoryInsightsPage /></ProtectedRoute> },
     { path: '/faq', element: <FAQPage /> },
